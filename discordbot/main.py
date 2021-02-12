@@ -13,9 +13,18 @@ from discordbot.embedmanager import EmbedManager
 from mongo.bsepoints import UserPoints, UserBets
 
 TOKEN = dotenv.get_key(".env", "DISCORD_TOKEN")
+BETA_MODE = dotenv.get_key(".env", "BETA_MODE")
 
-# IDS = [291508460519161856]  # test IDs
-IDS = [181098823228063764]  # actual IDS
+if BETA_MODE is None:
+    BETA_MODE = True
+else:
+    BETA_MODE = False
+
+if BETA_MODE is False:
+    IDS = [291508460519161856]  # test IDs
+else:
+    BETA_MODE = True
+    IDS = [181098823228063764]  # actual IDS
 
 intents = discord.Intents.all()
 
@@ -23,7 +32,7 @@ client = discord.Client(intents=intents)
 bot = commands.Bot(command_prefix="!", intents=intents)
 
 
-com = CommandManager(client, IDS, beta_mode=True)
+com = CommandManager(client, IDS, beta_mode=BETA_MODE)
 embeds = EmbedManager()
 slash = com.slash
 

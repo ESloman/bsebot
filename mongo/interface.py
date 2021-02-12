@@ -18,16 +18,16 @@ else:
     from urllib.parse import quote_plus
 
 
-def get_client(ip="127.0.0.1", user_name=None, password=None):
+def get_client(ip="192.168.0.15", user_name=None, password=None):
     """
     Returns a MongoDB Client connection for interacting with MongoDB Database Objects.
     """
     if user_name is None and password is None:
-        connection = "mongodb://{}:27017".format(ip)
+        connection = "mongodb://{}:27100".format(ip)
     elif user_name and password:
         u = quote_plus(user_name)
         p = quote_plus(password)
-        connection = "mongodb://%s:%s@{}:27017".format(ip) % (u, p)
+        connection = "mongodb://%s:%s@{}:27100".format(ip) % (u, p)
     else:
         return False
     return MongoClient(connection, serverSelectionTimeoutMS=1000)

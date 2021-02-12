@@ -213,7 +213,7 @@ class UserBets(BestSummerEverPointsDB):
         )
 
         points_dict = {}
-        for better in ret["betters"]:
+        for better in [b for b in ret["betters"] if ret["betters"][b]["emoji"] == emoji]:
             points_bet = ret["betters"][better]["points"]
             points_won = points_bet * 2
             points_dict[better] = points_won

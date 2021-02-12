@@ -6,7 +6,7 @@ class BaseClass(object):
     Base MongoDB DB Class. Provides basic method and properties that all other DB Classes will need.
     If not username or password is provided - authenticate without username and password.
     """
-    def __init__(self, ip="127.0.0.1", username=None, password=None):
+    def __init__(self, ip="192.168.0.15", username="admin", password="OrcsMordorSauron"):
         self.cli = interface.get_client(ip, username, password)
         self._vault = None
 

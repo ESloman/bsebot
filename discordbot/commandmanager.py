@@ -12,7 +12,7 @@ from discord_slash.utils import manage_commands
 
 from discordbot.clienteventclasses import OnReadyEvent, OnReactionAdd
 from discordbot.embedmanager import EmbedManager
-from discordbot.slashcommandeventclasses import BSEddiesLeaderboard, BSEddiesView
+from discordbot.slashcommandeventclasses import BSEddiesActive, BSEddiesLeaderboard, BSEddiesView
 from mongo.bsepoints import UserPoints, UserBets
 
 
@@ -21,7 +21,7 @@ class CommandManager(object):
     Class for registering all the client events and slash commands
     Needs to be initialised with a client and a list of guild IDS
     """
-    def __init__(self, client, guilds, beta_mode=False):
+    def __init__(self, client: discord.Client, guilds, beta_mode=False):
         self.client = client
         self.slash = SlashCommand(client, auto_register=True, auto_delete=True)
         self.beta_mode = beta_mode
@@ -33,11 +33,12 @@ class CommandManager(object):
 
         # client event classes
         self.on_ready = OnReadyEvent(client, guilds, self.beta_mode)
-        self.on_reaction_add = OnReactionAdd(guilds, self.beta_mode)
+        self.on_reaction_add = OnReactionAdd(client, guilds, self.beta_mode)
 
         # slash command classes
-        self.bseddies_view = BSEddiesView(guilds, self.beta_mode)
-        self.beddies_leaderboard = BSEddiesLeaderboard(guilds, self.beta_mode)
+        self.beddies_active = BSEddiesActive(client, guilds, self.beta_mode)
+        self.bseddies_view = BSEddiesView(client, guilds, self.beta_mode)
+        self.beddies_leaderboard = BSEddiesLeaderboard(client, guilds, self.beta_mode)
 
         self._register_client_events()
         self._register_slash_commands(guilds)
@@ -48,8 +49,27 @@ class CommandManager(object):
             self.on_ready.on_ready()
 
         @self.client.event
-        async def on_reaction_add(reaction, user):
-            await self.on_reaction_add.handle_reaction_event(reaction, user)
+        async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
+            guild = self.client.get_guild(payload.guild_id)  # type: discord.Guild
+            user = guild.get_member(payload.user_id)  # type: discord.User
+            channel = guild.get_channel(payload.channel_id)  # type: discord.TextChannel
+            partial_message = channel.get_partial_message(payload.message_id)  # type: discord.PartialMessage
+            message = await partial_message.fetch()  # type: discord.Message
+
+            await self.on_reaction_add.handle_reaction_event(message, guild, channel, payload.emoji.name, user)
+
+        @self.client.event
+        async def on_reaction_add(reaction: discord.Reaction, user: discord.User):
+            pass
+            """
+            await self.on_reaction_add.handle_reaction_event(
+                reaction.message,
+                reaction.message.guild,
+                reaction.message.channel,
+                reaction.emoji,
+                user
+            )
+            """
 
     def _register_slash_commands(self, guilds):
         """
@@ -79,6 +99,20 @@ class CommandManager(object):
             guild_ids=guilds)
         async def leaderboard(ctx: discord_slash.model.SlashContext):
             await self.beddies_leaderboard.leaderboard(ctx)
+
+        @self.slash.subcommand(
+            base="bseddies",
+            base_description="View your BSEddies, create bets and resolve bets",
+            name="active",
+            description="View all the active bets in the server.",
+            guild_ids=guilds)
+        async def active_bets(ctx: discord_slash.model.SlashContext):
+            """
+            Slash commands lists all the active bets in the system.
+            :param ctx:
+            :return:
+            """
+            await self.beddies_active.active(ctx)
 
         @self.slash.subcommand(
             base="bseddies",

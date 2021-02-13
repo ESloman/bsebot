@@ -16,6 +16,13 @@ class EmbedManager(object):
 
     @staticmethod
     def get_bet_embed(guild: discord.Guild, bet_id, bet: dict):
+        """
+        Gets the bet embed and returns that
+        :param guild:
+        :param bet_id:
+        :param bet:
+        :return:
+        """
         embed = discord.Embed(
             title=bet["title"],
             description=f"Bet ID: {bet_id}",
@@ -41,6 +48,12 @@ class EmbedManager(object):
         return embed
 
     def get_leaderboard_embed(self, guild: discord.Guild, number: Union[int, None]):
+        """
+        Return a str that will be the leaderboard table
+        :param guild:
+        :param number:
+        :return:
+        """
         users = self.user_points.get_all_users_for_guild(guild.id)
 
         users = sorted(users, key=lambda x: x["points"], reverse=True)

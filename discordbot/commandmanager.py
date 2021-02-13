@@ -12,10 +12,15 @@ from discord_slash.utils import manage_commands
 
 from discordbot.clienteventclasses import OnReadyEvent, OnReactionAdd
 from discordbot.embedmanager import EmbedManager
+from discordbot.slashcommandeventclasses import BSEddiesLeaderboard, BSEddiesView
 from mongo.bsepoints import UserPoints, UserBets
 
 
 class CommandManager(object):
+    """
+    Class for registering all the client events and slash commands
+    Needs to be initialised with a client and a list of guild IDS
+    """
     def __init__(self, client, guilds, beta_mode=False):
         self.client = client
         self.slash = SlashCommand(client, auto_register=True, auto_delete=True)
@@ -26,13 +31,18 @@ class CommandManager(object):
         self.user_points = UserPoints()
         self.user_bets = UserBets(guilds)
 
+        # client event classes
         self.on_ready = OnReadyEvent(client, guilds, self.beta_mode)
         self.on_reaction_add = OnReactionAdd(guilds, self.beta_mode)
 
-        self.register_client_events()
-        self.register_slash_commands(guilds)
+        # slash command classes
+        self.bseddies_view = BSEddiesView(guilds, self.beta_mode)
+        self.beddies_leaderboard = BSEddiesLeaderboard(guilds, self.beta_mode)
 
-    def register_client_events(self):
+        self._register_client_events()
+        self._register_slash_commands(guilds)
+
+    def _register_client_events(self):
         @self.client.event
         async def on_ready():
             self.on_ready.on_ready()
@@ -41,7 +51,7 @@ class CommandManager(object):
         async def on_reaction_add(reaction, user):
             await self.on_reaction_add.handle_reaction_event(reaction, user)
 
-    def register_slash_commands(self, guilds):
+    def _register_slash_commands(self, guilds):
         """
         Method for registering all the commands in one place.
         Most of these functions should call on the other classes to do the heavy lifting.
@@ -59,17 +69,7 @@ class CommandManager(object):
             description="View your total BSEddies",
             guild_ids=guilds)
         async def bseddies(ctx: discord_slash.model.SlashContext):
-            if ctx.guild.id not in guilds:
-                return
-
-            if self.beta_mode and ctx.channel.id != 809773876078575636:
-                msg = f"These features are in BETA mode and this isn't a BETA channel."
-                await ctx.send(content=msg, hidden=True)
-                return
-
-            points = self.user_points.get_user_points(ctx.author.id, ctx.guild.id)
-            await ctx.send(content=f"You have **{points}** :money_with_wings:`BSEDDIES`:money_with_wings:!",
-                           hidden=True)
+            await self.bseddies_view.view(ctx)
 
         @self.slash.subcommand(
             base="bseddies",
@@ -78,17 +78,7 @@ class CommandManager(object):
             description="View the BSEddie leaderboard.",
             guild_ids=guilds)
         async def leaderboard(ctx: discord_slash.model.SlashContext):
-            if ctx.guild.id not in guilds:
-                return
-
-            if self.beta_mode and ctx.channel.id != 809773876078575636:
-                msg = f"These features are in BETA mode and this isn't a BETA channel."
-                await ctx.send(content=msg, hidden=True)
-                return
-
-            embed = self.embeds.get_leaderboard_embed(ctx.guild, 5)
-            message = await ctx.channel.send(embed=embed, delete_after=300)
-            await message.add_reaction(u"▶️")
+            await self.beddies_leaderboard.leaderboard(ctx)
 
         @self.slash.subcommand(
             base="bseddies",

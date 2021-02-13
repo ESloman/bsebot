@@ -121,18 +121,18 @@ class CommandManager(object):
 
             if amount < 0:
                 msg = f"You can't _\"gift\"_ someone negative points."
-                await ctx.channel.send(content=msg, hidden=True)
+                await ctx.send(content=msg, hidden=True)
                 return
 
             points = self.user_points.get_user_points(ctx.author.id, ctx.guild.id)
             if points < amount:
                 msg = f"You have insufficient points to perform that action."
-                await ctx.channel.send(content=msg, hidden=True)
+                await ctx.send(content=msg, hidden=True)
                 return
 
             if friend.id == ctx.author.id:
                 msg = f"You can't gift yourself points."
-                await ctx.channel.send(content=msg, hidden=True)
+                await ctx.send(content=msg, hidden=True)
                 return
 
             if not friend.dm_channel:
@@ -146,7 +146,7 @@ class CommandManager(object):
             self.user_points.decrement_points(ctx.author.id, ctx.guild.id, amount)
             self.user_points.increment_points(friend.id, ctx.guild.id, amount)
 
-            await ctx.channel.send(content=f"Eddies transferred to `{friend.name}`!", hidden=True)
+            await ctx.send(content=f"Eddies transferred to `{friend.name}`!", hidden=True)
 
         @self.slash.subcommand(
             base="bseddies",

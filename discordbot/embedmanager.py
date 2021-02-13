@@ -57,7 +57,7 @@ class EmbedManager(object):
         message = (
             "**BSEddies Leaderboard**\n"
             f"Leaderboard is correct as of: "
-            f"{datetime.datetime.now().strftime('%d %b %y %H:%M:%S')}\n\n"
+            f"{datetime.datetime.now().strftime('%d %b %y %H:%M:%S')}\n"
         )
 
         for user in users[:number]:
@@ -65,7 +65,7 @@ class EmbedManager(object):
             self.pretty_table.add_row(
                 [users.index(user) + 1, name, user["points"]]
             )
-            message += f"**{users.index(user) + 1})**  {name}  :  {user['points']}"
+            message += f"\n**{users.index(user) + 1})**  {name}  :  {user['points']}"
 
         # message += self.pretty_table.get_string()
 

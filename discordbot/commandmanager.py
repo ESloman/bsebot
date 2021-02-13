@@ -119,6 +119,11 @@ class CommandManager(object):
                 await ctx.send(content=msg, hidden=True)
                 return
 
+            if friend.bot:
+                msg = f"Bots cannot be gifted eddies."
+                await ctx.send(content=msg, hidden=True)
+                return
+
             if amount < 0:
                 msg = f"You can't _\"gift\"_ someone negative points."
                 await ctx.send(content=msg, hidden=True)

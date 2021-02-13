@@ -77,7 +77,7 @@ class CommandManager(object):
             name="leaderboard",
             description="View the BSEddie leaderboard.",
             guild_ids=guilds)
-        async def _leaderboard(ctx: discord_slash.model.SlashContext):
+        async def leaderboard(ctx: discord_slash.model.SlashContext):
             if ctx.guild.id not in guilds:
                 return
 
@@ -93,6 +93,64 @@ class CommandManager(object):
         @self.slash.subcommand(
             base="bseddies",
             base_description="View your BSEddies, create bets and resolve bets",
+            name="gift",
+            description="Gift some of your eddies to a friend",
+            options=[
+                manage_commands.create_option(
+                    name="friend",
+                    description="The friend to gift the eddies to.",
+                    option_type=6,
+                    required=True
+                ),
+                manage_commands.create_option(
+                    name="amount",
+                    description="The amount to gift to a friend.",
+                    option_type=4,
+                    required=True
+                )
+            ],
+            guild_ids=guilds)
+        async def gift_eddies(ctx: discord_slash.model.SlashContext, friend: discord.User, amount: int):
+            if ctx.guild.id not in guilds:
+                return
+
+            if self.beta_mode and ctx.channel.id != 809773876078575636:
+                msg = f"These features are in BETA mode and this isn't a BETA channel."
+                await ctx.send(content=msg, hidden=True)
+                return
+
+            if amount < 0:
+                msg = f"You can't _\"gift\"_ someone negative points."
+                await ctx.channel.send(content=msg, hidden=True)
+                return
+
+            points = self.user_points.get_user_points(ctx.author.id, ctx.guild.id)
+            if points < amount:
+                msg = f"You have insufficient points to perform that action."
+                await ctx.channel.send(content=msg, hidden=True)
+                return
+
+            if friend.id == ctx.author.id:
+                msg = f"You can't gift yourself points."
+                await ctx.channel.send(content=msg, hidden=True)
+                return
+
+            if not friend.dm_channel:
+                await friend.create_dm()
+            try:
+                msg = f"**{ctx.author.name}** just gifted you `{amount}` eddies!!"
+                await friend.send(content=msg)
+            except discord.errors.Forbidden:
+                pass
+
+            self.user_points.decrement_points(ctx.author.id, ctx.guild.id, amount)
+            self.user_points.increment_points(friend.id, ctx.guild.id, amount)
+
+            await ctx.channel.send(content=f"Eddies transferred to `{friend.name}`!", hidden=True)
+
+        @self.slash.subcommand(
+            base="bseddies",
+            base_description="View your BSEddies, create bets and resolve bets",
             subcommand_group="bet",
             subcommand_group_description="Create or resolve bets using BSEddies",
             name="create",
@@ -104,7 +162,8 @@ class CommandManager(object):
                     option_type=3,
                     required=True
                 )
-            ]
+            ],
+            guild_ids=guilds
         )
         async def handle_bet_creation(ctx, bet_title: str):
             if ctx.guild.id not in guilds:
@@ -169,7 +228,8 @@ class CommandManager(object):
                     option_type=3,
                     required=True
                 ),
-            ]
+            ],
+            guild_ids=guilds
         )
         async def do_a_bet(ctx: discord_slash.model.SlashContext, bet_id: str, amount: int, emoji: str):
             if ctx.guild.id not in guilds:
@@ -225,7 +285,8 @@ class CommandManager(object):
                     option_type=3,
                     required=True
                 ),
-            ]
+            ],
+            guild_ids=guilds
         )
         async def close_a_bet(ctx: discord_slash.model.SlashContext, bet_id: str, emoji: str):
             if ctx.guild.id not in guilds:

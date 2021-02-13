@@ -120,6 +120,14 @@ class UserBets(BestSummerEverPointsDB):
         self.update({"type": "counter", "guild_id": guild_id}, {"$inc": {"count": 1}})
         return f"{count:04d}"
 
+    def get_all_active_bets(self, guild_id):
+        """
+        Gets all active bets.
+        :return:
+        """
+        bets = self.query({"active": True, "guild_id": guild_id})
+        return bets
+
     def create_new_bet(self, guild_id, user_id, title, options, option_dict):
         """
         Creates a new bet and inserts it into the DB.

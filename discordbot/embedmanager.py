@@ -1,7 +1,9 @@
+import datetime
 from typing import List, Union, Dict
 
 import discord
 import inflect
+from prettytable import PrettyTable
 
 from mongo.bsepoints import UserPoints
 
@@ -10,6 +12,7 @@ class EmbedManager(object):
     def __init__(self):
         self.user_points = UserPoints()
         self.inflect_engine = inflect.engine()
+        self.pretty_table = PrettyTable()
 
     @staticmethod
     def get_bet_embed(guild: discord.Guild, bet_id, bet: dict):
@@ -42,29 +45,31 @@ class EmbedManager(object):
 
         users = sorted(users, key=lambda x: x["points"], reverse=True)
 
-        embed = discord.Embed(
-            title="BSEddies Leaderboard",
-            color=discord.Color.green(),
-            description=""
-        )
+        self.pretty_table = PrettyTable()
 
-        message = ""
+        self.pretty_table.field_names = [" Position ", " Name ", " BSEDDIES "]
 
         if number is None:
             number = len(users)
         else:
             number = number if number < len(users) else len(users)
 
+        message = (
+            "**BSEddies Leaderboard**\n"
+            f"Leaderboard is correct as of: "
+            f"{datetime.datetime.now().strftime('%d %b %y %H:%M:%S')}\n\n"
+        )
+
         for user in users[:number]:
             name = guild.get_member(user["uid"]).name
-            con = f":{self.inflect_engine.number_to_words(users.index(user) + 1)}: {name}  :  {user['points']}"
-            if message:
-                message += "\n"
-            message += con
+            self.pretty_table.add_row(
+                [users.index(user) + 1, name, user["points"]]
+            )
+            message += f"**{users.index(user) + 1})**  {name}  :  {user['points']}"
+
+        # message += self.pretty_table.get_string()
 
         if number < 6:
             message += "\n\n :arrow_forward: for longer list"
 
-        embed.description = message
-
-        return embed
+        return message

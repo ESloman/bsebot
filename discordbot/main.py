@@ -32,7 +32,6 @@ if __name__ == "__main__":
 
     com = CommandManager(client, IDS, beta_mode=BETA_MODE)
     embeds = EmbedManager()
-    slash = com.slash
 
     user_bets = UserBets(IDS)
 

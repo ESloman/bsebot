@@ -73,6 +73,14 @@ class OnReactionAdd(BaseEvent):
                 pass
             return
 
+        if message.content and "BSEddies Leaderboard" in message.content:
+            if not message.author.bot:
+                return
+
+            content = self.embed_manager.get_leaderboard_embed(reaction.message.guild, None)
+            await reaction.message.edit(content=content)
+            return
+
         if message.embeds and "Bet ID" in message.embeds[0].description:
             embed = message.embeds[0]  # type: discord.Embed
             bet_id = embed.description.replace("Bet ID: ", "")

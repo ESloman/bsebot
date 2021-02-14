@@ -1,4 +1,5 @@
 import datetime
+from typing import Union
 
 from mongo import interface
 from mongo.db_classes import BestSummerEverPointsDB
@@ -128,7 +129,8 @@ class UserBets(BestSummerEverPointsDB):
         bets = self.query({"active": True, "guild_id": guild_id})
         return bets
 
-    def create_new_bet(self, guild_id, user_id, title, options, option_dict):
+    def create_new_bet(self, guild_id, user_id, title, options, option_dict,
+                       timeout: Union[datetime.datetime, None] = None):
         """
         Creates a new bet and inserts it into the DB.
         :param guild_id:
@@ -136,6 +138,7 @@ class UserBets(BestSummerEverPointsDB):
         :param title:
         :param options:
         :param option_dict:
+        :param timeout:
         :return:
         """
         bet_id = self.__get_new_bet_id(guild_id)
@@ -146,10 +149,13 @@ class UserBets(BestSummerEverPointsDB):
             "title": title,
             "options": options,
             "created": datetime.datetime.now(),
+            "timeout": timeout,
             "active": True,
             "betters": {},
             "result": None,
             "option_dict": option_dict,
+            "channel_id": None,
+            "message_id": None
         }
         self.insert(bet_doc)
         return bet_doc

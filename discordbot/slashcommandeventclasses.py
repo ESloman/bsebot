@@ -1,4 +1,5 @@
 import copy
+import datetime
 
 import discord
 import discord_slash
@@ -180,12 +181,15 @@ class BSEddiesCreateBet(BSEddies):
             await ctx.send(content=msg, hidden=True)
             return
 
+        timeout = datetime.datetime.now() + datetime.timedelta(minutes=5)
+
         bet = self.user_bets.create_new_bet(
             ctx.guild.id,
             ctx.author.id,
             bet_title,
             options=list(option_dict.keys()),
             option_dict=option_dict,
+            timeout=timeout
         )
 
         embed = self.embed_manager.get_bet_embed(ctx.guild, bet["bet_id"], bet)

@@ -10,6 +10,7 @@ from discord.ext import commands
 from discord_slash import SlashCommand, SlashContext
 from discord_slash.utils import manage_commands
 
+from discordbot.betcloser import BetCloser
 from discordbot.clienteventclasses import OnReadyEvent, OnReactionAdd
 from discordbot.embedmanager import EmbedManager
 from discordbot.slashcommandeventclasses import BSEddiesActive, BSEddiesGift, BSEddiesLeaderboard, BSEddiesView
@@ -27,6 +28,7 @@ class CommandManager(object):
         self.client = client
         self.slash = SlashCommand(client, sync_commands=True)
         self.beta_mode = beta_mode
+        self.guilds = guilds
 
         self.embeds = EmbedManager()
 
@@ -43,6 +45,9 @@ class CommandManager(object):
         self.bseddies_gift = BSEddiesGift(client, guilds, self.beta_mode)
         self.bseddies_view = BSEddiesView(client, guilds, self.beta_mode)
         self.beddies_leaderboard = BSEddiesLeaderboard(client, guilds, self.beta_mode)
+
+        # tasks
+        self.bet_closer_task = BetCloser(self.client, guilds)
 
         self._register_client_events()
         self._register_slash_commands(guilds)
@@ -335,7 +340,7 @@ class CommandManager(object):
             guild = ctx.guild  # type: discord.Guild
             bet = self.user_bets.get_bet_from_id(guild.id, bet_id)
 
-            if not bet["active"]:
+            if not bet["active"] and bet["result"] is not None:
                 msg = f"You cannot close a bet that is already closed."
                 await ctx.send(content=msg, hidden=True)
                 return

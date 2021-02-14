@@ -136,6 +136,81 @@ class BSEddiesGift(BSEddies):
         await ctx.send(content=f"Eddies transferred to `{friend.name}`!", hidden=True)
 
 
+class BSEddiesCloseBet(BSEddies):
+    def __init__(self, client, guilds, beta_mode=False):
+        super().__init__(client, guilds, beta_mode=beta_mode)
+
+    async def close_bet(
+            self,
+            ctx: discord_slash.context.SlashContext,
+            bet_id: str,
+            emoji: str,):
+
+        if not await self._handle_validation(ctx):
+            return
+
+        guild = ctx.guild  # type: discord.Guild
+        bet = self.user_bets.get_bet_from_id(guild.id, bet_id)
+
+        if not bet["active"] and bet["result"] is not None:
+            msg = f"You cannot close a bet that is already closed."
+            await ctx.send(content=msg, hidden=True)
+            return
+
+        if bet["user"] != ctx.author.id:
+            msg = f"You cannot close a bet that isn't yours."
+            await ctx.send(content=msg, hidden=True)
+            return
+
+        emoji = emoji.strip()
+
+        if emoji not in bet["option_dict"]:
+            msg = f"{emoji} isn't a valid outcome so the bet can't be closed."
+            await ctx.send(content=msg, hidden=True)
+            return
+
+        ret_dict = self.user_bets.close_a_bet(bet_id, guild.id, emoji)
+
+        desc = f"**{bet['title']}**\n{emoji} won!\n\n"
+
+        for better in ret_dict["winners"]:
+            desc += f"\n- {guild.get_member(int(better)).name} won `{ret_dict['winners'][better]}` eddies!"
+
+        author = guild.get_member(ctx.author.id)
+
+        # message the losers to tell them the bad news
+        for loser in ret_dict["losers"]:
+            mem = guild.get_member(int(loser))
+            if not mem.dm_channel:
+                await mem.create_dm()
+            try:
+                msg = (f"**{author.name}** just closed bet "
+                       f"`[{bet_id}] - {bet['title']}` and the result was {emoji}.\n"
+                       f"As this wasn't what you voted for - you have lost.")
+                await mem.send(content=msg)
+            except discord.errors.Forbidden:
+                pass
+
+        # message the winners to tell them the good news
+        for winner in ret_dict["winners"]:
+            mem = guild.get_member(int(winner))
+            if not mem.dm_channel:
+                await mem.create_dm()
+            try:
+                msg = (f"**{author.name}** just closed bet "
+                       f"`[{bet_id}] - {bet['title']}` and the result was {emoji}.\n"
+                       f"**This means you won!!** "
+                       f"You have won `{ret_dict['winners'][winner]}` BSEDDIES!!")
+                await mem.send(content=msg)
+            except discord.errors.Forbidden:
+                pass
+
+        # update the message to reflect that it's closed
+        channel = guild.get_channel(bet["channel_id"])
+        message = channel.get_partial_message(bet["message_id"])
+        await message.edit(content=desc, embed=None)
+
+
 class BSEddiesCreateBet(BSEddies):
     def __init__(self, client, guilds, beta_mode=False):
         super().__init__(client, guilds, beta_mode=beta_mode)

@@ -14,7 +14,7 @@ from discordbot.betcloser import BetCloser
 from discordbot.clienteventclasses import OnReadyEvent, OnReactionAdd
 from discordbot.embedmanager import EmbedManager
 from discordbot.slashcommandeventclasses import BSEddiesActive, BSEddiesGift, BSEddiesLeaderboard, BSEddiesView
-from discordbot.slashcommandeventclasses import BSEddiesCreateBet
+from discordbot.slashcommandeventclasses import BSEddiesCreateBet, BSEddiesCloseBet
 from mongo.bsepoints import UserPoints, UserBets
 
 
@@ -32,6 +32,7 @@ class CommandManager(object):
 
         self.embeds = EmbedManager()
 
+        # mongo interaction classes
         self.user_points = UserPoints()
         self.user_bets = UserBets(guilds)
 
@@ -44,11 +45,13 @@ class CommandManager(object):
         self.bseddies_create = BSEddiesCreateBet(client, guilds, self.beta_mode)
         self.bseddies_gift = BSEddiesGift(client, guilds, self.beta_mode)
         self.bseddies_view = BSEddiesView(client, guilds, self.beta_mode)
-        self.beddies_leaderboard = BSEddiesLeaderboard(client, guilds, self.beta_mode)
+        self.bseddies_leaderboard = BSEddiesLeaderboard(client, guilds, self.beta_mode)
+        self.bseddies_close = BSEddiesCloseBet(client, guilds, self.beta_mode)
 
         # tasks
         self.bet_closer_task = BetCloser(self.client, guilds)
 
+        # call the methods that register the events we're listening for
         self._register_client_events()
         self._register_slash_commands(guilds)
 
@@ -101,7 +104,16 @@ class CommandManager(object):
 
         @self.client.event
         async def on_reaction_add(reaction: discord.Reaction, user: discord.User):
+            """
+            This event is triggered when anyone 'reacts' to a message in a guild that the bot is in - even it's own
+            reactions. However, this only triggers for messages that the bot has in it's cache - reactions to older
+            messages will only trigger a 'on_raw_reaction_add' event.
 
+            Here, we simply hand it off to another class to deal with.
+            :param reaction:
+            :param user:
+            :return:
+            """
             await self.on_reaction_add.handle_reaction_event(
                 reaction.message,
                 reaction.message.guild,
@@ -109,6 +121,16 @@ class CommandManager(object):
                 reaction.emoji,
                 user
             )
+
+        @self.client.event
+        async def on_message(message: discord.Message):
+            """
+            This is the 'message' event. Whenever a message is sent in a guild that the bot is listening for -
+            we will enact this code. Here, we simply hand it off to another class to deal with.
+            :param message:
+            :return:
+            """
+            pass
 
     def _register_slash_commands(self, guilds):
         """
@@ -138,7 +160,7 @@ class CommandManager(object):
             description="View the BSEddie leaderboard.",
             guild_ids=guilds)
         async def leaderboard(ctx):
-            await self.beddies_leaderboard.leaderboard(ctx)
+            await self.bseddies_leaderboard.leaderboard(ctx)
 
         @self.slash.subcommand(
             base="bseddies",
@@ -329,41 +351,4 @@ class CommandManager(object):
             guild_ids=guilds
         )
         async def close_a_bet(ctx: discord_slash.context.SlashContext, bet_id: str, emoji: str):
-            if ctx.guild.id not in guilds:
-                return
-
-            if self.beta_mode and ctx.channel.id != 809773876078575636:
-                msg = f"These features are in BETA mode and this isn't a BETA channel."
-                await ctx.send(content=msg, hidden=True)
-                return
-
-            guild = ctx.guild  # type: discord.Guild
-            bet = self.user_bets.get_bet_from_id(guild.id, bet_id)
-
-            if not bet["active"] and bet["result"] is not None:
-                msg = f"You cannot close a bet that is already closed."
-                await ctx.send(content=msg, hidden=True)
-                return
-
-            if bet["user"] != ctx.author.id:
-                msg = f"You cannot close a bet that isn't yours."
-                await ctx.send(content=msg, hidden=True)
-                return
-
-            emoji = emoji.strip()
-
-            if emoji not in bet["option_dict"]:
-                msg = f"{emoji} isn't a valid outcome so the bet can't be closed."
-                await ctx.send(content=msg, hidden=True)
-                return
-
-            success = self.user_bets.close_a_bet(bet_id, guild.id, emoji)
-
-            desc = f"**{bet['title']}**\n{emoji} won!\n\n"
-
-            for better in success:
-                desc += f"\n- {guild.get_member(int(better)).name} won `{success[better]}` eddies!"
-
-            channel = guild.get_channel(bet["channel_id"])
-            message = channel.get_partial_message(bet["message_id"])
-            await message.edit(content=desc, embed=None)
+            await self.bseddies_close.close_bet(ctx, bet_id, emoji)

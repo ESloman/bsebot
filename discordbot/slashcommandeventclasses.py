@@ -1,5 +1,6 @@
 import copy
 import datetime
+import re
 
 import discord
 import discord_slash
@@ -225,6 +226,7 @@ class BSEddiesCreateBet(BSEddies):
             option_two_name=None,
             option_three_name=None,
             option_four_name=None,
+            timeout_str=None
     ):
         if not await self._handle_validation(ctx):
             return
@@ -256,7 +258,29 @@ class BSEddiesCreateBet(BSEddies):
             await ctx.send(content=msg, hidden=True)
             return
 
-        timeout = datetime.datetime.now() + datetime.timedelta(minutes=5)
+        if timeout_str is None:
+            timeout = datetime.datetime.now() + datetime.timedelta(minutes=5)
+        else:
+            timeout_str = timeout_str.strip()
+            match = re.match(r"\d{1,5}(s|m|h|d)", timeout_str)
+            if not match:
+                msg = ("Your timeout string was incorrectly formatted. Needs to be 1 - 5 digits "
+                       "and then either a s, m, h, or d "
+                       "to signify seconds, minutes, hours, or days respectively.")
+                await ctx.send(content=msg, hidden=True)
+                return
+            g = match.group()
+            if "s" in g:
+                dt_key = {"seconds": int(g.replace("s", ""))}
+            elif "m" in g:
+                dt_key = {"minutes": int(g.replace("m", ""))}
+            elif "h" in g:
+                dt_key = {"hours": int(g.replace("h", ""))}
+            elif "d" in g:
+                dt_key = {"days": int(g.replace("d", ""))}
+            else:
+                dt_key = {}
+            timeout = datetime.datetime.now() + datetime.timedelta(**dt_key)
 
         bet = self.user_bets.create_new_bet(
             ctx.guild.id,

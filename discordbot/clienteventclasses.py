@@ -69,6 +69,9 @@ class OnReactionAdd(BaseEvent):
         if guild.id not in self.guild_ids:
             return
 
+        if not message.author.bot:
+            return
+
         if self.beta_mode and channel.id != 809773876078575636:
             msg = f"These features are in BETA mode and this isn't a BETA channel."
             if not user.dm_channel:

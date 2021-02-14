@@ -27,12 +27,13 @@ if __name__ == "__main__":
 
     intents = discord.Intents.all()
 
-    client = discord.Client(intents=intents)
+    client = discord.Client()
+    cli = commands.Bot(command_prefix="!", intents=intents)
     bot = commands.Bot(command_prefix="!", intents=intents)
 
-    com = CommandManager(client, IDS, beta_mode=BETA_MODE)
+    com = CommandManager(cli, IDS, beta_mode=BETA_MODE)
     embeds = EmbedManager()
 
     user_bets = UserBets(IDS)
 
-    client.run(TOKEN)
+    cli.run(TOKEN)

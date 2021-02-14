@@ -214,26 +214,33 @@ class CommandManager(object):
                     required=True
                 ),
                 manage_commands.create_option(
-                    name="outcome_one_name",
+                    name="outcome_one",
                     description="Outcome number 1 name",
                     option_type=3,
                     required=False
                 ),
                 manage_commands.create_option(
-                    name="outcome_two_name",
+                    name="outcome_two",
                     description="Outcome number 2 name",
                     option_type=3,
                     required=False
                 ),
                 manage_commands.create_option(
-                    name="outcome_three_name",
+                    name="outcome_three",
                     description="Outcome number 3 name",
                     option_type=3,
                     required=False
                 ),
                 manage_commands.create_option(
-                    name="outcome_four_name",
+                    name="outcome_four",
                     description="Outcome number 4 name",
+                    option_type=3,
+                    required=False
+                ),
+                manage_commands.create_option(
+                    name="timeout",
+                    description=("How long should betting be open for? Must be DIGITS + (s|m|h|d). "
+                                 "Examples: 15m, 2d, 6h, etc"),
                     option_type=3,
                     required=False
                 )
@@ -243,23 +250,27 @@ class CommandManager(object):
         async def handle_bet_creation(
                 ctx: discord_slash.context.SlashContext,
                 bet_title: str,
-                outcome_one_name=None,
-                outcome_two_name=None,
-                outcome_three_name=None,
-                outcome_four_name=None,
+                outcome_one=None,
+                outcome_two=None,
+                outcome_three=None,
+                outcome_four=None,
+                timeout=None,
         ):
             """
             Catching discord slash for bet creation.
             :param ctx:
             :param bet_title:
-            :param outcome_one_name:
-            :param outcome_two_name:
-            :param outcome_three_name:
-            :param outcome_four_name:
+            :param outcome_one:
+            :param outcome_two:
+            :param outcome_three:
+            :param outcome_four:
+            :param timeout:
             :return:
             """
             await self.bseddies_create.handle_bet_creation(
-                ctx, bet_title, outcome_one_name, outcome_two_name, outcome_three_name, outcome_four_name
+                ctx, bet_title,
+                outcome_one, outcome_two, outcome_three, outcome_four,
+                timeout
             )
 
         @self.slash.subcommand(

@@ -226,10 +226,16 @@ class UserBets(BestSummerEverPointsDB):
             {"$set": {"active": False, "result": emoji, "closed": datetime.datetime.now()}}
         )
 
-        points_dict = {}
+        ret_dict = {
+            "result": emoji,
+            "timestamp": datetime.datetime.now(),
+            "losers": {b: ret["betters"][b]["points"]
+                       for b in ret["betters"] if ret["betters"][b]["emoji"] != emoji},
+            "winners": {}
+        }
         for better in [b for b in ret["betters"] if ret["betters"][b]["emoji"] == emoji]:
             points_bet = ret["betters"][better]["points"]
             points_won = points_bet * 2
-            points_dict[better] = points_won
+            ret_dict["winners"][better] = points_won
             self.user_points.increment_points(int(better), guild_id, points_won)
-        return points_dict
+        return ret_dict

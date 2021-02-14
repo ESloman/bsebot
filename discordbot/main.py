@@ -1,13 +1,9 @@
 import discord
-import discord_slash
 import dotenv
 from discord.ext import commands
-from discord_slash import SlashCommand, SlashContext
-from discord_slash.utils import manage_commands
 
 from discordbot.commandmanager import CommandManager
-from discordbot.embedmanager import EmbedManager
-from mongo.bsepoints import UserPoints, UserBets
+from mongo.bsepoints import UserBets
 
 
 if __name__ == "__main__":
@@ -27,12 +23,8 @@ if __name__ == "__main__":
 
     intents = discord.Intents.all()
 
-    client = discord.Client()
     cli = commands.Bot(command_prefix="!", intents=intents)
-    bot = commands.Bot(command_prefix="!", intents=intents)
-
     com = CommandManager(cli, IDS, beta_mode=BETA_MODE)
-    embeds = EmbedManager()
 
     user_bets = UserBets(IDS)
 

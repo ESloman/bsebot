@@ -12,7 +12,8 @@ from discord_slash.utils import manage_commands
 
 from discordbot.clienteventclasses import OnReadyEvent, OnReactionAdd
 from discordbot.embedmanager import EmbedManager
-from discordbot.slashcommandeventclasses import BSEddiesActive, BSEddiesLeaderboard, BSEddiesView
+from discordbot.slashcommandeventclasses import BSEddiesActive, BSEddiesGift, BSEddiesLeaderboard, BSEddiesView
+from discordbot.slashcommandeventclasses import BSEddiesCreateBet
 from mongo.bsepoints import UserPoints, UserBets
 
 
@@ -21,9 +22,10 @@ class CommandManager(object):
     Class for registering all the client events and slash commands
     Needs to be initialised with a client and a list of guild IDS
     """
+
     def __init__(self, client: discord.Client, guilds, beta_mode=False):
         self.client = client
-        self.slash = SlashCommand(client, auto_register=True, auto_delete=True)
+        self.slash = SlashCommand(client, sync_commands=True)
         self.beta_mode = beta_mode
 
         self.embeds = EmbedManager()
@@ -36,12 +38,24 @@ class CommandManager(object):
         self.on_reaction_add = OnReactionAdd(client, guilds, self.beta_mode)
 
         # slash command classes
-        self.beddies_active = BSEddiesActive(client, guilds, self.beta_mode)
+        self.bseddies_active = BSEddiesActive(client, guilds, self.beta_mode)
+        self.bseddies_create = BSEddiesCreateBet(client, guilds, self.beta_mode)
+        self.bseddies_gift = BSEddiesGift(client, guilds, self.beta_mode)
         self.bseddies_view = BSEddiesView(client, guilds, self.beta_mode)
         self.beddies_leaderboard = BSEddiesLeaderboard(client, guilds, self.beta_mode)
 
         self._register_client_events()
         self._register_slash_commands(guilds)
+
+    # noinspection PyProtectedMember
+    def __get_cached_messages_list(self):
+        """
+        Method for getting a list of cached message IDs
+        :return:
+        """
+        deque = self.client.cached_messages._SequenceProxy__proxied
+        cached = [d.id for d in deque]
+        return cached
 
     def _register_client_events(self):
         @self.client.event
@@ -50,8 +64,30 @@ class CommandManager(object):
 
         @self.client.event
         async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
+            """
+            This event catches EVERY reaction event on every message in the server.
+            However, any operations we want to perform are a bit slower as we need to 'fetch' the message
+            before we have all the data we have. BUT, we need to handle reactions to all messages as a user may
+            react to an older message that isn't in the cache and we can't just not do anything.
+
+            If the message is in the cache - then this event will fire and so will on_reaction_add. To prevent that,
+            and to keep on_reaction_add for cached messages and be faster, we check if the message_id is already
+            in the cache. If it is, then we can safely ignore it here. Otherwise we need to handle it.
+            :param payload:
+            :return:
+            """
+
+            cached_messages = self.__get_cached_messages_list()
+            if payload.message_id in cached_messages:
+                # message id is already in the cache
+                return
+
             guild = self.client.get_guild(payload.guild_id)  # type: discord.Guild
             user = guild.get_member(payload.user_id)  # type: discord.User
+
+            if user.bot:
+                return
+
             channel = guild.get_channel(payload.channel_id)  # type: discord.TextChannel
             partial_message = channel.get_partial_message(payload.message_id)  # type: discord.PartialMessage
             message = await partial_message.fetch()  # type: discord.Message
@@ -60,8 +96,7 @@ class CommandManager(object):
 
         @self.client.event
         async def on_reaction_add(reaction: discord.Reaction, user: discord.User):
-            pass
-            """
+
             await self.on_reaction_add.handle_reaction_event(
                 reaction.message,
                 reaction.message.guild,
@@ -69,7 +104,6 @@ class CommandManager(object):
                 reaction.emoji,
                 user
             )
-            """
 
     def _register_slash_commands(self, guilds):
         """
@@ -78,8 +112,9 @@ class CommandManager(object):
         :param guilds:
         :return:
         """
+
         @self.slash.slash(name="ping", guild_ids=guilds)
-        async def ping(ctx: discord_slash.model.SlashContext):
+        async def ping(ctx):
             await ctx.send(content=f"Pong! ({self.client.latency * 1000}ms)")
 
         @self.slash.subcommand(
@@ -88,7 +123,7 @@ class CommandManager(object):
             name="view",
             description="View your total BSEddies",
             guild_ids=guilds)
-        async def bseddies(ctx: discord_slash.model.SlashContext):
+        async def bseddies(ctx: discord_slash.context.SlashContext):
             await self.bseddies_view.view(ctx)
 
         @self.slash.subcommand(
@@ -97,7 +132,7 @@ class CommandManager(object):
             name="leaderboard",
             description="View the BSEddie leaderboard.",
             guild_ids=guilds)
-        async def leaderboard(ctx: discord_slash.model.SlashContext):
+        async def leaderboard(ctx):
             await self.beddies_leaderboard.leaderboard(ctx)
 
         @self.slash.subcommand(
@@ -106,13 +141,13 @@ class CommandManager(object):
             name="active",
             description="View all the active bets in the server.",
             guild_ids=guilds)
-        async def active_bets(ctx: discord_slash.model.SlashContext):
+        async def active_bets(ctx: discord_slash.context.SlashContext):
             """
             Slash commands lists all the active bets in the system.
             :param ctx:
             :return:
             """
-            await self.beddies_active.active(ctx)
+            await self.bseddies_active.active(ctx)
 
         @self.slash.subcommand(
             base="bseddies",
@@ -134,48 +169,8 @@ class CommandManager(object):
                 )
             ],
             guild_ids=guilds)
-        async def gift_eddies(ctx: discord_slash.model.SlashContext, friend: discord.User, amount: int):
-            if ctx.guild.id not in guilds:
-                return
-
-            if self.beta_mode and ctx.channel.id != 809773876078575636:
-                msg = f"These features are in BETA mode and this isn't a BETA channel."
-                await ctx.send(content=msg, hidden=True)
-                return
-
-            if friend.bot:
-                msg = f"Bots cannot be gifted eddies."
-                await ctx.send(content=msg, hidden=True)
-                return
-
-            if amount < 0:
-                msg = f"You can't _\"gift\"_ someone negative points."
-                await ctx.send(content=msg, hidden=True)
-                return
-
-            points = self.user_points.get_user_points(ctx.author.id, ctx.guild.id)
-            if points < amount:
-                msg = f"You have insufficient points to perform that action."
-                await ctx.send(content=msg, hidden=True)
-                return
-
-            if friend.id == ctx.author.id:
-                msg = f"You can't gift yourself points."
-                await ctx.send(content=msg, hidden=True)
-                return
-
-            if not friend.dm_channel:
-                await friend.create_dm()
-            try:
-                msg = f"**{ctx.author.name}** just gifted you `{amount}` eddies!!"
-                await friend.send(content=msg)
-            except discord.errors.Forbidden:
-                pass
-
-            self.user_points.decrement_points(ctx.author.id, ctx.guild.id, amount)
-            self.user_points.increment_points(friend.id, ctx.guild.id, amount)
-
-            await ctx.send(content=f"Eddies transferred to `{friend.name}`!", hidden=True)
+        async def gift_eddies(ctx: discord_slash.context.SlashContext, friend: discord.User, amount: int):
+            await self.bseddies_gift.gift_eddies(ctx, friend, amount)
 
         @self.slash.subcommand(
             base="bseddies",
@@ -190,46 +185,55 @@ class CommandManager(object):
                     description="What is the bet?",
                     option_type=3,
                     required=True
+                ),
+                manage_commands.create_option(
+                    name="outcome_one_name",
+                    description="Outcome number 1 name",
+                    option_type=3,
+                    required=False
+                ),
+                manage_commands.create_option(
+                    name="outcome_two_name",
+                    description="Outcome number 2 name",
+                    option_type=3,
+                    required=False
+                ),
+                manage_commands.create_option(
+                    name="outcome_three_name",
+                    description="Outcome number 3 name",
+                    option_type=3,
+                    required=False
+                ),
+                manage_commands.create_option(
+                    name="outcome_four_name",
+                    description="Outcome number 4 name",
+                    option_type=3,
+                    required=False
                 )
             ],
             guild_ids=guilds
         )
-        async def handle_bet_creation(ctx, bet_title: str):
-            if ctx.guild.id not in guilds:
-                return
-
-            if self.beta_mode and ctx.channel.id != 809773876078575636:
-                msg = f"These features are in BETA mode and this isn't a BETA channel."
-                await ctx.send(content=msg, hidden=True)
-                return
-
-            option_dict = {"✅": {"val": "succeed", "text": "yes"}, "❌": {"val": "fail", "text": "no"}}
-
-            bet = self.user_bets.create_new_bet(
-                ctx.guild.id,
-                ctx.author.id,
-                bet_title,
-                options=["succeed", "fail"],
-                option_dict=option_dict,
+        async def handle_bet_creation(
+                ctx: discord_slash.context.SlashContext,
+                bet_title: str,
+                outcome_one_name=None,
+                outcome_two_name=None,
+                outcome_three_name=None,
+                outcome_four_name=None,
+        ):
+            """
+            Catching discord slash for bet creation.
+            :param ctx:
+            :param bet_title:
+            :param outcome_one_name:
+            :param outcome_two_name:
+            :param outcome_three_name:
+            :param outcome_four_name:
+            :return:
+            """
+            await self.bseddies_create.handle_bet_creation(
+                ctx, bet_title, outcome_one_name, outcome_two_name, outcome_three_name, outcome_four_name
             )
-
-            embed = self.embeds.get_bet_embed(ctx.guild, bet["bet_id"], bet)
-
-            member = ctx.guild.get_member(ctx.author.id)
-            # embed.set_author(name=member.name)
-
-            content = f"Bet created by {member.mention}"
-
-            # await ctx.send(content=f"Bet created: {bet_title}", hidden=True)
-            message = await ctx.channel.send(content=content, embed=embed)
-
-            self.user_bets.update(
-                {"_id": bet["_id"]},
-                {"$set": {"message_id": message.id, "channel_id": message.channel.id}}
-            )
-
-            for emoji in option_dict:
-                await message.add_reaction(emoji)
 
         @self.slash.subcommand(
             base="bseddies",
@@ -260,7 +264,7 @@ class CommandManager(object):
             ],
             guild_ids=guilds
         )
-        async def do_a_bet(ctx: discord_slash.model.SlashContext, bet_id: str, amount: int, emoji: str):
+        async def do_a_bet(ctx: discord_slash.context.SlashContext, bet_id: str, amount: int, emoji: str):
             if ctx.guild.id not in guilds:
                 return
 
@@ -276,6 +280,8 @@ class CommandManager(object):
                 msg = f"Your reaction on **Bet {bet_id}** failed as the bet is closed for new bets."
                 await ctx.send(content=msg, hidden=True)
                 return
+
+            emoji = emoji.strip()
 
             if emoji not in bet["option_dict"]:
                 msg = f"Your reaction on **Bet {bet_id}** failed as that reaction isn't a valid outcome."
@@ -317,7 +323,7 @@ class CommandManager(object):
             ],
             guild_ids=guilds
         )
-        async def close_a_bet(ctx: discord_slash.model.SlashContext, bet_id: str, emoji: str):
+        async def close_a_bet(ctx: discord_slash.context.SlashContext, bet_id: str, emoji: str):
             if ctx.guild.id not in guilds:
                 return
 
@@ -338,6 +344,8 @@ class CommandManager(object):
                 msg = f"You cannot close a bet that isn't yours."
                 await ctx.send(content=msg, hidden=True)
                 return
+
+            emoji = emoji.strip()
 
             if emoji not in bet["option_dict"]:
                 msg = f"{emoji} isn't a valid outcome so the bet can't be closed."

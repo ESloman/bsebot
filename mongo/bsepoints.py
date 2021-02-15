@@ -239,3 +239,26 @@ class UserBets(BestSummerEverPointsDB):
             ret_dict["winners"][better] = points_won
             self.user_points.increment_points(int(better), guild_id, points_won)
         return ret_dict
+
+
+class UserInteractions(BestSummerEverPointsDB):
+    """
+    Class for interacting with the 'userinteractions' MongoDB collection in the 'bestsummereverpoints' DB
+    """
+    def __init__(self):
+        super().__init__()
+        self._vault = interface.get_collection(self.database, "userinteractions")
+
+    def add_entry(self, message_id, guild_id, user_id, channel_id, message_type, message_content, timestamp):
+
+        message = {
+            "message_id": message_id,
+            "guild_id": guild_id,
+            "user_id": user_id,
+            "channel_id": channel_id,
+            "message_type": message_type,
+            "content": message_content,
+            "timestamp": timestamp
+        }
+
+        self.insert(message)

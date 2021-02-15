@@ -1,7 +1,7 @@
 import discord
 
 from discordbot.embedmanager import EmbedManager
-from mongo.bsepoints import UserBets, UserPoints
+from mongo.bsepoints import UserBets, UserPoints, UserInteractions
 
 
 class BaseEvent(object):
@@ -126,3 +126,51 @@ class OnReactionAdd(BaseEvent):
                 embed = self.embed_manager.get_bet_embed(guild, bet_id, new_bet)
                 await message.edit(embed=embed)
             await message.remove_reaction(reaction_emoji, user)
+
+
+class OnMessage(BaseEvent):
+    """
+    Class for handling on_message events from Discord
+    """
+
+    def __init__(self, client, guild_ids, beta_mode=False):
+        super().__init__(client, guild_ids, beta_mode=beta_mode)
+        self.user_interactions = UserInteractions()
+
+    async def message_received(self, message: discord.Message):
+        guild_id = message.guild.id
+        user_id = message.author.id
+        channel_id = message.channel.id
+        message_content = message.content
+
+        if message.reference:
+            message_type = "reply"
+        elif message.attachments:
+            message_type = "attachment"
+        elif message.role_mentions:
+            message_type = "role_mention"
+        elif message.channel_mentions:
+            message_type = "channel_mention"
+        elif message.mentions:
+            message_type = "mention"
+        elif message.mention_everyone:
+            message_type = "everyone_mention"
+        elif "https://" in message.content or "http://" in message_content:
+            if "gif" in message.content:
+                message_type = "gif"
+            else:
+                message_type = "link"
+        else:
+            message_type = "message"
+
+        print(message_type)
+
+        self.user_interactions.add_entry(
+            message.id,
+            guild_id,
+            user_id,
+            channel_id,
+            message_type,
+            message_content,
+            message.created_at
+        )

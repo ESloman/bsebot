@@ -11,7 +11,7 @@ from discord_slash import SlashCommand, SlashContext
 from discord_slash.utils import manage_commands
 
 from discordbot.betcloser import BetCloser
-from discordbot.clienteventclasses import OnReadyEvent, OnReactionAdd
+from discordbot.clienteventclasses import OnReadyEvent, OnReactionAdd, OnMessage
 from discordbot.embedmanager import EmbedManager
 from discordbot.slashcommandeventclasses import BSEddiesActive, BSEddiesGift, BSEddiesLeaderboard, BSEddiesView
 from discordbot.slashcommandeventclasses import BSEddiesCreateBet, BSEddiesCloseBet
@@ -39,6 +39,7 @@ class CommandManager(object):
         # client event classes
         self.on_ready = OnReadyEvent(client, guilds, self.beta_mode)
         self.on_reaction_add = OnReactionAdd(client, guilds, self.beta_mode)
+        self.on_message = OnMessage(client, guilds, self.beta_mode)
 
         # slash command classes
         self.bseddies_active = BSEddiesActive(client, guilds, self.beta_mode)
@@ -130,10 +131,12 @@ class CommandManager(object):
             :param message:
             :return:
             """
-            pass
+            if message.author.bot:
+                return
+            await self.on_message.message_received(message)
 
     def _register_slash_commands(self, guilds):
-        """
+        """l
         Method for registering all the commands in one place.
         Most of these functions should call on the other classes to do the heavy lifting.
         :param guilds:

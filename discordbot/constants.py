@@ -17,13 +17,13 @@ MESSAGE_TYPES = [
 ]
 
 MESSAGE_VALUES = {
-    "message": 0.01,
-    "reply": 0.1,
+    "message": 0.1,
+    "reply": 0.2,
     "role_mention": 1,
     "channel_mention": 0.5,
     "mention": 0.25,
     "everyone_mention": 1,
-    "gif": 0.25,
+    "gif": 0.4,
     "link": 1,
     "attachment": 1,
 }

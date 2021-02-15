@@ -49,7 +49,7 @@ class UserPoints(BestSummerEverPointsDB):
         Sets a user's points to a given value.
         :param user_id:
         :param guild_id:
-        :param amount:
+        :param points:
         :return:
         """
         return self.update({"user_id": user_id, "guild_id": guild_id}, {"$set": {"points": points}})

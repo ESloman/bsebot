@@ -3,6 +3,7 @@ import dotenv
 from discord.ext import commands
 
 from discordbot.commandmanager import CommandManager
+from discordbot.constants import SLOMAN_SERVER_ID, BSE_SERVER_ID
 from mongo.bsepoints import UserBets
 
 
@@ -16,10 +17,10 @@ if __name__ == "__main__":
         BETA_MODE = False
 
     if BETA_MODE is False:
-        IDS = [291508460519161856]  # test IDs
+        IDS = [SLOMAN_SERVER_ID]  # test IDs
     else:
         BETA_MODE = True
-        IDS = [181098823228063764]  # actual IDS
+        IDS = [BSE_SERVER_ID]  # actual IDS
 
     intents = discord.Intents.all()
 

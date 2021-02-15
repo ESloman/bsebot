@@ -12,6 +12,7 @@ from discord_slash.utils import manage_commands
 
 from discordbot.betcloser import BetCloser
 from discordbot.clienteventclasses import OnReadyEvent, OnReactionAdd, OnMessage
+from discordbot.eddiegainmessageclass import EddieGainMessager
 from discordbot.embedmanager import EmbedManager
 from discordbot.slashcommandeventclasses import BSEddiesActive, BSEddiesGift, BSEddiesLeaderboard, BSEddiesView
 from discordbot.slashcommandeventclasses import BSEddiesCreateBet, BSEddiesCloseBet
@@ -51,6 +52,7 @@ class CommandManager(object):
 
         # tasks
         self.bet_closer_task = BetCloser(self.client, guilds)
+        self.eddie_gain_message_task = EddieGainMessager(self.client, guilds)
 
         # call the methods that register the events we're listening for
         self._register_client_events()

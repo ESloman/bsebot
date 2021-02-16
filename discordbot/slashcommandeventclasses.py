@@ -11,8 +11,8 @@ from mongo.bsepoints import UserBets, UserPoints
 
 
 class BSEddies(BaseEvent):
-    def __init__(self, client, guilds, beta_mode=False):
-        super().__init__(client, guilds, beta_mode=beta_mode)
+    def __init__(self, client, guilds, logger, beta_mode=False):
+        super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
     async def _handle_validation(self, ctx: discord_slash.context.SlashContext, **kwargs):
         """
@@ -49,8 +49,8 @@ class BSEddies(BaseEvent):
 
 
 class BSEddiesView(BSEddies):
-    def __init__(self, client, guilds, beta_mode=False):
-        super().__init__(client, guilds, beta_mode=beta_mode)
+    def __init__(self, client, guilds, logger, beta_mode=False):
+        super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
     async def view(self, ctx):
         """
@@ -68,10 +68,15 @@ class BSEddiesView(BSEddies):
 
 
 class BSEddiesLeaderboard(BSEddies):
-    def __init__(self, client, guilds, beta_mode=False):
-        super().__init__(client, guilds, beta_mode=beta_mode)
+    def __init__(self, client, guilds, logger, beta_mode=False):
+        super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
     async def leaderboard(self, ctx):
+        """
+        Basic method for sending the leaderboard to the channel that it was requested in.
+        :param ctx:
+        :return:
+        """
         if not await self._handle_validation(ctx):
             return
 
@@ -81,10 +86,15 @@ class BSEddiesLeaderboard(BSEddies):
 
 
 class BSEddiesActive(BSEddies):
-    def __init__(self, client, guilds, beta_mode=False):
-        super().__init__(client, guilds, beta_mode=beta_mode)
+    def __init__(self, client, guilds, logger, beta_mode=False):
+        super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
     async def active(self, ctx):
+        """
+        Simple method for listing all the
+        :param ctx:
+        :return:
+        """
         if not await self._handle_validation(ctx):
             return
 
@@ -108,12 +118,23 @@ class BSEddiesActive(BSEddies):
 
 
 class BSEddiesGift(BSEddies):
-    def __init__(self, client, guilds, beta_mode=False):
-        super().__init__(client, guilds, beta_mode=beta_mode)
+    def __init__(self, client, guilds, logger, beta_mode=False):
+        super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
     async def gift_eddies(self, ctx,
                           friend: discord.User,
                           amount: int):
+        """
+        Function for handling a 'gift eddies' event.
+
+        We make sure that the user initiating the command has enough BSEddies to give to a friend
+        and then we simply increment their friend's BSEddies and decrement theirs.
+
+        :param ctx:
+        :param friend:
+        :param amount:
+        :return:
+        """
         if not await self._handle_validation(ctx, friend=friend, amount=amount):
             return
 
@@ -138,20 +159,40 @@ class BSEddiesGift(BSEddies):
 
 
 class BSEddiesCloseBet(BSEddies):
-    def __init__(self, client, guilds, beta_mode=False):
-        super().__init__(client, guilds, beta_mode=beta_mode)
+    def __init__(self, client, guilds, logger, beta_mode=False):
+        super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
     async def close_bet(
             self,
             ctx: discord_slash.context.SlashContext,
             bet_id: str,
             emoji: str,):
+        """
+        This is the method for handling when we close a bet.
+
+        We validate that the user initiating the command is the user who created the bet and that
+        the bet is still open in the first place. We also make sure that the result the user
+        provided us is actually a valid result for the bet.
+
+        If that's all okay - we close the bet and dish out the BSEddies to the winners.
+        We also inform the winners/losers what the result was and how many BSEddies they won (if any).
+
+        :param ctx:
+        :param bet_id:
+        :param emoji:
+        :return:
+        """
 
         if not await self._handle_validation(ctx):
             return
 
         guild = ctx.guild  # type: discord.Guild
         bet = self.user_bets.get_bet_from_id(guild.id, bet_id)
+
+        if not bet:
+            msg = f"This bet doesn't exist."
+            await ctx.send(content=msg, hidden=True)
+            return
 
         if not bet["active"] and bet["result"] is not None:
             msg = f"You cannot close a bet that is already closed."
@@ -182,6 +223,7 @@ class BSEddiesCloseBet(BSEddies):
         # message the losers to tell them the bad news
         for loser in ret_dict["losers"]:
             mem = guild.get_member(int(loser))
+            self.user_points.decrement_pending_points(int(loser), guild.id, ret_dict["losers"][loser])
             if not mem.dm_channel:
                 await mem.create_dm()
             try:
@@ -195,6 +237,7 @@ class BSEddiesCloseBet(BSEddies):
         # message the winners to tell them the good news
         for winner in ret_dict["winners"]:
             mem = guild.get_member(int(winner))
+            self.user_points.decrement_pending_points(int(winner), guild.id, ret_dict["winners"][winner])
             if not mem.dm_channel:
                 await mem.create_dm()
             try:
@@ -213,8 +256,8 @@ class BSEddiesCloseBet(BSEddies):
 
 
 class BSEddiesCreateBet(BSEddies):
-    def __init__(self, client, guilds, beta_mode=False):
-        super().__init__(client, guilds, beta_mode=beta_mode)
+    def __init__(self, client, guilds, logger, beta_mode=False):
+        super().__init__(client, guilds, logger, beta_mode=beta_mode)
         self.default_two_options = {"1️⃣": {"val": "succeed"}, "2️⃣": {"val": "fail"}}
         self.multiple_options_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣"]
 
@@ -228,6 +271,25 @@ class BSEddiesCreateBet(BSEddies):
             option_four_name=None,
             timeout_str=None
     ):
+        """
+        The method that handles bet creation.
+
+        We work out which outcome names we're gonna need - either custom or defaults.
+        We make sure the user provided the right timeout or outcomes names (if at all).
+        We then set the timeout for the bet.
+        And we also work out which outcome emojis to use based of of the number of provided outcomes.
+
+        Then we create the bet and send a message to channel the bet was created in.
+
+        :param ctx:
+        :param bet_title:
+        :param option_one_name:
+        :param option_two_name:
+        :param option_three_name:
+        :param option_four_name:
+        :param timeout_str:
+        :return:
+        """
         if not await self._handle_validation(ctx):
             return
 
@@ -307,3 +369,65 @@ class BSEddiesCreateBet(BSEddies):
         )
         for emoji in option_dict:
             await message.add_reaction(emoji)
+
+
+class BSEddiesPlaceEvent(BSEddies):
+    def __init__(self, client, guilds, logger, beta_mode=False):
+        super().__init__(client, guilds, logger, beta_mode=beta_mode)
+
+    async def place_bet(
+            self,
+            ctx: discord_slash.context.SlashContext,
+            bet_id: str,
+            amount: int,
+            emoji: str,
+    ):
+        """
+        Main method for placing a bet.
+
+        Validates that a bet exists, is active and that the user has the right amount of BSEddies.
+        It also checks that the bet being placed is either new, or the same as the existing bet the user
+        has for this bet.
+
+        :param ctx:
+        :param bet_id:
+        :param amount:
+        :param emoji:
+        :return:
+        """
+        if not await self._handle_validation(ctx):
+            return
+
+        guild = ctx.guild  # type: discord.Guild
+        bet = self.user_bets.get_bet_from_id(guild.id, bet_id)
+
+        if not bet:
+            msg = f"This bet doesn't exist."
+            await ctx.send(content=msg, hidden=True)
+            return
+
+        if not bet["active"]:
+            msg = f"Your reaction on **Bet {bet_id}** failed as the bet is closed for new bets."
+            await ctx.send(content=msg, hidden=True)
+            return
+
+        emoji = emoji.strip()
+
+        if emoji not in bet["option_dict"]:
+            msg = f"Your reaction on **Bet {bet_id}** failed as that reaction isn't a valid outcome."
+            await ctx.send(content=msg, hidden=True)
+            return
+
+        success = self.user_bets.add_better_to_bet(bet_id, guild.id, ctx.author.id, emoji, amount)
+
+        if not success["success"]:
+            msg = f"Your reaction on **Bet {bet_id}** failed cos __{success['reason']}__?"
+            await ctx.send(content=msg, hidden=True)
+            return False
+
+        self.user_points.increment_pending_points(ctx.author.id, guild.id, amount)
+        bet = self.user_bets.get_bet_from_id(guild.id, bet_id)
+        channel = guild.get_channel(bet["channel_id"])
+        message = channel.get_partial_message(bet["message_id"])
+        embed = self.embed_manager.get_bet_embed(guild, bet_id, bet)
+        await message.edit(embed=embed)

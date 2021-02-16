@@ -8,20 +8,26 @@ from mongo.bsepoints import UserBets
 
 
 class BetCloser(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds):
+    def __init__(self, bot: discord.Client, guilds, logger):
         self.bot = bot
         self.guilds = guilds
         self.user_bets = UserBets()
-        self.embed_manager = EmbedManager()
+        self.logger = logger
+        self.embed_manager = EmbedManager(self.logger)
         self.bet_closer.start()
 
     def cog_unload(self):
+        """
+        Method for cancelling the loop.
+        :return:
+        """
         self.bet_closer.cancel()
 
     @tasks.loop(seconds=10.0)
     async def bet_closer(self):
         """
         Loop that takes all our active bets and ensures they haven't expired.
+        If they have expired - they get closed.
         :return:
         """
         now = datetime.datetime.now()
@@ -50,4 +56,8 @@ class BetCloser(commands.Cog):
 
     @bet_closer.before_loop
     async def before_bet_closer(self):
+        """
+        Make sure that websocket is open before we starting querying via it.
+        :return:
+        """
         await self.bot.wait_until_ready()

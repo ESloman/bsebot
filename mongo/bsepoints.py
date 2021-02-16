@@ -54,6 +54,26 @@ class UserPoints(BestSummerEverPointsDB):
         """
         return self.update({"user_id": user_id, "guild_id": guild_id}, {"$set": {"points": points}})
 
+    def set_pending_points(self, user_id, guild_id, points):
+        """
+        Sets a user's pending points to a given value.
+        :param user_id:
+        :param guild_id:
+        :param points:
+        :return:
+        """
+        return self.update({"user_id": user_id, "guild_id": guild_id}, {"$set": {"pending_points": points}})
+
+    def increment_pending_points(self, user_id, guild_id, amount):
+        """
+        Increases the 'pending' points of specified user
+        :param user_id:
+        :param guild_id:
+        :param amount:
+        :return:
+        """
+        return self.update({"uid": user_id, "guild_id": guild_id}, {"$inc": {"pending_points": amount}})
+
     def increment_points(self, user_id, guild_id, amount):
         """
         Increases a users points by a set amount.
@@ -63,6 +83,16 @@ class UserPoints(BestSummerEverPointsDB):
         :return:
         """
         return self.update({"uid": user_id, "guild_id": guild_id}, {"$inc": {"points": amount}})
+
+    def decrement_pending_points(self, user_id, guild_id, amount):
+        """
+        Decreases a users pending points by a set amount.
+        :param user_id:
+        :param guild_id:
+        :param amount:
+        :return:
+        """
+        return self.increment_pending_points(user_id, guild_id, amount * -1)
 
     def decrement_points(self, user_id, guild_id, amount):
         """
@@ -84,7 +114,8 @@ class UserPoints(BestSummerEverPointsDB):
         user_doc = {
             "uid": user_id,
             "guild_id": guild_id,
-            "points": 10
+            "points": 10,
+            "pending_points": 0
         }
         self.insert(user_doc)
 
@@ -201,7 +232,7 @@ class UserBets(BestSummerEverPointsDB):
             return {"success": False, "reason": "wrong option"}
 
         cur_points = self.user_points.get_user_points(user_id, guild_id)
-        if points > cur_points:
+        if (points > cur_points) or cur_points == 0:
             return {"success": False, "reason": "not enough points"}
 
         self.update(
@@ -250,6 +281,17 @@ class UserInteractions(BestSummerEverPointsDB):
         self._vault = interface.get_collection(self.database, "userinteractions")
 
     def add_entry(self, message_id, guild_id, user_id, channel_id, message_type, message_content, timestamp):
+        """
+        Adds an entry into our interactions DB with the corresponding message.
+        :param message_id:
+        :param guild_id:
+        :param user_id:
+        :param channel_id:
+        :param message_type:
+        :param message_content:
+        :param timestamp:
+        :return:
+        """
 
         message = {
             "message_id": message_id,

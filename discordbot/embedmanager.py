@@ -3,16 +3,15 @@ from typing import List, Union, Dict
 
 import discord
 import inflect
-from prettytable import PrettyTable
 
 from mongo.bsepoints import UserPoints
 
 
 class EmbedManager(object):
-    def __init__(self):
+    def __init__(self, logger):
         self.user_points = UserPoints()
         self.inflect_engine = inflect.engine()
-        self.pretty_table = PrettyTable()
+        self.logger = logger
 
     @staticmethod
     def get_bet_embed(guild: discord.Guild, bet_id, bet: dict):
@@ -69,10 +68,6 @@ class EmbedManager(object):
 
         users = sorted(users, key=lambda x: x["points"], reverse=True)
 
-        self.pretty_table = PrettyTable()
-
-        self.pretty_table.field_names = [" Position ", " Name ", " BSEDDIES "]
-
         if number is None:
             number = len(users)
         else:
@@ -86,12 +81,7 @@ class EmbedManager(object):
 
         for user in users[:number]:
             name = guild.get_member(user["uid"]).name
-            self.pretty_table.add_row(
-                [users.index(user) + 1, name, user["points"]]
-            )
             message += f"\n**{users.index(user) + 1})**  {name}  :  {user['points']}"
-
-        # message += self.pretty_table.get_string()
 
         if number < 6:
             message += "\n\n :arrow_forward: for longer list"

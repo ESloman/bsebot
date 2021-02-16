@@ -19,8 +19,7 @@ class BSEddiesManager(object):
     @staticmethod
     def _get_datetime_objects():
         now = datetime.datetime.now()
-        # yesterday = now - datetime.timedelta(days=1)
-        yesterday = now
+        yesterday = now - datetime.timedelta(days=1)
         start = yesterday.replace(hour=0, minute=0, second=0)
         end = yesterday.replace(hour=23, minute=59, second=59)
         return start, end

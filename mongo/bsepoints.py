@@ -249,7 +249,20 @@ class UserBets(BestSummerEverPointsDB):
             {"_id": ret["_id"]},
             {"$inc": {f"betters.{user_id}.points": points}, "$set": {"last_bet": datetime.datetime.now()}}
         )
+
         self.user_points.decrement_points(user_id, guild_id, points)
+        new_points = self.user_points.get_user_points(user_id, guild_id)
+
+        if new_points < 0:
+            # transaction went wrong somewhere. Reverse all the transactions that we did
+            # think this is a case of the user using reactions too quickly 
+            self.user_points.increment_points(user_id, guild_id, points)
+            self.update(
+                {"_id": ret["_id"]},
+                {"$inc": {f"betters.{user_id}.points": -1 * points}, "$set": {"last_bet": datetime.datetime.now()}}
+            )
+            return {"success": False, "reason": "not enough points"}
+
         return {"success": True}
 
     def close_a_bet(self, bet_id, guild_id, emoji):

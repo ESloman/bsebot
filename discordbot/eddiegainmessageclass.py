@@ -64,7 +64,7 @@ class EddieGainMessager(commands.Cog):
             user = await guild.fetch_member(int(user_id))  # type: discord.Member
             roles = user.roles  # type: List[discord.Role]
 
-            the_boys_role = [role for role in roles if r.id == THE_BOYS_ROLE]
+            the_boys_role = [role for role in roles if role.id == THE_BOYS_ROLE]
             if the_boys_role:
                 self.logger.info(f"Sending message to {user.display_name} for {eddie_dict[user_id]}")
                 await user.send(content=text)

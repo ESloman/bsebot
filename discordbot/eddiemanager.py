@@ -61,8 +61,7 @@ class BSEddiesManager(object):
         end = yesterday.replace(hour=23, minute=59, second=59)
         return start, end
 
-    @staticmethod
-    def _calc_eddies(counter):
+    def _calc_eddies(self, counter):
         """
         Quick function to loop over the message types and work out an amount of BSEddies the user will gain
         :param counter:

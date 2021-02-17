@@ -269,6 +269,7 @@ class UserBets(BestSummerEverPointsDB):
 
         ret_dict = {
             "result": emoji,
+            "outcome_name": ret["option_dict"][emoji],
             "timestamp": datetime.datetime.now(),
             "losers": {b: ret["betters"][b]["points"]
                        for b in ret["betters"] if ret["betters"][b]["emoji"] != emoji},

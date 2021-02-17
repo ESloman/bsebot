@@ -35,6 +35,16 @@ class UserPoints(BestSummerEverPointsDB):
         ret = self.query({"uid": user_id, "guild_id": guild_id}, projection={"points": True})
         return ret[0]["points"]
 
+    def get_user_pending_points(self, user_id, guild_id):
+        """
+        Returns a users points from a given guild.
+        :param user_id:
+        :param guild_id:
+        :return:
+        """
+        ret = self.query({"uid": user_id, "guild_id": guild_id}, projection={"pending_points": True})
+        return ret[0]["pending_points"]
+
     def get_all_users_for_guild(self, guild_id):
         """
         Gets all the users from a given guild.
@@ -62,7 +72,7 @@ class UserPoints(BestSummerEverPointsDB):
         :param points:
         :return:
         """
-        return self.update({"user_id": user_id, "guild_id": guild_id}, {"$set": {"pending_points": points}})
+        return self.update({"uid": user_id, "guild_id": guild_id}, {"$set": {"pending_points": points}})
 
     def increment_pending_points(self, user_id, guild_id, amount):
         """
@@ -269,6 +279,11 @@ class UserBets(BestSummerEverPointsDB):
             points_won = points_bet * 2
             ret_dict["winners"][better] = points_won
             self.user_points.increment_points(int(better), guild_id, points_won)
+
+        for better in ret["betters"]:
+            points_bet = ret["betters"][better]["points"]
+            self.user_points.decrement_pending_points(int(better), guild_id, points_bet)
+
         return ret_dict
 
 

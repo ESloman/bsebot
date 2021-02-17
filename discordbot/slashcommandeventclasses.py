@@ -1,11 +1,13 @@
 import copy
 import datetime
+import math
 import re
 
 import discord
 import discord_slash
 
 from discordbot.clienteventclasses import BaseEvent
+from discordbot.constants import BETA_USERS, CREATOR
 from discordbot.embedmanager import EmbedManager
 from mongo.bsepoints import UserBets, UserPoints
 
@@ -291,6 +293,31 @@ class BSEddiesCreateBet(BSEddies):
         :return:
         """
         if not await self._handle_validation(ctx):
+            return
+
+        points = self.user_points.get_user_points(ctx.author.id, ctx.guild.id)
+        max_bets = (math.floor(points / 100.0) * 100) / 50
+        current_bets = self.user_bets.query(
+            {"guild_id": ctx.guild.id,
+             "user": ctx.author.id,
+             "result": None
+             },
+            projection={"_id": True}
+        )
+
+        current_bets = len(current_bets)
+
+        if max_bets == 0:
+            max_bets = 2
+
+        if ctx.author.id == CREATOR or ctx.author.id in BETA_USERS:
+            max_bets = max_bets + 2
+
+        if current_bets and current_bets > max_bets:
+            msg = (f"The maximum number of open bets allowed is determined by your BSEddie total. The more you have,"
+                   f" the more open bets you're allowed to maintain. It looks like you already have the maximum "
+                   f"number of open bets. You'll have to wait until they're closed or you have more BSEddies.")
+            await ctx.send(content=msg, hidden=True)
             return
 
         if (option_one_name and not option_two_name) or (not option_one_name and option_two_name):

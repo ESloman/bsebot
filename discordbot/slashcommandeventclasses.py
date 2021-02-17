@@ -25,11 +25,6 @@ class BSEddies(BaseEvent):
         if ctx.guild.id not in self.guild_ids:
             return False
 
-        if self.beta_mode and ctx.channel.id != 809773876078575636:
-            msg = f"These features are in BETA mode and this isn't a BETA channel."
-            await ctx.send(content=msg, hidden=True)
-            return False
-
         if "friend" in kwargs and isinstance(kwargs["friend"], discord.User):
             if kwargs["friend"].bot:
                 msg = f"Bots cannot be gifted eddies."

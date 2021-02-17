@@ -95,16 +95,6 @@ class OnReactionAdd(BaseEvent):
         if not message.author.bot:
             return
 
-        if self.beta_mode and channel.id != 809773876078575636:
-            msg = f"These features are in BETA mode and this isn't a BETA channel."
-            if not user.dm_channel:
-                await user.create_dm()
-            try:
-                await user.send(content=msg)
-            except discord.errors.Forbidden:
-                pass
-            return
-
         if message.content and "BSEddies Leaderboard" in message.content and reaction_emoji == u"▶️":
             if not message.author.bot:
                 return

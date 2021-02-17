@@ -62,7 +62,7 @@ class UserPoints(BestSummerEverPointsDB):
         :param points:
         :return:
         """
-        return self.update({"user_id": user_id, "guild_id": guild_id}, {"$set": {"points": points}})
+        return self.update({"uid": user_id, "guild_id": guild_id}, {"$set": {"points": points}})
 
     def set_pending_points(self, user_id, guild_id, points):
         """
@@ -255,7 +255,7 @@ class UserBets(BestSummerEverPointsDB):
 
         if new_points < 0:
             # transaction went wrong somewhere. Reverse all the transactions that we did
-            # think this is a case of the user using reactions too quickly 
+            # think this is a case of the user using reactions too quickly
             self.user_points.increment_points(user_id, guild_id, points)
             self.update(
                 {"_id": ret["_id"]},

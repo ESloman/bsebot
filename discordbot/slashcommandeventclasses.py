@@ -65,7 +65,9 @@ class BSEddiesView(BSEddies):
             return
 
         points = self.user_points.get_user_points(ctx.author.id, ctx.guild.id)
-        msg = f"You have **{points}** :money_with_wings:`BSEDDIES`:money_with_wings:!"
+        pending = self.user_points.get_user_pending_points(ctx.author.id, ctx.guild.id)
+        msg = (f"You have **{points}** :money_with_wings:`BSEDDIES`:money_with_wings:!"
+               f"\nAdditionally, you have `{pending}` points on 'pending bets'.")
         await ctx.send(content=msg, hidden=True)
 
 
@@ -225,7 +227,6 @@ class BSEddiesCloseBet(BSEddies):
         # message the losers to tell them the bad news
         for loser in ret_dict["losers"]:
             mem = guild.get_member(int(loser))
-            self.user_points.decrement_pending_points(int(loser), guild.id, ret_dict["losers"][loser])
             if not mem.dm_channel:
                 await mem.create_dm()
             try:
@@ -239,7 +240,6 @@ class BSEddiesCloseBet(BSEddies):
         # message the winners to tell them the good news
         for winner in ret_dict["winners"]:
             mem = guild.get_member(int(winner))
-            self.user_points.decrement_pending_points(int(winner), guild.id, ret_dict["winners"][winner])
             if not mem.dm_channel:
                 await mem.create_dm()
             try:

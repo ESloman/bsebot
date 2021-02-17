@@ -212,7 +212,7 @@ class BSEddiesCloseBet(BSEddies):
 
         ret_dict = self.user_bets.close_a_bet(bet_id, guild.id, emoji)
 
-        desc = f"**{bet['title']}**\n{emoji} won!\n\n"
+        desc = f"**{bet['title']}**\n{emoji} - **{ret_dict['outcome_name']['val']}** won!\n\n"
 
         for better in ret_dict["winners"]:
             desc += f"\n- {guild.get_member(int(better)).name} won `{ret_dict['winners'][better]}` eddies!"

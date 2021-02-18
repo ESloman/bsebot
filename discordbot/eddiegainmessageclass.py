@@ -63,10 +63,18 @@ class EddieGainMessager(commands.Cog):
             the_boys_role = [role for role in roles if role.id == THE_BOYS_ROLE]
             if the_boys_role or user_id == CREATOR:
                 self.logger.info(f"Sending message to {user.display_name} for {eddie_dict[user_id]}")
-                await user.send(content=text)
+                try:
+                    await user.send(content=text)
+                except discord.Forbidden:
+                    self.logger.info(f"{user.display_name} - {text}")
+                    continue
 
         user = await guild.fetch_member(CREATOR)  # type: discord.Member
-        await user.send(content=msg)
+        try:
+            await user.send(content=msg)
+        except discord.Forbidden:
+            # can't send DM messages to this user
+            self.logger.info(f"{user.display_name} - {msg}")
 
         os.remove(path)
 

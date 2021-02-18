@@ -55,17 +55,13 @@ class EddieGainMessager(commands.Cog):
         for user_id in eddie_dict:
             msg += f"\n- `{user_id}`  :  **{eddie_dict[user_id]}**"
 
-            # only message users for now
-            if int(user_id) not in BETA_USERS:
-                continue
-
             text = f"Your daily salary of BSEDDIES is `{eddie_dict[user_id]}`.\n"
 
             user = await guild.fetch_member(int(user_id))  # type: discord.Member
             roles = user.roles  # type: List[discord.Role]
 
             the_boys_role = [role for role in roles if role.id == THE_BOYS_ROLE]
-            if the_boys_role:
+            if the_boys_role or user_id == CREATOR:
                 self.logger.info(f"Sending message to {user.display_name} for {eddie_dict[user_id]}")
                 await user.send(content=text)
 

@@ -170,6 +170,16 @@ class UserBets(BestSummerEverPointsDB):
         bets = self.query({"active": True, "guild_id": guild_id})
         return bets
 
+    def get_all_pending_bets(self, guild_id):
+        """
+        Gets all 'pending' bets - bets that don't have a result yet.
+        Could be active or closed.
+        :param guild_id:
+        :return:
+        """
+        bets = self.query({"result": None, "guild_id": guild_id})
+        return bets
+
     def create_new_bet(self, guild_id, user_id, title, options, option_dict,
                        timeout: Union[datetime.datetime, None] = None):
         """

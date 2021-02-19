@@ -88,7 +88,7 @@ class BSEddiesActive(BSEddies):
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
-    async def active(self, ctx):
+    async def active(self, ctx: discord_slash.context.SlashContext):
         """
         Simple method for listing all the
         :param ctx:
@@ -97,7 +97,7 @@ class BSEddiesActive(BSEddies):
         if not await self._handle_validation(ctx):
             return
 
-        bets = self.user_bets.get_all_active_bets(ctx.guild.id)
+        bets = self.user_bets.get_all_pending_bets(ctx.guild.id)
 
         message = "Here are all the active bets:\n"
 
@@ -105,9 +105,15 @@ class BSEddiesActive(BSEddies):
             if 'channel_id' not in bet or 'message_id' not in bet:
                 continue
 
+            if bet.get("private"):
+                if bet["channel_id"] != ctx.channel_id:
+                    continue
+
             link = f"https://discordapp.com/channels/{ctx.guild.id}/{bet['channel_id']}/{bet['message_id']}"
 
-            pt = f"**{bets.index(bet) + 1})** [{bet['bet_id']}] _{bet['title']}_\n{link}\n\n"
+            add_text = "OPEN FOR NEW BETS" if bet.get("active") else "CLOSED - AWAITING RESULT"
+
+            pt = f"**{bets.index(bet) + 1})** [{bet['bet_id']} - `{add_text}`] _{bet['title']}_\n{link}\n\n"
             message += pt
 
         if len(bets) == 0:
@@ -120,7 +126,7 @@ class BSEddiesGift(BSEddies):
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
-    async def gift_eddies(self, ctx,
+    async def gift_eddies(self, ctx: discord_slash.context.SlashContext,
                           friend: discord.User,
                           amount: int):
         """

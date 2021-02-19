@@ -180,6 +180,16 @@ class UserBets(BestSummerEverPointsDB):
         bets = self.query({"result": None, "guild_id": guild_id})
         return bets
 
+    def get_all_pending_bets_for_user(self, user_id, guild_id):
+        """
+        Gets all pending bets for a given user_id
+        :param user_id:
+        :param guild_id:
+        :return:
+        """
+        pending_bets = self.query({f"betters.{user_id}": {"$exists": True}, "guild_id": guild_id, "result": None})
+        return pending_bets
+
     def create_new_bet(self, guild_id, user_id, title, options, option_dict,
                        timeout: Union[datetime.datetime, None] = None):
         """

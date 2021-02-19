@@ -122,6 +122,48 @@ class BSEddiesActive(BSEddies):
         await ctx.send(content=message)
 
 
+class BSEddiesPending(BSEddies):
+    def __init__(self, client, guilds, logger, beta_mode=False):
+        super().__init__(client, guilds, logger, beta_mode=beta_mode)
+
+    async def pending(self, ctx: discord_slash.context.SlashContext):
+        """
+        Simple method for listing all the pending bets for a given user_id
+        :param ctx:
+        :return:
+        """
+        if not await self._handle_validation(ctx):
+            return
+
+        bets = self.user_bets.get_all_pending_bets_for_user(ctx.author.id, ctx.guild.id)
+
+        message = "Here are all your pending bets:\n"
+
+        for bet in bets:
+            if 'channel_id' not in bet or 'message_id' not in bet:
+                continue
+
+            if bet.get("private"):
+                if bet["channel_id"] != ctx.channel_id:
+                    continue
+
+            link = f"https://discordapp.com/channels/{ctx.guild.id}/{bet['channel_id']}/{bet['message_id']}"
+
+            add_text = "OPEN FOR NEW BETS" if bet.get("active") else "CLOSED - AWAITING RESULT"
+
+            pt = (f"**{bets.index(bet) + 1})** [{bet['bet_id']} - `{add_text}`] _{bet['title']}_"
+                  f"\nOutcome: {bet['betters'][str(ctx.author.id)]['emoji']}\n"
+                  f"Points: **{bet['betters'][str(ctx.author.id)]['points']}**\n{link}\n\n")
+            message += pt
+
+        if len(bets) == 0:
+            message = "You have no pending bets :("
+
+        self.logger.info(message)
+
+        await ctx.send(content=message, hidden=True)
+
+
 class BSEddiesGift(BSEddies):
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)

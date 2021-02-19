@@ -495,7 +495,6 @@ class BSEddiesPlaceEvent(BSEddies):
             await ctx.send(content=msg, hidden=True)
             return False
 
-        self.user_points.increment_pending_points(ctx.author.id, guild.id, amount)
         bet = self.user_bets.get_bet_from_id(guild.id, bet_id)
         channel = guild.get_channel(bet["channel_id"])
         message = channel.get_partial_message(bet["message_id"])

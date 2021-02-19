@@ -38,12 +38,21 @@ class UserPoints(BestSummerEverPointsDB):
     def get_user_pending_points(self, user_id, guild_id):
         """
         Returns a users points from a given guild.
+
+        We search for all the non-closed bets in the DB and get the points directly from there.
+
         :param user_id:
         :param guild_id:
         :return:
         """
-        ret = self.query({"uid": user_id, "guild_id": guild_id}, projection={"pending_points": True})
-        return ret[0]["pending_points"]
+        pending = 0
+
+        pending_bets = self.query({f"betters.{user_id}": {"$exists": True}, "guild_id": guild_id, "result": None}, )
+        for bet in pending_bets:
+            our_user = bet["betters"][str(user_id)]
+            pending += our_user["points"]
+
+        return pending
 
     def get_all_users_for_guild(self, guild_id):
         """
@@ -313,10 +322,6 @@ class UserBets(BestSummerEverPointsDB):
             points_won = points_bet * 2
             ret_dict["winners"][better] = points_won
             self.user_points.increment_points(int(better), guild_id, points_won)
-
-        for better in ret["betters"]:
-            points_bet = ret["betters"][better]["points"]
-            self.user_points.decrement_pending_points(int(better), guild_id, points_bet)
 
         return ret_dict
 

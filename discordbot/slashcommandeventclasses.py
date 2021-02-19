@@ -60,7 +60,7 @@ class BSEddiesView(BSEddies):
             return
 
         points = self.user_points.get_user_points(ctx.author.id, ctx.guild.id)
-        pending = self.user_points.get_user_pending_points(ctx.author.id, ctx.guild.id)
+        pending = self.user_bets.get_user_pending_points(ctx.author.id, ctx.guild.id)
         msg = (f"You have **{points}** :money_with_wings:`BSEDDIES`:money_with_wings:!"
                f"\nAdditionally, you have `{pending}` points on 'pending bets'.")
         await ctx.send(content=msg, hidden=True)

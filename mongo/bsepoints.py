@@ -35,25 +35,6 @@ class UserPoints(BestSummerEverPointsDB):
         ret = self.query({"uid": user_id, "guild_id": guild_id}, projection={"points": True})
         return ret[0]["points"]
 
-    def get_user_pending_points(self, user_id, guild_id):
-        """
-        Returns a users points from a given guild.
-
-        We search for all the non-closed bets in the DB and get the points directly from there.
-
-        :param user_id:
-        :param guild_id:
-        :return:
-        """
-        pending = 0
-
-        pending_bets = self.query({f"betters.{user_id}": {"$exists": True}, "guild_id": guild_id, "result": None}, )
-        for bet in pending_bets:
-            our_user = bet["betters"][str(user_id)]
-            pending += our_user["points"]
-
-        return pending
-
     def get_all_users_for_guild(self, guild_id):
         """
         Gets all the users from a given guild.
@@ -188,6 +169,25 @@ class UserBets(BestSummerEverPointsDB):
         """
         bets = self.query({"result": None, "guild_id": guild_id})
         return bets
+
+    def get_user_pending_points(self, user_id, guild_id):
+        """
+        Returns a users points from a given guild.
+
+        We search for all the non-closed bets in the DB and get the points directly from there.
+
+        :param user_id:
+        :param guild_id:
+        :return:
+        """
+        pending = 0
+
+        pending_bets = self.query({f"betters.{user_id}": {"$exists": True}, "guild_id": guild_id, "result": None}, )
+        for bet in pending_bets:
+            our_user = bet["betters"][str(user_id)]
+            pending += our_user["points"]
+
+        return pending
 
     def get_all_pending_bets_for_user(self, user_id, guild_id):
         """

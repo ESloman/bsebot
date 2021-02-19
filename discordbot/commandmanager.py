@@ -80,7 +80,7 @@ class CommandManager(object):
             Event that handles when we're 'ready'
             :return:
             """
-            self.on_ready.on_ready()
+            await self.on_ready.on_ready()
 
         @self.client.event
         async def on_member_join(member: discord.Member):

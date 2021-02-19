@@ -18,14 +18,15 @@ class BaseEvent(object):
 class OnReadyEvent(BaseEvent):
     def __init__(self, client, guild_ids, logger, beta_mode=False):
         super().__init__(client, guild_ids, logger, beta_mode=beta_mode)
-        self.client = client
+        self.client = client  # type: discord.Client
 
-    def on_ready(self):
+    async def on_ready(self):
         """
         Method called for on_ready event. Makes sure we have an entry for every user in each guild.
         :return:
         """
         self.logger.info("Checking guilds for members")
+
         for guild_id in self.guild_ids:
             guild = self.client.get_guild(guild_id)
             self.logger.info(f"Checking guild: {guild.id} - {guild.name}")

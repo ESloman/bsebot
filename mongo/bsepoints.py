@@ -200,9 +200,10 @@ class UserBets(BestSummerEverPointsDB):
         return pending_bets
 
     def create_new_bet(self, guild_id, user_id, title, options, option_dict,
-                       timeout: Union[datetime.datetime, None] = None):
+                       timeout: Union[datetime.datetime, None] = None, private=False):
         """
         Creates a new bet and inserts it into the DB.
+        :param private:
         :param guild_id:
         :param user_id:
         :param title:
@@ -225,7 +226,8 @@ class UserBets(BestSummerEverPointsDB):
             "result": None,
             "option_dict": option_dict,
             "channel_id": None,
-            "message_id": None
+            "message_id": None,
+            "private": private,
         }
         self.insert(bet_doc)
         return bet_doc

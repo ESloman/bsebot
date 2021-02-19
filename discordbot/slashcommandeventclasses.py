@@ -7,7 +7,7 @@ import discord
 import discord_slash
 
 from discordbot.clienteventclasses import BaseEvent
-from discordbot.constants import BETA_USERS, CREATOR
+from discordbot.constants import BETA_USERS, CREATOR, PRIVATE_CHANNEL_IDS
 from discordbot.embedmanager import EmbedManager
 from mongo.bsepoints import UserBets, UserPoints
 
@@ -410,13 +410,16 @@ class BSEddiesCreateBet(BSEddies):
                 dt_key = {}
             timeout = datetime.datetime.now() + datetime.timedelta(**dt_key)
 
+        private = ctx.channel_id in PRIVATE_CHANNELS
+
         bet = self.user_bets.create_new_bet(
             ctx.guild.id,
             ctx.author.id,
             bet_title,
             options=list(option_dict.keys()),
             option_dict=option_dict,
-            timeout=timeout
+            timeout=timeout,
+            private=private
         )
 
         embed = self.embed_manager.get_bet_embed(ctx.guild, bet["bet_id"], bet)

@@ -143,10 +143,6 @@ class BSEddiesPending(BSEddies):
             if 'channel_id' not in bet or 'message_id' not in bet:
                 continue
 
-            if bet.get("private"):
-                if bet["channel_id"] != ctx.channel_id:
-                    continue
-
             link = f"https://discordapp.com/channels/{ctx.guild.id}/{bet['channel_id']}/{bet['message_id']}"
 
             add_text = "OPEN FOR NEW BETS" if bet.get("active") else "CLOSED - AWAITING RESULT"

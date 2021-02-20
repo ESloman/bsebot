@@ -184,8 +184,6 @@ class OnMessage(BaseEvent):
         else:
             message_type = "message"
 
-        self.logger.info(message_type)
-
         self.user_interactions.add_entry(
             message.id,
             guild_id,

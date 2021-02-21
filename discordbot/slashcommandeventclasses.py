@@ -410,7 +410,7 @@ class BSEddiesCreateBet(BSEddies):
                 dt_key = {}
             timeout = datetime.datetime.now() + datetime.timedelta(**dt_key)
 
-        private = ctx.channel_id in PRIVATE_CHANNELS_IDS
+        private = ctx.channel_id in PRIVATE_CHANNEL_IDS
 
         bet = self.user_bets.create_new_bet(
             ctx.guild.id,

@@ -6,6 +6,7 @@ import re
 import discord
 import discord_slash
 
+from discordbot.bot_enums import TransactionTypes
 from discordbot.clienteventclasses import BaseEvent
 from discordbot.constants import BETA_USERS, CREATOR, PRIVATE_CHANNEL_IDS
 from discordbot.embedmanager import EmbedManager
@@ -195,6 +196,27 @@ class BSEddiesGift(BSEddies):
 
         self.user_points.decrement_points(ctx.author.id, ctx.guild.id, amount)
         self.user_points.increment_points(friend.id, ctx.guild.id, amount)
+
+        # add to transaction history
+        self.user_points.append_to_transaction_history(
+            ctx.author.id,
+            ctx.guild.id,
+            {
+                "type": TransactionTypes.GIFT_GIVE,
+                "amount": amount,
+                "timestamp": datetime.datetime.now(),
+            }
+        )
+
+        self.user_points.append_to_transaction_history(
+            friend.id,
+            ctx.guild.id,
+            {
+                "type": TransactionTypes.GIFT_RECEIVE,
+                "amount": amount,
+                "timestamp": datetime.datetime.now(),
+            }
+        )
 
         await ctx.send(content=f"Eddies transferred to `{friend.name}`!", hidden=True)
 
@@ -496,4 +518,15 @@ class BSEddiesPlaceEvent(BSEddies):
         channel = guild.get_channel(bet["channel_id"])
         message = channel.get_partial_message(bet["message_id"])
         embed = self.embed_manager.get_bet_embed(guild, bet_id, bet)
+        self.user_points.append_to_transaction_history(
+            ctx.author.id,
+            guild.id,
+            {
+                "type": TransactionTypes.BET_PLACE,
+                "amount": amount,
+                "timestamp": datetime.datetime.now(),
+                "bet_id": bet_id,
+                "comment": "Bet placed through slash command",
+            }
+        )
         await message.edit(embed=embed)

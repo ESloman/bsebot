@@ -8,6 +8,7 @@ import sys
 from collections import Counter
 from logging.handlers import RotatingFileHandler
 
+from discordbot.bot_enums import TransactionTypes
 from discordbot.constants import MESSAGE_TYPES, MESSAGE_VALUES
 from mongo.bsepoints import UserPoints, UserInteractions
 
@@ -123,6 +124,15 @@ class BSEddiesManager(object):
             eddies_gained = math.ceil(eddies_gained)
             self.user_points.increment_points(user, guild_id, eddies_gained)
             eddie_gain_dict[user] = eddies_gained
+            self.user_points.append_to_transaction_history(
+                user,
+                guild_id,
+                {
+                    "type": TransactionTypes.DAILY_SALARY,
+                    "amount": eddies_gained,
+                    "timestamp": datetime.datetime.now(),
+                }
+            )
             self.logger.info(f"{user} gained {eddies_gained}")
 
         with open(os.path.join(os.path.expanduser("~"), "eddies_gained.json"), "w+") as f:

@@ -22,7 +22,7 @@ class BSEddiesKing(commands.Cog):
         """
         self.king_checker.cancel()
 
-    @tasks.loop(minutes=10)
+    @tasks.loop(minutes=2)
     async def king_checker(self):
         """
         Loop that takes all our active bets and ensures they haven't expired.

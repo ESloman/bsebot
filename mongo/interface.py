@@ -7,10 +7,13 @@ MongoDB methods.
 """
 
 import sys
+from typing import Union
 
 from pymongo import MongoClient
 from pymongo.collection import Collection
+from pymongo.cursor import Cursor
 from pymongo.database import Database
+from pymongo.results import UpdateResult
 
 if sys.version_info[0] < 3:
     from urllib import quote_plus
@@ -18,10 +21,20 @@ else:
     from urllib.parse import quote_plus
 
 
-def get_client(ip="127.0.0.1", user_name=None, password=None):
+def get_client(
+        ip: str = "127.0.0.1",
+        user_name: Union[str, None] = None,
+        password: Union[str, None] = None) -> Union[MongoClient, bool]:
     """
     Returns a MongoDB Client connection for interacting with MongoDB Database Objects.
+
+    :param ip: STR - IP address of mongo instance to get client for
+    :param user_name: STR - user name to login to instance with
+    :param password: STR - password to login to instance with
+
+    :returns MongoClient object:
     """
+
     if user_name is None and password is None:
         connection = "mongodb://{}:27017".format(ip)
     elif user_name and password:
@@ -33,37 +46,63 @@ def get_client(ip="127.0.0.1", user_name=None, password=None):
     return MongoClient(connection, serverSelectionTimeoutMS=1000)
 
 
-def get_database_names(client):
+def get_database_names(client: MongoClient) -> list:
     """
     Returns a list of database names for a given client.
+
+    :param client: MongoClient object to return database names of
+
+    :returns list of database names:
     """
-    return client.database_names()
+    return client.list_database_names()
 
 
-def get_database(client, database):
+def get_database(client: MongoClient, database: str) -> Database:
     """
     Returns a mongoDB object for a given client and database.
     If the database doesn't exist, this will create a new database for the client.
+
+    :param client: MongoClient object to get database from
+    :param database: str of database name to get
+
+    :returns pymongo Database object:
     """
     return client[database]
 
 
-def get_collection_names(database, include_system_collections=False):
+def get_collection_names(
+        database: Database,
+        include_system_collections: bool = False) -> list:
     """
     Returns a list of collections for a given mongoDB database.
+
+    :param database: pymongo Database object
+    :param include_system_collections: bool. Whether or not to include the system collections
+
+    :returns list of collections in database:
     """
-    return database.collection_names(include_system_collections=include_system_collections)
+    return database.list_collection_names(include_system_collections=include_system_collections)
 
 
-def get_collection(database, collection):
+def get_collection(
+        database: Database,
+        collection: str) -> Collection:
     """
     Returns a mongoDB collection object for a given database and collection name.
     If the collection doesn't exist, this will create it.
+
+    :param database: pymongo Database object
+    :param collection: str name of collection to get
+
+    :returns pymongo Collection object:
     """
     return database[collection]
 
 
-def insert(collection, documents, in_order=True):
+def insert(
+        collection: Collection,
+        documents: Union[list, dict],
+        in_order: bool = True) -> list:
     """
     Inserts a given number of documents into a given collection.
     Returns a list of objectIDs of the items inserted.
@@ -71,13 +110,18 @@ def insert(collection, documents, in_order=True):
         collection : a mongoDB collection object
         documents : either a single document in dict form, or a list of documents as a list of dicts
         in_order : whether the documents should be entered in serial.
+
+    :returns: list of inserted IDs
     """
     documents = [documents, ] if isinstance(documents, dict) else documents
     results = collection.insert_many(documents, ordered=in_order)
     return results.inserted_ids
 
 
-def delete(collection, params, many=True):
+def delete(
+        collection: Collection,
+        params: dict,
+        many: bool = True) -> int:
     """
     Deletes all documents matching the query from the database
     Returns the number of documents deleted
@@ -85,12 +129,19 @@ def delete(collection, params, many=True):
         collection : a mongoDB collection object
         params : A dict to match eg {"status": "Pass"}
         many : delete all matching if True, else delete first found
+
+    :returns: int of deleted entries
     """
     delete_func = collection.delete_many if many else collection.delete_one
     return delete_func(params).deleted_count
 
 
-def update(collection, parameters, updated_vals, many=True, upsert=False):
+def update(
+        collection: Collection,
+        parameters: dict,
+        updated_vals: dict,
+        many: bool = True,
+        upsert: bool = False) -> UpdateResult:
     """
     Searches for matching entries based on a given parameters, and updates matching entries with the given update
     parameters.
@@ -111,11 +162,17 @@ def update(collection, parameters, updated_vals, many=True, upsert=False):
     Returns result object.
     """
     update_func = collection.update_many if many else collection.update_one
+    # noinspection PyArgumentList
     results = update_func(filter=parameters, update=updated_vals, upsert=upsert)
     return results
 
 
-def query(collection, parameters, lim=10000, projection=None, as_gen=True):
+def query(
+        collection: Collection,
+        parameters: dict,
+        lim: int = 10000,
+        projection: Union[dict, None] = None,
+        as_gen: bool = True) -> Union[list, Cursor]:
     """
     Searches a collection for documents based on given parameters.
     Parameters should be dictionaries : {key : search}. Where key is an existing key in the collection and
@@ -140,7 +197,9 @@ def query(collection, parameters, lim=10000, projection=None, as_gen=True):
     return results if as_gen else list(results)
 
 
-def drop_collection(name_or_collection, database=None):
+def drop_collection(
+        name_or_collection: Union[str, Collection],
+        database: Database = None) -> bool:
     """
     Drops a given collection. NON REVERSIBLE. The given collection can be a collection object or the name of the
     collection. If it's a name, the database object must be provided too. Returns True if valid or False if input
@@ -159,7 +218,9 @@ def drop_collection(name_or_collection, database=None):
         return False
 
 
-def create_index(collection, key_or_list_of_keys_to_index):
+def create_index(
+        collection: Collection,
+        key_or_list_of_keys_to_index: Union[str, list]) -> Union[bool, list, str]:
     """
     Creates an index for a given collection for the given key(s).
     Docs: https://docs.mongodb.com/manual/indexes/#index-types
@@ -177,7 +238,7 @@ def create_index(collection, key_or_list_of_keys_to_index):
     return rets if len(rets) > 1 else rets[0]
 
 
-def get_indexes(collection):
+def get_indexes(collection: Collection):
     """
     Returns the indexes for the given collection.
     :param collection:

@@ -61,13 +61,13 @@ class BSEddiesManager(object):
         end = yesterday.replace(hour=23, minute=59, second=59)
         return start, end
 
-    def _calc_eddies(self, counter):
+    def _calc_eddies(self, counter, start=5):
         """
         Quick function to loop over the message types and work out an amount of BSEddies the user will gain
         :param counter:
         :return:
         """
-        points = 5
+        points = start
         for message_type in MESSAGE_TYPES:
             if val := counter.get(message_type):
                 t_points = val * MESSAGE_VALUES[message_type]
@@ -93,14 +93,33 @@ class BSEddiesManager(object):
 
         users = self.user_points.get_all_users_for_guild(guild_id)
         user_ids = [u["uid"] for u in users]
+        user_dict = {u["uid"]: u for u in users}
 
         eddie_gain_dict = {"guild": guild_id}
         for user in user_ids:
             self.logger.info(f"processing {user}")
+
+            minimum = user_dict[user].get("daily_minimum", 5)
+
+            # calculate points here
             user_results = [r for r in results if r["user_id"] == user]
+
+            if not user_results:
+                if minimum == 0:
+                    continue
+                minimum -= 1
+                self.user_points.decrement_daily_minimum(user, guild_id, 1)
+                if minimum == 0:
+                    continue
+            else:
+                if minimum != 5:
+                    minimum = 5
+                    self.user_points.set_daily_minimum(user, guild_id, 5)
+
             message_types = [r["message_type"] for r in user_results]
             count = Counter(message_types)
-            eddies_gained = self._calc_eddies(count)
+            eddies_gained = self._calc_eddies(count, minimum)
+
             eddies_gained = math.ceil(eddies_gained)
             self.user_points.increment_points(user, guild_id, eddies_gained)
             eddie_gain_dict[user] = eddies_gained

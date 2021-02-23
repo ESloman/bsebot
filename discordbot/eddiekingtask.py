@@ -25,8 +25,7 @@ class BSEddiesKing(commands.Cog):
     @tasks.loop(minutes=2)
     async def king_checker(self):
         """
-        Loop that takes all our active bets and ensures they haven't expired.
-        If they have expired - they get closed.
+        Loop that makes sure the King is assigned correctly
         :return:
         """
         for guild_id in self.guilds:

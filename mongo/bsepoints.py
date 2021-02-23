@@ -35,6 +35,16 @@ class UserPoints(BestSummerEverPointsDB):
         ret = self.query({"uid": user_id, "guild_id": guild_id}, projection={"points": True})
         return ret[0]["points"]
 
+    def get_user_daily_minimum(self, user_id, guild_id):
+        """
+        Returns the user's daily minimum points.
+        :param user_id:
+        :param guild_id:
+        :return:
+        """
+        ret = self.query({"uid": user_id, "guild_id": guild_id}, projection={"daily_minimum": True})
+        return ret[0]["daily_minimum"]
+
     def get_all_users_for_guild(self, guild_id):
         """
         Gets all the users from a given guild.
@@ -64,6 +74,16 @@ class UserPoints(BestSummerEverPointsDB):
         """
         return self.update({"uid": user_id, "guild_id": guild_id}, {"$set": {"pending_points": points}})
 
+    def set_daily_minimum(self, user_id, guild_id, points):
+        """
+        Sets the user's daily minimum points to a given value.
+        :param points:
+        :param user_id:
+        :param guild_id:
+        :return:
+        """
+        return self.update({"uid": user_id, "guild_id": guild_id}, {"$set": {"daily_minimum": points}})
+
     def increment_pending_points(self, user_id, guild_id, amount):
         """
         Increases the 'pending' points of specified user
@@ -83,6 +103,16 @@ class UserPoints(BestSummerEverPointsDB):
         :return:
         """
         return self.update({"uid": user_id, "guild_id": guild_id}, {"$inc": {"points": amount}})
+
+    def increment_daily_minimum(self, user_id, guild_id, points):
+        """
+        Increments the user's daily minimum points by a given value.
+        :param points:
+        :param user_id:
+        :param guild_id:
+        :return:
+        """
+        return self.update({"uid": user_id, "guild_id": guild_id}, {"$inc": {"daily_minimum": points}})
 
     def decrement_pending_points(self, user_id, guild_id, amount):
         """
@@ -104,6 +134,16 @@ class UserPoints(BestSummerEverPointsDB):
         """
         return self.increment_points(user_id, guild_id, amount * -1)
 
+    def decrement_daily_minimum(self, user_id, guild_id, amount):
+        """
+        Decreases a user's daily minimum points
+        :param user_id:
+        :param guild_id:
+        :param amount:
+        :return:
+        """
+        return self.increment_daily_minimum(user_id, guild_id, amount * -1)
+
     def create_user(self, user_id, guild_id):
         """
         Create basic user points document.
@@ -115,7 +155,9 @@ class UserPoints(BestSummerEverPointsDB):
             "uid": user_id,
             "guild_id": guild_id,
             "points": 10,
-            "pending_points": 0
+            "pending_points": 0,
+            "daily_minimum": 5,
+            "transaction_history": [],
         }
         self.insert(user_doc)
 

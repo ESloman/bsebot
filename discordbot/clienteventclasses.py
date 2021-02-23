@@ -135,7 +135,6 @@ class OnReactionAdd(BaseEvent):
 
             ret = self.user_bets.add_better_to_bet(bet_id, guild.id, user.id, reaction_emoji, 1)
             if ret["success"]:
-                self.logger.info("bet successful!")
                 new_bet = self.user_bets.get_bet_from_id(guild.id, bet_id)
                 embed = self.embed_manager.get_bet_embed(guild, bet_id, new_bet)
                 await message.edit(embed=embed)
@@ -159,10 +158,14 @@ class OnMessage(BaseEvent):
         :param message:
         :return:
         """
-        guild_id = message.guild.id
-        user_id = message.author.id
-        channel_id = message.channel.id
-        message_content = message.content
+        try:
+            guild_id = message.guild.id
+            user_id = message.author.id
+            channel_id = message.channel.id
+            message_content = message.content
+        except AttributeError:
+            self.logger.exception(message)
+            return
 
         if message.reference:
             message_type = "reply"

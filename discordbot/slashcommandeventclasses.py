@@ -155,8 +155,6 @@ class BSEddiesPending(BSEddies):
         if len(bets) == 0:
             message = "You have no pending bets :("
 
-        self.logger.info(message)
-
         await ctx.send(content=message, hidden=True)
 
 

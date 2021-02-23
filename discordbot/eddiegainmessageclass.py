@@ -53,6 +53,10 @@ class EddieGainMessager(commands.Cog):
 
         msg = f"Eddie gain summary:\n"
         for user_id in eddie_dict:
+
+            if eddie_dict[user_id] == 0:
+                continue
+
             msg += f"\n- `{user_id}`  :  **{eddie_dict[user_id]}**"
             text = f"Your daily salary of BSEDDIES is `{eddie_dict[user_id]}`.\n"
 

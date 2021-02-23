@@ -1,6 +1,7 @@
 import datetime
 from typing import Union
 
+from discordbot.bot_enums import TransactionTypes
 from mongo import interface
 from mongo.db_classes import BestSummerEverPointsDB
 
@@ -160,6 +161,27 @@ class UserPoints(BestSummerEverPointsDB):
             "transaction_history": [],
         }
         self.insert(user_doc)
+
+    def append_to_transaction_history(self, user_id, guild_id, activity):
+        """
+        Add an item to a user's transaction history
+
+        Activity must be in the format:
+        {
+            'type': TRANSACTION_TYPE
+            'amount': AMOUNT OF EDDIES GAINED/LOST (this should be positive for gain / negative for loss)
+            'bet_id': OPTIONAL. Bet ID of bet user gained/lost eddies on
+            'user_id': OPTIONAL. User ID user gave/received eddies to/from
+            'timestamp': DATETIME OBJECT FOR TIMESTAMP
+            'comment': OPTIONAL. Comment as to what happened
+        }
+
+        :param user_id:
+        :param guild_id:
+        :param activity:
+        :return:
+        """
+        self.update({"uid": user_id, "guild_id": guild_id}, {"$push": {"transaction_history": activity}})
 
 
 class UserBets(BestSummerEverPointsDB):
@@ -366,6 +388,17 @@ class UserBets(BestSummerEverPointsDB):
             points_won = points_bet * 2
             ret_dict["winners"][better] = points_won
             self.user_points.increment_points(int(better), guild_id, points_won)
+            # add to transaction history
+            self.user_points.append_to_transaction_history(
+                int(better),
+                guild_id,
+                {
+                    "type": TransactionTypes.BET_WIN,
+                    "amount": points_won,
+                    "timestamp": datetime.datetime.now(),
+                    "bet_id": bet_id,
+                }
+            )
 
         return ret_dict
 

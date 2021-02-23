@@ -1,5 +1,8 @@
+import datetime
+
 import discord
 
+from discordbot.bot_enums import TransactionTypes
 from discordbot.embedmanager import EmbedManager
 from mongo.bsepoints import UserBets, UserPoints, UserInteractions
 
@@ -39,6 +42,18 @@ class OnReadyEvent(BaseEvent):
                         self.logger.info(
                             f"Creating new user entry for {member.id} - {member.name} for {guild.id} - {guild.name}"
                         )
+
+                        self.user_points.append_to_transaction_history(
+                            member.id,
+                            guild.id,
+                            {
+                                "type": TransactionTypes.USER_CREATE,
+                                "amount": 10,
+                                "timestamp": datetime.datetime.now(),
+                                "comment": "User created",
+                            }
+                        )
+
                     elif "pending_points" not in user:
                         self.user_points.set_pending_points(member.id, guild.id, 0)
                         self.logger.info(f"Setting pending points to 0 for {member.name}")
@@ -59,6 +74,18 @@ class OnMemberJoin(BaseEvent):
         """
         user_id = member.id
         self.user_points.create_user(user_id, member.guild.id)
+
+        self.user_points.append_to_transaction_history(
+            user_id,
+            member.guild.id,
+            {
+                "type": TransactionTypes.USER_CREATE,
+                "amount": 10,
+                "timestamp": datetime.datetime.now(),
+                "comment": "User created",
+            }
+        )
+
         self.logger.info(f"Creating BSEddies account for new user - {user_id} - {member.display_name}")
 
 
@@ -137,7 +164,22 @@ class OnReactionAdd(BaseEvent):
             if ret["success"]:
                 new_bet = self.user_bets.get_bet_from_id(guild.id, bet_id)
                 embed = self.embed_manager.get_bet_embed(guild, bet_id, new_bet)
+
                 await message.edit(embed=embed)
+
+                # add to transaction history
+                self.user_points.append_to_transaction_history(
+                    user.id,
+                    guild.id,
+                    {
+                        "type": TransactionTypes.BET_PLACE,
+                        "amount": 1,
+                        "timestamp": datetime.datetime.now(),
+                        "bet_id": bet_id,
+                        "comment": "Bet placed through reaction",
+                    }
+                )
+
             await message.remove_reaction(reaction_emoji, user)
 
 

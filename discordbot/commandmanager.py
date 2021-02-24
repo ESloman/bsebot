@@ -27,7 +27,7 @@ class CommandManager(object):
     Needs to be initialised with a client and a list of guild IDS
     """
 
-    def __init__(self, client: discord.Client, guilds, logger, beta_mode=False):
+    def __init__(self, client: discord.Client, guilds, logger, beta_mode=False, debug_mode=False):
         self.client = client
         self.slash = SlashCommand(client, sync_commands=True)
         self.beta_mode = beta_mode

@@ -209,6 +209,9 @@ class OnMessage(BaseEvent):
             self.logger.exception(message)
             return
 
+        if guild_id not in self.guild_ids:
+            return
+
         if message.reference:
             message_type = "reply"
         elif message.attachments:

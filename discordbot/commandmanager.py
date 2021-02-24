@@ -207,7 +207,14 @@ class CommandManager(object):
             :param message:
             :return:
             """
+
             if message.author.bot:
+                return
+
+            if message.channel.type.value == 1:
+                # this means we've received a Direct message!
+                # we'll have to handle this differently
+                self.logger.debug(message)
                 return
             await self.on_message.message_received(message)
 
@@ -227,7 +234,7 @@ class CommandManager(object):
         :return: None
         """
 
-        @self.slash.slash(name="ping", guild_ids=guilds)
+        @self.slash.slash(name="ping", description="Check latency between discord and server", guild_ids=guilds)
         async def ping(ctx: discord_slash.context.SlashContext) -> None:
             """
             Just a simple ping between discord and the server. More of a test method.
@@ -333,7 +340,7 @@ class CommandManager(object):
             subcommand_group="bet",
             subcommand_group_description="Create or resolve bets using BSEddies",
             name="create",
-            description="Create a bet",
+            description="Create a bet. IF providing outcome names - please provide them sequentially.",
             options=[
                 manage_commands.create_option(
                     name="bet_title",
@@ -366,6 +373,18 @@ class CommandManager(object):
                     required=False
                 ),
                 manage_commands.create_option(
+                    name="outcome_five",
+                    description="Outcome number 5 name",
+                    option_type=3,
+                    required=False
+                ),
+                manage_commands.create_option(
+                    name="outcome_six",
+                    description="Outcome number 6 name",
+                    option_type=3,
+                    required=False
+                ),
+                manage_commands.create_option(
                     name="timeout",
                     description=("How long should betting be open for? Must be DIGITS + (s|m|h|d). "
                                  "Examples: 15m, 2d, 6h, etc"),
@@ -382,6 +401,8 @@ class CommandManager(object):
                 outcome_two: Union[str, None] = None,
                 outcome_three: Union[str, None] = None,
                 outcome_four: Union[str, None] = None,
+                outcome_five: Union[str, None] = None,
+                outcome_six: Union[str, None] = None,
                 timeout: Union[str, None] = None,
         ) -> None:
             """
@@ -395,7 +416,7 @@ class CommandManager(object):
             default outcomes.
 
             The next four optional arguments are all outcome names. These should be provided in numerical order -
-            one, two, three, and lastly, four. And at least two should be provided if you want custom
+            one, two, three, four, five, and lastly, six. And at least two should be provided if you want custom
             outcome names.
 
             The final optional outcome is TIMEOUT. This is a simple string consisting of 1-4 digits + s, m, h, or d.
@@ -407,12 +428,14 @@ class CommandManager(object):
             :param outcome_two:
             :param outcome_three:
             :param outcome_four:
+            :param outcome_five:
+            :param outcome_six:
             :param timeout:
             :return:
             """
             await self.bseddies_create.handle_bet_creation(
                 ctx, bet_title,
-                outcome_one, outcome_two, outcome_three, outcome_four,
+                outcome_one, outcome_two, outcome_three, outcome_four, outcome_five, outcome_six,
                 timeout
             )
 

@@ -1,4 +1,5 @@
 import datetime
+import logging
 from typing import Union
 
 import discord
@@ -9,7 +10,23 @@ from mongo.bsepoints import UserBets, UserPoints, UserInteractions
 
 
 class BaseEvent(object):
-    def __init__(self, client, guild_ids, logger, beta_mode=False):
+    """
+    This is a BaseEvent class that all events will inherit from.
+
+    Basically just sets up all the vars that events will need and rely on.
+    """
+    def __init__(self,
+                 client: discord.Client,
+                 guild_ids: list,
+                 logger: logging.Logger,
+                 beta_mode: bool = False):
+        """
+        Constructor that initialises references DB Collections and various variables
+        :param client:
+        :param guild_ids:
+        :param logger:
+        :param beta_mode:
+        """
         self.user_bets = UserBets()
         self.user_points = UserPoints()
         self.client = client
@@ -20,14 +37,16 @@ class BaseEvent(object):
 
 
 class OnReadyEvent(BaseEvent):
+    """
+    Class for handling on_ready event
+    """
     def __init__(self, client, guild_ids, logger, beta_mode=False):
         super().__init__(client, guild_ids, logger, beta_mode=beta_mode)
-        self.client = client  # type: discord.Client
 
-    async def on_ready(self):
+    async def on_ready(self) -> None:
         """
         Method called for on_ready event. Makes sure we have an entry for every user in each guild.
-        :return:
+        :return: None
         """
         self.logger.info("Checking guilds for members")
 
@@ -63,15 +82,18 @@ class OnReadyEvent(BaseEvent):
 
 
 class OnMemberJoin(BaseEvent):
+    """
+    Class for handling when a new member joins the server
+    """
     def __init__(self, client, guild_ids, logger, beta_mode=False):
         super().__init__(client, guild_ids, logger, beta_mode=beta_mode)
-        self.client = client
 
-    def on_join(self, member: discord.Member):
+    def on_join(self, member: discord.Member) -> None:
         """
-        Method for handling when a new member joins the server
+        Method for handling when a new member joins the server.
+        We basically just make sure that the user has an entry in our DB
         :param member:
-        :return:
+        :return: None
         """
         user_id = member.id
         self.user_points.create_user(user_id, member.guild.id)
@@ -104,10 +126,21 @@ class OnReactionAdd(BaseEvent):
             channel: discord.TextChannel,
             reaction_emoji: str,
             user: discord.User
-    ):
+    ) -> None:
         """
-        Main event for handling reaction events. This method simply filters out
-        stuff that we don't care about and calls other methods to handle the stuff we do.
+        Main event for handling reaction events.
+
+        Firstly, we only care about reactions if they're from users so we discard any bot reactions.
+
+        Secondly, we only care about reactions to bot messages at the moment so discard any other events.
+
+        Then we check what type of message the user is reacting to:
+
+          - if it's a 'Leaderboard' message then we update the message with the full updated rankings
+          - if it's a 'BET' message then we check the bet is active and that the user is betting with a valid emoji.
+            If that's both fine then we call the function to add the bet to the actual BET. That function will do some
+            additional checking so we don't need to do loads of validation here.
+
         :param message:
         :param guild:
         :param channel:
@@ -124,6 +157,7 @@ class OnReactionAdd(BaseEvent):
         if not message.author.bot:
             return
 
+        # handling leaderboard messages
         if message.content and "BSEddies Leaderboard" in message.content and reaction_emoji == u"▶️":
             if not message.author.bot:
                 return
@@ -132,6 +166,7 @@ class OnReactionAdd(BaseEvent):
             await message.edit(content=content)
             return
 
+        # handling reactions to BETS
         if message.embeds and "Bet ID" in message.embeds[0].description:
             embed = message.embeds[0]  # type: discord.Embed
             bet_id = embed.description.replace("Bet ID: ", "")
@@ -139,6 +174,7 @@ class OnReactionAdd(BaseEvent):
 
             link = f"https://discordapp.com/channels/{guild.id}/{channel.id}/{message.id}"
 
+            # make sure the bet is active
             if not bet["active"]:
                 msg = f"Your reaction on **Bet {bet_id}** _({link})_ failed as the bet is closed for new bets."
                 if not user.dm_channel:
@@ -150,6 +186,7 @@ class OnReactionAdd(BaseEvent):
                 await message.remove_reaction(reaction_emoji, user)
                 return
 
+            # make sure that the reaction is a valid outcome
             if reaction_emoji not in bet['option_dict']:
                 msg = f"Your reaction on **Bet {bet_id}** _({link})_ failed as that reaction isn't a valid outcome."
                 if not user.dm_channel:
@@ -161,7 +198,9 @@ class OnReactionAdd(BaseEvent):
                 await message.remove_reaction(reaction_emoji, user)
                 return
 
+            # do the bet
             ret = self.user_bets.add_better_to_bet(bet_id, guild.id, user.id, reaction_emoji, 1)
+
             if ret["success"]:
                 new_bet = self.user_bets.get_bet_from_id(guild.id, bet_id)
                 embed = self.embed_manager.get_bet_embed(guild, bet_id, new_bet)
@@ -201,14 +240,11 @@ class OnMessage(BaseEvent):
         :param message:
         :return:
         """
-        try:
-            guild_id = message.guild.id
-            user_id = message.author.id
-            channel_id = message.channel.id
-            message_content = message.content
-        except AttributeError:
-            self.logger.exception(message)
-            return
+
+        guild_id = message.guild.id
+        user_id = message.author.id
+        channel_id = message.channel.id
+        message_content = message.content
 
         if guild_id not in self.guild_ids:
             return

@@ -2,6 +2,7 @@ import copy
 import datetime
 import math
 import re
+from typing import Union
 
 import discord
 import discord_slash

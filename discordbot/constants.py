@@ -1,4 +1,6 @@
-
+"""
+This file is for static variables throughout the project.
+"""
 
 SLOMAN_SERVER_ID = 291508460519161856
 BSE_SERVER_ID = 181098823228063764

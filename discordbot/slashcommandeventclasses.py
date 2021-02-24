@@ -1,3 +1,10 @@
+"""
+File for Slash Command Event Classes
+
+Each class in this file corresponds to a slash command that we've register in commandmanager.CommandManager
+These classes handle most of the logic for them
+"""
+
 import copy
 import datetime
 import math
@@ -10,19 +17,22 @@ import discord_slash
 from discordbot.bot_enums import TransactionTypes
 from discordbot.clienteventclasses import BaseEvent
 from discordbot.constants import BETA_USERS, CREATOR, PRIVATE_CHANNEL_IDS
-from discordbot.embedmanager import EmbedManager
-from mongo.bsepoints import UserBets, UserPoints
 
 
 class BSEddies(BaseEvent):
+    """
+    A base BSEddies event for any shared methods across
+    All slash command classes will inherit from this class
+    """
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
-    async def _handle_validation(self, ctx: discord_slash.context.SlashContext, **kwargs):
+    async def _handle_validation(self, ctx: discord_slash.context.SlashContext, **kwargs) -> bool:
         """
         Internal method for validating slash command inputs.
-        :param ctx:
-        :return:
+        :param ctx: discord ctx to use
+        :param kwargs: the additional kwargs to use in validation
+        :return: True or False
         """
         if ctx.guild.id not in self.guild_ids:
             return False
@@ -48,13 +58,19 @@ class BSEddies(BaseEvent):
 
 
 class BSEddiesView(BSEddies):
+    """
+    Class for handling `/bseddies view` commands
+    """
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
     async def view(self, ctx):
         """
         Basic view method for handling view slash commands.
-        If validation passes - it will inform the user of their current Eddies total.
+
+        Sends an ephemeral message to the user with their total eddies and any "pending" eddies they
+        have tied up in bets.
+
         :param ctx:
         :return:
         """
@@ -69,6 +85,9 @@ class BSEddiesView(BSEddies):
 
 
 class BSEddiesLeaderboard(BSEddies):
+    """
+    Class for handling `/bseddies leaderboard` commands
+    """
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
@@ -87,14 +106,23 @@ class BSEddiesLeaderboard(BSEddies):
 
 
 class BSEddiesActive(BSEddies):
+    """
+    Class for handling `/bseddies active` commands
+    """
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
-    async def active(self, ctx: discord_slash.context.SlashContext):
+    async def active(self, ctx: discord_slash.context.SlashContext) -> None:
         """
-        Simple method for listing all the
-        :param ctx:
-        :return:
+        Simple method for listing all the active bets in the system.
+
+        This will actually show all bets that haven't been closed yet - not purely the active ones.
+
+        We also make an effort to hide "private" bets that were created in private channels if the channel this
+        command is being sent in isn't said private channel.
+
+        :param ctx: the command context
+        :return: None
         """
         if not await self._handle_validation(ctx):
             return
@@ -125,14 +153,22 @@ class BSEddiesActive(BSEddies):
 
 
 class BSEddiesPending(BSEddies):
+    """
+    Class for handling `/bseddies pending` commands
+    """
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
-    async def pending(self, ctx: discord_slash.context.SlashContext):
+    async def pending(self, ctx: discord_slash.context.SlashContext) -> None:
         """
-        Simple method for listing all the pending bets for a given user_id
-        :param ctx:
-        :return:
+        Simple method for listing all the pending bets for the user that executed this command
+
+        A 'pending' bet is a bet that hasn't been closed or resolved the the user has invested eddies in to
+
+        This will send an ephemeral message to the user with all their pending bets.
+
+        :param ctx: slash command context
+        :return: None
         """
         if not await self._handle_validation(ctx):
             return
@@ -161,22 +197,25 @@ class BSEddiesPending(BSEddies):
 
 
 class BSEddiesGift(BSEddies):
+    """
+    Class for handling `/bseddies gift` command
+    """
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
     async def gift_eddies(self, ctx: discord_slash.context.SlashContext,
                           friend: discord.User,
-                          amount: int):
+                          amount: int) -> None:
         """
         Function for handling a 'gift eddies' event.
 
         We make sure that the user initiating the command has enough BSEddies to give to a friend
         and then we simply increment their friend's BSEddies and decrement theirs.
 
-        :param ctx:
-        :param friend:
-        :param amount:
-        :return:
+        :param ctx: slash command context
+        :param friend: discord.User for the friend to give eddies to
+        :param amount: the amount of eddies to give
+        :return: None
         """
         if not await self._handle_validation(ctx, friend=friend, amount=amount):
             return
@@ -223,6 +262,9 @@ class BSEddiesGift(BSEddies):
 
 
 class BSEddiesCloseBet(BSEddies):
+    """
+    Class for handling `/bseddies bet close` commands
+    """
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
@@ -230,7 +272,7 @@ class BSEddiesCloseBet(BSEddies):
             self,
             ctx: discord_slash.context.SlashContext,
             bet_id: str,
-            emoji: str,):
+            emoji: str,) -> None:
         """
         This is the method for handling when we close a bet.
 
@@ -241,10 +283,10 @@ class BSEddiesCloseBet(BSEddies):
         If that's all okay - we close the bet and dish out the BSEddies to the winners.
         We also inform the winners/losers what the result was and how many BSEddies they won (if any).
 
-        :param ctx:
-        :param bet_id:
-        :param emoji:
-        :return:
+        :param ctx: slash command context
+        :param bet_id: str - the BET ID
+        :param emoji: str - the winning outcome emoji
+        :return: None
         """
 
         if not await self._handle_validation(ctx):
@@ -318,10 +360,13 @@ class BSEddiesCloseBet(BSEddies):
 
 
 class BSEddiesCreateBet(BSEddies):
+    """
+    Class for handling `/bseddies bet create` command
+    """
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
         self.default_two_options = {"1️⃣": {"val": "succeed"}, "2️⃣": {"val": "fail"}}
-        self.multiple_options_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣"]
+        self.multiple_options_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣"]
 
     async def handle_bet_creation(
             self,
@@ -331,6 +376,8 @@ class BSEddiesCreateBet(BSEddies):
             option_two_name: Union[str, None] = None,
             option_three_name: Union[str, None] = None,
             option_four_name: Union[str, None] = None,
+            option_five_name: Union[str, None] = None,
+            option_six_name: Union[str, None] = None,
             timeout_str: Union[str, None] = None,
     ) -> None:
         """
@@ -349,6 +396,8 @@ class BSEddiesCreateBet(BSEddies):
         :param option_two_name:
         :param option_three_name:
         :param option_four_name:
+        :param option_six_name:
+        :param option_five_name:
         :param timeout_str:
         :return:
         """
@@ -400,6 +449,10 @@ class BSEddiesCreateBet(BSEddies):
                            self.multiple_options_emojis[2]: {"val": option_three_name}}
             if option_four_name:
                 option_dict[self.multiple_options_emojis[3]] = {"val": option_four_name}
+            if option_five_name:
+                option_dict[self.multiple_options_emojis[4]] = {"val": option_five_name}
+            if option_six_name:
+                option_dict[self.multiple_options_emojis[5]] = {"val": option_six_name}
         else:
             msg = (f"If you're providing custom outcome names - you must provide at least two outcomes.\n"
                    f"Additionally, you must provide the outcomes sequentially "
@@ -462,6 +515,9 @@ class BSEddiesCreateBet(BSEddies):
 
 
 class BSEddiesPlaceEvent(BSEddies):
+    """
+    Class for handling `/bseddies bet place` commands
+    """
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
@@ -471,7 +527,7 @@ class BSEddiesPlaceEvent(BSEddies):
             bet_id: str,
             amount: int,
             emoji: str,
-    ) -> None:
+    ) -> Union[None, bool]:
         """
         Main method for placing a bet.
 
@@ -483,7 +539,7 @@ class BSEddiesPlaceEvent(BSEddies):
         :param bet_id:
         :param amount:
         :param emoji:
-        :return:
+        :return: None or a bool
         """
         if not await self._handle_validation(ctx):
             return

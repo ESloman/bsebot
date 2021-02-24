@@ -173,7 +173,7 @@ class OnReactionAdd(BaseEvent):
                     guild.id,
                     {
                         "type": TransactionTypes.BET_PLACE,
-                        "amount": 1,
+                        "amount": -1,
                         "timestamp": datetime.datetime.now(),
                         "bet_id": bet_id,
                         "comment": "Bet placed through reaction",

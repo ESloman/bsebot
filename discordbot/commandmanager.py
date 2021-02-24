@@ -1,3 +1,8 @@
+"""
+This file contains our class that registers all the events we listen to and do things with
+"""
+
+import logging
 import os
 
 from typing import List, Dict, Union
@@ -25,9 +30,43 @@ class CommandManager(object):
     """
     Class for registering all the client events and slash commands
     Needs to be initialised with a client and a list of guild IDS
+
+    Only the constructor needs to be called in this class for it to register everything.
     """
 
-    def __init__(self, client: discord.Client, guilds, logger, beta_mode=False, debug_mode=False):
+    def __init__(self,
+                 client: discord.Client,
+                 guilds: list,
+                 logger: logging.Logger,
+                 beta_mode: bool = False,
+                 debug_mode: bool = False):
+        """
+        Constructor method. This does all the work in this class and no other methods need to be called.
+
+        We start by creating all the variables we need and some also an EmbedManager class (for creating embeds),
+        and our MongoDB Collection classes for interacting with those collections in the DB.
+
+        This is also where we create an instance of "SlashCommand". This is our main class that handles registering
+        of the slash commands.
+
+        Each "event" or "slash command" has their own "class" that handles all the actual logic for when we receive
+        an event or slash command. So we create instances of these classes next.
+
+        We have the Client Event classes all being registered and then all the Slash Command events being registered.
+
+        After that, we have our "tasks". Tasks are COG objects that perform a task at regular intervals. We use tasks
+        for a variety of different things. But essentially, each one is a class and we create an instance of each one
+        here. There's no need to do anything else once we instantiate each of them.
+
+        And finally, we call the two methods that actually register all the events and slash commands.
+
+        :param client: discord.Client object that represents our bot
+        :param guilds: list of guild IDs that we're listening on
+        :param logger:  logger object for logging
+        :param beta_mode: whether we're in beta mode or not
+        :param debug_mode: whether we're in debug mode or not
+        """
+
         self.client = client
         self.slash = SlashCommand(client, sync_commands=True)
         self.beta_mode = beta_mode
@@ -66,16 +105,31 @@ class CommandManager(object):
         self._register_slash_commands(guilds)
 
     # noinspection PyProtectedMember
-    def __get_cached_messages_list(self):
+    def __get_cached_messages_list(self) -> list:
         """
         Method for getting a list of cached message IDs
-        :return:
+        :return: list of cached messages
         """
         deque = self.client.cached_messages._SequenceProxy__proxied
         cached = [d.id for d in deque]
         return cached
 
-    def _register_client_events(self):
+    def _register_client_events(self) -> None:
+        """
+        This method registers all the 'client events'.
+        Client Events are normal discord events that we can listen to.
+        A full list of events can be found here: https://discordpy.readthedocs.io/en/latest/api.html
+
+        Each event must be it's own async method with a @self.client.event decorator so that it's actually
+        registered. None of these methods defined here will ever be called manually by anyone. The methods are called
+        by the CLIENT object and that will pass in all the required parameters.
+
+        Additionally, the method is called automatically from this class' constructor and shouldn't be called anywhere
+        else.
+
+        :return: None
+        """
+
         @self.client.event
         async def on_ready():
             """
@@ -157,20 +211,28 @@ class CommandManager(object):
                 return
             await self.on_message.message_received(message)
 
-    def _register_slash_commands(self, guilds):
-        """l
-        Method for registering all the commands in one place.
-        Most of these functions should call on the other classes to do the heavy lifting.
-        :param guilds:
-        :return:
+    def _register_slash_commands(self, guilds: list) -> None:
+        """
+        This method registers all the 'slash commands'.
+        Slash Commands are commands users can use in discord.
+
+        Each command must be it's own async method with a relevant decorator so that it's actually
+        registered. None of these methods defined here will ever be called manually by anyone. The methods are called
+        by the CLIENT object and that will pass in all the required parameters.
+
+        Additionally, the method is called automatically from this class' constructor and shouldn't be called anywhere
+        else.
+
+        :param guilds: The guild IDs to register the commands to
+        :return: None
         """
 
         @self.slash.slash(name="ping", guild_ids=guilds)
-        async def ping(ctx):
+        async def ping(ctx: discord_slash.context.SlashContext) -> None:
             """
             Just a simple ping between discord and the server. More of a test method.
-            :param ctx:
-            :return:
+            :param ctx: context of the slash command
+            :return: None
             """
             await ctx.send(content=f"Pong! ({self.client.latency * 1000}ms)")
 
@@ -180,7 +242,7 @@ class CommandManager(object):
             name="view",
             description="View your total BSEddies",
             guild_ids=guilds)
-        async def bseddies(ctx: discord_slash.context.SlashContext):
+        async def bseddies(ctx: discord_slash.context.SlashContext) -> None:
             """
             Slash command that allows the user to see how many BSEddies they have.
             :param ctx:
@@ -194,7 +256,7 @@ class CommandManager(object):
             name="leaderboard",
             description="View the BSEddie leaderboard.",
             guild_ids=guilds)
-        async def leaderboard(ctx):
+        async def leaderboard(ctx) -> None:
             """
             Slash command that allows the user to see the BSEddies leaderboard.
             :param ctx:
@@ -208,7 +270,7 @@ class CommandManager(object):
             name="active",
             description="View all the active bets in the server.",
             guild_ids=guilds)
-        async def active_bets(ctx: discord_slash.context.SlashContext):
+        async def active_bets(ctx: discord_slash.context.SlashContext) -> None:
             """
             Slash commands lists all the active bets in the system.
             :param ctx:
@@ -222,7 +284,7 @@ class CommandManager(object):
             name="pending",
             description="View all the unresolved bets you have betted on.",
             guild_ids=guilds)
-        async def pending_bets(ctx: discord_slash.context.SlashContext):
+        async def pending_bets(ctx: discord_slash.context.SlashContext) -> None:
             """
             Slash commands lists all the pending bets in the system for the user.
             :param ctx:
@@ -250,7 +312,7 @@ class CommandManager(object):
                 )
             ],
             guild_ids=guilds)
-        async def gift_eddies(ctx: discord_slash.context.SlashContext, friend: discord.User, amount: int):
+        async def gift_eddies(ctx: discord_slash.context.SlashContext, friend: discord.User, amount: int) -> None:
             """
             A slash command that allows users to gift eddies to their friends.
 
@@ -316,12 +378,12 @@ class CommandManager(object):
         async def handle_bet_creation(
                 ctx: discord_slash.context.SlashContext,
                 bet_title: str,
-                outcome_one=None,
-                outcome_two=None,
-                outcome_three=None,
-                outcome_four=None,
-                timeout=None,
-        ):
+                outcome_one: Union[str, None] = None,
+                outcome_two: Union[str, None] = None,
+                outcome_three: Union[str, None] = None,
+                outcome_four: Union[str, None] = None,
+                timeout: Union[str, None] = None,
+        ) -> None:
             """
             This is the command for bet creation. There's quite a few optional arguments here but it's
             relatively simple.
@@ -383,7 +445,7 @@ class CommandManager(object):
             ],
             guild_ids=guilds
         )
-        async def do_a_bet(ctx: discord_slash.context.SlashContext, bet_id: str, amount: int, emoji: str):
+        async def do_a_bet(ctx: discord_slash.context.SlashContext, bet_id: str, amount: int, emoji: str) -> None:
             """
             This is the command that allows users to place BSEddies.  on currently active bets.
 
@@ -428,7 +490,7 @@ class CommandManager(object):
             ],
             guild_ids=guilds
         )
-        async def close_a_bet(ctx: discord_slash.context.SlashContext, bet_id: str, emoji: str):
+        async def close_a_bet(ctx: discord_slash.context.SlashContext, bet_id: str, emoji: str) -> None:
             """
             This is the command that closes a bet. Closing a bet requires a result emoji.
             Once a bet is "closed" - no-one can bet on it and the winners will gain their BSEddies.

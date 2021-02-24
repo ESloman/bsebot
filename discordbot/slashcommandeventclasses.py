@@ -326,12 +326,12 @@ class BSEddiesCreateBet(BSEddies):
             self,
             ctx: discord_slash.context.SlashContext,
             bet_title: str,
-            option_one_name=None,
-            option_two_name=None,
-            option_three_name=None,
-            option_four_name=None,
-            timeout_str=None
-    ):
+            option_one_name: Union[str, None] = None,
+            option_two_name: Union[str, None] = None,
+            option_three_name: Union[str, None] = None,
+            option_four_name: Union[str, None] = None,
+            timeout_str: Union[str, None] = None,
+    ) -> None:
         """
         The method that handles bet creation.
 
@@ -470,7 +470,7 @@ class BSEddiesPlaceEvent(BSEddies):
             bet_id: str,
             amount: int,
             emoji: str,
-    ):
+    ) -> None:
         """
         Main method for placing a bet.
 

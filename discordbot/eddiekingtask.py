@@ -3,6 +3,7 @@ import datetime
 import discord
 from discord.ext import tasks, commands
 
+from discordbot.bot_enums import ActivityTypes
 from discordbot.constants import BSEDDIES_KING_ROLES
 from mongo.bsepoints import UserPoints
 
@@ -34,6 +35,7 @@ class BSEddiesKing(commands.Cog):
 
             role = guild_obj.get_role(role_id)  # type: discord.Role
             current_king = None
+            prev_king_id = None
             if len(role.members) > 1:
                 self.logger.info("We have multiple people with this role - purging the list.")
                 for member in role.members:  # type: discord.Member
@@ -43,15 +45,32 @@ class BSEddiesKing(commands.Cog):
 
             users = self.user_points.get_all_users_for_guild(guild_id)
             top_user = sorted(users, key=lambda x: x["points"], reverse=True)[0]
+
             if current_king is not None and top_user["uid"] != current_king:
+                prev_king_id = current_king
                 current = guild_obj.get_member(current_king)  # type: discord.Member
                 self.logger.info(f"Removing a king: {current.display_name}")
                 await current.remove_roles(role, reason="User is not longer King!")
+
+                activity = {
+                    "type": ActivityTypes.KING_LOSS,
+                    "timestamp": datetime.datetime.now(),
+                    "comment": f"Losing King to {top_user['uid']}"
+                }
+
+                self.user_points.append_to_activity_history(current_king, guild_id, activity)
                 current_king = None
 
             if current_king is None:
                 new = guild_obj.get_member(top_user["uid"])  # type: discord.Member
                 self.logger.info(f"Adding a new king: {new.display_name}")
+                activity = {
+                    "type": ActivityTypes.KING_LOSS,
+                    "timestamp": datetime.datetime.now(),
+                    "comment": f"Taking King from {prev_king_id}"
+                }
+
+                self.user_points.append_to_activity_history(top_user['uid'], guild_id, activity)
                 await new.add_roles(role, reason="User is now KING!")
 
     @king_checker.before_loop

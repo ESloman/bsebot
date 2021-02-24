@@ -227,6 +227,7 @@ class UserPoints(BestSummerEverPointsDB):
         :param activity:
         :return:
         """
+        self.update({"uid": user_id, "guild_id": guild_id}, {"$push": {"activity_history": activity}})
 
 
 class UserBets(BestSummerEverPointsDB):

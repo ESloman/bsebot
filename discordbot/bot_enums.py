@@ -9,3 +9,4 @@ class TransactionTypes(IntEnum):
     GIFT_RECEIVE = 5
     DAILY_SALARY = 6
     USER_CREATE = 7
+    OVERRIDE = 99

@@ -211,6 +211,23 @@ class UserPoints(BestSummerEverPointsDB):
         """
         self.update({"uid": user_id, "guild_id": guild_id}, {"$push": {"transaction_history": activity}})
 
+    def append_to_activity_history(self, user_id: int, guild_id: int, activity: dict) -> None:
+        """
+        Add an item to a user's activity history
+
+        Activity must be in the format:
+        {
+            'type': ACTIVITY_TYPE,
+            'timestamp': DATETIME OBJECT FOR TIMESTAMP
+            'comment': OPTIONAL. Comment as to what happened
+        }
+
+        :param user_id:
+        :param guild_id:
+        :param activity:
+        :return:
+        """
+
 
 class UserBets(BestSummerEverPointsDB):
     """

@@ -2,7 +2,7 @@
 A file for enums
 """
 
-from enum import auto, IntEnum
+from enum import IntEnum
 
 
 class TransactionTypes(IntEnum):
@@ -17,3 +17,11 @@ class TransactionTypes(IntEnum):
     DAILY_SALARY = 6
     USER_CREATE = 7
     OVERRIDE = 99
+
+
+class ActivityTypes(IntEnum):
+    """
+    ActivityTypes are types of activity that we are tracking (that aren't transactions)
+    """
+    KING_GAIN = 1
+    KING_LOSS = 2

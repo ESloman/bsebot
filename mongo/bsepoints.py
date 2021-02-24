@@ -70,7 +70,7 @@ class UserPoints(BestSummerEverPointsDB):
         :param guild_id: int - The guild ID to get users for
         :return: list of user dictionaries
         """
-        ret = self.query({"guild_id": guild_id}, projection={"points": True, "uid": True})
+        ret = self.query({"guild_id": guild_id}, projection={"points": True, "uid": True, "daily_minimum": True})
         return ret
 
     def set_points(self, user_id: int, guild_id: int, points: int) -> UpdateResult:

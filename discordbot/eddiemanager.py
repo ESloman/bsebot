@@ -108,6 +108,11 @@ class BSEddiesManager(object):
             if not user_results:
                 if minimum == 0:
                     continue
+
+                if minimum < 0:
+                    self.user_points.set_daily_minimum(user, guild_id, 0)
+                    continue
+
                 minimum -= 1
                 self.user_points.decrement_daily_minimum(user, guild_id, 1)
                 if minimum == 0:

@@ -203,7 +203,7 @@ class BSEddiesGift(BSEddies):
             ctx.guild.id,
             {
                 "type": TransactionTypes.GIFT_GIVE,
-                "amount": amount,
+                "amount": amount * -1,
                 "timestamp": datetime.datetime.now(),
             }
         )
@@ -523,7 +523,7 @@ class BSEddiesPlaceEvent(BSEddies):
             guild.id,
             {
                 "type": TransactionTypes.BET_PLACE,
-                "amount": amount,
+                "amount": amount * -1,
                 "timestamp": datetime.datetime.now(),
                 "bet_id": bet_id,
                 "comment": "Bet placed through slash command",

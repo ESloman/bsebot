@@ -5,14 +5,14 @@ This file also contains a _create_logger method that creates a logging.Logger ob
 rest of the codebase.
 """
 
-import discord
-import dotenv
 import logging
 import os
 import sys
-
-from discord.ext import commands
 from logging.handlers import RotatingFileHandler
+
+import discord
+import dotenv
+from discord.ext import commands
 
 from discordbot.commandmanager import CommandManager
 from discordbot.constants import SLOMAN_SERVER_ID, BSE_SERVER_ID
@@ -46,6 +46,7 @@ def _create_logger() -> logging.Logger:
 
     _logger.addHandler(stream_handler)
     _logger.addHandler(file_handler)
+
     return _logger
 
 

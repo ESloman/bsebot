@@ -37,7 +37,8 @@ class BSEddies(BaseEvent):
         if ctx.guild.id not in self.guild_ids:
             return False
 
-        if "friend" in kwargs and isinstance(kwargs["friend"], discord.User):
+        if "friend" in kwargs and (
+                isinstance(kwargs["friend"], discord.User) or isinstance(kwargs["friend"], discord.Member)):
             if kwargs["friend"].bot:
                 msg = f"Bots cannot be gifted eddies."
                 await ctx.send(content=msg, hidden=True)
@@ -461,7 +462,7 @@ class BSEddiesCreateBet(BSEddies):
             return
 
         if timeout_str is None:
-            timeout = datetime.datetime.now() + datetime.timedelta(minutes=5)
+            timeout = datetime.datetime.now() + datetime.timedelta(minutes=10)
         else:
             timeout_str = timeout_str.strip()
             match = re.match(r"\d{1,5}(s|m|h|d)", timeout_str)

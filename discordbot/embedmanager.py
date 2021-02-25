@@ -23,8 +23,7 @@ class EmbedManager(object):
         :return:
         """
         embed = discord.Embed(
-            title=bet["title"],
-            description=f"Bet ID: {bet_id}",
+            description=f"**{bet['title']}**\n\nBet ID: {bet_id}",
             color=discord.Color.blue(),
         )
 

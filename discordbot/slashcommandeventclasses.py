@@ -632,3 +632,44 @@ class BSEddiesPlaceEvent(BSEddies):
             }
         )
         await message.edit(embed=embed)
+
+
+class BSEddiesTransactionHistory(BSEddies):
+    """
+    Class for handling `/bseddies transactions` command
+    """
+    def __init__(self, client, guilds, logger, beta_mode=False):
+        super().__init__(client, guilds, logger, beta_mode=beta_mode)
+
+    async def transaction_history(self, ctx: discord_slash.context.SlashContext) -> None:
+        """
+        Gets the user history and takes the last 10 entries and then displays that list to the user
+        :param ctx:
+        :return:
+        """
+        if not await self._handle_validation(ctx):
+            return
+
+        user = self.user_points.find_user(ctx.author.id, ctx.guild.id)
+        transaction_history = user["transaction_history"]
+        recent_history = transaction_history[-10:]
+
+        message = "This is your recent transaction history.\n"
+
+        starting_points = user["points"]
+        for item in reversed(recent_history):
+            starting_points + (item["amount"] * -1)
+
+        for item in recent_history:
+            if recent_history.index(item) != 1:
+                starting_points += (item["amount"] * -1)
+
+            message += (
+                f"\n"
+                f"**Timestamp**: {item['timestamp'].strftime('%d %b %y %H:%M:%S')}\n"
+                f"**Transaction Type**: {TransactionTypes(item['type']).name}\n"
+                f"**Change amount**: {item['amount']}\n"
+                f"**Bet ID**: {item.get('bet_id', 'N/A')}\n"
+                f"**Comment**: {item.get('comment', 'No comment')}\n"
+            )
+        await ctx.send(content=message, hidden=True)

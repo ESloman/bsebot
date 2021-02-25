@@ -176,7 +176,7 @@ class OnReactionAdd(BaseEvent):
 
             # make sure the bet is active
             if not bet["active"]:
-                msg = f"Your reaction on **Bet {bet_id}** _({link})_ failed as the bet is closed for new bets."
+                msg = f"Your reaction on **Bet {bet_id}** _(<{link}>)_ failed as the bet is closed for new bets."
                 if not user.dm_channel:
                     await user.create_dm()
                 try:
@@ -188,7 +188,7 @@ class OnReactionAdd(BaseEvent):
 
             # make sure that the reaction is a valid outcome
             if reaction_emoji not in bet['option_dict']:
-                msg = f"Your reaction on **Bet {bet_id}** _({link})_ failed as that reaction isn't a valid outcome."
+                msg = f"Your reaction on **Bet {bet_id}** _(<{link}>)_ failed as that reaction isn't a valid outcome."
                 if not user.dm_channel:
                     await user.create_dm()
                 try:

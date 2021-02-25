@@ -1,5 +1,6 @@
 import datetime
 import logging
+import re
 from typing import Union
 
 import discord
@@ -169,7 +170,7 @@ class OnReactionAdd(BaseEvent):
         # handling reactions to BETS
         if message.embeds and "Bet ID" in message.embeds[0].description:
             embed = message.embeds[0]  # type: discord.Embed
-            bet_id = embed.description.replace("Bet ID: ", "")
+            bet_id = re.findall(r"(?<=Bet ID: )\d\d\d\d", embed.description)[0]
             bet = self.user_bets.get_bet_from_id(guild.id, bet_id)
 
             link = f"https://discordapp.com/channels/{guild.id}/{channel.id}/{message.id}"

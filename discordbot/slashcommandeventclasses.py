@@ -14,6 +14,7 @@ from typing import Union
 import discord
 import discord_slash
 
+from discordbot.betmanager import BetManager
 from discordbot.bot_enums import TransactionTypes
 from discordbot.clienteventclasses import BaseEvent
 from discordbot.constants import BETA_USERS, CREATOR, PRIVATE_CHANNEL_IDS
@@ -268,6 +269,7 @@ class BSEddiesCloseBet(BSEddies):
     """
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
+        self.bet_manager = BetManager(logger)
 
     async def close_bet(
             self,
@@ -295,6 +297,7 @@ class BSEddiesCloseBet(BSEddies):
 
         guild = ctx.guild  # type: discord.Guild
         bet = self.user_bets.get_bet_from_id(guild.id, bet_id)
+        author = ctx.author
 
         if not bet:
             msg = f"This bet doesn't exist."
@@ -306,7 +309,7 @@ class BSEddiesCloseBet(BSEddies):
             await ctx.send(content=msg, hidden=True)
             return
 
-        if bet["user"] != ctx.author.id:
+        if bet["user"] != author.id:
             msg = f"You cannot close a bet that isn't yours."
             await ctx.send(content=msg, hidden=True)
             return
@@ -318,7 +321,45 @@ class BSEddiesCloseBet(BSEddies):
             await ctx.send(content=msg, hidden=True)
             return
 
-        ret_dict = self.user_bets.close_a_bet(bet_id, guild.id, emoji)
+        # the logic in this if statement only applies if the user "won" their own bet and they were the only better
+        # they just get refunded the eddies that put in
+        if bet_dict := bet["betters"].get(str(author.id), None):
+            if len(bet["betters"]) == 1 and bet_dict["emoji"] == emoji:
+
+                self.logger.info(f"{ctx.author.id} just won a bet ({bet_id}) where they were the only better...")
+                self.user_bets.close_a_bet(bet["_id"], emoji)
+                self.user_points.increment_points(author.id, guild.id, bet_dict["points"])
+                self.user_points.append_to_transaction_history(
+                    ctx.author.id,
+                    guild.id,
+                    {
+                        "type": TransactionTypes.BET_REFUND,
+                        "amount": bet_dict["points"],
+                        "timestamp": datetime.datetime.now(),
+                        "bet_id": bet_id,
+                        "comment": "User won their own bet when no-one else entered."
+                    }
+                )
+                if not author.dm_channel:
+                    await author.create_dm()
+                try:
+                    msg = (f"Looks like you were the only person to bet on your bet and you _happened_ to win it. "
+                           f"As such, you have won **nothing**. However, you have been refunded the eddies that you "
+                           f"originally bet.")
+                    await author.send(content=msg)
+                except discord.errors.Forbidden:
+                    pass
+
+                desc = (f"**{bet['title']}**\n\nThere were no winners on this bet. {author.mention} just _happened_ "
+                        f"to win a bet they created and they were the only entry. They were refunded the amount of "
+                        f"eddies that they originally bet.")
+                # update the message to reflect that it's closed
+                channel = guild.get_channel(bet["channel_id"])
+                message = channel.get_partial_message(bet["message_id"])
+                await message.edit(content=desc, embed=None)
+                return
+
+        ret_dict = self.bet_manager.close_a_bet(bet_id, guild.id, emoji)
 
         desc = f"**{bet['title']}**\n{emoji} - **{ret_dict['outcome_name']['val']}** won!\n\n"
 

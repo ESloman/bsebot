@@ -10,6 +10,7 @@ This particular file contains Collection Classes for the 'bestsummereverpoints' 
 import datetime
 from typing import Union
 
+from bson import ObjectId
 from pymongo.results import UpdateResult
 
 from discordbot.bot_enums import TransactionTypes
@@ -365,12 +366,12 @@ class UserBets(BestSummerEverPointsDB):
         self.insert(bet_doc)
         return bet_doc
 
-    def get_bet_from_id(self, guild_id: int, bet_id: int) -> Union[dict, None]:
+    def get_bet_from_id(self, guild_id: int, bet_id: str) -> Union[dict, None]:
         """
         Gets an already created bet document from the database.
 
         :param guild_id: int - The guild ID the bet exists in
-        :param bet_id: int - The ID of the bet to get
+        :param bet_id: str - The ID of the bet to get
         :return: a dict of the bet or None if there's no matching bet ID
         """
 
@@ -447,52 +448,20 @@ class UserBets(BestSummerEverPointsDB):
 
         return {"success": True}
 
-    def close_a_bet(self, bet_id: int, guild_id: int, emoji: str) -> dict:
+    def close_a_bet(self, _id: ObjectId, emoji: str) -> None:
         """
         Close a bet from a bet ID.
         Here we also calculate who the winners are and allocate their winnings to them.
 
-        :param bet_id: str - the bet to close
-        :param guild_id: int - the guild ID the bet resides in
+        :param _id: ObjectId - the bet to close
         :param emoji: str - the winning result of the bet
-        :return: a result_dict that has some info about the winners and losers
+        :return: None
         """
 
-        ret = self.query({"bet_id": bet_id, "guild_id": guild_id})[0]
-
         self.update(
-            {"_id": ret["_id"]},
+            {"_id": _id},
             {"$set": {"active": False, "result": emoji, "closed": datetime.datetime.now()}}
         )
-
-        ret_dict = {
-            "result": emoji,
-            "outcome_name": ret["option_dict"][emoji],
-            "timestamp": datetime.datetime.now(),
-            "losers": {b: ret["betters"][b]["points"]
-                       for b in ret["betters"] if ret["betters"][b]["emoji"] != emoji},
-            "winners": {}
-        }
-
-        # assign winning points to the users who got the answer right
-        for better in [b for b in ret["betters"] if ret["betters"][b]["emoji"] == emoji]:
-            points_bet = ret["betters"][better]["points"]
-            points_won = points_bet * 2
-            ret_dict["winners"][better] = points_won
-            self.user_points.increment_points(int(better), guild_id, points_won)
-            # add to transaction history
-            self.user_points.append_to_transaction_history(
-                int(better),
-                guild_id,
-                {
-                    "type": TransactionTypes.BET_WIN,
-                    "amount": points_won,
-                    "timestamp": datetime.datetime.now(),
-                    "bet_id": bet_id,
-                }
-            )
-
-        return ret_dict
 
 
 class UserInteractions(BestSummerEverPointsDB):

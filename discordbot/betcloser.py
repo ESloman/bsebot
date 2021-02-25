@@ -45,7 +45,7 @@ class BetCloser(commands.Cog):
                         bet["active"] = False
                         embed = self.embed_manager.get_bet_embed(guild_obj, bet["bet_id"], bet)
                         await message.edit(embed=embed)
-                        msg = (f"Your bet `{bet['bet_id']} - {bet['title']}` ({message.jump_url}) "
+                        msg = (f"Your bet `{bet['bet_id']} - {bet['title']}` (<{message.jump_url}>) "
                                f"is now closed for bets and is waiting a result from you.")
                         if not member.dm_channel:
                             await member.create_dm()

@@ -420,8 +420,11 @@ class BSEddiesCreateBet(BSEddies):
         if max_bets == 0:
             max_bets = 2
 
-        if ctx.author.id == CREATOR or ctx.author.id in BETA_USERS:
-            max_bets = max_bets + 2
+        if ctx.author.id in BETA_USERS:
+            max_bets += 2
+
+        if ctx.author.id == CREATOR:
+            max_bets += 2
 
         if current_bets and current_bets > max_bets:
             msg = (f"The maximum number of open bets allowed is determined by your BSEddie total. The more you have,"

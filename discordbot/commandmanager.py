@@ -214,7 +214,7 @@ class CommandManager(object):
             if message.channel.type.value == 1:
                 # this means we've received a Direct message!
                 # we'll have to handle this differently
-                self.logger.debug(message)
+                self.logger.debug(f"{message} - {message.content}")
                 return
             await self.on_message.message_received(message)
 

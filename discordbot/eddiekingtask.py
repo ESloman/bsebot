@@ -54,6 +54,8 @@ class BSEddiesKing(commands.Cog):
 
                 await current.remove_roles(role, reason="User is not longer King!")
 
+                self.user_points.set_king_flag(current_king, guild_id, False)
+
                 message = (f"You have been **DETHRONED** - {new.display_name} is now the "
                            f"KING of {guild_obj.name}! :crown:")
                 await current.send(content=message)
@@ -78,6 +80,8 @@ class BSEddiesKing(commands.Cog):
 
                 self.user_points.append_to_activity_history(top_user['uid'], guild_id, activity)
                 await new.add_roles(role, reason="User is now KING!")
+
+                self.user_points.set_king_flag(top_user['uid'], guild_id, True)
 
                 message = f"You are now the KING of {guild_obj.name}! :crown:"
                 await new.send(content=message)

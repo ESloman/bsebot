@@ -29,15 +29,16 @@ class UserPoints(BestSummerEverPointsDB):
         super().__init__()
         self._vault = interface.get_collection(self.database, "userpoints")
 
-    def find_user(self, user_id: int, guild_id: int) -> Union[dict, None]:
+    def find_user(self, user_id: int, guild_id: int, projection=None) -> Union[dict, None]:
         """
         Looks up a user in the collection.
 
         :param user_id: int - The ID of the user to look for
         :param guild_id: int - The guild ID that the user belongs in
+        :param projection:
         :return: either a user dict or None if the user couldn't be found
         """
-        ret = self.query({"uid": user_id, "guild_id": guild_id})
+        ret = self.query({"uid": user_id, "guild_id": guild_id}, projection=projection)
         if ret:
             return ret[0]
         return None
@@ -190,6 +191,7 @@ class UserPoints(BestSummerEverPointsDB):
             "daily_minimum": 5,
             "transaction_history": [],
             "daily_eddies": dailies,
+            "king": False,
         }
         self.insert(user_doc)
 
@@ -203,6 +205,27 @@ class UserPoints(BestSummerEverPointsDB):
         :return:
         """
         self.update({"uid": user_id, "guild_id": guild_id}, {"$set": {"daily_eddies": value}})
+
+    def set_king_flag(self, user_id: int, guild_id: int, value: bool) -> None:
+        """
+        Sets the 'daily king' toggle for the given user.
+        This toggle quickly tells us who's get in the DB
+        :param user_id:
+        :param guild_id:
+        :param value:
+        :return:
+        """
+        self.update({"uid": user_id, "guild_id": guild_id}, {"$set": {"king": value}})
+
+    def get_current_king(self, guild_id: int) -> dict:
+        """
+
+        :param guild_id:
+        :return:
+        """
+        ret = self.query({"guild_id": guild_id, "king": True})
+        if ret:
+            return ret[0]
 
     def append_to_transaction_history(self, user_id: int, guild_id: int, activity: dict) -> None:
         """

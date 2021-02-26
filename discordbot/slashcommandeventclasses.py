@@ -449,7 +449,8 @@ class BSEddiesCreateBet(BSEddies):
         if not await self._handle_validation(ctx):
             return
 
-        points = self.user_points.get_user_points(ctx.author.id, ctx.guild.id)
+        user = self.user_points.find_user(ctx.author.id, ctx.guild.id, projection={"king": True, "points": True})
+        points = user["points"]
         max_bets = (math.floor(points / 100.0) * 100) / 50
         current_bets = self.user_bets.query(
             {"guild_id": ctx.guild.id,
@@ -468,6 +469,9 @@ class BSEddiesCreateBet(BSEddies):
             max_bets += 2
 
         if ctx.author.id == CREATOR:
+            max_bets += 2
+
+        if user.get("king", False):
             max_bets += 2
 
         if current_bets and current_bets > max_bets:

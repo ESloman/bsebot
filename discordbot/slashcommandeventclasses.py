@@ -673,3 +673,35 @@ class BSEddiesTransactionHistory(BSEddies):
                 f"**Comment**: {item.get('comment', 'No comment')}\n"
             )
         await ctx.send(content=message, hidden=True)
+
+
+class BSEddiesNotifcationToggle(BSEddies):
+    """
+    Class for handling `/bseddies notifcations` command
+    """
+    def __init__(self, client, guilds, logger, beta_mode=False):
+        super().__init__(client, guilds, logger, beta_mode=beta_mode)
+
+    async def notification_toggle(self, ctx: discord_slash.context.SlashContext) -> None:
+        """
+
+        :param ctx:
+        :return:
+        """
+        if not await self._handle_validation(ctx):
+            return
+
+        user_id = ctx.author.id
+        guild_id = ctx.guild.id
+
+        user = self.user_points.find_user(user_id, guild_id)
+
+        notification_setting = user.get("daily_eddies", False)
+
+        notification_setting = not notification_setting
+
+        self.user_points.set_daily_eddies_toggle(user_id, guild_id, notification_setting)
+
+        message = f"Your daily salary notifications have now been turned **{'ON' if notification_setting else 'OFF'}**."
+
+        await ctx.send(content=message, hidden=True)

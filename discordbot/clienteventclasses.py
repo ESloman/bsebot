@@ -1,11 +1,10 @@
 import datetime
 import logging
 import re
-from typing import Union
-
 import discord
 
 from discordbot.bot_enums import TransactionTypes
+from discordbot.constants import THE_BOYS_ROLE
 from discordbot.embedmanager import EmbedManager
 from mongo.bsepoints import UserBets, UserPoints, UserInteractions
 
@@ -54,30 +53,36 @@ class OnReadyEvent(BaseEvent):
         for guild_id in self.guild_ids:
             guild = self.client.get_guild(guild_id)
             self.logger.info(f"Checking guild: {guild.id} - {guild.name}")
-            for member in guild.members:
-                if not member.bot:
-                    self.logger.info(f"Checking {member.id} - {member.name}")
-                    user = self.user_points.find_user(member.id, guild.id)
-                    if not user:
-                        self.user_points.create_user(member.id, guild.id)
-                        self.logger.info(
-                            f"Creating new user entry for {member.id} - {member.name} for {guild.id} - {guild.name}"
-                        )
+            for member in guild.members:  # type: discord.Member
+                if member.bot:
+                    continue
 
-                        self.user_points.append_to_transaction_history(
-                            member.id,
-                            guild.id,
-                            {
-                                "type": TransactionTypes.USER_CREATE,
-                                "amount": 10,
-                                "timestamp": datetime.datetime.now(),
-                                "comment": "User created",
-                            }
-                        )
+                self.logger.info(f"Checking {member.id} - {member.name}")
+                user = self.user_points.find_user(member.id, guild.id)
+                if not user:
 
-                    elif "pending_points" not in user:
-                        self.user_points.set_pending_points(member.id, guild.id, 0)
-                        self.logger.info(f"Setting pending points to 0 for {member.name}")
+                    the_boys_role = [role for role in member.roles if role == THE_BOYS_ROLE]
+
+                    self.user_points.create_user(member.id, guild.id, bool(the_boys_role))
+                    self.logger.info(
+                        f"Creating new user entry for {member.id} - {member.name} for {guild.id} - {guild.name}"
+                    )
+
+                    self.user_points.append_to_transaction_history(
+                        member.id,
+                        guild.id,
+                        {
+                            "type": TransactionTypes.USER_CREATE,
+                            "amount": 10,
+                            "timestamp": datetime.datetime.now(),
+                            "comment": "User created",
+                        }
+                    )
+                    continue
+
+                if not user.get("daily_eddies"):
+                    the_boys_role = [role for role in member.roles if role == THE_BOYS_ROLE]
+                    self.user_points.set_daily_eddies_toggle(member.id, guild.id, bool(the_boys_role))
 
         self.logger.info("Finished member check.")
 

@@ -374,9 +374,11 @@ class BSEddiesCloseBet(BSEddies):
             if not mem.dm_channel:
                 await mem.create_dm()
             try:
+                points_bet = ret_dict["losers"][loser]
                 msg = (f"**{author.name}** just closed bet "
-                       f"`[{bet_id}] - {bet['title']}` and the result was {emoji}.\n"
-                       f"As this wasn't what you voted for - you have lost.")
+                       f"`[{bet_id}] - {bet['title']}` and the result was {emoji} "
+                       f"(`{ret_dict['outcome_name']['val']})`.\n"
+                       f"As this wasn't what you voted for - you have lost. You bet **{points_bet}** eddies.")
                 await mem.send(content=msg)
             except discord.errors.Forbidden:
                 pass
@@ -388,7 +390,8 @@ class BSEddiesCloseBet(BSEddies):
                 await mem.create_dm()
             try:
                 msg = (f"**{author.name}** just closed bet "
-                       f"`[{bet_id}] - {bet['title']}` and the result was {emoji}.\n"
+                       f"`[{bet_id}] - {bet['title']}` and the result was {emoji} "
+                       f"(`{ret_dict['outcome_name']['val']})`.\n"
                        f"**This means you won!!** "
                        f"You have won `{ret_dict['winners'][winner]}` BSEDDIES!!")
                 await mem.send(content=msg)

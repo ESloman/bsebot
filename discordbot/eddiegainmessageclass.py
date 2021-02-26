@@ -57,11 +57,11 @@ class EddieGainMessager(commands.Cog):
             if eddie_dict[user_id] == 0:
                 continue
 
-            msg += f"\n- `{user_id}`  :  **{eddie_dict[user_id]}**"
-            text = f"Your daily salary of BSEDDIES is `{eddie_dict[user_id]}`.\n"
-
             user = await guild.fetch_member(int(user_id))  # type: discord.Member
             roles = user.roles  # type: List[discord.Role]
+
+            msg += f"\n- `{user_id}` {user.display_name} :  **{eddie_dict[user_id]}**"
+            text = f"Your daily salary of BSEDDIES is `{eddie_dict[user_id]}`.\n"
 
             self.logger.info(f"{user.display_name} is gaining `{eddie_dict[user_id]} eddies`")
 

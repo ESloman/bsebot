@@ -217,6 +217,7 @@ class CommandManager(object):
                 # we'll have to handle this differently
                 self.logger.debug(f"{message} - {message.content}")
                 return
+
             await self.on_message.message_received(message)
 
     def _register_slash_commands(self, guilds: list) -> None:

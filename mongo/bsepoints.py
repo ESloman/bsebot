@@ -417,6 +417,11 @@ class UserBets(BestSummerEverPointsDB):
         ret = self.query({"bet_id": bet_id, "guild_id": guild_id})[0]
         betters = ret["betters"]
 
+        # checking the user has enough points
+        cur_points = self.user_points.get_user_points(user_id, guild_id)
+        if (points > cur_points) or cur_points == 0:
+            return {"success": False, "reason": "not enough points"}
+
         # this section is the logic if the user hasn't bet on this bet yet
         if str(user_id) not in betters:
             doc = {
@@ -435,11 +440,6 @@ class UserBets(BestSummerEverPointsDB):
         current_better = betters[str(user_id)]
         if emoji != current_better["emoji"]:
             return {"success": False, "reason": "wrong option"}
-
-        # checking the user has enough points
-        cur_points = self.user_points.get_user_points(user_id, guild_id)
-        if (points > cur_points) or cur_points == 0:
-            return {"success": False, "reason": "not enough points"}
 
         self.update(
             {"_id": ret["_id"]},

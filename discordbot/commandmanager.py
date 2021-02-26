@@ -22,7 +22,7 @@ from discordbot.eddiekingtask import BSEddiesKing
 from discordbot.embedmanager import EmbedManager
 from discordbot.slashcommandeventclasses import BSEddiesActive, BSEddiesGift, BSEddiesLeaderboard, BSEddiesView
 from discordbot.slashcommandeventclasses import BSEddiesCreateBet, BSEddiesCloseBet, BSEddiesPlaceEvent
-from discordbot.slashcommandeventclasses import BSEddiesPending, BSEddiesTransactionHistory
+from discordbot.slashcommandeventclasses import BSEddiesPending, BSEddiesTransactionHistory, BSEddiesNotifcationToggle
 from mongo.bsepoints import UserPoints, UserBets
 
 
@@ -95,6 +95,7 @@ class CommandManager(object):
         self.bseddies_place = BSEddiesPlaceEvent(client, guilds, self.logger, self.beta_mode)
         self.bseddies_pending = BSEddiesPending(client, guilds, self.logger, self.beta_mode)
         self.bseddies_transactions = BSEddiesTransactionHistory(client, guilds, self.logger, self.beta_mode)
+        self.bseddies_notifcations = BSEddiesNotifcationToggle(client, guilds, self.logger, self.beta_mode)
 
         # tasks
         self.bet_closer_task = BetCloser(self.client, guilds, self.logger)
@@ -314,6 +315,16 @@ class CommandManager(object):
             :return:
             """
             await self.bseddies_transactions.transaction_history(ctx)
+
+        @self.slash.subcommand(
+            base="bseddies",
+            base_description="View your BSEddies, create bets and resolve bets",
+            name="notifications",
+            description="Toggle whether you get daily allowance messages",
+            guild_ids=guilds
+        )
+        async def notification_toggle(ctx: discord_slash.context.SlashContext) -> None:
+            await self.bseddies_notifcations.notification_toggle(ctx)
 
         @self.slash.subcommand(
             base="bseddies",

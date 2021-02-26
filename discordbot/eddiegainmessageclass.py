@@ -1,4 +1,3 @@
-import datetime
 import json
 import os
 from typing import List
@@ -6,9 +5,8 @@ from typing import List
 import discord
 from discord.ext import tasks, commands
 
-from discordbot.constants import CREATOR, BETA_USERS, THE_BOYS_ROLE
-from discordbot.embedmanager import EmbedManager
-from mongo.bsepoints import UserBets
+from discordbot.constants import CREATOR
+from mongo.bsepoints import UserPoints
 
 
 class EddieGainMessager(commands.Cog):
@@ -23,6 +21,7 @@ class EddieGainMessager(commands.Cog):
         self.bot = bot
         self.guilds = guilds
         self.logger = logger
+        self.user_points = UserPoints()
         self.eddie_distributer.start()
 
     def cog_unload(self):
@@ -65,13 +64,13 @@ class EddieGainMessager(commands.Cog):
 
             self.logger.info(f"{user.display_name} is gaining `{eddie_dict[user_id]} eddies`")
 
-            the_boys_role = [role for role in roles if role.id == THE_BOYS_ROLE]
-            if the_boys_role or user_id == CREATOR:
+            user_dict = self.user_points.find_user(user_id, guild_id)
+
+            if user_dict.get("daily_eddies"):
                 self.logger.info(f"Sending message to {user.display_name} for {eddie_dict[user_id]}")
                 try:
                     await user.send(content=text)
                 except discord.Forbidden:
-                    self.logger.info(f"{user.display_name} - {text}")
                     continue
 
         user = await guild.fetch_member(CREATOR)  # type: discord.Member

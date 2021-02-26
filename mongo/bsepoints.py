@@ -173,10 +173,11 @@ class UserPoints(BestSummerEverPointsDB):
         """
         return self.increment_daily_minimum(user_id, guild_id, amount * -1)
 
-    def create_user(self, user_id: int, guild_id: int) -> None:
+    def create_user(self, user_id: int, guild_id: int, dailies: bool = False) -> None:
         """
         Create basic user points document.
 
+        :param dailies:
         :param user_id: int - The ID of the user to look for
         :param guild_id: int - The guild ID that the user belongs in
         :return: None
@@ -188,8 +189,20 @@ class UserPoints(BestSummerEverPointsDB):
             "pending_points": 0,
             "daily_minimum": 5,
             "transaction_history": [],
+            "daily_eddies": dailies,
         }
         self.insert(user_doc)
+
+    def set_daily_eddies_toggle(self, user_id: int, guild_id: int, value: bool) -> None:
+        """
+        Sets the "daily eddies" toggle for the given user.
+        This toggle determines if the user will receive the daily allowance messages from the bot.
+        :param user_id: the user id to use
+        :param guild_id: the guild id
+        :param value: bool - whether or not the messages should be sent
+        :return:
+        """
+        self.update({"uid": user_id, "guild_id": guild_id}, {"$set": {"daily_eddies": value}})
 
     def append_to_transaction_history(self, user_id: int, guild_id: int, activity: dict) -> None:
         """

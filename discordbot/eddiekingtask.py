@@ -45,12 +45,18 @@ class BSEddiesKing(commands.Cog):
 
             users = self.user_points.get_all_users_for_guild(guild_id)
             top_user = sorted(users, key=lambda x: x["points"], reverse=True)[0]
+            new = guild_obj.get_member(top_user["uid"])  # type: discord.Member
 
             if current_king is not None and top_user["uid"] != current_king:
                 prev_king_id = current_king
                 current = guild_obj.get_member(current_king)  # type: discord.Member
                 self.logger.info(f"Removing a king: {current.display_name}")
+
                 await current.remove_roles(role, reason="User is not longer King!")
+
+                message = (f"You have been **DETHRONED** - {new.display_name} is now the "
+                           f"KING of {guild_obj.name}! :crown:")
+                await current.send(content=message)
 
                 activity = {
                     "type": ActivityTypes.KING_LOSS,
@@ -62,8 +68,8 @@ class BSEddiesKing(commands.Cog):
                 current_king = None
 
             if current_king is None:
-                new = guild_obj.get_member(top_user["uid"])  # type: discord.Member
                 self.logger.info(f"Adding a new king: {new.display_name}")
+
                 activity = {
                     "type": ActivityTypes.KING_LOSS,
                     "timestamp": datetime.datetime.now(),
@@ -72,6 +78,9 @@ class BSEddiesKing(commands.Cog):
 
                 self.user_points.append_to_activity_history(top_user['uid'], guild_id, activity)
                 await new.add_roles(role, reason="User is now KING!")
+
+                message = f"You are now the KING of {guild_obj.name}! :crown:"
+                await new.send(content=message)
 
     @king_checker.before_loop
     async def before_king_checker(self):

@@ -64,7 +64,7 @@ class EddieGainMessager(commands.Cog):
 
             self.logger.info(f"{user.display_name} is gaining `{eddie_dict[user_id]} eddies`")
 
-            user_dict = self.user_points.find_user(user_id, guild_id)
+            user_dict = self.user_points.find_user(int(user_id), guild_id)
 
             if user_dict.get("daily_eddies"):
                 self.logger.info(f"Sending message to {user.display_name} for {eddie_dict[user_id]}")

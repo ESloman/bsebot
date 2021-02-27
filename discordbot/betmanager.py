@@ -52,10 +52,15 @@ class BetManager(object):
         elif modifier > 2:
             modifier = 2
 
+        point_one = (0, 2)
+        point_two = (winning_outcome_eddies, modifier)
+        m = ((point_two[1] - point_one[1]) / (point_two[0] - point_one[0]))
+        c = (point_two[1] - (m * point_two[0]))
+
         # assign winning points to the users who got the answer right
         for better in [b for b in ret["betters"] if ret["betters"][b]["emoji"] == emoji]:
             points_bet = ret["betters"][better]["points"]
-            points_won = math.ceil(points_bet * modifier)
+            points_won = math.floor(((m * points_bet) + c) * points_bet)
             ret_dict["winners"][better] = points_won
             self.user_points.increment_points(int(better), guild_id, points_won)
             # add to transaction history

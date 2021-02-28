@@ -54,7 +54,11 @@ class BetManager(object):
 
         point_one = (0, 2)
         point_two = (winning_outcome_eddies, modifier)
-        m = ((point_two[1] - point_one[1]) / (point_two[0] - point_one[0]))
+        try:
+            m = ((point_two[1] - point_one[1]) / (point_two[0] - point_one[0]))
+        except ZeroDivisionError:
+            m = 0
+            # this mean no-one won :(
         c = (point_two[1] - (m * point_two[0]))
 
         # assign winning points to the users who got the answer right

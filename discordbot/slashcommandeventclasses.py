@@ -693,6 +693,9 @@ class BSEddiesTransactionHistory(BSEddies):
             if l_id := item.get("loan_id"):
                 message += f"**Loan ID**: {l_id}\n"
 
+            if u_id := item.get("user_id"):
+                message += f"**User ID**: {u_id}\n"
+
         await ctx.send(content=message, hidden=True)
 
     @staticmethod

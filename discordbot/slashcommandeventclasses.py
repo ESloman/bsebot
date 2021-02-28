@@ -477,7 +477,7 @@ class BSEddiesCreateBet(BSEddies):
             max_bets += 2
 
         if ctx.author.id == CREATOR:
-            max_bets += 2
+            max_bets += 10
 
         if user.get("king", False):
             max_bets += 2

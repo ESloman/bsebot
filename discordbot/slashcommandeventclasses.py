@@ -45,6 +45,7 @@ class BSEddies(BaseEvent):
         if kwargs.get("admin") and ctx.author.id != CREATOR:
             msg = f"You do not have the permissions to use this command."
             await ctx.send(content=msg, hidden=True)
+            return False
 
         if "friend" in kwargs and (
                 isinstance(kwargs["friend"], discord.User) or isinstance(kwargs["friend"], discord.Member)):

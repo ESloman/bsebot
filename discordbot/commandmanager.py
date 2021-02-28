@@ -3,16 +3,12 @@ This file contains our class that registers all the events we listen to and do t
 """
 
 import logging
-import os
 
-from typing import List, Dict, Union
+from typing import Union
 
 import discord
 import discord_slash
-import dotenv
-import inflect
-from discord.ext import commands
-from discord_slash import SlashCommand, SlashContext
+from discord_slash import SlashCommand
 from discord_slash.utils import manage_commands
 
 from discordbot.betcloser import BetCloser

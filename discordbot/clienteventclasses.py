@@ -1,40 +1,11 @@
 import datetime
-import logging
-import re
 import discord
 
+from discordbot.baseeventclass import BaseEvent
 from discordbot.bot_enums import TransactionTypes
 from discordbot.constants import THE_BOYS_ROLE
-from discordbot.embedmanager import EmbedManager
-from mongo.bsepoints import UserBets, UserLoans, UserPoints, UserInteractions
-
-
-class BaseEvent(object):
-    """
-    This is a BaseEvent class that all events will inherit from.
-
-    Basically just sets up all the vars that events will need and rely on.
-    """
-    def __init__(self,
-                 client: discord.Client,
-                 guild_ids: list,
-                 logger: logging.Logger,
-                 beta_mode: bool = False):
-        """
-        Constructor that initialises references DB Collections and various variables
-        :param client:
-        :param guild_ids:
-        :param logger:
-        :param beta_mode:
-        """
-        self.user_bets = UserBets()
-        self.user_points = UserPoints()
-        self.user_loans = UserLoans()
-        self.client = client
-        self.guild_ids = guild_ids
-        self.beta_mode = beta_mode
-        self.embed_manager = EmbedManager(logger)
-        self.logger = logger
+from discordbot.reactioneventclasses import BetReactionEvent, LeaderBoardReactionEvent
+from mongo.bsepoints import UserInteractions
 
 
 class OnReadyEvent(BaseEvent):
@@ -125,6 +96,8 @@ class OnReactionAdd(BaseEvent):
     """
     def __init__(self, client, guild_ids, logger, beta_mode=False):
         super().__init__(client, guild_ids, logger, beta_mode=beta_mode)
+        self.leadership_event = LeaderBoardReactionEvent(client, guild_ids, logger, beta_mode=beta_mode)
+        self.bet_event = BetReactionEvent(client, guild_ids, logger, beta_mode=beta_mode)
 
     async def handle_reaction_event(
             self,
@@ -141,12 +114,8 @@ class OnReactionAdd(BaseEvent):
 
         Secondly, we only care about reactions to bot messages at the moment so discard any other events.
 
-        Then we check what type of message the user is reacting to:
-
-          - if it's a 'Leaderboard' message then we update the message with the full updated rankings
-          - if it's a 'BET' message then we check the bet is active and that the user is betting with a valid emoji.
-            If that's both fine then we call the function to add the bet to the actual BET. That function will do some
-            additional checking so we don't need to do loads of validation here.
+        Then we check what type of message the user is reacting to and pass it off to the relevant class to handle
+        the event
 
         :param message:
         :param guild:
@@ -166,68 +135,13 @@ class OnReactionAdd(BaseEvent):
 
         # handling leaderboard messages
         if message.content and "BSEddies Leaderboard" in message.content and reaction_emoji == u"▶️":
-            if not message.author.bot:
-                return
-
-            content = self.embed_manager.get_leaderboard_embed(guild, None)
-            await message.edit(content=content)
+            await self.leadership_event.handle_leaderboard_reaction(message, guild)
             return
 
         # handling reactions to BETS
         if message.embeds and "Bet ID" in message.embeds[0].description:
-            embed = message.embeds[0]  # type: discord.Embed
-            bet_id = re.findall(r"(?<=Bet ID: )\d\d\d\d", embed.description)[0]
-            bet = self.user_bets.get_bet_from_id(guild.id, bet_id)
-
-            link = f"https://discordapp.com/channels/{guild.id}/{channel.id}/{message.id}"
-
-            # make sure the bet is active
-            if not bet["active"]:
-                msg = f"Your reaction on **Bet {bet_id}** _(<{link}>)_ failed as the bet is closed for new bets."
-                if not user.dm_channel:
-                    await user.create_dm()
-                try:
-                    await user.send(content=msg)
-                except discord.errors.Forbidden:
-                    pass
-                await message.remove_reaction(reaction_emoji, user)
-                return
-
-            # make sure that the reaction is a valid outcome
-            if reaction_emoji not in bet['option_dict']:
-                msg = f"Your reaction on **Bet {bet_id}** _(<{link}>)_ failed as that reaction isn't a valid outcome."
-                if not user.dm_channel:
-                    await user.create_dm()
-                try:
-                    await user.send(content=msg)
-                except discord.errors.Forbidden:
-                    pass
-                await message.remove_reaction(reaction_emoji, user)
-                return
-
-            # do the bet
-            ret = self.user_bets.add_better_to_bet(bet_id, guild.id, user.id, reaction_emoji, 1)
-
-            if ret["success"]:
-                new_bet = self.user_bets.get_bet_from_id(guild.id, bet_id)
-                embed = self.embed_manager.get_bet_embed(guild, bet_id, new_bet)
-
-                await message.edit(embed=embed)
-
-                # add to transaction history
-                self.user_points.append_to_transaction_history(
-                    user.id,
-                    guild.id,
-                    {
-                        "type": TransactionTypes.BET_PLACE,
-                        "amount": -1,
-                        "timestamp": datetime.datetime.now(),
-                        "bet_id": bet_id,
-                        "comment": "Bet placed through reaction",
-                    }
-                )
-
-            await message.remove_reaction(reaction_emoji, user)
+            await self.bet_event.handle_bet_reaction_event(message, guild, channel, reaction_emoji, user)
+            return
 
 
 class OnMessage(BaseEvent):

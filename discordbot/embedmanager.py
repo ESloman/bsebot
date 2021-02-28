@@ -1,5 +1,5 @@
 import datetime
-from typing import List, Union, Dict
+from typing import Union
 
 import discord
 import inflect

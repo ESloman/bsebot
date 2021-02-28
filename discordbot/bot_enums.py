@@ -20,6 +20,8 @@ class TransactionTypes(IntEnum):
     LOAN_TAKE = 9
     LOAN_REPAYMENT = 10
     LOAN_COLLECTION = 11
+    ADMIN_GIVE = 12
+    ADMIN_TAKE = 13
     OVERRIDE = 99
 
 

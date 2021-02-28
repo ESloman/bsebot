@@ -661,23 +661,11 @@ class BSEddiesTransactionHistory(BSEddies):
         :param transaction_history:
         :return:
         """
-        if not await self._handle_validation(ctx):
-            return
-
-        user = self.user_points.find_user(ctx.author.id, ctx.guild.id)
-        transaction_history = user["transaction_history"]
         recent_history = transaction_history[-10:]
 
         message = "This is your recent transaction history.\n"
 
-        starting_points = user["points"]
-        for item in reversed(recent_history):
-            starting_points + (item["amount"] * -1)
-
         for item in recent_history:
-            if recent_history.index(item) != 1:
-                starting_points += (item["amount"] * -1)
-
             message += (
                 f"\n"
                 f"**Timestamp**: {item['timestamp'].strftime('%d %b %y %H:%M:%S')}\n"
@@ -812,4 +800,217 @@ class BSEddiesNotifcationToggle(BSEddies):
 
         message = f"Your daily salary notifications have now been turned **{'ON' if notification_setting else 'OFF'}**."
 
+        await ctx.send(content=message, hidden=True)
+
+
+class BSEddiesLoanTake(BSEddies):
+    """
+    Class for handling `/bseddies loan take` command
+    """
+    def __init__(self, client, guilds, logger, beta_mode=False):
+        super().__init__(client, guilds, logger, beta_mode=beta_mode)
+
+    async def loan_take(self, ctx: discord_slash.context.SlashContext, amount: int) -> None:
+        """
+        Method for handling the creation of a loan.
+
+        To create a loan we must check the following conditions:
+            - the user has less than 10 points
+            - the user doesn't have negative points
+            - the user isn't king
+            - the user doesn't have an active loan
+            - the user isn't trying to borrow more than 25 eddies
+
+        If any of those conditions fail - we let the user know. Otherwise, we create the loan for the user and tell
+        them how much they now owe.
+
+        :param ctx:
+        :param amount:
+        :return:
+        """
+        if not await self._handle_validation(ctx):
+            return
+
+        user_id = ctx.author.id
+        guild_id = ctx.guild.id
+
+        now = datetime.datetime.now()
+
+        user = self.user_points.find_user(user_id, guild_id)
+        points = user["points"]
+
+        active_loan = self.user_loans.get_active_loan_for_user(user_id, guild_id)
+
+        if active_loan is not None:
+            # user already has a loan
+            message = f"You already have an active loan. Please pay back that loan before you take out a new one."
+            await ctx.send(content=message, hidden=True)
+            return
+
+        if points >= 10:
+            # too many points
+            message = f"You have too many eddies to take a loan."
+            await ctx.send(content=message, hidden=True)
+            return
+
+        if points < 0:
+            # points below 0
+            message = f"You can't take out a loan when you have negative eddies."
+            await ctx.send(content=message, hidden=True)
+            return
+
+        if user.get("king"):
+            # the KING can't take out a loan
+            message = f"KINGs cannot take out loans :crown:"
+            await ctx.send(content=message, hidden=True)
+
+        if amount > 25:
+            # too many monies
+            message = f"You cannot take out a loan for `{amount}` - currently the maximum loan value is **50**."
+            await ctx.send(content=message, hidden=True)
+            return
+
+        new_loan = self.user_loans.create_new_loan(user_id, guild_id, amount, now)
+        self.user_points.increment_points(user_id, guild_id, amount)
+
+        self.user_points.append_to_transaction_history(
+            user_id, guild_id,
+            {
+                "type": TransactionTypes.LOAN_TAKE,
+                "amount": amount,
+                "timestamp": now,
+                "loan_id": new_loan["loan_id"],
+                "comment": "New loan taken out",
+            }
+        )
+
+        self.user_points.append_to_activity_history(
+            user_id, guild_id,
+            {
+                "type": ActivityTypes.LOAN_TAKE,
+                "loan_id": new_loan["loan_id"],
+                "timestamp": now,
+                "comment": f"New loan taken out for {amount}"
+            }
+        )
+
+        message = (f"Congratulations! Your loan application was successful. I have deposited `{amount}` eddies into "
+                   f"your account. You have **FOUR DAYS** to pay back `{new_loan['amount_due']}`. If you fail to do so, "
+                   f"I will take `{new_loan['amount_due'] * 2}` out of your account - even if that means you will "
+                   f"have a negative balance.\n\n"
+                   f"**Loan ID**: {new_loan['loan_id']}\n"
+                   f"**Amount**: {amount}\n"
+                   f"**Amount Due**: {new_loan['amount_due']}\n"
+                   f"**Date Due**: {new_loan['due']}")
+        await ctx.send(content=message, hidden=True)
+
+
+class BSEddiesLoanView(BSEddies):
+    """
+    Class for handling `/bseddies loan view` command
+    """
+    def __init__(self, client, guilds, logger, beta_mode=False):
+        super().__init__(client, guilds, logger, beta_mode=beta_mode)
+
+    async def loan_view(self, ctx: discord_slash.context.SlashContext) -> None:
+        """
+        Method that handles the slash command.
+
+        We first check if the user has an active loan - but if they don't, we inform them as such.
+        Otherwise, we send the user a message with the loan information in.
+
+        :param ctx:
+        :return:
+        """
+        if not await self._handle_validation(ctx):
+            return
+
+        user_id = ctx.author.id
+        guild_id = ctx.guild.id
+
+        loan = self.user_loans.get_active_loan_for_user(user_id, guild_id)
+
+        if not loan:
+            message = "You have no active loan at the moment. Good on you."
+            await ctx.send(content=message, hidden=True)
+            return
+
+        message = (f"**Loan ID**: {loan['loan_id']}\n"
+                   f"**Amount**: {loan['amount']}\n"
+                   f"**Created**: {loan['created']}\n"
+                   f"**Amount Due**: {loan['amount_due']}\n"
+                   f"**Date Due**: {loan['due']}")
+        await ctx.send(content=message, hidden=True)
+
+
+class BSEddiesLoanRepay(BSEddies):
+    """
+    Class for handling `/bseddies loan repay` command
+    """
+    def __init__(self, client, guilds, logger, beta_mode=False):
+        super().__init__(client, guilds, logger, beta_mode=beta_mode)
+
+    async def loan_repay(self, ctx: discord_slash.context.SlashContext) -> None:
+        """
+        Main function for handling loan repayment.
+
+        We check that the user has an active loan to start with - if they don't we tell the user as such.
+        We then check if the user has enough eddies to repay the loan - if they don't then we inform them as such.
+
+        If get this far, then we take the eddies out of their account, add to the relevant histories and "resolve" the
+        loan.
+
+        :param ctx:
+        :return:
+        """
+        if not await self._handle_validation(ctx):
+            return
+
+        user_id = ctx.author.id
+        guild_id = ctx.guild.id
+
+        loan = self.user_loans.get_active_loan_for_user(user_id, guild_id)
+
+        if not loan:
+            message = "You have no active loan at the moment. Good on you."
+            await ctx.send(content=message, hidden=True)
+            return
+
+        user = self.user_points.find_user(user_id, guild_id)
+
+        points = user["points"]
+        amount_due = loan["amount_due"]
+
+        if points < amount_due:
+            message = f"You don't have enough eddies to pay back your loan yet. You need `{amount_due}`."
+            await ctx.send(content=message, hidden=True)
+            return
+
+        now = datetime.datetime.now()
+
+        self.user_points.decrement_points(user_id, guild_id, amount_due)
+        self.user_loans.close_loan(guild_id, loan["loan_id"], now)
+
+        self.user_points.append_to_transaction_history(
+            user_id, guild_id,
+            {
+                "type": TransactionTypes.LOAN_REPAYMENT,
+                "amount": amount_due * -1,
+                "timestamp": now,
+                "loan_id": loan["loan_id"],
+                "comment": "Repaid loan",
+            }
+        )
+
+        self.user_points.append_to_activity_history(
+            user_id, guild_id,
+            {
+                "type": ActivityTypes.LOAN_REPAYMENT,
+                "loan_id": loan["loan_id"],
+                "timestamp": now,
+                "comment": f"Repaid loan for {amount_due}"
+            }
+        )
+
+        message = f"Congrats! You've successfully paid your loan back. You owe nothing."
         await ctx.send(content=message, hidden=True)

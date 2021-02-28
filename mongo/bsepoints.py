@@ -8,12 +8,13 @@ This particular file contains Collection Classes for the 'bestsummereverpoints' 
 """
 
 import datetime
+import math
 from typing import Union
 
 from bson import ObjectId
 from pymongo.results import UpdateResult
 
-from discordbot.bot_enums import TransactionTypes
+from discordbot.constants import LOAN_BASE_INTEREST_RATE
 from mongo import interface
 from mongo.db_classes import BestSummerEverPointsDB
 
@@ -498,6 +499,110 @@ class UserBets(BestSummerEverPointsDB):
             {"_id": _id},
             {"$set": {"active": False, "result": emoji, "closed": datetime.datetime.now()}}
         )
+
+
+class UserLoans(BestSummerEverPointsDB):
+    """
+
+    """
+    def __init__(self):
+        super(UserLoans, self).__init__()
+        self._vault = interface.get_collection(self.database, "userloans")
+
+    def __create_counter_document(self, guild_id: int) -> None:
+        """
+        Method that creates our base 'counter' document for counting loan IDs
+
+        :param guild_id: int - guild ID to create document for
+        :return: None
+        """
+        if not self.query({"type": "counter", "guild_id": guild_id}):
+            self.insert({"type": "counter", "guild_id": guild_id, "count": 1})
+
+    def __get_new_loan_id(self, guild_id) -> str:
+        """
+        Generate new unique ID and return it in the format we want.
+
+        :param guild_id: int - guild ID to create the new unique loan ID for
+        :return: str - new unique loan ID
+        """
+        try:
+            count = self.query({"type": "counter", "guild_id": guild_id}, projection={"count": True})[0]["count"]
+        except IndexError:
+            self.__create_counter_document(guild_id)
+            count = self.query({"type": "counter", "guild_id": guild_id}, projection={"count": True})[0]["count"]
+        self.update({"type": "counter", "guild_id": guild_id}, {"$inc": {"count": 1}})
+        return f"{count:03d}"
+
+    def get_all_loans(self, guild_id: int):
+        """
+
+        :param guild_id:
+        :return:
+        """
+        return self.query({"guild_id": guild_id})
+
+    def get_all_active_loans(self, guild_id: int):
+        """
+
+        :param guild_id:
+        :return:
+        """
+        return self.query({"guild_id": guild_id, "type": "loan", "open": True})
+
+    def create_new_loan(self, user_id: int, guild_id: int, amount: int, timestamp: datetime.datetime) -> dict:
+        """
+        Method for creating a loan in the DB. We work out the amount due here as well
+
+        :param user_id: The user that created the loan
+        :param guild_id: The guild ID the loan was created in
+        :param amount: The amount the user wants to borrow
+        :param timestamp: When the loan was created
+        :return: the loan dictionary
+        """
+        loan_id = self.__get_new_loan_id(guild_id)
+
+        due_date = timestamp + datetime.timedelta(days=4)
+
+        amount_due = math.ceil(amount * LOAN_BASE_INTEREST_RATE)
+
+        document = {
+            "type": "loan",
+            "loan_id": loan_id,
+            "guild_id": guild_id,
+            "user_id": user_id,
+            "amount": amount,
+            "amount_due": amount_due,
+            "interest_rate": LOAN_BASE_INTEREST_RATE,
+            "created": timestamp,
+            "due": due_date,
+            "resolved": None,
+            "open": True,
+            "collected": False,
+        }
+        self.insert(document)
+        return document
+
+    def close_loan(self, guild_id: int, loan_id: int, timestamp: datetime.datetime) -> None:
+        """
+        Function for closing a loan
+        :param guild_id: The guild ID of the loan
+        :param loan_id: The loan ID to close
+        :param timestamp: The datetime object when the loan was closed
+        :return:
+        """
+        self.update({"loan_id": loan_id, "guild_id": guild_id}, {"$set": {"resolved": timestamp, "open": False}})
+
+    def get_active_loan_for_user(self, user_id: int, guild_id: int) -> dict:
+        """
+        Gets the user's active loan
+        :param user_id: the user to get the loan for
+        :param guild_id: the guild to get the loan for
+        :return: loan dictionary or None if there's no active loan
+        """
+        ret = self.query({"user_id": user_id, "guild_id": guild_id, "open": True})
+        if ret:
+            return ret[0]
 
 
 class UserInteractions(BestSummerEverPointsDB):

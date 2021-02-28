@@ -20,9 +20,11 @@ from discordbot.clienteventclasses import OnReadyEvent, OnReactionAdd, OnMessage
 from discordbot.eddiegainmessageclass import EddieGainMessager
 from discordbot.eddiekingtask import BSEddiesKing
 from discordbot.embedmanager import EmbedManager
+from discordbot.loancollectiontask import BSEddiesLoanCollections
 from discordbot.slashcommandeventclasses import BSEddiesActive, BSEddiesGift, BSEddiesLeaderboard, BSEddiesView
 from discordbot.slashcommandeventclasses import BSEddiesCreateBet, BSEddiesCloseBet, BSEddiesPlaceEvent
 from discordbot.slashcommandeventclasses import BSEddiesPending, BSEddiesTransactionHistory, BSEddiesNotifcationToggle
+from discordbot.slashcommandeventclasses import BSEddiesLoanTake, BSEddiesLoanView, BSEddiesLoanRepay
 from mongo.bsepoints import UserPoints, UserBets
 
 
@@ -96,11 +98,15 @@ class CommandManager(object):
         self.bseddies_pending = BSEddiesPending(client, guilds, self.logger, self.beta_mode)
         self.bseddies_transactions = BSEddiesTransactionHistory(client, guilds, self.logger, self.beta_mode)
         self.bseddies_notifcations = BSEddiesNotifcationToggle(client, guilds, self.logger, self.beta_mode)
+        self.bseddies_loan_take = BSEddiesLoanTake(client, guilds, self.logger, self.beta_mode)
+        self.bseddies_loan_view = BSEddiesLoanView(client, guilds, self.logger, self.beta_mode)
+        self.bseddies_loan_repay = BSEddiesLoanRepay(client, guilds, self.logger, self.beta_mode)
 
         # tasks
         self.bet_closer_task = BetCloser(self.client, guilds, self.logger)
         self.eddie_gain_message_task = EddieGainMessager(self.client, guilds, self.logger)
         self.eddie_king_task = BSEddiesKing(self.client, guilds, self.logger)
+        self.loan_collections = BSEddiesLoanCollections(self.client, guilds, self.logger)
 
         # call the methods that register the events we're listening for
         self._register_client_events()
@@ -569,3 +575,65 @@ class CommandManager(object):
             :return:
             """
             await self.bseddies_close.close_bet(ctx, bet_id, emoji)
+
+        @self.slash.subcommand(
+            base="bseddies",
+            base_description="View your BSEddies, create bets and resolve bets",
+            subcommand_group="loan",
+            subcommand_group_description="Apply for a loan, view your loan, and repay your loans",
+            name="apply",
+            description="Apply for a loan for the specified amount. You have one week to pay that back + interest.",
+            options=[
+                manage_commands.create_option(
+                    name="amount",
+                    description="The amount of eddies to apply for",
+                    option_type=4,
+                    required=True,
+                ),
+            ],
+            guild_ids=guilds,
+        )
+        async def apply_for_a_loan(ctx: discord_slash.context.SlashContext, amount: int) -> None:
+            """
+            This is a command that allows us to apply for a loan. Simply takes the amount of eddies the user would
+            like to borrow.
+            :param ctx:
+            :param amount:
+            :return:
+            """
+            await self.bseddies_loan_take.loan_take(ctx, amount)
+
+        @self.slash.subcommand(
+            base="bseddies",
+            base_description="View your BSEddies, create bets and resolve bets",
+            subcommand_group="loan",
+            subcommand_group_description="Apply for a loan, view your loan, and repay your loans",
+            name="view",
+            description="View your active loan",
+            guild_ids=guilds,
+        )
+        async def loan_view(ctx: discord_slash.context.SlashContext) -> None:
+            """
+            This is a command that simply allows the user to view their active loan (if they have one).
+            :param ctx:
+            :return:
+            """
+            await self.bseddies_loan_view.loan_view(ctx)
+
+        @self.slash.subcommand(
+            base="bseddies",
+            base_description="View your BSEddies, create bets and resolve bets",
+            subcommand_group="loan",
+            subcommand_group_description="Apply for a loan, view your loan, and repay your loans",
+            name="repay",
+            description="Repay your loan",
+            guild_ids=guilds,
+        )
+        async def loan_repay(ctx: discord_slash.context.SlashContext) -> None:
+            """
+            This is a command that allows the user to repay their active loan (if they have one). Loans are repaid
+            in full if the user has enough eddies.
+            :param ctx:
+            :return:
+            """
+            await self.bseddies_loan_repay.loan_repay(ctx)

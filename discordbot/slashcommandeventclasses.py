@@ -8,14 +8,16 @@ These classes handle most of the logic for them
 import copy
 import datetime
 import math
+import os
 import re
 from typing import Union
 
 import discord
 import discord_slash
+import xlsxwriter
 
 from discordbot.betmanager import BetManager
-from discordbot.bot_enums import TransactionTypes
+from discordbot.bot_enums import TransactionTypes, ActivityTypes
 from discordbot.clienteventclasses import BaseEvent
 from discordbot.constants import BETA_USERS, CREATOR, PRIVATE_CHANNEL_IDS
 
@@ -247,6 +249,7 @@ class BSEddiesGift(BSEddies):
                 "type": TransactionTypes.GIFT_GIVE,
                 "amount": amount * -1,
                 "timestamp": datetime.datetime.now(),
+                "user_id": friend.id,
             }
         )
 
@@ -257,6 +260,7 @@ class BSEddiesGift(BSEddies):
                 "type": TransactionTypes.GIFT_RECEIVE,
                 "amount": amount,
                 "timestamp": datetime.datetime.now(),
+                "user_id": ctx.author.id,
             }
         )
 
@@ -648,10 +652,13 @@ class BSEddiesTransactionHistory(BSEddies):
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
-    async def transaction_history(self, ctx: discord_slash.context.SlashContext) -> None:
+    @staticmethod
+    async def _handle_recent_trans(ctx: discord_slash.context.SlashContext, transaction_history: list) -> None:
         """
-        Gets the user history and takes the last 10 entries and then displays that list to the user
+        This handles our 'recent transaction history' command. We take the last ten items in the transaction history and
+        build a nice formatted ephemeral message with it and send it to the user.
         :param ctx:
+        :param transaction_history:
         :return:
         """
         if not await self._handle_validation(ctx):
@@ -676,10 +683,101 @@ class BSEddiesTransactionHistory(BSEddies):
                 f"**Timestamp**: {item['timestamp'].strftime('%d %b %y %H:%M:%S')}\n"
                 f"**Transaction Type**: {TransactionTypes(item['type']).name}\n"
                 f"**Change amount**: {item['amount']}\n"
-                f"**Bet ID**: {item.get('bet_id', 'N/A')}\n"
+                f"**Running eddies total**: {item['points']}\n"
                 f"**Comment**: {item.get('comment', 'No comment')}\n"
             )
+
+            if b_id := item.get("bet_id"):
+                message += f"**Bet ID**: {b_id}\n"
+
+            if l_id := item.get("loan_id"):
+                message += f"**Loan ID**: {l_id}\n"
+
         await ctx.send(content=message, hidden=True)
+
+    @staticmethod
+    async def _handle_full_trans(ctx: discord_slash.context.SlashContext, transaction_history: list) -> None:
+        """
+        Method for handling out "full transaction history" command
+
+        This mostly just builds an XLSX file that we can send to the user. We use the XLSXWRITER library to do the
+        heavy lifting here.
+
+        Once we've created the file, we send it to the user in a DM and send an ephemeral message to let the user know.
+        Ephemeral messages don't support file attachments yet.
+        :param ctx:
+        :param transaction_history:
+        :return:
+        """
+        path = os.path.join(os.path.expanduser("~"), "trans_files")
+        f_name = f"full_trans_{ctx.author.id}.xlsx"
+
+        if not os.path.exists(path):
+            os.makedirs(path)
+
+        full_name = os.path.join(path, f_name)
+
+        workbook = xlsxwriter.Workbook(full_name)
+        worksheet = workbook.add_worksheet("Transaction History")
+
+        cols = ["Item", "Type", "Timestamp", "Change amount", "Eddies", "Bet ID", "Loan ID", "User ID", "Comment"]
+        worksheet.write_row(0, 0, cols, workbook.add_format({"bold": True}))
+
+        row = 1
+        for item in transaction_history:
+            worksheet.write_row(
+                row, 0,
+                [row, TransactionTypes(item['type']).name, item['timestamp'].strftime('%d %b %y %H:%M:%S'),
+                 item["amount"], item["points"], item.get("bet_id", "N/A"), item.get("loan_id", "N/A"),
+                 item.get("user_id", "N/A"), item.get("comment", "No comment")]
+            )
+            row += 1
+
+        center_format = workbook.add_format()
+        center_format.set_align('center')
+        center_format.set_align('vcenter')
+
+        worksheet.set_column("A:A", cell_format=center_format)
+        worksheet.set_column("B:B", width=18)
+        worksheet.set_column("C:D", width=20)
+        worksheet.set_column("I:I", width=50)
+
+        workbook.close()
+
+        try:
+            await ctx.author.send(content="Here's your full transaction history:", file=discord.File(full_name, f_name))
+        except discord.Forbidden:
+            # user doesn't allow DMs
+            pass
+
+        await ctx.send(content="I've sent you a DM with your full history.", hidden=True)
+
+    async def transaction_history(self, ctx: discord_slash.context.SlashContext, full: Union[str, None]) -> None:
+        """
+        Gets the user history and takes the last 10 entries and then displays that list to the user
+        :param ctx:
+        :param full:
+        :return:
+        """
+        if not await self._handle_validation(ctx):
+            return
+
+        user = self.user_points.find_user(ctx.author.id, ctx.guild.id)
+        transaction_history = user["transaction_history"]
+
+        amount = 0
+        for item in transaction_history:
+            if transaction_history.index(item) == 0:
+                item["points"] = item["amount"]
+                amount = item["amount"]
+                continue
+            amount += item["amount"]
+            item["points"] = amount
+
+        if full is None:
+            await self._handle_recent_trans(ctx, transaction_history)
+        else:
+            await self._handle_full_trans(ctx, transaction_history)
 
 
 class BSEddiesNotifcationToggle(BSEddies):
@@ -691,7 +789,7 @@ class BSEddiesNotifcationToggle(BSEddies):
 
     async def notification_toggle(self, ctx: discord_slash.context.SlashContext) -> None:
         """
-
+        Function for allowing the user to toggle whether they get daily salary notifications.
         :param ctx:
         :return:
         """

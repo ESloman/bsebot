@@ -307,14 +307,28 @@ class CommandManager(object):
             base_description="View your BSEddies, create bets and resolve bets",
             name="transactions",
             description="View your transaction history.",
+            options=[
+                manage_commands.create_option(
+                    name="full",
+                    description="Whether or not you want your _entire_ transaction history or just recent transactions",
+                    option_type=3,
+                    required=False,
+                    choices=[
+                        manage_commands.create_choice(
+                            "yes", "yes"
+                        )
+                    ]
+                ),
+            ],
             guild_ids=guilds)
-        async def transaction_history(ctx: discord_slash.context.SlashContext) -> None:
+        async def transaction_history(ctx: discord_slash.context.SlashContext, full: Union[str, None] = None) -> None:
             """
             Slash command that allows the user to see their eddie transaction history
             :param ctx:
+            :param full:
             :return:
             """
-            await self.bseddies_transactions.transaction_history(ctx)
+            await self.bseddies_transactions.transaction_history(ctx, full)
 
         @self.slash.subcommand(
             base="bseddies",

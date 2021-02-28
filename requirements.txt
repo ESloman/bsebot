@@ -3,3 +3,4 @@ requests
 python-dotenv~=0.15.0
 pymongo~=3.11.3
 inflect~=5.0.2
+xlsxwriter

@@ -17,6 +17,9 @@ class TransactionTypes(IntEnum):
     DAILY_SALARY = 6
     USER_CREATE = 7
     BET_REFUND = 8
+    LOAN_TAKE = 9
+    LOAN_REPAYMENT = 10
+    LOAN_COLLECTION = 11
     OVERRIDE = 99
 
 
@@ -26,3 +29,6 @@ class ActivityTypes(IntEnum):
     """
     KING_GAIN = 1
     KING_LOSS = 2
+    LOAN_TAKE = 3
+    LOAN_REPAYMENT = 4
+    LOAN_COLLECTION = 5

@@ -6,7 +6,7 @@ import discord
 from discordbot.bot_enums import TransactionTypes
 from discordbot.constants import THE_BOYS_ROLE
 from discordbot.embedmanager import EmbedManager
-from mongo.bsepoints import UserBets, UserPoints, UserInteractions
+from mongo.bsepoints import UserBets, UserLoans, UserPoints, UserInteractions
 
 
 class BaseEvent(object):
@@ -29,6 +29,7 @@ class BaseEvent(object):
         """
         self.user_bets = UserBets()
         self.user_points = UserPoints()
+        self.user_loans = UserLoans()
         self.client = client
         self.guild_ids = guild_ids
         self.beta_mode = beta_mode

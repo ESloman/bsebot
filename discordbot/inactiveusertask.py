@@ -51,6 +51,10 @@ class BSEddiesInactiveUsers(commands.Cog):
         :return:
         """
         points_to_cull = self.__calc_eddie_to_take(user)
+
+        if points_to_cull == 0:
+            return total_culled_points
+
         users_who_will_be_culled.append((user["_id"], user_obj))
         total_culled_points += points_to_cull
         self.logger.info(f"{user_obj.display_name} will be deducted {points_to_cull} for inactivity.")

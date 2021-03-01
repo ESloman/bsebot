@@ -88,10 +88,13 @@ class BSEddiesView(BSEddies):
         if not await self._handle_validation(ctx):
             return
 
-        points = self.user_points.get_user_points(ctx.author.id, ctx.guild.id)
+        ret = self.user_points.find_user(
+            ctx.author.id, ctx.guild.id, projection={"points": True, "high_score": True})
+
         pending = self.user_bets.get_user_pending_points(ctx.author.id, ctx.guild.id)
-        msg = (f"You have **{points}** :money_with_wings:`BSEDDIES`:money_with_wings:!"
-               f"\nAdditionally, you have `{pending}` points on 'pending bets'.")
+        msg = (f"You have **{ret['points']}** :money_with_wings:`BSEDDIES`:money_with_wings:!"
+               f"\nAdditionally, you have `{pending}` points on 'pending bets'.\n\n"
+               f"The _absolute highest_ amount of eddies you've ever had was `{ret['high_score']}`!.")
         await ctx.send(content=msg, hidden=True)
 
 

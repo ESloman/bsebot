@@ -49,9 +49,9 @@ class BSEddiesInactiveUsers(commands.Cog):
                     self.logger.info(f"{user['uid']} - {user_obj.display_name} last interacted within two weeks")
                     continue
 
-                elif last_interaction < two_weeks_ago and last_cull is not None and last_cull < two_weeks_ago:
+                elif last_cull is not None and last_interaction < two_weeks_ago < last_cull:
                     # haven't interacted in two weeks but we culled within the last two weeks
-                    self.logger.info(f"{user['uid']} - {user_obj.display_name} last interacted within two weeks"
+                    self.logger.info(f"{user['uid']} - {user_obj.display_name} last interacted over two weeks"
                                      f" but was culled recently.")
                     continue
 

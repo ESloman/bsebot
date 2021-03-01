@@ -22,6 +22,8 @@ class TransactionTypes(IntEnum):
     LOAN_COLLECTION = 11
     ADMIN_GIVE = 12
     ADMIN_TAKE = 13
+    POINT_ROT_LOSS = 14
+    POINT_ROT_GAIN = 15
     OVERRIDE = 99
 
 

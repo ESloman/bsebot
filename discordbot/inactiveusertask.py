@@ -44,6 +44,10 @@ class BSEddiesInactiveUsers(commands.Cog):
         for guild_id in self.guilds:
             guild_obj = self.bot.get_guild(guild_id)  # type: discord.Guild
 
+            users_who_will_be_culled = []
+            users_who_will_gain_points = []
+            total_culled_points = 0
+
             all_users = self.user_points.query({"guild_id": guild_id})
             for user in all_users:
 
@@ -64,6 +68,7 @@ class BSEddiesInactiveUsers(commands.Cog):
                 if last_interaction > two_weeks_ago:
                     # interacted recently
                     self.logger.info(f"{user['uid']} - {user_obj.display_name} last interacted within two weeks")
+                    users_who_will_gain_points.append((user, user_obj))
                     continue
 
                 elif last_cull is not None and last_interaction < two_weeks_ago < last_cull:
@@ -75,6 +80,8 @@ class BSEddiesInactiveUsers(commands.Cog):
                 elif last_interaction < two_weeks_ago and last_cull is None:
                     # in this siutation - the user has never been culled and last interacted more than two weeks ago
                     points_to_cull = self.__calc_eddie_to_take(user)
+                    users_who_will_be_culled.append((user, user_obj))
+                    total_culled_points += points_to_cull
                     self.logger.info(f"{user['uid']} - {user_obj.display_name} hasn't interacted recently and has "
                                      f"never been culled. Culling {points_to_cull}")
                     self.user_points.update({"_id": user["_id"]}, {"$set": {"last_cull_time": now}})
@@ -82,10 +89,19 @@ class BSEddiesInactiveUsers(commands.Cog):
                 elif last_interaction < two_weeks_ago and last_cull < two_weeks_ago:
                     # in this situation - the user was culled two weeks ago and last interacted two weeks ago
                     points_to_cull = self.__calc_eddie_to_take(user)
+                    users_who_will_be_culled.append((user, user_obj))
+                    total_culled_points += points_to_cull
                     self.logger.info(f"{user['uid']} - {user_obj.display_name} hasn't interacted recently and hasn't "
                                      f"been culled in two weeks either. Culling {points_to_cull}")
                     self.user_points.update({"_id": user["_id"]}, {"$set": {"last_cull_time": now}})
 
+            self.logger.debug(users_who_will_be_culled)
+            self.logger.debug(users_who_will_gain_points)
+
+            points_each = total_culled_points / len(users_who_will_gain_points)
+
+            self.logger.debug(f"Each user will gain {points_each}")
+            
     @inactive_user_task.before_loop
     async def before_king_checker(self):
         """

@@ -45,24 +45,27 @@ class BSEddiesInactiveUsers(commands.Cog):
                 last_cull = user.get("last_cull_time")
 
                 if last_interaction > two_weeks_ago:
-                    self.logger.info(f"{user['uid']} - {user_obj.display_name} last interacted within two weeks")
                     # interacted recently
+                    self.logger.info(f"{user['uid']} - {user_obj.display_name} last interacted within two weeks")
                     continue
+
                 elif last_interaction < two_weeks_ago and last_cull is not None and last_cull < two_weeks_ago:
+                    # haven't interacted in two weeks but we culled within the last two weeks
                     self.logger.info(f"{user['uid']} - {user_obj.display_name} last interacted within two weeks"
                                      f" but was culled recently.")
-                    # haven't interacted in two weeks but we culled within the last two weeks
                     continue
+
                 elif last_interaction < two_weeks_ago and last_cull is None:
+                    # in this siutation - the user has never been culled and last interacted more than two weeks ago
                     self.logger.info(f"{user['uid']} - {user_obj.display_name} hasn't interacted recently and has "
                                      f"never been culled.")
-                    # in this siutation - the user has never been culled and last interacted more than two weeks ago
-                    pass
+                    self.user_points.update({"_id": user["_id"]}, {"$set": {"last_cull_time": now}})
+
                 elif last_interaction < two_weeks_ago and last_cull < two_weeks_ago:
+                    # in this situation - the user was culled two weeks ago and last interacted two weeks ago
                     self.logger.info(f"{user['uid']} - {user_obj.display_name} hasn't interacted recently and hasn't "
                                      f"been culled in two weeks either.")
-                    # in this situation - the user was culled two weeks ago and last interacted two weeks ago
-                    pass
+                    self.user_points.update({"_id": user["_id"]}, {"$set": {"last_cull_time": now}})
 
     @inactive_user_task.before_loop
     async def before_king_checker(self):

@@ -4,6 +4,7 @@ import math
 import discord
 from discord.ext import tasks, commands
 
+from discordbot.bot_enums import TransactionTypes
 from discordbot.constants import BSE_SERVER_ID, CREATOR
 from mongo.bsepoints import UserPoints
 
@@ -24,7 +25,12 @@ class BSEddiesInactiveUsers(commands.Cog):
         self.inactive_user_task.cancel()
 
     @staticmethod
-    def __calc_eddie_to_take(user):
+    def __calc_eddie_to_take(user: dict):
+        """
+        Makes sure we take at least half the user's points - but don't go below 10
+        :param user: user dictionary
+        :return: int
+        """
         current_points = user["points"]
         points_to_take = math.floor(current_points / 2)
         remaining = current_points - points_to_take
@@ -35,20 +41,45 @@ class BSEddiesInactiveUsers(commands.Cog):
         return points_to_take
 
     def __cull_user(self, user, total_culled_points, users_who_will_be_culled, now, user_obj):
+        """
+        Method for culling a user's points.
+        :param user:
+        :param total_culled_points:
+        :param users_who_will_be_culled:
+        :param now:
+        :param user_obj:
+        :return:
+        """
         points_to_cull = self.__calc_eddie_to_take(user)
         users_who_will_be_culled.append((user["_id"], user_obj))
         total_culled_points += points_to_cull
         self.logger.info(f"{user_obj.display_name} will be deducted {points_to_cull} for inactivity.")
         self.user_points.update({"_id": user["_id"]}, {"$set": {"last_cull_time": now}})
 
+        self.user_points.decrement_points(user_obj.id, BSE_SERVER_ID, points_to_cull)
+
+        self.user_points.append_to_transaction_history(
+            user_obj.id, BSE_SERVER_ID,
+            {
+                "type": TransactionTypes.POINT_ROT_LOSS,
+                "amount": points_to_cull * -1,
+                "timestamp": now,
+                "comment": "Gained eddies due to other user's inactivity"
+            }
+        )
+
         return total_culled_points
 
-    @tasks.loop(hours=1)
+    @tasks.loop(hours=8)
     async def inactive_user_task(self):
         """
-        Loop that makes sure the King is assigned correctly
+        Task that makes sure inactive users don't get too high in the leaderboards. We half their points every week
+        to keep them down.
         :return:
         """
+
+        self.logger.info("Beginning check for inactive users.")
+
         now = datetime.datetime.now()
         one_week_ago = now - datetime.timedelta(days=7)
 
@@ -114,12 +145,21 @@ class BSEddiesInactiveUsers(commands.Cog):
             for lucky_user in users_who_will_gain_points:
                 user_obj = lucky_user[1]  # type: discord.User
                 self.user_points.increment_points(user_obj.id, BSE_SERVER_ID, points_each)
-                if user_obj.id == CREATOR:
 
-                    try:
-                        await user_obj.send(content=message)
-                    except discord.Forbidden:
-                        pass
+                self.user_points.append_to_transaction_history(
+                    user_obj.id, BSE_SERVER_ID,
+                    {
+                        "type": TransactionTypes.POINT_ROT_GAIN,
+                        "amount": points_each,
+                        "timestamp": now,
+                        "comment": "Gained eddies due to other user's inactivity"
+                    }
+                )
+                try:
+                    await user_obj.send(content=message)
+                except discord.Forbidden:
+                    pass
+        self.logger.info("Finished checking for inactive users")
 
     @inactive_user_task.before_loop
     async def before_king_checker(self):

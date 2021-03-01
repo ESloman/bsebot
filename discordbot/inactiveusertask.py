@@ -34,6 +34,15 @@ class BSEddiesInactiveUsers(commands.Cog):
             points_to_take -= addition
         return points_to_take
 
+    def __cull_user(self, user, total_culled_points, users_who_will_be_culled, now, user_obj):
+        points_to_cull = self.__calc_eddie_to_take(user)
+        users_who_will_be_culled.append((user["_id"], user_obj))
+        total_culled_points += points_to_cull
+        self.logger.info(f"{user_obj.display_name} will be deducted {points_to_cull} for inactivity.")
+        self.user_points.update({"_id": user["_id"]}, {"$set": {"last_cull_time": now}})
+
+        return total_culled_points
+
     @tasks.loop(hours=1)
     async def inactive_user_task(self):
         """
@@ -41,9 +50,9 @@ class BSEddiesInactiveUsers(commands.Cog):
         :return:
         """
         now = datetime.datetime.now()
-        two_weeks_ago = now - datetime.timedelta(days=14)
+        one_week_ago = now - datetime.timedelta(days=7)
+
         for guild_id in self.guilds:
-            guild_obj = self.bot.get_guild(guild_id)  # type: discord.Guild
 
             users_who_will_be_culled = []
             users_who_will_gain_points = []
@@ -66,30 +75,26 @@ class BSEddiesInactiveUsers(commands.Cog):
 
                 last_cull = user.get("last_cull_time")
 
-                if last_interaction > two_weeks_ago:
+                if last_interaction > one_week_ago:
                     # interacted recently
                     users_who_will_gain_points.append((user["_id"], user_obj))
                     continue
 
-                elif last_cull is not None and last_interaction < two_weeks_ago < last_cull:
-                    # haven't interacted in two weeks but we culled within the last two weeks
+                elif last_cull is not None and last_interaction < one_week_ago < last_cull:
+                    # haven't interacted in the last week but we already culled them more recently than that
                     continue
 
-                elif last_interaction < two_weeks_ago and last_cull is None:
-                    # in this siutation - the user has never been culled and last interacted more than two weeks ago
-                    points_to_cull = self.__calc_eddie_to_take(user)
-                    users_who_will_be_culled.append((user["_id"], user_obj))
-                    total_culled_points += points_to_cull
-                    self.logger.info(f"{user_obj.display_name} will be deducted {total_culled_points} for inactivity.")
-                    self.user_points.update({"_id": user["_id"]}, {"$set": {"last_cull_time": now}})
+                elif last_interaction < one_week_ago and last_cull is None:
+                    # user hasn't interacted in the last week and we've never culled them
+                    total_culled_points = self.__cull_user(
+                        user, total_culled_points, users_who_will_be_culled, now, user_obj
+                    )
 
-                elif last_interaction < two_weeks_ago and last_cull is not None and last_cull < two_weeks_ago:
-                    # in this situation - the user was culled two weeks ago and last interacted two weeks ago
-                    points_to_cull = self.__calc_eddie_to_take(user)
-                    users_who_will_be_culled.append((user["_id"], user_obj))
-                    total_culled_points += points_to_cull
-                    self.logger.info(f"{user_obj.display_name} will be deducted {total_culled_points} for inactivity.")
-                    self.user_points.update({"_id": user["_id"]}, {"$set": {"last_cull_time": now}})
+                elif last_interaction < one_week_ago and last_cull is not None and last_cull < one_week_ago:
+                    # user hasn't interacted in the last week and we culled them over a week ago
+                    total_culled_points = self.__cull_user(
+                        user, total_culled_points, users_who_will_be_culled, now, user_obj
+                    )
                 else:
                     continue
 
@@ -108,9 +113,13 @@ class BSEddiesInactiveUsers(commands.Cog):
 
             for lucky_user in users_who_will_gain_points:
                 user_obj = lucky_user[1]  # type: discord.User
-                # self.user_points.increment_points(user_obj.id, BSE_SERVER_ID, points_each)
+                self.user_points.increment_points(user_obj.id, BSE_SERVER_ID, points_each)
                 if user_obj.id == CREATOR:
-                    await user_obj.send(content=message)
+
+                    try:
+                        await user_obj.send(content=message)
+                    except discord.Forbidden:
+                        pass
 
     @inactive_user_task.before_loop
     async def before_king_checker(self):

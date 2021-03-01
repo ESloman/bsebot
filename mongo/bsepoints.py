@@ -30,6 +30,19 @@ class UserPoints(BestSummerEverPointsDB):
         super().__init__()
         self._vault = interface.get_collection(self.database, "userpoints")
 
+    def __check_highest_eddie_count(self, user_id: int, guild_id: int):
+        """
+        Internal function for making sure the user always has the high score set correctly
+        :param user_id:
+        :param guild_id:
+        :return:
+        """
+        ret = self.query(
+            {"uid": user_id, "guild_id": guild_id}, projection={"_id": True, "high_score": True, "points": True}
+        )[0]
+        if ret["points"] > ret.get("high_score", 0):
+            self.update({"_id": ret["_id"]}, {"$set": {"high_score": ret["points"]}})
+
     def find_user(self, user_id: int, guild_id: int, projection=None) -> Union[dict, None]:
         """
         Looks up a user in the collection.
@@ -85,7 +98,9 @@ class UserPoints(BestSummerEverPointsDB):
         :param points: int - points to set the user to
         :return: UpdateResults object
         """
-        return self.update({"uid": user_id, "guild_id": guild_id}, {"$set": {"points": points}})
+        ret = self.update({"uid": user_id, "guild_id": guild_id}, {"$set": {"points": points}})
+        self.__check_highest_eddie_count(user_id, guild_id)
+        return ret
 
     def set_pending_points(self, user_id: int, guild_id: int, points: int) -> UpdateResult:
         """
@@ -129,7 +144,10 @@ class UserPoints(BestSummerEverPointsDB):
         :param amount: int - amount to increase pending points by
         :return: UpdateResults object
         """
-        return self.update({"uid": user_id, "guild_id": guild_id}, {"$inc": {"points": amount}})
+        ret = self.update({"uid": user_id, "guild_id": guild_id}, {"$inc": {"points": amount}})
+        if amount > 0:
+            self.__check_highest_eddie_count(user_id, guild_id)
+        return ret
 
     def increment_daily_minimum(self, user_id: int, guild_id: int, amount: int) -> UpdateResult:
         """
@@ -193,6 +211,7 @@ class UserPoints(BestSummerEverPointsDB):
             "transaction_history": [],
             "daily_eddies": dailies,
             "king": False,
+            "high_score": 10
         }
         self.insert(user_doc)
 

@@ -1,4 +1,5 @@
 import datetime
+import math
 
 import discord
 from discord.ext import tasks, commands
@@ -21,7 +22,18 @@ class BSEddiesInactiveUsers(commands.Cog):
         """
         self.inactive_user_task.cancel()
 
-    @tasks.loop(minutes=2)
+    @staticmethod
+    def __calc_eddie_to_take(user):
+        current_points = user["points"]
+        points_to_take = math.floor(current_points / 2)
+        remaining = current_points - points_to_take
+
+        if remaining < 10:
+            addition = 10 - remaining
+            points_to_take -= addition
+        return points_to_take
+
+    @tasks.loop(hours=1)
     async def inactive_user_task(self):
         """
         Loop that makes sure the King is assigned correctly
@@ -35,7 +47,12 @@ class BSEddiesInactiveUsers(commands.Cog):
             all_users = self.user_points.query({"guild_id": guild_id})
             for user in all_users:
 
+                if user["points"] <= 10:
+                    # we don't care if the user has this many points
+                    continue
+
                 user_obj = self.bot.get_user(user['uid'])  # type: discord.User
+
                 interactions = [a for a in user["transaction_history"] if a["type"] in [2, 4, 9, 10]]
                 if not interactions:
                     last_interaction = now - datetime.timedelta(days=30)
@@ -57,14 +74,16 @@ class BSEddiesInactiveUsers(commands.Cog):
 
                 elif last_interaction < two_weeks_ago and last_cull is None:
                     # in this siutation - the user has never been culled and last interacted more than two weeks ago
+                    points_to_cull = self.__calc_eddie_to_take(user)
                     self.logger.info(f"{user['uid']} - {user_obj.display_name} hasn't interacted recently and has "
-                                     f"never been culled.")
+                                     f"never been culled. Culling {points_to_cull}")
                     self.user_points.update({"_id": user["_id"]}, {"$set": {"last_cull_time": now}})
 
                 elif last_interaction < two_weeks_ago and last_cull < two_weeks_ago:
                     # in this situation - the user was culled two weeks ago and last interacted two weeks ago
+                    points_to_cull = self.__calc_eddie_to_take(user)
                     self.logger.info(f"{user['uid']} - {user_obj.display_name} hasn't interacted recently and hasn't "
-                                     f"been culled in two weeks either.")
+                                     f"been culled in two weeks either. Culling {points_to_cull}")
                     self.user_points.update({"_id": user["_id"]}, {"$set": {"last_cull_time": now}})
 
     @inactive_user_task.before_loop

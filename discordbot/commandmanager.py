@@ -16,6 +16,7 @@ from discordbot.clienteventclasses import OnReadyEvent, OnReactionAdd, OnMessage
 from discordbot.eddiegainmessageclass import EddieGainMessager
 from discordbot.eddiekingtask import BSEddiesKing
 from discordbot.embedmanager import EmbedManager
+from discordbot.inactiveusertask import BSEddiesInactiveUsers
 from discordbot.loancollectiontask import BSEddiesLoanCollections
 from discordbot.slashcommandeventclasses import BSEddiesActive, BSEddiesGift, BSEddiesLeaderboard, BSEddiesView
 from discordbot.slashcommandeventclasses import BSEddiesCreateBet, BSEddiesCloseBet, BSEddiesPlaceEvent
@@ -106,6 +107,7 @@ class CommandManager(object):
         self.eddie_gain_message_task = EddieGainMessager(self.client, guilds, self.logger)
         self.eddie_king_task = BSEddiesKing(self.client, guilds, self.logger)
         self.loan_collections = BSEddiesLoanCollections(self.client, guilds, self.logger)
+        self.inactive_users = BSEddiesInactiveUsers(self.client, guilds, self.logger)
 
         # call the methods that register the events we're listening for
         self._register_client_events()

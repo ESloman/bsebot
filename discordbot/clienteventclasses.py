@@ -4,7 +4,7 @@ import discord
 from discordbot.baseeventclass import BaseEvent
 from discordbot.bot_enums import TransactionTypes
 from discordbot.constants import THE_BOYS_ROLE
-from discordbot.reactioneventclasses import BetReactionEvent, LeaderBoardReactionEvent
+from discordbot.reactioneventclasses import BetReactionEvent, LeaderBoardReactionEvent, RevolutionReactionEvent
 from mongo.bsepoints import UserInteractions
 
 
@@ -98,6 +98,7 @@ class OnReactionAdd(BaseEvent):
         super().__init__(client, guild_ids, logger, beta_mode=beta_mode)
         self.leadership_event = LeaderBoardReactionEvent(client, guild_ids, logger, beta_mode=beta_mode)
         self.bet_event = BetReactionEvent(client, guild_ids, logger, beta_mode=beta_mode)
+        self.revolution_event = RevolutionReactionEvent(client, guild_ids, logger, beta_mode=beta_mode)
 
     async def handle_reaction_event(
             self,
@@ -142,6 +143,10 @@ class OnReactionAdd(BaseEvent):
         if message.embeds and "Bet ID" in message.embeds[0].description:
             await self.bet_event.handle_bet_reaction_event(message, guild, channel, reaction_emoji, user)
             return
+
+        # handling reactions to REVOLUTIONS
+        if message.content and "REVOLUTION IS UPON US" in message.content and reaction_emoji == "🎟️":
+            await self.revolution_event.handle_revolution_reaction(message, guild, user)
 
 
 class OnMessage(BaseEvent):

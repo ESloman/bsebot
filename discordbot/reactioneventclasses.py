@@ -5,6 +5,7 @@ import discord
 
 from discordbot.bot_enums import TransactionTypes
 from discordbot.baseeventclass import BaseEvent
+from discordbot.constants import BSEDDIES_KING_ROLES
 
 
 class BaseReactionEvent(BaseEvent):
@@ -122,3 +123,92 @@ class BetReactionEvent(BaseEvent):
             )
 
         await message.remove_reaction(reaction_emoji, user)
+
+
+class RevolutionReactionEvent(BaseEvent):
+    """
+    Class for handling user reactions to revolution events
+    """
+
+    def __init__(self, client, guild_ids, logger, beta_mode=False):
+        super().__init__(client, guild_ids, logger, beta_mode=beta_mode)
+
+    @staticmethod
+    async def _send_message(user: discord.User, message):
+        """
+        Static method for sending a user a DM. We need to do this a lot in this class so it makes
+        sense to have a dedicated method.
+        :param user:
+        :param message:
+        :return:
+        """
+        if not user.dm_channel:
+            await user.create_dm()
+        try:
+            await user.send(content=message)
+        except discord.errors.Forbidden:
+            pass
+
+    async def handle_revolution_reaction(self, message: discord.Message, guild: discord.Guild, user: discord.User):
+        """
+        Function for handling revolution reaction. Basically, a user is buying a 'ticket' here.
+
+        We do some basic checking. The user must:
+            - be buying a ticket for a non-expired event
+            - not be the king
+            - have enough eddies
+            - not have already bought a ticket
+
+        If the user passes all that - we buy them a ticket.
+
+        :param message:
+        :param guild:
+        :param user:
+        :return:
+        """
+        event_id = re.findall(r"(?<=\*\*Event ID\*\*: `)\d\d\d", message.content)[0]
+        event = self.revolutions.get_event(guild.id, event_id)
+
+        if not event["open"]:
+            await self._send_message(user, "Unfortunately, this event has expired and you can no longer buy tickets.")
+            await message.remove_reaction("🎟️", user)
+            return
+
+        now = datetime.datetime.now()
+
+        if event["expired"] < now:
+            await self._send_message(user, "Unfortunately, this event has expired and you can no longer buy tickets.")
+            await message.remove_reaction("🎟️", user)
+            return
+
+        our_user = self.user_points.find_user(user.id, guild.id, {"points": True, "king": True})
+
+        if our_user.get("king", False):
+            await self._send_message(user, "Unfortunately, you are the KING and cannot buy tickets for this event.")
+            await message.remove_reaction("🎟️", user)
+            return
+
+        if our_user["points"] < event["ticket_cost"]:
+            await self._send_message(user, "Unfortunately, you don't have enough eddies to buy a ticket.")
+            await message.remove_reaction("🎟️", user)
+            return
+
+        if user.id in event["ticket_buyers"]:
+            await self._send_message(user, "Unfortunately, you have already bought a ticket for this event.")
+            await message.remove_reaction("🎟️", user)
+            return
+
+        self.revolutions.increment_chance(event_id, guild.id, 5)
+        self.revolutions.increment_eddies_total(event_id, guild.id, event["ticket_cost"])
+        self.revolutions.add_user_to_buyers(event_id, guild.id, user.id)
+        # self.user_points.decrement_points(user.id, guild.id, event["ticket_cost"])
+
+        new_event = self.revolutions.get_event(guild.id, event_id)
+
+        king = self.user_points.get_current_king(guild.id)
+
+        king_user = await self.client.fetch_user(king["uid"])  # type: discord.User
+        role = guild.get_role(BSEDDIES_KING_ROLES[guild.id])
+
+        edited_message = self.embed_manager.get_revolution_message(king_user, role, new_event)
+        await message.edit(content=edited_message)

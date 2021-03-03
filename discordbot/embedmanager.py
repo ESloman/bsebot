@@ -4,6 +4,7 @@ from typing import Union
 import discord
 import inflect
 
+from discordbot.constants import BSEDDIES_KING_ROLES
 from mongo.bsepoints import UserPoints
 
 
@@ -84,5 +85,35 @@ class EmbedManager(object):
 
         if number < 6:
             message += "\n\n :arrow_forward: for longer list"
+
+        return message
+
+    @staticmethod
+    def get_revolution_message(king_user: discord.User, role: discord.Role, event: dict):
+        """
+        Method for creating a 'Revolution' message
+
+        :param king_user:
+        :param role:
+        :param event:
+        :return:
+        """
+
+        message = (
+            f"**REVOLUTION IS UPON US**\n\n"
+            f"Yet again, we must try to overthrow our {role.mention}. {king_user.mention} has ruled tyranically for "
+            f"far too long and we are now offered a chance to take their BSEddies and knock him down a peg or two.\n\n"
+            f""
+            f"To do so, we must do it in an orderly fashion. If you would like to participate, please buy a ticket "
+            f"(by reacting appropriately). Each ticket bought will increase our success rate. "
+            f"_**If we are successful**_, the {role.mention}, will have their BSEddies cut in half. "
+            f"These eddies will be re-distributed amongst those who bought tickets. **_If we fail_**, then the eddies"
+            f" spent on buying tickets will be given to {role.mention}.\n\n"
+            f"**Event ID**: `{event['event_id']}`\n"
+            f"**Tickets bought**: `{len(event['ticket_buyers'])}`\n"
+            f"**Success rate**: `{event['chance']}%`\n"
+            f"**Ticket price**: `{event['ticket_cost']}`\n"
+            f"**Event time**: `{event['expired'].strftime('%d %b %y %H:%M:%S')}`"
+        )
 
         return message

@@ -18,6 +18,7 @@ from discordbot.eddiekingtask import BSEddiesKing
 from discordbot.embedmanager import EmbedManager
 from discordbot.inactiveusertask import BSEddiesInactiveUsers
 from discordbot.loancollectiontask import BSEddiesLoanCollections
+from discordbot.revolutiontask import BSEddiesRevolutionTask
 from discordbot.slashcommandeventclasses import BSEddiesActive, BSEddiesGift, BSEddiesLeaderboard, BSEddiesView
 from discordbot.slashcommandeventclasses import BSEddiesCreateBet, BSEddiesCloseBet, BSEddiesPlaceEvent
 from discordbot.slashcommandeventclasses import BSEddiesPending, BSEddiesTransactionHistory, BSEddiesNotifcationToggle
@@ -108,6 +109,7 @@ class CommandManager(object):
         self.eddie_king_task = BSEddiesKing(self.client, guilds, self.logger)
         self.loan_collections = BSEddiesLoanCollections(self.client, guilds, self.logger)
         self.inactive_users = BSEddiesInactiveUsers(self.client, guilds, self.logger)
+        self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger)
 
         # call the methods that register the events we're listening for
         self._register_client_events()

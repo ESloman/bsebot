@@ -4,6 +4,7 @@ import discord
 
 from discordbot.embedmanager import EmbedManager
 from mongo.bsepoints import UserBets, UserLoans, UserPoints
+from mongo.bseticketedevents import RevolutionEvent
 
 
 class BaseEvent(object):
@@ -27,6 +28,7 @@ class BaseEvent(object):
         self.user_bets = UserBets()
         self.user_points = UserPoints()
         self.user_loans = UserLoans()
+        self.revolutions = RevolutionEvent()
         self.client = client
         self.guild_ids = guild_ids
         self.beta_mode = beta_mode

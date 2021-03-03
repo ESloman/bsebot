@@ -69,7 +69,7 @@ class BSEddiesRevolutionTask(commands.Cog):
         message = self.embed_manager.get_revolution_message(king_user, role, event)
         message_obj = await channel.send(content=message)  # type: discord.Message
         self.revolutions.update(
-            {"_id": event["_id"]}, {"$set": {"message_id": message_obj.id, "channel_id": message_obj.guild.id}}
+            {"_id": event["_id"]}, {"$set": {"message_id": message_obj.id, "channel_id": message_obj.channel.id}}
         )
 
         await message_obj.add_reaction("🎟️")

@@ -113,8 +113,8 @@ class CommandManager(object):
         self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger)
 
         # call the methods that register the events we're listening for
-        # self._register_client_events()
-        # self._register_slash_commands(guilds)
+        self._register_client_events()
+        self._register_slash_commands(guilds)
 
     # noinspection PyProtectedMember
     def __get_cached_messages_list(self) -> list:

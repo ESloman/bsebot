@@ -75,8 +75,7 @@ class RevolutionEvent(TicketedEvent):
         :return:
         """
 
-        # event_id = self.__get_new_id(guild_id)
-        event_id = "000"
+        event_id = self.__get_new_id(guild_id)
 
         event_doc = {
             "type": "revolution",

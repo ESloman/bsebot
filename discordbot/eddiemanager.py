@@ -126,7 +126,7 @@ class BSEddiesManager(object):
             count = Counter(message_types)
             eddies_gained = self._calc_eddies(count, minimum)
 
-            eddies_gained = math.ceil(eddies_gained)
+            eddies_gained = math.floor(eddies_gained)
             self.user_points.increment_points(user, guild_id, eddies_gained)
             eddie_gain_dict[user] = eddies_gained
             self.user_points.append_to_transaction_history(

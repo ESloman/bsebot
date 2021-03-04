@@ -183,7 +183,7 @@ class BSEddiesActive(BSEddies):
 
             if (len(message) + 400) > 2000 and bet != bets[-1]:
                 await ctx.send(content=message)
-                message = "Here are all the active bets:\n"
+                message = ""
 
         if len(bets) == 0:
             message = "There are no active bets :("
@@ -231,7 +231,7 @@ class BSEddiesPending(BSEddies):
 
             if (len(message) + 400) > 2000 and bet != bets[-1]:
                 await ctx.send(content=message, hidden=True)
-                message = "Here are all your pending bets:\n"
+                message = ""
 
         if len(bets) == 0:
             message = "You have no pending bets :("

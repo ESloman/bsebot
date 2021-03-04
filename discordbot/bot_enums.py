@@ -24,6 +24,9 @@ class TransactionTypes(IntEnum):
     ADMIN_TAKE = 13
     POINT_ROT_LOSS = 14
     POINT_ROT_GAIN = 15
+    REV_TICKET_BUY = 16
+    REV_TICKET_WIN = 17
+    REV_TICKET_KING_WIN = 18
     OVERRIDE = 99
 
 

@@ -64,7 +64,7 @@ class BetManager(object):
         # assign winning points to the users who got the answer right
         for better in [b for b in ret["betters"] if ret["betters"][b]["emoji"] == emoji]:
             points_bet = ret["betters"][better]["points"]
-            points_won = math.floor(((m * points_bet) + c) * points_bet)
+            points_won = math.ceil(((m * points_bet) + c) * points_bet)
             ret_dict["winners"][better] = points_won
             self.user_points.increment_points(int(better), guild_id, points_won)
             # add to transaction history

@@ -142,7 +142,9 @@ class BSEddiesInactiveUsers(commands.Cog):
             points_each = math.floor(total_culled_points / len(users_who_will_gain_points))
             self.logger.debug(f"Each user ({len(users_who_will_gain_points)}) will gain {points_each}")
 
-            message = (f"{', '.join([f'**{u[1].display_name}**' for u in users_who_will_be_culled])} have all lost a "
+            prt = "has" if len(users_who_will_gain_points) == 1 else "have all"
+
+            message = (f"{', '.join([f'**{u[1].display_name}**' for u in users_who_will_be_culled])} {prt} lost a "
                        f"share of their eddies due to inactivity. This share has been redistributed amongst the active "
                        f"users. Because of this - you have gained `{points_each}`! Happy betting.")
 

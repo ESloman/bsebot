@@ -247,15 +247,6 @@ class CommandManager(object):
         :return: None
         """
 
-        @self.slash.slash(name="ping", description="Check latency between discord and server", guild_ids=guilds)
-        async def ping(ctx: discord_slash.context.SlashContext) -> None:
-            """
-            Just a simple ping between discord and the server. More of a test method.
-            :param ctx: context of the slash command
-            :return: None
-            """
-            await ctx.send(content=f"Pong! ({self.client.latency * 1000}ms)")
-
         @self.slash.subcommand(
             base="bseddies",
             base_description="View your BSEddies, create bets and resolve bets",
@@ -276,12 +267,13 @@ class CommandManager(object):
             name="leaderboard",
             description="View the BSEddie leaderboard.",
             guild_ids=guilds)
-        async def leaderboard(ctx) -> None:
+        async def leaderboard(ctx: discord_slash.context.SlashContext) -> None:
             """
             Slash command that allows the user to see the BSEddies leaderboard.
             :param ctx:
             :return:
             """
+            await ctx.respond(eat=True)
             await self.bseddies_leaderboard.leaderboard(ctx)
 
         @self.slash.subcommand(
@@ -290,12 +282,13 @@ class CommandManager(object):
             name="highscores",
             description="View the BSEddie High Scores.",
             guild_ids=guilds)
-        async def high_scores(ctx) -> None:
+        async def high_scores(ctx: discord_slash.context.SlashContext) -> None:
             """
             Slash command that allows the user to see the BSEddies high scores.
             :param ctx:
             :return:
             """
+            await ctx.respond(eat=True)
             await self.bseddies_high_score.highscore(ctx)
 
         @self.slash.subcommand(
@@ -310,6 +303,7 @@ class CommandManager(object):
             :param ctx:
             :return:
             """
+            await ctx.respond(eat=True)
             await self.bseddies_active.active(ctx)
 
         @self.slash.subcommand(
@@ -352,6 +346,7 @@ class CommandManager(object):
             :param full:
             :return:
             """
+            await ctx.respond(eat=True)
             await self.bseddies_transactions.transaction_history(ctx, full)
 
         @self.slash.subcommand(
@@ -498,6 +493,7 @@ class CommandManager(object):
             :param timeout:
             :return:
             """
+            await ctx.respond(eat=True)
             await self.bseddies_create.handle_bet_creation(
                 ctx, bet_title,
                 outcome_one, outcome_two, outcome_three, outcome_four, outcome_five, outcome_six,
@@ -553,6 +549,7 @@ class CommandManager(object):
             :param emoji:
             :return:
             """
+            await ctx.respond(eat=True)
             await self.bseddies_place.place_bet(ctx, bet_id, amount, emoji)
 
         @self.slash.subcommand(
@@ -592,6 +589,7 @@ class CommandManager(object):
             :param emoji:
             :return:
             """
+            await ctx.respond(eat=True)
             await self.bseddies_close.close_bet(ctx, bet_id, emoji)
 
         @self.slash.subcommand(
@@ -683,6 +681,7 @@ class CommandManager(object):
             :param scenario_type:
             :return:
             """
+            await ctx.respond(eat=True)
             await self.bseddies_autogen.generate_bets(ctx, scenario_type)
 
         @self.slash.subcommand(

@@ -5,6 +5,7 @@ from discordbot.baseeventclass import BaseEvent
 from discordbot.bot_enums import TransactionTypes
 from discordbot.constants import THE_BOYS_ROLE
 from discordbot.reactioneventclasses import BetReactionEvent, LeaderBoardReactionEvent, RevolutionReactionEvent
+from discordbot.reactioneventclasses import HighScoreReactionEvent
 from mongo.bsepoints import UserInteractions
 
 
@@ -97,6 +98,7 @@ class OnReactionAdd(BaseEvent):
     def __init__(self, client, guild_ids, logger, beta_mode=False):
         super().__init__(client, guild_ids, logger, beta_mode=beta_mode)
         self.leadership_event = LeaderBoardReactionEvent(client, guild_ids, logger, beta_mode=beta_mode)
+        self.high_score_event = HighScoreReactionEvent(client, guild_ids, logger, beta_mode=beta_mode)
         self.bet_event = BetReactionEvent(client, guild_ids, logger, beta_mode=beta_mode)
         self.revolution_event = RevolutionReactionEvent(client, guild_ids, logger, beta_mode=beta_mode)
 
@@ -137,6 +139,11 @@ class OnReactionAdd(BaseEvent):
         # handling leaderboard messages
         if message.content and "BSEddies Leaderboard" in message.content and reaction_emoji == u"▶️":
             await self.leadership_event.handle_leaderboard_reaction(message, guild)
+            return
+
+        # handle high score messages
+        if message.content and "BSEddies High Scores" in message.content and reaction_emoji == u"▶️":
+            await self.high_score_event.handle_highscore_reaction(message, guild)
             return
 
         # handling reactions to BETS

@@ -40,6 +40,29 @@ class LeaderBoardReactionEvent(BaseEvent):
         return
 
 
+class HighScoreReactionEvent(BaseEvent):
+    """
+    Class for handling user reactions to high score boards
+    """
+    def __init__(self, client, guild_ids, logger, beta_mode=False):
+        super().__init__(client, guild_ids, logger, beta_mode=beta_mode)
+
+    async def handle_highscore_reaction(self, message: discord.Message, guild: discord.Guild) -> None:
+        """
+        Here we do a basic check to make sure that a user is reacting to the message - if so, we update the high score.
+
+        :param message:
+        :param guild:
+        :return:
+        """
+        if not message.author.bot:
+            return
+
+        content = self.embed_manager.get_highscore_embed(guild, None)
+        await message.edit(content=content)
+        return
+
+
 class BetReactionEvent(BaseEvent):
     """
     Class for handling user reactions to bets

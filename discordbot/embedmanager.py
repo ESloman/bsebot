@@ -88,6 +88,37 @@ class EmbedManager(object):
 
         return message
 
+    def get_highscore_embed(self, guild: discord.Guild, number: Union[int, None]):
+        """
+        Return a str that will be the leaderboard table
+        :param guild:
+        :param number:
+        :return:
+        """
+        users = self.user_points.get_all_users_for_guild(guild.id)
+
+        users = sorted(users, key=lambda x: x.get("high_score", 0), reverse=True)
+
+        if number is None:
+            number = len(users)
+        else:
+            number = number if number < len(users) else len(users)
+
+        message = (
+            "**BSEddies High Scores**\n"
+            f"This is correct as of: "
+            f"{datetime.datetime.now().strftime('%d %b %y %H:%M:%S')}\n"
+        )
+
+        for user in users[:number]:
+            name = guild.get_member(user["uid"]).name
+            message += f"\n**{users.index(user) + 1})**  {name}  :  {user.get('high_score', 0)}"
+
+        if number < 6:
+            message += "\n\n :arrow_forward: for longer list"
+
+        return message
+
     @staticmethod
     def get_revolution_message(king_user: discord.User, role: discord.Role, event: dict):
         """

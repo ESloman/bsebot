@@ -102,7 +102,7 @@ class BSEddiesInactiveUsers(commands.Cog):
 
                 user_obj = self.bot.get_user(user['uid'])  # type: discord.User
 
-                interactions = [a for a in user["transaction_history"] if a["type"] in [2, 4, 9, 10]]
+                interactions = [a for a in user["transaction_history"] if a["type"] not in [1, 6, 14]]
                 if not interactions:
                     last_interaction = now - datetime.timedelta(days=30)
                 else:
@@ -134,10 +134,10 @@ class BSEddiesInactiveUsers(commands.Cog):
                     continue
 
             if total_culled_points == 0:
-                return
+                continue
 
             if len(users_who_will_gain_points) == 0:
-                return
+                continue
 
             points_each = math.floor(total_culled_points / len(users_who_will_gain_points))
             self.logger.debug(f"Each user ({len(users_who_will_gain_points)}) will gain {points_each}")

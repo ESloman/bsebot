@@ -270,9 +270,7 @@ class CommandManager(object):
             """
             await self.bseddies_view.view(ctx)
 
-        @self.slash.subcommand(
-            base="bseddies",
-            base_description="View your BSEddies, create bets and resolve bets",
+        @self.slash.slash(
             name="leaderboard",
             description="View the BSEddie leaderboard.",
             guild_ids=guilds)

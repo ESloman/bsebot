@@ -201,10 +201,19 @@ class RevolutionReactionEvent(BaseEvent):
         self.revolutions.increment_chance(event_id, guild.id, 5)
         self.revolutions.increment_eddies_total(event_id, guild.id, event["ticket_cost"])
         self.revolutions.add_user_to_buyers(event_id, guild.id, user.id)
-        # self.user_points.decrement_points(user.id, guild.id, event["ticket_cost"])
+        self.user_points.decrement_points(user.id, guild.id, event["ticket_cost"])
+
+        self.user_points.append_to_transaction_history(
+            user.id, guild.id,
+            {
+                "type": TransactionTypes.REV_TICKET_BUY,
+                "amount": event["ticket_cost"] * -1,
+                "event_id": event["event_id"],
+                "timestamp": datetime.datetime.now(),
+            }
+        )
 
         new_event = self.revolutions.get_event(guild.id, event_id)
-
         king = self.user_points.get_current_king(guild.id)
 
         king_user = await self.client.fetch_user(king["uid"])  # type: discord.User
@@ -212,3 +221,4 @@ class RevolutionReactionEvent(BaseEvent):
 
         edited_message = self.embed_manager.get_revolution_message(king_user, role, new_event)
         await message.edit(content=edited_message)
+        await self._send_message(user, "Congrats - you bought a ticket! 🎟")

@@ -5,7 +5,8 @@ import random
 import discord
 from discord.ext import tasks, commands
 
-from discordbot.constants import BSEDDIES_KING_ROLES
+from discordbot.bot_enums import TransactionTypes
+from discordbot.constants import BSEDDIES_KING_ROLES, BSEDDIES_REVOLUTION_CHANNEL
 from discordbot.embedmanager import EmbedManager
 from mongo.bsepoints import UserPoints
 from mongo.bseticketedevents import RevolutionEvent
@@ -28,7 +29,7 @@ class BSEddiesRevolutionTask(commands.Cog):
         """
         self.revolution.cancel()
 
-    @tasks.loop(seconds=20)
+    @tasks.loop(minutes=5)
     async def revolution(self):
         """
         Constantly checks to make sure that all events have been closed properly or raised correctly
@@ -64,7 +65,7 @@ class BSEddiesRevolutionTask(commands.Cog):
         guild_obj = await self.bot.fetch_guild(guild_id)  # type: discord.Guild
         role = guild_obj.get_role(BSEDDIES_KING_ROLES[guild_id])  # type: discord.Role
         channels = await guild_obj.fetch_channels()
-        channel = [c for c in channels if c.id == 814087061619212299][0]
+        channel = [c for c in channels if c.id == BSEDDIES_REVOLUTION_CHANNEL][0]
 
         message = self.embed_manager.get_revolution_message(king_user, role, event)
         message_obj = await channel.send(content=message)  # type: discord.Message
@@ -105,11 +106,25 @@ class BSEddiesRevolutionTask(commands.Cog):
         success = (random.random() * 100) < chance
 
         points_to_lose = 0
+
         if not success:
             # revolution FAILED
             eddies = event["eddies_spent"]
             message = (f"Sadly, our revolution has failed. THE KING LIVES :crown: {king_user.mention} will gain "
                        f"an additional `{eddies}` eddies. Better luck next week!")
+
+            self.user_points.increment_points(king_id, guild_id, eddies)
+            self.user_points.append_to_transaction_history(
+                king_id, guild_id,
+                {
+                    "type": TransactionTypes.REV_TICKET_KING_WIN,
+                    "amount": eddies,
+                    "event_id": event["event_id"],
+                    "timestamp": datetime.datetime.now(),
+                    "comment": "User survived a REVOLUTION",
+                }
+            )
+
             await channel.send(content=message)
 
         else:
@@ -121,7 +136,22 @@ class BSEddiesRevolutionTask(commands.Cog):
             message = (f"SUCCESS! THE KING IS DEAD! We have successfully taken eddies away from the KING. "
                        f"{king_user.mention} will lose **{points_to_lose}** and each ticker holder will gain "
                        f"`{points_each}`.")
+
+            for user_id in ticket_buyers:
+                self.user_points.increment_points(user_id, guild_id, points_each)
+                self.user_points.append_to_transaction_history(
+                    user_id, guild_id,
+                    {
+                        "type": TransactionTypes.REV_TICKET_WIN,
+                        "amount": points_each,
+                        "event_id": event["event_id"],
+                        "timestamp": datetime.datetime.now(),
+                        "comment": "User won a REVOLUTION",
+                    }
+                )
+
             await channel.send(content=message)
+
         self.revolutions.close_event(event["event_id"], guild_id, success, points_to_lose)
 
     @revolution.before_loop

@@ -181,6 +181,10 @@ class BSEddiesActive(BSEddies):
             pt = f"**{bets.index(bet) + 1})** [{bet['bet_id']} - `{add_text}`] _{bet['title']}_\n{link}\n\n"
             message += pt
 
+            if (len(message) + 400) > 2000 and bet != bets[-1]:
+                await ctx.send(content=message)
+                message = "Here are all the active bets:\n"
+
         if len(bets) == 0:
             message = "There are no active bets :("
 
@@ -224,6 +228,10 @@ class BSEddiesPending(BSEddies):
                   f"\nOutcome: {bet['betters'][str(ctx.author.id)]['emoji']}\n"
                   f"Points: **{bet['betters'][str(ctx.author.id)]['points']}**\n{link}\n\n")
             message += pt
+
+            if (len(message) + 400) > 2000 and bet != bets[-1]:
+                await ctx.send(content=message, hidden=True)
+                message = "Here are all your pending bets:\n"
 
         if len(bets) == 0:
             message = "You have no pending bets :("

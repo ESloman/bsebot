@@ -32,7 +32,7 @@ class BSEddiesInactiveUsers(commands.Cog):
         :return: int
         """
         current_points = user["points"]
-        points_to_take = math.floor(current_points / 2)
+        points_to_take = math.floor(current_points * 0.75)
         remaining = current_points - points_to_take
 
         if remaining < 10:

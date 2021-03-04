@@ -113,8 +113,8 @@ class CommandManager(object):
         self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger)
 
         # call the methods that register the events we're listening for
-        self._register_client_events()
-        self._register_slash_commands(guilds)
+        # self._register_client_events()
+        # self._register_slash_commands(guilds)
 
     # noinspection PyProtectedMember
     def __get_cached_messages_list(self) -> list:
@@ -283,20 +283,6 @@ class CommandManager(object):
             :return:
             """
             await self.bseddies_leaderboard.leaderboard(ctx)
-
-        @self.slash.subcommand(
-            base="bseddies",
-            base_description="View your BSEddies, create bets and resolve bets",
-            name="highscores",
-            description="View the BSEddie High Score leaderboard.",
-            guild_ids=guilds)
-        async def high_scores(ctx) -> None:
-            """
-            Slash command that allows the user to see the BSEddies High Score leaderboard.
-            :param ctx:
-            :return:
-            """
-            await self.bseddies_high_score.highscore(ctx)
 
         @self.slash.subcommand(
             base="bseddies",

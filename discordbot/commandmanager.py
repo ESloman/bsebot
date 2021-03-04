@@ -287,6 +287,20 @@ class CommandManager(object):
         @self.slash.subcommand(
             base="bseddies",
             base_description="View your BSEddies, create bets and resolve bets",
+            name="highscores",
+            description="View the BSEddie High Scores.",
+            guild_ids=guilds)
+        async def high_scores(ctx) -> None:
+            """
+            Slash command that allows the user to see the BSEddies high scores.
+            :param ctx:
+            :return:
+            """
+            await self.bseddies_high_score.highscore(ctx)
+
+        @self.slash.subcommand(
+            base="bseddies",
+            base_description="View your BSEddies, create bets and resolve bets",
             name="active",
             description="View all the active bets in the server.",
             guild_ids=guilds)

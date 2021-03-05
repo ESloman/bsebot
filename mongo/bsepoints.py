@@ -287,6 +287,42 @@ class UserPoints(BestSummerEverPointsDB):
         """
         self.update({"uid": user_id, "guild_id": guild_id}, {"$push": {"activity_history": activity}})
 
+    @staticmethod
+    def get_king_info(king_user: dict) -> dict:
+        """
+        Function for calculating king stats from a given user dictionary
+        :param king_user:
+        :return:
+        """
+        act_history = king_user.get("activity_history", [])
+        kingstuff = [a for a in act_history if a["type"] in [1, 2]]
+        gain = None
+        total_time = 0
+        times_king = 0
+        all_times = []
+        current_run = 0
+        for k in kingstuff:
+            if k["type"] == 1:
+                gain = k["timestamp"]
+                times_king += 1
+                if kingstuff.index(k) != (len(kingstuff) - 1):
+                    continue
+                else:
+                    now = datetime.datetime.now()
+                    t = (now - gain).total_seconds()
+                    all_times.append(t)
+                    total_time += t
+                    current_run = t
+                    continue
+
+            if gain is not None:
+                t = (k["timestamp"] - gain).total_seconds()
+                all_times.append(t)
+                total_time += t
+                gain = None
+
+        return {"times": times_king, "all_times": all_times, "total": total_time, "current": current_run}
+
 
 class UserBets(BestSummerEverPointsDB):
     """

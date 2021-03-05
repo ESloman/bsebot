@@ -1230,11 +1230,14 @@ class BSEddiesKing(BSEddies):
 
         role_id = BSEDDIES_KING_ROLES[guild_id]
         role = ctx.guild.get_role(role_id)
+        member = ctx.guild.get_member(ctx.author.id) # type: discord.Member
 
         message = (f"**King Info**\n"
-                   f"{ctx.author.mention} is our current {role.mention}. They've been King for "
+                   f"{member.mention} is our current {role.mention}. They've been King for "
                    f"{str(datetime.timedelta(seconds=data['current']))}.\n\n"
-                   f"The total amount of time they've spent as KING is `{data['total']}`\n"
-                   f"They've been KING {data['times']} times.\n"
-                   f"The longest they've been KING for is {str(datetime.timedelta(seconds=max(data['all_times'])))}")
-        await ctx.send(content=message, hidden=True)
+                   f"The total amount of time they've spent as KING is "
+                   f"`{str(datetime.timedelta(seconds=data['total']))}`\n"
+                   f"They've been {role.mention} **{data['times']}** times.\n"
+                   f"The longest they've been {role.mention} for is "
+                   f"{str(datetime.timedelta(seconds=max(data['all_times'])))}")
+        await ctx.send(content=message)

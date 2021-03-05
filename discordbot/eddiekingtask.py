@@ -73,7 +73,7 @@ class BSEddiesKing(commands.Cog):
                 self.logger.info(f"Adding a new king: {new.display_name}")
 
                 activity = {
-                    "type": ActivityTypes.KING_LOSS,
+                    "type": ActivityTypes.KING_GAIN,
                     "timestamp": datetime.datetime.now(),
                     "comment": f"Taking King from {prev_king_id}"
                 }

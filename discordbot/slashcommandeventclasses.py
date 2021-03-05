@@ -1220,7 +1220,12 @@ class BSEddiesKing(BSEddies):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
     async def king_data(self, ctx: discord_slash.context.SlashContext) -> None:
-        if not await self._handle_validation(ctx, admin=True):
+        """
+
+        :param ctx:
+        :return:
+        """
+        if not await self._handle_validation(ctx):
             return
 
         guild_id = ctx.guild.id

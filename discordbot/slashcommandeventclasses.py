@@ -1230,7 +1230,7 @@ class BSEddiesKing(BSEddies):
 
         role_id = BSEDDIES_KING_ROLES[guild_id]
         role = ctx.guild.get_role(role_id)
-        member = ctx.guild.get_member(ctx.author.id) # type: discord.Member
+        member = ctx.guild.get_member(king_user["uid"])  # type: discord.Member
 
         message = (f"**King Info**\n"
                    f"{member.mention} is our current {role.mention}. They've been King for "

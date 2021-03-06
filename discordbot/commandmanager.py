@@ -11,8 +11,9 @@ import discord_slash
 from discord_slash import SlashCommand
 from discord_slash.utils import manage_commands
 
+from apis.giphyapi import GiphyAPI
 from discordbot.betcloser import BetCloser
-from discordbot.clienteventclasses import OnReadyEvent, OnReactionAdd, OnMessage, OnMemberJoin
+from discordbot.clienteventclasses import OnReadyEvent, OnReactionAdd, OnMessage, OnMemberJoin, OnDirectMessage
 from discordbot.eddiegainmessageclass import EddieGainMessager
 from discordbot.eddiekingtask import BSEddiesKing
 from discordbot.embedmanager import EmbedManager
@@ -41,7 +42,8 @@ class CommandManager(object):
                  guilds: list,
                  logger: logging.Logger,
                  beta_mode: bool = False,
-                 debug_mode: bool = False):
+                 debug_mode: bool = False,
+                 giphy_token: str = None):
         """
         Constructor method. This does all the work in this class and no other methods need to be called.
 
@@ -67,6 +69,7 @@ class CommandManager(object):
         :param logger:  logger object for logging
         :param beta_mode: whether we're in beta mode or not
         :param debug_mode: whether we're in debug mode or not
+        :param giphy_token:
         """
 
         self.client = client
@@ -74,8 +77,11 @@ class CommandManager(object):
         self.beta_mode = beta_mode
         self.guilds = guilds
         self.logger = logger
+        self.giphy_token = giphy_token
 
         self.embeds = EmbedManager(self.logger)
+
+        self.giphyapi = GiphyAPI(self.giphy_token)
 
         # mongo interaction classes
         self.user_points = UserPoints()
@@ -86,6 +92,7 @@ class CommandManager(object):
         self.on_reaction_add = OnReactionAdd(client, guilds, self.logger, self.beta_mode)
         self.on_message = OnMessage(client, guilds, self.logger, self.beta_mode)
         self.on_member_join = OnMemberJoin(client, guilds, self.logger, self.beta_mode)
+        self.direct_message = OnDirectMessage(client, guilds, self.logger, self.giphyapi, self.beta_mode)
 
         # slash command classes
         self.bseddies_active = BSEddiesActive(client, guilds, self.logger, self.beta_mode)
@@ -230,6 +237,7 @@ class CommandManager(object):
                 # this means we've received a Direct message!
                 # we'll have to handle this differently
                 self.logger.debug(f"{message} - {message.content}")
+                await self.direct_message.dm_received(message)
                 return
 
             await self.on_message.message_received(message)

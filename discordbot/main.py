@@ -70,6 +70,7 @@ if __name__ == "__main__":
     TOKEN = dotenv.get_key(".env", "DISCORD_TOKEN")
     BETA_MODE = dotenv.get_key(".env", "BETA_MODE")
     DEBUG_MODE = dotenv.get_key(".env", "DEBUG_MODE")
+    GIPHY_TOKEN = dotenv.get_key(".env", "GIPHY_API_KEY")
 
     if TOKEN is None:
         exit(-1)
@@ -94,7 +95,7 @@ if __name__ == "__main__":
     intents = discord.Intents.all()
 
     cli = commands.Bot(command_prefix="!", intents=intents)
-    com = CommandManager(cli, IDS, logger, beta_mode=BETA_MODE, debug_mode=DEBUG_MODE)
+    com = CommandManager(cli, IDS, logger, beta_mode=BETA_MODE, debug_mode=DEBUG_MODE, giphy_token=GIPHY_TOKEN)
 
     user_bets = UserBets(IDS)
 

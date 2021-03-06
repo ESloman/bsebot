@@ -24,7 +24,7 @@ if __name__ == "__main__":
     revs.create_event(
         BSE_SERVER_ID,
         datetime.datetime.now(),
-        datetime.datetime.now() + datetime.timedelta(hours=3),
+        datetime.datetime.now() + datetime.timedelta(hours=3, minutes=30),
         ticket_cost,
         king_user["uid"],
         BSEDDIES_REVOLUTION_CHANNEL

@@ -63,6 +63,7 @@ class RevolutionEvent(TicketedEvent):
             expired: datetime.datetime,
             ticket_cost: int,
             king_id: int,
+            channel_id: int = None,
     ) -> dict:
         """
         Create event class. Puts an entry into the DB for future use.
@@ -72,6 +73,7 @@ class RevolutionEvent(TicketedEvent):
         :param expired:
         :param ticket_cost:
         :param king_id:
+        :param channel_id:
         :return:
         """
 
@@ -87,7 +89,7 @@ class RevolutionEvent(TicketedEvent):
             "ticket_buyers": [],
             "open": True,
             "message_id": None,
-            "channel_id": None,
+            "channel_id": channel_id,
             "guild_id": guild_id,
             "king": king_id,
             "points_distributed": 0,

@@ -65,7 +65,7 @@ class BSEddiesRevolutionTask(commands.Cog):
         guild_obj = await self.bot.fetch_guild(guild_id)  # type: discord.Guild
         role = guild_obj.get_role(BSEDDIES_KING_ROLES[guild_id])  # type: discord.Role
         channels = await guild_obj.fetch_channels()
-        channel = [c for c in channels if c.id == BSEDDIES_REVOLUTION_CHANNEL][0]
+        channel = [c for c in channels if c.id == event.get("channel_id", BSEDDIES_REVOLUTION_CHANNEL)][0]
 
         message = self.embed_manager.get_revolution_message(king_user, role, event)
         message_obj = await channel.send(content=message)  # type: discord.Message
@@ -103,7 +103,7 @@ class BSEddiesRevolutionTask(commands.Cog):
 
         king_user = await self.bot.fetch_user(king_id)
 
-        success = (random.random() * 100) < chance
+        success = (random.random() * 100) <= chance
 
         points_to_lose = 0
 

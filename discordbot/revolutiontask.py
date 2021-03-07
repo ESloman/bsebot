@@ -106,7 +106,7 @@ class BSEddiesRevolutionTask(commands.Cog):
         val = (random.random() * 100)
         success = val <= chance
 
-        self.logger.debug(f"Number was: {va} and chance was: {chance}")
+        self.logger.debug(f"Number was: {val} and chance was: {chance}")
         points_to_lose = 0
 
         if not success:

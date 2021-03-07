@@ -103,8 +103,10 @@ class BSEddiesRevolutionTask(commands.Cog):
 
         king_user = await self.bot.fetch_user(king_id)
 
-        success = (random.random() * 100) <= chance
+        val = (random.random() * 100)
+        success = val <= chance
 
+        self.logger.debug(f"Number was: {va} and chance was: {chance}")
         points_to_lose = 0
 
         if not success:

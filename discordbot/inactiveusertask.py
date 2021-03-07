@@ -85,7 +85,7 @@ class BSEddiesInactiveUsers(commands.Cog):
         self.logger.info("Beginning check for inactive users.")
 
         now = datetime.datetime.now()
-        one_week_ago = now - datetime.timedelta(days=7)
+        one_week_ago = now - datetime.timedelta(days=5)
 
         for guild_id in self.guilds:
 
@@ -102,7 +102,9 @@ class BSEddiesInactiveUsers(commands.Cog):
 
                 user_obj = self.bot.get_user(user['uid'])  # type: discord.User
 
-                interactions = [a for a in user["transaction_history"] if a["type"] not in [1, 6, 14]]
+                interactions = [
+                    a for a in user["transaction_history"] if a["type"] not in [1, 6, 7, 11, 13, 14, 17, 18, 99]
+                ]
                 if not interactions:
                     last_interaction = now - datetime.timedelta(days=30)
                 else:

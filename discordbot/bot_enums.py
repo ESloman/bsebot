@@ -27,6 +27,7 @@ class TransactionTypes(IntEnum):
     REV_TICKET_BUY = 16
     REV_TICKET_WIN = 17
     REV_TICKET_KING_WIN = 18
+    REV_TICKET_KING_LOSS = 19
     OVERRIDE = 99
 
 

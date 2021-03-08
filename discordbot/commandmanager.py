@@ -120,7 +120,7 @@ class CommandManager(object):
         self.eddie_king_task = BSEddiesKing(self.client, guilds, self.logger)
         self.loan_collections = BSEddiesLoanCollections(self.client, guilds, self.logger)
         self.inactive_users = BSEddiesInactiveUsers(self.client, guilds, self.logger)
-        self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger)
+        self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger, self.giphy_token)
 
         # call the methods that register the events we're listening for
         self._register_client_events()

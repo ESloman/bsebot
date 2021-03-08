@@ -5,6 +5,7 @@ import random
 import discord
 from discord.ext import tasks, commands
 
+from apis.giphyapi import GiphyAPI
 from discordbot.bot_enums import TransactionTypes
 from discordbot.constants import BSEDDIES_KING_ROLES, BSEDDIES_REVOLUTION_CHANNEL
 from discordbot.embedmanager import EmbedManager
@@ -13,13 +14,14 @@ from mongo.bseticketedevents import RevolutionEvent
 
 
 class BSEddiesRevolutionTask(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger):
+    def __init__(self, bot: discord.Client, guilds, logger, giphy_token):
         self.bot = bot
         self.user_points = UserPoints()
         self.revolutions = RevolutionEvent()
         self.embed_manager = EmbedManager(logger)
         self.logger = logger
         self.guilds = guilds
+        self.giphy_api = GiphyAPI(giphy_token)
         self.revolution.start()
 
     def cog_unload(self):
@@ -74,7 +76,8 @@ class BSEddiesRevolutionTask(commands.Cog):
         )
 
         await message_obj.add_reaction("🎟️")
-        await channel.send(content="https://media.giphy.com/media/4NiFoaN9ufCOKbbn2i/giphy.gif")
+        gif = await self.giphy_api.random_gif("revolution")
+        await channel.send(content=gif)
 
     async def handle_resolving_bet(self, guild_id: int, event: dict):
         """

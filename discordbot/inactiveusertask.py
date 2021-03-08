@@ -103,7 +103,7 @@ class BSEddiesInactiveUsers(commands.Cog):
                 user_obj = self.bot.get_user(user['uid'])  # type: discord.User
 
                 interactions = [
-                    a for a in user["transaction_history"] if a["type"] not in [1, 6, 7, 11, 13, 14, 15, 17, 18, 99]
+                    a for a in user["transaction_history"] if a["type"] not in [6, 11, 13, 14, 15, 17, 18, 99]
                 ]
                 if not interactions:
                     last_interaction = now - datetime.timedelta(days=30)

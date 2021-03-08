@@ -74,7 +74,7 @@ class BSEddiesInactiveUsers(commands.Cog):
 
         return total_culled_points
 
-    @tasks.loop(hours=8)
+    @tasks.loop(hours=2)
     async def inactive_user_task(self):
         """
         Task that makes sure inactive users don't get too high in the leaderboards. We half their points every week
@@ -103,7 +103,7 @@ class BSEddiesInactiveUsers(commands.Cog):
                 user_obj = self.bot.get_user(user['uid'])  # type: discord.User
 
                 interactions = [
-                    a for a in user["transaction_history"] if a["type"] not in [1, 6, 7, 11, 13, 14, 17, 18, 99]
+                    a for a in user["transaction_history"] if a["type"] not in [1, 6, 7, 11, 13, 14, 15, 17, 18, 99]
                 ]
                 if not interactions:
                     last_interaction = now - datetime.timedelta(days=30)

@@ -139,6 +139,18 @@ class BSEddiesRevolutionTask(commands.Cog):
                        f"{king_user.mention} will lose **{points_to_lose}** and each ticker holder will gain "
                        f"`{points_each}`.")
 
+            self.user_points.decrement_points(king_id, guild_id, points_to_lose)
+            self.user_points.append_to_transaction_history(
+                king_id, guild_id,
+                {
+                    "type": TransactionTypes.REV_TICKET_KING_LOSS,
+                    "amount": points_to_lose * -1,
+                    "event_id": event["event_id"],
+                    "timestamp": datetime.datetime.now(),
+                    "comment": "King lost a REVOLUTION",
+                }
+            )
+
             for user_id in ticket_buyers:
                 self.user_points.increment_points(user_id, guild_id, points_each)
                 self.user_points.append_to_transaction_history(

@@ -132,8 +132,9 @@ class EmbedManager(object):
 
         message = (
             f"**REVOLUTION IS UPON US**\n\n"
-            f"Yet again, we must try to overthrow our {role.mention}. {king_user.mention} has ruled tyranically for "
-            f"far too long and we are now offered a chance to take their BSEddies and knock him down a peg or two.\n\n"
+            f"@everyone - Yet again, we must try to overthrow our {role.mention}. {king_user.mention} has ruled "
+            f"tyranically for far too long and we are now offered a chance to take their BSEddies and knock him down "
+            f"a peg or two.\n\n"
             f""
             f"To do so, we must do it in an orderly fashion. If you would like to participate, please buy a ticket "
             f"(by reacting appropriately). Each ticket bought will increase our success rate. "

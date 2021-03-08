@@ -31,13 +31,19 @@ class BSEddiesRevolutionTask(commands.Cog):
         """
         self.revolution.cancel()
 
-    @tasks.loop(minutes=5)
+    @tasks.loop(hours=8)
     async def revolution(self):
         """
         Constantly checks to make sure that all events have been closed properly or raised correctly
         :return:
         """
         now = datetime.datetime.now()
+
+        if now.weekday() == 6 and self.revolution.hours == 8:
+            self.revolution.change_interval(minutes=30, hours=0)
+        elif now.weekday() != 6 and self.revolution.hours != 8:
+            self.revolution.change_interval(hours=8, minutes=0)
+
         for guild_id in self.guilds:
 
             open_events = self.revolutions.get_open_events(guild_id)
@@ -46,11 +52,48 @@ class BSEddiesRevolutionTask(commands.Cog):
                 message = event.get("message_id")
                 if message is None:
                     await self.create_event(guild_id, event)
+                    self.revolution.change_interval(minutes=5)
                     continue
 
                 if now > event["expired"]:
                     await self.handle_resolving_bet(guild_id, event)
+                    self.revolution.change_interval(minutes=30)
                     continue
+
+                if (event["expired"] - now).total_seconds() < 10800 and not event.get("three_hours"):
+                    await self.send_excited_gif(guild_id, event, "Three hours", "three_hours")
+
+                elif (event["expired"] - now).total_seconds() < 7200 and not event.get("two_hours"):
+                    await self.send_excited_gif(guild_id, event, "Two hours", "two_hours")
+
+                elif (event["expired"] - now).total_seconds() < 3600 and not event.get("one_hour"):
+                    await self.send_excited_gif(guild_id, event, "One hour", "one_hour")
+
+                elif (event["expired"] - now).total_seconds() < 1800 and not event.get("half_hour"):
+                    self.revolution.change_interval(minutes=1)
+                    await self.send_excited_gif(guild_id, event, "HALF AN HOUR", "half_hour")
+
+                elif (event["expired"] - now).total_seconds() < 900 and not event.get("quarter_hour"):
+                    await self.send_excited_gif(guild_id, event, "15 MINUTES", "quarter_hour")
+
+    async def send_excited_gif(self, guild_id: int, event: dict, hours_string: str, key: str):
+        """
+        Method for sending a countdown gif in regards to tickets and things
+        :param guild_id:
+        :param event:
+        :param hours_string:
+        :param key:
+        :return:
+        """
+        guild_obj = await self.bot.fetch_guild(guild_id)  # type: discord.Guild
+        channels = await guild_obj.fetch_channels()
+        channel = [c for c in channels if c.id == event.get("channel_id", BSEDDIES_REVOLUTION_CHANNEL)][0]
+        gif = await self.giphy_api.random_gif("celebrate")
+        await channel.send(
+            content=f"Just under **{hours_string.upper()}** to go now - remember to buy your tickets! 🎟️🎟️🎟️"
+        )
+        await channel.send(content=gif)
+        self.revolutions.update({"_id": event["_id"]}, {"$set": {key: True}})
 
     async def create_event(self, guild_id: int, event: dict):
         """
@@ -129,8 +172,7 @@ class BSEddiesRevolutionTask(commands.Cog):
                     "comment": "User survived a REVOLUTION",
                 }
             )
-
-            await channel.send(content=message)
+            gif = await self.giphy_api.random_gif("disappointed")
 
         else:
             king_dict = self.user_points.find_user(king_id, guild_id, projection={"points": True})
@@ -154,6 +196,8 @@ class BSEddiesRevolutionTask(commands.Cog):
                 }
             )
 
+            gif = await self.giphy_api.random_gif("celebrate")
+
             for user_id in ticket_buyers:
                 self.user_points.increment_points(user_id, guild_id, points_each)
                 self.user_points.append_to_transaction_history(
@@ -167,8 +211,8 @@ class BSEddiesRevolutionTask(commands.Cog):
                     }
                 )
 
-            await channel.send(content=message)
-
+        await channel.send(content=message)
+        await channel.send(content=gif)
         self.revolutions.close_event(event["event_id"], guild_id, success, points_to_lose)
 
     @revolution.before_loop

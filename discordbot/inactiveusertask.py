@@ -6,13 +6,14 @@ from discord.ext import tasks, commands
 
 from discordbot.bot_enums import TransactionTypes
 from discordbot.constants import BSE_SERVER_ID, CREATOR
-from mongo.bsepoints import UserPoints
+from mongo.bsepoints import UserPoints, UserBets
 
 
 class BSEddiesInactiveUsers(commands.Cog):
     def __init__(self, bot: discord.Client, guilds, logger):
         self.bot = bot
         self.user_points = UserPoints()
+        self.user_bets = UserBets()
         self.logger = logger
         self.guilds = guilds
         self.inactive_user_task.start()
@@ -98,6 +99,13 @@ class BSEddiesInactiveUsers(commands.Cog):
 
                 user_obj = self.bot.get_user(user['uid'])  # type: discord.User
 
+                pending_points = self.user_bets.get_user_pending_points(user["uid"], guild_id)
+
+                if pending_points > 0:
+                    time_limit = now - datetime.timedelta(days=10)
+                else:
+                    time_limit = one_week_ago
+
                 interactions = [
                     a for a in user["transaction_history"] if a["type"] not in [6, 11, 13, 14, 15, 17, 18, 99]
                 ]
@@ -108,7 +116,7 @@ class BSEddiesInactiveUsers(commands.Cog):
 
                 last_cull = user.get("last_cull_time")
 
-                if last_interaction > one_week_ago:
+                if last_interaction > time_limit:
                     # interacted recently
                     users_who_will_gain_points.append((user["_id"], user_obj))
                     continue
@@ -117,17 +125,17 @@ class BSEddiesInactiveUsers(commands.Cog):
                     # we don't care if the user has this many points
                     continue
 
-                elif last_cull is not None and last_interaction < one_week_ago < last_cull:
+                elif last_cull is not None and last_interaction < time_limit < last_cull:
                     # haven't interacted in the last week but we already culled them more recently than that
                     continue
 
-                elif last_interaction < one_week_ago and last_cull is None:
+                elif last_interaction < time_limit and last_cull is None:
                     # user hasn't interacted in the last week and we've never culled them
                     total_culled_points = self.__cull_user(
                         user, total_culled_points, users_who_will_be_culled, now, user_obj
                     )
 
-                elif last_interaction < one_week_ago and last_cull is not None and last_cull < one_week_ago:
+                elif last_interaction < time_limit and last_cull is not None and last_cull < time_limit:
                     # user hasn't interacted in the last week and we culled them over a week ago
                     total_culled_points = self.__cull_user(
                         user, total_culled_points, users_who_will_be_culled, now, user_obj

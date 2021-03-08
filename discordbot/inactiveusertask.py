@@ -96,10 +96,6 @@ class BSEddiesInactiveUsers(commands.Cog):
             all_users = self.user_points.query({"guild_id": guild_id})
             for user in all_users:
 
-                if user["points"] <= 10:
-                    # we don't care if the user has this many points
-                    continue
-
                 user_obj = self.bot.get_user(user['uid'])  # type: discord.User
 
                 interactions = [
@@ -115,6 +111,10 @@ class BSEddiesInactiveUsers(commands.Cog):
                 if last_interaction > one_week_ago:
                     # interacted recently
                     users_who_will_gain_points.append((user["_id"], user_obj))
+                    continue
+
+                elif user["points"] <= 10:
+                    # we don't care if the user has this many points
                     continue
 
                 elif last_cull is not None and last_interaction < one_week_ago < last_cull:
@@ -142,9 +142,13 @@ class BSEddiesInactiveUsers(commands.Cog):
                 continue
 
             points_each = math.floor(total_culled_points / len(users_who_will_gain_points))
+
+            if points_each == 0:
+                points_each = 1
+
             self.logger.debug(f"Each user ({len(users_who_will_gain_points)}) will gain {points_each}")
 
-            prt = "has" if len(users_who_will_gain_points) == 1 else "have all"
+            prt = "has" if len(users_who_will_be_culled) == 1 else "have all"
 
             message = (f"{', '.join([f'**{u[1].display_name}**' for u in users_who_will_be_culled])} {prt} lost a "
                        f"share of their eddies due to inactivity. This share has been redistributed amongst the active "

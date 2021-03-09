@@ -16,6 +16,7 @@ class BSEddiesInactiveUsers(commands.Cog):
         self.user_bets = UserBets()
         self.logger = logger
         self.guilds = guilds
+        self.safe_interactions = [2, 3, 4, 5, 8, 9, 10, 11, 12, 16, 17, 18, 19]
         self.inactive_user_task.start()
 
     def cog_unload(self):
@@ -107,7 +108,7 @@ class BSEddiesInactiveUsers(commands.Cog):
                     time_limit = one_week_ago
 
                 interactions = [
-                    a for a in user["transaction_history"] if a["type"] not in [6, 11, 13, 14, 15, 17, 18, 99]
+                    a for a in user["transaction_history"] if a["type"] not in [6, 11, 13, 14, 15, 99]
                 ]
                 if not interactions:
                     last_interaction = now - datetime.timedelta(days=30)
@@ -119,6 +120,31 @@ class BSEddiesInactiveUsers(commands.Cog):
                 if last_interaction > time_limit:
                     # interacted recently
                     users_who_will_gain_points.append((user["_id"], user_obj))
+
+                    # this is where we can do 24 hour warnings
+                    twenty_four_hour_warning = time_limit + datetime.timedelta(days=1)
+                    if last_interaction < twenty_four_hour_warning:
+                        if not user.get("cull_warning"):
+                            # OH UH
+                            message = (
+                                f"It looks like you haven't used any eddies in a while. If you don't use them in"
+                                f" the next **24** hours, your eddies will be culled and `75%` of your eddies "
+                                f"will be distributed amongst the other server members that are using eddies."
+                                f"\n\n"
+                                f"Valid interaction types: "
+                                f"{', '.join([f'`{TransactionTypes(n).name}`' for n in self.safe_interactions])}"
+                            )
+                            self.logger.info(f"Sending cull warning to {user['uid']}")
+                            self.user_points.update({"_id": user["_id"]}, {"$set": {"cull_warning": True}})
+                            if user.get("daily_eddies"):
+                                try:
+                                    await user_obj.send(content=message)
+                                except discord.Forbidden:
+                                    pass
+                    else:
+                        if user.get("cull_warning"):
+                            self.user_points.update({"_id": user["_id"]}, {"$set": {"cull_warning": False}})
+
                     continue
 
                 elif user["points"] <= 10:

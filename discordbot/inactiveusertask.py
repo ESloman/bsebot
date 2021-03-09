@@ -124,6 +124,10 @@ class BSEddiesInactiveUsers(commands.Cog):
                     # this is where we can do 24 hour warnings
                     twenty_four_hour_warning = time_limit + datetime.timedelta(days=1)
                     if last_interaction < twenty_four_hour_warning:
+
+                        if last_cull and time_limit < last_cull:
+                            continue 
+
                         if not user.get("cull_warning"):
                             # OH UH
                             message = (

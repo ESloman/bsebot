@@ -80,7 +80,10 @@ class EmbedManager(object):
         )
 
         for user in users[:number]:
-            name = guild.get_member(user["uid"]).name
+            try:
+                name = guild.get_member(user["uid"]).name
+            except AttributeError:
+                continue
             message += f"\n**{users.index(user) + 1})**  {name}  :  {user['points']}"
 
         if number < 6:

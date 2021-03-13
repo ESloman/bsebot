@@ -100,6 +100,9 @@ class BSEddiesInactiveUsers(commands.Cog):
 
                 user_obj = self.bot.get_user(user['uid'])  # type: discord.User
 
+                if user_obj is None:
+                    continue
+
                 pending_points = self.user_bets.get_user_pending_points(user["uid"], guild_id)
 
                 if pending_points > 0:

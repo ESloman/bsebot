@@ -15,7 +15,7 @@ from apis.giphyapi import GiphyAPI
 from discordbot.betcloser import BetCloser
 from discordbot.clienteventclasses import OnReadyEvent, OnReactionAdd, OnMessage, OnMemberJoin, OnDirectMessage
 from discordbot.eddiegainmessageclass import EddieGainMessager
-from discordbot.eddiekingtask import BSEddiesKing
+from discordbot.eddiekingtask import BSEddiesKingTask
 from discordbot.embedmanager import EmbedManager
 from discordbot.inactiveusertask import BSEddiesInactiveUsers
 from discordbot.loancollectiontask import BSEddiesLoanCollections
@@ -117,7 +117,7 @@ class CommandManager(object):
         # tasks
         self.bet_closer_task = BetCloser(self.client, guilds, self.logger)
         self.eddie_gain_message_task = EddieGainMessager(self.client, guilds, self.logger)
-        self.eddie_king_task = BSEddiesKing(self.client, guilds, self.logger)
+        self.eddie_king_task = BSEddiesKingTask(self.client, guilds, self.logger)
         self.loan_collections = BSEddiesLoanCollections(self.client, guilds, self.logger)
         self.inactive_users = BSEddiesInactiveUsers(self.client, guilds, self.logger)
         self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger, self.giphy_token)

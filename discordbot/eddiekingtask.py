@@ -8,7 +8,7 @@ from discordbot.constants import BSEDDIES_KING_ROLES
 from mongo.bsepoints import UserPoints
 
 
-class BSEddiesKing(commands.Cog):
+class BSEddiesKingTask(commands.Cog):
     def __init__(self, bot: discord.Client, guilds, logger):
         self.bot = bot
         self.user_points = UserPoints()
@@ -30,6 +30,7 @@ class BSEddiesKing(commands.Cog):
         :return:
         """
         for guild_id in self.guilds:
+            self.logger.info(f"Beginning king check for {guild_id}")
             guild_obj = self.bot.get_guild(guild_id)  # type: discord.Guild
             role_id = BSEDDIES_KING_ROLES[guild_id]
 

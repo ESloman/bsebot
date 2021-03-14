@@ -62,7 +62,7 @@ class BSEddiesManager(object):
         end = yesterday.replace(hour=23, minute=59, second=59)
         return start, end
 
-    def _calc_eddies(self, counter, start=5):
+    def _calc_eddies(self, counter, start=3):
         """
         Quick function to loop over the message types and work out an amount of BSEddies the user will gain
         :param counter:
@@ -100,7 +100,7 @@ class BSEddiesManager(object):
         for user in user_ids:
             self.logger.info(f"processing {user}")
 
-            minimum = user_dict[user].get("daily_minimum", 5)
+            minimum = user_dict[user].get("daily_minimum", 3)
 
             # calculate points here
             user_results = [r for r in results if r["user_id"] == user]
@@ -118,9 +118,9 @@ class BSEddiesManager(object):
                 if minimum == 0:
                     continue
             else:
-                if minimum != 5:
-                    minimum = 5
-                    self.user_points.set_daily_minimum(user, guild_id, 5)
+                if minimum != 3:
+                    minimum = 3
+                    self.user_points.set_daily_minimum(user, guild_id, 3)
 
             message_types = [r["message_type"] for r in user_results]
             count = Counter(message_types)

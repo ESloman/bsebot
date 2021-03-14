@@ -31,7 +31,7 @@ class BSEddiesRevolutionTask(commands.Cog):
         """
         self.revolution.cancel()
 
-    @tasks.loop(hours=8)
+    @tasks.loop(minutes=5)
     async def revolution(self):
         """
         Constantly checks to make sure that all events have been closed properly or raised correctly

@@ -221,7 +221,8 @@ class RevolutionReactionEvent(BaseEvent):
             await message.remove_reaction("🎟️", user)
             return
 
-        self.revolutions.increment_chance(event_id, guild.id, 5)
+        if event["chance"] < 75:
+            self.revolutions.increment_chance(event_id, guild.id, 5)
         self.revolutions.increment_eddies_total(event_id, guild.id, event["ticket_cost"])
         self.revolutions.add_user_to_buyers(event_id, guild.id, user.id)
         self.user_points.decrement_points(user.id, guild.id, event["ticket_cost"])

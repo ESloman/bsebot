@@ -5,7 +5,7 @@ import discord
 from discord.ext import tasks, commands
 
 from discordbot.bot_enums import TransactionTypes
-from discordbot.constants import BSE_SERVER_ID, CREATOR
+from discordbot.constants import BSE_SERVER_ID
 from mongo.bsepoints import UserPoints, UserBets
 
 
@@ -60,7 +60,7 @@ class BSEddiesInactiveUsers(commands.Cog):
         users_who_will_be_culled.append((user["_id"], user_obj))
         total_culled_points += points_to_cull
         self.logger.info(f"{user_obj.display_name} will be deducted {points_to_cull} for inactivity.")
-        self.user_points.update({"_id": user["_id"]}, {"$set": {"last_cull_time": now}})
+        self.user_points.update({"_id": user["_id"]}, {"$set": {"last_cull_time": now, "cull_warning": True}})
 
         self.user_points.decrement_points(user_obj.id, BSE_SERVER_ID, points_to_cull)
 
@@ -70,11 +70,42 @@ class BSEddiesInactiveUsers(commands.Cog):
                 "type": TransactionTypes.POINT_ROT_LOSS,
                 "amount": points_to_cull * -1,
                 "timestamp": now,
-                "comment": "Gained eddies due to other user's inactivity"
+                "comment": "Lost eddies due to their own inactivity"
             }
         )
 
         return total_culled_points
+
+    def __check_and_warn_user(self, user: dict, last_interaction_time: datetime.datetime, days: int, user_obj):
+        """
+
+        :param user:
+        :param last_interaction_time:
+        :param days:
+        :param user_obj:
+        :return:
+        """
+        now = datetime.datetime.now()
+
+        timedelta = now - last_interaction_time  # type: datetime.timedelta
+        if timedelta.days == days and not user.get("cull_warning"):
+            message = (
+                f"It looks like you haven't used any eddies in a while. If you don't use them in"
+                f" the next **24** hours, your eddies will be culled and `75%` of your eddies "
+                f"will be distributed amongst the other server members that are using eddies."
+                f"\n\n"
+                f"Valid interaction types: "
+                f"{', '.join([f'`{TransactionTypes(n).name}`' for n in self.safe_interactions])}"
+            )
+            self.logger.info(f"Sending cull warning to {user['uid']}")
+            self.user_points.update({"_id": user["_id"]}, {"$set": {"cull_warning": True}})
+            if user.get("daily_eddies"):
+                try:
+                    await user_obj.send(content=message)
+                except discord.Forbidden:
+                    pass
+        elif timedelta.days < days:
+            self.user_points.update({"_id": user["_id"]}, {"$set": {"cull_warning": False}})
 
     @tasks.loop(hours=2)
     async def inactive_user_task(self):
@@ -106,8 +137,10 @@ class BSEddiesInactiveUsers(commands.Cog):
                 pending_points = self.user_bets.get_user_pending_points(user["uid"], guild_id)
 
                 if pending_points > 0:
+                    days = 10
                     time_limit = now - datetime.timedelta(days=10)
                 else:
+                    days = 5
                     time_limit = one_week_ago
 
                 interactions = [
@@ -123,35 +156,7 @@ class BSEddiesInactiveUsers(commands.Cog):
                 if last_interaction > time_limit:
                     # interacted recently
                     users_who_will_gain_points.append((user["_id"], user_obj))
-
-                    # this is where we can do 24 hour warnings
-                    twenty_four_hour_warning = time_limit + datetime.timedelta(days=1)
-                    if last_interaction < twenty_four_hour_warning:
-
-                        if last_cull and time_limit < last_cull:
-                            continue 
-
-                        if not user.get("cull_warning"):
-                            # OH UH
-                            message = (
-                                f"It looks like you haven't used any eddies in a while. If you don't use them in"
-                                f" the next **24** hours, your eddies will be culled and `75%` of your eddies "
-                                f"will be distributed amongst the other server members that are using eddies."
-                                f"\n\n"
-                                f"Valid interaction types: "
-                                f"{', '.join([f'`{TransactionTypes(n).name}`' for n in self.safe_interactions])}"
-                            )
-                            self.logger.info(f"Sending cull warning to {user['uid']}")
-                            self.user_points.update({"_id": user["_id"]}, {"$set": {"cull_warning": True}})
-                            if user.get("daily_eddies"):
-                                try:
-                                    await user_obj.send(content=message)
-                                except discord.Forbidden:
-                                    pass
-                    else:
-                        if user.get("cull_warning"):
-                            self.user_points.update({"_id": user["_id"]}, {"$set": {"cull_warning": False}})
-
+                    self.__check_and_warn_user(user, last_interaction, days, user_obj)
                     continue
 
                 elif user["points"] <= 10:
@@ -160,6 +165,7 @@ class BSEddiesInactiveUsers(commands.Cog):
 
                 elif last_cull is not None and last_interaction < time_limit < last_cull:
                     # haven't interacted in the last week but we already culled them more recently than that
+                    self.__check_and_warn_user(user, last_cull, days, user_obj)
                     continue
 
                 elif last_interaction < time_limit and last_cull is None:

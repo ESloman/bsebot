@@ -76,7 +76,7 @@ class BSEddiesInactiveUsers(commands.Cog):
 
         return total_culled_points
 
-    def __check_and_warn_user(self, user: dict, last_interaction_time: datetime.datetime, days: int, user_obj):
+    async def __check_and_warn_user(self, user: dict, last_interaction_time: datetime.datetime, days: int, user_obj):
         """
 
         :param user:
@@ -156,7 +156,7 @@ class BSEddiesInactiveUsers(commands.Cog):
                 if last_interaction > time_limit:
                     # interacted recently
                     users_who_will_gain_points.append((user["_id"], user_obj))
-                    self.__check_and_warn_user(user, last_interaction, days, user_obj)
+                    await self.__check_and_warn_user(user, last_interaction, days, user_obj)
                     continue
 
                 elif user["points"] <= 10:
@@ -165,7 +165,7 @@ class BSEddiesInactiveUsers(commands.Cog):
 
                 elif last_cull is not None and last_interaction < time_limit < last_cull:
                     # haven't interacted in the last week but we already culled them more recently than that
-                    self.__check_and_warn_user(user, last_cull, days, user_obj)
+                    await self.__check_and_warn_user(user, last_cull, days, user_obj)
                     continue
 
                 elif last_interaction < time_limit and last_cull is None:

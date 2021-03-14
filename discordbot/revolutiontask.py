@@ -40,8 +40,10 @@ class BSEddiesRevolutionTask(commands.Cog):
         now = datetime.datetime.now()
 
         if now.weekday() == 6 and self.revolution.hours == 8:
-            self.revolution.change_interval(minutes=30, hours=0)
+            self.logger.info("Changing revolution task interval to 15 minutes.")
+            self.revolution.change_interval(minutes=15, hours=0)
         elif now.weekday() != 6 and self.revolution.hours != 8:
+            self.logger.info("Changing revolution task interval back to 8 hours.")
             self.revolution.change_interval(hours=8, minutes=0)
 
         for guild_id in self.guilds:
@@ -52,11 +54,13 @@ class BSEddiesRevolutionTask(commands.Cog):
                 message = event.get("message_id")
                 if message is None:
                     await self.create_event(guild_id, event)
+                    self.logger.info("Changing revolution task interval to 5 minutes.")
                     self.revolution.change_interval(minutes=5)
                     continue
 
                 if now > event["expired"]:
                     await self.handle_resolving_bet(guild_id, event)
+                    self.logger.info("Changing revolution task interval to 30 minutes.")
                     self.revolution.change_interval(minutes=30)
                     continue
 
@@ -70,6 +74,7 @@ class BSEddiesRevolutionTask(commands.Cog):
                     await self.send_excited_gif(guild_id, event, "One hour", "one_hour")
 
                 elif (event["expired"] - now).total_seconds() < 1800 and not event.get("half_hour"):
+                    self.logger.info("Changing revolution task interval to 1 minute")
                     self.revolution.change_interval(minutes=1)
                     await self.send_excited_gif(guild_id, event, "HALF AN HOUR", "half_hour")
 

@@ -697,6 +697,11 @@ class BSEddiesPlaceEvent(BSEddies):
             await ctx.send(content=msg, hidden=True)
             return
 
+        if amount <= 0:
+            msg = f"Cannot bet negative eddies or 0 eddies."
+            await ctx.send(content=msg, hidden=True)
+            return
+
         success = self.user_bets.add_better_to_bet(bet_id, guild.id, ctx.author.id, emoji, amount)
 
         if not success["success"]:

@@ -1391,6 +1391,7 @@ class BSEServerTurnOff(BaseEvent):
         stopped = self.aws.stop_instance(AWS_GAME_SERVER_INSTANCE)
         guild = self.client.get_guild(BSE_SERVER_ID)
         channel = guild.get_channel(BSE_SERVER_INFO_CHANNEL)  # type: discord.TextChannel
+        self.task.server_info.restart()
 
         if channel:
             mention = channel.mention

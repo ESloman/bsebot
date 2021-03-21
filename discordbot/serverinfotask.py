@@ -1,6 +1,6 @@
+import asyncio
 import datetime
 import re
-import socket
 
 import a2s
 import asyncssh
@@ -110,13 +110,10 @@ class ServerInfo(commands.Cog):
                 message += s_message
                 continue
 
-            try:
-                if server["type"] == "steam":
-                    add_details, plys = await self.format_steam_server(server)
-                    s_message += add_details
-                    players_connected += plys
-            except:
-                self.logger.exception("error")
+            if server["type"] == "steam":
+                add_details, plys = await self.format_steam_server(server)
+                s_message += add_details
+                players_connected += plys
 
             message += s_message
             message += "\n"
@@ -140,7 +137,7 @@ class ServerInfo(commands.Cog):
         addr = (server["ip"], server["rcon_port"])
         try:
             info = await a2s.ainfo(addr)
-        except socket.timeout:
+        except asyncio.TimeoutError:
             info = None
 
         if not info:

@@ -30,7 +30,6 @@ class BSEddiesKingTask(commands.Cog):
         :return:
         """
         for guild_id in self.guilds:
-            self.logger.info(f"Beginning king check for {guild_id}")
             guild_obj = self.bot.get_guild(guild_id)  # type: discord.Guild
             role_id = BSEDDIES_KING_ROLES[guild_id]
 

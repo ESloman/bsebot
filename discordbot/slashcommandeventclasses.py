@@ -1391,8 +1391,6 @@ class BSEServerTurnOff(BaseEvent):
         guild = self.client.get_guild(BSE_SERVER_ID)
         channel = guild.get_channel(BSE_SERVER_INFO_CHANNEL)  # type: discord.TextChannel
 
-        self.task.server_info.change_interval(hours=1, minutes=0)
-
         if channel:
             mention = channel.mention
         else:

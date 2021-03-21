@@ -1339,7 +1339,7 @@ class BSEServerTurnOn(BaseEvent):
         instance = self.aws.get_instance(AWS_GAME_SERVER_INSTANCE)
 
         if instance.state["Code"] != 80:
-            self.task.server_info.change_interval(hours=0, minutes=1)
+            self.task.server_info.change_interval(seconds=15)
             await ctx.send(content="Instance isn't `stopped` so I cannot start it for you.", hidden=True)
             return
 
@@ -1347,7 +1347,7 @@ class BSEServerTurnOn(BaseEvent):
         guild = self.client.get_guild(BSE_SERVER_ID)
         channel = guild.get_channel(BSE_SERVER_INFO_CHANNEL)  # type: discord.TextChannel
 
-        self.task.server_info.change_interval(hours=0, minutes=1)
+        self.task.server_info.change_interval(seconds=15)
         self.task.server_info.restart()
 
         if channel:

@@ -110,10 +110,13 @@ class ServerInfo(commands.Cog):
                 message += s_message
                 continue
 
-            if server["type"] == "steam":
-                add_details, plys = await self.format_steam_server(server)
-                s_message += add_details
-                players_connected += plys
+            try:
+                if server["type"] == "steam":
+                    add_details, plys = await self.format_steam_server(server)
+                    s_message += add_details
+                    players_connected += plys
+            except:
+                self.logger.exception("error")
 
             message += s_message
             message += "\n"

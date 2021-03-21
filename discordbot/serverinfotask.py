@@ -36,96 +36,98 @@ class ServerInfo(commands.Cog):
         Constantly checks to make sure that all events have been closed properly or raised correctly
         :return:
         """
+        try:
+            guild = self.bot.get_guild(BSE_SERVER_ID)
+            channel = guild.get_channel(BSE_SERVER_INFO_CHANNEL)
 
-        guild = self.bot.get_guild(BSE_SERVER_ID)
-        channel = guild.get_channel(BSE_SERVER_INFO_CHANNEL)
+            self.logger.info("Quering amazon server")
+            instance = self.aws.get_instance(AWS_GAME_SERVER_INSTANCE)
 
-        self.logger.info("Quering amazon server")
-        instance = self.aws.get_instance(AWS_GAME_SERVER_INSTANCE)
+            status = instance.state["Name"]
 
-        status = instance.state["Name"]
+            if status == "running":
 
-        if status == "running":
+                # increase the interval to get more accurate server info
+                if self.server_info.seconds == 0:
+                    self.server_info.change_interval(hours=0, seconds=15)
 
-            # increase the interval to get more accurate server info
-            if self.server_info.seconds == 0:
-                self.server_info.change_interval(hours=0, seconds=15)
+                status_emoji = ":green_circle:"
+            elif status == "stopped":
 
-            status_emoji = ":green_circle:"
-        elif status == "stopped":
+                # reduce the interval to prevent too many api calls when accuracy isn't needed
+                if self.server_info.seconds == 15:
+                    self.server_info.change_interval(hours=1, seconds=0)
 
-            # reduce the interval to prevent too many api calls when accuracy isn't needed
-            if self.server_info.seconds == 15:
-                self.server_info.change_interval(hours=1, seconds=0)
+                status_emoji = ":red_circle:"
+            else:
+                status_emoji = ":yellow_circle:"
 
-            status_emoji = ":red_circle:"
-        else:
-            status_emoji = ":yellow_circle:"
+            ip = instance.public_ip_address
+            launch_time = instance.launch_time
+            if launch_time:
+                up_time = datetime.datetime.now(datetime.timezone.utc) - launch_time
+            else:
+                up_time = None
 
-        ip = instance.public_ip_address
-        launch_time = instance.launch_time
-        if launch_time:
-            up_time = datetime.datetime.now(datetime.timezone.utc) - launch_time
-        else:
-            up_time = None
+            message = (
+                "**BSE Server Info**\n\n"
+                f"**IP Address**: `{ip}`\n"
+                f"**Status**: {status_emoji} `{status}`"
+            )
 
-        message = (
-            "**BSE Server Info**\n\n"
-            f"**IP Address**: `{ip}`\n"
-            f"**Status**: {status_emoji} `{status}`"
-        )
+            if up_time and status != "stopped":
+                message += f"\n**Uptime**: `{up_time}`"
 
-        if up_time and status != "stopped":
-            message += f"\n**Uptime**: `{up_time}`"
+            if status == "running":
+                async with asyncssh.connect("awsgames") as conn:
+                    # load average
+                    result = await conn.run("uptime", check=True)
+                    load_average = re.findall("(?<=load average: ).*(?=\\n)", result.stdout)[0]
+                    message += f"\n**Load average**: `{load_average}`"
 
-        if status == "running":
-            async with asyncssh.connect("awsgames") as conn:
-                # load average
-                result = await conn.run("uptime", check=True)
-                load_average = re.findall("(?<=load average: ).*(?=\\n)", result.stdout)[0]
-                message += f"\n**Load average**: `{load_average}`"
+                    # memory usage
+                    mem_cmd = "awk '/^Mem/ {printf(\"%u%%\", 100*$3/$2);}' <(free -m)"
+                    result = await conn.run(mem_cmd, check=True)
+                    memory_usage = result.stdout
+                    message += f"\n**Memory usage**: `{memory_usage}`"
 
-                # memory usage
-                mem_cmd = "awk '/^Mem/ {printf(\"%u%%\", 100*$3/$2);}' <(free -m)"
-                result = await conn.run(mem_cmd, check=True)
-                memory_usage = result.stdout
-                message += f"\n**Memory usage**: `{memory_usage}`"
+                    # disk space free
+                    disk_cmd = "df --output=pcent /dev/root | tr -dc '0-9'"
+                    result = await conn.run(disk_cmd, check=True)
+                    disk_space = f"{result.stdout}%"
+                    message += f"\n**Disk space usage**: `{disk_space}`"
 
-                # disk space free
-                disk_cmd = "df --output=pcent /dev/root | tr -dc '0-9'"
-                result = await conn.run(disk_cmd, check=True)
-                disk_space = f"{result.stdout}%"
-                message += f"\n**Disk space usage**: `{disk_space}`"
+            players_connected = 0
+            all_game_servers = self.game_servers.get_all_game_servers()
 
-        players_connected = 0
-        all_game_servers = self.game_servers.get_all_game_servers()
+            if all_game_servers:
+                message += "\n\n**Services**:\n"
 
-        if all_game_servers:
-            message += "\n\n**Services**:\n"
+            for server in all_game_servers:
+                s_message = f"\n`Game`: _{server['game'].title()}_\n`Server`: _{server['name']}_"
+                if status != "running":
+                    s_message += f"\n`Status`: :red_circle: _Offline_"
+                    message += s_message
+                    continue
 
-        for server in all_game_servers:
-            s_message = f"\n`Game`: _{server['game'].title()}_\n`Server`: _{server['name']}_"
-            if status != "running":
-                s_message += f"\n`Status`: :red_circle: _Offline_"
+                if server["type"] == "steam":
+                    add_details, plys = await self.format_steam_server(server)
+                    s_message += add_details
+                    players_connected += plys
+
                 message += s_message
-                continue
+                message += "\n"
 
-            if server["type"] == "steam":
-                add_details, plys = await self.format_steam_server(server)
-                s_message += add_details
-                players_connected += plys
+            self.game_server_info.update_player_count(players_connected)
+            if players_connected == 0 and up_time.total_seconds() > 900:
+                self.aws.stop_instance(AWS_GAME_SERVER_INSTANCE)
 
-            message += s_message
-            message += "\n"
+            message += f"\n\nThis message is updated every minute or so when the server is online."
 
-        self.game_server_info.update_player_count(players_connected)
-        if players_connected == 0 and up_time.total_seconds() > 900:
-            self.aws.stop_instance(AWS_GAME_SERVER_INSTANCE)
-
-        message += f"\n\nThis message is updated every minute or so when the server is online."
-
-        message_to_edit = await channel.fetch_message(823122665530982400)
-        await message_to_edit.edit(content=message)
+            message_to_edit = await channel.fetch_message(823122665530982400)
+            await message_to_edit.edit(content=message)
+        except:
+            self.logger.exception("error")
 
     @staticmethod
     async def format_steam_server(server):

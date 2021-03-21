@@ -30,7 +30,7 @@ class ServerInfo(commands.Cog):
         """
         self.server_info.cancel()
 
-    @tasks.loop(minutes=1)
+    @tasks.loop(seconds=15)
     async def server_info(self):
         """
         Constantly checks to make sure that all events have been closed properly or raised correctly
@@ -48,15 +48,15 @@ class ServerInfo(commands.Cog):
         if status == "running":
 
             # increase the interval to get more accurate server info
-            if self.server_info.minutes == 0:
-                self.server_info.change_interval(hours=0, minutes=1)
+            if self.server_info.seconds == 0:
+                self.server_info.change_interval(hours=0, seconds=15)
 
             status_emoji = ":green_circle:"
         elif status == "stopped":
 
             # reduce the interval to prevent too many api calls when accuracy isn't needed
-            if self.server_info.minutes == 1:
-                self.server_info.change_interval(hours=1, minutes=0)
+            if self.server_info.seconds == 15:
+                self.server_info.change_interval(hours=1, seconds=0)
 
             status_emoji = ":red_circle:"
         else:

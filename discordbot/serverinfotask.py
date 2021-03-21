@@ -139,7 +139,7 @@ class ServerInfo(commands.Cog):
         addr = (server["ip"], server["rcon_port"])
         try:
             info = await a2s.ainfo(addr)
-        except asyncio.TimeoutError:
+        except (asyncio.TimeoutError, ConnectionRefusedError):
             info = None
 
         if not info:

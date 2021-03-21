@@ -33,3 +33,23 @@ class BestSummerEverPointsDB(BaseClass):
         :return:
         """
         return self.bse_db
+
+
+class BestSummerEverGameServersDB(BaseClass):
+    """
+    Class to represent the BestSummerEverGameServers DB
+    """
+    def __init__(self):
+        """
+        Constructor method that initialises the DB object.
+        """
+        super().__init__()
+        self.bse_servers_db = interface.get_database(self.cli, "bestsummerevergameservers")
+
+    @property
+    def database(self) -> Database:
+        """
+        Basic database property.
+        :return:
+        """
+        return self.bse_servers_db

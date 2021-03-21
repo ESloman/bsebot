@@ -1348,6 +1348,7 @@ class BSEServerTurnOn(BaseEvent):
         channel = guild.get_channel(BSE_SERVER_INFO_CHANNEL)  # type: discord.TextChannel
 
         self.task.server_info.change_interval(hours=0, minutes=1)
+        self.task.server_info.restart()
 
         if channel:
             mention = channel.mention

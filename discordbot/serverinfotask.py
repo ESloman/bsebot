@@ -121,7 +121,8 @@ class ServerInfo(commands.Cog):
             message += "\n"
 
         self.game_server_info.update_player_count(players_connected)
-        if players_connected == 0 and up_time.total_seconds() > 900:
+
+        if players_connected == 0 and up_time.total_seconds() > 900 and not self.game_server_info.get_debug_mode():
             self.aws.stop_instance(AWS_GAME_SERVER_INSTANCE)
 
         message += f"\n\nThis message is updated every minute or so when the server is online."

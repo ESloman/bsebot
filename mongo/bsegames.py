@@ -81,3 +81,8 @@ class GameServerInfo(BestSummerEverGameServersDB):
     def get_player_count(self):
         ret = self.query({"type": "player_count"}, as_gen=False)
         return ret[0]["player_count"]
+
+    def get_debug_mode(self):
+        ret = self.query({"type": "debug_mode"}, as_gen=False)
+        return ret[0].get("debug_mode", False)
+

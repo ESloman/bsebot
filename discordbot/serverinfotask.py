@@ -190,7 +190,7 @@ class ServerInfo(commands.Cog):
 
         if query.players.online > 0:
             server_message += "\n`Players`:"
-            for ply in query.players:
+            for ply in query.players.names:
                 server_message += f"\n - {ply}"
 
         return server_message, query.players.online

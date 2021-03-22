@@ -184,7 +184,7 @@ class ServerInfo(commands.Cog):
         server_message = (
             f"\n`Status`: :green_circle: _Online_\n"
             f"`Port`: {server['port']}\n"
-            f"`Version`: _{query.software.version}_"
+            f"`Version`: _{query.software.version}_\n"
             f"`Player Count`: _{query.players.online}_"
         )
 

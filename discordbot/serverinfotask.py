@@ -6,6 +6,7 @@ import a2s
 import asyncssh
 import discord
 from discord.ext import tasks, commands
+from mcstatus import MinecraftServer
 
 from apis.awsapi import AWSAPI
 from discordbot.constants import AWS_GAME_SERVER_INSTANCE, BSE_SERVER_ID, BSE_SERVER_INFO_CHANNEL
@@ -106,7 +107,8 @@ class ServerInfo(commands.Cog):
             message += "\n\n**Services**:\n"
 
         for server in all_game_servers:
-            s_message = f"\n`Game`: _{server['game'].title()}_\n`Server`: _{server['name']}_"
+            message += f"\n*----*\n"
+            s_message = f"`Game`: _{server['game'].title()}_\n`Server`: _{server['name']}_"
             if status != "running":
                 s_message += f"\n`Status`: :red_circle: _Offline_"
                 message += s_message
@@ -114,6 +116,10 @@ class ServerInfo(commands.Cog):
 
             if server["type"] == "steam":
                 add_details, plys = await self.format_steam_server(server)
+                s_message += add_details
+                players_connected += plys
+            elif server["type"] == "minecraft":
+                add_details, plys = await self.format_minecraft_server(server)
                 s_message += add_details
                 players_connected += plys
 
@@ -158,6 +164,36 @@ class ServerInfo(commands.Cog):
             for ply in players:
                 server_message += f"\n - {ply.name or 'unknown'}"
         return server_message, info.player_count
+
+    @staticmethod
+    async def format_minecraft_server(server):
+        """
+
+        :param server:
+        :return:
+        """
+        mc_server = MinecraftServer(server["dns"], server["port"])
+        try:
+            query = await mc_server.async_query()
+        except (asyncio.TimeoutError, ConnectionRefusedError):
+            query = None
+
+        if not query:
+            return f"\n`Status`: :red_circle: _Offline_", 0
+
+        server_message = (
+            f"\n`Status`: :green_circle: _Online_\n"
+            f"`Port`: {server['port']}\n"
+            f"`Version`: _{query.software.version}_"
+            f"`Player Count`: _{query.players.online}_"
+        )
+
+        if query.players.online > 0:
+            server_message += "\n`Players`:"
+            for ply in query.players.name:
+                server_message += f"\n - {ply}"
+
+        return server_message, query.players.online
 
     @server_info.before_loop
     async def before_server_info(self):

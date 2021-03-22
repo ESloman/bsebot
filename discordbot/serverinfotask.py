@@ -174,7 +174,7 @@ class ServerInfo(commands.Cog):
         """
         mc_server = MinecraftServer(server["dns"], server["port"])
         try:
-            query = await mc_server.async_query()
+            query = mc_server.query()
         except (asyncio.TimeoutError, ConnectionRefusedError):
             query = None
 

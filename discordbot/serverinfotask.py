@@ -177,6 +177,8 @@ class ServerInfo(commands.Cog):
             query = mc_server.query()
         except (asyncio.TimeoutError, ConnectionRefusedError):
             query = None
+        except:
+            self.logger.exception("unknown exception")
 
         if not query:
             return f"\n`Status`: :red_circle: _Offline_", 0

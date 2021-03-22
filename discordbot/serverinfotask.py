@@ -165,8 +165,7 @@ class ServerInfo(commands.Cog):
                 server_message += f"\n - {ply.name or 'unknown'}"
         return server_message, info.player_count
 
-    @staticmethod
-    async def format_minecraft_server(server):
+    async def format_minecraft_server(self, server):
         """
 
         :param server:
@@ -178,7 +177,8 @@ class ServerInfo(commands.Cog):
         except (asyncio.TimeoutError, ConnectionRefusedError):
             query = None
         except:
-            self.logger.exception("unknown exception")
+            self.logger.info("unknown exception")
+            query = None
 
         if not query:
             return f"\n`Status`: :red_circle: _Offline_", 0

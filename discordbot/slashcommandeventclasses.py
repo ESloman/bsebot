@@ -13,6 +13,7 @@ import random
 import re
 from typing import Union
 
+import asyncssh
 import discord
 import discord_slash
 import xlsxwriter
@@ -1400,5 +1401,83 @@ class BSEServerTurnOff(BaseEvent):
 
         await ctx.send(
             content=f"Successfully stopped AWS instance for you. Please check {mention} for status.",
+            hidden=True
+        )
+
+
+class BSEToggleGameService(BaseEvent):
+    def __init__(self, client, guilds, logger, task):
+        super().__init__(client, guilds, logger)
+        self.task = task  # type: ServerInfo
+        self.aws = AWSAPI()
+        self.toggle_on_commands = {
+            "valheim": "sudo systemctl start valheimserver.service",
+            "minecraft_base": "docker start bse_mc_base",
+            "minecraft_hardcore": "docker start bse_mc_hardcore_iii",
+        }
+        self.toggle_off_commands = {
+            "valheim": "sudo systemctl stop valheimserver.service",
+            "minecraft_base": "docker stop bse_mc_base",
+            "minecraft_hardcore": "docker stop bse_mc_hardcore_iii",
+        }
+
+    async def toggle_game_service(
+            self,
+            ctx: discord_slash.context.SlashContext,
+            server: str,
+            toggle: bool) -> None:
+        """
+
+        :param ctx:
+        :param server:
+        :param toggle:
+        :return:
+        """
+
+        if ctx.author.id != CREATOR:
+            await ctx.send(content="You lack the permissions for this.", hidden=True)
+            return
+
+        instance = self.aws.get_instance(AWS_GAME_SERVER_INSTANCE)
+
+        if instance.state["Name"] != "running":
+            await ctx.send(
+                content="The instance isn't 'running' yet - please start the server or give it a minute",
+                hidden=True
+            )
+            return
+
+        cmd_d = self.toggle_on_commands if toggle else self.toggle_off_commands
+
+        if not toggle:
+            # insert logic here to see if there's people connected
+            pass
+
+        cmd = cmd_d[server]
+        try:
+            async with asyncssh.connect("awsgames") as conn:
+                result = await conn.run(cmd, check=True)
+        except ConnectionRefusedError:
+            await ctx.send(
+                content="The instance isn't 'running' yet - please start the server or give it a minute",
+                hidden=True
+            )
+            return
+
+        guild = self.client.get_guild(BSE_SERVER_ID)
+        channel = guild.get_channel(BSE_SERVER_INFO_CHANNEL)  # type: discord.TextChannel
+
+        self.task.server_info.change_interval(seconds=15)
+        self.task.server_info.restart()
+
+        if channel:
+            mention = channel.mention
+        else:
+            mention = "info channel"
+
+        word = "started" if toggle else "stopped"
+
+        await ctx.send(
+            content=f"Successfully {word} {server} for you. Please check {mention} for status.",
             hidden=True
         )

@@ -75,7 +75,10 @@ class GameServerInfo(BestSummerEverGameServersDB):
         :param amount:
         :return:
         """
-        ret = self.update({"type": "player_count"}, {"$set": {"player_count": amount}})
+        ret = self.update(
+            {"type": "player_count"},
+            {"$set": {"player_count": amount, "last_connection": datetime.datetime.now()}}
+        )
         return ret
 
     def get_player_count(self):
@@ -86,3 +89,6 @@ class GameServerInfo(BestSummerEverGameServersDB):
         ret = self.query({"type": "debug_mode"}, as_gen=False)
         return ret[0].get("debug_mode", False)
 
+    def get_last_player_connected(self):
+        ret = self.query({"type": "player_count"}, as_gen=False)
+        return ret[0].get("last_connection")

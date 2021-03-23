@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import re
+import socket
 
 import a2s
 import asyncssh
@@ -40,7 +41,6 @@ class ServerInfo(commands.Cog):
         guild = self.bot.get_guild(BSE_SERVER_ID)
         channel = guild.get_channel(BSE_SERVER_INFO_CHANNEL)
 
-        self.logger.info("Quering amazon server")
         instance = self.aws.get_instance(AWS_GAME_SERVER_INSTANCE)
 
         status = instance.state["Name"]
@@ -128,8 +128,13 @@ class ServerInfo(commands.Cog):
 
         self.game_server_info.update_player_count(players_connected)
 
+        # logic here for automatically turning off the server when no-one is connected
         if players_connected == 0 and up_time.total_seconds() > 900 and not self.game_server_info.get_debug_mode():
-            self.aws.stop_instance(AWS_GAME_SERVER_INSTANCE)
+            last_conn = self.game_server_info.get_last_player_connected()
+            if not last_conn:
+                self.aws.stop_instance(AWS_GAME_SERVER_INSTANCE)
+            elif (datetime.datetime.now() - last_conn).total_seconds() > 300:
+                self.aws.stop_instance(AWS_GAME_SERVER_INSTANCE)
 
         message += f"\n\nThis message is updated every minute or so when the server is online."
 
@@ -146,7 +151,7 @@ class ServerInfo(commands.Cog):
         addr = (server["ip"], server["rcon_port"])
         try:
             info = await a2s.ainfo(addr)
-        except (asyncio.TimeoutError, ConnectionRefusedError):
+        except (asyncio.TimeoutError, ConnectionRefusedError, socket.timeout):
             info = None
 
         if not info:
@@ -173,11 +178,11 @@ class ServerInfo(commands.Cog):
         """
         mc_server = MinecraftServer(server["dns"], server["port"])
         try:
-            query = mc_server.query()
-        except (asyncio.TimeoutError, ConnectionRefusedError):
+            query = mc_server.query(tries=1)
+        except (asyncio.TimeoutError, ConnectionRefusedError, socket.timeout):
             query = None
         except:
-            self.logger.info("unknown exception")
+            self.logger.exception("unknown exception")
             query = None
 
         if not query:

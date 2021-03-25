@@ -56,7 +56,7 @@ class ServerInfo(commands.Cog):
 
             # reduce the interval to prevent too many api calls when accuracy isn't needed
             if self.server_info.seconds == 15:
-                self.server_info.change_interval(hours=1, seconds=0)
+                self.server_info.change_interval(hours=12, seconds=0)
 
             status_emoji = ":red_circle:"
         else:

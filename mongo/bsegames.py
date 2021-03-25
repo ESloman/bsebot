@@ -75,9 +75,14 @@ class GameServerInfo(BestSummerEverGameServersDB):
         :param amount:
         :return:
         """
+
+        update_d = {"player_count": amount}
+        if amount > 0:
+            update_d["last_connection"] = datetime.datetime.now()
+
         ret = self.update(
             {"type": "player_count"},
-            {"$set": {"player_count": amount, "last_connection": datetime.datetime.now()}}
+            {"$set": update_d}
         )
         return ret
 

@@ -1333,7 +1333,7 @@ class BSEServerTurnOn(BaseEvent):
         :return:
         """
 
-        if ctx.author.id not in SERVER_ADMINS:
+        if ctx.author.id != CREATOR:
             await ctx.send(content="You lack the permissions for this.", hidden=True)
             return
 
@@ -1434,7 +1434,7 @@ class BSEToggleGameService(BaseEvent):
         :return:
         """
 
-        if ctx.author.id not in SERVER_ADMINS:
+        if ctx.author.id != CREATOR:
             await ctx.send(content="You lack the permissions for this.", hidden=True)
             return
 

@@ -109,7 +109,7 @@ class ServerInfo(commands.Cog):
         for server in all_game_servers:
             message += f"\n*----*\n"
             s_message = f"`Game`: _{server['game'].title()}_\n`Server`: _{server['name']}_"
-            if status != "running":
+            if status != "running" or server['game'] == "valheim":
                 s_message += f"\n`Status`: :red_circle: _Offline_"
                 message += s_message
                 continue

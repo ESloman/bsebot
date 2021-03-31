@@ -425,6 +425,7 @@ class BSEddiesCloseBet(BSEddies):
                 channel = guild.get_channel(bet["channel_id"])
                 message = channel.get_partial_message(bet["message_id"])
                 await message.edit(content=desc, embed=None)
+                await ctx.send(content="Closed the bet for you!", hidden=True)
                 return
 
         ret_dict = self.bet_manager.close_a_bet(bet_id, guild.id, emoji)
@@ -470,6 +471,7 @@ class BSEddiesCloseBet(BSEddies):
         channel = guild.get_channel(bet["channel_id"])
         message = channel.get_partial_message(bet["message_id"])
         await message.edit(content=desc, embed=None)
+        await ctx.send(content="Closed the bet for you!", hidden=True)
 
 
 class BSEddiesCreateBet(BSEddies):

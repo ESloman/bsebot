@@ -278,7 +278,7 @@ class CommandManager(object):
             :param ctx:
             :return:
             """
-            await ctx.respond(eat=True)
+            await ctx.defer(hidden=True)
             await self.server_on.turn_server_on(ctx)
 
         @self.slash.subcommand(
@@ -293,7 +293,7 @@ class CommandManager(object):
             :param ctx:
             :return:
             """
-            await ctx.respond(eat=True)
+            await ctx.defer(hidden=True)
             await self.server_off.turn_server_off(ctx)
 
         @self.slash.subcommand(
@@ -327,7 +327,7 @@ class CommandManager(object):
             :param game_server:
             :return:
             """
-            await ctx.respond(eat=True)
+            await ctx.defer(hidden=True)
             await self.service_toggle.toggle_game_service(ctx, game_server, True)
 
         @self.slash.subcommand(
@@ -361,7 +361,7 @@ class CommandManager(object):
             :param game_server:
             :return:
             """
-            await ctx.respond(eat=True)
+            await ctx.defer(hidden=True)
             await self.service_toggle.toggle_game_service(ctx, game_server, False)
 
         @self.slash.subcommand(
@@ -390,7 +390,6 @@ class CommandManager(object):
             :param ctx:
             :return:
             """
-            await ctx.respond(eat=True)
             await self.bseddies_leaderboard.leaderboard(ctx)
 
         @self.slash.subcommand(
@@ -405,7 +404,6 @@ class CommandManager(object):
             :param ctx:
             :return:
             """
-            await ctx.respond(eat=True)
             await self.bseddies_king.king_data(ctx)
 
         @self.slash.subcommand(
@@ -420,7 +418,6 @@ class CommandManager(object):
             :param ctx:
             :return:
             """
-            await ctx.respond(eat=True)
             await self.bseddies_high_score.highscore(ctx)
 
         @self.slash.subcommand(
@@ -435,7 +432,6 @@ class CommandManager(object):
             :param ctx:
             :return:
             """
-            await ctx.respond(eat=True)
             await self.bseddies_active.active(ctx)
 
         @self.slash.subcommand(
@@ -478,7 +474,7 @@ class CommandManager(object):
             :param full:
             :return:
             """
-            await ctx.respond(eat=True)
+            await ctx.defer(hidden=True)
             await self.bseddies_transactions.transaction_history(ctx, full)
 
         @self.slash.subcommand(
@@ -625,7 +621,7 @@ class CommandManager(object):
             :param timeout:
             :return:
             """
-            await ctx.respond(eat=True)
+            await ctx.defer(hidden=True)
             await self.bseddies_create.handle_bet_creation(
                 ctx, bet_title,
                 outcome_one, outcome_two, outcome_three, outcome_four, outcome_five, outcome_six,
@@ -681,7 +677,6 @@ class CommandManager(object):
             :param emoji:
             :return:
             """
-            await ctx.respond(eat=True)
             await self.bseddies_place.place_bet(ctx, bet_id, amount, emoji)
 
         @self.slash.subcommand(
@@ -721,7 +716,7 @@ class CommandManager(object):
             :param emoji:
             :return:
             """
-            await ctx.respond(eat=True)
+            await ctx.defer(hidden=True)
             await self.bseddies_close.close_bet(ctx, bet_id, emoji)
 
         @self.slash.subcommand(
@@ -813,7 +808,7 @@ class CommandManager(object):
             :param scenario_type:
             :return:
             """
-            await ctx.respond(eat=True)
+            await ctx.defer(hidden=True)
             await self.bseddies_autogen.generate_bets(ctx, scenario_type)
 
         @self.slash.subcommand(

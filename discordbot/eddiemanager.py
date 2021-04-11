@@ -93,6 +93,7 @@ class BSEddiesManager(object):
         )
 
         users = self.user_points.get_all_users_for_guild(guild_id)
+        users = [u for u in users if not u.get("inactive")]
         user_ids = [u["uid"] for u in users]
         user_dict = {u["uid"]: u for u in users}
 

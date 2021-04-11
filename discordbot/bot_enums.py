@@ -59,3 +59,5 @@ class ActivityTypes(IntEnum):
     BSEDDIES_ADMIN_TAKE = 22
     BSEDDIES_ADMIN_CHANGE = 23
     BSEDDIES_KING = 24
+    SERVER_LEAVE = 25
+    SERVER_JOIN = 26

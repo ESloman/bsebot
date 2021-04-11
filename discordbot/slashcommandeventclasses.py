@@ -124,7 +124,7 @@ class BSEddiesLeaderboard(BSEddies):
         self._add_event_type_to_activity_history(ctx.author, ctx.guild_id, ActivityTypes.BSEDDIES_LEADERBOARD)
 
         embed = self.embed_manager.get_leaderboard_embed(ctx.guild, 5)
-        message = await ctx.channel.send(content=embed)
+        message = await ctx.send(content=embed)
         await message.add_reaction(u"▶️")
 
 
@@ -147,7 +147,7 @@ class BSEddiesHighScore(BSEddies):
         self._add_event_type_to_activity_history(ctx.author, ctx.guild_id, ActivityTypes.BSEDDIES_HIGHSCORES)
 
         embed = self.embed_manager.get_highscore_embed(ctx.guild, 5)
-        message = await ctx.channel.send(content=embed)
+        message = await ctx.send(content=embed)
         await message.add_reaction(u"▶️")
 
 
@@ -639,7 +639,7 @@ class BSEddiesCreateBet(BSEddies):
         content = f"Bet created by {member.mention}"
 
         # await ctx.send(content=f"Bet created: {bet_title}", hidden=True)
-        message = await ctx.channel.send(content=content, embed=embed)
+        message = await ctx.send(content=content, embed=embed)
 
         self.user_bets.update(
             {"_id": bet["_id"]},
@@ -732,6 +732,7 @@ class BSEddiesPlaceEvent(BSEddies):
             }
         )
         await message.edit(embed=embed)
+        await ctx.send(content="Placed the bet for you!", hidden=True)
 
 
 class BSEddiesTransactionHistory(BSEddies):

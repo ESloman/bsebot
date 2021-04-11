@@ -44,6 +44,7 @@ class BSEddiesKingTask(commands.Cog):
                 current_king = role.members[0].id
 
             users = self.user_points.get_all_users_for_guild(guild_id)
+            users = [u for u in users if not u.get("inactive")]
             top_user = sorted(users, key=lambda x: x["points"], reverse=True)[0]
             new = guild_obj.get_member(top_user["uid"])  # type: discord.Member
 

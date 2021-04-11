@@ -56,7 +56,12 @@ class EddieGainMessager(commands.Cog):
             if eddie_dict[user_id] == 0:
                 continue
 
-            user = await guild.fetch_member(int(user_id))  # type: discord.Member
+            try:
+                user = await guild.fetch_member(int(user_id))  # type: discord.Member
+            except discord.NotFound:
+                msg += f"\n- `{user_id}` :  **{eddie_dict[user_id]}**"
+                continue
+
             roles = user.roles  # type: List[discord.Role]
 
             msg += f"\n- `{user_id}` {user.display_name} :  **{eddie_dict[user_id]}**"

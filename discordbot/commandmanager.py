@@ -14,6 +14,7 @@ from discord_slash.utils import manage_commands
 from apis.giphyapi import GiphyAPI
 from discordbot.betcloser import BetCloser
 from discordbot.clienteventclasses import OnReadyEvent, OnReactionAdd, OnMessage, OnMemberJoin, OnDirectMessage
+from discordbot.clienteventclasses import OnMemberLeave
 from discordbot.eddiegainmessageclass import EddieGainMessager
 from discordbot.eddiekingtask import BSEddiesKingTask
 from discordbot.embedmanager import EmbedManager
@@ -94,6 +95,7 @@ class CommandManager(object):
         self.on_reaction_add = OnReactionAdd(client, guilds, self.logger, self.beta_mode)
         self.on_message = OnMessage(client, guilds, self.logger, self.beta_mode)
         self.on_member_join = OnMemberJoin(client, guilds, self.logger, self.beta_mode)
+        self.on_member_leave = OnMemberLeave(client, guilds, self.logger, self.beta_mode)
         self.direct_message = OnDirectMessage(client, guilds, self.logger, self.giphyapi, self.beta_mode)
 
         # slash command classes
@@ -176,6 +178,15 @@ class CommandManager(object):
             :return:
             """
             self.on_member_join.on_join(member)
+
+        @self.client.event
+        async def on_member_remove(member: discord.Member):
+            """
+            Event that's called when a member leaves the guild.
+            :param member:
+            :return:
+            """
+            self.on_member_leave.on_leave(member)
 
         @self.client.event
         async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):

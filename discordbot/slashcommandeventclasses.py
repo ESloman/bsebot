@@ -639,7 +639,7 @@ class BSEddiesCreateBet(BSEddies):
         content = f"Bet created by {member.mention}"
 
         # await ctx.send(content=f"Bet created: {bet_title}", hidden=True)
-        message = await ctx.send(content=content, embed=embed)
+        message = await ctx.channel.send(content=content, embed=embed)
 
         self.user_bets.update(
             {"_id": bet["_id"]},
@@ -647,6 +647,7 @@ class BSEddiesCreateBet(BSEddies):
         )
         for emoji in option_dict:
             await message.add_reaction(emoji)
+        await ctx.send(content="Created bet for you.", hidden=True)
 
 
 class BSEddiesPlaceEvent(BSEddies):

@@ -34,7 +34,7 @@ class BSEddiesInactiveUsers(commands.Cog):
         :return: int
         """
         current_points = user["points"]
-        points_to_take = math.floor(current_points * 0.75)
+        points_to_take = math.floor(current_points * 0.50)
         remaining = current_points - points_to_take
 
         if remaining < 10:
@@ -118,7 +118,7 @@ class BSEddiesInactiveUsers(commands.Cog):
         self.logger.info("Beginning check for inactive users.")
 
         now = datetime.datetime.now()
-        one_week_ago = now - datetime.timedelta(days=5)
+        one_week_ago = now - datetime.timedelta(days=30)
 
         for guild_id in self.guilds:
 
@@ -137,10 +137,10 @@ class BSEddiesInactiveUsers(commands.Cog):
                 pending_points = self.user_bets.get_user_pending_points(user["uid"], guild_id)
 
                 if pending_points > 0:
-                    days = 10
-                    time_limit = now - datetime.timedelta(days=10)
+                    days = 60
+                    time_limit = now - datetime.timedelta(days=60)
                 else:
-                    days = 5
+                    days = 30
                     time_limit = one_week_ago
 
                 interactions = [

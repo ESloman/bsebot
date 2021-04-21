@@ -24,7 +24,7 @@ class OnReadyEvent(BaseEvent):
         self.logger.info("Checking guilds for members")
 
         for guild_id in self.guild_ids:
-            guild = self.client.get_guild(guild_id)
+            guild = self.client.get_guild(guild_id)  # type: discord.Guild
             self.logger.info(f"Checking guild: {guild.id} - {guild.name}")
             for member in guild.members:  # type: discord.Member
                 if member.bot:

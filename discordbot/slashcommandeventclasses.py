@@ -1341,6 +1341,8 @@ class BSEServerTurnOn(BaseEvent):
             await ctx.send(content="You lack the permissions for this.", hidden=True)
             return
 
+        self._add_event_type_to_activity_history(ctx.author, ctx.guild_id, ActivityTypes.BSE_SERVER_ON)
+
         instance = self.aws.get_instance(AWS_GAME_SERVER_INSTANCE)
 
         if instance.state["Code"] != 80:
@@ -1383,6 +1385,8 @@ class BSEServerTurnOff(BaseEvent):
         if ctx.author.id not in SERVER_ADMINS:
             await ctx.send(content="You lack the permissions for this.", hidden=True)
             return
+
+        self._add_event_type_to_activity_history(ctx.author, ctx.guild_id, ActivityTypes.BSE_SERVER_OFF)
 
         instance = self.aws.get_instance(AWS_GAME_SERVER_INSTANCE)
         if instance.state["Code"] != 16:
@@ -1441,6 +1445,10 @@ class BSEToggleGameService(BaseEvent):
         if ctx.author.id not in SERVER_ADMINS:
             await ctx.send(content="You lack the permissions for this.", hidden=True)
             return
+
+        self._add_event_type_to_activity_history(
+            ctx.author, ctx.guild_id, ActivityTypes.BSE_GAME_SERVER_TOGGLE, server=server, toggle=toggle
+        )
 
         instance = self.aws.get_instance(AWS_GAME_SERVER_INSTANCE)
 

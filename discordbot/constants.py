@@ -18,15 +18,15 @@ MESSAGE_TYPES = [
 ]
 
 MESSAGE_VALUES = {
-    "message": 0.1,
+    "message": 0.15,
     "reply": 0.2,
     "role_mention": 1,
     "channel_mention": 0.5,
-    "mention": 0.25,
+    "mention": 0.3,
     "everyone_mention": 1,
     "gif": 0.4,
-    "link": 1,
-    "attachment": 1,
+    "link": 1.2,
+    "attachment": 1.2,
 }
 
 BET_OUTCOME_COUNT_MODIFIER = {

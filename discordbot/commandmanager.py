@@ -314,16 +314,6 @@ class CommandManager(object):
 
             await self.on_message.message_received(message)
 
-        @self.client.event
-        async def on_interaction(interaction: discord.Interaction):
-            """
-
-            :param interaction:
-            :return:
-            """
-            print(interaction)
-            pass
-
     def _register_slash_commands(self, guilds: list) -> None:
         """
         This method registers all the 'slash commands'.

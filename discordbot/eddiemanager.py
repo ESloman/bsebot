@@ -101,7 +101,7 @@ class BSEddiesManager(object):
         for user in user_ids:
             self.logger.info(f"processing {user}")
 
-            minimum = user_dict[user].get("daily_minimum", 3)
+            minimum = user_dict[user].get("daily_minimum", 4)
 
             # calculate points here
             user_results = [r for r in results if r["user_id"] == user]
@@ -119,11 +119,20 @@ class BSEddiesManager(object):
                 if minimum == 0:
                     continue
             else:
-                if minimum != 3:
-                    minimum = 3
-                    self.user_points.set_daily_minimum(user, guild_id, 3)
+                if minimum != 4:
+                    minimum = 4
+                    self.user_points.set_daily_minimum(user, guild_id, 4)
 
             message_types = [r["message_type"] for r in user_results]
+
+            # add reaction_received events
+            for message in user_results:
+                if reactions := message.get("reactions"):
+                    for reaction in reactions:
+                        if reaction["user_id"] == user:
+                            continue
+                        message_types.append("reaction_received")
+
             count = Counter(message_types)
             eddies_gained = self._calc_eddies(count, minimum)
 

@@ -14,7 +14,7 @@ from discord_slash.utils import manage_commands
 from apis.giphyapi import GiphyAPI
 from discordbot.betcloser import BetCloser
 from discordbot.clienteventclasses import OnReadyEvent, OnReactionAdd, OnMessage, OnMemberJoin, OnDirectMessage
-from discordbot.clienteventclasses import OnMemberLeave
+from discordbot.clienteventclasses import OnMemberLeave, OnReactionRemove
 from discordbot.eddiegainmessageclass import EddieGainMessager
 from discordbot.eddiekingtask import BSEddiesKingTask
 from discordbot.embedmanager import EmbedManager
@@ -93,6 +93,7 @@ class CommandManager(object):
         # client event classes
         self.on_ready = OnReadyEvent(client, guilds, self.logger, self.beta_mode)
         self.on_reaction_add = OnReactionAdd(client, guilds, self.logger, self.beta_mode)
+        self.on_reaction_remove = OnReactionRemove(client, guilds, self.logger, self.beta_mode)
         self.on_message = OnMessage(client, guilds, self.logger, self.beta_mode)
         self.on_member_join = OnMemberJoin(client, guilds, self.logger, self.beta_mode)
         self.on_member_leave = OnMemberLeave(client, guilds, self.logger, self.beta_mode)
@@ -221,6 +222,38 @@ class CommandManager(object):
             await self.on_reaction_add.handle_reaction_event(message, guild, channel, payload.emoji.name, user)
 
         @self.client.event
+        async def on_raw_reaction_remove(payload: discord.RawReactionActionEvent):
+            """
+            This event catches EVERY reaction removal event on every message in the server.
+            However, any operations we want to perform are a bit slower as we need to 'fetch' the message
+            before we have all the data we have. BUT, we need to handle reactions to all messages as a user may
+            react to an older message that isn't in the cache and we can't just not do anything.
+
+            If the message is in the cache - then this event will fire and so will on_reaction_add. To prevent that,
+            and to keep on_reaction_add for cached messages and be faster, we check if the message_id is already
+            in the cache. If it is, then we can safely ignore it here. Otherwise we need to handle it.
+            :param payload:
+            :return:
+            """
+
+            cached_messages = self.__get_cached_messages_list()
+            if payload.message_id in cached_messages:
+                # message id is already in the cache
+                return
+
+            guild = self.client.get_guild(payload.guild_id)  # type: discord.Guild
+            user = guild.get_member(payload.user_id)  # type: discord.User
+
+            if user.bot:
+                return
+
+            channel = guild.get_channel(payload.channel_id)  # type: discord.TextChannel
+            partial_message = channel.get_partial_message(payload.message_id)  # type: discord.PartialMessage
+            message = await partial_message.fetch()  # type: discord.Message
+
+            await self.on_reaction_remove.handle_reaction_event(message, guild, channel, payload.emoji.name, user)
+
+        @self.client.event
         async def on_reaction_add(reaction: discord.Reaction, user: discord.User):
             """
             This event is triggered when anyone 'reacts' to a message in a guild that the bot is in - even it's own
@@ -233,6 +266,26 @@ class CommandManager(object):
             :return:
             """
             await self.on_reaction_add.handle_reaction_event(
+                reaction.message,
+                reaction.message.guild,
+                reaction.message.channel,
+                reaction.emoji,
+                user
+            )
+
+        @self.client.event
+        async def on_reaction_remove(reaction: discord.Reaction, user: discord.User):
+            """
+            This event is triggered when anyone removes a 'reaction' to a message in a guild that the bot is in -
+            even it's own eactions. However, this only triggers for messages that the bot has in it's cache -
+            reactions to older messages will only trigger a 'on_raw_reaction_remove' event.
+
+            Here, we simply hand it off to another class to deal with.
+            :param reaction:
+            :param user:
+            :return:
+            """
+            await self.on_reaction_remove.handle_reaction_event(
                 reaction.message,
                 reaction.message.guild,
                 reaction.message.channel,
@@ -260,6 +313,16 @@ class CommandManager(object):
                 return
 
             await self.on_message.message_received(message)
+
+        @self.client.event
+        async def on_interaction(interaction: discord.Interaction):
+            """
+
+            :param interaction:
+            :return:
+            """
+            print(interaction)
+            pass
 
     def _register_slash_commands(self, guilds: list) -> None:
         """

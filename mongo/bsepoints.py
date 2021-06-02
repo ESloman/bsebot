@@ -707,3 +707,65 @@ class UserInteractions(BestSummerEverPointsDB):
         }
 
         self.insert(message)
+
+    def add_reaction_entry(
+            self,
+            message_id: int,
+            guild_id: int,
+            user_id: int,
+            channel_id: int,
+            message_content: str,
+            timestamp: datetime.datetime,
+            author_id: int) -> None:
+        """
+        Adds a reaction entry into our interactions DB with the corresponding message.
+        :param message_id: int - message ID
+        :param guild_id: int - guild ID
+        :param user_id: int - user ID
+        :param channel_id: int - channel ID
+        :param message_content: str - message content
+        :param timestamp: - datetime object
+        :param author_id:
+        :return: None
+        """
+        entry = {
+            "user_id": user_id,
+            "content": message_content,
+            "timestamp": timestamp,
+        }
+
+        self.update(
+            {"message_id": message_id, "guild_id": guild_id, "channel_id": channel_id, "user_id": author_id},
+            {"$push": {"reactions": entry}},
+        )
+
+    def remove_reaction_entry(
+            self,
+            message_id: int,
+            guild_id: int,
+            user_id: int,
+            channel_id: int,
+            message_content: str,
+            timestamp: datetime.datetime,
+            author_id: int) -> None:
+        """
+        Adds a reaction entry into our interactions DB with the corresponding message.
+        :param message_id: int - message ID
+        :param guild_id: int - guild ID
+        :param user_id: int - user ID
+        :param channel_id: int - channel ID
+        :param message_content: str - message content
+        :param timestamp: - datetime object
+        :param author_id:
+        :return: None
+        """
+        entry = {
+            "user_id": user_id,
+            "content": message_content,
+            "timestamp": timestamp,
+        }
+
+        self.update(
+            {"message_id": message_id, "guild_id": guild_id, "channel_id": channel_id, "user_id": author_id},
+            {"$pull": {"reactions": entry}},
+        )

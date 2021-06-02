@@ -148,6 +148,7 @@ class OnReactionAdd(BaseEvent):
     """
     def __init__(self, client, guild_ids, logger, beta_mode=False):
         super().__init__(client, guild_ids, logger, beta_mode=beta_mode)
+        self.user_interactions = UserInteractions()
         self.leadership_event = LeaderBoardReactionEvent(client, guild_ids, logger, beta_mode=beta_mode)
         self.high_score_event = HighScoreReactionEvent(client, guild_ids, logger, beta_mode=beta_mode)
         self.bet_event = BetReactionEvent(client, guild_ids, logger, beta_mode=beta_mode)
@@ -166,7 +167,7 @@ class OnReactionAdd(BaseEvent):
 
         Firstly, we only care about reactions if they're from users so we discard any bot reactions.
 
-        Secondly, we only care about reactions to bot messages at the moment so discard any other events.
+        Secondly, we work out if it's a reaction to a user message or a bot message and handle accordingly.
 
         Then we check what type of message the user is reacting to and pass it off to the relevant class to handle
         the event
@@ -185,6 +186,7 @@ class OnReactionAdd(BaseEvent):
             return
 
         if not message.author.bot:
+            self.handle_user_reaction(reaction_emoji, message, guild, channel, user, message.author)
             return
 
         # handling leaderboard messages
@@ -205,6 +207,104 @@ class OnReactionAdd(BaseEvent):
         # handling reactions to REVOLUTIONS
         if message.content and "REVOLUTION IS UPON US" in message.content and reaction_emoji == "🎟️":
             await self.revolution_event.handle_revolution_reaction(message, guild, user)
+
+    def handle_user_reaction(
+            self, reaction: str, message: discord.Message,
+            guild: discord.Guild, channel: discord.TextChannel, user: discord.User, author: discord.Member
+    ) -> None:
+        """
+
+        :param reaction:
+        :param message:
+        :param guild:
+        :param channel:
+        :param user:
+        :param author:
+        :return:
+        """
+        message_id = message.id
+        guild_id = guild.id
+
+        self.user_interactions.add_reaction_entry(
+            message.id,
+            guild_id,
+            user.id,
+            channel.id,
+            reaction,
+            message.created_at,
+            author.id
+        )
+
+
+class OnReactionRemove(BaseEvent):
+    """
+    Class for handling on_reaction_remove events from Discord
+    """
+    def __init__(self, client, guild_ids, logger, beta_mode=False):
+        super().__init__(client, guild_ids, logger, beta_mode=beta_mode)
+        self.user_interactions = UserInteractions()
+
+    async def handle_reaction_event(
+            self,
+            message: discord.Message,
+            guild: discord.Guild,
+            channel: discord.TextChannel,
+            reaction_emoji: str,
+            user: discord.User
+    ) -> None:
+        """
+        Main event for handling reaction events.
+
+        Firstly, we only care about reaction removals if they're from users so we discard any bot reactions.
+
+        Secondly, we only care about reaction removals to user messages at the moment so discard any other events.
+
+        Then we check what type of message the user is reacting to and pass it off to the relevant class to handle
+        the event
+
+        :param message:
+        :param guild:
+        :param channel:
+        :param reaction_emoji:
+        :param user:
+        :return:
+        """
+        if user.bot:
+            return
+
+        if guild.id not in self.guild_ids:
+            return
+
+        if not message.author.bot:
+            self.handle_user_reaction(reaction_emoji, message, guild, channel, user, message.author)
+            return
+
+    def handle_user_reaction(
+            self, reaction: str, message: discord.Message,
+            guild: discord.Guild, channel: discord.TextChannel, user: discord.User, author: discord.Member
+    ) -> None:
+        """
+
+        :param reaction:
+        :param message:
+        :param guild:
+        :param channel:
+        :param user:
+        :param author:
+        :return:
+        """
+        message_id = message.id
+        guild_id = guild.id
+
+        self.user_interactions.remove_reaction_entry(
+            message.id,
+            guild_id,
+            user.id,
+            channel.id,
+            reaction,
+            message.created_at,
+            author.id
+        )
 
 
 class OnMessage(BaseEvent):

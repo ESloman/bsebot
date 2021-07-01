@@ -141,13 +141,15 @@ class EmbedManager(object):
             f""
             f"To do so, we must do it in an orderly fashion. If you would like to participate, please buy a ticket "
             f"(by reacting appropriately). Each ticket bought will increase our success rate. "
-            f"_**If we are successful**_, the {role.mention}, will have their BSEddies cut in half. "
-            f"These eddies will be re-distributed amongst those who bought tickets. **_If we fail_**, then the eddies"
-            f" spent on buying tickets will be given to {role.mention}.\n\n"
+            f"_**If we are successful**_, the {role.mention}, will have their BSEddies cut in half. The amount of "
+            f"eddies that KING will lose is locked in from this moment onwards. These eddies will be re-distributed "
+            f"amongst those who bought tickets. **_If we fail_**, then the eddies spent on buying tickets will be "
+            f"given to {role.mention}.\n\n"
             f"**Event ID**: `{event['event_id']}`\n"
             f"**Tickets bought**: `{len(event['ticket_buyers'])}`\n"
             f"**Success rate**: `{event['chance']}%`\n"
             f"**Ticket price**: `{event['ticket_cost']}`\n"
+            f"**Locked in KING eddies**: `{event.get('locked_in_eddies')}`\n"
             f"**Event time**: `{event['expired'].strftime('%d %b %y %H:%M:%S')}`"
         )
 

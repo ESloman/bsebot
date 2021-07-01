@@ -27,5 +27,6 @@ if __name__ == "__main__":
         datetime.datetime.now() + datetime.timedelta(hours=3, minutes=30),
         ticket_cost,
         king_user["uid"],
+        user_points,
         BSEDDIES_REVOLUTION_CHANNEL
     )

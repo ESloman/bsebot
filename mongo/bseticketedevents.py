@@ -63,6 +63,7 @@ class RevolutionEvent(TicketedEvent):
             expired: datetime.datetime,
             ticket_cost: int,
             king_id: int,
+            locked_in_eddies: int,
             channel_id: int = None,
     ) -> dict:
         """
@@ -73,6 +74,7 @@ class RevolutionEvent(TicketedEvent):
         :param expired:
         :param ticket_cost:
         :param king_id:
+        :param locked_in_eddies:
         :param channel_id:
         :return:
         """
@@ -95,6 +97,7 @@ class RevolutionEvent(TicketedEvent):
             "points_distributed": 0,
             "eddies_spent": 0,
             "success": None,
+            "locked_in_eddies": locked_in_eddies,
         }
         self.insert(document=event_doc)
         return event_doc

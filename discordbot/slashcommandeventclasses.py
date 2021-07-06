@@ -1200,7 +1200,7 @@ class BSEddiesPredict(BSEddies):
 
     async def predict(self, ctx: discord_slash.context.SlashContext) -> None:
         """
-        Command to give a user some extra eddies.
+        Command to allow a user to see how many eddies they might gain today.
         :param ctx:
         :return:
         """
@@ -1226,7 +1226,7 @@ class BSEddiesPredict(BSEddies):
 
         eddies = self.manager.calc_individual(ctx.author.id, user_dict, results, ctx.guild_id, False)
 
-        await ctx.send(content=f"`{eddies}`", hidden=True)
+        await ctx.send(content=f"You're estimated to gain `{eddies}` today.", hidden=True)
 
 
 class BSEddiesAdminGive(BSEddies):

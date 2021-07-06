@@ -77,6 +77,15 @@ class BSEddiesManager(object):
         return points
 
     def calc_individual(self, user, user_dict, user_results, guild_id, real=False):
+        """
+        Method for calculating the eddie amount of an individual.
+        :param user:
+        :param user_dict:
+        :param user_results:
+        :param guild_id:
+        :param real:
+        :return:
+        """
 
         minimum = user_dict.get("daily_minimum", 4)
 

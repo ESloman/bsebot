@@ -1213,6 +1213,9 @@ class BSEddiesPredict(BSEddies):
 
         start, end = self.manager.get_datetime_objects()
 
+        start = start + datetime.timedelta(days=1)
+        end = end + datetime.timedelta(days=1)
+
         # query gets all messages yesterday
         results = self.manager.user_interactions.query(
             {

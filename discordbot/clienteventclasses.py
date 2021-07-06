@@ -1,6 +1,8 @@
 import datetime
 import discord
 
+from discord.emoji import Emoji
+
 from discordbot.baseeventclass import BaseEvent
 from discordbot.bot_enums import TransactionTypes, ActivityTypes
 from discordbot.constants import THE_BOYS_ROLE
@@ -224,6 +226,9 @@ class OnReactionAdd(BaseEvent):
         """
         message_id = message.id
         guild_id = guild.id
+
+        if isinstance(reaction, Emoji):
+            reaction = reaction.name
 
         self.user_interactions.add_reaction_entry(
             message.id,

@@ -64,3 +64,4 @@ class ActivityTypes(IntEnum):
     BSE_SERVER_ON = 27
     BSE_SERVER_OFF = 28
     BSE_GAME_SERVER_TOGGLE = 29
+    BSEDDIES_PREDICT = 30

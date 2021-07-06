@@ -51,7 +51,7 @@ class BSEddiesManager(object):
         return _logger
 
     @staticmethod
-    def _get_datetime_objects():
+    def get_datetime_objects():
         """
         Get's the datetime START and END of yesterday
         :return:
@@ -76,13 +76,53 @@ class BSEddiesManager(object):
                 self.logger.info(f"{t_points} for {message_type}")
         return points
 
+    def calc_individual(self, user, user_dict, user_results, guild_id, real=False):
+
+        minimum = user_dict.get("daily_minimum", 4)
+
+        if not user_results:
+            if minimum == 0:
+                return 0
+
+            if minimum < 0:
+                if real:
+                    self.user_points.set_daily_minimum(user, guild_id, 0)
+                return 0
+
+            minimum -= 1
+            if real:
+                self.user_points.decrement_daily_minimum(user, guild_id, 1)
+            if minimum == 0:
+                return 0
+        else:
+            if minimum != 4:
+                minimum = 4
+                if real:
+                    self.user_points.set_daily_minimum(user, guild_id, 4)
+
+        message_types = [r["message_type"] for r in user_results]
+
+        # add reaction_received events
+        for message in user_results:
+            if reactions := message.get("reactions"):
+                for reaction in reactions:
+                    if reaction["user_id"] == user:
+                        continue
+                    message_types.append("reaction_received")
+
+        count = Counter(message_types)
+        eddies_gained = self._calc_eddies(count, minimum)
+
+        eddies_gained = math.floor(eddies_gained)
+        return eddies_gained
+
     def give_out_eddies(self, guild_id=181098823228063764):
         """
         Takes all the user IDs for a server and distributes BSEddies to them
         :param guild_id:
         :return:
         """
-        start, end = self._get_datetime_objects()
+        start, end = self.get_datetime_objects()
 
         # query gets all messages yesterday
         results = self.user_interactions.query(
@@ -101,42 +141,13 @@ class BSEddiesManager(object):
         for user in user_ids:
             self.logger.info(f"processing {user}")
 
-            minimum = user_dict[user].get("daily_minimum", 4)
-
-            # calculate points here
             user_results = [r for r in results if r["user_id"] == user]
 
-            if not user_results:
-                if minimum == 0:
-                    continue
+            eddies_gained = self.calc_individual(user, user_dict[user], user_results, guild_id, True)
 
-                if minimum < 0:
-                    self.user_points.set_daily_minimum(user, guild_id, 0)
-                    continue
+            if eddies_gained == 0:
+                continue
 
-                minimum -= 1
-                self.user_points.decrement_daily_minimum(user, guild_id, 1)
-                if minimum == 0:
-                    continue
-            else:
-                if minimum != 4:
-                    minimum = 4
-                    self.user_points.set_daily_minimum(user, guild_id, 4)
-
-            message_types = [r["message_type"] for r in user_results]
-
-            # add reaction_received events
-            for message in user_results:
-                if reactions := message.get("reactions"):
-                    for reaction in reactions:
-                        if reaction["user_id"] == user:
-                            continue
-                        message_types.append("reaction_received")
-
-            count = Counter(message_types)
-            eddies_gained = self._calc_eddies(count, minimum)
-
-            eddies_gained = math.floor(eddies_gained)
             self.user_points.increment_points(user, guild_id, eddies_gained)
             eddie_gain_dict[user] = eddies_gained
             self.user_points.append_to_transaction_history(

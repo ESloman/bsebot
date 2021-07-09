@@ -681,7 +681,7 @@ class UserInteractions(BestSummerEverPointsDB):
             guild_id: int,
             user_id: int,
             channel_id: int,
-            message_type: str,
+            message_type: list,
             message_content: str,
             timestamp: datetime.datetime) -> None:
         """
@@ -707,6 +707,37 @@ class UserInteractions(BestSummerEverPointsDB):
         }
 
         self.insert(message)
+
+    def add_reply_to_message(
+            self,
+            reference_message_id: int,
+            message_id: int,
+            guild_id: int,
+            user_id: int,
+            timestamp: datetime.datetime,
+            content: str,
+    ):
+        """
+
+        :param reference_message_id:
+        :param guild_id:
+        :param user_id:
+        :param message_id:
+        :param timestamp:
+        :param content:
+        :return:
+        """
+        entry = {
+            "user_id": user_id,
+            "content": content,
+            "timestamp": timestamp,
+            "message_id": message_id,
+        }
+
+        self.update(
+            {"message_id": reference_message_id, "guild_id": guild_id},
+            {"$push": {"replies": entry}},
+        )
 
     def add_reaction_entry(
             self,

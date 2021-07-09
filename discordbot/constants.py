@@ -15,7 +15,8 @@ MESSAGE_TYPES = [
     "everyone_mention",
     "gif",
     "link",
-    "reaction_received"
+    "reaction_received",
+    "reply_received"
 ]
 
 MESSAGE_VALUES = {
@@ -29,6 +30,7 @@ MESSAGE_VALUES = {
     "link": 1.2,
     "attachment": 1.2,
     "reaction_received": 2,
+    "reply_received": 1
 }
 
 BET_OUTCOME_COUNT_MODIFIER = {

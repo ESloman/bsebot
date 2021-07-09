@@ -338,25 +338,30 @@ class OnMessage(BaseEvent):
         if guild_id not in self.guild_ids:
             return
 
+        message_type = []
+
         if message.reference:
-            message_type = "reply"
+            message_type.append("reply")
+            self.user_interactions.add_reply_to_message(
+                message.reference.message_id, message.id, guild_id, user_id, message.created_at, message_content
+            )
         elif message.attachments:
-            message_type = "attachment"
+            message_type.append("attachment")
         elif message.role_mentions:
-            message_type = "role_mention"
+            message_type.append("role_mention")
         elif message.channel_mentions:
-            message_type = "channel_mention"
+            message_type.append("channel_mention")
         elif message.mentions:
-            message_type = "mention"
+            message_type.append("mention")
         elif message.mention_everyone:
-            message_type = "everyone_mention"
+            message_type.append("everyone_mention")
         elif "https://" in message.content or "http://" in message_content:
             if "gif" in message.content:
-                message_type = "gif"
+                message_type.append("gif")
             else:
-                message_type = "link"
+                message_type.append("link")
         else:
-            message_type = "message"
+            message_type.append("message")
 
         self.user_interactions.add_entry(
             message.id,

@@ -227,11 +227,11 @@ class OnReactionAdd(BaseEvent):
         message_id = message.id
         guild_id = guild.id
 
-        if isinstance(reaction, Emoji):
+        if isinstance(reaction, (Emoji, discord.PartialEmoji)):
             reaction = reaction.name
 
         self.user_interactions.add_reaction_entry(
-            message.id,
+            message_id,
             guild_id,
             user.id,
             channel.id,

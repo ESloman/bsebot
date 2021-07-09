@@ -109,7 +109,12 @@ class BSEddiesManager(object):
                 if real:
                     self.user_points.set_daily_minimum(user, guild_id, 4)
 
-        message_types = [r["message_type"] for r in user_results]
+        message_types = []
+        for r in user_results:
+            if isinstance(r["message_type"], list):
+                message_types.extend(r["message_type"])
+            else:
+                message_types.append(r["message_type"])
 
         # add reaction_received events
         for message in user_results:
@@ -118,6 +123,12 @@ class BSEddiesManager(object):
                     if reaction["user_id"] == user:
                         continue
                     message_types.append("reaction_received")
+
+            if replies := message.get("replies"):
+                for reply in replies:
+                    if reply["user_id"] == user:
+                        continue
+                    message_types.append("reply_received")
 
         count = Counter(message_types)
         eddies_gained = self._calc_eddies(count, minimum)

@@ -1227,9 +1227,18 @@ class BSEddiesPredict(BSEddies):
 
         user_dict = self.user_points.find_user(ctx.author.id, ctx.guild_id)
 
-        eddies = self.manager.calc_individual(ctx.author.id, user_dict, results, ctx.guild_id, False)
+        eddies, breakdown = self.manager.calc_individual(ctx.author.id, user_dict, results, ctx.guild_id, False)
 
-        await ctx.send(content=f"You're estimated to gain `{eddies}` today.", hidden=True)
+        message = (
+            f"You're estimated to gain `{eddies}` today.\n"
+            f"\n"
+            f"The breakdown is as follows:"
+        )
+
+        for key in breakdown:
+            message += f"\n - `{key}`  :  **{breakdown[key]}**"
+
+        await ctx.send(content=message, hidden=True)
 
 
 class BSEddiesAdminGive(BSEddies):

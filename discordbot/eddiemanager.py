@@ -91,18 +91,18 @@ class BSEddiesManager(object):
 
         if not user_results:
             if minimum == 0:
-                return 0
+                return 0, {}
 
             if minimum < 0:
                 if real:
                     self.user_points.set_daily_minimum(user, guild_id, 0)
-                return 0
+                return 0, {}
 
             minimum -= 1
             if real:
                 self.user_points.decrement_daily_minimum(user, guild_id, 1)
             if minimum == 0:
-                return 0
+                return 0, {}
         else:
             if minimum != 4:
                 minimum = 4
@@ -134,7 +134,10 @@ class BSEddiesManager(object):
         eddies_gained = self._calc_eddies(count, minimum)
 
         eddies_gained = math.floor(eddies_gained)
-        return eddies_gained
+
+        count["daily"] = minimum
+
+        return eddies_gained, count
 
     def give_out_eddies(self, guild_id=181098823228063764):
         """
@@ -163,7 +166,7 @@ class BSEddiesManager(object):
 
             user_results = [r for r in results if r["user_id"] == user]
 
-            eddies_gained = self.calc_individual(user, user_dict[user], user_results, guild_id, True)
+            eddies_gained, breakdown = self.calc_individual(user, user_dict[user], user_results, guild_id, True)
 
             if eddies_gained == 0:
                 continue

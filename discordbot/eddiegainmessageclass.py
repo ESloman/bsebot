@@ -5,7 +5,7 @@ from typing import List
 import discord
 from discord.ext import tasks, commands
 
-from discordbot.constants import CREATOR
+from discordbot.constants import CREATOR, HUMAN_MESSAGE_TYPES
 from mongo.bsepoints import UserPoints
 
 
@@ -53,26 +53,34 @@ class EddieGainMessager(commands.Cog):
         msg = f"Eddie gain summary:\n"
         for user_id in eddie_dict:
 
-            if eddie_dict[user_id] == 0:
+            value = eddie_dict[user_id][0]
+            breakdown = eddie_dict[user_id][1]
+
+            if value == 0:
                 continue
 
             try:
                 user = await guild.fetch_member(int(user_id))  # type: discord.Member
             except discord.NotFound:
-                msg += f"\n- `{user_id}` :  **{eddie_dict[user_id]}**"
+                msg += f"\n- `{user_id}` :  **{value}**"
                 continue
 
             roles = user.roles  # type: List[discord.Role]
 
-            msg += f"\n- `{user_id}` {user.display_name} :  **{eddie_dict[user_id]}**"
-            text = f"Your daily salary of BSEDDIES is `{eddie_dict[user_id]}`.\n"
+            msg += f"\n- `{user_id}` {user.display_name} :  **{value}**"
+            text = f"Your daily salary of BSEDDIES is `{value}`.\n"
 
-            self.logger.info(f"{user.display_name} is gaining `{eddie_dict[user_id]} eddies`")
+            text += f"\nThis is based on the following amount of interactivity yesterday:"
+
+            for key in sorted(breakdown):
+                text += f"\n - `{HUMAN_MESSAGE_TYPES[key]}`  :  **{breakdown[key]}**"
+
+            self.logger.info(f"{user.display_name} is gaining `{value} eddies`")
 
             user_dict = self.user_points.find_user(int(user_id), guild_id)
 
             if user_dict.get("daily_eddies"):
-                self.logger.info(f"Sending message to {user.display_name} for {eddie_dict[user_id]}")
+                self.logger.info(f"Sending message to {user.display_name} for {value}")
                 try:
                     await user.send(content=text)
                 except discord.Forbidden:

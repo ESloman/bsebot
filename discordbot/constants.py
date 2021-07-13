@@ -19,6 +19,21 @@ MESSAGE_TYPES = [
     "reply_received"
 ]
 
+HUMAN_MESSAGE_TYPES = {
+    "message": "Messages",
+    "reply": "Replies to messages",
+    "attachment": "Attachments sent",
+    "role_mention": "Role mentions",
+    "channel_mention": "Channel mentions",
+    "mention": "Mentions",
+    "everyone_mention": "Everyone mentions",
+    "gif": "Gifs sent",
+    "link": "Links sent",
+    "reaction_received": "Reactions received",
+    "reply_received": "Replies received",
+    "daily": "Daily minimum"
+}
+
 MESSAGE_VALUES = {
     "message": 0.15,
     "reply": 0.2,

@@ -172,7 +172,7 @@ class BSEddiesManager(object):
                 continue
 
             self.user_points.increment_points(user, guild_id, eddies_gained)
-            eddie_gain_dict[user] = eddies_gained
+            eddie_gain_dict[user] = (eddies_gained, breakdown)
             self.user_points.append_to_transaction_history(
                 user,
                 guild_id,

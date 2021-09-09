@@ -704,7 +704,7 @@ class CommandManager(object):
             await self.bseddies_create.handle_bet_creation(
                 ctx, bet_title,
                 outcome_one, outcome_two, outcome_three, outcome_four, outcome_five, outcome_six,
-                timeout
+                timeout_str=timeout
             )
 
         @self.slash.subcommand(
@@ -875,6 +875,7 @@ class CommandManager(object):
                     required=True,
                     choices=[
                         manage_commands.create_choice("valorant", "Valorant"),
+                        manage_commands.create_choice("pook", "Pook")
                     ]
                 ),
             ],

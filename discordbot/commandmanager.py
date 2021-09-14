@@ -878,18 +878,30 @@ class CommandManager(object):
                         manage_commands.create_choice("pook", "Pook")
                     ]
                 ),
+                manage_commands.create_option(
+                    name="timeout",
+                    description=("How long should betting be open for? Must be DIGITS + (s|m|h|d). "
+                                 "Examples: 15m, 2d, 6h, etc"),
+                    option_type=3,
+                    required=False
+                )
             ],
             guild_ids=guilds
         )
-        async def autogenerate_bets(ctx: discord_slash.context.SlashContext, scenario_type: str) -> None:
+        async def autogenerate_bets(
+                ctx: discord_slash.context.SlashContext,
+                scenario_type: str,
+                timeout: str,
+        ) -> None:
             """
 
             :param ctx:
             :param scenario_type:
+            :param timeout:
             :return:
             """
             await ctx.defer(hidden=True)
-            await self.bseddies_autogen.generate_bets(ctx, scenario_type)
+            await self.bseddies_autogen.generate_bets(ctx, scenario_type, timeout)
 
         @self.slash.subcommand(
             base="bseddies",

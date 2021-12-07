@@ -55,7 +55,7 @@ class GameServers(BestSummerEverGameServersDB):
 
         :return:
         """
-        return self.query({}, as_gen=False)
+        return self.query({"display": True}, as_gen=False)
 
 
 class GameServerInfo(BestSummerEverGameServersDB):

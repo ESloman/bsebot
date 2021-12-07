@@ -377,11 +377,8 @@ class CommandManager(object):
                         "valheim", "Valheim"
                     ),
                     manage_commands.create_choice(
-                        "minecraft_base", "Minecraft Vanilla"
+                        "minecraft_1.18", "Minecraft 1.18"
                     ),
-                    manage_commands.create_choice(
-                        "minecraft_hardcore", "Minecraft Hardcore"
-                    )
                 ]
             ), ]
         )
@@ -411,11 +408,8 @@ class CommandManager(object):
                         "valheim", "Valheim"
                     ),
                     manage_commands.create_choice(
-                        "minecraft_base", "Minecraft Vanilla"
+                        "minecraft_1.18", "Minecraft 1.18"
                     ),
-                    manage_commands.create_choice(
-                        "minecraft_hardcore", "Minecraft Hardcore"
-                    )
                 ]
             ), ]
         )

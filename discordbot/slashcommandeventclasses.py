@@ -1512,11 +1512,13 @@ class BSEToggleGameService(BaseEvent):
             "valheim": "sudo systemctl start valheimserver.service",
             "minecraft_base": "docker start bse_mc_base",
             "minecraft_hardcore": "docker start bse_mc_hardcore_iii",
+            "minecraft_1.18": "docker start bse_mc_1.18"
         }
         self.toggle_off_commands = {
             "valheim": "sudo systemctl stop valheimserver.service",
             "minecraft_base": "docker stop bse_mc_base",
             "minecraft_hardcore": "docker stop bse_mc_hardcore_iii",
+            "minecraft_1.18": "docker stop bse_mc_1.18",
         }
 
     async def toggle_game_service(

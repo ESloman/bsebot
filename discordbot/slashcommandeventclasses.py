@@ -1560,7 +1560,13 @@ class BSEToggleGameService(BaseEvent):
         cmd = cmd_d[server]
         try:
             async with asyncssh.connect("awsgames") as conn:
+                if server == "minecraft_1.18":
+                    if not toggle:
+                        await conn.run("sudo systemctl stop updater.service")
                 result = await conn.run(cmd, check=True)
+                if server == "minecraft_1.18":
+                    if toggle:
+                        await conn.run("sudo systemctl start updater.service")
         except ConnectionRefusedError:
             await ctx.send(
                 content="The instance isn't 'running' yet - please start the server or give it a minute",

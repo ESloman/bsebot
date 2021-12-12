@@ -145,7 +145,7 @@ class ServerInfo(commands.Cog):
                 self.aws.stop_instance(AWS_GAME_SERVER_INSTANCE)
             elif (datetime.datetime.now() - last_conn).total_seconds() > 300:
                 self.aws.stop_instance(AWS_GAME_SERVER_INSTANCE)
-        elif names:
+        elif names and up_time.total_seconds() > 300:
             if not any([name in self.safe_mc_plys for name in names]):
                 self.logger.info("Shutting down server - no 'safe' players still online")
                 self.aws.stop_instance(AWS_GAME_SERVER_INSTANCE)

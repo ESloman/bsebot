@@ -16,6 +16,13 @@ from mongo.bsegames import GameServers, GameServerInfo
 
 
 class ServerInfo(commands.Cog):
+    safe_mc_plys = [
+        "MCShaw94",
+        "bimpleton",
+        "ESloman",
+        "Il_Tasso"
+    ]
+
     def __init__(self, bot: discord.Client, logger):
         self.bot = bot
         self.embed_manager = EmbedManager(logger)
@@ -106,6 +113,8 @@ class ServerInfo(commands.Cog):
         if all_game_servers:
             message += "\n\n**Services**:\n"
 
+        names = []
+
         for server in all_game_servers:
             message += f"\n*----*\n"
             s_message = f"`Game`: _{server['game'].title()}_\n`Server`: _{server['name']}_"
@@ -119,9 +128,10 @@ class ServerInfo(commands.Cog):
                 s_message += add_details
                 players_connected += plys
             elif server["type"] == "minecraft":
-                add_details, plys = await self.format_minecraft_server(server)
+                add_details, plys, plys_names = await self.format_minecraft_server(server)
                 s_message += add_details
                 players_connected += plys
+                names.extend(plys_names)
 
             message += s_message
             message += "\n"
@@ -134,6 +144,10 @@ class ServerInfo(commands.Cog):
             if not last_conn:
                 self.aws.stop_instance(AWS_GAME_SERVER_INSTANCE)
             elif (datetime.datetime.now() - last_conn).total_seconds() > 300:
+                self.aws.stop_instance(AWS_GAME_SERVER_INSTANCE)
+        elif names:
+            if not any([name in self.safe_mc_plys for name in names]):
+                self.logger.info("Shutting down server - no 'safe' players still online")
                 self.aws.stop_instance(AWS_GAME_SERVER_INSTANCE)
 
         message += f"\n\nThis message is updated every minute or so when the server is online."
@@ -200,7 +214,7 @@ class ServerInfo(commands.Cog):
             for ply in query.players.names:
                 server_message += f"\n - {ply}"
 
-        return server_message, query.players.online
+        return server_message, query.players.online, query.players.names
 
     @server_info.before_loop
     async def before_server_info(self):

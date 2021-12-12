@@ -200,7 +200,7 @@ class ServerInfo(commands.Cog):
             query = None
 
         if not query:
-            return f"\n`Status`: :red_circle: _Offline_", 0
+            return f"\n`Status`: :red_circle: _Offline_", 0, []
 
         server_message = (
             f"\n`Status`: :green_circle: _Online_\n"

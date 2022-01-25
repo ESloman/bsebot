@@ -379,6 +379,9 @@ class CommandManager(object):
                     manage_commands.create_choice(
                         "minecraft_1.18", "Minecraft 1.18"
                     ),
+                    manage_commands.create_choice(
+                        "project_zomboid", "Project Zomboid"
+                    ),
                 ]
             ), ]
         )
@@ -409,6 +412,9 @@ class CommandManager(object):
                     ),
                     manage_commands.create_choice(
                         "minecraft_1.18", "Minecraft 1.18"
+                    ),
+                    manage_commands.create_choice(
+                        "project_zomboid", "Project Zomboid"
                     ),
                 ]
             ), ]

@@ -16,7 +16,9 @@ MESSAGE_TYPES = [
     "gif",
     "link",
     "reaction_received",
-    "reply_received"
+    "reply_received",
+    "wordle",
+    "wordle_win"
 ]
 
 HUMAN_MESSAGE_TYPES = {
@@ -31,7 +33,9 @@ HUMAN_MESSAGE_TYPES = {
     "link": "Links sent",
     "reaction_received": "Reactions received",
     "reply_received": "Replies received",
-    "daily": "Daily minimum"
+    "daily": "Daily minimum",
+    "wordle": "Wordle",
+    "wordle_win": "Wordle Victory"
 }
 
 MESSAGE_VALUES = {
@@ -45,7 +49,18 @@ MESSAGE_VALUES = {
     "link": 1.2,
     "attachment": 1.2,
     "reaction_received": 2,
-    "reply_received": 1
+    "reply_received": 1,
+    "wordle": 2
+}
+
+WORDLE_VALUES = {
+    6: 0,
+    5: 1,
+    4: 2,
+    3: 3,
+    2: 5,
+    1: 0,
+    "X": 0
 }
 
 BET_OUTCOME_COUNT_MODIFIER = {

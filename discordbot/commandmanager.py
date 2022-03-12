@@ -125,7 +125,7 @@ class CommandManager(object):
         self.eddie_gain_message_task = EddieGainMessager(self.client, guilds, self.logger)
         self.eddie_king_task = BSEddiesKingTask(self.client, guilds, self.logger)
         self.loan_collections = BSEddiesLoanCollections(self.client, guilds, self.logger)
-        self.inactive_users = BSEddiesInactiveUsers(self.client, guilds, self.logger)
+        # self.inactive_users = BSEddiesInactiveUsers(self.client, guilds, self.logger)
         self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger, self.giphy_token)
         self.server_info = ServerInfo(self.client, self.logger)
 

@@ -173,7 +173,7 @@ class BSEddiesManager(object):
 
             try:
                 wordle_message = [w for w in user_results if "wordle" in w["message_type"]][0]
-                result = re.search("\d\/\d", wordle_message).group()
+                result = re.search("\d\/\d", wordle_message["content"]).group()
                 guesses = result.split("/")[0]
 
                 if guesses != "X":
@@ -199,12 +199,14 @@ class BSEddiesManager(object):
             eddie_gain_dict[user] = (eddies_gained, breakdown)
 
         # do wordle here
-        wordle_messages = sorted(wordle_messages, key=lambda x: x[1], reverse=True)
-        top_guess = wordle_messages[0][1]
-        for wordle_attempt in wordle_messages:
-            if wordle_attempt[1] == top_guess:
-                eddie_gain_dict[wordle_attempt[0]][0] += 5
-                eddie_gain_dict[wordle_attempt[0]][1]["wordle_win"] = 1
+        if wordle_messages:
+            wordle_messages = sorted(wordle_messages, key=lambda x: x[1], reverse=True)
+            top_guess = wordle_messages[0][1]
+            for wordle_attempt in wordle_messages:
+                if wordle_attempt[1] == top_guess:
+                    gain_dict = eddie_gain_dict[wordle_attempt[0]][1]
+                    gain_dict["wordle_win"] = 1
+                    eddie_gain_dict[wordle_attempt[0]] = (eddie_gain_dict[wordle_attempt[0]][0] + 5, gain_dict)
 
         for _user in eddie_gain_dict:
             if _user == "guild":

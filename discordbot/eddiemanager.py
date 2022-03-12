@@ -3,13 +3,14 @@ import json
 import logging
 import math
 import os
+import re
 import sys
 
 from collections import Counter
 from logging.handlers import RotatingFileHandler
 
 from discordbot.bot_enums import TransactionTypes
-from discordbot.constants import MESSAGE_TYPES, MESSAGE_VALUES
+from discordbot.constants import MESSAGE_TYPES, MESSAGE_VALUES, WORDLE_VALUES
 from mongo.bsepoints import UserPoints, UserInteractions
 
 
@@ -161,6 +162,8 @@ class BSEddiesManager(object):
         user_dict = {u["uid"]: u for u in users}
 
         eddie_gain_dict = {"guild": guild_id}
+        wordle_messages = []
+
         for user in user_ids:
             self.logger.info(f"processing {user}")
 
@@ -168,21 +171,56 @@ class BSEddiesManager(object):
 
             eddies_gained, breakdown = self.calc_individual(user, user_dict[user], user_results, guild_id, True)
 
+            try:
+                wordle_message = [w for w in user_results if "wordle" in w["message_type"]][0]
+                result = re.search("\d\/\d", wordle_message).group()
+                guesses = result.split("/")[0]
+
+                if guesses != "X":
+                    guesses = int(guesses)
+
+                wordle_value = WORDLE_VALUES[guesses]
+                eddies_gained += wordle_value
+
+                if "wordle" not in breakdown:
+                    breakdown["wordle"] = 3
+
+                breakdown["wordle"] += eddies_gained
+
+                if guesses != "X":
+                    wordle_messages.append((user, guesses))
+
+            except Exception as e:
+                self.logger.info(e)
+
             if eddies_gained == 0:
                 continue
 
-            self.user_points.increment_points(user, guild_id, eddies_gained)
             eddie_gain_dict[user] = (eddies_gained, breakdown)
+
+        # do wordle here
+        wordle_messages = sorted(wordle_messages, key=lambda x: x[1], reverse=True)
+        top_guess = wordle_messages[0][1]
+        for wordle_attempt in wordle_messages:
+            if wordle_attempt[1] == top_guess:
+                eddie_gain_dict[wordle_attempt[0]][0] += 5
+                eddie_gain_dict[wordle_attempt[0]][1]["wordle_win"] = 1
+
+        for _user in eddie_gain_dict:
+            if _user == "guild":
+                continue
+            self.user_points.increment_points(_user, guild_id, eddie_gain_dict[_user][0])
+
             self.user_points.append_to_transaction_history(
-                user,
+                _user,
                 guild_id,
                 {
                     "type": TransactionTypes.DAILY_SALARY,
-                    "amount": eddies_gained,
+                    "amount": eddie_gain_dict[_user][0],
                     "timestamp": datetime.datetime.now(),
                 }
             )
-            self.logger.info(f"{user} gained {eddies_gained}")
+            self.logger.info(f"{_user} gained {eddie_gain_dict[_user][0]}")
 
         with open(os.path.join(os.path.expanduser("~"), "eddies_gained.json"), "w+") as f:
             json.dump(eddie_gain_dict, f)

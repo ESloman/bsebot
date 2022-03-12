@@ -1,5 +1,6 @@
 import datetime
 import discord
+import re
 
 from discord.emoji import Emoji
 
@@ -345,23 +346,33 @@ class OnMessage(BaseEvent):
             self.user_interactions.add_reply_to_message(
                 message.reference.message_id, message.id, guild_id, user_id, message.created_at, message_content
             )
-        elif message.attachments:
+
+        if message.attachments:
             message_type.append("attachment")
-        elif message.role_mentions:
+
+        if message.role_mentions:
             message_type.append("role_mention")
-        elif message.channel_mentions:
+
+        if message.channel_mentions:
             message_type.append("channel_mention")
-        elif message.mentions:
+
+        if message.mentions:
             message_type.append("mention")
-        elif message.mention_everyone:
+
+        if message.mention_everyone:
             message_type.append("everyone_mention")
-        elif "https://" in message.content or "http://" in message_content:
+
+        if "https://" in message.content or "http://" in message_content:
             if "gif" in message.content:
                 message_type.append("gif")
             else:
                 message_type.append("link")
-        else:
+
+        if not message.attachments:
             message_type.append("message")
+
+        if re.match("Wordle \d?\d\d\d \d\/\d\\n\\n", message.content):
+            message_type.append("wordle")
 
         self.user_interactions.add_entry(
             message.id,

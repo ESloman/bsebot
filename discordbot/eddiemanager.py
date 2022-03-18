@@ -185,7 +185,7 @@ class BSEddiesManager(object):
                 if "wordle" not in breakdown:
                     breakdown["wordle"] = 3
 
-                breakdown["wordle"] += eddies_gained
+                breakdown["wordle"] += wordle_value
 
                 if guesses != "X":
                     wordle_messages.append((user, guesses))

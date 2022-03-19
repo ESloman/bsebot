@@ -200,7 +200,7 @@ class BSEddiesManager(object):
 
         # do wordle here
         if wordle_messages:
-            wordle_messages = sorted(wordle_messages, key=lambda x: x[1], reverse=True)
+            wordle_messages = sorted(wordle_messages, key=lambda x: x[1])
             top_guess = wordle_messages[0][1]
             for wordle_attempt in wordle_messages:
                 if wordle_attempt[1] == top_guess:

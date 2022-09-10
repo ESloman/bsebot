@@ -16,7 +16,7 @@ class OnReadyEvent(BaseEvent):
     """
     Class for handling on_ready event
     """
-    def __init__(self, client, guild_ids, logger, beta_mode=False):
+    def __init__(self, client: discord.Bot, guild_ids, logger, beta_mode=False):
         super().__init__(client, guild_ids, logger, beta_mode=beta_mode)
 
     async def on_ready(self) -> None:
@@ -59,6 +59,29 @@ class OnReadyEvent(BaseEvent):
                 if not user.get("daily_eddies"):
                     the_boys_role = [role for role in member.roles if role == THE_BOYS_ROLE]
                     self.user_points.set_daily_eddies_toggle(member.id, guild.id, bool(the_boys_role))
+
+            await guild.fetch_emojis()
+            # sort out emojis
+            emojis_list = []
+            for emoji in guild.emojis:
+                emoji_obj = await guild.fetch_emoji(emoji.id)
+                print(f"{emoji_obj.user}: {emoji_obj.name}")
+
+            # join all threads
+            for channel in guild.channels:
+                if type(channel) not in [discord.channel.TextChannel]:
+                    continue
+
+                if threads := channel.threads:
+                    for thread in threads:
+                        if thread.archived or thread.locked:
+                            continue
+
+                        await thread.fetch_members()
+
+                        if self.client.user.id not in [member.id for member in thread.members]:
+                            await thread.join()
+                            print(f"Joined {thread.name}")
 
         self.logger.info("Finished member check.")
 
@@ -322,12 +345,13 @@ class OnMessage(BaseEvent):
         super().__init__(client, guild_ids, logger, beta_mode=beta_mode)
         self.user_interactions = UserInteractions()
 
-    async def message_received(self, message: discord.Message):
+    async def message_received(self, message: discord.Message, message_type_only=False):
         """
         Main method for handling when we receive a message.
         Mostly just extracts data and puts it into the DB.
         We also work out what "type" of message it is.
         :param message:
+        :param message_type_only:
         :return:
         """
 
@@ -342,22 +366,31 @@ class OnMessage(BaseEvent):
         message_type = []
 
         if message.reference:
-            message_type.append("reply")
-            self.user_interactions.add_reply_to_message(
-                message.reference.message_id, message.id, guild_id, user_id, message.created_at, message_content
-            )
+            referenced_message = self.client.get_message(message.reference.message_id)  # type: discord.Message
+            if not referenced_message:
+                referenced_message = await message.channel.fetch_message(message.reference.message_id)
+            if referenced_message.author.id != user_id:
+                message_type.append("reply")
+                self.user_interactions.add_reply_to_message(
+                    message.reference.message_id, message.id, guild_id, user_id, message.created_at, message_content
+                )
 
         if message.attachments:
             message_type.append("attachment")
 
-        if message.role_mentions:
-            message_type.append("role_mention")
+        if role_mentions := message.role_mentions:
+            for _ in role_mentions:
+                message_type.append("role_mention")
 
-        if message.channel_mentions:
-            message_type.append("channel_mention")
+        if channel_mentions := message.channel_mentions:
+            for _ in channel_mentions:
+                message_type.append("channel_mention")
 
-        if message.mentions:
-            message_type.append("mention")
+        if mentions := message.mentions:
+            for mention in mentions:
+                if mention.id == user_id:
+                    continue
+                message_type.append("mention")
 
         if message.mention_everyone:
             message_type.append("everyone_mention")
@@ -373,6 +406,9 @@ class OnMessage(BaseEvent):
 
         if re.match("Wordle \d?\d\d\d \d\/\d\\n\\n", message.content):
             message_type.append("wordle")
+
+        if message_type_only:
+            return message_type
 
         self.user_interactions.add_entry(
             message.id,
@@ -412,3 +448,64 @@ class OnDirectMessage(BaseEvent):
         elif [a for a in self.rude if a in message_content.lower()]:
             gif = await self.giphyapi.random_gif("shocked")
             await message.author.send(content=gif)
+
+
+class OnThreadCreate(BaseEvent):
+    """
+        Class for handling on_thread_create event
+        """
+
+    def __init__(self, client: discord.Bot, guild_ids, logger, beta_mode=False):
+        super().__init__(client, guild_ids, logger, beta_mode=beta_mode)
+        self.user_interactions = UserInteractions()
+        self.on_message = OnMessage(client, guild_ids, logger, beta_mode)
+
+    async def on_thread_create(self, thread: discord.Thread) -> None:
+        """
+        Method called for on_ready event. Makes sure we have an entry for every user in each guild.
+        :return: None
+        """
+        await thread.join()
+        print(f"Joined {thread.name}")
+
+        if not thread.starting_message:
+            starting_message = await thread.fetch_message(thread.id)  # type: discord.Message
+        else:
+            starting_message = thread.starting_message  # type: discord.Message
+
+        message_type = await self.on_message.message_received(starting_message, True)
+        message_type.extend("thread_create")
+
+        self.user_interactions.add_entry(
+            thread.id,
+            thread.guild.id,
+            thread.owner_id,
+            thread.parent_id,
+            message_type,
+            starting_message.content,
+            thread.created_at
+        )
+
+
+class OnThreadUpdate(BaseEvent):
+    """
+    Class for handling on_thread_update event
+    """
+
+    def __init__(self, client: discord.Bot, guild_ids, logger, beta_mode=False):
+        super().__init__(client, guild_ids, logger, beta_mode=beta_mode)
+
+    async def on_update(self, before: discord.Thread, after: discord.Thread):
+        """
+
+        :param before:
+        :param after:
+        :return:
+        """
+        if before.archived and not after.archived:
+            print(f"Thread has been unarchived - joining")
+            thread_members = await after.fetch_members()
+            member_ids = [member.id for member in thread_members]
+            if self.client.user.id not in member_ids:
+                await after.join()
+                print(f"Joining unarchived thread")

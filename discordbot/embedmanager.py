@@ -86,9 +86,6 @@ class EmbedManager(object):
                 continue
             message += f"\n**{users.index(user) + 1})**  {name}  :  {user['points']}"
 
-        if number < 6:
-            message += "\n\n :arrow_forward: for longer list"
-
         return message
 
     def get_highscore_embed(self, guild: discord.Guild, number: Union[int, None]):
@@ -119,9 +116,6 @@ class EmbedManager(object):
             except AttributeError:
                 continue
             message += f"\n**{users.index(user) + 1})**  {name}  :  {user.get('high_score', 0)}"
-
-        if number < 6:
-            message += "\n\n :arrow_forward: for longer list"
 
         return message
 

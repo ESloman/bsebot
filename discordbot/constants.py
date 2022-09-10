@@ -35,7 +35,8 @@ HUMAN_MESSAGE_TYPES = {
     "reply_received": "Replies received",
     "daily": "Daily minimum",
     "wordle": "Wordle",
-    "wordle_win": "Wordle Victory"
+    "wordle_win": "Wordle Victory",
+    "thread_create": "Thread Create"
 }
 
 MESSAGE_VALUES = {
@@ -50,7 +51,8 @@ MESSAGE_VALUES = {
     "attachment": 1.2,
     "reaction_received": 2,
     "reply_received": 1,
-    "wordle": 2
+    "wordle": 2,
+    "thread_create": 2
 }
 
 WORDLE_VALUES = {

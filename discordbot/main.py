@@ -94,7 +94,7 @@ if __name__ == "__main__":
 
     intents = discord.Intents.all()
 
-    cli = commands.Bot(command_prefix="!", intents=intents)
+    cli = discord.Bot(debug_guilds=IDS, intents=intents)
     com = CommandManager(cli, IDS, logger, beta_mode=BETA_MODE, debug_mode=DEBUG_MODE, giphy_token=GIPHY_TOKEN)
 
     user_bets = UserBets(IDS)

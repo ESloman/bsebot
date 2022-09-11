@@ -23,17 +23,20 @@ class BSEddiesKingTask(commands.Cog):
         """
         self.king_checker.cancel()
 
-    @tasks.loop(minutes=2)
+    @tasks.loop(minutes=1)
     async def king_checker(self):
         """
         Loop that makes sure the King is assigned correctly
         :return:
         """
         for guild_id in self.guilds:
-            guild_obj = self.bot.get_guild(guild_id)  # type: discord.Guild
+            guild_obj = await self.bot.fetch_guild(guild_id)  # type: discord.Guild
+            guild = self.bot.get_guild(guild_id)
+            member_ids = [member.id for member in guild.members]
+
             role_id = BSEDDIES_KING_ROLES[guild_id]
 
-            role = guild_obj.get_role(role_id)  # type: discord.Role
+            role = guild.get_role(role_id)  # type: discord.Role
             current_king = None
             prev_king_id = None
             if len(role.members) > 1:
@@ -44,9 +47,14 @@ class BSEddiesKingTask(commands.Cog):
                 current_king = role.members[0].id
 
             users = self.user_points.get_all_users_for_guild(guild_id)
-            users = [u for u in users if not u.get("inactive")]
+            users = [u for u in users if not u.get("inactive") and u["uid"] in member_ids]
             top_user = sorted(users, key=lambda x: x["points"], reverse=True)[0]
-            new = guild_obj.get_member(top_user["uid"])  # type: discord.Member
+
+            if current_king is not None and top_user["uid"] == current_king:
+                # current king is fine
+                return
+
+            new = await guild_obj.fetch_member(top_user["uid"])  # type: discord.Member
 
             if current_king is not None and top_user["uid"] != current_king:
                 prev_king_id = current_king

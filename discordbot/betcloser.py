@@ -4,17 +4,21 @@ import discord
 from discord.ext import tasks, commands
 
 from discordbot.embedmanager import EmbedManager
+from discordbot.views import BetView
 from mongo.bsepoints import UserBets
 
 
 class BetCloser(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger):
+    def __init__(self, bot: discord.Client, guilds, logger, place, close):
         self.bot = bot
         self.guilds = guilds
         self.user_bets = UserBets()
         self.logger = logger
         self.embed_manager = EmbedManager(self.logger)
         self.bet_closer.start()
+
+        self.place = place
+        self.close = close
 
     def cog_unload(self):
         """
@@ -40,11 +44,17 @@ class BetCloser(commands.Cog):
                         # set the bet to no longer active ??
                         self.user_bets.update({"_id": bet["_id"]}, {"$set": {"active": False}})
                         member = guild_obj.get_member(bet["user"])
-                        channel = guild_obj.get_channel(bet["channel_id"])
+                        channel = await guild_obj.fetch_channel(bet["channel_id"])
                         message = await channel.fetch_message(bet["message_id"])  # type: discord.Message
                         bet["active"] = False
+
                         embed = self.embed_manager.get_bet_embed(guild_obj, bet["bet_id"], bet)
-                        await message.edit(embed=embed)
+                        bet_view = BetView(bet, self.place, self.close)
+
+                        # disable bet button
+                        bet_view.children[0].disabled = True
+
+                        await message.edit(embed=embed, view=bet_view)
                         msg = (f"Your bet `{bet['bet_id']} - {bet['title']}` (<{message.jump_url}>) "
                                f"is now closed for bets and is waiting a result from you.")
                         if not member.dm_channel:

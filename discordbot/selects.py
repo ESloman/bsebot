@@ -77,13 +77,14 @@ class BetOutcomesSelect(Select):
         """
         if not outcomes:
             outcomes = ["placeholder1", "placeholder2"]
-
-        options = [
-            SelectOption(label=opt) for opt in outcomes
-        ]
+            options = [
+                SelectOption(label=opt) for opt in outcomes
+            ]
+        else:
+            options = outcomes
 
         super().__init__(
-            disabled=True,
+            disabled=not outcomes,
             placeholder="Select an outcome",
             min_values=1,
             max_values=1,

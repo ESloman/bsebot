@@ -60,6 +60,21 @@ class OnReadyEvent(BaseEvent):
                     the_boys_role = [role for role in member.roles if role == THE_BOYS_ROLE]
                     self.user_points.set_daily_eddies_toggle(member.id, guild.id, bool(the_boys_role))
 
+            member_ids = [member.id for member in guild.members]
+            _users = self.user_points.get_all_users_for_guild(guild_id)
+            _users = [u for u in _users if not u.get("inactive")]
+            for user in _users:
+                if user["uid"] not in member_ids:
+                    self.user_points.update({"_id": user["_id"]}, {"$set": {"inactive": True}})
+                    self.user_points.append_to_activity_history(
+                        user["uid"],
+                        guild_id,
+                        {
+                            "type": ActivityTypes.SERVER_LEAVE,
+                            "timestamp": datetime.datetime.now()
+                        }
+                    )
+
             await guild.fetch_emojis()
             # sort out emojis
             emojis_list = []

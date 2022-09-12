@@ -5,26 +5,20 @@ Each class in this file corresponds to a slash command that we've register in co
 These classes handle most of the logic for them
 """
 
-import copy
 import datetime
-import math
 import os
-import random
 import re
 from typing import Union
 
-import asyncssh
 import discord
 import xlsxwriter
 
-from apis.awsapi import AWSAPI
 from discordbot.betmanager import BetManager
 from discordbot.bot_enums import TransactionTypes, ActivityTypes
 from discordbot.clienteventclasses import BaseEvent
 from discordbot.constants import BETA_USERS, CREATOR, PRIVATE_CHANNEL_IDS, BSEDDIES_KING_ROLES, AWS_GAME_SERVER_INSTANCE
 from discordbot.constants import BSE_SERVER_INFO_CHANNEL, BSE_SERVER_ID, SERVER_ADMINS, HUMAN_MESSAGE_TYPES
 from discordbot.eddiegains import BSEddiesManager
-from discordbot.serverinfotask import ServerInfo
 
 # views
 from discordbot.views import LeaderBoardView, HighScoreBoardView

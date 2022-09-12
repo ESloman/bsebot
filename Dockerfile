@@ -1,4 +1,4 @@
-FROM python:3.10.7-slim
+FROM python:3.10.7
 
 ARG DISCORD_TOKEN
 ARG GIPHY_TOKEN

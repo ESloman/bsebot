@@ -84,7 +84,8 @@ class EmbedManager(object):
                 name = guild.get_member(user["uid"]).name
             except AttributeError:
                 continue
-            message += f"\n**{users.index(user) + 1})**  {name}  :  {user['points']}"
+            if user["points"] != 10:
+                message += f"\n**{users.index(user) + 1})**  {name}  :  {user['points']}"
 
         return message
 
@@ -115,7 +116,8 @@ class EmbedManager(object):
                 name = guild.get_member(user["uid"]).name
             except AttributeError:
                 continue
-            message += f"\n**{users.index(user) + 1})**  {name}  :  {user.get('high_score', 0)}"
+            if user["points"] != 10:
+                message += f"\n**{users.index(user) + 1})**  {name}  :  {user.get('high_score', 0)}"
 
         return message
 

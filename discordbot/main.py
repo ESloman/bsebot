@@ -93,7 +93,14 @@ if __name__ == "__main__":
 
     intents = discord.Intents.all()
 
-    cli = discord.Bot(debug_guilds=IDS, intents=intents)
+    listening_activity = discord.Activity(
+        name="conversations",
+        state="Listening",
+        type=discord.ActivityType.listening,
+        details="Waiting for commands!"
+    )
+
+    cli = discord.Bot(debug_guilds=IDS, intents=intents, activity=listening_activity)
     com = CommandManager(cli, IDS, logger, beta_mode=BETA_MODE, debug_mode=DEBUG_MODE, giphy_token=GIPHY_TOKEN)
 
     user_bets = UserBets(IDS)

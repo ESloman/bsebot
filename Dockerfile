@@ -9,7 +9,7 @@ COPY ./* /home/app/
 
 ENV PYTHONPATH=/home/app/
 
-RUN pip install -f home/app/requirements.txt
+RUN pip install -r home/app/requirements.txt
 
 RUN touch /home/app/discordbot/.env \
     && echo "DEBUG_MODE=1" >> /home/app/discordbot/.env \

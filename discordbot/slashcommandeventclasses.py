@@ -339,7 +339,7 @@ class BSEddiesCloseBet(BSEddies):
         if not bet_ids:
             bet_ids = self.user_bets.query(
                 {"closed": None, "guild_id": ctx.guild_id, "user": ctx.user.id},
-                projection={"bet_id": True, "title": True, "created": True}
+                projection={"bet_id": True, "title": True, "created": True, "option_dict": True}
             )
 
         if len(bet_ids) == 0:
@@ -665,7 +665,7 @@ class BSEddiesPlaceBet(BSEddies):
         if not bet_ids:
             bet_ids = self.user_bets.query(
                 {"active": True, "guild_id": ctx.guild_id},
-                projection={"bet_id": True, "title": True}
+                projection={"bet_id": True, "title": True, "option_dict": True}
             )
 
         if len(bet_ids) == 0:

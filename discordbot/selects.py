@@ -136,11 +136,12 @@ class BetSelectAmount(Select):
             SelectOption(label=f"{user_eddies} - ALL your eddies", value=f"{user_eddies}")
         )
 
+        new_opts = []
         for opt in options:
-            if int(opt.value) > user_eddies:
-                options.remove(opt)
+            if int(opt.value) <= int(user_eddies):
+                new_opts.append(opt)
 
-        options = sorted(options, key=lambda x: int(x.value))
+        options = sorted(new_opts, key=lambda x: int(x.value))
 
         super().__init__(
             disabled=True,

@@ -12,7 +12,6 @@ from logging.handlers import RotatingFileHandler
 
 import discord
 import dotenv
-from discord.ext import commands
 
 from discordbot.commandmanager import CommandManager
 from discordbot.constants import SLOMAN_SERVER_ID, BSE_SERVER_ID

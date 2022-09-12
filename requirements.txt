@@ -4,7 +4,7 @@ python-dotenv~=0.21.0
 pymongo~=4.2.0
 inflect~=6.0.0
 xlsxwriter~=3.0.3
-a2s
-boto3
-mcstatus
-asyncssh
+a2s~=1.01
+boto3~=1.24.70
+mcstatus~=9.4.2
+asyncssh~=2.12.0

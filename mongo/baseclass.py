@@ -49,7 +49,7 @@ class BaseClass(object):
         :param document: document(s) to insert as dict or list of dicts
         :return: list of inserted IDs
         """
-        if not self.vault:
+        if self.vault is None:
             raise NoVaultError("No vault instantiated.")
         if not isinstance(document, (list, dict)):
             raise IncorrectDocument("Given document isn't a dictionary or a list.")
@@ -65,7 +65,7 @@ class BaseClass(object):
         :param updated_vals:
         :return: UpdateResult object
         """
-        if not self.vault:
+        if self.vault is None:
             raise NoVaultError("No vault instantiated.")
         rets = interface.update(self.vault, parameters, updated_vals)
         return rets
@@ -77,7 +77,7 @@ class BaseClass(object):
         :param parameters: Parameters to match and delete on. Must be a dictionary.
         :return: number of deleted
         """
-        if not self.vault:
+        if self.vault is None:
             raise NoVaultError("No vault instantiated.")
         rets = interface.delete(self.vault, parameters, many)
         return rets
@@ -107,7 +107,7 @@ class BaseClass(object):
             as_gen : True returns generator (mongoDB cursor obj) and false returns list of results
         Returns a generator (cursor obj) if as_gen else returns a list of results
         """
-        if not self.vault:
+        if self.vault is None:
             raise NoVaultError("No vault instantiated.")
         return interface.query(self.vault, parameters, limit, projection, as_gen)
 
@@ -126,7 +126,7 @@ class BaseClass(object):
         :param field: str of field name to index of
         :return:
         """
-        if not self.vault:
+        if self.vault is None:
             raise NoVaultError("No vault instantiated.")
         return interface.create_index(self.vault, field)
 
@@ -135,7 +135,7 @@ class BaseClass(object):
         Gets a list of indexes on the current collection
         :return:
         """
-        if not self.vault:
+        if self.vault is None:
             raise NoVaultError("No vault instantiated.")
         return interface.get_indexes(self.vault)
 

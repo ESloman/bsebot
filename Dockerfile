@@ -18,4 +18,4 @@ RUN ls -la /home/app/ \
     && echo "DISCORD_TOKEN=${DISCORD_TOKEN}" >> /home/app/discordbot/.env \
     && echo "GIPHY_TOKEN=${GIPHY_TOKEN}" >> /home/app/discordbot/.env
 
-CMD ["python", "/home/app/discordbot.main.py"]
+CMD ["python", "/home/app/discordbot/main.py"]

@@ -16,15 +16,12 @@ from discordbot.clienteventclasses import OnMemberLeave, OnReactionRemove, OnThr
 from discordbot.eddiegains import EddieGainMessager
 from discordbot.eddiekingtask import BSEddiesKingTask
 from discordbot.embedmanager import EmbedManager
-# from discordbot.inactiveusertask import BSEddiesInactiveUsers
-# from discordbot.loancollectiontask import BSEddiesLoanCollections
 # from discordbot.revolutiontask import BSEddiesRevolutionTask
-# from discordbot.serverinfotask import ServerInfo
 from discordbot.slashcommandeventclasses import BSEddiesLeaderboard, BSEddiesView, BSEddiesActive, BSEddiesGift
 from discordbot.slashcommandeventclasses import BSEddiesHighScore, BSEddiesAdminGive
 from discordbot.slashcommandeventclasses import BSEddiesCloseBet, BSEddiesPlaceBet
 from discordbot.slashcommandeventclasses import BSEddiesPending, BSEddiesTransactionHistory
-from discordbot.slashcommandeventclasses import BSEddiesPredict, BSEddiesKing
+from discordbot.slashcommandeventclasses import BSEddiesPredict
 
 from discordbot.modals import BSEddiesBetCreateModal
 from discordbot.views import PlaceABetView

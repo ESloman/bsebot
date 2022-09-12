@@ -16,6 +16,8 @@ RUN ls -la /home/app/ \
     && touch /home/app/discordbot/.env \
     && echo "DEBUG_MODE=1" >> /home/app/discordbot/.env \
     && echo "DISCORD_TOKEN=${DISCORD_TOKEN}" >> /home/app/discordbot/.env \
-    && echo "GIPHY_TOKEN=${GIPHY_TOKEN}" >> /home/app/discordbot/.env
+    && echo "GIPHY_API_TOKEN=${GIPHY_TOKEN}" >> /home/app/discordbot/.env
+
+WORKDIR /home/app/discordbot
 
 CMD ["python", "/home/app/discordbot/main.py"]

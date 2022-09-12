@@ -35,4 +35,6 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: GIPHY_TOKEN=${{ secrets.GIPHY_TOKEN }},DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}
+          build-args: |
+            GIPHY_TOKEN=${{ secrets.GIPHY_TOKEN }}
+            DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}

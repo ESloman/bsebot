@@ -914,7 +914,7 @@ class BSEddiesPredict(BSEddies):
         if not await self._handle_validation(ctx):
             return
 
-        await ctx.defer()
+        await ctx.defer(ephemeral=True)
 
         self._add_event_type_to_activity_history(
             ctx.author, ctx.guild_id, ActivityTypes.BSEDDIES_PREDICT

@@ -9,6 +9,7 @@ from apis.giphyapi import GiphyAPI
 from discordbot.bot_enums import TransactionTypes
 from discordbot.constants import BSEDDIES_KING_ROLES, BSEDDIES_REVOLUTION_CHANNEL
 from discordbot.embedmanager import EmbedManager
+from discordbot.views import RevolutionView
 from mongo.bsepoints import UserPoints
 from mongo.bseticketedevents import RevolutionEvent
 
@@ -31,7 +32,7 @@ class BSEddiesRevolutionTask(commands.Cog):
         """
         self.revolution.cancel()
 
-    @tasks.loop(minutes=5)
+    @tasks.loop(time=datetime.time(hour=16, minute=0, second=0))
     async def revolution(self):
         """
         Constantly checks to make sure that all events have been closed properly or raised correctly
@@ -39,47 +40,54 @@ class BSEddiesRevolutionTask(commands.Cog):
         """
         now = datetime.datetime.now()
 
-        if now.weekday() == 6 and self.revolution.hours == 8:
-            self.logger.info("Changing revolution task interval to 15 minutes.")
-            self.revolution.change_interval(minutes=15, hours=0)
-        elif now.weekday() != 6 and self.revolution.hours != 8:
-            self.logger.info("Changing revolution task interval back to 8 hours.")
-            self.revolution.change_interval(hours=8, minutes=0)
+        if now.weekday() != 6:
+            self.logger.info("Skipping as it's not Sunday")
+            return
 
         for guild_id in self.guilds:
 
-            open_events = self.revolutions.get_open_events(guild_id)
-            for event in open_events:
+            king_user = self.user_points.get_current_king(guild_id)
 
-                message = event.get("message_id")
-                if message is None:
-                    await self.create_event(guild_id, event)
-                    self.logger.info("Changing revolution task interval to 5 minutes.")
-                    self.revolution.change_interval(minutes=5)
-                    continue
+            user_points = king_user["points"]
 
-                if now > event["expired"]:
-                    await self.handle_resolving_bet(guild_id, event)
-                    self.logger.info("Changing revolution task interval to 30 minutes.")
-                    self.revolution.change_interval(minutes=30)
-                    continue
+            event = self.revolutions.create_event(
+                guild_id,
+                datetime.datetime.now(),
+                datetime.datetime.now() + datetime.timedelta(hours=3, minutes=30),
+                king_user["uid"],
+                user_points,
+                BSEDDIES_REVOLUTION_CHANNEL
+            )
 
-                if (event["expired"] - now).total_seconds() < 10800 and not event.get("three_hours"):
-                    await self.send_excited_gif(guild_id, event, "Three hours", "three_hours")
+            message = event.get("message_id")
+            if message is None:
+                await self.create_event(guild_id, event)
+                self.logger.info("Changing revolution task interval to 5 minutes.")
+                self.revolution.change_interval(minutes=5)
+                continue
 
-                elif (event["expired"] - now).total_seconds() < 7200 and not event.get("two_hours"):
-                    await self.send_excited_gif(guild_id, event, "Two hours", "two_hours")
+            if now > event["expired"]:
+                await self.handle_resolving_bet(guild_id, event)
+                self.logger.info("Changing revolution task interval to 30 minutes.")
+                self.revolution.change_interval(time=datetime.time(hour=16, minute=0, second=0))
+                continue
 
-                elif (event["expired"] - now).total_seconds() < 3600 and not event.get("one_hour"):
-                    await self.send_excited_gif(guild_id, event, "One hour", "one_hour")
+            if (event["expired"] - now).total_seconds() < 10800 and not event.get("three_hours"):
+                await self.send_excited_gif(guild_id, event, "Three hours", "three_hours")
 
-                elif (event["expired"] - now).total_seconds() < 1800 and not event.get("half_hour"):
-                    self.logger.info("Changing revolution task interval to 1 minute")
-                    self.revolution.change_interval(minutes=1)
-                    await self.send_excited_gif(guild_id, event, "HALF AN HOUR", "half_hour")
+            elif (event["expired"] - now).total_seconds() < 7200 and not event.get("two_hours"):
+                await self.send_excited_gif(guild_id, event, "Two hours", "two_hours")
 
-                elif (event["expired"] - now).total_seconds() < 900 and not event.get("quarter_hour"):
-                    await self.send_excited_gif(guild_id, event, "15 MINUTES", "quarter_hour")
+            elif (event["expired"] - now).total_seconds() < 3600 and not event.get("one_hour"):
+                await self.send_excited_gif(guild_id, event, "One hour", "one_hour")
+
+            elif (event["expired"] - now).total_seconds() < 1800 and not event.get("half_hour"):
+                self.logger.info("Changing revolution task interval to 1 minute")
+                self.revolution.change_interval(minutes=1)
+                await self.send_excited_gif(guild_id, event, "HALF AN HOUR", "half_hour")
+
+            elif (event["expired"] - now).total_seconds() < 900 and not event.get("quarter_hour"):
+                await self.send_excited_gif(guild_id, event, "15 MINUTES", "quarter_hour")
 
     async def send_excited_gif(self, guild_id: int, event: dict, hours_string: str, key: str):
         """
@@ -95,7 +103,7 @@ class BSEddiesRevolutionTask(commands.Cog):
         channel = [c for c in channels if c.id == event.get("channel_id", BSEDDIES_REVOLUTION_CHANNEL)][0]
         gif = await self.giphy_api.random_gif("celebrate")
         await channel.send(
-            content=f"Just under **{hours_string.upper()}** to go now - remember to buy your tickets! 🎟️🎟️🎟️"
+            content=f"Just under **{hours_string.upper()}** to go now - remember to choose your side!️"
         )
         await channel.send(content=gif)
         self.revolutions.update({"_id": event["_id"]}, {"$set": {key: True}})
@@ -117,13 +125,15 @@ class BSEddiesRevolutionTask(commands.Cog):
         channels = await guild_obj.fetch_channels()
         channel = [c for c in channels if c.id == event.get("channel_id", BSEDDIES_REVOLUTION_CHANNEL)][0]
 
+        revolution_view = RevolutionView(self.bot, event, self.logger)
+
         message = self.embed_manager.get_revolution_message(king_user, role, event)
-        message_obj = await channel.send(content=message)  # type: discord.Message
+        message_obj = await channel.send(content=message, view=revolution_view)  # type: discord.Message
+
         self.revolutions.update(
             {"_id": event["_id"]}, {"$set": {"message_id": message_obj.id, "channel_id": message_obj.channel.id}}
         )
 
-        await message_obj.add_reaction("🎟️")
         gif = await self.giphy_api.random_gif("revolution")
         await channel.send(content=gif)
 
@@ -139,15 +149,16 @@ class BSEddiesRevolutionTask(commands.Cog):
         """
         chance = event["chance"]
         king_id = event.get("king", self.user_points.get_current_king(guild_id)["uid"])
-        ticket_buyers = event["ticket_buyers"]
+        _users = event["users"]
+        revolutionaries = event["revolutionaries"]
         channel_id = event["channel_id"]
 
         guild_obj = await self.bot.fetch_guild(guild_id)
         channels = await guild_obj.fetch_channels()
         channel = [c for c in channels if c.id == channel_id][0]
 
-        if len(ticket_buyers) == 0:
-            message = f"No-one bought a ticket so there are no winners here."
+        if len(_users) == 0:
+            message = f"No-one supported or overthrew the King - nothing happens."
             await channel.send(content=message)
             self.revolutions.close_event(event["event_id"], guild_id, False, 0)
             return
@@ -162,16 +173,12 @@ class BSEddiesRevolutionTask(commands.Cog):
 
         if not success:
             # revolution FAILED
-            eddies = event["eddies_spent"]
-            message = (f"Sadly, our revolution has failed. THE KING LIVES :crown: {king_user.mention} will gain "
-                       f"an additional `{eddies}` eddies. Better luck next week!")
+            message = f"Sadly, our revolution has failed. THE KING LIVES :crown: Better luck next week!"
 
-            self.user_points.increment_points(king_id, guild_id, eddies)
             self.user_points.append_to_transaction_history(
                 king_id, guild_id,
                 {
                     "type": TransactionTypes.REV_TICKET_KING_WIN,
-                    "amount": eddies,
                     "event_id": event["event_id"],
                     "timestamp": datetime.datetime.now(),
                     "comment": "User survived a REVOLUTION",
@@ -183,11 +190,30 @@ class BSEddiesRevolutionTask(commands.Cog):
             king_dict = self.user_points.find_user(king_id, guild_id, projection={"points": True})
             points_to_lose = math.floor(event.get('locked_in_eddies', king_dict["points"]) / 2)
 
-            points_each = math.floor(points_to_lose / len(ticket_buyers))
+            supporters = event["supporters"]
+
+            total_points_to_distribute = points_to_lose
+            for supporter in supporters:
+                supporter_eddies = self.user_points.get_user_points(supporter, guild_id)
+                supporter_eddies_to_lose = math.floor(supporter_eddies * 0.1)
+                total_points_to_distribute += supporter_eddies_to_lose
+                self.user_points.decrement_points(supporter, guild_id, supporter_eddies_to_lose)
+                self.user_points.append_to_transaction_history(
+                    supporter, guild_id,
+                    {
+                        "type": TransactionTypes.SUPPORTER_LOST_REVOLUTION,
+                        "amount": supporter_eddies_to_lose * -1,
+                        "event_id": event["event_id"],
+                        "timestamp": datetime.datetime.now(),
+                        "comment": "Supporter lost a revolution",
+                    }
+                )
+
+            points_each = math.floor(total_points_to_distribute / len(revolutionaries))
 
             message = (f"SUCCESS! THE KING IS DEAD! We have successfully taken eddies away from the KING. "
-                       f"{king_user.mention} will lose **{points_to_lose}** and each ticker holder will gain "
-                       f"`{points_each}`.")
+                       f"{king_user.mention} will lose **{points_to_lose}** and each of their supporters has lost"
+                       f"`10%` of their eddies. Each revolutionary will gain `{points_each}` eddies.")
 
             self.user_points.decrement_points(king_id, guild_id, points_to_lose)
             self.user_points.append_to_transaction_history(
@@ -203,7 +229,7 @@ class BSEddiesRevolutionTask(commands.Cog):
 
             gif = await self.giphy_api.random_gif("celebrate")
 
-            for user_id in ticket_buyers:
+            for user_id in revolutionaries:
                 self.user_points.increment_points(user_id, guild_id, points_each)
                 self.user_points.append_to_transaction_history(
                     user_id, guild_id,

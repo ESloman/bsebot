@@ -8,6 +8,8 @@ from discord.emoji import Emoji
 from discordbot.baseeventclass import BaseEvent
 from discordbot.bot_enums import TransactionTypes, ActivityTypes
 from discordbot.constants import THE_BOYS_ROLE
+from discordbot.views import RevolutionView
+from mongo.bseticketedevents import RevolutionEvent
 from mongo.bsepoints import UserInteractions, ServerEmojis
 
 
@@ -19,6 +21,7 @@ class OnReadyEvent(BaseEvent):
         super().__init__(client, guild_ids, logger, beta_mode=beta_mode)
         self.server_emojis = ServerEmojis()
         self.user_interactions = UserInteractions()
+        self.events = RevolutionEvent()
 
     async def on_ready(self) -> None:
         """
@@ -151,6 +154,14 @@ class OnReadyEvent(BaseEvent):
 
                             await thread.join()
                             print(f"Joined {thread.name}")
+
+            if events := self.events.get_open_events(guild_id):
+                if len(events) > 1:
+                    print(f"???")
+                    continue
+                event = events[0]
+                view = RevolutionView(self.client, event, self.logger)
+                self.client.add_view(view)
 
         self.logger.info("Finished member check.")
 

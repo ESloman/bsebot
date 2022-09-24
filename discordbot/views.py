@@ -177,12 +177,13 @@ class BetView(discord.ui.View):
 
 class RevolutionView(discord.ui.View):
     def __init__(self, client: discord.Client, event: dict, logger):
-        super().__init__()
+        super().__init__(timeout=None)
         self.client = client
         self.event_id = event["event_id"]
         self.revolutions = RevolutionEvent()
         self.user_points = UserPoints()
         self.embeds = EmbedManager(logger)
+        self.logger = logger
 
     def toggle_stuff(self, disable):
         for child in self.children:

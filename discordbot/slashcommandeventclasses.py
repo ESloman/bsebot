@@ -920,12 +920,7 @@ class BSEddiesPredict(BSEddies):
             ctx.author, ctx.guild_id, ActivityTypes.BSEDDIES_PREDICT
         )
 
-        start, end = self.manager.get_datetime_objects()
-
-        start = start + datetime.timedelta(days=1)
-        end = end + datetime.timedelta(days=1)
-
-        eddies_dict = self.manager.give_out_eddies(ctx.guild_id, False)
+        eddies_dict = self.manager.give_out_eddies(ctx.guild_id, False, 0)
 
         eddies = eddies_dict[ctx.author.id][0]
         breakdown = eddies_dict[ctx.author.id][1]

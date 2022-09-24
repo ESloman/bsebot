@@ -128,13 +128,13 @@ class BSEddiesManager(object):
         self.logger = logger
 
     @staticmethod
-    def get_datetime_objects():
+    def get_datetime_objects(days=1):
         """
         Get's the datetime START and END of yesterday
         :return:
         """
         now = datetime.datetime.now()
-        yesterday = now - datetime.timedelta(days=1)
+        yesterday = now - datetime.timedelta(days=days)
         start = yesterday.replace(hour=0, minute=0, second=0)
         end = yesterday.replace(hour=23, minute=59, second=59)
         return start, end
@@ -259,14 +259,15 @@ class BSEddiesManager(object):
 
         return eddies_gained, count
 
-    def give_out_eddies(self, guild_id, real=False):
+    def give_out_eddies(self, guild_id, real=False, days=1):
         """
         Takes all the user IDs for a server and distributes BSEddies to them
         :param guild_id:
         :param real:
+        :param days:
         :return:
         """
-        start, end = self.get_datetime_objects()
+        start, end = self.get_datetime_objects(days)
 
         # query gets all messages yesterday
         results = self.user_interactions.query(

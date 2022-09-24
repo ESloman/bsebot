@@ -914,6 +914,8 @@ class BSEddiesPredict(BSEddies):
         if not await self._handle_validation(ctx):
             return
 
+        await ctx.defer()
+
         self._add_event_type_to_activity_history(
             ctx.author, ctx.guild_id, ActivityTypes.BSEDDIES_PREDICT
         )
@@ -923,25 +925,22 @@ class BSEddiesPredict(BSEddies):
         start = start + datetime.timedelta(days=1)
         end = end + datetime.timedelta(days=1)
 
-        # query gets all messages yesterday
-        results = self.manager.user_interactions.query(
-            {
-                "guild_id": ctx.guild_id,
-                "user_id": ctx.author.id,
-                "timestamp": {"$gt": start, "$lt": end}
-            }
-        )
-
-        user_dict = self.user_points.find_user(ctx.author.id, ctx.guild_id)
-
         eddies_dict = self.manager.give_out_eddies(ctx.guild_id, False)
 
-        user_eddies_dict = eddies_dict[ctx.author.id]
         eddies = eddies_dict[ctx.author.id][0]
         breakdown = eddies_dict[ctx.author.id][1]
+        tax = eddies_dict[ctx.author.id][2]
+
+        king_id = self.user_points.get_current_king(ctx.guild_id)["uid"]
+
+        if king_id == ctx.author.id:
+            tax_message = f"You're estimated to gain `{tax}` from tax gains."
+        else:
+            tax_message = f"You're estimated to be taxed `{tax}` by the KING"
 
         message = (
-            f"You're estimated to gain `{eddies}` today.\n"
+            f"You're estimated to gain `{eddies}` (after tax) today.\n"
+            f"{tax_message}\n"
             f"\n"
             f"This is based on the following amount of interactivity today:"
         )
@@ -949,7 +948,7 @@ class BSEddiesPredict(BSEddies):
         for key in sorted(breakdown):
             message += f"\n - `{HUMAN_MESSAGE_TYPES[key]}`  :  **{breakdown[key]}**"
 
-        await ctx.respond(content=message, ephemeral=True)
+        await ctx.followup.send(content=message, ephemeral=True)
 
 
 class BSEddiesAdminGive(BSEddies):

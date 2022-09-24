@@ -1,7 +1,5 @@
 import datetime
-import json
 import math
-import os
 import re
 from collections import Counter
 from typing import List
@@ -361,7 +359,7 @@ class BSEddiesManager(object):
 
             if _user != current_king_id:
                 # apply tax
-                taxed = eddie_gain_dict[_user][0] * 0.1
+                taxed = math.floor(eddie_gain_dict[_user][0] * 0.1)
                 eddie_gain_dict[_user][0] -= taxed
                 eddie_gain_dict[_user].append(taxed)
                 tax_gains += taxed

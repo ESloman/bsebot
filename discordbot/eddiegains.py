@@ -38,7 +38,7 @@ class EddieGainMessager(commands.Cog):
         self.eddie_distributer.cancel()
 
     @tasks.loop(
-        time=datetime.time(hour=5, minute=0, second=0)
+        time=datetime.time(hour=6, minute=0, second=0)
     )
     async def eddie_distributer(self):
         """
@@ -348,7 +348,7 @@ class BSEddiesManager(object):
                 if wordle_attempt[1] == top_guess:
                     gain_dict = eddie_gain_dict[wordle_attempt[0]][1]
                     gain_dict["wordle_win"] = 1
-                    eddie_gain_dict[wordle_attempt[0]] = (eddie_gain_dict[wordle_attempt[0]][0] + 5, gain_dict)
+                    eddie_gain_dict[wordle_attempt[0]] = [eddie_gain_dict[wordle_attempt[0]][0] + 5, gain_dict]
 
         current_king_id = self.user_points.get_current_king(guild_id)["uid"]
         tax_gains = 0

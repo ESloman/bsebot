@@ -934,7 +934,11 @@ class BSEddiesPredict(BSEddies):
 
         user_dict = self.user_points.find_user(ctx.author.id, ctx.guild_id)
 
-        eddies, breakdown = self.manager.calc_individual(ctx.author.id, user_dict, results, ctx.guild_id, False)
+        eddies_dict = self.manager.give_out_eddies(ctx.guild_id, False)
+
+        user_eddies_dict = eddies_dict[ctx.author.id]
+        eddies = eddies_dict[ctx.author.id][0]
+        breakdown = eddies_dict[ctx.author.id][1]
 
         message = (
             f"You're estimated to gain `{eddies}` today.\n"

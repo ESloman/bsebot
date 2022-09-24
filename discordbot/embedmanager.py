@@ -4,7 +4,6 @@ from typing import Union
 import discord
 import inflect
 
-from discordbot.constants import BSEDDIES_KING_ROLES
 from mongo.bsepoints import UserPoints
 
 
@@ -138,16 +137,14 @@ class EmbedManager(object):
             f"tyranically for far too long and we are now offered a chance to take their BSEddies and knock him down "
             f"a peg or two.\n\n"
             f""
-            f"To do so, we must do it in an orderly fashion. If you would like to participate, please buy a ticket "
-            f"(by reacting appropriately). Each ticket bought will increase our success rate. "
-            f"_**If we are successful**_, the {role.mention}, will have their BSEddies cut in half. The amount of "
-            f"eddies that KING will lose is locked in from this moment onwards. These eddies will be re-distributed "
-            f"amongst those who bought tickets. **_If we fail_**, then the eddies spent on buying tickets will be "
-            f"given to {role.mention}.\n\n"
+            f"If you would like to OVERTHROW {role.mention} then you press the **OVERTHROW** button.\n"
+            f"If you believe that {king_user.mention} hasn't done too bad a job then you can **SUPPORT** them to "
+            f"reduce the chances of revolution happening. If the King _loses_, then supporters will lose eddies "
+            f"alongside their King."
             f"**Event ID**: `{event['event_id']}`\n"
-            f"**Tickets bought**: `{len(event['ticket_buyers'])}`\n"
             f"**Success rate**: `{event['chance']}%`\n"
-            f"**Ticket price**: `{event['ticket_cost']}`\n"
+            f"**Revolutionaries**: `{event['revolutionaries']}`\n"
+            f"**Supporters**: `{event['supporters']}`\n"
             f"**Locked in KING eddies**: `{event.get('locked_in_eddies')}`\n"
             f"**Event time**: `{event['expired'].strftime('%d %b %y %H:%M:%S')}`"
         )

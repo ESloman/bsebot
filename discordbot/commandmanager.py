@@ -259,9 +259,6 @@ class CommandManager(object):
             :return:
             """
 
-            if message.author.bot:
-                return
-
             if message.channel.type.value == 1:
                 # this means we've received a Direct message!
                 # we'll have to handle this differently

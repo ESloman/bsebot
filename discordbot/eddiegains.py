@@ -11,7 +11,7 @@ from discord.ext import tasks, commands
 
 from discordbot.bot_enums import TransactionTypes
 from discordbot.constants import CREATOR, MESSAGE_TYPES, MESSAGE_VALUES, WORDLE_VALUES, HUMAN_MESSAGE_TYPES
-from mongo.bsepoints import UserPoints, UserInteractions
+from mongo.bsepoints import ServerEmojis, UserPoints, UserInteractions
 
 
 class EddieGainMessager(commands.Cog):
@@ -30,14 +30,6 @@ class EddieGainMessager(commands.Cog):
 
         self.eddie_manager = BSEddiesManager(self.bot, self.logger)
 
-        # now = datetime.datetime.now()
-        # if now.hour > 6:
-        #     next_exec = now.replace(hour=6, minute=0, second=0, microsecond=0).replace(day=now.day + 1)
-        # else:
-        #     next_exec = now.replace(hour=6, minute=0, second=0, microsecond=0)
-        #
-        # self.eddie_distributer.change_interval(time=next_exec)
-
         self.eddie_distributer.start()
 
     def cog_unload(self):
@@ -48,7 +40,7 @@ class EddieGainMessager(commands.Cog):
         self.eddie_distributer.cancel()
 
     @tasks.loop(
-        time=datetime.time(hour=6, minute=0, second=0)
+        time=datetime.time(hour=5, minute=0, second=0)
     )
     async def eddie_distributer(self):
         """
@@ -58,18 +50,19 @@ class EddieGainMessager(commands.Cog):
         :return:
         """
 
-        now = datetime.datetime.now()
-
         for guild in self.bot.guilds:
             eddie_dict = self.eddie_manager.give_out_eddies(guild.id)
 
             guild = await self.bot.fetch_guild(guild.id)  # type: discord.Guild
+
+            current_king_id = self.user_points.get_current_king(guild.id)["uid"]
 
             msg = f"Eddie gain summary:\n"
             for user_id in eddie_dict:
 
                 value = eddie_dict[user_id][0]
                 breakdown = eddie_dict[user_id][1]
+                tax = eddie_dict[user_id][2]
 
                 if value == 0:
                     continue
@@ -83,7 +76,12 @@ class EddieGainMessager(commands.Cog):
                 roles = user.roles  # type: List[discord.Role]
 
                 msg += f"\n- `{user_id}` {user.display_name} :  **{value}**"
-                text = f"Your daily salary of BSEDDIES is `{value}`.\n"
+                text = f"Your daily salary of BSEDDIES is `{value}` (after tax).\n"
+
+                if user_id == current_king_id:
+                    text += f"You gained an additional `{tax}` from tax gains\n"
+                else:
+                    text += f"You were taxed `{tax}` by the KING.\n"
 
                 text += f"\nThis is based on the following amount of interactivity yesterday:"
 
@@ -127,6 +125,7 @@ class BSEddiesManager(object):
     def __init__(self, bot: discord.Client, logger):
         self.user_interactions = UserInteractions()
         self.user_points = UserPoints()
+        self.server_emojis = ServerEmojis()
         self.bot = bot
         self.logger = logger
 
@@ -156,12 +155,27 @@ class BSEddiesManager(object):
                 self.logger.info(f"{t_points} for {message_type}")
         return points
 
-    def calc_individual(self, user, user_dict, user_results, guild_id, real=False):
+    def calc_individual(
+            self,
+            user,
+            user_dict,
+            user_results,
+            user_reacted,
+            user_reactions,
+            start,
+            end,
+            guild_id,
+            real=False
+    ):
         """
         Method for calculating the eddie amount of an individual.
         :param user:
         :param user_dict:
         :param user_results:
+        :param user_reacted:
+        :param user_reactions:
+        :param start:
+        :param end:
         :param guild_id:
         :param real:
         :return:
@@ -196,14 +210,42 @@ class BSEddiesManager(object):
             else:
                 message_types.append(r["message_type"])
 
-        # add reaction_received events
-        for message in user_results:
-            if reactions := message.get("reactions"):
-                for reaction in reactions:
-                    if reaction["user_id"] == user:
-                        continue
+        # REACTION HANDLING
+        for message in user_reacted:
+            # messages the user sent that got reacted to
+            for reaction in message.get("reactions", []):
+                if reaction["user_id"] == user:
+                    continue
+                if start < reaction["timestamp"] < end:
                     message_types.append("reaction_received")
 
+        for message in user_reactions:
+            # messages the user reacted to
+            reactions = message.get("reactions", [])
+
+            our_user_reactions = [
+                react for react in reactions if react["user_id"] == user and (start < react["timestamp"] < end)
+            ]
+            for reaction in our_user_reactions:
+
+                if emoji := self.server_emojis.get_emoji_from_name(guild_id, reaction["content"]):
+                    message_types.append("custom_emoji_reaction")
+
+                matching_reactions = [
+                    react for react in reactions
+                    if react["content"] == reaction["content"] and react["user_id"] != user
+                ]
+
+                if matching_reactions:
+                    # someone else reacted with the same emoji we did
+                    _matching = sorted(matching_reactions, key=lambda x: x["timestamp"])
+                    if _matching[0]["timestamp"] > reaction["timestamp"]:
+                        # we reacted first!
+                        for _ in matching_reactions:
+                            message_types.append("react_train")
+
+        # add reaction_received events
+        for message in user_results:
             if replies := message.get("replies"):
                 for reply in replies:
                     if reply["user_id"] == user:
@@ -219,10 +261,11 @@ class BSEddiesManager(object):
 
         return eddies_gained, count
 
-    def give_out_eddies(self, guild_id):
+    def give_out_eddies(self, guild_id, real=False):
         """
         Takes all the user IDs for a server and distributes BSEddies to them
         :param guild_id:
+        :param real:
         :return:
         """
         start, end = self.get_datetime_objects()
@@ -233,6 +276,13 @@ class BSEddiesManager(object):
                 "guild_id": guild_id,
                 "timestamp": {"$gt": start, "$lt": end}
             }
+        )
+
+        reactions = self.user_interactions.query(
+            {
+                "guild_id": guild_id,
+                "reactions.timestamp": {"$gt": start, "$lt": end}
+             }
         )
 
         users = self.user_points.get_all_users_for_guild(guild_id)
@@ -247,8 +297,23 @@ class BSEddiesManager(object):
             self.logger.info(f"processing {user}")
 
             user_results = [r for r in results if r["user_id"] == user]
+            user_reacted_messages = [r for r in reactions if r["user_id"] == user]
+            user_reactions = [
+                r for r in reactions
+                if any([react for react in r["reactions"] if react["user_id"] == user])
+            ]
 
-            eddies_gained, breakdown = self.calc_individual(user, user_dict[user], user_results, guild_id, True)
+            eddies_gained, breakdown = self.calc_individual(
+                user,
+                user_dict[user],
+                user_results,
+                user_reacted_messages,
+                user_reactions,
+                start,
+                end,
+                guild_id,
+                real
+            )
 
             try:
                 wordle_message = [w for w in user_results if "wordle" in w["message_type"]][0]
@@ -269,13 +334,13 @@ class BSEddiesManager(object):
                 if guesses != "X":
                     wordle_messages.append((user, guesses))
 
-            except Exception as e:
-                self.logger.info(e)
+            except IndexError as e:
+                self.logger.exception(f"Error doing wordle calc")
 
             if eddies_gained == 0:
                 continue
 
-            eddie_gain_dict[user] = (eddies_gained, breakdown)
+            eddie_gain_dict[user] = [eddies_gained, breakdown]
 
         # do wordle here
         if wordle_messages:
@@ -287,20 +352,46 @@ class BSEddiesManager(object):
                     gain_dict["wordle_win"] = 1
                     eddie_gain_dict[wordle_attempt[0]] = (eddie_gain_dict[wordle_attempt[0]][0] + 5, gain_dict)
 
+        current_king_id = self.user_points.get_current_king(guild_id)["uid"]
+        tax_gains = 0
+
         for _user in eddie_gain_dict:
             if _user == "guild":
                 continue
-            self.user_points.increment_points(_user, guild_id, eddie_gain_dict[_user][0])
 
+            if _user != current_king_id:
+                # apply tax
+                taxed = eddie_gain_dict[_user][0] * 0.1
+                eddie_gain_dict[_user][0] -= taxed
+                eddie_gain_dict[_user].append(taxed)
+                tax_gains += taxed
+
+            if real:
+
+                self.user_points.increment_points(_user, guild_id, eddie_gain_dict[_user][0])
+                self.user_points.append_to_transaction_history(
+                    _user,
+                    guild_id,
+                    {
+                        "type": TransactionTypes.DAILY_SALARY,
+                        "amount": eddie_gain_dict[_user][0],
+                        "timestamp": datetime.datetime.now(),
+                    }
+                )
+            self.logger.info(f"{_user} gained {eddie_gain_dict[_user][0]}")
+
+        eddie_gain_dict[current_king_id].append(tax_gains)
+
+        if real:
+            self.user_points.increment_points(current_king_id, guild_id, eddie_gain_dict[current_king_id][0])
             self.user_points.append_to_transaction_history(
-                _user,
+                current_king_id,
                 guild_id,
                 {
-                    "type": TransactionTypes.DAILY_SALARY,
-                    "amount": eddie_gain_dict[_user][0],
+                    "type": TransactionTypes.TAX_GAINS,
+                    "amount": eddie_gain_dict[current_king_id][2],
                     "timestamp": datetime.datetime.now(),
                 }
             )
-            self.logger.info(f"{_user} gained {eddie_gain_dict[_user][0]}")
 
         return eddie_gain_dict

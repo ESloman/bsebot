@@ -61,7 +61,6 @@ class RevolutionEvent(TicketedEvent):
             self, guild_id: int,
             created: datetime.datetime,
             expired: datetime.datetime,
-            ticket_cost: int,
             king_id: int,
             locked_in_eddies: int,
             channel_id: int = None,
@@ -72,7 +71,6 @@ class RevolutionEvent(TicketedEvent):
         :param guild_id:
         :param created:
         :param expired:
-        :param ticket_cost:
         :param king_id:
         :param locked_in_eddies:
         :param channel_id:
@@ -87,7 +85,6 @@ class RevolutionEvent(TicketedEvent):
             "created": created,
             "expired": expired,
             "chance": 30,
-            "ticket_cost": ticket_cost,
             "ticket_buyers": [],
             "open": True,
             "message_id": None,

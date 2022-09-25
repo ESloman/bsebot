@@ -662,6 +662,7 @@ class BSEddiesPlaceBet(BSEddies):
     """
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
+        self.bseddies_close = BSEddiesCloseBet(client, guilds, logger, beta_mode)
 
     async def create_bet_view(
             self,
@@ -774,7 +775,7 @@ class BSEddiesPlaceBet(BSEddies):
                 "comment": "Bet placed through slash command",
             }
         )
-        await message.edit(embed=embed)
+        await message.edit(embed=embed, view=BetView(bet, self, self.bseddies_close))
         await response.edit_message(content="Placed the bet for you!", view=None)
 
 

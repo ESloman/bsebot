@@ -143,8 +143,8 @@ class EmbedManager(object):
             f"alongside their King."
             f"**Event ID**: `{event['event_id']}`\n"
             f"**Success rate**: `{event['chance']}%`\n"
-            f"**Revolutionaries**: `{event['revolutionaries']}`\n"
-            f"**Supporters**: `{event['supporters']}`\n"
+            f"**Revolutionaries**: `{event.get('revolutionaries', [])}`\n"
+            f"**Supporters**: `{event.get('supporters', [])}`\n"
             f"**Locked in KING eddies**: `{event.get('locked_in_eddies')}`\n"
             f"**Event time**: `{event['expired'].strftime('%d %b %y %H:%M:%S')}`"
         )

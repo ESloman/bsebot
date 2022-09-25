@@ -4,10 +4,8 @@ This file contains our class that registers all the events we listen to and do t
 
 import logging
 
-from typing import Union
-
 import discord
-from discord import SlashCommand, SlashCommandGroup, SlashCommandOptionType
+from discord import SlashCommandGroup
 
 from apis.giphyapi import GiphyAPI
 from discordbot.betcloser import BetCloser
@@ -16,7 +14,7 @@ from discordbot.clienteventclasses import OnMemberLeave, OnThreadCreate, OnThrea
 from discordbot.eddiegains import EddieGainMessager
 from discordbot.eddiekingtask import BSEddiesKingTask
 from discordbot.embedmanager import EmbedManager
-# from discordbot.revolutiontask import BSEddiesRevolutionTask
+from discordbot.revolutiontask import BSEddiesRevolutionTask
 from discordbot.slashcommandeventclasses import BSEddiesLeaderboard, BSEddiesView, BSEddiesActive, BSEddiesGift
 from discordbot.slashcommandeventclasses import BSEddiesHighScore, BSEddiesAdminGive
 from discordbot.slashcommandeventclasses import BSEddiesCloseBet, BSEddiesPlaceBet
@@ -114,8 +112,7 @@ class CommandManager(object):
         self.bet_closer_task = BetCloser(self.client, guilds, self.logger, self.bseddies_place, self.bseddies_close)
         self.eddie_gain_message_task = EddieGainMessager(self.client, guilds, self.logger)
         self.eddie_king_task = BSEddiesKingTask(self.client, guilds, self.logger)
-        # self.inactive_users = BSEddiesInactiveUsers(self.client, guilds, self.logger)
-        # self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger, self.giphy_token)
+        self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger, self.giphy_token)
 
         # create all the subcommand groups
         self.bet_group = SlashCommandGroup("bet", "Bet related stuff")  # type: SlashCommandGroup

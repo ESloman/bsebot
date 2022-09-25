@@ -23,6 +23,7 @@ class BSEddiesRevolutionTask(commands.Cog):
         self.logger = logger
         self.guilds = guilds
         self.giphy_api = GiphyAPI(giphy_token)
+        self.rev_started = False
         self.revolution.start()
 
     def cog_unload(self):
@@ -32,7 +33,7 @@ class BSEddiesRevolutionTask(commands.Cog):
         """
         self.revolution.cancel()
 
-    @tasks.loop(time=datetime.time(hour=16, minute=0, second=0))
+    @tasks.loop(minutes=1)
     async def revolution(self):
         """
         Constantly checks to make sure that all events have been closed properly or raised correctly
@@ -40,8 +41,7 @@ class BSEddiesRevolutionTask(commands.Cog):
         """
         now = datetime.datetime.now()
 
-        if now.weekday() != 6:
-            self.logger.info("Skipping as it's not Sunday")
+        if not self.rev_start and (now.weekday() != 6 or now.hour != 16 or now.minute != 0):
             return
 
         for guild_id in self.guilds:
@@ -50,43 +50,43 @@ class BSEddiesRevolutionTask(commands.Cog):
 
             user_points = king_user["points"]
 
-            event = self.revolutions.create_event(
-                guild_id,
-                datetime.datetime.now(),
-                datetime.datetime.now() + datetime.timedelta(hours=3, minutes=30),
-                king_user["uid"],
-                user_points,
-                BSEDDIES_REVOLUTION_CHANNEL
-            )
+            if not self.rev_started:
+                event = self.revolutions.create_event(
+                    guild_id,
+                    datetime.datetime.now(),
+                    datetime.datetime.now() + datetime.timedelta(hours=3, minutes=30),
+                    king_user["uid"],
+                    user_points,
+                    BSEDDIES_REVOLUTION_CHANNEL
+                )
+            else:
+                event = self.revolutions.get_open_events(guild_id)[0]
+
+            self.rev_started = True
 
             message = event.get("message_id")
             if message is None:
                 await self.create_event(guild_id, event)
-                self.logger.info("Changing revolution task interval to 5 minutes.")
-                self.revolution.change_interval(minutes=5)
                 continue
 
             if now > event["expired"]:
                 await self.handle_resolving_bet(guild_id, event)
                 self.logger.info("Changing revolution task interval to 30 minutes.")
-                self.revolution.change_interval(time=datetime.time(hour=16, minute=0, second=0))
                 continue
 
-            if (event["expired"] - now).total_seconds() < 10800 and not event.get("three_hours"):
-                await self.send_excited_gif(guild_id, event, "Three hours", "three_hours")
+            # if (event["expired"] - now).total_seconds() < 10800 and not event.get("three_hours"):
+            #    await self.send_excited_gif(guild_id, event, "Three hours", "three_hours")
 
-            elif (event["expired"] - now).total_seconds() < 7200 and not event.get("two_hours"):
+            elif now.hour == 17 and now.minute == 30 and not event.get("two_hours"):
                 await self.send_excited_gif(guild_id, event, "Two hours", "two_hours")
 
-            elif (event["expired"] - now).total_seconds() < 3600 and not event.get("one_hour"):
+            elif now.hour == 18 and now.minute == 30 and not event.get("one_hour"):
                 await self.send_excited_gif(guild_id, event, "One hour", "one_hour")
 
-            elif (event["expired"] - now).total_seconds() < 1800 and not event.get("half_hour"):
-                self.logger.info("Changing revolution task interval to 1 minute")
-                self.revolution.change_interval(minutes=1)
+            elif now.hour == 19 and now.minute == 0 and not event.get("half_hour"):
                 await self.send_excited_gif(guild_id, event, "HALF AN HOUR", "half_hour")
 
-            elif (event["expired"] - now).total_seconds() < 900 and not event.get("quarter_hour"):
+            elif now.hour == 19 and now.minute == 15 and not event.get("quarter_house"):
                 await self.send_excited_gif(guild_id, event, "15 MINUTES", "quarter_hour")
 
     async def send_excited_gif(self, guild_id: int, event: dict, hours_string: str, key: str):
@@ -156,6 +156,8 @@ class BSEddiesRevolutionTask(commands.Cog):
         guild_obj = await self.bot.fetch_guild(guild_id)
         channels = await guild_obj.fetch_channels()
         channel = [c for c in channels if c.id == channel_id][0]
+
+        self.rev_started = False
 
         if len(_users) == 0:
             message = f"No-one supported or overthrew the King - nothing happens."

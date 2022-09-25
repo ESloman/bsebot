@@ -47,15 +47,15 @@ class EddieGainMessager(commands.Cog):
         """
         now = datetime.datetime.now()
 
-        if now.hour != 7 or now.minute != 20:
+        if now.hour != 7 or now.minute != 30:
             return
 
-        for guild in self.guilds:
-            eddie_dict = self.eddie_manager.give_out_eddies(guild.id, real=True)
+        for guild_id in self.guilds:
+            eddie_dict = self.eddie_manager.give_out_eddies(guild_id, real=True)
 
-            guild = await self.bot.fetch_guild(guild.id)  # type: discord.Guild
+            guild = await self.bot.fetch_guild(guild_id)  # type: discord.Guild
 
-            current_king_id = self.user_points.get_current_king(guild.id)["uid"]
+            current_king_id = self.user_points.get_current_king(guild_id)["uid"]
 
             msg = f"Eddie gain summary:\n"
             for user_id in eddie_dict:

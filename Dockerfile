@@ -5,7 +5,7 @@ ARG GIPHY_TOKEN
 
 RUN rm -rf /etc/timezone \
     && touch /etc/timezone \
-    echo "Europe/London" > /etc/timezone \
+    && echo "Europe/London" > /etc/timezone \
     && dpkg-reconfigure --frontend noninteractive tzdata
 
 RUN mkdir -vp /home/app

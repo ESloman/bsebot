@@ -3,6 +3,9 @@ FROM python:3.10.7
 ARG DISCORD_TOKEN
 ARG GIPHY_TOKEN
 
+RUN echo "Europe/London" | tee /etc/timezone \
+    && dpkg-reconfigure --frontend noninteractive tzdata
+
 RUN mkdir -vp /home/app
 
 COPY . /home/app/

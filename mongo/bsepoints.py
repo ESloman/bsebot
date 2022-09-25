@@ -713,7 +713,7 @@ class ServerEmojis(BestSummerEverPointsDB):
         super().__init__()
         self._vault = interface.get_collection(self.database, "serveremojis")
 
-    def get_emoji(self, guild_id: int, emoji_id: str) -> Union[dict, None]:
+    def get_emoji(self, guild_id: int, emoji_id: int) -> Union[dict, None]:
         """
         Gets an already created emoji document from the database.
 
@@ -769,7 +769,7 @@ class ServerStickers(BestSummerEverPointsDB):
         super().__init__()
         self._vault = interface.get_collection(self.database, "serverstickers")
 
-    def get_sticker(self, guild_id: int, sticker_id: str) -> Union[dict, None]:
+    def get_sticker(self, guild_id: int, sticker_id: int) -> Union[dict, None]:
         """
         Gets an already created sticker document from the database.
 

@@ -37,9 +37,7 @@ class EddieGainMessager(commands.Cog):
         """
         self.eddie_distributer.cancel()
 
-    @tasks.loop(
-        time=datetime.time(hour=6, minute=15)
-    )
+    @tasks.loop(minutes=1)
     async def eddie_distributer(self):
         """
         Opens up our json file of user IDS and loops over them.
@@ -47,6 +45,10 @@ class EddieGainMessager(commands.Cog):
         daily BSEddies gain.
         :return:
         """
+        now = datetime.datetime.now()
+
+        if now.hour != 6 or now.minute != 55:
+            return
 
         for guild in self.bot.guilds:
             eddie_dict = self.eddie_manager.give_out_eddies(guild.id)
@@ -366,7 +368,7 @@ class BSEddiesManager(object):
                 tax_gains += taxed
 
             if real:
-
+                print(f"Incrementing {_user} by {eddie_gain_dict[_user][0]}")
                 self.user_points.increment_points(_user, guild_id, eddie_gain_dict[_user][0])
                 self.user_points.append_to_transaction_history(
                     _user,

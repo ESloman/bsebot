@@ -107,8 +107,6 @@ class OnReadyEvent(BaseEvent):
                         {"emoji_id": emoji_obj.id, "created_at": emoji_obj.created_at}
                     )
 
-                print(f"{emoji_obj.user}: {emoji_obj.name}")
-
             await guild.fetch_stickers()
             # sort out stickers
             for sticker in guild.stickers:
@@ -135,8 +133,6 @@ class OnReadyEvent(BaseEvent):
                         datetime.datetime.now(),
                         {"sticker_id": stick_obj.id, "created_at": stick_obj.created_at}
                     )
-
-                print(f"{stick_obj.user}: {stick_obj.name}")
 
             # join all threads
             for channel in guild.channels:

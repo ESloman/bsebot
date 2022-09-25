@@ -8,7 +8,7 @@ from discord.emoji import Emoji
 from discordbot.baseeventclass import BaseEvent
 from discordbot.bot_enums import TransactionTypes, ActivityTypes
 from discordbot.constants import THE_BOYS_ROLE
-from discordbot.views import RevolutionView
+from discordbot.views import LeaderBoardView, RevolutionView
 from mongo.bseticketedevents import RevolutionEvent
 from mongo.bsepoints import UserInteractions, ServerEmojis
 
@@ -158,6 +158,8 @@ class OnReadyEvent(BaseEvent):
                 event = events[0]
                 view = RevolutionView(self.client, event, self.logger)
                 self.client.add_view(view)
+
+            self.client.add_view(LeaderBoardView(self.embed_manager))
 
         self.logger.info("Finished member check.")
 

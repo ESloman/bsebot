@@ -160,6 +160,7 @@ class OnReadyEvent(BaseEvent):
                     continue
                 event = events[0]
                 view = RevolutionView(self.client, event, self.logger)
+                view.toggle_stuff(False)
                 self.client.add_view(view)
 
             # find all open bets
@@ -171,7 +172,7 @@ class OnReadyEvent(BaseEvent):
 
                 message = channel.get_partial_message(message_id)
 
-                embed = self.embed_manager.get_bet_embed(guild_id, bet["bet_id"], bet)
+                embed = self.embed_manager.get_bet_embed(guild, bet["bet_id"], bet)
                 view = BetView(bet, self.place, self.close)
                 await message.edit(embed=embed, view=view)
 

@@ -38,7 +38,7 @@ class EddieGainMessager(commands.Cog):
         self.eddie_distributer.cancel()
 
     @tasks.loop(
-        time=datetime.time(hour=6, minute=0, second=0)
+        time=datetime.time(hour=6, minute=15)
     )
     async def eddie_distributer(self):
         """

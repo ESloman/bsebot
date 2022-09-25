@@ -18,7 +18,7 @@ class LeaderBoardView(discord.ui.View):
         self.embeds = embed_manager
         super().__init__(timeout=None)
 
-    @discord.ui.button(label="Expand", style=discord.ButtonStyle.primary)
+    @discord.ui.button(label="Expand", style=discord.ButtonStyle.primary, custom_id="leaderboard_button")
     async def button_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         """
         Button Callback
@@ -38,9 +38,9 @@ class LeaderBoardView(discord.ui.View):
 class HighScoreBoardView(discord.ui.View):
     def __init__(self, embed_manager: EmbedManager):
         self.embeds = embed_manager
-        super().__init__()
+        super().__init__(timeout=None)
 
-    @discord.ui.button(label="Expand", style=discord.ButtonStyle.primary)
+    @discord.ui.button(label="Expand", style=discord.ButtonStyle.primary, custom_id="highscore_button")
     async def button_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         """
         Button Callback
@@ -189,7 +189,7 @@ class RevolutionView(discord.ui.View):
         for child in self.children:
             child.disabled = disable
 
-    @discord.ui.button(label=f"OVERTHROW", style=discord.ButtonStyle.green)
+    @discord.ui.button(label=f"OVERTHROW", style=discord.ButtonStyle.green, custom_id="overthrow_button")
     async def overthrow_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         response = interaction.response  # type: discord.InteractionResponse
         followup = interaction.followup  # type: discord.Webhook
@@ -264,7 +264,7 @@ class RevolutionView(discord.ui.View):
         await followup.edit_message(interaction.message.id, view=self, content=edited_message)
         await followup.send(content="Congrats - you've pledged your `support`!", ephemeral=True)
 
-    @discord.ui.button(label=f"SUPPORT THE KING", style=discord.ButtonStyle.red)
+    @discord.ui.button(label=f"SUPPORT THE KING", style=discord.ButtonStyle.red, custom_id="support_button")
     async def support_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
 
         response = interaction.response  # type: discord.InteractionResponse

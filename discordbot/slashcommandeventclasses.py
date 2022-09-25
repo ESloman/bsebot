@@ -731,28 +731,30 @@ class BSEddiesPlaceBet(BSEddies):
             await response.edit_message(content=msg, view=None)
             return
 
+        view = BetView(bet, self, self.bseddies_close)
+
         if not bet["active"]:
             msg = f"Your reaction on **Bet {bet_id}** failed as the bet is closed for new bets."
-            await response.edit_message(content=msg, view=None)
+            await response.edit_message(content=msg, view=view)
             return
 
         emoji = emoji.strip()
 
         if emoji not in bet["option_dict"]:
             msg = f"Your reaction on **Bet {bet_id}** failed as that reaction isn't a valid outcome."
-            await response.edit_message(content=msg, view=None)
+            await response.edit_message(content=msg, view=view)
             return
 
         if amount <= 0:
             msg = f"Cannot bet negative eddies or 0 eddies."
-            await response.edit_message(content=msg, view=None)
+            await response.edit_message(content=msg, view=view)
             return
 
         success = self.user_bets.add_better_to_bet(bet_id, guild.id, ctx.user.id, emoji, amount)
 
         if not success["success"]:
             msg = f"Your bet on **Bet {bet_id}** failed cos __{success['reason']}__?"
-            await response.edit_message(content=msg, view=None)
+            await response.edit_message(content=msg, view=view)
             return False
 
         bet = self.user_bets.get_bet_from_id(guild.id, bet_id)
@@ -775,7 +777,7 @@ class BSEddiesPlaceBet(BSEddies):
                 "comment": "Bet placed through slash command",
             }
         )
-        await message.edit(embed=embed, view=BetView(bet, self, self.bseddies_close))
+        await message.edit(embed=embed, view=view)
         await response.edit_message(content="Placed the bet for you!", view=None)
 
 

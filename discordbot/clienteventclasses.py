@@ -8,7 +8,8 @@ from discord.emoji import Emoji
 from discordbot.baseeventclass import BaseEvent
 from discordbot.bot_enums import TransactionTypes, ActivityTypes
 from discordbot.constants import THE_BOYS_ROLE
-from discordbot.views import LeaderBoardView, RevolutionView
+from discordbot.slashcommandeventclasses import BSEddiesPlaceBet, BSEddiesCloseBet
+from discordbot.views import LeaderBoardView, RevolutionView, BetView
 from mongo.bseticketedevents import RevolutionEvent
 from mongo.bsepoints import UserInteractions, ServerEmojis
 
@@ -22,6 +23,8 @@ class OnReadyEvent(BaseEvent):
         self.server_emojis = ServerEmojis()
         self.user_interactions = UserInteractions()
         self.events = RevolutionEvent()
+        self.close = BSEddiesCloseBet(client, guild_ids, self.logger, self.beta_mode)
+        self.place = BSEddiesPlaceBet(client, guild_ids, self.logger, self.beta_mode)
 
     async def on_ready(self) -> None:
         """
@@ -158,6 +161,19 @@ class OnReadyEvent(BaseEvent):
                 event = events[0]
                 view = RevolutionView(self.client, event, self.logger)
                 self.client.add_view(view)
+
+            # find all open bets
+            bets = self.user_bets.get_all_active_bets(guild_id)
+            for bet in bets:
+                message_id = bet["message_id"]
+                channel_id = bet["channel_id"]
+                channel = await guild.fetch_channel(channel_id)
+
+                message = channel.get_partial_message(message_id)
+
+                embed = self.embed_manager.get_bet_embed(guild_id, bet["bet_id"], bet)
+                view = BetView(bet, self.place, self.close)
+                await message.edit(embed=embed, view=view)
 
             self.client.add_view(LeaderBoardView(self.embed_manager))
 

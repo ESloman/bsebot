@@ -47,11 +47,11 @@ class EddieGainMessager(commands.Cog):
         """
         now = datetime.datetime.now()
 
-        if now.hour != 6 or now.minute != 55:
+        if now.hour != 7 or now.minute != 20:
             return
 
-        for guild in self.bot.guilds:
-            eddie_dict = self.eddie_manager.give_out_eddies(guild.id)
+        for guild in self.guilds:
+            eddie_dict = self.eddie_manager.give_out_eddies(guild.id, real=True)
 
             guild = await self.bot.fetch_guild(guild.id)  # type: discord.Guild
 
@@ -336,7 +336,8 @@ class BSEddiesManager(object):
                     wordle_messages.append((user, guesses))
 
             except IndexError as e:
-                self.logger.exception(f"Error doing wordle calc")
+                # just means we had an error with this
+                pass
 
             if eddies_gained == 0:
                 continue

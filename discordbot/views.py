@@ -240,7 +240,7 @@ class RevolutionView(discord.ui.View):
             event["supporters"].pop(user_id)
 
         self.revolutions.update(
-            {"_id": event["_id"]}, event
+            {"_id": event["_id"]}, {"$set": {"chance": event["chance"], "supporters": event["supporters"], "revolutionaries": event["revolutionaries"], "users": event["users"]}}
         )
 
         self.user_points.append_to_transaction_history(
@@ -318,7 +318,7 @@ class RevolutionView(discord.ui.View):
             event["revolutionaries"].pop(user_id)
 
         self.revolutions.update(
-            {"_id": event["_id"]}, event
+            {"_id": event["_id"]}, {"$set": {"chance": event["chance"], "supporters": event["supporters"], "revolutionaries": event["revolutionaries"], "users": event["users"]}}
         )
 
         self.user_points.append_to_transaction_history(

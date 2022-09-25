@@ -16,7 +16,7 @@ from mongo.bseticketedevents import RevolutionEvent
 class LeaderBoardView(discord.ui.View):
     def __init__(self, embed_manager: EmbedManager):
         self.embeds = embed_manager
-        super().__init__()
+        super().__init__(timeout=None)
 
     @discord.ui.button(label="Expand", style=discord.ButtonStyle.primary)
     async def button_callback(self, button: discord.ui.Button, interaction: discord.Interaction):

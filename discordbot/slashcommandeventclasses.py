@@ -448,6 +448,10 @@ class BSEddiesCloseBet(BSEddies):
                         f"eddies that they originally bet.")
                 # update the message to reflect that it's closed
                 channel = guild.get_channel(bet["channel_id"])
+                if not channel:
+                    # channel is thread
+                    channel = guild.get_thread(bet["channel_id"])
+
                 message = channel.get_partial_message(bet["message_id"])
                 await message.edit(content=desc, view=None, embeds=[])
                 await ctx.response.edit_message(content="Closed the bet for you!", view=None)
@@ -494,6 +498,9 @@ class BSEddiesCloseBet(BSEddies):
 
         # update the message to reflect that it's closed
         channel = guild.get_channel(bet["channel_id"])
+        if not channel:
+            # channel is thread
+            channel = guild.get_thread(bet["channel_id"])
         message = channel.get_partial_message(bet["message_id"])
         await message.edit(content=desc, view=None, embeds=[])
         await ctx.response.edit_message(content="Closed the bet for you!", view=None)
@@ -749,6 +756,11 @@ class BSEddiesPlaceBet(BSEddies):
 
         bet = self.user_bets.get_bet_from_id(guild.id, bet_id)
         channel = guild.get_channel(bet["channel_id"])
+
+        if not channel:
+            # channel is thread
+            channel = guild.get_thread(bet["channel_id"])
+
         message = channel.get_partial_message(bet["message_id"])
         embed = self.embed_manager.get_bet_embed(guild, bet_id, bet)
         self.user_points.append_to_transaction_history(

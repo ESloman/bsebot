@@ -161,7 +161,7 @@ class CloseABetView(discord.ui.View):
 
 class BetView(discord.ui.View):
     def __init__(self, bet, bseddies_place, bseddies_close):
-        super().__init__()
+        super().__init__(timeout=None)
         self.bet = bet
         self.place = bseddies_place
         self.close = bseddies_close
@@ -235,7 +235,9 @@ class RevolutionView(discord.ui.View):
         if user_id not in event["users"]:
             event["users"].append(user_id)
 
-        event["supporters"].pop(user_id)
+        if user_id in event["supporters"]:
+            event["chance"] += 15
+            event["supporters"].pop(user_id)
 
         self.revolutions.update(
             {"_id": event["_id"]}, event
@@ -311,7 +313,9 @@ class RevolutionView(discord.ui.View):
         if user_id not in event["users"]:
             event["users"].append(user_id)
 
-        event["revolutionaries"].pop(user_id)
+        if user_id in event["revolutionaries"]:
+            event["chance"] -= 15
+            event["revolutionaries"].pop(user_id)
 
         self.revolutions.update(
             {"_id": event["_id"]}, event

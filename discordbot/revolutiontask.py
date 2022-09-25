@@ -41,7 +41,7 @@ class BSEddiesRevolutionTask(commands.Cog):
         """
         now = datetime.datetime.now()
 
-        if not self.rev_start and (now.weekday() != 6 or now.hour != 16 or now.minute != 0):
+        if not self.rev_started and (now.weekday() != 6 or now.hour != 16 or now.minute != 0):
             return
 
         for guild_id in self.guilds:

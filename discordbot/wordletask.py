@@ -36,6 +36,7 @@ class WordleTask(commands.Cog):
         now = datetime.datetime.now()
 
         if now.hour < 7:
+            self.wait_iters = None
             self.sent_wordle = False
             self.set_wordle_activity = False
             return
@@ -43,31 +44,36 @@ class WordleTask(commands.Cog):
         if self.sent_wordle and not self.set_wordle_activity:
             return
 
-        if now.hour > 9:
+        if now.hour >= 9:
             if self.set_wordle_activity:
+                print(f"Setting activity back to default")
                 listening_activity = discord.Activity(
                     name="conversations",
                     state="Listening",
                     type=discord.ActivityType.listening,
                     details="Waiting for commands!"
                 )
-                await self.bot.change_presence(activity=listening_activity, status=discord.Status.idle)
+                await self.bot.change_presence(activity=listening_activity, status=discord.Status.online)
                 self.set_wordle_activity = False
+
             return
 
         if self.sent_wordle:
             return
 
         if not self.set_wordle_activity:
+            print(f"Setting wordle activity")
             game = discord.Game("Wordle")
             await self.bot.change_presence(status=discord.Status.online, activity=game)
             self.set_wordle_activity = True
 
         if self.wait_iters is None:
-            self.wait_iters = random.randint(0, 2)
+            self.wait_iters = random.randint(1, 6)
+            print(f"Setting iterations to {self.wait_iters}")
             return
 
         if self.wait_iters != 0:
+            print(f"Decrementing countdown...")
             self.wait_iters -= 1
             return
 
@@ -124,6 +130,7 @@ class WordleTask(commands.Cog):
         await channel.send(content=message)
         self.sent_wordle = True
 
+        print(f"Setting activity back to default")
         listening_activity = discord.Activity(
             name="conversations",
             state="Listening",

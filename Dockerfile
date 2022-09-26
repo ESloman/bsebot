@@ -3,10 +3,10 @@ FROM python:3.10.7
 ARG DISCORD_TOKEN
 ARG GIPHY_TOKEN
 
-RUN rm -rf /etc/timezone \
-    && touch /etc/timezone \
-    && echo "Europe/London" > /etc/timezone \
-    && dpkg-reconfigure --frontend noninteractive tzdata
+RUN apt-get update \
+    && apt-get install -yq tzdata \
+    && ln -fs /usr/share/zoneinfo/Europe/London /etc/localtime \
+    && dpkg-reconfigure -f noninteractive tzdata
 
 RUN mkdir -vp /home/app
 

@@ -15,6 +15,7 @@ from discordbot.eddiegains import EddieGainMessager
 from discordbot.eddiekingtask import BSEddiesKingTask
 from discordbot.embedmanager import EmbedManager
 from discordbot.revolutiontask import BSEddiesRevolutionTask
+from discordbot.dailyvallytask import AfterWorkVally
 from discordbot.slashcommandeventclasses import BSEddiesLeaderboard, BSEddiesView, BSEddiesActive, BSEddiesGift
 from discordbot.slashcommandeventclasses import BSEddiesHighScore, BSEddiesAdminGive
 from discordbot.slashcommandeventclasses import BSEddiesCloseBet, BSEddiesPlaceBet
@@ -113,6 +114,7 @@ class CommandManager(object):
         self.eddie_gain_message_task = EddieGainMessager(self.client, guilds, self.logger)
         self.eddie_king_task = BSEddiesKingTask(self.client, guilds, self.logger)
         self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger, self.giphy_token)
+        self.vally_task = AfterWorkVally(self.client, guilds, self.logger)
 
         # create all the subcommand groups
         self.bet_group = SlashCommandGroup("bet", "Bet related stuff")  # type: SlashCommandGroup

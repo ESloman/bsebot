@@ -58,7 +58,7 @@ class BSEddiesKingTask(commands.Cog):
 
             if current_king is not None and top_user["uid"] != current_king:
                 prev_king_id = current_king
-                current = guild_obj.get_member(current_king)  # type: discord.Member
+                current = await guild_obj.fetch_member(current_king)  # type: discord.Member
                 self.logger.info(f"Removing a king: {current.display_name}")
 
                 await current.remove_roles(role, reason="User is not longer King!")

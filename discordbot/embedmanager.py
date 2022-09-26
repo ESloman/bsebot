@@ -142,7 +142,7 @@ class EmbedManager(object):
             f"reduce the chances of revolution happening. If the King _loses_, then supporters will lose eddies "
             f"alongside their King."
             f"**Event ID**: `{event['event_id']}`\n"
-            f"**Success rate**: `{event['chance']}%`\n"
+            f"**Success rate**: `{max(min(event['chance'], 100), 0)}%`\n"
             f"**Revolutionaries**: `{event.get('revolutionaries', [])}`\n"
             f"**Supporters**: `{event.get('supporters', [])}`\n"
             f"**Locked in KING eddies**: `{event.get('locked_in_eddies')}`\n"

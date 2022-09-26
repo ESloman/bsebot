@@ -26,6 +26,10 @@ class BSEddiesRevolutionTask(commands.Cog):
         self.rev_started = False
         self.revolution.start()
 
+        for guild_id in guilds:
+            if event := self.revolutions.get_open_events(guild_id):
+                self.rev_started = True
+
     def cog_unload(self):
         """
         Method for cancelling the loop.

@@ -1,6 +1,5 @@
 
 import datetime
-from typing import List
 
 import discord
 
@@ -228,10 +227,20 @@ class RevolutionView(discord.ui.View):
             await followup.edit_message(interaction.message.id, view=self)
             return
 
+        if user_id in event["supporters"]:
+            await followup.send(
+                content="You have already pledged to support - you can't change your mind!",
+                ephemeral=True
+            )
+            self.toggle_stuff(False)
+            await followup.edit_message(interaction.message.id, view=self)
+            return
+
         event["chance"] += 15
 
         if user_id not in event["revolutionaries"]:
             event["revolutionaries"].append(user_id)
+
         if user_id not in event["users"]:
             event["users"].append(user_id)
 
@@ -240,7 +249,13 @@ class RevolutionView(discord.ui.View):
             event["supporters"].pop(user_id)
 
         self.revolutions.update(
-            {"_id": event["_id"]}, {"$set": {"chance": event["chance"], "supporters": event["supporters"], "revolutionaries": event["revolutionaries"], "users": event["users"]}}
+            {"_id": event["_id"]},
+            {"$set": {
+                "chance": event["chance"],
+                "supporters": event["supporters"],
+                "revolutionaries": event["revolutionaries"],
+                "users": event["users"]
+            }}
         )
 
         self.user_points.append_to_transaction_history(
@@ -264,7 +279,7 @@ class RevolutionView(discord.ui.View):
         self.toggle_stuff(False)
 
         await followup.edit_message(interaction.message.id, view=self, content=edited_message)
-        await followup.send(content="Congrats - you've pledged your `support`!", ephemeral=True)
+        await followup.send(content="Congrats - you've pledged to `overthrow`!", ephemeral=True)
 
     @discord.ui.button(label=f"SUPPORT THE KING", style=discord.ButtonStyle.red, custom_id="support_button")
     async def support_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -306,6 +321,15 @@ class RevolutionView(discord.ui.View):
             await followup.edit_message(interaction.message.id, view=self)
             return
 
+        if user_id in event["revolutionaries"]:
+            await followup.send(
+                content="You have already pledged to overthrow - you can't change your mind!",
+                ephemeral=True
+            )
+            self.toggle_stuff(False)
+            await followup.edit_message(interaction.message.id, view=self)
+            return
+
         event["chance"] -= 15
 
         if user_id not in event["supporters"]:
@@ -313,12 +337,14 @@ class RevolutionView(discord.ui.View):
         if user_id not in event["users"]:
             event["users"].append(user_id)
 
-        if user_id in event["revolutionaries"]:
-            event["chance"] -= 15
-            event["revolutionaries"].pop(user_id)
-
         self.revolutions.update(
-            {"_id": event["_id"]}, {"$set": {"chance": event["chance"], "supporters": event["supporters"], "revolutionaries": event["revolutionaries"], "users": event["users"]}}
+            {"_id": event["_id"]},
+            {"$set": {
+                "chance": event["chance"],
+                "supporters": event["supporters"],
+                "revolutionaries": event["revolutionaries"],
+                "users": event["users"]
+            }}
         )
 
         self.user_points.append_to_transaction_history(

@@ -17,7 +17,7 @@ class AfterWorkVally(commands.Cog):
         self.messages = [
             "Anyone playing after-work {role} today?",
             "Who's about for {role} today?",
-            "Anyone wanna get salty after-work today {role}?"
+            "Anyone wanna get salty playing {role} today?"
         ]
 
     def cog_unload(self):
@@ -27,7 +27,7 @@ class AfterWorkVally(commands.Cog):
         """
         self.vally_message.cancel()
 
-    @tasks.loop(minutes=15)
+    @tasks.loop(minutes=10)
     async def vally_message(self):
         """
         Loop that makes sure the King is assigned correctly
@@ -38,7 +38,7 @@ class AfterWorkVally(commands.Cog):
         if now.weekday() not in [0, 1, 2, 3, 4]:
             return
 
-        if now.hour != 15 or not (45 <= now.minute <= 59):
+        if now.hour != 15 or not (45 <= now.minute <= 54):
             return
 
         print(f"Time to send vally message!")

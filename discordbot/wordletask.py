@@ -25,7 +25,7 @@ class WordleTask(commands.Cog):
         Method for cancelling the loop.
         :return:
         """
-        self.vally_message.cancel()
+        self.wordle_message.cancel()
 
     @tasks.loop(minutes=15)
     async def wordle_message(self):

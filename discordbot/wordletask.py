@@ -137,7 +137,7 @@ class WordleTask(commands.Cog):
             type=discord.ActivityType.listening,
             details="Waiting for commands!"
         )
-        await self.bot.change_presence(activity=listening_activity, status=discord.Status.idle)
+        await self.bot.change_presence(activity=listening_activity, status=discord.Status.online)
         self.set_wordle_activity = False
 
     @wordle_message.before_loop

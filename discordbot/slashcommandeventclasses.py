@@ -23,6 +23,7 @@ from discordbot.eddiegains import BSEddiesManager
 # views
 from discordbot.views import LeaderBoardView, HighScoreBoardView
 from discordbot.views import PlaceABetView, CloseABetView, BetView
+from discordbot.views import AutoGenerateView
 
 
 class BSEddies(BaseEvent):
@@ -383,6 +384,8 @@ class BSEddiesCloseBet(BSEddies):
         if not await self._handle_validation(ctx):
             return
 
+        await ctx.response.defer()
+
         self._add_event_type_to_activity_history(
             ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_BET_CLOSE,
             bet_id=bet_id, emoji=emoji
@@ -394,24 +397,24 @@ class BSEddiesCloseBet(BSEddies):
 
         if not bet:
             msg = f"This bet doesn't exist."
-            await ctx.response.edit_message(content=msg, view=None)
+            await ctx.followup.edit_message(content=msg, view=None)
             return
 
         if not bet["active"] and bet["result"] is not None:
             msg = f"You cannot close a bet that is already closed."
-            await ctx.response.edit_message(content=msg, view=None)
+            await ctx.followup.edit_message(content=msg, view=None)
             return
 
         if bet["user"] != author.id:
             msg = f"You cannot close a bet that isn't yours."
-            await ctx.response.edit_message(content=msg, view=None)
+            await ctx.followup.edit_message(content=msg, view=None)
             return
 
         emoji = emoji.strip()
 
         if emoji not in bet["option_dict"]:
             msg = f"{emoji} isn't a valid outcome so the bet can't be closed."
-            await ctx.response.edit_message(content=msg, view=None)
+            await ctx.followup.edit_message(content=msg, view=None)
             return
 
         # the logic in this if statement only applies if the user "won" their own bet and they were the only better
@@ -454,7 +457,7 @@ class BSEddiesCloseBet(BSEddies):
 
                 message = channel.get_partial_message(bet["message_id"])
                 await message.edit(content=desc, view=None, embeds=[])
-                await ctx.response.edit_message(content="Closed the bet for you!", view=None)
+                await ctx.followup.edit_message(content="Closed the bet for you!", view=None)
                 return
 
         ret_dict = self.bet_manager.close_a_bet(bet_id, guild.id, emoji)
@@ -502,8 +505,9 @@ class BSEddiesCloseBet(BSEddies):
             # channel is thread
             channel = guild.get_thread(bet["channel_id"])
         message = channel.get_partial_message(bet["message_id"])
+
         await message.edit(content=desc, view=None, embeds=[])
-        await ctx.response.edit_message(content="Closed the bet for you!", view=None)
+        await ctx.followup.edit_message(content="Closed the bet for you!", view=None)
 
 
 class BSEddiesCreateBet(BSEddies):
@@ -779,6 +783,20 @@ class BSEddiesPlaceBet(BSEddies):
         )
         await message.edit(embed=embed, view=view)
         await response.edit_message(content="Placed the bet for you!", view=None)
+
+
+class BSEddiesAutoGenerate(BSEddies):
+    """
+        Class for handling `/autogenerate` commands
+        """
+
+    def __init__(self, client, guilds, logger, beta_mode=False):
+        super().__init__(client, guilds, logger, beta_mode=beta_mode)
+        self.bet = BSEddiesCreateBet(client, guilds, logger, beta_mode)
+
+    async def create_auto_generate_view(self, ctx: discord.ApplicationContext):
+        view = AutoGenerateView()
+        await ctx.followup.send(view=view, ephemeral=True)
 
 
 class BSEddiesTransactionHistory(BSEddies):

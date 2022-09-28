@@ -7,9 +7,10 @@ from discord.emoji import Emoji
 
 from discordbot.baseeventclass import BaseEvent
 from discordbot.bot_enums import TransactionTypes, ActivityTypes
-from discordbot.constants import THE_BOYS_ROLE
+from discordbot.constants import THE_BOYS_ROLE, BSE_SERVER_ID, GENERAL_CHAT
 from discordbot.slashcommandeventclasses import BSEddiesPlaceBet, BSEddiesCloseBet
 from discordbot.views import LeaderBoardView, RevolutionView, BetView
+from mongo.bsedataclasses import SpoilerThreads
 from mongo.bseticketedevents import RevolutionEvent
 from mongo.bsepoints import UserInteractions, ServerEmojis
 
@@ -25,6 +26,7 @@ class OnReadyEvent(BaseEvent):
         self.events = RevolutionEvent()
         self.close = BSEddiesCloseBet(client, guild_ids, self.logger, self.beta_mode)
         self.place = BSEddiesPlaceBet(client, guild_ids, self.logger, self.beta_mode)
+        self.spoilers = SpoilerThreads()
 
     async def on_ready(self) -> None:
         """
@@ -32,6 +34,11 @@ class OnReadyEvent(BaseEvent):
         :return: None
         """
         self.logger.info("Checking guilds for members")
+
+        messages_to_delete = [
+            # ( message_id , channel_id )
+            (1023331417012306000, 1022020024749269013)
+        ]
 
         for guild_id in self.guild_ids:
             guild = self.client.get_guild(guild_id)  # type: discord.Guild
@@ -154,6 +161,22 @@ class OnReadyEvent(BaseEvent):
                             await thread.join()
                             print(f"Joined {thread.name}")
 
+            # add thread to spoiler info
+            if guild_id == BSE_SERVER_ID:
+                general = await guild.fetch_channel(GENERAL_CHAT)
+                if threads := general.threads:
+                    for thread in threads:
+                        thread_id = thread.id
+                        thread_info = self.spoilers.get_thread_by_id(BSE_SERVER_ID, thread_id)
+
+                        if not thread_info:
+                            print(f"No info for thread {thread_id}, {thread.name}. Inserting now.")
+                            self.spoilers.insert_spoiler_thread(
+                                BSE_SERVER_ID,
+                                thread_id,
+                                thread.name,
+                            )
+
             if events := self.events.get_open_events(guild_id):
                 if len(events) > 1:
                     print(f"???")
@@ -175,6 +198,14 @@ class OnReadyEvent(BaseEvent):
                 embed = self.embed_manager.get_bet_embed(guild, bet["bet_id"], bet)
                 view = BetView(bet, self.place, self.close)
                 await message.edit(embed=embed, view=view)
+
+            try:
+                for message in messages_to_delete:
+                    channel = await guild.fetch_channel(message[1])
+                    message_obj = channel.get_partial_message(message[0])
+                    await channel.delete_messages([message_obj, ])
+            except discord.errors.InvalidData:
+                pass
 
             self.client.add_view(LeaderBoardView(self.embed_manager))
 

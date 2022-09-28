@@ -16,12 +16,13 @@ from discordbot.eddiekingtask import BSEddiesKingTask
 from discordbot.embedmanager import EmbedManager
 from discordbot.revolutiontask import BSEddiesRevolutionTask
 from discordbot.dailyvallytask import AfterWorkVally
+from discordbot.threadmutetask import ThreadSpoilerTask
 from discordbot.wordletask import WordleTask
 from discordbot.slashcommandeventclasses import BSEddiesLeaderboard, BSEddiesView, BSEddiesActive, BSEddiesGift
 from discordbot.slashcommandeventclasses import BSEddiesHighScore, BSEddiesAdminGive
 from discordbot.slashcommandeventclasses import BSEddiesCloseBet, BSEddiesPlaceBet
 from discordbot.slashcommandeventclasses import BSEddiesPending, BSEddiesTransactionHistory
-from discordbot.slashcommandeventclasses import BSEddiesPredict
+from discordbot.slashcommandeventclasses import BSEddiesPredict, BSEddiesAutoGenerate
 
 from discordbot.modals import BSEddiesBetCreateModal
 from discordbot.views import PlaceABetView
@@ -109,23 +110,20 @@ class CommandManager(object):
         self.bseddies_admin_give = BSEddiesAdminGive(client, guilds, self.logger, self.beta_mode)
         self.bseddies_high_score = BSEddiesHighScore(client, guilds, self.logger, self.beta_mode)
         self.bseddies_predict = BSEddiesPredict(client, guilds, self.logger, self.beta_mode)
+        self.bseddies_autogenerate = BSEddiesAutoGenerate(client, guilds, self.logger, self.beta_mode)
 
         # tasks
         self.bet_closer_task = BetCloser(self.client, guilds, self.logger, self.bseddies_place, self.bseddies_close)
         self.eddie_gain_message_task = EddieGainMessager(self.client, guilds, self.logger)
         self.eddie_king_task = BSEddiesKingTask(self.client, guilds, self.logger)
         self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger, self.giphy_token)
+        self.thread_task = ThreadSpoilerTask(self.client, guilds, self.logger)
         self.vally_task = AfterWorkVally(self.client, guilds, self.logger)
         self.wordle_task = WordleTask(self.client, guilds, self.logger)
-
-        # create all the subcommand groups
-        self.bet_group = SlashCommandGroup("bet", "Bet related stuff")  # type: SlashCommandGroup
 
         # call the methods that register the events we're listening for
         self._register_client_events()
         self._register_slash_commands(guilds)
-
-        self.client.add_application_command(self.bet_group)
 
     # noinspection PyProtectedMember
     def __get_cached_messages_list(self) -> list:
@@ -382,6 +380,11 @@ class CommandManager(object):
                 title="Create a bet"
             )
             await ctx.send_modal(modal)
+
+        @self.client.command(description="Autogenerate bets")
+        async def autogenerate(ctx: discord.ApplicationContext):
+            await ctx.defer()
+            await self.bseddies_autogenerate.create_auto_generate_view(ctx)
 
         @self.client.command(description="Place a bet")
         async def place(ctx: discord.ApplicationContext) -> None:

@@ -115,7 +115,7 @@ class BetOutcomesSelect(Select):
 
 class BetSelectAmount(Select):
     amounts = [
-        1, 5, 10, 25, 50, 100, 250, 500, 750, 1000, 1500, 2000
+        1, 5, 10, 25, 50, 75, 100, 175, 250, 500, 750, 1000, 1250, 1500, 1750, 2000
     ]
 
     def __init__(self, user_eddies):

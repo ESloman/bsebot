@@ -61,10 +61,27 @@ class BetManager(object):
             # this mean no-one won :(
         c = (point_two[1] - (m * point_two[0]))
 
+        # get eddies the losers bet
+        try:
+            _extra_eddies = sum(ret_dict["losers"].values())
+        except Exception as e:
+            _extra_eddies = 0
+
         # assign winning points to the users who got the answer right
-        for better in [b for b in ret["betters"] if ret["betters"][b]["emoji"] == emoji]:
+        winners = [b for b in ret["betters"] if ret["betters"][b]["emoji"] == emoji]
+        for better in winners:
             points_bet = ret["betters"][better]["points"]
             points_won = math.ceil(((m * points_bet) + c) * points_bet)
+
+            if points_bet < 10:
+                points_won += points_bet
+
+            # add on loser points
+            try:
+                points_won += int(math.floor(_extra_eddies / len(winners)))
+            except Exception:
+                pass
+
             ret_dict["winners"][better] = points_won
             self.user_points.increment_points(int(better), guild_id, points_won)
             # add to transaction history

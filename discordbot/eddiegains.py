@@ -373,7 +373,7 @@ class BSEddiesManager(object):
 
             if bot_guesses < top_guess:
                 top_guess = bot_guesses
-            
+
             for wordle_attempt in wordle_messages:
                 if wordle_attempt[1] == top_guess:
                     gain_dict = eddie_gain_dict[wordle_attempt[0]][1]

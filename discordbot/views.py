@@ -332,7 +332,7 @@ class AutoGenerateView(discord.ui.View):
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=4, disabled=True, custom_id="submit_btn")
     async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await interaction.response.defer()
+        await interaction.response.defer(ephemeral=True)
 
         data = {"_id": [], "number": 0}
 

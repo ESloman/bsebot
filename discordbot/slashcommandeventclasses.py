@@ -827,7 +827,6 @@ class BSEddiesAutoGenerate(BSEddies):
             )
 
 
-
 class BSEddiesTransactionHistory(BSEddies):
     """
     Class for handling `/bseddies transactions` command

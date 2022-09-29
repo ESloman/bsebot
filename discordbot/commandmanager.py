@@ -117,7 +117,7 @@ class CommandManager(object):
         self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger, self.giphy_token)
         self.thread_task = ThreadSpoilerTask(self.client, guilds, self.logger)
         self.vally_task = AfterWorkVally(self.client, guilds, self.logger)
-        # self.wordle_task = WordleTask(self.client, guilds, self.logger)
+        self.wordle_task = WordleTask(self.client, guilds, self.logger)
 
         # call the methods that register the events we're listening for
         self._register_client_events()

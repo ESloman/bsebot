@@ -9,6 +9,7 @@ from discord.ext import tasks, commands
 
 from discordbot.bot_enums import TransactionTypes
 from discordbot.constants import CREATOR, MESSAGE_TYPES, MESSAGE_VALUES, WORDLE_VALUES, HUMAN_MESSAGE_TYPES
+from discordbot.constants import GENERAL_CHAT
 from mongo.bsepoints import ServerEmojis, UserPoints, UserInteractions
 
 
@@ -344,10 +345,35 @@ class BSEddiesManager(object):
 
             eddie_gain_dict[user] = [eddies_gained, breakdown]
 
+        # grab the bot's wordle message here
+        results = self.user_interactions.query(
+            {
+                "guild_id": guild_id,
+                "timestamp": {"$gt": start, "$lt": end},
+                "user_id": self.bot.user.id,
+                "channel_id": GENERAL_CHAT,
+                "message_type": "wordle"
+            }
+        )
+
+        bot_guesses = 100  # arbitrarily high number
+        if results:
+            bot_message = results[0]
+            bot_result = re.search("\d\/\d", bot_message["content"]).group()
+            bot_guesses = bot_result.split("/")[0]
+            if bot_guesses != "X":
+                bot_guesses = int(bot_guesses)
+            else:
+                bot_guesses = 100
+
         # do wordle here
         if wordle_messages:
             wordle_messages = sorted(wordle_messages, key=lambda x: x[1])
             top_guess = wordle_messages[0][1]
+
+            if bot_guesses < top_guess:
+                top_guess = bot_guesses
+            
             for wordle_attempt in wordle_messages:
                 if wordle_attempt[1] == top_guess:
                     gain_dict = eddie_gain_dict[wordle_attempt[0]][1]

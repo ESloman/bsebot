@@ -37,7 +37,6 @@ class OnReadyEvent(BaseEvent):
 
         messages_to_delete = [
             # ( message_id , channel_id )
-            (1023331417012306000, 1022020024749269013)
         ]
 
         for guild_id in self.guild_ids:
@@ -204,7 +203,7 @@ class OnReadyEvent(BaseEvent):
                     channel = await guild.fetch_channel(message[1])
                     message_obj = channel.get_partial_message(message[0])
                     await channel.delete_messages([message_obj, ])
-            except discord.errors.InvalidData:
+            except (discord.errors.InvalidData, discord.errors.NotFound):
                 pass
 
             self.client.add_view(LeaderBoardView(self.embed_manager))

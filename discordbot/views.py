@@ -317,7 +317,7 @@ class AutoGenerateView(discord.ui.View):
                     break
             await interaction.response.edit_message(view=self.auto)
 
-    def __init__(self):
+    def __init__(self, auto_class):
         super().__init__(timeout=120)
 
         generation_methods = [
@@ -325,6 +325,7 @@ class AutoGenerateView(discord.ui.View):
             ("selected", "Select the bets to create from the pool")
         ]
 
+        self.auto_class = auto_class
         self.add_item(self.TypeSelect(["valorant"]))
         method_select = self.MethodSelect(generation_methods, self)
         self.add_item(method_select)
@@ -333,7 +334,8 @@ class AutoGenerateView(discord.ui.View):
     async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         await interaction.response.defer()
 
-        data = {}
+        data = {"_id": [], "number": 0}
+
         for child in self.children:
             if child.custom_id == "generate_method":
                 data["method"] = child.values[0]
@@ -347,7 +349,8 @@ class AutoGenerateView(discord.ui.View):
                 except IndexError:
                     data["number"] = [opt.value for opt in child.options if opt.default is True][0]
 
-        print(data)
+        self.auto_class.autogenerate_wrapper(interaction, data["method"], data["number"], data["_ids"])
+        await interaction.followup.edit_message(content="Bets created", view=None)
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=4, disabled=False, custom_id="cancel_btn")
     async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction):

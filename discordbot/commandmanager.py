@@ -5,7 +5,6 @@ This file contains our class that registers all the events we listen to and do t
 import logging
 
 import discord
-from discord import SlashCommandGroup
 
 from apis.giphyapi import GiphyAPI
 from discordbot.betcloser import BetCloser
@@ -25,7 +24,6 @@ from discordbot.slashcommandeventclasses import BSEddiesPending, BSEddiesTransac
 from discordbot.slashcommandeventclasses import BSEddiesPredict, BSEddiesAutoGenerate
 
 from discordbot.modals import BSEddiesBetCreateModal
-from discordbot.views import PlaceABetView
 from mongo.bsepoints import UserPoints, UserBets
 
 
@@ -119,7 +117,7 @@ class CommandManager(object):
         self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger, self.giphy_token)
         self.thread_task = ThreadSpoilerTask(self.client, guilds, self.logger)
         self.vally_task = AfterWorkVally(self.client, guilds, self.logger)
-        self.wordle_task = WordleTask(self.client, guilds, self.logger)
+        # self.wordle_task = WordleTask(self.client, guilds, self.logger)
 
         # call the methods that register the events we're listening for
         self._register_client_events()

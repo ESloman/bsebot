@@ -381,7 +381,7 @@ class CommandManager(object):
 
         @self.client.command(description="Autogenerate bets")
         async def autogenerate(ctx: discord.ApplicationContext):
-            await ctx.defer()
+            await ctx.defer(ephemeral=True)
             await self.bseddies_autogenerate.create_auto_generate_view(ctx)
 
         @self.client.command(description="Place a bet")

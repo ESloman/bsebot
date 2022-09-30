@@ -37,7 +37,7 @@ class ThreadSpoilerTask(commands.Cog):
             return
 
         self.logger.info(f"Checking spoiler threads for mute messages")
-        guild = await self.bot.fetch_guild(BSE_SERVER_ID)
+        guild = self.bot.get_guild(BSE_SERVER_ID)
         general = await guild.fetch_channel(GENERAL_CHAT)
         threads = general.threads
 

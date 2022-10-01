@@ -399,24 +399,24 @@ class BSEddiesCloseBet(BSEddies):
 
         if not bet:
             msg = f"This bet doesn't exist."
-            await ctx.followup.edit_message(content=msg, view=None)
+            await ctx.followup.edit_message(content=msg, view=None, message_id=ctx.message.id)
             return
 
         if not bet["active"] and bet["result"] is not None:
             msg = f"You cannot close a bet that is already closed."
-            await ctx.followup.edit_message(content=msg, view=None)
+            await ctx.followup.edit_message(content=msg, view=None, message_id=ctx.message.id)
             return
 
         if bet["user"] != author.id:
             msg = f"You cannot close a bet that isn't yours."
-            await ctx.followup.edit_message(content=msg, view=None)
+            await ctx.followup.edit_message(content=msg, view=None, message_id=ctx.message.id)
             return
 
         emoji = emoji.strip()
 
         if emoji not in bet["option_dict"]:
             msg = f"{emoji} isn't a valid outcome so the bet can't be closed."
-            await ctx.followup.edit_message(content=msg, view=None)
+            await ctx.followup.edit_message(content=msg, view=None, message_id=ctx.message.id)
             return
 
         # the logic in this if statement only applies if the user "won" their own bet and they were the only better
@@ -459,7 +459,7 @@ class BSEddiesCloseBet(BSEddies):
 
                 message = channel.get_partial_message(bet["message_id"])
                 await message.edit(content=desc, view=None, embeds=[])
-                await ctx.followup.edit_message(content="Closed the bet for you!", view=None)
+                await ctx.followup.edit_message(content="Closed the bet for you!", view=None, message_id=ctx.message.id)
                 return
 
         ret_dict = self.bet_manager.close_a_bet(bet_id, guild.id, emoji)
@@ -509,7 +509,7 @@ class BSEddiesCloseBet(BSEddies):
         message = channel.get_partial_message(bet["message_id"])
 
         await message.edit(content=desc, view=None, embeds=[])
-        await ctx.followup.edit_message(content="Closed the bet for you!", view=None)
+        await ctx.followup.edit_message(content="Closed the bet for you!", view=None, message_id=ctx.message.id)
 
 
 class BSEddiesCreateBet(BSEddies):

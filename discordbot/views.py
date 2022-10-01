@@ -349,8 +349,8 @@ class AutoGenerateView(discord.ui.View):
                 except IndexError:
                     data["number"] = [opt.value for opt in child.options if opt.default is True][0]
 
-        self.auto_class.autogenerate_wrapper(interaction, data["method"], data["number"], data["_ids"])
-        await interaction.followup.edit_message(content="Bets created", view=None)
+        await self.auto_class.autogenerate_wrapper(interaction, data["method"], data["number"], data["_ids"])
+        await interaction.followup.edit_message(content="Bets created", view=None, message_id=interaction.message.id)
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=4, disabled=False, custom_id="cancel_btn")
     async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction):

@@ -10,6 +10,7 @@ from discord.ext import tasks, commands
 from discordbot.bot_enums import TransactionTypes
 from discordbot.constants import CREATOR, MESSAGE_TYPES, MESSAGE_VALUES, WORDLE_VALUES, HUMAN_MESSAGE_TYPES
 from discordbot.constants import GENERAL_CHAT
+from mongo.bsedataclasses import TaxRate
 from mongo.bsepoints import ServerEmojis, UserPoints, UserInteractions
 
 
@@ -127,6 +128,7 @@ class BSEddiesManager(object):
         self.user_interactions = UserInteractions()
         self.user_points = UserPoints()
         self.server_emojis = ServerEmojis()
+        self.tax_rate = TaxRate()
         self.bot = bot
         self.logger = logger
 
@@ -382,6 +384,9 @@ class BSEddiesManager(object):
 
         current_king_id = self.user_points.get_current_king(guild_id)["uid"]
         tax_gains = 0
+        
+        tax_rate = self.tax_rate.get_tax_rate()
+        self.logger.info(f"Tax rate is: {tax_rate}")
 
         for _user in eddie_gain_dict:
             if _user == "guild":
@@ -389,13 +394,13 @@ class BSEddiesManager(object):
 
             if _user != current_king_id:
                 # apply tax
-                taxed = math.floor(eddie_gain_dict[_user][0] * 0.1)
+                taxed = math.floor(eddie_gain_dict[_user][0] * tax_rate)
                 eddie_gain_dict[_user][0] -= taxed
                 eddie_gain_dict[_user].append(taxed)
                 tax_gains += taxed
 
             if real:
-                print(f"Incrementing {_user} by {eddie_gain_dict[_user][0]}")
+                self.logger.info(f"Incrementing {_user} by {eddie_gain_dict[_user][0]}")
                 self.user_points.increment_points(_user, guild_id, eddie_gain_dict[_user][0])
                 self.user_points.append_to_transaction_history(
                     _user,

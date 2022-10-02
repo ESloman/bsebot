@@ -110,7 +110,7 @@ class PlaceABetView(discord.ui.View):
         )
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=3, disabled=False, custom_id="cancel_btn",
-                       emoji=":no_entry_sign:")
+                       emoji="🚫")
     async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         await interaction.response.edit_message(content="Cancelled", view=None)
 
@@ -157,7 +157,7 @@ class CloseABetView(discord.ui.View):
         )
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=2, disabled=False, custom_id="cancel_btn",
-                       emoji=":no_entry_sign:")
+                       emoji="🚫")
     async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         await interaction.response.edit_message(content="Cancelled", view=None)
 
@@ -355,7 +355,7 @@ class AutoGenerateView(discord.ui.View):
         await interaction.followup.edit_message(content="Bets created", view=None, message_id=interaction.message.id)
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=4, disabled=False, custom_id="cancel_btn",
-                       emoji=":no_entry_sign:")
+                       emoji="🚫")
     async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         await interaction.response.edit_message(content="Cancelled", view=None)
 
@@ -378,7 +378,7 @@ class RevolutionView(discord.ui.View):
         label=f"OVERTHROW",
         style=discord.ButtonStyle.green,
         custom_id="overthrow_button",
-        emoji=":flame:"
+        emoji="🔥"
     )
     async def overthrow_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         response = interaction.response  # type: discord.InteractionResponse
@@ -476,7 +476,7 @@ class RevolutionView(discord.ui.View):
         label=f"SUPPORT THE KING",
         style=discord.ButtonStyle.red,
         custom_id="support_button",
-        emoji=":crown:"
+        emoji="👑"
     )
     async def support_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
 

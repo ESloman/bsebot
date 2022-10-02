@@ -436,17 +436,12 @@ class RevolutionView(discord.ui.View):
             await followup.edit_message(interaction.message.id, view=self)
             return
 
-        event["chance"] += 15
-
         if user_id not in event["revolutionaries"]:
             event["revolutionaries"].append(user_id)
 
         if user_id not in event["users"]:
             event["users"].append(user_id)
-
-        if user_id in event["supporters"]:
             event["chance"] += 15
-            event["supporters"].pop(user_id)
 
         self.revolutions.update(
             {"_id": event["_id"]},
@@ -535,12 +530,13 @@ class RevolutionView(discord.ui.View):
             await followup.edit_message(interaction.message.id, view=self)
             return
 
-        event["chance"] -= 15
-
-        if user_id not in event["supporters"]:
-            event["supporters"].append(user_id)
+        
         if user_id not in event["users"]:
             event["users"].append(user_id)
+            event["chance"] -= 15
+        if user_id not in event["supporters"]:
+            event["supporters"].append(user_id)
+
 
         self.revolutions.update(
             {"_id": event["_id"]},

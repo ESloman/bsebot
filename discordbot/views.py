@@ -345,7 +345,7 @@ class AutoGenerateView(discord.ui.View):
     async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
 
-        data = {"_id": [], "number": 0}
+        data = {"_ids": [], "number": 0}
 
         for child in self.children:
             if child.custom_id == "generate_method":

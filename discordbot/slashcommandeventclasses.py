@@ -813,7 +813,10 @@ class BSEddiesAutoGenerate(BSEddies):
         if method == "random":
             bets = self.auto_bets.get_random_bets_for_type("valorant", number)
         else:
+            self.logger.info(f"Bet ids: {bet_ids}")
             bets = self.auto_bets.query({"type": "valorant", "_id": {"$in": bet_ids}})
+
+        self.logger.info("Bets: {bets}")
 
         for bet in bets:
             await self.bet.handle_bet_creation(

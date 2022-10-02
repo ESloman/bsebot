@@ -109,7 +109,8 @@ class PlaceABetView(discord.ui.View):
             data["emoji"]
         )
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=3, disabled=False, custom_id="cancel_btn")
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=3, disabled=False, custom_id="cancel_btn",
+                       emoji=":no_entry_sign:")
     async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         await interaction.response.edit_message(content="Cancelled", view=None)
 
@@ -155,7 +156,8 @@ class CloseABetView(discord.ui.View):
             data["emoji"]
         )
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=2, disabled=False, custom_id="cancel_btn")
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=2, disabled=False, custom_id="cancel_btn",
+                       emoji=":no_entry_sign:")
     async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         await interaction.response.edit_message(content="Cancelled", view=None)
 
@@ -352,7 +354,8 @@ class AutoGenerateView(discord.ui.View):
         await self.auto_class.autogenerate_wrapper(interaction, data["method"], data["number"], data["_ids"])
         await interaction.followup.edit_message(content="Bets created", view=None, message_id=interaction.message.id)
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=4, disabled=False, custom_id="cancel_btn")
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=4, disabled=False, custom_id="cancel_btn",
+                       emoji=":no_entry_sign:")
     async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         await interaction.response.edit_message(content="Cancelled", view=None)
 
@@ -562,3 +565,17 @@ class RevolutionView(discord.ui.View):
 
         await followup.edit_message(interaction.message.id, view=self, content=edited_message)
         await followup.send(content="Congrats - you've pledged your `support`!", ephemeral=True)
+
+
+class TaxRateView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(label=":chart_with_upwards_trend: Set Tax Rate", style=discord.ButtonStyle.blurple)
+    async def place_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+        # submit
+        pass
+
+    @discord.ui.button(label=":no_entry_sign: Cancel", style=discord.ButtonStyle.gray)
+    async def close_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+        pass

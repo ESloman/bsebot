@@ -155,6 +155,4 @@ class TaxRate(BestSummerEverPointsDB):
         else:
             update_doc = {"type": "tax"}
         
-        self.update(update_doc, {"value": {"$set": tax_rate}})
-
-        
+        self.update(update_doc, {"$set": {"value": tax_rate}})

@@ -818,6 +818,8 @@ class BSEddiesAutoGenerate(BSEddies):
             bets = self.auto_bets.query({"type": "valorant", "_id": {"$in": [ObjectId(b) for b in bet_ids]}})
 
         self.logger.info("Bets: {bets}")
+        
+        bets = sorted(bets, key=lambda x: x["title"])
 
         for bet in bets:
             await self.bet.handle_bet_creation(

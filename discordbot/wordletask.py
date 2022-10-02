@@ -46,7 +46,7 @@ class WordleTask(commands.Cog):
 
         if now.hour >= 9:
             if self.set_wordle_activity:
-                print(f"Setting activity back to default")
+                self.logger.info(f"Setting activity back to default")
                 listening_activity = discord.Activity(
                     name="conversations",
                     state="Listening",
@@ -62,18 +62,18 @@ class WordleTask(commands.Cog):
             return
 
         if not self.set_wordle_activity:
-            print(f"Setting wordle activity")
+            self.logger.info(f"Setting wordle activity")
             game = discord.Game("Wordle")
             await self.bot.change_presence(status=discord.Status.online, activity=game)
             self.set_wordle_activity = True
 
         if self.wait_iters is None:
             self.wait_iters = random.randint(1, 6)
-            print(f"Setting iterations to {self.wait_iters}")
+            self.logger.info(f"Setting iterations to {self.wait_iters}")
             return
 
         if self.wait_iters != 0:
-            print(f"Decrementing countdown...")
+            self.logger.info(f"Decrementing countdown...")
             self.wait_iters -= 1
             return
 
@@ -113,7 +113,7 @@ class WordleTask(commands.Cog):
             _match = re.match(r"Wordle \d+", content)
             value = _match.group().split()[1]
 
-        print(f"Got wordle number to be: {value}")
+        self.logger.info(f"Got wordle number to be: {value}")
 
         random_wordle = list(self.user_interactions.vault.aggregate([
             {"$match": {"message_type": "wordle"}},
@@ -126,11 +126,11 @@ class WordleTask(commands.Cog):
         guild = await self.bot.fetch_guild(BSE_SERVER_ID)
         channel = await guild.fetch_channel(GENERAL_CHAT)
 
-        print(f"Sending wordle message: {message}")
+        self.logger.info(f"Sending wordle message: {message}")
         await channel.send(content=message)
         self.sent_wordle = True
 
-        print(f"Setting activity back to default")
+        self.logger.info(f"Setting activity back to default")
         listening_activity = discord.Activity(
             name="conversations",
             state="Listening",

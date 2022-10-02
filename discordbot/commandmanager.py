@@ -17,7 +17,7 @@ from discordbot.revolutiontask import BSEddiesRevolutionTask
 from discordbot.dailyvallytask import AfterWorkVally
 from discordbot.threadmutetask import ThreadSpoilerTask
 from discordbot.wordletask import WordleTask
-from discordbot.slashcommandeventclasses import BSEddiesLeaderboard, BSEddiesView, BSEddiesActive, BSEddiesGift
+from discordbot.slashcommandeventclasses import BSEddiesLeaderboard, BSEddiesTaxRate, BSEddiesView, BSEddiesActive, BSEddiesGift
 from discordbot.slashcommandeventclasses import BSEddiesHighScore, BSEddiesAdminGive
 from discordbot.slashcommandeventclasses import BSEddiesCloseBet, BSEddiesPlaceBet
 from discordbot.slashcommandeventclasses import BSEddiesPending, BSEddiesTransactionHistory
@@ -109,6 +109,7 @@ class CommandManager(object):
         self.bseddies_high_score = BSEddiesHighScore(client, guilds, self.logger, self.beta_mode)
         self.bseddies_predict = BSEddiesPredict(client, guilds, self.logger, self.beta_mode)
         self.bseddies_autogenerate = BSEddiesAutoGenerate(client, guilds, self.logger, self.beta_mode)
+        self.bseddies_tax_rate = BSEddiesTaxRate(client, guilds, self.logger, self.beta_mode)
 
         # tasks
         self.bet_closer_task = BetCloser(self.client, guilds, self.logger, self.bseddies_place, self.bseddies_close)
@@ -426,3 +427,13 @@ class CommandManager(object):
             :return:
             """
             await self.bseddies_admin_give.admin_give(ctx, user, amount)
+
+        @self.client.command(description="Set server eddies tax rate")
+        async def taxrate(ctx: discord.ApplicationContext):
+            """
+            Slash command to set tax rate
+
+            Args:
+                ctx (discord.ApplicationContext): _description_
+            """
+            await self.bseddies_tax_rate.create_tax_view(ctx)

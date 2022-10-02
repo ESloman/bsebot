@@ -12,6 +12,7 @@ from typing import Union
 
 import discord
 import xlsxwriter
+from pymongo import ObjectId
 
 from discordbot.betmanager import BetManager
 from discordbot.bot_enums import TransactionTypes, ActivityTypes
@@ -814,7 +815,7 @@ class BSEddiesAutoGenerate(BSEddies):
             bets = self.auto_bets.get_random_bets_for_type("valorant", number)
         else:
             self.logger.info(f"Bet ids: {bet_ids}")
-            bets = self.auto_bets.query({"type": "valorant", "_id": {"$in": bet_ids}})
+            bets = self.auto_bets.query({"type": "valorant", "_id": {"$in": [ObjectId(b) for b in bet_ids]}})
 
         self.logger.info("Bets: {bets}")
 

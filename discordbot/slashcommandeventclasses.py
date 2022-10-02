@@ -571,7 +571,10 @@ class BSEddiesCreateBet(BSEddies):
         if not await self._handle_validation(ctx):
             return
 
-        await ctx.response.defer(ephemeral=True)
+        try:
+            await ctx.response.defer(ephemeral=True)
+        except Exception as e:
+            pass
 
         self._add_event_type_to_activity_history(
             ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_BET_CREATE,

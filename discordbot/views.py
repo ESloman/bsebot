@@ -436,6 +436,15 @@ class RevolutionView(discord.ui.View):
             await followup.edit_message(interaction.message.id, view=self)
             return
 
+        if user_id in event["users"]:
+            await followup.send(
+                content="You've already acted on this - you cannot do so again",
+                ephemeral=True
+            )
+            self.toggle_stuff(False)
+            await followup.edit_message(interaction.message.id, view=self)
+            return
+        
         if user_id not in event["revolutionaries"]:
             event["revolutionaries"].append(user_id)
 
@@ -530,6 +539,14 @@ class RevolutionView(discord.ui.View):
             await followup.edit_message(interaction.message.id, view=self)
             return
 
+        if user_id in event["users"]:
+            await followup.send(
+                content="You've already acted on this - you cannot do so again",
+                ephemeral=True
+            )
+            self.toggle_stuff(False)
+            await followup.edit_message(interaction.message.id, view=self)
+            return
         
         if user_id not in event["users"]:
             event["users"].append(user_id)

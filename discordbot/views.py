@@ -94,7 +94,7 @@ class PlaceABetView(discord.ui.View):
             child.disabled = True
         await self.message.edit(content="This `place` command timed out - please _place_ another one", view=None)
 
-    @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=3, disabled=True, custom_id="submit_btn")
+    @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=3, disabled=True, custom_id="submit_btn", emoji="💰")
     async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
 
         data = {}
@@ -178,7 +178,7 @@ class BetView(discord.ui.View):
         self.place = bseddies_place
         self.close = bseddies_close
 
-    @discord.ui.button(label="Place a bet", style=discord.ButtonStyle.blurple)
+    @discord.ui.button(label="Place a bet", style=discord.ButtonStyle.blurple, emoji="💰")
     async def place_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         await self.place.create_bet_view(interaction, [self.bet, ])
 
@@ -578,6 +578,7 @@ class TaxRateView(discord.ui.View):
         self.select = TaxRateSelect(current_tax)
         self.add_item(self.select)
         self.tax_rate = TaxRate()
+        self.user_points = UserPoints()
 
     def _append_to_history(self, user_id, guild_id, _type: ActivityTypes, **params):
         
@@ -591,7 +592,7 @@ class TaxRateView(discord.ui.View):
         doc["value"] = params["value"]
         self.user_points.append_to_activity_history(user_id, guild_id, doc)
     
-    @discord.ui.button(label="Set Tax Rate", style=discord.ButtonStyle.blurple, emoji="📈")
+    @discord.ui.button(label="Set Tax Rate", style=discord.ButtonStyle.blurple, emoji="📈", row=2)
     async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         
         try:
@@ -609,6 +610,6 @@ class TaxRateView(discord.ui.View):
             view=None
         )
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.gray, emoji="✖️")
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.gray, emoji="✖️", row=2)
     async def close_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         await interaction.response.edit_message(content="Cancelled", view=None)

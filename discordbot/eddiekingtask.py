@@ -1,5 +1,4 @@
 import datetime
-from http import server
 
 import discord
 from discord.ext import tasks, commands

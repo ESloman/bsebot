@@ -50,11 +50,15 @@ class BetManager(object):
         except ZeroDivisionError:
             modifier = 1
 
+        modifier += (random.random() / 2)
+        
         if modifier <= 1:
             modifier = 1.05
-        elif modifier > 2:
-            modifier = 2
 
+        if len(ret_dict["losers"]) == 0:
+            # no losers and only winnners
+            modifier = 1.2
+        
         point_one = (0, 2 + (random.random() / 2))
         point_two = (winning_outcome_eddies, modifier)
         try:
@@ -129,7 +133,7 @@ class BetManager(object):
             king_id,
             guild_id,
             {
-                "type": TransactionTypes.BET_WIN,
+                "type": TransactionTypes.BET_TAX,
                 "amount": total_eddies_taxed,
                 "timestamp": datetime.datetime.now(),
                 "bet_id": bet_id,

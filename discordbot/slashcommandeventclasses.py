@@ -18,7 +18,6 @@ from discordbot.betmanager import BetManager
 from discordbot.bot_enums import TransactionTypes, ActivityTypes
 from discordbot.clienteventclasses import BaseEvent
 from discordbot.constants import CREATOR, PRIVATE_CHANNEL_IDS, BSEDDIES_KING_ROLES
-from discordbot.constants import HUMAN_MESSAGE_TYPES
 from discordbot.eddiegains import BSEddiesManager
 
 # views
@@ -825,6 +824,27 @@ class BSEddiesAutoGenerate(BSEddies):
         bets = sorted(bets, key=lambda x: x["title"])
 
         for bet in bets:
+            try:
+                if not bet["options"] and bet.get("voice_channel"):
+                    # bet has no options but should be constructed from channel members
+                    vc_channel = await self.client.fetch_channel(bet.get("voice_channel"))
+                    for member in vc_channel.members[0]:
+                        bet["options"].append(member.display_name)
+                    
+                    if bet["type"] == "valorant" and len(bet["options"]) < 5 and bet.get("fill"):
+                        bet["options"].appeand("a rando")
+
+            except Exception as e:
+                self.logger.info(f"Something went wrong creating an auto bet: {e}, {bet}")
+
+            if bet.get("channel_members") and method == "random":
+                # validate that we can use this bet
+                vc_channel = await self.client.fetch_channel(bet.get("voice_channel"))
+                member_ids = [m.id for m in vc_channel.members]
+                if not all([c_m in member_ids for c_m in bet["channel_members"]]):
+                    self.logger.info("Can't use bet {bet} as not all required members are present")
+                    continue
+            
             await self.bet.handle_bet_creation(
                 ctx,
                 bet["title"],

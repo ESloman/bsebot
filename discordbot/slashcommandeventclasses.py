@@ -828,7 +828,7 @@ class BSEddiesAutoGenerate(BSEddies):
                 if not bet["options"] and bet.get("voice_channel"):
                     # bet has no options but should be constructed from channel members
                     vc_channel = await self.client.fetch_channel(bet.get("voice_channel"))
-                    for member in vc_channel.members[0]:
+                    for member in vc_channel.members:
                         bet["options"].append(member.display_name)
                     
                     if bet["type"] == "valorant" and len(bet["options"]) < 5 and bet.get("fill"):
@@ -836,6 +836,7 @@ class BSEddiesAutoGenerate(BSEddies):
 
             except Exception as e:
                 self.logger.info(f"Something went wrong creating an auto bet: {e}, {bet}")
+                continue
 
             if bet.get("channel_members") and method == "random":
                 # validate that we can use this bet

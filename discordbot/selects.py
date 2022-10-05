@@ -1,6 +1,5 @@
 import math
 
-import discord
 from discord import SelectOption, Interaction
 from discord.ui import Select, View, Button
 

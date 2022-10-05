@@ -40,3 +40,6 @@ jobs:
           build-args: |
             GIPHY_TOKEN=${{ secrets.GIPHY_TOKEN }}
             DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}
+            GIT_HASH=${{ $GITHUB_SHA }}
+            GIT_USER=ESloman
+            GIT_PASS=${{ secrets.GIT_PASS }}

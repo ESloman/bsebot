@@ -2,7 +2,6 @@ FROM python:3.10.7
 
 ARG DISCORD_TOKEN
 ARG GIPHY_TOKEN
-ARG GIT_HASH
 ARG GIT_USER
 ARG GIT_PASS
 
@@ -15,7 +14,8 @@ RUN mkdir -vp /home/app
 
 COPY . /home/app/
 
-RUN git config --global url.https://${GIT_USER}:${GIT_PASS}@github.com/.insteadOf https://github.com/
+RUN GIT_HASH=$(git rev-parse --verify HEAD) \
+    && git config --global url.https://${GIT_USER}:${GIT_PASS}@github.com/.insteadOf https://github.com/
 
 ENV PYTHONPATH=/home/app/
 

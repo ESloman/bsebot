@@ -1,10 +1,11 @@
 import datetime
+from http import server
 
 import discord
 from discord.ext import tasks, commands
 
 from discordbot.bot_enums import ActivityTypes
-from discordbot.constants import BSEDDIES_KING_ROLES
+from discordbot.constants import BSE_SERVER_ID, BSEDDIES_KING_ROLES, BSEDDIES_REVOLUTION_CHANNEL
 from mongo.bsepoints import UserPoints
 
 
@@ -94,6 +95,11 @@ class BSEddiesKingTask(commands.Cog):
 
                 message = f"You are now the KING of {guild_obj.name}! :crown:"
                 await new.send(content=message)
+                
+                if guild_id == BSE_SERVER_ID:
+                    channel = guild.get_channel(BSEDDIES_REVOLUTION_CHANNEL)
+                    msg = f"{new.mention} is now the {role.mention}! 👑"
+                    await channel.send(content=msg)
 
     @king_checker.before_loop
     async def before_king_checker(self):

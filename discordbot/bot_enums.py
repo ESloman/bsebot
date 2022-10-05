@@ -32,6 +32,7 @@ class TransactionTypes(IntEnum):
     REV_OVERTHROW = 21
     SUPPORTER_LOST_REVOLUTION = 22
     TAX_GAINS = 23
+    BET_TAX = 24
     OVERRIDE = 99
 
 

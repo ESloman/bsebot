@@ -1,5 +1,6 @@
 import math
 
+import discord
 from discord import SelectOption, Interaction
 from discord.ui import Select, View, Button
 
@@ -33,8 +34,7 @@ class BetSelect(Select):
             placeholder="Select a bet",
             min_values=1,
             max_values=1,
-            options=options,
-            custom_id="bet_select"
+            options=options
         )
         self.user_bets = UserBets()
 
@@ -51,7 +51,7 @@ class BetSelect(Select):
         bet_obj = self.user_bets.get_bet_from_id(interaction.guild_id, selected_bet)
         outcomes = bet_obj["option_dict"]
 
-        outcome_select = [item for item in self.view.children if item.custom_id == "outcome_select"][0]
+        outcome_select = [item for item in self.view.children if type(item) == BetOutcomesSelect][0]
         outcome_select.options = [
             SelectOption(
                 label=outcomes[key]["val"],
@@ -63,52 +63,12 @@ class BetSelect(Select):
 
         # disable the other ui elements when this changes
         for child in self.view.children:
-            if child.custom_id in ["amount_select", "submit_btn"]:
+            
+            if type(child) == BetSelectAmount:
                 child.disabled = True
-
-        await interaction.response.edit_message(view=self.view)
-
-
-class BetOutcomesSelect(Select):
-    def __init__(self, outcomes: list, enable_id="amount_select"):
-        """
-
-        :param outcomes:
-        """
-        if not outcomes:
-            outcomes = ["placeholder1", "placeholder2"]
-            options = [
-                SelectOption(label=opt) for opt in outcomes
-            ]
-        else:
-            options = outcomes
-
-        super().__init__(
-            disabled=not outcomes,
-            placeholder="Select an outcome",
-            min_values=1,
-            max_values=1,
-            options=options,
-            custom_id="outcome_select"
-        )
-
-        # the item we need to enable when we get a value
-        self.enable = enable_id
-
-    async def callback(self, interaction: Interaction):
-        """
-
-        :param interaction:
-        :return:
-        """
-        selected_outcome = interaction.data["values"][0]
-        for option in self.options:
-            option.default = option.value == selected_outcome
-
-        for child in self.view.children:
-            if child.custom_id == self.enable:
-                child.disabled = False
-                break
+            
+            if type(child) == Button and child.label == "Submit":
+                child.disabled = True
 
         await interaction.response.edit_message(view=self.view)
 
@@ -148,8 +108,7 @@ class BetSelectAmount(Select):
             placeholder="Select amount of eddies to bet",
             min_values=1,
             max_values=1,
-            options=options,
-            custom_id="amount_select"
+            options=options
         )
 
     async def callback(self, interaction: Interaction):
@@ -163,7 +122,50 @@ class BetSelectAmount(Select):
             option.default = option.value == selected_amount
 
         for child in self.view.children:
-            if child.custom_id == "submit_btn":
+            if type(child) == Button and child.label == "Submit":
+                child.disabled = False
+                break
+
+        await interaction.response.edit_message(view=self.view)
+
+
+class BetOutcomesSelect(Select):
+    def __init__(self, outcomes: list, enable_type=BetSelectAmount):
+        """
+
+        :param outcomes:
+        """
+        if not outcomes:
+            outcomes = ["placeholder1", "placeholder2"]
+            options = [
+                SelectOption(label=opt) for opt in outcomes
+            ]
+        else:
+            options = outcomes
+
+        super().__init__(
+            disabled=not outcomes,
+            placeholder="Select an outcome",
+            min_values=1,
+            max_values=1,
+            options=options
+        )
+
+        # the item we need to enable when we get a value
+        self.enable = enable_type
+
+    async def callback(self, interaction: Interaction):
+        """
+
+        :param interaction:
+        :return:
+        """
+        selected_outcome = interaction.data["values"][0]
+        for option in self.options:
+            option.default = option.value == selected_outcome
+
+        for child in self.view.children:
+            if type(child) == self.enable:
                 child.disabled = False
                 break
 

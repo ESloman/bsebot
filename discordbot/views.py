@@ -5,7 +5,7 @@ import discord
 from discord import SelectOption, Interaction
 
 from discordbot.bot_enums import ActivityTypes, TransactionTypes
-from discordbot.constants import BSEDDIES_KING_ROLES
+from discordbot.constants import BSEDDIES_KING_ROLES, BSE_SERVER_ID, BSEDDIES_REVOLUTION_CHANNEL
 from discordbot.embedmanager import EmbedManager
 from discordbot.selects import BetSelect, BetOutcomesSelect, BetSelectAmount, TaxRateSelect
 
@@ -94,20 +94,20 @@ class PlaceABetView(discord.ui.View):
             child.disabled = True
         await self.message.edit(content="This `place` command timed out - please _place_ another one", view=None)
 
-    @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=3, disabled=True, custom_id="submit_btn", emoji="💰")
+    @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=3, disabled=True, emoji="💰")
     async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
 
         data = {}
         for child in self.children:
-            if child.custom_id == "bet_select":
+            if type(child) == BetSelect:
                 try:
                     data["bet_id"] = child.values[0]
                 except IndexError:
                     # this means that this was default
                     data["bet_id"] = child.options[0].value
-            elif child.custom_id == "outcome_select":
+            elif type(child) == BetOutcomesSelect:
                 data["emoji"] = child.values[0]
-            elif child.custom_id == "amount_select":
+            elif type(child) == BetSelectAmount:
                 data["amount"] = int(child.values[0])
 
         # call the callback that actually places the bet
@@ -118,8 +118,7 @@ class PlaceABetView(discord.ui.View):
             data["emoji"]
         )
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=3, disabled=False, custom_id="cancel_btn",
-                       emoji="✖️")
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=3, disabled=False, emoji="✖️")
     async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         await interaction.response.edit_message(content="Cancelled", view=None)
 
@@ -141,21 +140,21 @@ class CloseABetView(discord.ui.View):
         else:
             options = []
 
-        self.add_item(BetOutcomesSelect(options, "submit_btn"))
+        self.add_item(BetOutcomesSelect(options, discord.ui.Button))
         self.submit_callback = submit_callback
 
-    @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=2, disabled=True, custom_id="submit_btn")
+    @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=2, disabled=True)
     async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
 
         data = {}
         for child in self.children:
-            if child.custom_id == "bet_select":
+            if type(child) == BetSelect:
                 try:
                     data["bet_id"] = child.values[0]
                 except IndexError:
                     # this means that this was default
                     data["bet_id"] = child.options[0].value
-            elif child.custom_id == "outcome_select":
+            elif type(child) == BetOutcomesSelect:
                 data["emoji"] = child.values[0]
 
         # call the callback that actually places the bet
@@ -165,8 +164,7 @@ class CloseABetView(discord.ui.View):
             data["emoji"]
         )
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=2, disabled=False, custom_id="cancel_btn",
-                       emoji="✖️")
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=2, disabled=False, emoji="✖️")
     async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         await interaction.response.edit_message(content="Cancelled", view=None)
 
@@ -628,6 +626,11 @@ class TaxRateView(discord.ui.View):
             content=f"Successfully set tax rate to **{value}**.", 
             view=None
         )
+        
+        if interaction.guild_id == BSE_SERVER_ID:
+            channel = interaction.guild.get_channel(BSEDDIES_REVOLUTION_CHANNEL)
+            msg = f"{interaction.user.mention} has changed the tax rate to `{value}`! 📈"
+            await channel.send(content=msg)
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.gray, emoji="✖️", row=2)
     async def close_callback(self, button: discord.ui.Button, interaction: discord.Interaction):

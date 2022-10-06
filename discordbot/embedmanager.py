@@ -72,19 +72,20 @@ class EmbedManager(object):
         else:
             number = number if number < len(users) else len(users)
 
+        users = [user for user in users if user["points"] != 10 and not user.get("inactive")]
+        
         message = (
             "**BSEddies Leaderboard**\n"
             f"Leaderboard is correct as of: "
             f"{datetime.datetime.now().strftime('%d %b %y %H:%M:%S')}\n"
         )
-
+        
         for user in users[:number]:
             try:
                 name = guild.get_member(user["uid"]).name
             except AttributeError:
                 continue
-            if user["points"] != 10:
-                message += f"\n**{users.index(user) + 1})**  {name}  :  {user['points']}"
+            message += f"\n**{users.index(user) + 1})**  {name}  :  {user['points']}"
 
         return message
 
@@ -103,6 +104,8 @@ class EmbedManager(object):
             number = len(users)
         else:
             number = number if number < len(users) else len(users)
+        
+        users = [user for user in users if user["points"] != 10 and not user.get("inactive")]
 
         message = (
             "**BSEddies High Scores**\n"
@@ -115,8 +118,7 @@ class EmbedManager(object):
                 name = guild.get_member(user["uid"]).name
             except AttributeError:
                 continue
-            if user["points"] != 10:
-                message += f"\n**{users.index(user) + 1})**  {name}  :  {user.get('high_score', 0)}"
+            message += f"\n**{users.index(user) + 1})**  {name}  :  {user.get('high_score', 0)}"
 
         return message
 

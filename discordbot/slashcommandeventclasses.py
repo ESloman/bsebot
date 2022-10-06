@@ -17,7 +17,7 @@ from bson import ObjectId
 from discordbot.betmanager import BetManager
 from discordbot.bot_enums import TransactionTypes, ActivityTypes
 from discordbot.clienteventclasses import BaseEvent
-from discordbot.constants import CREATOR, PRIVATE_CHANNEL_IDS, BSEDDIES_KING_ROLES
+from discordbot.constants import CREATOR, PRIVATE_CHANNEL_IDS, BSEDDIES_KING_ROLES, HUMAN_MESSAGE_TYPES
 from discordbot.eddiegains import BSEddiesManager
 
 # views

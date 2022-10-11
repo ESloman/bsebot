@@ -1,0 +1,6 @@
+{
+    "python.autoComplete.extraPaths": [
+        "C:\\Users\\ellio\\.pyenv\\pyenv-win\\shims",
+        "C:\\Users\\ellio\\.pyenv\\pyenv-win\\versions\\3.10.7\\lib\\site-packages"
+    ]
+}

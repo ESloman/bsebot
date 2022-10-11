@@ -184,6 +184,11 @@ class OnReadyEvent(BaseEvent):
                 view = RevolutionView(self.client, event, self.logger)
                 view.toggle_stuff(False)
                 self.client.add_view(view)
+                message_id = event["message_id"]
+                channel_id = event["channel_id"]
+                
+                channel = await guild.fetch_channel(channel_id)
+                message = channel.get_partial_message(message_id)
 
             # find all open bets
             bets = self.user_bets.get_all_active_bets(guild_id)

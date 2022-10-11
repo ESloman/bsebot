@@ -87,6 +87,7 @@ class RevolutionEvent(TicketedEvent):
             "chance": 30,
             "revolutionaries": [],
             "supporters": [],
+            "users": [],
             "ticket_buyers": [],
             "open": True,
             "message_id": None,

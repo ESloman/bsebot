@@ -102,19 +102,21 @@ class BetManager(object):
             total_eddies_won += points_won
             actual_amount_won = points_won - points_bet  # the actual winnings without original bet
             total_eddies_winnings += actual_amount_won
-            tax_amount = actual_amount_won - math.floor((actual_amount_won * tax_value))
-            self.logger.info(f"{better} bet {points_bet} eddies and won {actual_amount_won} ({points_won}) - getting taxed {tax_amount}")
+            tax_amount = math.floor((actual_amount_won * tax_value))
+            self.logger.info(f"{better} bet {points_bet} eddies and won {actual_amount_won} ({points_won}) - getting taxed {tax_amount} so {eddies_won_minux_tax=}")
             total_eddies_taxed += tax_amount
+            
+            eddies_won_minux_tax = points_won - tax_amount
 
-            ret_dict["winners"][better] = points_won
-            self.user_points.increment_points(int(better), guild_id, points_won)
+            ret_dict["winners"][better] = eddies_won_minux_tax
+            self.user_points.increment_points(int(better), guild_id, eddies_won_minux_tax)
             # add to transaction history
             self.user_points.append_to_transaction_history(
                 int(better),
                 guild_id,
                 {
                     "type": TransactionTypes.BET_WIN,
-                    "amount": points_won,
+                    "amount": eddies_won_minux_tax,
                     "timestamp": datetime.datetime.now(),
                     "bet_id": bet_id,
                 }
@@ -125,7 +127,7 @@ class BetManager(object):
             f"Bet ID: {bet_id}\n"
             f"Eddies won: {total_eddies_winnings}\n"
             f"Eddies won (with original bets): {total_eddies_won}\n"
-            f"Eddies taxed: {total_eddies_taxed}"
+            f"Eddies taxed: {total_eddies_taxed}\n"
         )
         
         king_id = self.user_points.get_current_king(guild_id)["uid"]

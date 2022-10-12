@@ -98,6 +98,7 @@ class RevolutionEvent(TicketedEvent):
             "eddies_spent": 0,
             "success": None,
             "locked_in_eddies": locked_in_eddies,
+            "times_saved": 0
         }
         self.insert(document=event_doc)
         return event_doc

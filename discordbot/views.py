@@ -234,7 +234,7 @@ class AutoGenerateView(discord.ui.View):
                     if type(child) is self.auto.AutoBetsSelect:
                         self.auto.remove_item(child)
                         break
-                amount_select = self.auto.BetsAmountSelect(self.auto)
+                amount_select = self.auto.BetsAmountSelect()
                 self.auto.add_item(amount_select)
 
                 for child in self.auto.children:
@@ -300,14 +300,12 @@ class AutoGenerateView(discord.ui.View):
             await interaction.response.edit_message(view=self.auto)
 
     class BetsAmountSelect(discord.ui.Select):
-        def __init__(self, auto: discord.ui.View):
+        def __init__(self):
             options = [
                 SelectOption(label=f"{x}", value=f"{x}") for x in range(1, 6)
             ]
 
             options[2].default = True
-
-            self.auto = auto
 
             super().__init__(
                 placeholder="Select number of bets to generate",
@@ -322,12 +320,35 @@ class AutoGenerateView(discord.ui.View):
             for option in self.options:
                 option.default = option.value == selected_bet
 
-            for child in self.auto.children:
+            for child in self.view.children:
                 if child.custom_id == "submit_btn":
                     child.disabled = False
                     break
-            await interaction.response.edit_message(view=self.auto)
+            await interaction.response.edit_message(view=self.view)
 
+    class TimeoutSelect(discord.ui.Select):
+        def __init__(self):
+            option_vals = ["5m", "10m", "15m", "20m", "25m", "30m", "45m", "60m"]
+            options = [
+                SelectOption(label=f"{x}", value=f"{x}") for x in option_vals
+            ]
+
+            options[5].default = True
+
+            super().__init__(
+                placeholder="Select bet timeout",
+                min_values=1,
+                max_values=1,
+                options=options,
+                custom_id="bet_timeout_select"
+            )
+
+        async def callback(self, interaction: Interaction):
+            selected_bet = interaction.data["values"][0]
+            for option in self.options:
+                option.default = option.value == selected_bet
+            await interaction.response.edit_message(view=self.view)
+    
     def __init__(self, auto_class):
         super().__init__(timeout=120)
 
@@ -338,6 +359,7 @@ class AutoGenerateView(discord.ui.View):
 
         self.auto_class = auto_class
         self.add_item(self.TypeSelect(["valorant"]))
+        self.add_item(self.TimeoutSelect())
         method_select = self.MethodSelect(generation_methods, self)
         self.add_item(method_select)
 
@@ -345,7 +367,7 @@ class AutoGenerateView(discord.ui.View):
     async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
 
-        data = {"_ids": [], "number": 0}
+        data = {"_ids": [], "number": 0, "timeout": "30m"}
 
         for child in self.children:
             if child.custom_id == "generate_method":
@@ -359,8 +381,14 @@ class AutoGenerateView(discord.ui.View):
                     data["number"] = child.values[0]
                 except IndexError:
                     data["number"] = [opt.value for opt in child.options if opt.default is True][0]
+            
+            elif child.custom_id == "bet_timeout_select":
+                try:
+                    data["timeout"] = child.values[0]
+                except IndexError:
+                    data["timeout"] = [opt.value for opt in child.options if opt.default is True][0]
 
-        await self.auto_class.autogenerate_wrapper(interaction, data["method"], data["number"], data["_ids"])
+        await self.auto_class.autogenerate_wrapper(interaction, data["method"], data["number"], data["_ids"], data["timeout"])
         await interaction.followup.edit_message(content="Bets created", view=None, message_id=interaction.message.id)
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=4, disabled=False, custom_id="cancel_btn",

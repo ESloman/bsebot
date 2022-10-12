@@ -1,16 +1,18 @@
 import datetime
-import discord
+import os
 import re
-from typing import List
+import subprocess
+from typing import List, Optional
 
+import discord
 from discord.emoji import Emoji
 
 from discordbot.baseeventclass import BaseEvent
 from discordbot.bot_enums import TransactionTypes, ActivityTypes
-from discordbot.constants import THE_BOYS_ROLE, BSE_SERVER_ID, GENERAL_CHAT
+from discordbot.constants import BSEDDIES_REVOLUTION_CHANNEL, THE_BOYS_ROLE, BSE_SERVER_ID, GENERAL_CHAT
 from discordbot.slashcommandeventclasses import BSEddiesPlaceBet, BSEddiesCloseBet
 from discordbot.views import LeaderBoardView, RevolutionView, BetView
-from mongo.bsedataclasses import SpoilerThreads
+from mongo.bsedataclasses import CommitHash, SpoilerThreads
 from mongo.bseticketedevents import RevolutionEvent
 from mongo.bsepoints import UserInteractions, ServerEmojis
 
@@ -27,6 +29,7 @@ class OnReadyEvent(BaseEvent):
         self.close = BSEddiesCloseBet(client, guild_ids, self.logger, self.beta_mode)
         self.place = BSEddiesPlaceBet(client, guild_ids, self.logger, self.beta_mode)
         self.spoilers = SpoilerThreads()
+        self.hashes = CommitHash()
 
     async def on_ready(self) -> None:
         """
@@ -213,7 +216,62 @@ class OnReadyEvent(BaseEvent):
 
             self.client.add_view(LeaderBoardView(self.embed_manager))
 
+            commit_log = self.git_compare(guild_id)
+            self.logger.info("Got commit log successfully")
+            
+            if commit_log is not None:
+                if guild_id == BSE_SERVER_ID:
+                    channel_id = BSEDDIES_REVOLUTION_CHANNEL
+                else:
+                    channel_id = 291508460519161856
+                
+                channel = await guild.fetch_channel(channel_id)
+                
+                update_message = (
+                    "I have just been updated and restarted. Here are the recent commits in this new update:\n\n"
+                    "```diff\n"
+                    f"{commit_log}\n"
+                    "```"
+                )
+                await channel.send(content=update_message)
+
         self.logger.info("Finished member check.")
+
+    def git_compare(self, guild_id: int) -> Optional[str]:
+        """Returns
+
+        Returns:
+            str: _description_
+        """
+        if guild_id == BSE_SERVER_ID:
+            path = "/home/app"
+        else:
+            path = os.path.expanduser("~/gitwork/bsebot/bsebot.git")
+        
+        hash_doc = self.hashes.get_last_hash(guild_id)
+        last_hash = hash_doc["hash"]
+        
+        head_sha = subprocess.check_output(
+            ["git", "rev-parse", "HEAD"],
+            cwd=path
+            ).decode("utf8").strip("\n")
+        self.logger.info(f"{head_sha=}")
+        
+        if last_hash == head_sha:
+            return None
+        
+        commit_log = subprocess.check_output([
+            "git",
+            "log",
+            f"{last_hash}..{head_sha}"
+        ], cwd=path).decode("utf8").strip("\n")
+
+        self.logger.info(f"{commit_log=}")
+        
+        # set the commit hash now
+        self.hashes.update({"_id": hash_doc["_id"]}, {"$set": {"hash": head_sha}})
+
+        return commit_log
 
 
 class OnMemberJoin(BaseEvent):

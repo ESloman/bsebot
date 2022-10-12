@@ -1,5 +1,6 @@
 
 import datetime
+import math
 
 import discord
 from discord import SelectOption, Interaction
@@ -615,6 +616,85 @@ class RevolutionView(discord.ui.View):
 
         await followup.edit_message(interaction.message.id, view=self, content=edited_message)
         await followup.send(content="Congrats - you've pledged your `support`!", ephemeral=True)
+
+    @discord.ui.button(
+        label=f"Save THYSELF",
+        style=discord.ButtonStyle.grey,
+        custom_id="save_button",
+        emoji="💵"
+    )
+    async def save_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+        
+        response = interaction.response  # type: discord.InteractionResponse
+        followup = interaction.followup  # type: discord.Webhook
+
+        self.toggle_stuff(True)
+
+        # disable these whilst we do revolution stuff
+        await response.edit_message(view=self)
+
+        event = self.revolutions.get_event(interaction.guild.id, self.event_id)
+
+        if not event["open"]:
+            await followup.send(content="Unfortunately, this event has expired", ephemeral=True)
+            # leave it disabled
+            return
+
+        now = datetime.datetime.now()
+
+        if event["expired"] < now:
+            await followup.send(content="Unfortunately, this event has expired", ephemeral=True)
+            # leave it disabled
+            return
+        
+        if event["king"] != interaction.user.id:
+            await followup.send(content="You're not the King - so you can't use this button.")
+            self.toggle_stuff(False)
+            await followup.edit_message(interaction.message.id, view=self)
+        
+        user_id = interaction.user.id
+        guild_id = interaction.guild.id
+
+        our_user = self.user_points.find_user(
+            user_id,
+            guild_id,
+            {"points": True, "king": True}
+        )
+        
+        eddies = our_user["points"]
+        amount_to_subtract = math.floor(eddies * 0.1)
+        self.user_points.decrement_points(user_id, guild_id, amount_to_subtract)
+
+        # add to transaction history
+        self.user_points.append_to_transaction_history(
+            user_id,
+            guild_id,
+            {
+                "type": TransactionTypes.GIFT_GIVE,
+                "amount": amount_to_subtract * -1,
+                "timestamp": datetime.datetime.now(),
+            }
+        )
+        
+        event["chance"] -= 15
+        event["times_saved"] += 1
+        self.revolutions.update(
+            {"_id": event["_id"]},
+            {"$set": {
+                "chance": event["chance"],
+                "times_saved": event["times_saved"]
+            }}
+        )
+        
+        guild = self.client.get_guild(guild_id)
+
+        role = guild.get_role(BSEDDIES_KING_ROLES[guild_id])
+
+        edited_message = self.embeds.get_revolution_message(interaction.user, role, event)
+        
+        await followup.send(content=f"{interaction.user.mention} just spent `{eddies}` to reduce the overthrow chance by **15%**.")
+        self.toggle_stuff(False)
+        await followup.edit_message(interaction.message.id, view=self, content=edited_message)
 
 
 class TaxRateView(discord.ui.View):

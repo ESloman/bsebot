@@ -6,6 +6,7 @@ from discord.ext import tasks, commands
 from discordbot.bot_enums import ActivityTypes
 from discordbot.constants import BSE_SERVER_ID, BSEDDIES_KING_ROLES, BSEDDIES_REVOLUTION_CHANNEL
 from mongo.bsepoints import UserPoints
+from mongo.bseticketedevents import RevolutionEvent
 
 
 class BSEddiesKingTask(commands.Cog):
@@ -14,7 +15,9 @@ class BSEddiesKingTask(commands.Cog):
         self.user_points = UserPoints()
         self.logger = logger
         self.guilds = guilds
+        self.events = RevolutionEvent()
         self.king_checker.start()
+        self.event = None
 
     def cog_unload(self):
         """
@@ -30,6 +33,21 @@ class BSEddiesKingTask(commands.Cog):
         :return:
         """
         for guild_id in self.guilds:
+            
+            if events := self.events.get_open_events(guild_id):
+                # ongoing revolution event - not changing the King now
+                self.event = events[0]
+                continue
+            elif self.event is not None:
+                # there was a recent event
+                now = datetime.datetime.now()
+                expiry_time = self.event["expired"]  # type: datetime.datetime
+                if (now - expiry_time).total_seconds() < 120:
+                    # only been two minutes since the event - wait
+                    self.logger.info(f"The recent event {self.event} only finished {expiry_time} - waiting...")
+                    continue
+                self.event = None
+
             guild_obj = await self.bot.fetch_guild(guild_id)  # type: discord.Guild
             guild = self.bot.get_guild(guild_id)
             member_ids = [member.id for member in guild.members]

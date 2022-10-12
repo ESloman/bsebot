@@ -19,7 +19,8 @@ class AfterWorkVally(commands.Cog):
             "Who's about for after-work {role}?",
             "Anyone wanna get salty playing {role}?",
             "Who's gonna grind some -insert map we don't like here- today {role}?",
-            "Anyone want to lose some RR {role}?"
+            "Anyone want to lose some RR {role}?",
+            "Who wants to roll some fat 1s {role}?"
         ]
 
     def cog_unload(self):

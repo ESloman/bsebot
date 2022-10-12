@@ -159,3 +159,20 @@ class TaxRate(BestSummerEverPointsDB):
             update_doc = {"type": "tax"}
         
         self.update(update_doc, {"$set": {"value": tax_rate}})
+
+
+class CommitHash(BestSummerEverPointsDB):
+    """
+    Class for interacting with the 'taxrate' MongoDB collection in the 'bestsummereverpoints' DB
+    """
+    def __init__(self):
+        """
+        Constructor method that initialises the vault object
+        """
+        super().__init__()
+        self._vault = interface.get_collection(self.database, "hashes")
+    
+    def get_last_hash(self, guild_id: int) -> dict:
+        ret = self.query({"type": "hash", "guild_id": guild_id})
+        if ret:
+            return ret[0]

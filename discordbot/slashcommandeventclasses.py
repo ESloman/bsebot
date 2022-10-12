@@ -33,6 +33,7 @@ class BSEddies(BaseEvent):
     A base BSEddies event for any shared methods across
     All slash command classes will inherit from this class
     """
+
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
@@ -76,6 +77,7 @@ class BSEddiesView(BSEddies):
     """
     Class for handling `/view` commands
     """
+
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
@@ -108,6 +110,7 @@ class BSEddiesLeaderboard(BSEddies):
     """
     Class for handling `/leaderboard` commands
     """
+
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
@@ -131,6 +134,7 @@ class BSEddiesHighScore(BSEddies):
     """
     Class for handling `/bseddies highscore` commands
     """
+
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
@@ -154,6 +158,7 @@ class BSEddiesActive(BSEddies):
     """
     Class for handling `/active` commands
     """
+
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
@@ -207,6 +212,7 @@ class BSEddiesPending(BSEddies):
     """
     Class for handling `/bseddies pending` commands
     """
+
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
@@ -257,6 +263,7 @@ class BSEddiesGift(BSEddies):
     """
     Class for handling `/bseddies gift` command
     """
+
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
@@ -329,6 +336,7 @@ class BSEddiesCloseBet(BSEddies):
     """
     Class for handling `/bseddies bet close` commands
     """
+
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
         self.bet_manager = BetManager(logger)
@@ -366,7 +374,7 @@ class BSEddiesCloseBet(BSEddies):
             self,
             ctx: discord.Interaction,
             bet_id: str,
-            emoji: str,) -> None:
+            emoji: str, ) -> None:
         """
         This is the method for handling when we close a bet.
 
@@ -516,6 +524,7 @@ class BSEddiesCreateBet(BSEddies):
     """
     Class for handling `/bseddies bet create` command
     """
+
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
         self.multiple_options_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "0️⃣"]
@@ -669,6 +678,7 @@ class BSEddiesPlaceBet(BSEddies):
     """
     Class for handling `/bseddies bet place` commands
     """
+
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
         self.bseddies_close = BSEddiesCloseBet(client, guilds, logger, beta_mode)
@@ -811,17 +821,35 @@ class BSEddiesAutoGenerate(BSEddies):
             ctx,
             method: str,
             number: int,
-            bet_ids: list
+            bet_ids: list,
+            timeout_str: str = "30m"
     ):
         if method == "random":
-            bets = self.auto_bets.get_random_bets_for_type("valorant", int(number))
+            validated_bets = []
+            while method == "random" and len(validated_bets) < int(number):
+                # grab more than required in the hopes that we only have to do one API call to mongo here
+                bets = self.auto_bets.get_random_bets_for_type("valorant", int(number) + 2)
+                for bet in bets:
+                    if len(validated_bets) == int(number):
+                        # got the number requested already
+                        break
+                    if bet in validated_bets:
+                        # already got this one
+                        continue
+                    if not bet.get("channel_members"):
+                        validated_bets.append(bet)
+                        continue
+                    # validate that we can use this bet
+                    vc_channel = await self.client.fetch_channel(bet.get("voice_channel"))
+                    member_ids = [m.id for m in vc_channel.members]
+                    if not all([c_m in member_ids for c_m in bet["channel_members"]]):
+                        self.logger.info(f"Can't use bet {bet} as not all required members are present")
+                        continue
+                    validated_bets.append(bet)
         else:
-            self.logger.info(f"Bet ids: {bet_ids}")
-            bets = self.auto_bets.query({"type": "valorant", "_id": {"$in": [ObjectId(b) for b in bet_ids]}})
+            validated_bets = self.auto_bets.query({"type": "valorant", "_id": {"$in": [ObjectId(b) for b in bet_ids]}})
 
-        self.logger.info("Bets: {bets}")
-        
-        bets = sorted(bets, key=lambda x: x["title"])
+        bets = sorted(validated_bets, key=lambda x: x["title"])
 
         for bet in bets:
             try:
@@ -830,27 +858,19 @@ class BSEddiesAutoGenerate(BSEddies):
                     vc_channel = await self.client.fetch_channel(bet.get("voice_channel"))
                     for member in vc_channel.members:
                         bet["options"].append(member.display_name)
-                    
+
                     if bet["type"] == "valorant" and len(bet["options"]) < 5 and bet.get("fill"):
-                        bet["options"].appeand("a rando")
+                        bet["options"].append("a rando")
 
             except Exception as e:
                 self.logger.info(f"Something went wrong creating an auto bet: {e}, {bet}")
                 continue
 
-            if bet.get("channel_members") and method == "random":
-                # validate that we can use this bet
-                vc_channel = await self.client.fetch_channel(bet.get("voice_channel"))
-                member_ids = [m.id for m in vc_channel.members]
-                if not all([c_m in member_ids for c_m in bet["channel_members"]]):
-                    self.logger.info("Can't use bet {bet} as not all required members are present")
-                    continue
-            
             await self.bet.handle_bet_creation(
                 ctx,
                 bet["title"],
                 *bet["options"],
-                timeout_str="30m",
+                timeout_str=timeout_str,
                 autogenerated=True,
                 bseddies_place=self.place,
                 bseddies_close=self.close
@@ -861,6 +881,7 @@ class BSEddiesTransactionHistory(BSEddies):
     """
     Class for handling `/bseddies transactions` command
     """
+
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
 
@@ -1120,29 +1141,29 @@ class BSEddiesKing(BSEddies):
 
 
 class BSEddiesTaxRate(BSEddies):
-    
+
     def __init__(self, client, guilds, logger, beta_mode=False):
         super().__init__(client, guilds, logger, beta_mode=beta_mode)
         self.tax_rate = TaxRate()
-    
+
     async def create_tax_view(self, ctx: discord.ApplicationContext):
-        
+
         if not await self._handle_validation(ctx):
             return
-        
+
         self._add_event_type_to_activity_history(
             ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_SET_TAX_RATE, user_id=ctx.user.id
         )
-        
+
         guild_id = ctx.guild.id
         king_user = self.user_points.get_current_king(guild_id)
-        
+
         if ctx.user.id != king_user["uid"]:
             message = "You are not the King - you cannot set the tax rate."
             await ctx.respond(content=message, ephemeral=True)
             return
-        
+
         value = self.tax_rate.get_tax_rate()
         view = TaxRateView(value)
-        
+
         await ctx.respond(view=view, ephemeral=True)

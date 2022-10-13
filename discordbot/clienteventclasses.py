@@ -265,6 +265,9 @@ class OnReadyEvent(BaseEvent):
         if last_hash == head_sha:
             return None
         
+        if guild_id == BSE_SERVER_ID:
+            path = "/home/gitwork/bsebot"
+        
         commit_log = subprocess.check_output([
             "git",
             "log",

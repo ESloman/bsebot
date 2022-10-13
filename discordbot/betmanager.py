@@ -103,10 +103,10 @@ class BetManager(object):
             actual_amount_won = points_won - points_bet  # the actual winnings without original bet
             total_eddies_winnings += actual_amount_won
             tax_amount = math.floor((actual_amount_won * tax_value))
-            self.logger.info(f"{better} bet {points_bet} eddies and won {actual_amount_won} ({points_won}) - getting taxed {tax_amount} so {eddies_won_minux_tax=}")
             total_eddies_taxed += tax_amount
-            
             eddies_won_minux_tax = points_won - tax_amount
+            
+            self.logger.info(f"{better} bet {points_bet} eddies and won {actual_amount_won} ({points_won}) - getting taxed {tax_amount} so {eddies_won_minux_tax=}")
 
             ret_dict["winners"][better] = eddies_won_minux_tax
             self.user_points.increment_points(int(better), guild_id, eddies_won_minux_tax)

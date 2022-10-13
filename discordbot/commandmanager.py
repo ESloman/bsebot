@@ -203,6 +203,9 @@ class CommandManager(object):
                 return
 
             channel = guild.get_channel(payload.channel_id)  # type: discord.TextChannel
+            if not channel:
+                # channel is thread
+                channel = guild.get_thread(payload.channel_id)
             partial_message = channel.get_partial_message(payload.message_id)  # type: discord.PartialMessage
             message = await partial_message.fetch()  # type: discord.Message
 

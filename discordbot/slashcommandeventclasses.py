@@ -519,6 +519,81 @@ class BSEddiesCloseBet(BSEddies):
         await message.edit(content=desc, view=None, embeds=[])
         await ctx.followup.edit_message(content="Closed the bet for you!", view=None, message_id=ctx.message.id)
 
+    async def cancel_bet(
+            self,
+            ctx: discord.Interaction,
+            bet_id: str
+        ) -> None:
+        """
+        This is the method for handling when we close a bet.
+
+        We validate that the user initiating the command is the user who created the bet and that
+        the bet is still open in the first place. We also make sure that the result the user
+        provided us is actually a valid result for the bet.
+
+        If that's all okay - we close the bet and dish out the BSEddies to the winners.
+        We also inform the winners/losers what the result was and how many BSEddies they won (if any).
+
+        :param ctx: slash command context
+        :param bet_id: str - the BET ID
+        :param emoji: str - the winning outcome emoji
+        :return: None
+        """
+
+        if not await self._handle_validation(ctx):
+            return
+
+        await ctx.response.defer()
+
+        self._add_event_type_to_activity_history(
+            ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_BET_CANCEL,
+            bet_id=bet_id
+        )
+
+        guild = ctx.guild  # type: discord.Guild
+        bet = self.user_bets.get_bet_from_id(guild.id, bet_id)
+        author = ctx.user
+
+        if not bet:
+            msg = f"This bet doesn't exist."
+            await ctx.followup.edit_message(content=msg, view=None, message_id=ctx.message.id, embeds=[])
+            return
+
+        if not bet["active"] and bet["result"] is not None:
+            msg = f"You cannot cancel a bet that is already closed."
+            await ctx.followup.edit_message(content=msg, view=None, message_id=ctx.message.id)
+            return
+
+        if bet["user"] != author.id:
+            msg = f"You cannot cancel a bet that isn't yours."
+            await ctx.followup.edit_message(content=msg, view=None, message_id=ctx.message.id)
+            return
+
+        if betters := bet.get("betters"):
+            for better in betters:
+                bet_dict = betters[better]
+                self.user_points.increment_points(int(better), guild.id, bet_dict["points"])
+                self.user_points.append_to_transaction_history(
+                    int(better),
+                    guild.id,
+                    {
+                        "type": TransactionTypes.BET_REFUND,
+                        "amount": bet_dict["points"],
+                        "timestamp": datetime.datetime.now(),
+                        "bet_id": bet_id,
+                        "comment": "Bet was cancelled."
+                    }
+                )
+
+        self.user_bets.close_a_bet(bet["_id"], None)
+        # update the message to reflect that it's closed
+        channel = guild.get_channel(bet["channel_id"])
+        if not channel:
+            # channel is thread
+            channel = guild.get_thread(bet["channel_id"])
+        message = channel.get_partial_message(bet["message_id"])
+        await message.edit(content="Bet has been cancelled. Any bets were refunded to the betters.", view=None, embeds=[])
+
 
 class BSEddiesCreateBet(BSEddies):
     """

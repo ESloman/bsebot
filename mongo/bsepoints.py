@@ -542,7 +542,7 @@ class UserBets(BestSummerEverPointsDB):
 
         return {"success": True}
 
-    def close_a_bet(self, _id: ObjectId, emoji: str) -> None:
+    def close_a_bet(self, _id: ObjectId, emoji: Optional[str]) -> None:
         """
         Close a bet from a bet ID.
         Here we also calculate who the winners are and allocate their winnings to them.

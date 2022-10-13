@@ -216,24 +216,27 @@ class OnReadyEvent(BaseEvent):
 
             self.client.add_view(LeaderBoardView(self.embed_manager))
 
-            commit_log = self.git_compare(guild_id)
-            self.logger.info("Got commit log successfully")
-            
-            if commit_log is not None:
-                if guild_id == BSE_SERVER_ID:
-                    channel_id = BSEDDIES_REVOLUTION_CHANNEL
-                else:
-                    channel_id = 291508460519161856
+            try:
+                commit_log = self.git_compare(guild_id)
+                self.logger.info("Got commit log successfully")
                 
-                channel = await guild.fetch_channel(channel_id)
-                
-                update_message = (
-                    "I have just been updated and restarted. Here are the recent commits in this new update:\n\n"
-                    "```diff\n"
-                    f"{commit_log}\n"
-                    "```"
-                )
-                await channel.send(content=update_message)
+                if commit_log is not None:
+                    if guild_id == BSE_SERVER_ID:
+                        channel_id = BSEDDIES_REVOLUTION_CHANNEL
+                    else:
+                        channel_id = 291508460519161856
+                    
+                    channel = await guild.fetch_channel(channel_id)
+                    
+                    update_message = (
+                        "I have just been updated and restarted. Here are the recent commits in this new update:\n\n"
+                        "```diff\n"
+                        f"{commit_log}\n"
+                        "```"
+                    )
+                    await channel.send(content=update_message)
+            except Exception as e:
+                self.logger.exception(f"Error with doing the git thing: {e}")
 
         self.logger.info("Finished member check.")
 

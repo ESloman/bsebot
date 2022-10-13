@@ -15,8 +15,7 @@ RUN mkdir -vp /home/app
 COPY . /home/app/
 
 RUN cd /home/app \
-    && GIT_HASH=$(git rev-parse --verify HEAD) \
-    && git config --global url.https://${GIT_USER}:${GIT_PASS}@github.com/.insteadOf https://github.com/
+    && git config --global url."https://${GIT_USER}:${GIT_PASS}@github.com/".insteadOf https://github.com/
 
 ENV PYTHONPATH=/home/app/
 

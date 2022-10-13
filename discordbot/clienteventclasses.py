@@ -198,6 +198,8 @@ class OnReadyEvent(BaseEvent):
             for bet in bets:
                 message_id = bet["message_id"]
                 channel_id = bet["channel_id"]
+                if not channel_id or not message_id:
+                    continue
                 channel = await guild.fetch_channel(channel_id)
 
                 message = channel.get_partial_message(message_id)

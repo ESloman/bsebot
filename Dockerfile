@@ -15,7 +15,9 @@ RUN mkdir -vp /home/app
 COPY . /home/app/
 
 RUN cd /home/app \
-    && git config --global url."https://${GIT_USER}:${GIT_PASS}@github.com/".insteadOf https://github.com/
+    && mkdir -vp /home/gitwork \
+    && cd /home/gitwork \
+    && git clone https://${GIT_USER}:${GIT_PASS}@github.com/ESloman/bsebot.git
 
 ENV PYTHONPATH=/home/app/
 

@@ -696,7 +696,7 @@ class RevolutionView(discord.ui.View):
 
         edited_message = self.embeds.get_revolution_message(interaction.user, role, event)
         
-        await followup.send(content=f"{interaction.user.mention} just spent `{eddies}` to reduce the overthrow chance by **15%**.")
+        await followup.send(content=f"{interaction.user.mention} just spent `{amount_to_subtract}` to reduce the overthrow chance by **15%**.")
         self.toggle_stuff(False)
         await followup.edit_message(interaction.message.id, view=self, content=edited_message)
 

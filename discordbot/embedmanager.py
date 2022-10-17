@@ -142,7 +142,7 @@ class EmbedManager(object):
             f"If you would like to OVERTHROW {role.mention} then you press the **OVERTHROW** button.\n"
             f"If you believe that {king_user.mention} hasn't done too bad a job then you can **SUPPORT** them to "
             f"reduce the chances of revolution happening. If the King _loses_, then supporters will lose eddies "
-            f"alongside their King."
+            f"alongside their King.\n"
             f"**Event ID**: `{event['event_id']}`\n"
             f"**Success rate**: `{max(min(event['chance'], 100), 0)}%`\n"
             f"**Revolutionaries**: `{event.get('revolutionaries', [])}`\n"

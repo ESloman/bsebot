@@ -195,6 +195,8 @@ class OnReadyEvent(BaseEvent):
 
             # find all open bets
             bets = self.user_bets.get_all_active_bets(guild_id)
+            other_bets = self.user_bets.get_all_inactive_pending_bets(guild_id)
+            bets.extend(other_bets)
             for bet in bets:
                 message_id = bet["message_id"]
                 channel_id = bet["channel_id"]
@@ -482,14 +484,14 @@ class OnMessage(BaseEvent):
 
         message_type = []
 
-        if message.reference:
-            referenced_message = self.client.get_message(message.reference.message_id)  # type: discord.Message
+        if reference := message.reference:
+            referenced_message = self.client.get_message(reference.message_id)
             if not referenced_message:
-                referenced_message = await message.channel.fetch_message(message.reference.message_id)
+                referenced_message = await message.channel.fetch_message(reference.message_id)
             if referenced_message.author.id != user_id:
                 message_type.append("reply")
                 self.user_interactions.add_reply_to_message(
-                    message.reference.message_id, message.id, guild_id, user_id, message.created_at, message_content
+                    reference.message_id, message.id, guild_id, user_id, message.created_at, message_content
                 )
 
         if stickers := message.stickers:

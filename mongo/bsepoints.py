@@ -378,6 +378,19 @@ class UserBets(BestSummerEverPointsDB):
         bets = self.query({"active": True, "guild_id": guild_id})
         return bets
 
+    def get_all_inactive_pending_bets(self, guild_id: int) -> list:
+        """
+        Gets all the bets that are not active without results
+
+        Args:
+            guild_id (int): _description_
+
+        Returns:
+            list: _description_
+        """
+        bets = self.query({"active": False, "result": None, "guild_id": guild_id})
+        return bets
+
     def get_all_pending_bets(self, guild_id: int) -> list:
         """
         Gets all 'pending' bets - bets that don't have a result yet.

@@ -561,12 +561,13 @@ class BSEddiesCloseBet(BSEddies):
 
         if not bet["active"] and bet["result"] is not None:
             msg = f"You cannot cancel a bet that is already closed."
-            await ctx.followup.edit_message(content=msg, view=None, message_id=ctx.message.id)
+            await ctx.followup.send(content=msg, view=None, ephemeral=True)
+            await ctx.followup.edit_message(view=None, message_id=ctx.message.id, embeds=[])
             return
 
         if bet["user"] != author.id:
             msg = f"You cannot cancel a bet that isn't yours."
-            await ctx.followup.edit_message(content=msg, view=None, message_id=ctx.message.id)
+            await ctx.followup.send(content=msg, view=None, ephemeral=True)
             return
 
         if betters := bet.get("betters"):

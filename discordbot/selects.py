@@ -86,14 +86,26 @@ class BetSelectAmount(Select):
         options = [
             SelectOption(label=f"{opt}", value=f"{opt}") for opt in self.amounts
         ]
-        options.append(
-            SelectOption(
-                label=f"{math.floor(user_eddies / 2)} - Half your eddies",
-                value=f"{math.floor(user_eddies / 2)}")
-        )
-        options.append(
-            SelectOption(label=f"{user_eddies} - ALL your eddies", value=f"{user_eddies}")
-        )
+        
+        if user_eddies != 0:
+            half_eddies = math.floor(user_eddies / 2)
+            if half_eddies in self.amounts:
+                opt = [o for o in options if o.value == f"{half_eddies}"][0]
+                opt.label = f"{half_eddies} - Half your eddies"
+            else:
+                options.append(
+                    SelectOption(
+                        label=f"{half_eddies} - Half your eddies",
+                        value=f"{half_eddies}")
+                )
+            
+            if user_eddies in self.amounts:
+                opt = [o for o in options if o.value == f"{user_eddies}"][0]
+                opt.label = f"{half_eddies} - ALL your eddies"
+            else:
+                options.append(
+                    SelectOption(label=f"{user_eddies} - ALL your eddies", value=f"{user_eddies}")
+                )
 
         new_opts = []
         for opt in options:

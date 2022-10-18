@@ -27,7 +27,7 @@ class WordleTask(commands.Cog):
         """
         self.wordle_message.cancel()
 
-    @tasks.loop(minutes=15)
+    @tasks.loop(minutes=10)
     async def wordle_message(self):
         """
         Loop that makes sure the King is assigned correctly
@@ -35,7 +35,7 @@ class WordleTask(commands.Cog):
         """
         now = datetime.datetime.now()
 
-        if now.hour < 7:
+        if now.hour < 8:
             self.wait_iters = None
             self.sent_wordle = False
             self.set_wordle_activity = False
@@ -44,7 +44,7 @@ class WordleTask(commands.Cog):
         if self.sent_wordle and not self.set_wordle_activity:
             return
 
-        if now.hour >= 9:
+        if now.hour >= 10:
             if self.set_wordle_activity:
                 self.logger.info(f"Setting activity back to default")
                 listening_activity = discord.Activity(
@@ -68,7 +68,7 @@ class WordleTask(commands.Cog):
             self.set_wordle_activity = True
 
         if self.wait_iters is None:
-            self.wait_iters = random.randint(1, 6)
+            self.wait_iters = random.randint(3, 11)
             self.logger.info(f"Setting iterations to {self.wait_iters}")
             return
 

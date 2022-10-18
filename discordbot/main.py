@@ -92,6 +92,9 @@ if __name__ == "__main__":
     logger = _create_logger()
 
     intents = discord.Intents.all()
+    
+    intents.presences = False
+    intents.typing = False
 
     listening_activity = discord.Activity(
         name="conversations",

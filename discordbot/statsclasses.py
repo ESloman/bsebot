@@ -24,7 +24,7 @@ class StatsGatherer:
     def get_monthly_datetime_objects():
         now = datetime.datetime.now()
         start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=1)
-        new_month = (start.month % 12) or 12
+        new_month = ((start.month + 1) % 12) or 12
         end = start.replace(month=new_month)
         return start, end
     
@@ -79,8 +79,8 @@ class StatsGatherer:
             },
             limit=10000
         )
-        self.__message_cache_time = now
-        return self.__message_cache
+        self.__bet_cache_time = now
+        return self.__bet_cache
 
     def _get_users(self, guild_id: int) -> List[dict]:
         """Internal method to query for users between a certain date

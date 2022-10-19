@@ -41,20 +41,27 @@ class MonthlyBSEddiesAwards(commands.Cog):
         busiest_channel, busiest_channel_messages = self.stats.busiest_channel(*args)
         busiest_day, busiest_day_messages = self.stats.busiest_day(*args)
         num_bets = self.stats.number_of_bets(*args)
-        
-        
-        busiest_channel_obj = guild.get_channel(busiest_channel)
+
+        busiest_channel_obj = await guild.fetch_channel(busiest_channel)
+        busiest_day_format = busiest_day.strftime("%a %d %b")
         
         message = (
-            "Some server stats from last month:\n"
-            f"Number of messages sent: `{num_messages}`\n"
-            f"Average message length: Characters (`{avg_message_chars}`), Words (`{avg_message_words}`)\n"
-            f"Chattiest channel: {busiest_channel_obj.mention} (`{busiest_channel_messages}`)\n"
-            f"Chattiest day: {busiest_day} (`{busiest_day_messages}`)"
+            "Some server stats 📈 from last month:\n\n"
+            f"**Number of messages sent**: `{num_messages}`\n"
+            f"**Average message length**: Characters (`{avg_message_chars}`), Words (`{avg_message_words}`)\n"
+            f"**Chattiest channel**: {busiest_channel_obj.mention} (`{busiest_channel_messages}`)\n"
+            f"**Chattiest day**: {busiest_day_format} (`{busiest_day_messages}`)\n"
+            f"**Bets created**: `{num_bets}`"
         )
         
+        # TESTING ONLY
+        sloman_guild = await self.bot.fetch_guild(291508460519161856)
+        sloman_channel = await self.bot.fetch_channel(291508460519161856)
         
-    
+        await sloman_channel.send(content=message)
+        
+        self.logger.info(message) 
+
     @bseddies_awards.before_loop
     async def before_thread_mute(self):
         """

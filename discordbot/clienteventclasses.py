@@ -202,7 +202,13 @@ class OnReadyEvent(BaseEvent):
                 channel_id = bet["channel_id"]
                 if not channel_id or not message_id:
                     continue
-                channel = await guild.fetch_channel(channel_id)
+                
+                try:
+                    channel = await guild.fetch_channel(channel_id)
+                except discord.errors.NotFound:
+                    # possible the channel no longer exists
+                    self.logger.debug(f"Issue with fetching channel: {channel_id=}, {bet=}")
+                    continue
 
                 message = channel.get_partial_message(message_id)
 

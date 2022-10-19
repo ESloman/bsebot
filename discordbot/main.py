@@ -85,7 +85,7 @@ if __name__ == "__main__":
         DEBUG_MODE = bool(int(DEBUG_MODE))
 
     if DEBUG_MODE is True:
-        IDS = [SLOMAN_SERVER_ID]  # test IDs
+        IDS = [SLOMAN_SERVER_ID, BSE_SERVER_ID]  # test IDs
     else:
         IDS = [BSE_SERVER_ID]  # actual IDS
 

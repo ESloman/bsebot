@@ -1,10 +1,6 @@
 import datetime
 import math
-from this import d
 from typing import List, Optional, Tuple
-
-import discord
-from tomlkit import date
 
 from mongo.bsepoints import UserBets, UserInteractions, UserPoints
 

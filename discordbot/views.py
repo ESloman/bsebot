@@ -511,7 +511,7 @@ class RevolutionView(discord.ui.View):
 
         role = guild.get_role(BSEDDIES_KING_ROLES[guild_id])
 
-        edited_message = self.embeds.get_revolution_message(king_user, role, event)
+        edited_message = self.embeds.get_revolution_message(king_user, role, event, guild)
 
         self.toggle_stuff(False)
 
@@ -614,7 +614,7 @@ class RevolutionView(discord.ui.View):
 
         role = guild.get_role(BSEDDIES_KING_ROLES[guild_id])
 
-        edited_message = self.embeds.get_revolution_message(king_user, role, event)
+        edited_message = self.embeds.get_revolution_message(king_user, role, event, guild)
 
         self.toggle_stuff(False)
 
@@ -694,7 +694,7 @@ class RevolutionView(discord.ui.View):
 
         role = guild.get_role(BSEDDIES_KING_ROLES[guild_id])
 
-        edited_message = self.embeds.get_revolution_message(interaction.user, role, event)
+        edited_message = self.embeds.get_revolution_message(interaction.user, role, event, guild)
         
         await followup.send(content=f"{interaction.user.mention} just spent `{amount_to_subtract}` to reduce the overthrow chance by **15%**.")
         self.toggle_stuff(False)

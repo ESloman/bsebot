@@ -131,7 +131,7 @@ class BSEddiesRevolutionTask(commands.Cog):
 
         revolution_view = RevolutionView(self.bot, event, self.logger)
 
-        message = self.embed_manager.get_revolution_message(king_user, role, event)
+        message = self.embed_manager.get_revolution_message(king_user, role, event, guild_obj)
         message_obj = await channel.send(content=message, view=revolution_view)  # type: discord.Message
 
         self.revolutions.update(

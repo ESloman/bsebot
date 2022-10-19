@@ -35,7 +35,7 @@ class EmbedManager(object):
                     if val:
                         val += "\n"
                     better_info = guild.get_member(better["user_id"])
-                    val += f"- {better_info.name} - {better['points']}"
+                    val += f"- {better_info.name if better_info else better['user_id']} - {better['points']}"
             else:
                 val = "No-one has bet on this option yet."
             embed.add_field(
@@ -123,7 +123,7 @@ class EmbedManager(object):
         return message
 
     @staticmethod
-    def get_revolution_message(king_user: discord.User, role: discord.Role, event: dict):
+    def get_revolution_message(king_user: discord.User, role: discord.Role, event: dict, guild: discord.Guild):
         """
         Method for creating a 'Revolution' message
 
@@ -132,6 +132,20 @@ class EmbedManager(object):
         :param event:
         :return:
         """
+        revos = []
+        for rev in event.get('revolutionaries', []):
+            if rev_info := guild.get_member(rev):
+                revos.append(rev_info.name)
+            else:
+                revos.append(rev)
+
+        supps = []
+        for sup in event.get('revolutionaries', []):
+            if sup_info := guild.get_member(sup):
+                supps.append(sup_info.name)
+            else:
+                supps.append(sup)
+
 
         message = (
             f"**REVOLUTION IS UPON US**\n\n"
@@ -145,8 +159,8 @@ class EmbedManager(object):
             f"alongside their King.\n"
             f"**Event ID**: `{event['event_id']}`\n"
             f"**Success rate**: `{max(min(event['chance'], 100), 0)}%`\n"
-            f"**Revolutionaries**: `{event.get('revolutionaries', [])}`\n"
-            f"**Supporters**: `{event.get('supporters', [])}`\n"
+            f"**Revolutionaries**: `{','.join(revos)}`\n"
+            f"**Supporters**: `{','.join(supps)}`\n"
             f"**Locked in KING eddies**: `{event.get('locked_in_eddies')}`\n"
             f"**Event time**: `{event['expired'].strftime('%d %b %y %H:%M:%S')}`"
         )

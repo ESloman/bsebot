@@ -1,12 +1,15 @@
 import datetime
 import math
+import re
 from typing import List, Optional, Tuple
 
+from discordbot.bot_enums import TransactionTypes
+from discordbot.constants import BSE_BOT_ID
 from mongo.bsepoints import UserBets, UserInteractions, UserPoints
 
 
 class StatsGatherer:
-    def __init__(self, ) -> None:
+    def __init__(self) -> None:
         self.user_bets = UserBets()
         self.user_interactions = UserInteractions()
         self.user_points = UserPoints()
@@ -19,6 +22,9 @@ class StatsGatherer:
 
         self.__user_cache = []  # type: List[dict]
         self.__user_cache_time = None  # type: Optional[datetime.datetime]
+        
+        self.__transaction_cache = []  # type: List[dict]
+        self.__transaction_cache_time = None  # type: Optional[datetime.datetime]
     
     @staticmethod
     def get_monthly_datetime_objects():
@@ -83,7 +89,7 @@ class StatsGatherer:
         return self.__bet_cache
 
     def _get_users(self, guild_id: int) -> List[dict]:
-        """Internal method to query for users between a certain date
+        """Internal method to query for users
         Will cache the users on first parse and return the cache if cache was set less than an hour ago
 
         Args:
@@ -100,6 +106,31 @@ class StatsGatherer:
         self.__user_cache_time = now
         return self.__user_cache
 
+    def _get_transactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
+        """Internal method to query for transactions between a certain date
+        Will cache the transactions on first parse and return the cache if cache was set less than an hour ago
+
+        Args:
+            guild_id (int): the guild ID
+            start (datetime.datetime): the beginning of time period
+            end (datetime.datetime): the end of the time period
+
+        Returns:
+            List[dict]: a list of transactions
+        """
+        now = datetime.datetime.now()
+        if self.__transaction_cache and (now - self.__transaction_cache_time).total_seconds() < 3600:
+            return self.__transaction_cache
+        
+        users = self._get_users(guild_id)
+        transaction_history = []
+        for user in users:
+            transactions = [t for t in user.get("transaction_history", []) if start < t["timestamp"] < end]
+            transaction_history.extend(transactions)
+        self.__transaction_cache = transaction_history
+        self.__transaction_cache_time = now
+        return self.__transaction_cache
+    
     # generic server stats
     def number_of_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> int:
         """Returns the number of messages between two given time periods
@@ -202,6 +233,45 @@ class StatsGatherer:
         """
         bets = self._get_bets(guild_id, start, end)
         return len(bets)
+    
+    def salary_gains(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> int:
+        """Returns the total amount of eddies gained through salaries this month
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            int: _description_
+        """
+        transactions = self._get_transactions(guild_id, start, end)
+        salary_total = 0
+        for trans in transactions:
+            if trans["type"] != TransactionTypes.DAILY_SALARY:
+                continue
+            salary_total += trans["amount"]
+        return salary_total
+        
+    def average_wordle_victory(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> float:
+        messages = self._get_messages(guild_id, start, end)
+        wordle_messages = [m for m in messages if "wordle" in m["message_type"]]
+        
+        wordle_count = []
+        for wordle in wordle_messages:
+            if wordle["user_id"] == BSE_BOT_ID:
+                continue
+            
+            result = re.search("\d\/\d", wordle["content"]).group()
+            guesses = result.split("/")[0]
+
+            if guesses == "X":
+                continue
+            guesses = int(guesses)
+            wordle_count.append(guesses)
+            
+        average_wordle = round((sum(wordle_count) / len(wordle_count)), 2)
+        return average_wordle
     
     # stats that can be won
     # messages

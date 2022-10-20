@@ -41,6 +41,8 @@ class MonthlyBSEddiesAwards(commands.Cog):
         busiest_channel, busiest_channel_messages = self.stats.busiest_channel(*args)
         busiest_day, busiest_day_messages = self.stats.busiest_day(*args)
         num_bets = self.stats.number_of_bets(*args)
+        salary_gains = self.stats.salary_gains(*args)
+        average_wordle = self.stats.average_wordle_victory(*args)
 
         busiest_channel_obj = await guild.fetch_channel(busiest_channel)
         busiest_day_format = busiest_day.strftime("%a %d %b")
@@ -51,7 +53,9 @@ class MonthlyBSEddiesAwards(commands.Cog):
             f"**Average message length**: Characters (`{avg_message_chars}`), Words (`{avg_message_words}`)\n"
             f"**Chattiest channel**: {busiest_channel_obj.mention} (`{busiest_channel_messages}`)\n"
             f"**Chattiest day**: {busiest_day_format} (`{busiest_day_messages}`)\n"
-            f"**Bets created**: `{num_bets}`"
+            f"**Bets created**: `{num_bets}`\n"
+            f"**Eddies gained via salary**: `{salary_gains}`\n"
+            f"**Average wordle score**: `{average_wordle}`\n"
         )
         
         # TESTING ONLY

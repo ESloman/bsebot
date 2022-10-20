@@ -126,6 +126,8 @@ class StatsGatherer:
         transaction_history = []
         for user in users:
             transactions = [t for t in user.get("transaction_history", []) if start < t["timestamp"] < end]
+            for _trans in transactions:
+                _trans["uid"] = user["uid"]
             transaction_history.extend(transactions)
         self.__transaction_cache = transaction_history
         self.__transaction_cache_time = now
@@ -254,6 +256,16 @@ class StatsGatherer:
         return salary_total
         
     def average_wordle_victory(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> float:
+        """Calculates the server's average wordle score
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            float: The average wordle score
+        """
         messages = self._get_messages(guild_id, start, end)
         wordle_messages = [m for m in messages if "wordle" in m["message_type"]]
         
@@ -266,15 +278,61 @@ class StatsGatherer:
             guesses = result.split("/")[0]
 
             if guesses == "X":
-                continue
+                guesses = "10"
             guesses = int(guesses)
             wordle_count.append(guesses)
             
         average_wordle = round((sum(wordle_count) / len(wordle_count)), 2)
         return average_wordle
     
+    def bet_eddies_stats(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[int, int]:
+        """Calculates the total eddies placed on bets, and the total eddies won on bets
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Tuple[int, int]: returns a tuple of eddies placed and eddies won
+        """
+        transactions = self._get_transactions(guild_id, start, end)
+
+        eddies_placed = 0
+        eddies_won = 0
+        for trans in transactions:
+            trans_type = trans["type"]
+            if trans_type == TransactionTypes.BET_PLACE:
+                eddies_placed -= trans["amount"]  # amount is negative in these cases
+            elif trans_type == TransactionTypes.BET_WIN:
+                eddies_won += trans["amount"]
+
+        return eddies_placed, eddies_won
+
     # stats that can be won
     # messages
+    def most_messages_sent(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[int, int]:
+        """Calculates the person who has sent the most messages in the server
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Tuple[int, int]: the ID of the user and the amount of messages sent
+        """
+        messages = self._get_messages(guild_id, start, end)
+
+        message_users = {}
+        for message in messages:
+            uid = message["user_id"]
+            if uid not in message_users:
+                message_users[uid] = 0
+            message_users[uid] += 1
+        chattiest = sorted(message_users, key=lambda x: message_users[x], reverse=True)[0]
+        return chattiest, message_users[chattiest]
+
     def longest_message(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> dict:
         """Returns the longest message from two given time periods
 
@@ -296,6 +354,46 @@ class StatsGatherer:
                 if len(content) > len(longest_message["content"]):
                     longest_message = message
         return longest_message
+
+    def lowest_average_wordle_score(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[int, float]:
+        """Calculates which user has the best average wordle score
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Tuple[int, float]: the user ID and the average wordle score
+        """
+        messages = self._get_messages(guild_id, start, end)
+        wordle_messages = [m for m in messages if "wordle" in m["message_type"]]
+        
+        wordle_count = {}
+        for wordle in wordle_messages:
+            uid = wordle["user_id"]
+            if uid == BSE_BOT_ID:
+                continue
+            if uid not in wordle_count:
+                wordle_count[uid] = []
+
+            result = re.search("\d\/\d", wordle["content"]).group()
+            guesses = result.split("/")[0]
+
+            if guesses == "X":
+                guesses = "10"
+            guesses = int(guesses)
+
+            wordle_count[uid].append(guesses)
+        
+        wordle_avgs = {}
+        for uid in wordle_count:
+            all_guesses = wordle_count[uid]
+            avg = round((sum(all_guesses) / len(all_guesses)), 2)
+            wordle_avgs[uid] = avg
+        
+        best_avg = sorted(wordle_avgs, key=lambda x: wordle_avgs[x], reverse=True)[0]
+        return best_avg, wordle_avgs[best_avg]
 
     # bets
     def most_bets_created(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[int, int]:
@@ -319,3 +417,53 @@ class StatsGatherer:
         
         busiest = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
         return busiest, bet_users[busiest]
+
+    def most_eddies_bet(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[int, int]:
+        """Calculates who placed the most eddies on bets
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Tuple[int, int]: User who placed the most bets, the amount they placed
+        """
+        transactions = self._get_transactions(guild_id, start, end)
+        
+        bet_users = {}
+        for trans in transactions:
+            if trans["type"] != TransactionTypes.BET_PLACE:
+                continue
+            uid = trans["uid"]
+            if uid not in bet_users:
+                bet_users[uid] = 0
+            bet_users[uid] -= trans["amount"]
+        
+        most_placed = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
+        return most_placed, bet_users[most_placed]
+    
+    def most_eddies_won(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[int, int]:
+        """Calculates who won the most eddies on bets
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Tuple[int, int]: User who won the most bets, the amount they placed
+        """
+        transactions = self._get_transactions(guild_id, start, end)
+        
+        bet_users = {}
+        for trans in transactions:
+            if trans["type"] != TransactionTypes.BET_WIN:
+                continue
+            uid = trans["uid"]
+            if uid not in bet_users:
+                bet_users[uid] = 0
+            bet_users[uid] += trans["amount"]
+        
+        most_placed = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
+        return most_placed, bet_users[most_placed]

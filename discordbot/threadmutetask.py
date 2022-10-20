@@ -62,6 +62,7 @@ class ThreadSpoilerTask(commands.Cog):
             if not thread_info["active"]:
                 # thread is no longer active
                 self.logger.info(f"Thread is no longer active")
+                continue
 
             day = thread_info["day"]
             if now.weekday() != day:

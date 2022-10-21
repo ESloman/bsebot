@@ -10,6 +10,7 @@ from apis.giphyapi import GiphyAPI
 from discordbot.betcloser import BetCloser
 from discordbot.clienteventclasses import OnReadyEvent, OnReactionAdd, OnMessage, OnMemberJoin, OnDirectMessage
 from discordbot.clienteventclasses import OnMemberLeave, OnThreadCreate, OnThreadUpdate
+from discordbot.constants import BSE_SERVER_ID
 from discordbot.eddiegains import EddieGainMessager
 from discordbot.eddiekingtask import BSEddiesKingTask
 from discordbot.embedmanager import EmbedManager
@@ -116,9 +117,11 @@ class CommandManager(object):
         self.eddie_gain_message_task = EddieGainMessager(self.client, guilds, self.logger)
         self.eddie_king_task = BSEddiesKingTask(self.client, guilds, self.logger)
         self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger, self.giphy_token)
-        self.thread_task = ThreadSpoilerTask(self.client, guilds, self.logger)
-        self.vally_task = AfterWorkVally(self.client, guilds, self.logger)
-        self.wordle_task = WordleTask(self.client, guilds, self.logger)
+        
+        if BSE_SERVER_ID in self.guilds:
+            self.thread_task = ThreadSpoilerTask(self.client, guilds, self.logger)
+            self.vally_task = AfterWorkVally(self.client, guilds, self.logger)
+            self.wordle_task = WordleTask(self.client, guilds, self.logger)
 
         # call the methods that register the events we're listening for
         self._register_client_events()

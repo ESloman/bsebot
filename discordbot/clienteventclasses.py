@@ -262,8 +262,12 @@ class OnReadyEvent(BaseEvent):
             path = os.path.expanduser("~/gitwork/bsebot/bsebot.git")
         
         hash_doc = self.hashes.get_last_hash(guild_id)
-        last_hash = hash_doc["hash"]
-        
+        try:
+            last_hash = hash_doc["hash"]
+        except TypeError:
+            # typically in testing mode - there's no hash doc to compare against
+            return None
+
         head_sha = subprocess.check_output(
             ["git", "rev-parse", "HEAD"],
             cwd=path

@@ -3,7 +3,7 @@ import datetime
 import discord
 from discord.ext import tasks, commands
 
-from discordbot.constants import BSE_SERVER_ID
+from discordbot.constants import BSEDDIES_REVOLUTION_CHANNEL, BSE_SERVER_ID
 from discordbot.statsclasses import StatsGatherer
 
 
@@ -12,7 +12,6 @@ class MonthlyBSEddiesAwards(commands.Cog):
         self.bot = bot
         self.logger = logger
         self.guilds = guilds
-        
         self.stats = StatsGatherer()
 
         self.bseddies_awards.start()
@@ -24,10 +23,21 @@ class MonthlyBSEddiesAwards(commands.Cog):
         """
         self.bseddies_awards.cancel()
 
-    @tasks.loop(minutes=5)
+    @tasks.loop(minutes=60)
     async def bseddies_awards(self):
         now = datetime.datetime.now()
         
+        if not now.day == 1 or not now.hour == 11:
+            # we only want to trigger on the first of each month
+            # and also trigger at 11am
+            return
+        
+        if BSE_SERVER_ID not in self.guilds:
+            # does not support other servers yet
+            return
+        
+        self.logger.info(f"It's the first of the month and about ~11ish - time to trigger the awards! {now=}")                    
+                    
         start, end = self.stats.get_monthly_datetime_objects()
         
         args = (BSE_SERVER_ID, start, end)
@@ -35,6 +45,7 @@ class MonthlyBSEddiesAwards(commands.Cog):
         guild = await self.bot.fetch_guild(BSE_SERVER_ID)
         
         # SERVER STATS
+        # get all generic discord server stats
         
         num_messages = self.stats.number_of_messages(*args)
         avg_message_chars, avg_message_words = self.stats.average_message_length(*args)
@@ -62,24 +73,30 @@ class MonthlyBSEddiesAwards(commands.Cog):
         )
 
         # BSEDDIES AWARDS
+        # get all stats for bseddies awards
 
         most_messages_id, most_messages_count = self.stats.most_messages_sent(*args)
-        longest_message_id, longest_message_count = self.stats.longest_message(*args)
+        longest_message = self.stats.longest_message(*args)
         wordle_id, wordle_avg_score = self.stats.lowest_average_wordle_score(*args)
         most_bets_id, most_bets_number = self.stats.most_bets_created(*args)
         most_eddies_placed_id, most_eddies_placed = self.stats.most_eddies_bet(*args)
         most_eddies_won_id, most_eddies_won = self.stats.most_eddies_won(*args)
+        longest_king_id, time_king = self.stats.most_time_king(*args)
+        
+        longest_message_id = longest_message["user_id"]
+        longest_message_count = len(longest_message["content"])
 
         user_id_dict = {}  # type: dict[int, discord.Member]
         for _id in [
             most_messages_id, longest_message_id, wordle_id,
-            most_bets_id, most_eddies_placed_id, most_eddies_won_id
+            most_bets_id, most_eddies_placed_id, most_eddies_won_id,
+            longest_king_id
         ]:
             if _id in user_id_dict:
                 continue
             member = await guild.fetch_member(_id)
             user_id_dict[_id] = member
-
+        
         bseddies_awards = (
             "Time for the monthly **BSEddies Awards** 🏆\n\n"
             "The _'won't shut up'_ award: "
@@ -90,21 +107,20 @@ class MonthlyBSEddiesAwards(commands.Cog):
             f"{user_id_dict[wordle_id].mention} (`{wordle_avg_score}` average wordle score)\n"
             "The _'bookie'_ award: "
             f"{user_id_dict[most_bets_id].mention} (`{most_bets_number}` bets created)\n"
-            "The _'just one more bet'__ award: "
+            "The _'just one more bet'_ award: "
             f"{user_id_dict[most_eddies_placed_id].mention} (`{most_eddies_placed}` eddies bet)\n"
             "The _'rollin' in it'_ award: "
             f"{user_id_dict[most_eddies_won_id].mention} (`{most_eddies_won}` eddies won)\n"
+            "The _'king of kings'_ award: "
+            f"{user_id_dict[longest_king_id].mention} (`{str(datetime.timedelta(seconds=time_king))}` spent as KING)"
         )
+        
+        channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
 
-        # TESTING ONLY
-        sloman_guild = await self.bot.fetch_guild(291508460519161856)
-        sloman_channel = await self.bot.fetch_channel(291508460519161856)
-
-        self.logger.info(message)
-        self.logger.info(bseddies_awards)
-
-        await sloman_channel.send(content=message)
-        await sloman_channel.send(content=bseddies_awards)
+        await channel.send(content=message)
+        await channel.send(content=bseddies_awards)
+        
+        self.logger.info(f"Sent messages! Until next month!")
 
 
     @bseddies_awards.before_loop

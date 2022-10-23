@@ -3,7 +3,7 @@ import math
 import re
 from typing import List, Optional, Tuple
 
-from discordbot.bot_enums import TransactionTypes
+from discordbot.bot_enums import ActivityTypes, TransactionTypes
 from discordbot.constants import BSE_BOT_ID
 from mongo.bsepoints import UserBets, UserInteractions, UserPoints
 
@@ -25,6 +25,9 @@ class StatsGatherer:
         
         self.__transaction_cache = []  # type: List[dict]
         self.__transaction_cache_time = None  # type: Optional[datetime.datetime]
+        
+        self.__activity_cache = []  # type: List[dict]
+        self.__activity_cache_time = None  # type: Optional[datetime.datetime]
     
     @staticmethod
     def get_monthly_datetime_objects():
@@ -106,6 +109,7 @@ class StatsGatherer:
         self.__user_cache_time = now
         return self.__user_cache
 
+
     def _get_transactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
         """Internal method to query for transactions between a certain date
         Will cache the transactions on first parse and return the cache if cache was set less than an hour ago
@@ -132,6 +136,33 @@ class StatsGatherer:
         self.__transaction_cache = transaction_history
         self.__transaction_cache_time = now
         return self.__transaction_cache
+    
+    def _get_activities(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
+        """Internal method to query for activities between a certain date
+        Will cache the activities on first parse and return the cache if cache was set less than an hour ago
+
+        Args:
+            guild_id (int): the guild ID
+            start (datetime.datetime): the beginning of time period
+            end (datetime.datetime): the end of the time period
+
+        Returns:
+            List[dict]: a list of activities
+        """
+        now = datetime.datetime.now()
+        if self.__activity_cache and (now - self.__activity_cache_time).total_seconds() < 3600:
+            return self.__activity_cache
+        
+        users = self._get_users(guild_id)
+        activity_history = []
+        for user in users:
+            activities = [t for t in user.get("activity_history", []) if start < t["timestamp"] < end]
+            for _act in activities:
+                _act["uid"] = user["uid"]
+            activity_history.extend(activities)
+        self.__activity_cache = activity_history
+        self.__activity_cache_time = now
+        return self.__activity_cache
     
     # generic server stats
     def number_of_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> int:
@@ -392,7 +423,7 @@ class StatsGatherer:
             avg = round((sum(all_guesses) / len(all_guesses)), 2)
             wordle_avgs[uid] = avg
         
-        best_avg = sorted(wordle_avgs, key=lambda x: wordle_avgs[x], reverse=True)[0]
+        best_avg = sorted(wordle_avgs, key=lambda x: wordle_avgs[x])[0]
         return best_avg, wordle_avgs[best_avg]
 
     # bets
@@ -443,7 +474,7 @@ class StatsGatherer:
         most_placed = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
         return most_placed, bet_users[most_placed]
     
-    def most_eddies_won(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[int, int]:
+    def most_eddies_won(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[int, float]:
         """Calculates who won the most eddies on bets
 
         Args:
@@ -467,3 +498,44 @@ class StatsGatherer:
         
         most_placed = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
         return most_placed, bet_users[most_placed]
+    
+    def most_time_king(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[int, int]:
+        """Calculates who's been King longest this month
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Tuple[int, int]: User ID of who's been King longest and total seconds they've been King
+        """
+        
+        activity_history = self._get_activities(guild_id, start, end)
+        king_events = sorted(
+            [a for a in activity_history if a["type"] in [ActivityTypes.KING_GAIN, ActivityTypes.KING_LOSS]], 
+            key=lambda x: x["timestamp"]
+        )
+        
+        kings = {}
+        previous_time = start
+        
+        for event in king_events:
+            if event["type"] == ActivityTypes.KING_LOSS:
+                uid = event["uid"]
+                
+                timestamp = event["timestamp"]  # type: datetime.datetime
+                time_king = (timestamp - previous_time).total_seconds()
+                
+                if uid not in kings:
+                    kings[uid] = 0
+                kings[uid] += time_king
+                previous_time = None
+            
+            elif event["type"] == ActivityTypes.KING_GAIN:
+                
+                previous_time = event["timestamp"]
+                
+        longest_king = sorted(kings, key=lambda x: kings[x], reverse=True)[0]
+        
+        return longest_king, int(kings[longest_king])

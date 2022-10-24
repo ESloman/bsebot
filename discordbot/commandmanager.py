@@ -12,12 +12,12 @@ from discordbot.clienteventclasses import OnReadyEvent, OnReactionAdd, OnMessage
 from discordbot.clienteventclasses import OnMemberLeave, OnThreadCreate, OnThreadUpdate
 from discordbot.constants import BSE_SERVER_ID
 from discordbot.eddiegains import EddieGainMessager
-from discordbot.eddiekingtask import BSEddiesKingTask
+from discordbot.tasks.eddiekingtask import BSEddiesKingTask
 from discordbot.embedmanager import EmbedManager
-from discordbot.revolutiontask import BSEddiesRevolutionTask
-from discordbot.dailyvallytask import AfterWorkVally
-from discordbot.threadmutetask import ThreadSpoilerTask
-from discordbot.wordletask import WordleTask
+from discordbot.tasks.revolutiontask import BSEddiesRevolutionTask
+from discordbot.tasks.dailyvallytask import AfterWorkVally
+from discordbot.tasks.threadmutetask import ThreadSpoilerTask
+from discordbot.tasks.wordletask import WordleTask
 from discordbot.slashcommandeventclasses import BSEddiesLeaderboard, BSEddiesTaxRate, BSEddiesView, BSEddiesActive, BSEddiesGift
 from discordbot.slashcommandeventclasses import BSEddiesHighScore, BSEddiesAdminGive
 from discordbot.slashcommandeventclasses import BSEddiesCloseBet, BSEddiesPlaceBet

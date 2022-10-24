@@ -126,6 +126,8 @@ class CommandManager(object):
         # call the methods that register the events we're listening for
         self._register_client_events()
         self._register_slash_commands(guilds)
+        
+        self.client.sync_commands(method="auto", guild_ids=guilds)
 
     # noinspection PyProtectedMember
     def __get_cached_messages_list(self) -> list:

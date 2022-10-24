@@ -77,16 +77,20 @@ class UserPoints(BestSummerEverPointsDB):
         ret = self.query({"uid": user_id, "guild_id": guild_id}, projection={"daily_minimum": True})
         return ret[0]["daily_minimum"]
 
-    def get_all_users_for_guild(self, guild_id: int) -> list:
+    def get_all_users_for_guild(self, guild_id: int, projection: Optional[dict] = None) -> list:
         """
         Gets all the users from a given guild.
 
         :param guild_id: int - The guild ID to get users for
         :return: list of user dictionaries
         """
+
+        if projection is None:
+            projection = {"points": True, "uid": True, "daily_minimum": True, "high_score": True, "inactive": True}
+
         ret = self.query(
             {"guild_id": guild_id},
-            projection={"points": True, "uid": True, "daily_minimum": True, "high_score": True, "inactive": True}
+            projection=projection
         )
         return ret
 

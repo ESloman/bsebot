@@ -33,6 +33,8 @@ class TransactionTypes(IntEnum):
     SUPPORTER_LOST_REVOLUTION = 22
     TAX_GAINS = 23
     BET_TAX = 24
+    MONTHLY_AWARDS_PRIZE = 25
+    ANNUAL_AWARDS_PRIZE = 26
     OVERRIDE = 99
 
 

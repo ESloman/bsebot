@@ -3,8 +3,10 @@ import datetime
 import discord
 from discord.ext import tasks, commands
 
-from discordbot.constants import BSEDDIES_REVOLUTION_CHANNEL, BSE_SERVER_ID
+from discordbot.bot_enums import TransactionTypes
+from discordbot.constants import BSEDDIES_REVOLUTION_CHANNEL, BSE_SERVER_ID, MONTHLY_AWARDS_PRIZE
 from discordbot.statsclasses import StatsGatherer
+from mongo.bsepoints import UserPoints
 
 
 class MonthlyBSEddiesAwards(commands.Cog):
@@ -13,6 +15,7 @@ class MonthlyBSEddiesAwards(commands.Cog):
         self.logger = logger
         self.guilds = guilds
         self.stats = StatsGatherer()
+        self.user_points = UserPoints()
 
         self.bseddies_awards.start()
     
@@ -119,6 +122,24 @@ class MonthlyBSEddiesAwards(commands.Cog):
 
         await channel.send(content=message)
         await channel.send(content=bseddies_awards)
+        
+        # give the users their eddies
+        
+        for _id in [
+            most_messages_id, longest_message_id, wordle_id,
+            most_bets_id, most_eddies_placed_id, most_eddies_won_id,
+            longest_king_id
+        ]:
+            self.user_points.append_to_transaction_history(
+                _id,
+                BSE_SERVER_ID,
+                {
+                    "type": TransactionTypes.MONTHLY_AWARDS_PRIZE,
+                    "timestamp": datetime.datetime.now(),
+                    "amount": MONTHLY_AWARDS_PRIZE
+                }
+            )
+            self.user_points.increment_points(_id, BSE_SERVER_ID, MONTHLY_AWARDS_PRIZE)
         
         self.logger.info(f"Sent messages! Until next month!")
 

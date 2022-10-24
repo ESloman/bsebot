@@ -53,6 +53,10 @@ The `mongo` folder contains DB API classes for interacting with our database.
 
 The bot is started by running the `discordbot/main.py` file. This reads the parameters from the `.env` file located in the same directory. The code will create an instance of a `discord.Bot` class, which allows us to interact with Discord, and a `commandmanager.CommandManager` class that adds our desired functionality. The code then starts the asyncio listening loop that connects to Discord and listens to events.
 
+#### Logging
+
+A note on logs. In `main.py`, we create a Python `logging` logger object. This logger is setup to log how we want it to and logs to both stdout and to a file. We pass the same logging object to the various classes throughout the codebase. We can add information to the logs by using `self.logger.info` in most places (rather than `print`). It's a standard python Logger so other log types are available (`self.logger.debug`, `self.logger.exception`, etc).
+
 ### Core concepts
 
 The BSEBot works and interacts with Discord by listening for events. Everything that happens in Discord (like a message being sent, someone reacting to something, creating a channel, using a slash command, etc) is an event. We can add 'event listeners' to handle particular events - the `pycord` framework will then invoke our code when it receives an event of that type. The code uses coroutines and an asynchronous framework that allows it to process multiple things (like events) simultaneously.

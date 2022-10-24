@@ -10,14 +10,15 @@ from apis.giphyapi import GiphyAPI
 from discordbot.betcloser import BetCloser
 from discordbot.clienteventclasses import OnReadyEvent, OnReactionAdd, OnMessage, OnMemberJoin, OnDirectMessage
 from discordbot.clienteventclasses import OnMemberLeave, OnThreadCreate, OnThreadUpdate
+from discordbot.constants import BSE_SERVER_ID
 from discordbot.eddiegains import EddieGainMessager
-from discordbot.eddiekingtask import BSEddiesKingTask
+from discordbot.tasks.eddiekingtask import BSEddiesKingTask
 from discordbot.embedmanager import EmbedManager
-from discordbot.monthlyawards import MonthlyBSEddiesAwards
-from discordbot.revolutiontask import BSEddiesRevolutionTask
-from discordbot.dailyvallytask import AfterWorkVally
-from discordbot.threadmutetask import ThreadSpoilerTask
-from discordbot.wordletask import WordleTask
+from discordbot.tasks.monthlyawards import MonthlyBSEddiesAwards
+from discordbot.tasks.revolutiontask import BSEddiesRevolutionTask
+from discordbot.tasks.dailyvallytask import AfterWorkVally
+from discordbot.tasks.threadmutetask import ThreadSpoilerTask
+from discordbot.tasks.wordletask import WordleTask
 from discordbot.slashcommandeventclasses import BSEddiesLeaderboard, BSEddiesTaxRate, BSEddiesView, BSEddiesActive, BSEddiesGift
 from discordbot.slashcommandeventclasses import BSEddiesHighScore, BSEddiesAdminGive
 from discordbot.slashcommandeventclasses import BSEddiesCloseBet, BSEddiesPlaceBet
@@ -117,11 +118,13 @@ class CommandManager(object):
         self.eddie_gain_message_task = EddieGainMessager(self.client, guilds, self.logger)
         self.eddie_king_task = BSEddiesKingTask(self.client, guilds, self.logger)
         self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger, self.giphy_token)
-        self.thread_task = ThreadSpoilerTask(self.client, guilds, self.logger)
-        self.vally_task = AfterWorkVally(self.client, guilds, self.logger)
-        self.wordle_task = WordleTask(self.client, guilds, self.logger)
-        self.monthly_awards_task = MonthlyBSEddiesAwards(self.client, guilds, self.logger)
-
+        
+        if BSE_SERVER_ID in self.guilds:
+            self.thread_task = ThreadSpoilerTask(self.client, guilds, self.logger)
+            self.vally_task = AfterWorkVally(self.client, guilds, self.logger)
+            self.wordle_task = WordleTask(self.client, guilds, self.logger)
+			self.monthly_awards_task = MonthlyBSEddiesAwards(self.client, guilds, self.logger)
+            
         # call the methods that register the events we're listening for
         self._register_client_events()
         self._register_slash_commands(guilds)

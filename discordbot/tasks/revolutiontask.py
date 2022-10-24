@@ -81,14 +81,14 @@ class BSEddiesRevolutionTask(commands.Cog):
             # if (event["expired"] - now).total_seconds() < 10800 and not event.get("three_hours"):
             #    await self.send_excited_gif(guild_id, event, "Three hours", "three_hours")
 
-            elif now.hour == 17 and now.minute == 30 and not event.get("two_hours"):
-                await self.send_excited_gif(guild_id, event, "Two hours", "two_hours")
+            # elif now.hour == 17 and now.minute == 30 and not event.get("two_hours"):
+            #     await self.send_excited_gif(guild_id, event, "Two hours", "two_hours")
 
             elif now.hour == 18 and now.minute == 30 and not event.get("one_hour"):
                 await self.send_excited_gif(guild_id, event, "One hour", "one_hour")
 
-            elif now.hour == 19 and now.minute == 0 and not event.get("half_hour"):
-                await self.send_excited_gif(guild_id, event, "HALF AN HOUR", "half_hour")
+            # elif now.hour == 19 and now.minute == 0 and not event.get("half_hour"):
+            #     await self.send_excited_gif(guild_id, event, "HALF AN HOUR", "half_hour")
 
             elif now.hour == 19 and now.minute == 15 and not event.get("quarter_house"):
                 await self.send_excited_gif(guild_id, event, "15 MINUTES", "quarter_hour")

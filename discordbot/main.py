@@ -85,7 +85,7 @@ if __name__ == "__main__":
         DEBUG_MODE = bool(int(DEBUG_MODE))
 
     if DEBUG_MODE is True:
-        IDS = [SLOMAN_SERVER_ID, BSE_SERVER_ID]  # test IDs
+        IDS = [SLOMAN_SERVER_ID]  # test IDs
     else:
         IDS = [BSE_SERVER_ID]  # actual IDS
 
@@ -107,7 +107,7 @@ if __name__ == "__main__":
         debug_guilds=IDS,
         intents=intents,
         activity=listening_activity,
-        auto_sync_commands=False if DEBUG_MODE else True
+        auto_sync_commands=False
     )
     com = CommandManager(cli, IDS, logger, beta_mode=BETA_MODE, debug_mode=DEBUG_MODE, giphy_token=GIPHY_TOKEN)
 

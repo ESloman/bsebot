@@ -1,0 +1,311 @@
+
+import datetime
+import math
+
+import discord
+
+from discordbot.bot_enums import TransactionTypes
+from discordbot.constants import BSEDDIES_KING_ROLES
+from discordbot.embedmanager import EmbedManager
+
+from mongo.bsepoints import UserPoints
+from mongo.bseticketedevents import RevolutionEvent
+
+
+class RevolutionView(discord.ui.View):
+    def __init__(self, client: discord.Client, event: dict, logger):
+        super().__init__(timeout=None)
+        self.client = client
+        self.event_id = event["event_id"]
+        self.revolutions = RevolutionEvent()
+        self.user_points = UserPoints()
+        self.embeds = EmbedManager(logger)
+        self.logger = logger
+
+    def toggle_stuff(self, disable):
+        for child in self.children:
+            child.disabled = disable
+
+    @discord.ui.button(
+        label=f"OVERTHROW",
+        style=discord.ButtonStyle.green,
+        custom_id="overthrow_button",
+        emoji="🔥"
+    )
+    async def overthrow_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+        response = interaction.response  # type: discord.InteractionResponse
+        followup = interaction.followup  # type: discord.Webhook
+
+        self.toggle_stuff(True)
+
+        # disable these whilst we do revolution stuff
+        await response.edit_message(view=self)
+
+        event = self.revolutions.get_event(interaction.guild.id, self.event_id)
+
+        if not event["open"]:
+            await followup.send(content="Unfortunately, this event has expired", ephemeral=True)
+            # leave it disabled
+            return
+
+        now = datetime.datetime.now()
+
+        if event["expired"] < now:
+            await followup.send(content="Unfortunately, this event has expired", ephemeral=True)
+            # leave it disabled
+            return
+
+        user_id = interaction.user.id
+        guild_id = interaction.guild.id
+
+        our_user = self.user_points.find_user(
+            user_id,
+            guild_id,
+            {"points": True, "king": True}
+        )
+
+        if our_user.get("king", False):
+            await followup.send(content="You ARE the King - you can't overthrow yourself.", ephemeral=True)
+            self.toggle_stuff(False)
+            await followup.edit_message(interaction.message.id, view=self)
+            return
+
+        if user_id in event["supporters"]:
+            await followup.send(
+                content="You have already pledged to support - you can't change your mind!",
+                ephemeral=True
+            )
+            self.toggle_stuff(False)
+            await followup.edit_message(interaction.message.id, view=self)
+            return
+
+        if user_id in event["users"]:
+            await followup.send(
+                content="You've already acted on this - you cannot do so again",
+                ephemeral=True
+            )
+            self.toggle_stuff(False)
+            await followup.edit_message(interaction.message.id, view=self)
+            return
+        
+        if user_id not in event["revolutionaries"]:
+            event["revolutionaries"].append(user_id)
+
+        if user_id not in event["users"]:
+            event["users"].append(user_id)
+            event["chance"] += 15
+
+        self.revolutions.update(
+            {"_id": event["_id"]},
+            {"$set": {
+                "chance": event["chance"],
+                "supporters": event["supporters"],
+                "revolutionaries": event["revolutionaries"],
+                "users": event["users"]
+            }}
+        )
+
+        self.user_points.append_to_transaction_history(
+            user_id, guild_id,
+            {
+                "type": TransactionTypes.REV_OVERTHROW,
+                "event_id": event["event_id"],
+                "timestamp": datetime.datetime.now(),
+            }
+        )
+
+        king = self.user_points.get_current_king(guild_id)
+
+        king_user = await self.client.fetch_user(king["uid"])  # type: discord.User
+        guild = self.client.get_guild(guild_id)
+
+        role = guild.get_role(BSEDDIES_KING_ROLES[guild_id])
+
+        edited_message = self.embeds.get_revolution_message(king_user, role, event, guild)
+
+        self.toggle_stuff(False)
+
+        await followup.edit_message(interaction.message.id, view=self, content=edited_message)
+        await followup.send(content="Congrats - you've pledged to `overthrow`!", ephemeral=True)
+
+    @discord.ui.button(
+        label=f"SUPPORT THE KING",
+        style=discord.ButtonStyle.red,
+        custom_id="support_button",
+        emoji="👑"
+    )
+    async def support_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+
+        response = interaction.response  # type: discord.InteractionResponse
+        followup = interaction.followup  # type: discord.Webhook
+
+        self.toggle_stuff(True)
+
+        # disable these whilst we do revolution stuff
+        await response.edit_message(view=self)
+
+        event = self.revolutions.get_event(interaction.guild.id, self.event_id)
+
+        if not event["open"]:
+            await followup.send(content="Unfortunately, this event has expired", ephemeral=True)
+            # leave it disabled
+            return
+
+        now = datetime.datetime.now()
+
+        if event["expired"] < now:
+            await followup.send(content="Unfortunately, this event has expired", ephemeral=True)
+            # leave it disabled
+            return
+
+        user_id = interaction.user.id
+        guild_id = interaction.guild.id
+
+        our_user = self.user_points.find_user(
+            user_id,
+            guild_id,
+            {"points": True, "king": True}
+        )
+
+        if our_user.get("king", False):
+            await followup.send(content="You ARE the King - you can't support yourself.", ephemeral=True)
+            self.toggle_stuff(False)
+            await followup.edit_message(interaction.message.id, view=self)
+            return
+
+        if user_id in event["revolutionaries"]:
+            await followup.send(
+                content="You have already pledged to overthrow - you can't change your mind!",
+                ephemeral=True
+            )
+            self.toggle_stuff(False)
+            await followup.edit_message(interaction.message.id, view=self)
+            return
+
+        if user_id in event["users"]:
+            await followup.send(
+                content="You've already acted on this - you cannot do so again",
+                ephemeral=True
+            )
+            self.toggle_stuff(False)
+            await followup.edit_message(interaction.message.id, view=self)
+            return
+        
+        if user_id not in event["users"]:
+            event["users"].append(user_id)
+            event["chance"] -= 15
+        if user_id not in event["supporters"]:
+            event["supporters"].append(user_id)
+
+
+        self.revolutions.update(
+            {"_id": event["_id"]},
+            {"$set": {
+                "chance": event["chance"],
+                "supporters": event["supporters"],
+                "revolutionaries": event["revolutionaries"],
+                "users": event["users"]
+            }}
+        )
+
+        self.user_points.append_to_transaction_history(
+            user_id, guild_id,
+            {
+                "type": TransactionTypes.REV_SUPPORT,
+                "event_id": event["event_id"],
+                "timestamp": datetime.datetime.now(),
+            }
+        )
+
+        king = self.user_points.get_current_king(guild_id)
+
+        king_user = await self.client.fetch_user(king["uid"])  # type: discord.User
+        guild = self.client.get_guild(guild_id)
+
+        role = guild.get_role(BSEDDIES_KING_ROLES[guild_id])
+
+        edited_message = self.embeds.get_revolution_message(king_user, role, event, guild)
+
+        self.toggle_stuff(False)
+
+        await followup.edit_message(interaction.message.id, view=self, content=edited_message)
+        await followup.send(content="Congrats - you've pledged your `support`!", ephemeral=True)
+
+    @discord.ui.button(
+        label=f"Save THYSELF",
+        style=discord.ButtonStyle.grey,
+        custom_id="save_button",
+        emoji="💵"
+    )
+    async def save_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+        
+        response = interaction.response  # type: discord.InteractionResponse
+        followup = interaction.followup  # type: discord.Webhook
+
+        self.toggle_stuff(True)
+
+        # disable these whilst we do revolution stuff
+        await response.edit_message(view=self)
+
+        event = self.revolutions.get_event(interaction.guild.id, self.event_id)
+
+        if not event["open"]:
+            await followup.send(content="Unfortunately, this event has expired", ephemeral=True)
+            # leave it disabled
+            return
+
+        now = datetime.datetime.now()
+
+        if event["expired"] < now:
+            await followup.send(content="Unfortunately, this event has expired", ephemeral=True)
+            # leave it disabled
+            return
+        
+        if event["king"] != interaction.user.id:
+            await followup.send(content="You're not the King - so you can't use this button.")
+            self.toggle_stuff(False)
+            await followup.edit_message(interaction.message.id, view=self)
+        
+        user_id = interaction.user.id
+        guild_id = interaction.guild.id
+
+        our_user = self.user_points.find_user(
+            user_id,
+            guild_id,
+            {"points": True, "king": True}
+        )
+        
+        eddies = our_user["points"]
+        amount_to_subtract = math.floor(eddies * 0.1)
+        self.user_points.decrement_points(user_id, guild_id, amount_to_subtract)
+
+        # add to transaction history
+        self.user_points.append_to_transaction_history(
+            user_id,
+            guild_id,
+            {
+                "type": TransactionTypes.GIFT_GIVE,
+                "amount": amount_to_subtract * -1,
+                "timestamp": datetime.datetime.now(),
+            }
+        )
+        
+        event["chance"] -= 15
+        event["times_saved"] += 1
+        self.revolutions.update(
+            {"_id": event["_id"]},
+            {"$set": {
+                "chance": event["chance"],
+                "times_saved": event["times_saved"]
+            }}
+        )
+        
+        guild = self.client.get_guild(guild_id)
+
+        role = guild.get_role(BSEDDIES_KING_ROLES[guild_id])
+
+        edited_message = self.embeds.get_revolution_message(interaction.user, role, event, guild)
+        
+        await followup.send(content=f"{interaction.user.mention} just spent `{amount_to_subtract}` to reduce the overthrow chance by **15%**.")
+        self.toggle_stuff(False)
+        await followup.edit_message(interaction.message.id, view=self, content=edited_message)

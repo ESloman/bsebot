@@ -21,9 +21,18 @@ The above command creates a new local branch and also checks it out for you.
 
 Let's create the 'Slash Command Class' for our new Slash Command.
 
-Every Slash Command has a corresponding class in `slashcommandeventclasses.py`. We'll put the logic in there. Open up the file and scroll to the very bottom - create a new class and call it `Hello`. We'll have it inherit from the base `BSEddies` class too. Then create the `__init__` method and add our standard args. Use these args in the `super` call. You should end up with something looking like this:
+Every Slash Command has a corresponding class file in the `slashcommandeventclasses` directory. We'll put the logic in there. Create a new file in that directory call `hello.py` (each file is named after the command) and then create a new class and call it `Hello`. We'll have it inherit from the base `BSEddies` class too. Then create the `__init__` method and add our standard args. Use these args in the `super` call.
+We need to make sure we import our dependencies too - import `BSEddies` from `slashcommandeventclasses` and also import `discord`.
+
+
+You should end up with something looking like this:
 
 ````python
+import discord
+
+from discordbot.slashcommandeventclasses import BSEddies
+
+
 class Hello(BSEddies):
     """
     Class for handling `/hello` commands
@@ -81,6 +90,12 @@ class Hello(BSEddies):
 Notice that I `awaited` the `respond` method as it is also a coroutine. When using `respond`, we have to explicitly set the 'content' (AKA, message content), and we also have the option to send the message ephemerally or not. If we set `ephemeral` to True, only the user who invoked the command will see it, otherwise the message will be sent to the channel and everyone can see it. _Generally_, I try to send most messages `ephemerally` unless the nature or functionality of the command needs the message to be seen by everyone (like bets, leaderboards, etc).
 
 Additionally, instead of using `user.display_name`, we could have used `user.mention` if you wanted to _tag_ the user in the message as well.
+
+Before we move on, open up the `__init__.py` file in `slashcommandeventclasses` and add a line importing our `Hello` class. Try to keep it alphabetical.
+
+````python
+from hello import Hello
+````
 
 That's the logic defined - let's connect it up.
 

@@ -21,7 +21,8 @@ RUN cd /home/app \
 
 ENV PYTHONPATH=/home/app/
 
-RUN pip install -r home/app/requirements.txt \
+RUN pip install cython cchardet \
+    && pip install -r home/app/requirements.txt \
     && touch /home/app/discordbot/.env \
     && echo "DEBUG_MODE=0" >> /home/app/discordbot/.env \
     && echo "DISCORD_TOKEN=${DISCORD_TOKEN}" >> /home/app/discordbot/.env \

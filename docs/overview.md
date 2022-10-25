@@ -96,7 +96,7 @@ Every event that we listen for has a corresponding 'Event Class'. These event cl
 
 For example,
 
-In `discordbot/clienteventclasses.py` (where we define our event classes for client events), we have a `OnReadyEvent` class. It has one method called `on_ready` that contains all of the logic we want to perform when the bot is first started and has successfully connected to Discord.
+In `discordbot/clienteventclasses` (where we define our event classes for client events), we have a `OnReadyEvent` class in a `onready.py` file. It has one method called `on_ready` that contains all of the logic we want to perform when the bot is first started and has successfully connected to Discord.
 
 ````python
 class OnReadyEvent(BaseEvent):
@@ -135,7 +135,7 @@ async def on_ready():
 
 This is how we handle every event we want to listen to and every event has a corresponding `EventClass`.
 
-'Client' event classes are native Discord events (listed on the reference above). Slash commands are slightly different but each invoked slash commands triggers a 'slash command event' and we also have a corresponding `BSEddies` slash command event class in `slashcommandeventclasses.py`.
+'Client' event classes are native Discord events (listed on the reference above). Slash commands are slightly different but each invoked slash commands triggers a 'slash command event' and we also have a corresponding `BSEddies` slash command event class in `slashcommandeventclasses/bseddies.py`.
 
 ### Slash Commands Overview
 
@@ -164,7 +164,7 @@ Like our events, we have a `bseddies_view` class instantiated here
 self.bseddies_view = BSEddiesView(client, guilds, self.logger, self.beta_mode)
 ````
 
-This class is defined in `slashcommandeventclasses.py` and contains the actual logic for handling the event. It's relatively simple - this is the output when a user invokes the command:
+This class is defined in `slashcommandeventclasses/view.py` and contains the actual logic for handling the event. It's relatively simple - this is the output when a user invokes the command:
 
 ![view command output](images/view_command_output.PNG)
 

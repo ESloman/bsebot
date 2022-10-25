@@ -44,7 +44,7 @@ class AfterWorkVally(commands.Cog):
         if now.hour != 15 or not (45 <= now.minute <= 54):
             return
 
-        print(f"Time to send vally message!")
+        self.logger.info(f"Time to send vally message!")
 
         if BSE_SERVER_ID not in self.guilds:
             return
@@ -56,7 +56,7 @@ class AfterWorkVally(commands.Cog):
         message = random.choice(self.messages)  # type: str
         message = message.format(role=role.mention)
 
-        print(f"Sending daily vally message: {message}")
+        self.logger.info(f"Sending daily vally message: {message}")
         await channel.send(content=message)
 
     @vally_message.before_loop

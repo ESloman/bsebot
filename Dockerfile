@@ -1,4 +1,4 @@
-FROM python:3.10.7
+FROM python:3.11.0
 
 ARG DISCORD_TOKEN
 ARG GIPHY_TOKEN
@@ -21,7 +21,9 @@ RUN cd /home/app \
 
 ENV PYTHONPATH=/home/app/
 
-RUN pip install -r home/app/requirements.txt \
+RUN pip install cython \
+    && pip install cchardet \
+    && pip install -r home/app/requirements.txt \
     && touch /home/app/discordbot/.env \
     && echo "DEBUG_MODE=0" >> /home/app/discordbot/.env \
     && echo "DISCORD_TOKEN=${DISCORD_TOKEN}" >> /home/app/discordbot/.env \

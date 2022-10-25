@@ -4,10 +4,11 @@ import re
 from typing import Union
 
 import discord
+
+import discordbot.views as views
 from discordbot.bot_enums import ActivityTypes
 from discordbot.constants import PRIVATE_CHANNEL_IDS
 from discordbot.slashcommandeventclasses import BSEddies
-from discordbot.views import BetView
 
 
 class BSEddiesCreateBet(BSEddies):
@@ -151,7 +152,7 @@ class BSEddiesCreateBet(BSEddies):
         member = ctx.guild.get_member(ctx.user.id)
         content = f"Bet created by {member.mention}"
 
-        bet_view = BetView(bet, bseddies_place, bseddies_close)
+        bet_view = views.BetView(bet, bseddies_place, bseddies_close)
 
         # await ctx.send(content=f"Bet created: {bet_title}", hidden=True)
         message = await ctx.channel.send(content=content, embed=embed, view=bet_view)

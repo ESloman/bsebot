@@ -265,7 +265,7 @@ class BSEddiesCloseBet(BSEddies):
                     }
                 )
 
-        self.user_bets.close_a_bet(bet["_id"], None)
+        self.user_bets.close_a_bet(bet["_id"], "cancelled")
         # update the message to reflect that it's closed
         channel = guild.get_channel(bet["channel_id"])
         if not channel:

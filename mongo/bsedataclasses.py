@@ -11,7 +11,7 @@ import datetime
 import random
 from typing import Optional, Union
 
-from discordbot.bot_enums import AwardsTypes
+from discordbot.bot_enums import AwardsTypes, StatTypes
 from mongo import interface
 from mongo.db_classes import BestSummerEverPointsDB
 
@@ -185,6 +185,32 @@ class Awards(BestSummerEverPointsDB):
         super().__init__()
         self._vault = interface.get_collection(self.database, "awards")
     
+    def document_stat(
+        self, 
+        guild_id: int,
+        stat: StatTypes, 
+        month: str,
+        value: Union[int, float, datetime.datetime],
+        timestamp: datetime.datetime,
+        short_name: str,
+        **kwargs
+    ) -> list:
+        
+        doc = {
+            "type": "stat",
+            "guild_id": guild_id,
+            "stat": stat,
+            "timestamp": timestamp,
+            "month": month,
+            "value": value,
+            "short_name": short_name
+        }
+
+        for key in kwargs:
+            doc[key] = kwargs[key]
+
+        return self.insert(doc)
+    
     def document_award(
         self, 
         guild_id: int, 
@@ -192,8 +218,9 @@ class Awards(BestSummerEverPointsDB):
         award: AwardsTypes, 
         month: str, 
         eddies: int, 
-        value: Union[int, float]
-        ) -> list:
+        value: Union[int, float],
+        short_name: str
+    ) -> list:
         """Insert an award into the DB
 
         Args:
@@ -204,12 +231,14 @@ class Awards(BestSummerEverPointsDB):
             eddies (int): the eddies won
         """
         doc = {
+            "type": "award",
             "guild_id": guild_id,
             "user_id": user_id,
             "award": award,
             "timestamp": datetime.datetime.now(),
             "month": month,
             "eddies": eddies,
-            "value": value
+            "value": value,
+            "short_name": short_name
         }
         return self.insert(doc)

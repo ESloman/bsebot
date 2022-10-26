@@ -1,11 +1,25 @@
+
 import datetime
 import math
+from pickletools import long1
 import re
-from typing import List, Optional, Tuple
+from dataclasses import dataclass
+from typing import List, Optional, Tuple, Union
 
-from discordbot.bot_enums import ActivityTypes, TransactionTypes
-from discordbot.constants import BSE_BOT_ID
+from discordbot.bot_enums import ActivityTypes, AwardsTypes, TransactionTypes
+from discordbot.constants import BSE_BOT_ID, MONTHLY_AWARDS_PRIZE
 from mongo.bsepoints import UserBets, UserInteractions, UserPoints
+
+
+@dataclass
+class Stat:
+    guild_id: int
+    user_id: int
+    award: AwardsTypes
+    month: str
+    value: Union[int, float]
+    timestamp: datetime.datetime
+    eddies: int
 
 
 class StatsGatherer:
@@ -342,7 +356,7 @@ class StatsGatherer:
 
     # stats that can be won
     # messages
-    def most_messages_sent(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[int, int]:
+    def most_messages_sent(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Calculates the person who has sent the most messages in the server
 
         Args:
@@ -351,7 +365,7 @@ class StatsGatherer:
             end (datetime.datetime): end of time period
 
         Returns:
-            Tuple[int, int]: the ID of the user and the amount of messages sent
+            Stat: the most messages stat
         """
         messages = self._get_messages(guild_id, start, end)
 
@@ -362,9 +376,53 @@ class StatsGatherer:
                 message_users[uid] = 0
             message_users[uid] += 1
         chattiest = sorted(message_users, key=lambda x: message_users[x], reverse=True)[0]
-        return chattiest, message_users[chattiest]
 
-    def longest_message(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> dict:
+        data_class = Stat(
+            guild_id, 
+            chattiest, 
+            AwardsTypes.MOST_MESSAGES, 
+            start.strftime("%b %y"),
+            message_users[chattiest],
+            datetime.datetime.now(),
+            MONTHLY_AWARDS_PRIZE
+        )
+
+        return data_class
+    
+    def least_messages_sent(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """Calculates the person who has sent the least messages in the server
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: least messages stat
+        """
+        messages = self._get_messages(guild_id, start, end)
+
+        message_users = {}
+        for message in messages:
+            uid = message["user_id"]
+            if uid not in message_users:
+                message_users[uid] = 0
+            message_users[uid] += 1
+        least_chattiest = sorted(message_users, key=lambda x: message_users[x])[0]
+        
+        data_class = Stat(
+            guild_id, 
+            least_chattiest, 
+            AwardsTypes.LEAST_MESSAGES, 
+            start.strftime("%b %y"),
+            message_users[least_chattiest],
+            datetime.datetime.now(),
+            MONTHLY_AWARDS_PRIZE
+        )
+        
+        return data_class
+
+    def longest_message(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Returns the longest message from two given time periods
 
         Args:
@@ -373,7 +431,7 @@ class StatsGatherer:
             end (datetime.datetime): end of time period
 
         Returns:
-            dict: the longest message dict
+            Stat: the longest message stat
         """
         messages = self._get_messages(guild_id, start, end)
         longest_message = None
@@ -384,9 +442,20 @@ class StatsGatherer:
                     continue
                 if len(content) > len(longest_message["content"]):
                     longest_message = message
-        return longest_message
+        
+        data_class = Stat(
+            guild_id, 
+            longest_message["user_id"], 
+            AwardsTypes.LONGEST_MESSAGE, 
+            start.strftime("%b %y"),
+            len(longest_message["content"]),
+            datetime.datetime.now(),
+            MONTHLY_AWARDS_PRIZE
+        )
 
-    def lowest_average_wordle_score(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[int, float]:
+        return data_class
+
+    def lowest_average_wordle_score(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Calculates which user has the best average wordle score
 
         Args:
@@ -395,7 +464,7 @@ class StatsGatherer:
             end (datetime.datetime): end of time period
 
         Returns:
-            Tuple[int, float]: the user ID and the average wordle score
+            Stat: the wordle stat
         """
         messages = self._get_messages(guild_id, start, end)
         wordle_messages = [m for m in messages if "wordle" in m["message_type"]]
@@ -424,10 +493,21 @@ class StatsGatherer:
             wordle_avgs[uid] = avg
         
         best_avg = sorted(wordle_avgs, key=lambda x: wordle_avgs[x])[0]
-        return best_avg, wordle_avgs[best_avg]
+
+        data_class = Stat(
+            guild_id, 
+            best_avg, 
+            AwardsTypes.BEST_AVG_WORDLE, 
+            start.strftime("%b %y"),
+            wordle_avgs[best_avg],
+            datetime.datetime.now(),
+            MONTHLY_AWARDS_PRIZE
+        )
+
+        return data_class
 
     # bets
-    def most_bets_created(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[int, int]:
+    def most_bets_created(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Get the user who made the most bets
 
         Args:
@@ -436,7 +516,7 @@ class StatsGatherer:
             end (datetime.datetime): end of time period
 
         Returns:
-            Tuple[int, int]: User who created the most bets, number of bets created
+            Stat: most bets stat
         """
         bets = self._get_bets(guild_id, start, end)
         bet_users = {}
@@ -447,9 +527,20 @@ class StatsGatherer:
             bet_users[u] += 1
         
         busiest = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
-        return busiest, bet_users[busiest]
 
-    def most_eddies_bet(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[int, int]:
+        data_class = Stat(
+            guild_id, 
+            busiest, 
+            AwardsTypes.MOST_BETS, 
+            start.strftime("%b %y"),
+            bet_users[busiest],
+            datetime.datetime.now(),
+            MONTHLY_AWARDS_PRIZE
+        )
+        
+        return data_class
+
+    def most_eddies_bet(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Calculates who placed the most eddies on bets
 
         Args:
@@ -458,7 +549,7 @@ class StatsGatherer:
             end (datetime.datetime): end of time period
 
         Returns:
-            Tuple[int, int]: User who placed the most bets, the amount they placed
+            Stat: most eddies bet stat
         """
         transactions = self._get_transactions(guild_id, start, end)
         
@@ -472,9 +563,20 @@ class StatsGatherer:
             bet_users[uid] -= trans["amount"]
         
         most_placed = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
-        return most_placed, bet_users[most_placed]
+
+        data_class = Stat(
+            guild_id, 
+            most_placed, 
+            AwardsTypes.MOST_EDDIES_BET, 
+            start.strftime("%b %y"),
+            bet_users[most_placed],
+            datetime.datetime.now(),
+            MONTHLY_AWARDS_PRIZE
+        )
+
+        return data_class
     
-    def most_eddies_won(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[int, float]:
+    def most_eddies_won(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Calculates who won the most eddies on bets
 
         Args:
@@ -483,7 +585,7 @@ class StatsGatherer:
             end (datetime.datetime): end of time period
 
         Returns:
-            Tuple[int, int]: User who won the most bets, the amount they placed
+            Stat: most eddies won stat
         """
         transactions = self._get_transactions(guild_id, start, end)
         
@@ -497,9 +599,20 @@ class StatsGatherer:
             bet_users[uid] += trans["amount"]
         
         most_placed = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
-        return most_placed, bet_users[most_placed]
+
+        data_class = Stat(
+            guild_id, 
+            most_placed, 
+            AwardsTypes.MOST_EDDIES_WON, 
+            start.strftime("%b %y"),
+            bet_users[most_placed],
+            datetime.datetime.now(),
+            MONTHLY_AWARDS_PRIZE
+        )
+
+        return data_class
     
-    def most_time_king(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[int, int]:
+    def most_time_king(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Calculates who's been King longest this month
 
         Args:
@@ -508,7 +621,7 @@ class StatsGatherer:
             end (datetime.datetime): end of time period
 
         Returns:
-            Tuple[int, int]: User ID of who's been King longest and total seconds they've been King
+            Stat: longest King stat
         """
         
         activity_history = self._get_activities(guild_id, start, end)
@@ -537,5 +650,15 @@ class StatsGatherer:
                 previous_time = event["timestamp"]
                 
         longest_king = sorted(kings, key=lambda x: kings[x], reverse=True)[0]
+
+        data_class = Stat(
+            guild_id, 
+            longest_king, 
+            AwardsTypes.LONGEST_KING, 
+            start.strftime("%b %y"),
+            kings[longest_king],
+            datetime.datetime.now(),
+            MONTHLY_AWARDS_PRIZE
+        )
         
-        return longest_king, int(kings[longest_king])
+        return data_class

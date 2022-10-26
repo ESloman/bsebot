@@ -4,9 +4,9 @@ from typing import Union
 
 import discord
 
+import discordbot.views as views
 from discordbot.bot_enums import TransactionTypes, ActivityTypes
 from discordbot.slashcommandeventclasses import BSEddies, BSEddiesCloseBet
-from discordbot.views import PlaceABetView, BetView
 
 
 class BSEddiesPlaceBet(BSEddies):
@@ -41,7 +41,7 @@ class BSEddiesPlaceBet(BSEddies):
             ctx.user.id, ctx.guild_id
         )
 
-        place_bet_view = PlaceABetView(bet_ids, points, submit_callback=self.place_bet)
+        place_bet_view = views.PlaceABetView(bet_ids, points, submit_callback=self.place_bet)
         try:
             await ctx.respond(content="**Placing a bet**", view=place_bet_view, ephemeral=True)
         except AttributeError:
@@ -85,7 +85,7 @@ class BSEddiesPlaceBet(BSEddies):
             await response.edit_message(content=msg, view=None)
             return
 
-        view = BetView(bet, self, self.bseddies_close)
+        view = views.BetView(bet, self, self.bseddies_close)
 
         if not bet["active"]:
             msg = f"Your reaction on **Bet {bet_id}** failed as the bet is closed for new bets."

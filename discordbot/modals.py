@@ -3,11 +3,14 @@ from discordbot.slashcommandeventclasses import BSEddiesCreateBet, BSEddiesPlace
 
 
 class BSEddiesBetCreateModal(discord.ui.Modal):
-    def __init__(self, client, guilds, logger, beta, *args, **kwargs) -> None:
+    def __init__(self, client, guilds, logger, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.bseddies_create = BSEddiesCreateBet(client, guilds, logger, beta)
-        self.bseddies_place = BSEddiesPlaceBet(client, guilds, logger, beta)
-        self.bseddies_close = BSEddiesCloseBet(client, guilds, logger, beta)
+        
+        self.logger = logger
+        
+        self.bseddies_create = BSEddiesCreateBet(client, guilds, logger)
+        self.bseddies_place = BSEddiesPlaceBet(client, guilds, logger)
+        self.bseddies_close = BSEddiesCloseBet(client, guilds, logger)
 
         self.add_item(discord.ui.InputText(label="Bet title", placeholder="Enter your bet title here"))
         self.add_item(
@@ -42,7 +45,7 @@ class BSEddiesBetCreateModal(discord.ui.Modal):
         bet_timeout_comp = response_components[2]
         bet_timeout = bet_timeout_comp["components"][0]["value"] or "20m"
 
-        print(f"{bet_title}, {bet_outcomes}")
+        self.logger.info(f"{bet_title}, {bet_outcomes}")
 
         if len(bet_outcomes) > 8:
             await interaction.response.send_message(

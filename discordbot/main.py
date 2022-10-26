@@ -54,7 +54,7 @@ if __name__ == "__main__":
     This is our primary entry point for getting the bot start. 
     
     We expect a '.env' file to be located in the same directory that contains our DISCORD_TOKEN and also whether or not
-    we're in BETA_MODE and/or DEBUG_MODE.
+    we're in DEBUG_MODE.
     
     We start by getting those values from the .env file and exit if we don't have a DISCORD_TOKEN.
     We then work out which SERVER_IDs to use based on whether or not we're in DEBUG_MODE.
@@ -67,17 +67,11 @@ if __name__ == "__main__":
     """
 
     TOKEN = dotenv.get_key(".env", "DISCORD_TOKEN")
-    BETA_MODE = dotenv.get_key(".env", "BETA_MODE")
     DEBUG_MODE = dotenv.get_key(".env", "DEBUG_MODE")
     GIPHY_TOKEN = dotenv.get_key(".env", "GIPHY_API_KEY")
 
     if TOKEN is None:
         exit(-1)
-
-    if BETA_MODE is None:
-        BETA_MODE = False
-    else:
-        BETA_MODE = bool(int(BETA_MODE))
 
     if DEBUG_MODE is None:
         DEBUG_MODE = False
@@ -109,7 +103,8 @@ if __name__ == "__main__":
         activity=listening_activity,
         auto_sync_commands=False
     )
-    com = CommandManager(cli, IDS, logger, beta_mode=BETA_MODE, debug_mode=DEBUG_MODE, giphy_token=GIPHY_TOKEN)
+
+    com = CommandManager(cli, IDS, logger, giphy_token=GIPHY_TOKEN)
 
     user_bets = UserBets(IDS)
 

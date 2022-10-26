@@ -2,6 +2,7 @@
 This file contains our class that registers all the events we listen to and do things with
 """
 
+import asyncio
 import logging
 
 import discord
@@ -10,6 +11,7 @@ from apis.giphyapi import GiphyAPI
 from discordbot.betcloser import BetCloser
 from discordbot.clienteventclasses import OnReadyEvent, OnReactionAdd, OnMessage, OnMemberJoin, OnDirectMessage
 from discordbot.clienteventclasses import OnMemberLeave, OnThreadCreate, OnThreadUpdate
+from discordbot.clienteventclasses import OnEmojiCreate, OnStickerCreate
 from discordbot.constants import BSE_SERVER_ID
 from discordbot.eddiegains import EddieGainMessager
 from discordbot.tasks.eddiekingtask import BSEddiesKingTask
@@ -41,9 +43,8 @@ class CommandManager(object):
                  client: discord.Bot,
                  guilds: list,
                  logger: logging.Logger,
-                 beta_mode: bool = False,
-                 debug_mode: bool = False,
-                 giphy_token: str = None):
+                 giphy_token: str = None
+        ) -> None:
         """
         Constructor method. This does all the work in this class and no other methods need to be called.
 
@@ -67,13 +68,11 @@ class CommandManager(object):
         :param client: discord.Client object that represents our bot
         :param guilds: list of guild IDs that we're listening on
         :param logger:  logger object for logging
-        :param beta_mode: whether we're in beta mode or not
         :param debug_mode: whether we're in debug mode or not
         :param giphy_token:
         """
 
         self.client = client
-        self.beta_mode = beta_mode
         self.guilds = guilds
         self.logger = logger
         self.giphy_token = giphy_token
@@ -89,29 +88,31 @@ class CommandManager(object):
         self.__get_cached_messages_list()
 
         # client event classes
-        self.on_ready = OnReadyEvent(client, guilds, self.logger, self.beta_mode)
-        self.on_reaction_add = OnReactionAdd(client, guilds, self.logger, self.beta_mode)
-        self.on_message = OnMessage(client, guilds, self.logger, self.beta_mode)
-        self.on_member_join = OnMemberJoin(client, guilds, self.logger, self.beta_mode)
-        self.on_member_leave = OnMemberLeave(client, guilds, self.logger, self.beta_mode)
-        self.direct_message = OnDirectMessage(client, guilds, self.logger, self.giphyapi, self.beta_mode)
-        self.on_thread_create = OnThreadCreate(client, guilds, self.logger, self.beta_mode)
-        self.on_thread_update = OnThreadUpdate(client, guilds, self.logger, self.beta_mode)
+        self.on_ready = OnReadyEvent(client, guilds, self.logger)
+        self.on_reaction_add = OnReactionAdd(client, guilds, self.logger)
+        self.on_message = OnMessage(client, guilds, self.logger)
+        self.on_member_join = OnMemberJoin(client, guilds, self.logger)
+        self.on_member_leave = OnMemberLeave(client, guilds, self.logger)
+        self.direct_message = OnDirectMessage(client, guilds, self.logger, self.giphyapi)
+        self.on_thread_create = OnThreadCreate(client, guilds, self.logger)
+        self.on_thread_update = OnThreadUpdate(client, guilds, self.logger)
+        self.on_emoji_create = OnEmojiCreate(client, guilds, self.logger)
+        self.on_sticker_create = OnStickerCreate(client, guilds, self.logger)
 
         # slash command classes
-        self.bseddies_active = BSEddiesActive(client, guilds, self.logger, self.beta_mode)
-        self.bseddies_gift = BSEddiesGift(client, guilds, self.logger, self.beta_mode)
-        self.bseddies_view = BSEddiesView(client, guilds, self.logger, self.beta_mode)
-        self.bseddies_leaderboard = BSEddiesLeaderboard(client, guilds, self.logger, self.beta_mode)
-        self.bseddies_close = BSEddiesCloseBet(client, guilds, self.logger, self.beta_mode)
-        self.bseddies_place = BSEddiesPlaceBet(client, guilds, self.logger, self.beta_mode)
-        self.bseddies_pending = BSEddiesPending(client, guilds, self.logger, self.beta_mode)
-        self.bseddies_transactions = BSEddiesTransactionHistory(client, guilds, self.logger, self.beta_mode)
-        self.bseddies_admin_give = BSEddiesAdminGive(client, guilds, self.logger, self.beta_mode)
-        self.bseddies_high_score = BSEddiesHighScore(client, guilds, self.logger, self.beta_mode)
-        self.bseddies_predict = BSEddiesPredict(client, guilds, self.logger, self.beta_mode)
-        self.bseddies_autogenerate = BSEddiesAutoGenerate(client, guilds, self.logger, self.beta_mode)
-        self.bseddies_tax_rate = BSEddiesTaxRate(client, guilds, self.logger, self.beta_mode)
+        self.bseddies_active = BSEddiesActive(client, guilds, self.logger)
+        self.bseddies_gift = BSEddiesGift(client, guilds, self.logger)
+        self.bseddies_view = BSEddiesView(client, guilds, self.logger)
+        self.bseddies_leaderboard = BSEddiesLeaderboard(client, guilds, self.logger)
+        self.bseddies_close = BSEddiesCloseBet(client, guilds, self.logger)
+        self.bseddies_place = BSEddiesPlaceBet(client, guilds, self.logger)
+        self.bseddies_pending = BSEddiesPending(client, guilds, self.logger)
+        self.bseddies_transactions = BSEddiesTransactionHistory(client, guilds, self.logger)
+        self.bseddies_admin_give = BSEddiesAdminGive(client, guilds, self.logger)
+        self.bseddies_high_score = BSEddiesHighScore(client, guilds, self.logger)
+        self.bseddies_predict = BSEddiesPredict(client, guilds, self.logger)
+        self.bseddies_autogenerate = BSEddiesAutoGenerate(client, guilds, self.logger)
+        self.bseddies_tax_rate = BSEddiesTaxRate(client, guilds, self.logger)
 
         # tasks
         self.bet_closer_task = BetCloser(self.client, guilds, self.logger, self.bseddies_place, self.bseddies_close)
@@ -123,7 +124,7 @@ class CommandManager(object):
             self.thread_task = ThreadSpoilerTask(self.client, guilds, self.logger)
             self.vally_task = AfterWorkVally(self.client, guilds, self.logger)
             self.wordle_task = WordleTask(self.client, guilds, self.logger)
-			self.monthly_awards_task = MonthlyBSEddiesAwards(self.client, guilds, self.logger)
+            self.monthly_awards_task = MonthlyBSEddiesAwards(self.client, guilds, self.logger)
             
         # call the methods that register the events we're listening for
         self._register_client_events()
@@ -143,7 +144,7 @@ class CommandManager(object):
         """
         This method registers all the 'client events'.
         Client Events are normal discord events that we can listen to.
-        A full list of events can be found here: https://discordpy.readthedocs.io/en/latest/api.html
+        A full list of events can be found here: https://docs.pycord.dev/en/stable/api.html#event-reference
 
         Each event must be it's own async method with a @self.client.event decorator so that it's actually
         registered. None of these methods defined here will ever be called manually by anyone. The methods are called
@@ -273,6 +274,39 @@ class CommandManager(object):
                 return
 
             await self.on_message.message_received(message)
+        
+        @self.client.event
+        async def on_guild_emojis_update(
+            guild: discord.Guild, 
+            before: discord.Sequence[discord.Emoji],
+            after: discord.Sequence[discord.Emoji]
+        ) -> None:
+            """
+            For updating our internal list of emojis
+
+            Args:
+                guild (discord.Guild): the Guild object
+                before (discord.Sequence[discord.Emoji]): list of emojis before
+                after (discord.Sequence[discord.Emoji]): list of emojis after
+            """
+            await self.on_emoji_create.on_emojis_update(guild.id, before, after)
+        
+
+        @self.client.event
+        async def on_guild_stickers_update(
+            guild: discord.Guild, 
+            before: discord.Sequence[discord.Sticker],
+            after: discord.Sequence[discord.Sticker]
+        ) -> None:
+            """
+            For updating our internal list of emojis
+
+            Args:
+                guild (discord.Guild): the Guild object
+                before (discord.Sequence[discord.Emoji]): list of stickers before
+                after (discord.Sequence[discord.Emoji]): list of stickers after
+            """
+            await self.on_sticker_create.on_stickers_update(guild.id, before, after)
 
     def _register_slash_commands(self, guilds: list) -> None:
         """
@@ -383,7 +417,6 @@ class CommandManager(object):
                 client=self.client,
                 guilds=self.guilds,
                 logger=self.logger,
-                beta=self.beta_mode,
                 title="Create a bet"
             )
             await ctx.send_modal(modal)

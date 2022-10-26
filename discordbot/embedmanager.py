@@ -2,7 +2,6 @@ import datetime
 from typing import Union
 
 import discord
-import inflect
 
 from mongo.bsepoints import UserPoints
 
@@ -10,7 +9,6 @@ from mongo.bsepoints import UserPoints
 class EmbedManager(object):
     def __init__(self, logger):
         self.user_points = UserPoints()
-        self.inflect_engine = inflect.engine()
         self.logger = logger
 
     @staticmethod
@@ -140,7 +138,7 @@ class EmbedManager(object):
                 revos.append(rev)
 
         supps = []
-        for sup in event.get('revolutionaries', []):
+        for sup in event.get('supporters', []):
             if sup_info := guild.get_member(sup):
                 supps.append(sup_info.name)
             else:
@@ -157,10 +155,11 @@ class EmbedManager(object):
             f"If you believe that {king_user.mention} hasn't done too bad a job then you can **SUPPORT** them to "
             f"reduce the chances of revolution happening. If the King _loses_, then supporters will lose eddies "
             f"alongside their King.\n"
+            f"The KING may spend 10% of their eddies using the_Save Thyself_ button to reduce revolution chance by 15%.\n"
             f"**Event ID**: `{event['event_id']}`\n"
             f"**Success rate**: `{max(min(event['chance'], 100), 0)}%`\n"
-            f"**Revolutionaries**: `{','.join(revos)}`\n"
-            f"**Supporters**: `{','.join(supps)}`\n"
+            f"**Revolutionaries**: `{', '.join(revos)}`\n"
+            f"**Supporters**: `{', '.join(supps)}`\n"
             f"**Locked in KING eddies**: `{event.get('locked_in_eddies')}`\n"
             f"**Event time**: `{event['expired'].strftime('%d %b %y %H:%M:%S')}`"
         )

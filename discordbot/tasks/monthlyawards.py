@@ -31,22 +31,22 @@ class MonthlyBSEddiesAwards(commands.Cog):
     @tasks.loop(minutes=60)
     async def bseddies_awards(self):
         now = datetime.datetime.now()
-        
+
         if not now.day == 1 or not now.hour == 11:
             # we only want to trigger on the first of each month
             # and also trigger at 11am
             return
-        
+
         if BSE_SERVER_ID not in self.guilds:
             # does not support other servers yet
             return
         
-        self.logger.info(f"It's the first of the month and about ~11ish - time to trigger the awards! {now=}")                    
-                    
+        self.logger.info(f"It's the first of the month and about ~11ish - time to trigger the awards! {now=}")
+
         start, end = self.stats.get_monthly_datetime_objects()
         
         args = (BSE_SERVER_ID, start, end)
-        
+
         guild = await self.bot.fetch_guild(BSE_SERVER_ID)
         
         # SERVER STATS
@@ -71,7 +71,7 @@ class MonthlyBSEddiesAwards(commands.Cog):
         message = (
             "Some server stats 📈 from last month:\n\n"
             f"**Number of messages sent**: `{number_messages.value}`\n"
-            f"**Average message length**: Characters (`{avg_message_chars.value}`), Words (`{avg_message_words.vale}`)\n"
+            f"**Average message length**: Characters (`{avg_message_chars.value}`), Words (`{avg_message_words.value}`)\n"
             f"**Chattiest channel**: {busiest_channel_obj.mention} (`{busiest_channel.messages}`)\n"
             f"**Chattiest day**: {busiest_day_format} (`{busiest_day.messages}`)\n"
             f"**Average wordle score**: `{average_wordle.value}`\n"
@@ -82,7 +82,7 @@ class MonthlyBSEddiesAwards(commands.Cog):
         )
 
         for stat in stats:
-            # self.awards.document_stat(**{k: v for k, v in stat.__dict__.items() if v})
+            self.awards.document_stat(**{k: v for k, v in stat.__dict__.items() if v})
             self.logger.info(f"{ {k: v for k, v in stat.__dict__.items() if v} }")
 
         # BSEDDIES AWARDS
@@ -143,17 +143,17 @@ class MonthlyBSEddiesAwards(commands.Cog):
         # give the users their eddies
         
         for award in awards:
-            #self.user_points.append_to_transaction_history(
-            #    award.user_id,
-            #    award.guild_id,
-            #    {
-            #        "type": TransactionTypes.MONTHLY_AWARDS_PRIZE,
-            #        "timestamp": datetime.datetime.now(),
-            #        "amount": award.eddies,
-            #    }
-            #)
-            #self.user_points.increment_points(award.user_id, award.guild_id, award.eddies)
-            #self.awards.document_award(**{k:v for k, v in award.__dict__.items() if v})
+            self.user_points.append_to_transaction_history(
+               award.user_id,
+               award.guild_id,
+               {
+                   "type": TransactionTypes.MONTHLY_AWARDS_PRIZE,
+                   "timestamp": datetime.datetime.now(),
+                   "amount": award.eddies,
+               }
+            )
+            self.user_points.increment_points(award.user_id, award.guild_id, award.eddies)
+            self.awards.document_award(**{k:v for k, v in award.__dict__.items() if v})
             self.logger.info(f"{ {k:v for k, v in award.__dict__.items() if v} }")
         
         self.logger.info(f"Sent messages! Until next month!")

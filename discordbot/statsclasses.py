@@ -4,20 +4,24 @@ import re
 from dataclasses import dataclass
 from typing import List, Optional, Tuple, Union
 
-from discordbot.bot_enums import ActivityTypes, AwardsTypes, TransactionTypes
+from discordbot.bot_enums import ActivityTypes, AwardsTypes, StatTypes, TransactionTypes
 from discordbot.constants import BSE_BOT_ID, MONTHLY_AWARDS_PRIZE
 from mongo.bsepoints import UserBets, UserInteractions, UserPoints
 
 
 @dataclass
 class Stat:
+    type: str
     guild_id: int
-    user_id: int
-    award: AwardsTypes
     month: str
-    value: Union[int, float]
+    short_name: str
     timestamp: datetime.datetime
-    eddies: int
+    value: Union[int, float, datetime.datetime]
+    user_id: Optional[int] = None
+    award: Optional[AwardsTypes] = None
+    stat: Optional[StatTypes] = None
+    eddies: Optional[int] = None
+    kwargs: Optional[dict] = None
 
 
 class StatsGatherer:
@@ -177,7 +181,7 @@ class StatsGatherer:
         return self.__activity_cache
     
     # generic server stats
-    def number_of_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> int:
+    def number_of_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Returns the number of messages between two given time periods
 
         Args:
@@ -189,9 +193,20 @@ class StatsGatherer:
             int: the number of messages
         """
         messages = self._get_messages(guild_id, start, end)
-        return len(messages)
+
+        data_class = Stat(
+            "stat",
+            guild_id,
+            stat=StatTypes.NUMBER_OF_MESSAGES,
+            month=start.strftime("%b %y"),
+            value=len(messages),
+            timestamp=datetime.datetime.now(),
+            short_name="number_of_messages"
+        )
+
+        return data_class
     
-    def average_message_length(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[float, float]:
+    def average_message_length(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[Stat]:
         """Returns the average message length between two given time periods
         Returns a tuple of (AVERAGE_CHARACTERs, AVERAGE_WORDs)
 
@@ -201,7 +216,7 @@ class StatsGatherer:
             end (datetime.datetime): end of the time period 
 
         Returns:
-            Tuple[float, float]: returns a tuple of average message characters and average words per message
+            Tuple[Stat, Stat]: returns a tuple of average message characters and average words per message
         """
 
         messages = self._get_messages(guild_id, start, end)
@@ -213,9 +228,30 @@ class StatsGatherer:
                 words.append(len(content.split(" ")))
         average_message_len = round((sum(lengths) / len(lengths)), 2)
         average_word_number = round((sum(words) / len(words)), 2)
-        return average_message_len, average_word_number
+        
+        data_class_a = Stat(
+            "stat",
+            guild_id,
+            stat=StatTypes.AVERAGE_MESSAGE_LENGTH_CHARS,
+            month=start.strftime("%b %y"),
+            value=average_message_len,
+            timestamp=datetime.datetime.now(),
+            short_name="average_message_length_chars"
+        )
 
-    def busiest_channel(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[int, int]:
+        data_class_b = Stat(
+            "stat",
+            guild_id,
+            stat=StatTypes.AVERAGE_MESSAGE_LENGTH_WORDS,
+            month=start.strftime("%b %y"),
+            value=average_word_number,
+            timestamp=datetime.datetime.now(),
+            short_name="average_message_length_words"
+        )
+
+        return data_class_a, data_class_b
+
+    def busiest_channel(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Returns the channel with the most messages for a given time period
         Returns a float of the channel ID and the number of messages
 
@@ -240,9 +276,21 @@ class StatsGatherer:
         
         busiest = sorted(channels, key=lambda x: channels[x], reverse=True)[0]
 
-        return busiest, channels[busiest]
+        data_class = Stat(
+            "stat",
+            guild_id,
+            stat=StatTypes.BUSIEST_CHANNEL,
+            month=start.strftime("%b %y"),
+            value=busiest,
+            timestamp=datetime.datetime.now(),
+            short_name="busiest_channel"
+        )
+
+        data_class.messages = channels[busiest]
+
+        return data_class
     
-    def busiest_day(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[datetime.date, int]:
+    def busiest_day(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Returns the day with the most messages sent for the given time period
         Returns a tuple of the date and number of messages
 
@@ -263,9 +311,22 @@ class StatsGatherer:
             days[day] += 1
         
         busiest = sorted(days, key=lambda x: days[x], reverse=True)[0]
-        return busiest, days[busiest]
-    
-    def number_of_bets(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> int:
+        
+        data_class = Stat(
+            "stat",
+            guild_id,
+            stat=StatTypes.BUSIEST_DAY,
+            month=start.strftime("%b %y"),
+            value=busiest,
+            timestamp=datetime.datetime.now(),
+            short_name="busiest_day"
+        )
+
+        data_class.messages = days[busiest]
+
+        return data_class
+
+    def number_of_bets(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Returns the number of bets between two given time periods
 
         Args:
@@ -277,9 +338,20 @@ class StatsGatherer:
             int: the number of bets
         """
         bets = self._get_bets(guild_id, start, end)
-        return len(bets)
+        
+        data_class = Stat(
+            "stat",
+            guild_id,
+            stat=StatTypes.NUMBER_OF_BETS,
+            month=start.strftime("%b %y"),
+            value=len(bets),
+            timestamp=datetime.datetime.now(),
+            short_name="number_of_bets"
+        )
+
+        return data_class
     
-    def salary_gains(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> int:
+    def salary_gains(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Returns the total amount of eddies gained through salaries this month
 
         Args:
@@ -296,9 +368,20 @@ class StatsGatherer:
             if trans["type"] != TransactionTypes.DAILY_SALARY:
                 continue
             salary_total += trans["amount"]
-        return salary_total
         
-    def average_wordle_victory(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> float:
+        data_class = Stat(
+            "stat",
+            guild_id,
+            stat=StatTypes.SALARY_GAINS,
+            month=start.strftime("%b %y"),
+            value=salary_total,
+            timestamp=datetime.datetime.now(),
+            short_name="salary_total"
+        )
+
+        return data_class
+        
+    def average_wordle_victory(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Calculates the server's average wordle score
 
         Args:
@@ -326,9 +409,20 @@ class StatsGatherer:
             wordle_count.append(guesses)
             
         average_wordle = round((sum(wordle_count) / len(wordle_count)), 2)
-        return average_wordle
+        
+        data_class = Stat(
+            "stat",
+            guild_id,
+            stat=StatTypes.AVERAGE_WORDLE_VICTORY,
+            month=start.strftime("%b %y"),
+            value=average_wordle,
+            timestamp=datetime.datetime.now(),
+            short_name="average_wordle_victory"
+        )
+
+        return data_class
     
-    def bet_eddies_stats(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[int, int]:
+    def bet_eddies_stats(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[Stat, Stat]:
         """Calculates the total eddies placed on bets, and the total eddies won on bets
 
         Args:
@@ -349,8 +443,28 @@ class StatsGatherer:
                 eddies_placed -= trans["amount"]  # amount is negative in these cases
             elif trans_type == TransactionTypes.BET_WIN:
                 eddies_won += trans["amount"]
+        
+        data_class_a = Stat(
+            "stat",
+            guild_id,
+            stat=StatTypes.EDDIES_PLACED,
+            month=start.strftime("%b %y"),
+            value=eddies_placed,
+            timestamp=datetime.datetime.now(),
+            short_name="number_of_eddies_placed"
+        )
 
-        return eddies_placed, eddies_won
+        data_class_b = Stat(
+            "stat",
+            guild_id,
+            stat=StatTypes.EDDIES_WIN,
+            month=start.strftime("%b %y"),
+            value=eddies_won,
+            timestamp=datetime.datetime.now(),
+            short_name="number_of_eddies_won"
+        )
+
+        return data_class_a, data_class_b
 
     # stats that can be won
     # messages
@@ -376,13 +490,15 @@ class StatsGatherer:
         chattiest = sorted(message_users, key=lambda x: message_users[x], reverse=True)[0]
 
         data_class = Stat(
-            guild_id, 
-            chattiest, 
-            AwardsTypes.MOST_MESSAGES, 
-            start.strftime("%b %y"),
-            message_users[chattiest],
-            datetime.datetime.now(),
-            MONTHLY_AWARDS_PRIZE
+            type="award",
+            guild_id=guild_id, 
+            user_id=chattiest, 
+            award=AwardsTypes.MOST_MESSAGES, 
+            month=start.strftime("%b %y"),
+            value=message_users[chattiest],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="most_messages_sent"
         )
 
         return data_class
@@ -409,13 +525,15 @@ class StatsGatherer:
         least_chattiest = sorted(message_users, key=lambda x: message_users[x])[0]
         
         data_class = Stat(
-            guild_id, 
-            least_chattiest, 
-            AwardsTypes.LEAST_MESSAGES, 
-            start.strftime("%b %y"),
-            message_users[least_chattiest],
-            datetime.datetime.now(),
-            MONTHLY_AWARDS_PRIZE
+            type="award",
+            guild_id=guild_id, 
+            user_id=least_chattiest, 
+            award=AwardsTypes.LEAST_MESSAGES, 
+            month=start.strftime("%b %y"),
+            value=message_users[least_chattiest],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="least_messages_sent"
         )
         
         return data_class
@@ -442,13 +560,15 @@ class StatsGatherer:
                     longest_message = message
         
         data_class = Stat(
-            guild_id, 
-            longest_message["user_id"], 
-            AwardsTypes.LONGEST_MESSAGE, 
-            start.strftime("%b %y"),
-            len(longest_message["content"]),
-            datetime.datetime.now(),
-            MONTHLY_AWARDS_PRIZE
+            type="award",
+            guild_id=guild_id, 
+            user_id=longest_message["user_id"], 
+            award=AwardsTypes.LONGEST_MESSAGE, 
+            month=start.strftime("%b %y"),
+            value=len(longest_message["content"]),
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="longest_message"
         )
 
         return data_class
@@ -493,13 +613,15 @@ class StatsGatherer:
         best_avg = sorted(wordle_avgs, key=lambda x: wordle_avgs[x])[0]
 
         data_class = Stat(
-            guild_id, 
-            best_avg, 
-            AwardsTypes.BEST_AVG_WORDLE, 
-            start.strftime("%b %y"),
-            wordle_avgs[best_avg],
-            datetime.datetime.now(),
-            MONTHLY_AWARDS_PRIZE
+            type="award",
+            guild_id=guild_id, 
+            user_id=best_avg, 
+            award=AwardsTypes.BEST_AVG_WORDLE, 
+            month=start.strftime("%b %y"),
+            value=wordle_avgs[best_avg],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="lowest_avg_wordle"
         )
 
         return data_class
@@ -527,13 +649,15 @@ class StatsGatherer:
         busiest = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
 
         data_class = Stat(
-            guild_id, 
-            busiest, 
-            AwardsTypes.MOST_BETS, 
-            start.strftime("%b %y"),
-            bet_users[busiest],
-            datetime.datetime.now(),
-            MONTHLY_AWARDS_PRIZE
+            type="award",
+            guild_id=guild_id, 
+            user_id=busiest, 
+            award=AwardsTypes.MOST_BETS, 
+            month=start.strftime("%b %y"),
+            value=bet_users[busiest],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="most_bets_created"
         )
         
         return data_class
@@ -563,13 +687,15 @@ class StatsGatherer:
         most_placed = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
 
         data_class = Stat(
-            guild_id, 
-            most_placed, 
-            AwardsTypes.MOST_EDDIES_BET, 
-            start.strftime("%b %y"),
-            bet_users[most_placed],
-            datetime.datetime.now(),
-            MONTHLY_AWARDS_PRIZE
+            type="award",
+            guild_id=guild_id, 
+            user_id=most_placed, 
+            award=AwardsTypes.MOST_EDDIES_BET, 
+            month=start.strftime("%b %y"),
+            value=bet_users[most_placed],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="most_eddies_placed"
         )
 
         return data_class
@@ -599,13 +725,15 @@ class StatsGatherer:
         most_placed = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
 
         data_class = Stat(
-            guild_id, 
-            most_placed, 
-            AwardsTypes.MOST_EDDIES_WON, 
-            start.strftime("%b %y"),
-            bet_users[most_placed],
-            datetime.datetime.now(),
-            MONTHLY_AWARDS_PRIZE
+            type="award",
+            guild_id=guild_id, 
+            user_id=most_placed, 
+            award=AwardsTypes.MOST_EDDIES_WON, 
+            month=start.strftime("%b %y"),
+            value=bet_users[most_placed],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="most_eddies_won"
         )
 
         return data_class
@@ -650,13 +778,15 @@ class StatsGatherer:
         longest_king = sorted(kings, key=lambda x: kings[x], reverse=True)[0]
 
         data_class = Stat(
-            guild_id, 
-            longest_king, 
-            AwardsTypes.LONGEST_KING, 
-            start.strftime("%b %y"),
-            kings[longest_king],
-            datetime.datetime.now(),
-            MONTHLY_AWARDS_PRIZE
+            type="award",
+            guild_id=guild_id, 
+            user_id=longest_king, 
+            award=AwardsTypes.LONGEST_KING, 
+            month=start.strftime("%b %y"),
+            value=kings[longest_king],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="longest_king"
         )
         
         return data_class

@@ -52,30 +52,38 @@ class MonthlyBSEddiesAwards(commands.Cog):
         # SERVER STATS
         # get all generic discord server stats
         
-        num_messages = self.stats.number_of_messages(*args)
+        number_messages = self.stats.number_of_messages(*args)
         avg_message_chars, avg_message_words = self.stats.average_message_length(*args)
-        busiest_channel, busiest_channel_messages = self.stats.busiest_channel(*args)
-        busiest_day, busiest_day_messages = self.stats.busiest_day(*args)
+        busiest_channel = self.stats.busiest_channel(*args)
+        busiest_day = self.stats.busiest_day(*args)
         num_bets = self.stats.number_of_bets(*args)
         salary_gains = self.stats.salary_gains(*args)
         average_wordle = self.stats.average_wordle_victory(*args)
         eddies_placed, eddies_won = self.stats.bet_eddies_stats(*args)
 
-        busiest_channel_obj = await guild.fetch_channel(busiest_channel)
-        busiest_day_format = busiest_day.strftime("%a %d %b")
+        busiest_channel_obj = await guild.fetch_channel(busiest_channel.value)
+        busiest_day_format = busiest_day.value.strftime("%a %d %b")
+
+        stats = [
+            number_messages, avg_message_chars, avg_message_words, busiest_channel, busiest_day
+        ]
         
         message = (
             "Some server stats 📈 from last month:\n\n"
-            f"**Number of messages sent**: `{num_messages}`\n"
-            f"**Average message length**: Characters (`{avg_message_chars}`), Words (`{avg_message_words}`)\n"
-            f"**Chattiest channel**: {busiest_channel_obj.mention} (`{busiest_channel_messages}`)\n"
-            f"**Chattiest day**: {busiest_day_format} (`{busiest_day_messages}`)\n"
-            f"**Average wordle score**: `{average_wordle}`\n"
-            f"**Bets created**: `{num_bets}`\n"
-            f"**Eddies gained via salary**: `{salary_gains}`\n"
-            f"**Eddies placed on bets**: `{eddies_placed}`\n"
-            f"**Eddies won on bets**: `{eddies_won}`\n"
+            f"**Number of messages sent**: `{number_messages.value}`\n"
+            f"**Average message length**: Characters (`{avg_message_chars.value}`), Words (`{avg_message_words.vale}`)\n"
+            f"**Chattiest channel**: {busiest_channel_obj.mention} (`{busiest_channel.messages}`)\n"
+            f"**Chattiest day**: {busiest_day_format} (`{busiest_day.messages}`)\n"
+            f"**Average wordle score**: `{average_wordle.value}`\n"
+            f"**Bets created**: `{num_bets.value}`\n"
+            f"**Eddies gained via salary**: `{salary_gains.value}`\n"
+            f"**Eddies placed on bets**: `{eddies_placed.value}`\n"
+            f"**Eddies won on bets**: `{eddies_won.value}`\n"
         )
+
+        for stat in stats:
+            # self.awards.document_stat(**{k: v for k, v in stat.__dict__.items() if v})
+            self.logger.info(f"{ {k: v for k, v in stat.__dict__.items() if v} }")
 
         # BSEDDIES AWARDS
         # get all stats for bseddies awards
@@ -135,25 +143,18 @@ class MonthlyBSEddiesAwards(commands.Cog):
         # give the users their eddies
         
         for award in awards:
-            self.user_points.append_to_transaction_history(
-                award.user_id,
-                award.guild_id,
-                {
-                    "type": TransactionTypes.MONTHLY_AWARDS_PRIZE,
-                    "timestamp": datetime.datetime.now(),
-                    "amount": award.eddies,
-                }
-            )
-            self.user_points.increment_points(award.user_id, award.guild_id, award.eddies)
-
-            self.awards.document_award(
-                award.guild_id,
-                award.user_id,
-                award.award,
-                award.month,
-                award.eddies,
-                award.value
-            )
+            #self.user_points.append_to_transaction_history(
+            #    award.user_id,
+            #    award.guild_id,
+            #    {
+            #        "type": TransactionTypes.MONTHLY_AWARDS_PRIZE,
+            #        "timestamp": datetime.datetime.now(),
+            #        "amount": award.eddies,
+            #    }
+            #)
+            #self.user_points.increment_points(award.user_id, award.guild_id, award.eddies)
+            #self.awards.document_award(**{k:v for k, v in award.__dict__.items() if v})
+            self.logger.info(f"{ {k:v for k, v in award.__dict__.items() if v} }")
         
         self.logger.info(f"Sent messages! Until next month!")
 

@@ -1,9 +1,9 @@
 
 import discord
 
+import discordbot.views as views
 from discordbot.bot_enums import ActivityTypes
 from discordbot.slashcommandeventclasses import BSEddies
-from discordbot.views import LeaderBoardView
 
 
 class BSEddiesLeaderboard(BSEddies):
@@ -25,6 +25,6 @@ class BSEddiesLeaderboard(BSEddies):
 
         self._add_event_type_to_activity_history(ctx.author, ctx.guild_id, ActivityTypes.BSEDDIES_LEADERBOARD)
 
-        leaderboard_view = LeaderBoardView(self.embed_manager)
+        leaderboard_view = views.LeaderBoardView(self.embed_manager)
         msg = self.embed_manager.get_leaderboard_embed(ctx.guild, 5)
         await ctx.respond(content=msg, view=leaderboard_view)

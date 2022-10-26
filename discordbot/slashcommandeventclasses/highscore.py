@@ -1,9 +1,9 @@
 
 import discord
 
+import discordbot.views as views
 from discordbot.bot_enums import ActivityTypes
 from discordbot.slashcommandeventclasses import BSEddies
-from discordbot.views import HighScoreBoardView
 
 
 class BSEddiesHighScore(BSEddies):
@@ -25,6 +25,6 @@ class BSEddiesHighScore(BSEddies):
 
         self._add_event_type_to_activity_history(ctx.author, ctx.guild_id, ActivityTypes.BSEDDIES_HIGHSCORES)
 
-        highscore_view = HighScoreBoardView(self.embed_manager)
+        highscore_view = views.HighScoreBoardView(self.embed_manager)
         msg = self.embed_manager.get_highscore_embed(ctx.guild, 5)
         await ctx.respond(content=msg, view=highscore_view)

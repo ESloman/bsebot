@@ -257,7 +257,10 @@ class OnReadyEvent(BaseEvent):
                         f"{commit_log}\n"
                         "```"
                     )
-                    await channel.send(content=update_message)
+                    try:
+                        await channel.send(content=update_message)
+                    except discord.errors.HTTPException:
+                        self.logger.info(f"Message is too long to send - skipping")
             except Exception as e:
                 self.logger.exception(f"Error with doing the git thing: {e}")
 
@@ -274,7 +277,10 @@ class OnReadyEvent(BaseEvent):
         if guild_id == BSE_SERVER_ID:
             path = "/home/app"
         else:
-            path = os.path.expanduser("~/gitwork/bsebot/bsebot.git")
+            if os.name == "posix":
+                path = os.path.expanduser("~/gitwork/bsebot/bsebot.git")
+            else:
+                path = os.path.expanduser("~/gitwork/bsebot")
         
         hash_doc = self.hashes.get_last_hash(guild_id)
         try:
@@ -283,13 +289,19 @@ class OnReadyEvent(BaseEvent):
             # typically in testing mode - there's no hash doc to compare against
             return None
 
-        head_sha = subprocess.check_output(
-            ["git", "rev-parse", "HEAD"],
-            cwd=path
-            ).decode("utf8").strip("\n")
+        try:
+            head_sha = subprocess.check_output(
+                ["git", "rev-parse", "HEAD"],
+                cwd=path
+                ).decode("utf8").strip("\n")
+        except NotADirectoryError:
+            self.logger.info(f"Got an error with the directory: {path}")
+            return None
+        
         self.logger.info(f"{head_sha=}")
         
         if last_hash == head_sha:
+            self.logger.info(f"{last_hash=}, {head_sha=}")
             return None
         
         if guild_id == BSE_SERVER_ID:

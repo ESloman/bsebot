@@ -1,8 +1,8 @@
 
 import discord
 
+import discordbot.views as views
 from discordbot.bot_enums import ActivityTypes
-from discordbot.views import TaxRateView
 from discordbot.slashcommandeventclasses import BSEddies
 
 from mongo.bsedataclasses import TaxRate
@@ -32,6 +32,6 @@ class BSEddiesTaxRate(BSEddies):
             return
 
         value = self.tax_rate.get_tax_rate()
-        view = TaxRateView(value)
+        view = views.TaxRateView(value)
 
         await ctx.respond(view=view, ephemeral=True)

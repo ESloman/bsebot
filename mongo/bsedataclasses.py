@@ -7,9 +7,11 @@ that provides methods for interacting with that Collection.
 This particular file contains Collection Classes for the 'bestsummereverpoints' DB.
 """
 
+import datetime
 import random
 from typing import Optional, Union
 
+from discordbot.bot_enums import AwardsTypes
 from mongo import interface
 from mongo.db_classes import BestSummerEverPointsDB
 
@@ -176,3 +178,38 @@ class CommitHash(BestSummerEverPointsDB):
         ret = self.query({"type": "hash", "guild_id": guild_id})
         if ret:
             return ret[0]
+
+
+class Awards(BestSummerEverPointsDB):
+    def __init__(self):
+        super().__init__()
+        self._vault = interface.get_collection(self.database, "awards")
+    
+    def document_award(
+        self, 
+        guild_id: int, 
+        user_id: int, 
+        award: AwardsTypes, 
+        month: str, 
+        eddies: int, 
+        value: Union[int, float]
+        ) -> list:
+        """Insert an award into the DB
+
+        Args:
+            guild_id (int): server ID
+            user_id (int): user ID
+            award (AwardsTypes): the enum type of the award won
+            month (str): a readable format like 'Oct 22'
+            eddies (int): the eddies won
+        """
+        doc = {
+            "guild_id": guild_id,
+            "user_id": user_id,
+            "award": award,
+            "timestamp": datetime.datetime.now(),
+            "month": month,
+            "eddies": eddies,
+            "value": value
+        }
+        return self.insert(doc)

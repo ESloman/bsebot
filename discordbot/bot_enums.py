@@ -75,3 +75,20 @@ class ActivityTypes(IntEnum):
     BSEDDIES_SET_TAX_RATE = 31
     BSEDDIES_ACTUAL_SET_TAX_RATE = 32
     BSEDDIES_BET_CANCEL = 33
+
+
+class AwardsTypes(IntEnum):
+    """_summary_
+
+    Args:
+        IntEnum (_type_): _description_
+    """
+    MOST_MESSAGES = 1
+    LEAST_MESSAGES = 2
+    LONGEST_MESSAGE = 3
+    BEST_AVG_WORDLE = 4
+    MOST_BETS = 5
+    MOST_EDDIES_BET = 6
+    MOST_EDDIES_LOST = 7
+    MOST_EDDIES_WON = 8
+    LONGEST_KING = 9

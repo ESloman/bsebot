@@ -3,10 +3,11 @@ import datetime
 import discord
 from discord.ext import tasks, commands
 
-from discordbot.bot_enums import TransactionTypes
+from discordbot.bot_enums import AwardsTypes, TransactionTypes
 from discordbot.constants import BSEDDIES_REVOLUTION_CHANNEL, BSE_SERVER_ID, MONTHLY_AWARDS_PRIZE
 from discordbot.statsclasses import StatsGatherer
 from mongo.bsepoints import UserPoints
+from mongo.bsedataclasses import Awards
 
 
 class MonthlyBSEddiesAwards(commands.Cog):
@@ -16,6 +17,7 @@ class MonthlyBSEddiesAwards(commands.Cog):
         self.guilds = guilds
         self.stats = StatsGatherer()
         self.user_points = UserPoints()
+        self.awards = Awards()
 
         self.bseddies_awards.start()
     
@@ -77,45 +79,52 @@ class MonthlyBSEddiesAwards(commands.Cog):
 
         # BSEDDIES AWARDS
         # get all stats for bseddies awards
-
-        most_messages_id, most_messages_count = self.stats.most_messages_sent(*args)
-        longest_message = self.stats.longest_message(*args)
-        wordle_id, wordle_avg_score = self.stats.lowest_average_wordle_score(*args)
-        most_bets_id, most_bets_number = self.stats.most_bets_created(*args)
-        most_eddies_placed_id, most_eddies_placed = self.stats.most_eddies_bet(*args)
-        most_eddies_won_id, most_eddies_won = self.stats.most_eddies_won(*args)
-        longest_king_id, time_king = self.stats.most_time_king(*args)
         
-        longest_message_id = longest_message["user_id"]
-        longest_message_count = len(longest_message["content"])
+        most_messages = self.stats.most_messages_sent(*args)
+        least_messages = self.stats.least_messages_sent(*args)
+        longest_message = self.stats.longest_message(*args)
+        best_wordle = self.stats.lowest_average_wordle_score(*args)
+        most_bets = self.stats.most_bets_created(*args)
+        most_eddies_placed = self.stats.most_eddies_bet(*args)
+        most_eddies_won = self.stats.most_eddies_won(*args)
+        longest_king = self.stats.most_time_king(*args)
+
+        awards = [
+            most_messages,
+            least_messages,
+            longest_message,
+            best_wordle,
+            most_bets,
+            most_eddies_placed,
+            most_eddies_won,
+            longest_king
+        ]
 
         user_id_dict = {}  # type: dict[int, discord.Member]
-        for _id in [
-            most_messages_id, longest_message_id, wordle_id,
-            most_bets_id, most_eddies_placed_id, most_eddies_won_id,
-            longest_king_id
-        ]:
-            if _id in user_id_dict:
+        for award in awards:
+            if award.user_id in user_id_dict:
                 continue
-            member = await guild.fetch_member(_id)
-            user_id_dict[_id] = member
+            member = await guild.fetch_member(award.user_id)
+            user_id_dict[award.user_id] = member
         
         bseddies_awards = (
             "Time for the monthly **BSEddies Awards** 🏆\n\n"
             "The _'won't shut up'_ award: "
-            f"{user_id_dict[most_messages_id].mention} (`{most_messages_count}` messages sent)\n"
+            f"{user_id_dict[most_messages.user_id].mention} (`{most_messages.value}` messages sent)\n"
             "The _'can't find the enter key'_ award: "
-            f"{user_id_dict[longest_message_id].mention} (`{longest_message_count}` longest message length)\n"
+            f"{user_id_dict[longest_message.user_id].mention} (`{longest_message.value}` longest message length)\n"
             "The _'I have an English degree'_ award: "
-            f"{user_id_dict[wordle_id].mention} (`{wordle_avg_score}` average wordle score)\n"
+            f"{user_id_dict[best_wordle.user_id].mention} (`{best_wordle.value}` average wordle score)\n"
             "The _'bookie'_ award: "
-            f"{user_id_dict[most_bets_id].mention} (`{most_bets_number}` bets created)\n"
+            f"{user_id_dict[most_bets.user_id].mention} (`{most_bets.value}` bets created)\n"
             "The _'just one more bet'_ award: "
-            f"{user_id_dict[most_eddies_placed_id].mention} (`{most_eddies_placed}` eddies bet)\n"
+            f"{user_id_dict[most_eddies_placed.user_id].mention} (`{most_eddies_placed.value}` eddies bet)\n"
             "The _'rollin' in it'_ award: "
-            f"{user_id_dict[most_eddies_won_id].mention} (`{most_eddies_won}` eddies won)\n"
+            f"{user_id_dict[most_eddies_won.user_id].mention} (`{most_eddies_won.value}` eddies won)\n"
             "The _'king of kings'_ award: "
-            f"{user_id_dict[longest_king_id].mention} (`{str(datetime.timedelta(seconds=time_king))}` spent as KING)"
+            f"{user_id_dict[longest_king.user_id].mention} (`{str(datetime.timedelta(seconds=longest_king.value))}` spent as KING)\n"
+            "The _'participation'_ award: "
+            f"{user_id_dict[least_messages.user_id].mention} (`{least_messages.value}` messages sent)"
         )
         
         channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
@@ -125,21 +134,26 @@ class MonthlyBSEddiesAwards(commands.Cog):
         
         # give the users their eddies
         
-        for _id in [
-            most_messages_id, longest_message_id, wordle_id,
-            most_bets_id, most_eddies_placed_id, most_eddies_won_id,
-            longest_king_id
-        ]:
+        for award in awards:
             self.user_points.append_to_transaction_history(
-                _id,
-                BSE_SERVER_ID,
+                award.user_id,
+                award.guild_id,
                 {
                     "type": TransactionTypes.MONTHLY_AWARDS_PRIZE,
                     "timestamp": datetime.datetime.now(),
-                    "amount": MONTHLY_AWARDS_PRIZE
+                    "amount": award.eddies,
                 }
             )
-            self.user_points.increment_points(_id, BSE_SERVER_ID, MONTHLY_AWARDS_PRIZE)
+            self.user_points.increment_points(award.user_id, award.guild_id, award.eddies)
+
+            self.awards.document_award(
+                award.guild_id,
+                award.user_id,
+                award.award,
+                award.month,
+                award.eddies,
+                award.value
+            )
         
         self.logger.info(f"Sent messages! Until next month!")
 

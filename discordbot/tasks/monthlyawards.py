@@ -130,7 +130,8 @@ class MonthlyBSEddiesAwards(commands.Cog):
             "The _'rollin' in it'_ award: "
             f"{user_id_dict[most_eddies_won.user_id].mention} (`{most_eddies_won.value}` eddies won)\n"
             "The _'king of kings'_ award: "
-            f"{user_id_dict[longest_king.user_id].mention} (`{str(datetime.timedelta(seconds=longest_king.value))}` spent as KING)\n"
+            f"{user_id_dict[longest_king.user_id].mention} "
+            f"(`{str(datetime.timedelta(seconds=longest_king.value))}` spent as KING)\n"
             "The _'participation'_ award: "
             f"{user_id_dict[least_messages.user_id].mention} (`{least_messages.value}` messages sent)"
         )

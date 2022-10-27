@@ -1,0 +1,9 @@
+[flake8]
+exclude = 
+    .git,
+    .github,
+    .vscode,
+    datafiles,
+    __pycache__
+
+max-line-length = 120

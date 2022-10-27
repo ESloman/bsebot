@@ -2,33 +2,33 @@
 This file contains our class that registers all the events we listen to and do things with
 """
 
-import asyncio
 import logging
 
 import discord
-
 from apis.giphyapi import GiphyAPI
-from discordbot.betcloser import BetCloser
-from discordbot.clienteventclasses import OnReadyEvent, OnReactionAdd, OnMessage, OnMemberJoin, OnDirectMessage
-from discordbot.clienteventclasses import OnMemberLeave, OnThreadCreate, OnThreadUpdate
-from discordbot.clienteventclasses import OnEmojiCreate, OnStickerCreate
+from mongo.bsepoints import UserBets, UserPoints
+
+from discordbot.clienteventclasses import OnDirectMessage, OnEmojiCreate, OnMemberJoin, OnMemberLeave
+from discordbot.clienteventclasses import OnMessage, OnReactionAdd, OnReadyEvent, OnStickerCreate
+from discordbot.clienteventclasses import OnThreadCreate, OnThreadUpdate
+
 from discordbot.constants import BSE_SERVER_ID
-from discordbot.eddiegains import EddieGainMessager
-from discordbot.tasks.eddiekingtask import BSEddiesKingTask
 from discordbot.embedmanager import EmbedManager
+from discordbot.modals import BSEddiesBetCreateModal
+from discordbot.slashcommandeventclasses import BSEddiesActiveBSEddiesAdminGive, BSEddiesAutoGenerate, BSEddiesCloseBet
+from discordbot.slashcommandeventclasses import BSEddiesGift, BSEddiesHighScore, BSEddiesLeaderboard, BSEddiesPending
+from discordbot.slashcommandeventclasses import BSEddiesPlaceBet, BSEddiesPredict, BSEddiesTaxRate
+from discordbot.slashcommandeventclasses import BSEddiesTransactionHistory, BSEddiesView
+
+# task imports
+from discordbot.tasks.betcloser import BetCloser
+from discordbot.tasks.dailyvallytask import AfterWorkVally
+from discordbot.tasks.eddiegains import EddieGainMessager
+from discordbot.tasks.eddiekingtask import BSEddiesKingTask
 from discordbot.tasks.monthlyawards import MonthlyBSEddiesAwards
 from discordbot.tasks.revolutiontask import BSEddiesRevolutionTask
-from discordbot.tasks.dailyvallytask import AfterWorkVally
 from discordbot.tasks.threadmutetask import ThreadSpoilerTask
 from discordbot.tasks.wordletask import WordleTask
-from discordbot.slashcommandeventclasses import BSEddiesLeaderboard, BSEddiesTaxRate, BSEddiesView, BSEddiesActive, BSEddiesGift
-from discordbot.slashcommandeventclasses import BSEddiesHighScore, BSEddiesAdminGive
-from discordbot.slashcommandeventclasses import BSEddiesCloseBet, BSEddiesPlaceBet
-from discordbot.slashcommandeventclasses import BSEddiesPending, BSEddiesTransactionHistory
-from discordbot.slashcommandeventclasses import BSEddiesPredict, BSEddiesAutoGenerate
-
-from discordbot.modals import BSEddiesBetCreateModal
-from mongo.bsepoints import UserPoints, UserBets
 
 
 class CommandManager(object):

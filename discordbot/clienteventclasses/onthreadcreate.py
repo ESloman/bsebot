@@ -31,7 +31,7 @@ class OnThreadCreate(BaseEvent):
             starting_message = thread.starting_message  # type: discord.Message
 
         message_type = await self.on_message.message_received(starting_message, True)
-        message_type.extend("thread_create")
+        message_type.append("thread_create")
 
         self.user_interactions.add_entry(
             thread.id,

@@ -15,12 +15,12 @@ class OnEmojiCreate(BaseEvent):
     async def on_emojis_update(self, guild_id: int, before: List[discord.Emoji], after: List[discord.Emoji]) -> None:
 
         guild = await self.client.fetch_guild(guild_id)
-        
+
         for emoji in after:
-            if emoji_obj := self.server_emojis.get_emoji(guild_id, emoji.id):
+            if _ := self.server_emojis.get_emoji(guild_id, emoji.id):
                 # do something here to make sure nothing has changed
                 continue
-            
+
             new_emoji_obj = await guild.fetch_emoji(emoji.id)
 
             self.logger.info(f"New emoji, {emoji.name}, created!")

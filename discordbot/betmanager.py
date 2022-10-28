@@ -51,14 +51,14 @@ class BetManager(object):
             modifier = 1
 
         modifier += (random.random() / 2)
-        
+
         if modifier <= 1:
             modifier = 1.05
 
         if len(ret_dict["losers"]) == 0:
             # no losers and only winnners
             modifier = 1.2
-        
+
         point_one = (0, 2 + (random.random() / 2))
         point_two = (winning_outcome_eddies, modifier)
         try:
@@ -67,23 +67,23 @@ class BetManager(object):
             m = 0
             # this mean no-one won :(
         c = (point_two[1] - (m * point_two[0]))
-        
+
         self.logger.info(f"Bet {bet_id} winnings has modifier {m} and coefficient {c}")
 
         # get eddies the losers bet
         try:
             _extra_eddies = sum(ret_dict["losers"].values())
-        except Exception as e:
+        except Exception:
             _extra_eddies = 0
 
         # get tax value
         tax_value = self.tax_rate.get_tax_rate()
-        
+
         # total eddies won and total taxes
         total_eddies_winnings = 0
         total_eddies_won = 0
         total_eddies_taxed = 0
-        
+
         # assign winning points to the users who got the answer right
         winners = [b for b in ret["betters"] if ret["betters"][b]["emoji"] == emoji]
         for better in winners:
@@ -98,15 +98,18 @@ class BetManager(object):
                 points_won += int(math.floor(_extra_eddies / len(winners)))
             except Exception:
                 pass
-           
+
             total_eddies_won += points_won
             actual_amount_won = points_won - points_bet  # the actual winnings without original bet
             total_eddies_winnings += actual_amount_won
             tax_amount = math.floor((actual_amount_won * tax_value))
             total_eddies_taxed += tax_amount
             eddies_won_minux_tax = points_won - tax_amount
-            
-            self.logger.info(f"{better} bet {points_bet} eddies and won {actual_amount_won} ({points_won}) - getting taxed {tax_amount} so {eddies_won_minux_tax=}")
+
+            self.logger.info(
+                f"{better} bet {points_bet} eddies and won {actual_amount_won} ({points_won}) - "
+                "getting taxed {tax_amount} so {eddies_won_minux_tax=}"
+            )
 
             ret_dict["winners"][better] = eddies_won_minux_tax
             self.user_points.increment_points(int(better), guild_id, eddies_won_minux_tax)
@@ -129,7 +132,7 @@ class BetManager(object):
             f"Eddies won (with original bets): {total_eddies_won}\n"
             f"Eddies taxed: {total_eddies_taxed}\n"
         )
-        
+
         king_id = self.user_points.get_current_king(guild_id)["uid"]
         self.user_points.increment_points(king_id, guild_id, total_eddies_taxed)
         self.user_points.append_to_transaction_history(
@@ -142,9 +145,9 @@ class BetManager(object):
                 "bet_id": bet_id,
             }
         )
-        
+
         ret_dict["king_tax"] = total_eddies_taxed
         ret_dict["king"] = king_id
         ret_dict["total_winnings"] = total_eddies_winnings
-        
+
         return ret_dict

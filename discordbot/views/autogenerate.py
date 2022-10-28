@@ -212,7 +212,9 @@ class AutoGenerateView(discord.ui.View):
                 except IndexError:
                     data["timeout"] = [opt.value for opt in child.options if opt.default is True][0]
 
-        await self.auto_class.autogenerate_wrapper(interaction, data["method"], data["number"], data["_ids"], data["timeout"])
+        await self.auto_class.autogenerate_wrapper(
+            interaction, data["method"], data["number"], data["_ids"], data["timeout"]
+        )
         await interaction.followup.edit_message(content="Bets created", view=None, message_id=interaction.message.id)
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=4, disabled=False, custom_id="cancel_btn",

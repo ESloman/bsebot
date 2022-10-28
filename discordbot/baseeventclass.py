@@ -15,11 +15,12 @@ class BaseEvent(object):
 
     Basically just sets up all the vars that events will need and rely on.
     """
-    def __init__(self,
-                 client: discord.Client,
-                 guild_ids: list,
-                 logger: logging.Logger
-        ):
+    def __init__(
+        self,
+        client: discord.Client,
+        guild_ids: list,
+        logger: logging.Logger
+    ):
         """
         Constructor that initialises references DB Collections and various variables
         :param client:
@@ -37,7 +38,8 @@ class BaseEvent(object):
         self.logger = logger
 
     def _add_event_type_to_activity_history(
-            self, user: discord.Member, guild_id: int, _type: ActivityTypes, **params) -> None:
+            self, user: discord.Member, guild_id: int, _type: ActivityTypes, **params
+    ) -> None:
         """
 
         :param user:

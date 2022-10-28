@@ -1,11 +1,11 @@
 {
     "python.autoComplete.extraPaths": [
         "C:\\Users\\ellio\\.pyenv\\pyenv-win\\shims",
-        "C:\\Users\\ellio\\.pyenv\\pyenv-win\\versions\\3.10.7\\lib\\site-packages"
+        "C:\\Users\\ellio\\.pyenv\\pyenv-win\\versions\\3.11.0\\lib\\site-packages"
     ],
     "python.analysis.extraPaths": [
         "C:\\Users\\ellio\\.pyenv\\pyenv-win\\shims",
-        "C:\\Users\\ellio\\.pyenv\\pyenv-win\\versions\\3.10.7\\lib\\site-packages"
+        "C:\\Users\\ellio\\.pyenv\\pyenv-win\\versions\\3.11.0\\lib\\site-packages"
     ],
     "python.envFile": "${workspaceFolder}/.vscode/.env"
 }

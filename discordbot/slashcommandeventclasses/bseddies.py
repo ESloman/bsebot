@@ -26,25 +26,25 @@ class BSEddies(BaseEvent):
             return False
 
         if kwargs.get("admin") and ctx.author.id != CREATOR:
-            msg = f"You do not have the permissions to use this command."
+            msg = "You do not have the permissions to use this command."
             await ctx.respond(content=msg, ephemeral=True)
             return False
 
         if "friend" in kwargs and (
                 isinstance(kwargs["friend"], discord.User) or isinstance(kwargs["friend"], discord.Member)):
             if kwargs["friend"].bot:
-                msg = f"Bots cannot be gifted eddies."
+                msg = "Bots cannot be gifted eddies."
                 await ctx.respond(content=msg, ephemeral=True)
                 return False
 
             if kwargs["friend"].id == ctx.author.id:
-                msg = f"You can't gift yourself points."
+                msg = "You can't gift yourself points."
                 await ctx.respond(content=msg, ephemeral=True)
                 return False
 
         if "amount" in kwargs and isinstance(kwargs["amount"], int):
             if kwargs["amount"] < 0:
-                msg = f"You can't _\"gift\"_ someone negative points."
+                msg = "You can't _\"gift\"_ someone negative points."
                 await ctx.respond(content=msg, ephemeral=True)
                 return False
 

@@ -15,9 +15,9 @@ from discordbot.clienteventclasses import OnThreadCreate, OnThreadUpdate
 from discordbot.constants import BSE_SERVER_ID
 from discordbot.embedmanager import EmbedManager
 from discordbot.modals import BSEddiesBetCreateModal
-from discordbot.slashcommandeventclasses import BSEddiesActiveBSEddiesAdminGive, BSEddiesAutoGenerate, BSEddiesCloseBet
-from discordbot.slashcommandeventclasses import BSEddiesGift, BSEddiesHighScore, BSEddiesLeaderboard, BSEddiesPending
-from discordbot.slashcommandeventclasses import BSEddiesPlaceBet, BSEddiesPredict, BSEddiesTaxRate
+from discordbot.slashcommandeventclasses import BSEddiesActive, BSEddiesAdminGive, BSEddiesAutoGenerate
+from discordbot.slashcommandeventclasses import BSEddiesCloseBet, BSEddiesGift, BSEddiesHighScore, BSEddiesLeaderboard
+from discordbot.slashcommandeventclasses import BSEddiesPending, BSEddiesPlaceBet, BSEddiesPredict, BSEddiesTaxRate
 from discordbot.slashcommandeventclasses import BSEddiesTransactionHistory, BSEddiesView
 
 # task imports
@@ -39,12 +39,13 @@ class CommandManager(object):
     Only the constructor needs to be called in this class for it to register everything.
     """
 
-    def __init__(self,
-                 client: discord.Bot,
-                 guilds: list,
-                 logger: logging.Logger,
-                 giphy_token: str = None
-        ) -> None:
+    def __init__(
+        self,
+        client: discord.Bot,
+        guilds: list,
+        logger: logging.Logger,
+        giphy_token: str = None
+    ) -> None:
         """
         Constructor method. This does all the work in this class and no other methods need to be called.
 
@@ -119,13 +120,13 @@ class CommandManager(object):
         self.eddie_gain_message_task = EddieGainMessager(self.client, guilds, self.logger)
         self.eddie_king_task = BSEddiesKingTask(self.client, guilds, self.logger)
         self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger, self.giphy_token)
-        
+
         if BSE_SERVER_ID in self.guilds:
             self.thread_task = ThreadSpoilerTask(self.client, guilds, self.logger)
             self.vally_task = AfterWorkVally(self.client, guilds, self.logger)
             self.wordle_task = WordleTask(self.client, guilds, self.logger)
             self.monthly_awards_task = MonthlyBSEddiesAwards(self.client, guilds, self.logger)
-            
+
         # call the methods that register the events we're listening for
         self._register_client_events()
         self._register_slash_commands(guilds)
@@ -274,10 +275,10 @@ class CommandManager(object):
                 return
 
             await self.on_message.message_received(message)
-        
+
         @self.client.event
         async def on_guild_emojis_update(
-            guild: discord.Guild, 
+            guild: discord.Guild,
             before: discord.Sequence[discord.Emoji],
             after: discord.Sequence[discord.Emoji]
         ) -> None:
@@ -290,11 +291,10 @@ class CommandManager(object):
                 after (discord.Sequence[discord.Emoji]): list of emojis after
             """
             await self.on_emoji_create.on_emojis_update(guild.id, before, after)
-        
 
         @self.client.event
         async def on_guild_stickers_update(
-            guild: discord.Guild, 
+            guild: discord.Guild,
             before: discord.Sequence[discord.Sticker],
             after: discord.Sequence[discord.Sticker]
         ) -> None:

@@ -34,11 +34,11 @@ class BSEddiesAutoGenerate(slashcommandeventclasses.BSEddies):
             bet_ids: list,
             timeout_str: str = "30m"
     ) -> None:
-        
+
         self._add_event_type_to_activity_history(
             ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_AUTOGENERATE
         )
-        
+
         if method == "random":
             validated_bets = []
             while method == "random" and len(validated_bets) < int(number):

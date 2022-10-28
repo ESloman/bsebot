@@ -71,13 +71,13 @@ class EmbedManager(object):
             number = number if number < len(users) else len(users)
 
         users = [user for user in users if user["points"] != 10 and not user.get("inactive")]
-        
+
         message = (
             "**BSEddies Leaderboard**\n"
             f"Leaderboard is correct as of: "
             f"{datetime.datetime.now().strftime('%d %b %y %H:%M:%S')}\n"
         )
-        
+
         for user in users[:number]:
             try:
                 name = guild.get_member(user["uid"]).name
@@ -102,7 +102,7 @@ class EmbedManager(object):
             number = len(users)
         else:
             number = number if number < len(users) else len(users)
-        
+
         users = [user for user in users if user["points"] != 10 and not user.get("inactive")]
 
         message = (
@@ -144,18 +144,18 @@ class EmbedManager(object):
             else:
                 supps.append(sup)
 
-
         message = (
             f"**REVOLUTION IS UPON US**\n\n"
             f"@everyone - Yet again, we must try to overthrow our {role.mention}. {king_user.mention} has ruled "
-            f"tyranically for far too long and we are now offered a chance to take their BSEddies and knock him down "
-            f"a peg or two.\n\n"
-            f""
+            "tyranically for far too long and we are now offered a chance to take their BSEddies and knock him down "
+            "a peg or two.\n\n"
+            ""
             f"If you would like to OVERTHROW {role.mention} then you press the **OVERTHROW** button.\n"
             f"If you believe that {king_user.mention} hasn't done too bad a job then you can **SUPPORT** them to "
-            f"reduce the chances of revolution happening. If the King _loses_, then supporters will lose eddies "
-            f"alongside their King.\n"
-            f"The KING may spend 10% of their eddies using the_Save Thyself_ button to reduce revolution chance by 15%.\n"
+            "reduce the chances of revolution happening. If the King _loses_, then supporters will lose eddies "
+            "alongside their King.\n"
+            "The KING may spend 10% of their eddies using the_Save Thyself_ "
+            "button to reduce revolution chance by 15%.\n"
             f"**Event ID**: `{event['event_id']}`\n"
             f"**Success rate**: `{max(min(event['chance'], 100), 0)}%`\n"
             f"**Revolutionaries**: `{', '.join(revos)}`\n"

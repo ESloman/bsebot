@@ -52,7 +52,7 @@ class BSEddiesCloseBet(BSEddies):
             ctx: discord.Interaction,
             bet_id: str,
             emoji: str
-        ) -> None:
+    ) -> None:
         """
         This is the method for handling when we close a bet.
 
@@ -84,17 +84,17 @@ class BSEddiesCloseBet(BSEddies):
         author = ctx.user
 
         if not bet:
-            msg = f"This bet doesn't exist."
+            msg = "This bet doesn't exist."
             await ctx.followup.edit_message(content=msg, view=None, message_id=ctx.message.id)
             return
 
         if not bet["active"] and bet["result"] is not None:
-            msg = f"You cannot close a bet that is already closed."
+            msg = "You cannot close a bet that is already closed."
             await ctx.followup.edit_message(content=msg, view=None, message_id=ctx.message.id)
             return
 
         if bet["user"] != author.id:
-            msg = f"You cannot close a bet that isn't yours."
+            msg = "You cannot close a bet that isn't yours."
             await ctx.followup.edit_message(content=msg, view=None, message_id=ctx.message.id)
             return
 
@@ -127,9 +127,9 @@ class BSEddiesCloseBet(BSEddies):
                 if not author.dm_channel:
                     await author.create_dm()
                 try:
-                    msg = (f"Looks like you were the only person to bet on your bet and you _happened_ to win it. "
-                           f"As such, you have won **nothing**. However, you have been refunded the eddies that you "
-                           f"originally bet.")
+                    msg = ("Looks like you were the only person to bet on your bet and you _happened_ to win it. "
+                           "As such, you have won **nothing**. However, you have been refunded the eddies that you "
+                           "originally bet.")
                     await author.send(content=msg)
                 except discord.errors.Forbidden:
                     pass
@@ -201,7 +201,7 @@ class BSEddiesCloseBet(BSEddies):
             self,
             ctx: discord.Interaction,
             bet_id: str
-        ) -> None:
+    ) -> None:
         """
         This is the method for handling when we close a bet.
 
@@ -233,18 +233,18 @@ class BSEddiesCloseBet(BSEddies):
         author = ctx.user
 
         if not bet:
-            msg = f"This bet doesn't exist."
+            msg = "This bet doesn't exist."
             await ctx.followup.edit_message(content=msg, view=None, message_id=ctx.message.id, embeds=[])
             return
 
         if not bet["active"] and bet["result"] is not None:
-            msg = f"You cannot cancel a bet that is already closed."
+            msg = "You cannot cancel a bet that is already closed."
             await ctx.followup.send(content=msg, view=None, ephemeral=True)
             await ctx.followup.edit_message(view=None, message_id=ctx.message.id, embeds=[])
             return
 
         if bet["user"] != author.id:
-            msg = f"You cannot cancel a bet that isn't yours."
+            msg = "You cannot cancel a bet that isn't yours."
             await ctx.followup.send(content=msg, view=None, ephemeral=True)
             return
 
@@ -271,4 +271,6 @@ class BSEddiesCloseBet(BSEddies):
             # channel is thread
             channel = guild.get_thread(bet["channel_id"])
         message = channel.get_partial_message(bet["message_id"])
-        await message.edit(content="Bet has been cancelled. Any bets were refunded to the betters.", view=None, embeds=[])
+        await message.edit(
+            content="Bet has been cancelled. Any bets were refunded to the betters.", view=None, embeds=[]
+        )

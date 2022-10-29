@@ -36,20 +36,20 @@ class ThreadSpoilerTask(commands.Cog):
         if BSE_SERVER_ID not in self.guilds:
             return
 
-        self.logger.info(f"Checking spoiler threads for mute messages")
+        self.logger.info("Checking spoiler threads for mute messages")
         guild = self.bot.get_guild(BSE_SERVER_ID)
         general = await guild.fetch_channel(GENERAL_CHAT)
         threads = general.threads
 
         if not threads:
-            self.logger.info(f"Found no threads to parse")
+            self.logger.info("Found no threads to parse")
             # no threads
             return
 
         for thread in general.threads:
             self.logger.info(f"Checking {thread.name} for spoiler message")
             if "spoiler" not in thread.name.lower():
-                self.logger.info(f"Thread doesn't have spoiler name")
+                self.logger.info("Thread doesn't have spoiler name")
                 continue
 
             thread_id = thread.id
@@ -61,7 +61,7 @@ class ThreadSpoilerTask(commands.Cog):
 
             if not thread_info["active"]:
                 # thread is no longer active
-                self.logger.info(f"Thread is no longer active")
+                self.logger.info("Thread is no longer active")
                 continue
 
             day = thread_info["day"]
@@ -70,7 +70,7 @@ class ThreadSpoilerTask(commands.Cog):
                 # not the right day for this spoiler thread
                 continue
 
-            message = f"New episode today - remember to mute cuties @everyone xoxo"
+            message = "New episode today - remember to mute cuties @everyone xoxo"
             await thread.send(content=message, allowed_mentions=discord.AllowedMentions(everyone=True))
             self.logger.info(f"Sent message to {thread.id}, {thread.name}: {message}")
 

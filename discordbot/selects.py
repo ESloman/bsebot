@@ -1,7 +1,7 @@
 import math
 
 from discord import SelectOption, Interaction
-from discord.ui import Select, View, Button
+from discord.ui import Select, Button
 
 from mongo.bsepoints import UserBets
 
@@ -62,10 +62,10 @@ class BetSelect(Select):
 
         # disable the other ui elements when this changes
         for child in self.view.children:
-            
+
             if type(child) == BetSelectAmount:
                 child.disabled = True
-            
+
             if type(child) == Button and child.label == "Submit":
                 child.disabled = True
 
@@ -86,7 +86,7 @@ class BetSelectAmount(Select):
         options = [
             SelectOption(label=f"{opt}", value=f"{opt}") for opt in self.amounts
         ]
-        
+
         if user_eddies != 0:
             half_eddies = math.floor(user_eddies / 2)
             if half_eddies in self.amounts:
@@ -98,7 +98,7 @@ class BetSelectAmount(Select):
                         label=f"{half_eddies} - Half your eddies",
                         value=f"{half_eddies}")
                 )
-            
+
             if user_eddies in self.amounts:
                 opt = [o for o in options if o.value == f"{user_eddies}"][0]
                 opt.label = f"{half_eddies} - ALL your eddies"
@@ -193,7 +193,7 @@ class TaxRateSelect(Select):
         options = [
             SelectOption(label=f"{opt}%", value=f"{opt / 100}") for opt in self.amounts
         ]
-        
+
         for option in options:
             if float(option.value) == current_val:
                 option.default = True
@@ -206,7 +206,7 @@ class TaxRateSelect(Select):
             max_values=1,
             options=options
         )
-    
+
     async def callback(self, interaction: Interaction):
         """
 

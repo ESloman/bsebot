@@ -95,7 +95,7 @@ class OnMessage(BaseEvent):
         if not message.attachments:
             message_type.append("message")
 
-        if re.match("Wordle \d?\d\d\d \d\/\d\\n\\n", message.content):
+        if re.match(r"Wordle \d?\d\d\d \d/\d\n\n", message.content):
             message_type.append("wordle")
 
         if emojis := re.findall(r"<:[a-zA-Z_0-9]*:\d*>", message.content):

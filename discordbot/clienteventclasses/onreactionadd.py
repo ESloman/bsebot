@@ -49,12 +49,12 @@ class OnReactionAdd(BaseEvent):
         return self.handle_user_reaction(reaction_emoji, message, guild, channel, user, message.author)
 
     def handle_user_reaction(
-            self, 
-            reaction: str, 
+            self,
+            reaction: str,
             message: discord.Message,
-            guild: discord.Guild, 
+            guild: discord.Guild,
             channel: discord.TextChannel,
-            user: discord.User, 
+            user: discord.User,
             author: discord.Member
     ) -> None:
         """

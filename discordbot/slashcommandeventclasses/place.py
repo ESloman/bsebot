@@ -81,7 +81,7 @@ class BSEddiesPlaceBet(BSEddies):
         bet = self.user_bets.get_bet_from_id(guild.id, bet_id)
 
         if not bet:
-            msg = f"This bet doesn't exist."
+            msg = "This bet doesn't exist."
             await response.edit_message(content=msg, view=None)
             return
 
@@ -100,7 +100,7 @@ class BSEddiesPlaceBet(BSEddies):
             return
 
         if amount <= 0:
-            msg = f"Cannot bet negative eddies or 0 eddies."
+            msg = "Cannot bet negative eddies or 0 eddies."
             await response.edit_message(content=msg, view=view)
             return
 

@@ -14,16 +14,15 @@ class OnThreadUpdate(BaseEvent):
 
     async def on_update(self, before: discord.Thread, after: discord.Thread) -> None:
         """
-
         :param before:
         :param after:
         :return:
         """
 
         if before.archived and not after.archived:
-            self.logger.info(f"Thread has been unarchived - joining")
+            self.logger.info("Thread has been unarchived - joining")
             thread_members = await after.fetch_members()
             member_ids = [member.id for member in thread_members]
             if self.client.user.id not in member_ids:
                 await after.join()
-                self.logger.info(f"Joining unarchived thread")
+                self.logger.info("Joining unarchived thread")

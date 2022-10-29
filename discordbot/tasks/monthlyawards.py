@@ -3,8 +3,8 @@ import datetime
 import discord
 from discord.ext import tasks, commands
 
-from discordbot.bot_enums import AwardsTypes, TransactionTypes
-from discordbot.constants import BSEDDIES_REVOLUTION_CHANNEL, BSE_SERVER_ID, MONTHLY_AWARDS_PRIZE
+from discordbot.bot_enums import TransactionTypes
+from discordbot.constants import BSEDDIES_REVOLUTION_CHANNEL, BSE_SERVER_ID
 from discordbot.statsclasses import StatsGatherer
 from mongo.bsepoints import UserPoints
 from mongo.bsedataclasses import Awards
@@ -20,7 +20,7 @@ class MonthlyBSEddiesAwards(commands.Cog):
         self.awards = Awards()
 
         self.bseddies_awards.start()
-    
+
     def cog_unload(self):
         """
         Method for cancelling the loop.
@@ -40,18 +40,18 @@ class MonthlyBSEddiesAwards(commands.Cog):
         if BSE_SERVER_ID not in self.guilds:
             # does not support other servers yet
             return
-        
+
         self.logger.info(f"It's the first of the month and about ~11ish - time to trigger the awards! {now=}")
 
         start, end = self.stats.get_monthly_datetime_objects()
-        
+
         args = (BSE_SERVER_ID, start, end)
 
         guild = await self.bot.fetch_guild(BSE_SERVER_ID)
-        
+
         # SERVER STATS
         # get all generic discord server stats
-        
+
         number_messages = self.stats.number_of_messages(*args)
         avg_message_chars, avg_message_words = self.stats.average_message_length(*args)
         busiest_channel = self.stats.busiest_channel(*args)
@@ -67,11 +67,12 @@ class MonthlyBSEddiesAwards(commands.Cog):
         stats = [
             number_messages, avg_message_chars, avg_message_words, busiest_channel, busiest_day
         ]
-        
+
         message = (
             "Some server stats 📈 from last month:\n\n"
             f"**Number of messages sent**: `{number_messages.value}`\n"
-            f"**Average message length**: Characters (`{avg_message_chars.value}`), Words (`{avg_message_words.value}`)\n"
+            f"**Average message length**: Characters (`{avg_message_chars.value}`), "
+            f"Words (`{avg_message_words.value}`)\n"
             f"**Chattiest channel**: {busiest_channel_obj.mention} (`{busiest_channel.messages}`)\n"
             f"**Chattiest day**: {busiest_day_format} (`{busiest_day.messages}`)\n"
             f"**Average wordle score**: `{average_wordle.value}`\n"
@@ -87,7 +88,7 @@ class MonthlyBSEddiesAwards(commands.Cog):
 
         # BSEDDIES AWARDS
         # get all stats for bseddies awards
-        
+
         most_messages = self.stats.most_messages_sent(*args)
         least_messages = self.stats.least_messages_sent(*args)
         longest_message = self.stats.longest_message(*args)
@@ -114,7 +115,7 @@ class MonthlyBSEddiesAwards(commands.Cog):
                 continue
             member = await guild.fetch_member(award.user_id)
             user_id_dict[award.user_id] = member
-        
+
         bseddies_awards = (
             "Time for the monthly **BSEddies Awards** 🏆\n\n"
             "The _'won't shut up'_ award: "
@@ -135,14 +136,14 @@ class MonthlyBSEddiesAwards(commands.Cog):
             "The _'participation'_ award: "
             f"{user_id_dict[least_messages.user_id].mention} (`{least_messages.value}` messages sent)"
         )
-        
+
         channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
 
         await channel.send(content=message)
         await channel.send(content=bseddies_awards)
-        
+
         # give the users their eddies
-        
+
         for award in awards:
             self.user_points.append_to_transaction_history(
                award.user_id,
@@ -154,11 +155,10 @@ class MonthlyBSEddiesAwards(commands.Cog):
                }
             )
             self.user_points.increment_points(award.user_id, award.guild_id, award.eddies)
-            self.awards.document_award(**{k:v for k, v in award.__dict__.items() if v})
-            self.logger.info(f"{ {k:v for k, v in award.__dict__.items() if v} }")
-        
-        self.logger.info(f"Sent messages! Until next month!")
+            self.awards.document_award(**{k: v for k, v in award.__dict__.items() if v})
+            self.logger.info(f"{ {k: v for k, v in award.__dict__.items() if v} }")
 
+        self.logger.info("Sent messages! Until next month!")
 
     @bseddies_awards.before_loop
     async def before_thread_mute(self):

@@ -18,7 +18,7 @@ class OnStickerCreate(BaseEvent):
             before: List[discord.GuildSticker],
             after: List[discord.GuildSticker]
     ) -> None:
-        
+
         guild = await self.client.fetch_guild(guild_id)
 
         for sticker in after:
@@ -27,7 +27,7 @@ class OnStickerCreate(BaseEvent):
                 continue
 
             new_stick_obj = await guild.fetch_sticker(sticker.id)
-            
+
             self.logger.info(f"New sticker, {stick_obj.name}, created!")
             self.server_stickers.insert_sticker(
                 sticker.id,

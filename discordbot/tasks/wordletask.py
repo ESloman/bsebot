@@ -46,7 +46,7 @@ class WordleTask(commands.Cog):
 
         if now.hour >= 10:
             if self.set_wordle_activity:
-                self.logger.info(f"Setting activity back to default")
+                self.logger.info("Setting activity back to default")
                 listening_activity = discord.Activity(
                     name="conversations",
                     state="Listening",
@@ -62,7 +62,7 @@ class WordleTask(commands.Cog):
             return
 
         if not self.set_wordle_activity:
-            self.logger.info(f"Setting wordle activity")
+            self.logger.info("Setting wordle activity")
             game = discord.Game("Wordle")
             await self.bot.change_presence(status=discord.Status.online, activity=game)
             self.set_wordle_activity = True
@@ -73,7 +73,7 @@ class WordleTask(commands.Cog):
             return
 
         if self.wait_iters != 0:
-            self.logger.info(f"Decrementing countdown...")
+            self.logger.info("Decrementing countdown...")
             self.wait_iters -= 1
             return
 
@@ -130,7 +130,7 @@ class WordleTask(commands.Cog):
         await channel.send(content=message)
         self.sent_wordle = True
 
-        self.logger.info(f"Setting activity back to default")
+        self.logger.info("Setting activity back to default")
         listening_activity = discord.Activity(
             name="conversations",
             state="Listening",

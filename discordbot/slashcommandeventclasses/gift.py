@@ -40,7 +40,7 @@ class BSEddiesGift(BSEddies):
 
         points = self.user_points.get_user_points(ctx.author.id, ctx.guild.id)
         if points < amount:
-            msg = f"You have insufficient points to perform that action."
+            msg = "You have insufficient points to perform that action."
             await ctx.respond(content=msg, ephemeral=True)
             return
 

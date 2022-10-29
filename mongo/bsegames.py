@@ -8,13 +8,7 @@ This particular file contains Collection Classes for the 'bestsummerevergameserv
 """
 
 import datetime
-import math
-from typing import Union
 
-from bson import ObjectId
-from pymongo.results import UpdateResult
-
-from discordbot.constants import LOAN_BASE_INTEREST_RATE
 from mongo import interface
 from mongo.db_classes import BestSummerEverGameServersDB
 

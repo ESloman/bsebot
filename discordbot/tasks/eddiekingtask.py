@@ -33,7 +33,7 @@ class BSEddiesKingTask(commands.Cog):
         :return:
         """
         for guild_id in self.guilds:
-            
+
             if events := self.events.get_open_events(guild_id):
                 # ongoing revolution event - not changing the King now
                 self.event = events[0]
@@ -112,7 +112,7 @@ class BSEddiesKingTask(commands.Cog):
 
                 message = f"You are now the KING of {guild_obj.name}! :crown:"
                 await new.send(content=message)
-                
+
                 if guild_id == BSE_SERVER_ID:
                     channel = guild.get_channel(BSEDDIES_REVOLUTION_CHANNEL)
                     msg = f"{new.mention} is now the {role.mention}! 👑"

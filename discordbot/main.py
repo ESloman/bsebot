@@ -51,18 +51,18 @@ def _create_logger() -> logging.Logger:
 
 if __name__ == "__main__":
     """
-    This is our primary entry point for getting the bot start. 
-    
+    This is our primary entry point for getting the bot start.
+
     We expect a '.env' file to be located in the same directory that contains our DISCORD_TOKEN and also whether or not
     we're in DEBUG_MODE.
-    
+
     We start by getting those values from the .env file and exit if we don't have a DISCORD_TOKEN.
     We then work out which SERVER_IDs to use based on whether or not we're in DEBUG_MODE.
-    
+
     We then create the logger object and initialise our discord client.
     Then, we use the client to create an instance of CommandManager - this class registers all the events we're
     listening for.
-    
+
     Finally, we start the asyncio loop and start listening for events.
     """
 
@@ -86,7 +86,7 @@ if __name__ == "__main__":
     logger = _create_logger()
 
     intents = discord.Intents.all()
-    
+
     intents.presences = False
     intents.typing = False
 

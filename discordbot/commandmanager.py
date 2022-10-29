@@ -400,7 +400,11 @@ class CommandManager(object):
         @self.client.command(description="View your transaction history.")
         async def transactions(
                 ctx: discord.ApplicationContext,
-                full: discord.Option(bool, description="Do you want the full transaction history?", default=False),
+                full: discord.Option(
+                    bool,
+                    description="Do you want the full transaction history?",  # noqa: F722
+                    default=False
+                ),
         ) -> None:
             """
             Slash command that allows the user to see their eddie transaction history

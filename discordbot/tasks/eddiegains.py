@@ -2,7 +2,6 @@ import datetime
 import math
 import re
 from collections import Counter
-from typing import List
 
 import discord
 from discord.ext import tasks, commands
@@ -59,7 +58,7 @@ class EddieGainMessager(commands.Cog):
 
             current_king_id = self.user_points.get_current_king(guild_id)["uid"]
 
-            msg = f"Eddie gain summary:\n"
+            msg = "Eddie gain summary:\n"
             for user_id in eddie_dict:
 
                 value = eddie_dict[user_id][0]
@@ -75,8 +74,6 @@ class EddieGainMessager(commands.Cog):
                     msg += f"\n- `{user_id}` :  **{value}**"
                     continue
 
-                roles = user.roles  # type: List[discord.Role]
-
                 msg += f"\n- `{user_id}` {user.display_name} :  **{value}**"
                 text = f"Your daily salary of BSEDDIES is `{value}` (after tax).\n"
 
@@ -85,7 +82,7 @@ class EddieGainMessager(commands.Cog):
                 else:
                     text += f"You were taxed `{tax}` by the KING.\n"
 
-                text += f"\nThis is based on the following amount of interactivity yesterday:"
+                text += "\nThis is based on the following amount of interactivity yesterday:"
 
                 for key in sorted(breakdown):
                     text += f"\n - `{HUMAN_MESSAGE_TYPES[key]}`  :  **{breakdown[key]}**"
@@ -231,7 +228,7 @@ class BSEddiesManager(object):
             ]
             for reaction in our_user_reactions:
 
-                if emoji := self.server_emojis.get_emoji_from_name(guild_id, reaction["content"]):
+                if _ := self.server_emojis.get_emoji_from_name(guild_id, reaction["content"]):
                     message_types.append("custom_emoji_reaction")
 
                 matching_reactions = [
@@ -321,7 +318,7 @@ class BSEddiesManager(object):
 
             try:
                 wordle_message = [w for w in user_results if "wordle" in w["message_type"]][0]
-                result = re.search("\d\/\d", wordle_message["content"]).group()
+                result = re.search(r"\d/\d", wordle_message["content"]).group()
                 guesses = result.split("/")[0]
 
                 if guesses != "X":
@@ -338,7 +335,7 @@ class BSEddiesManager(object):
                 if guesses != "X":
                     wordle_messages.append((user, guesses))
 
-            except IndexError as e:
+            except IndexError:
                 # just means we had an error with this
                 pass
 
@@ -361,7 +358,7 @@ class BSEddiesManager(object):
         bot_guesses = 100  # arbitrarily high number
         if results:
             bot_message = results[0]
-            bot_result = re.search("\d\/\d", bot_message["content"]).group()
+            bot_result = re.search(r"\d/\d", bot_message["content"]).group()
             bot_guesses = bot_result.split("/")[0]
             if bot_guesses != "X":
                 bot_guesses = int(bot_guesses)
@@ -384,7 +381,7 @@ class BSEddiesManager(object):
 
         current_king_id = self.user_points.get_current_king(guild_id)["uid"]
         tax_gains = 0
-        
+
         tax_rate = self.tax_rate.get_tax_rate()
         self.logger.info(f"Tax rate is: {tax_rate}")
 

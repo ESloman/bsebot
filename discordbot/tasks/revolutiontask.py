@@ -27,7 +27,7 @@ class BSEddiesRevolutionTask(commands.Cog):
         self.revolution.start()
 
         for guild_id in guilds:
-            if event := self.revolutions.get_open_events(guild_id):
+            if _ := self.revolutions.get_open_events(guild_id):
                 self.rev_started = True
 
     def cog_unload(self):
@@ -164,7 +164,7 @@ class BSEddiesRevolutionTask(commands.Cog):
         self.rev_started = False
 
         if len(_users) == 0:
-            message = f"No-one supported or overthrew the King - nothing happens."
+            message = "No-one supported or overthrew the King - nothing happens."
             await channel.send(content=message)
             self.revolutions.close_event(event["event_id"], guild_id, False, 0)
             return
@@ -179,7 +179,7 @@ class BSEddiesRevolutionTask(commands.Cog):
 
         if not success:
             # revolution FAILED
-            message = f"Sadly, our revolution has failed. THE KING LIVES :crown: Better luck next week!"
+            message = "Sadly, our revolution has failed. THE KING LIVES :crown: Better luck next week!"
 
             self.user_points.append_to_transaction_history(
                 king_id, guild_id,

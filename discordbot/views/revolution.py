@@ -27,7 +27,7 @@ class RevolutionView(discord.ui.View):
             child.disabled = disable
 
     @discord.ui.button(
-        label=f"OVERTHROW",
+        label="OVERTHROW",
         style=discord.ButtonStyle.green,
         custom_id="overthrow_button",
         emoji="🔥"
@@ -87,7 +87,7 @@ class RevolutionView(discord.ui.View):
             self.toggle_stuff(False)
             await followup.edit_message(interaction.message.id, view=self)
             return
-        
+
         if user_id not in event["revolutionaries"]:
             event["revolutionaries"].append(user_id)
 
@@ -129,7 +129,7 @@ class RevolutionView(discord.ui.View):
         await followup.send(content="Congrats - you've pledged to `overthrow`!", ephemeral=True)
 
     @discord.ui.button(
-        label=f"SUPPORT THE KING",
+        label="SUPPORT THE KING",
         style=discord.ButtonStyle.red,
         custom_id="support_button",
         emoji="👑"
@@ -190,13 +190,12 @@ class RevolutionView(discord.ui.View):
             self.toggle_stuff(False)
             await followup.edit_message(interaction.message.id, view=self)
             return
-        
+
         if user_id not in event["users"]:
             event["users"].append(user_id)
             event["chance"] -= 15
         if user_id not in event["supporters"]:
             event["supporters"].append(user_id)
-
 
         self.revolutions.update(
             {"_id": event["_id"]},
@@ -232,13 +231,13 @@ class RevolutionView(discord.ui.View):
         await followup.send(content="Congrats - you've pledged your `support`!", ephemeral=True)
 
     @discord.ui.button(
-        label=f"Save THYSELF",
+        label="Save THYSELF",
         style=discord.ButtonStyle.grey,
         custom_id="save_button",
         emoji="💵"
     )
     async def save_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
-        
+
         response = interaction.response  # type: discord.InteractionResponse
         followup = interaction.followup  # type: discord.Webhook
 
@@ -260,12 +259,12 @@ class RevolutionView(discord.ui.View):
             await followup.send(content="Unfortunately, this event has expired", ephemeral=True)
             # leave it disabled
             return
-        
+
         if event["king"] != interaction.user.id:
             await followup.send(content="You're not the King - so you can't use this button.")
             self.toggle_stuff(False)
             await followup.edit_message(interaction.message.id, view=self)
-        
+
         user_id = interaction.user.id
         guild_id = interaction.guild.id
 
@@ -274,7 +273,7 @@ class RevolutionView(discord.ui.View):
             guild_id,
             {"points": True, "king": True}
         )
-        
+
         eddies = our_user["points"]
         amount_to_subtract = math.floor(eddies * 0.1)
         self.user_points.decrement_points(user_id, guild_id, amount_to_subtract)
@@ -289,7 +288,7 @@ class RevolutionView(discord.ui.View):
                 "timestamp": datetime.datetime.now(),
             }
         )
-        
+
         event["chance"] -= 15
         event["times_saved"] += 1
         self.revolutions.update(
@@ -299,13 +298,13 @@ class RevolutionView(discord.ui.View):
                 "times_saved": event["times_saved"]
             }}
         )
-        
+
         guild = self.client.get_guild(guild_id)
 
         role = guild.get_role(BSEDDIES_KING_ROLES[guild_id])
 
         edited_message = self.embeds.get_revolution_message(interaction.user, role, event, guild)
-        
+
         msg = f"{interaction.user.mention} just spent `{amount_to_subtract}` to reduce the overthrow chance by **15%**."
         await followup.send(content=msg)
         self.toggle_stuff(False)

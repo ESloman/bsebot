@@ -5,9 +5,9 @@ from discordbot.slashcommandeventclasses import BSEddiesCreateBet, BSEddiesPlace
 class BSEddiesBetCreateModal(discord.ui.Modal):
     def __init__(self, client, guilds, logger, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        
+
         self.logger = logger
-        
+
         self.bseddies_create = BSEddiesCreateBet(client, guilds, logger)
         self.bseddies_place = BSEddiesPlaceBet(client, guilds, logger)
         self.bseddies_close = BSEddiesCloseBet(client, guilds, logger)

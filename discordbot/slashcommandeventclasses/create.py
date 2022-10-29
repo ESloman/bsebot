@@ -72,7 +72,7 @@ class BSEddiesCreateBet(BSEddies):
 
         try:
             await ctx.response.defer(ephemeral=True)
-        except Exception as e:
+        except Exception:
             pass
 
         self._add_event_type_to_activity_history(
@@ -83,9 +83,9 @@ class BSEddiesCreateBet(BSEddies):
         )
 
         if not option_one_name or not option_two_name:
-            msg = (f"If you're providing custom outcome names - you must provide at least two outcomes.\n"
-                   f"Additionally, you must provide the outcomes sequentially "
-                   f"(ie, outcome_one, then outcome_two, and then outcome_three, and then outcome_four.)")
+            msg = ("If you're providing custom outcome names - you must provide at least two outcomes.\n"
+                   "Additionally, you must provide the outcomes sequentially "
+                   "(ie, outcome_one, then outcome_two, and then outcome_three, and then outcome_four.)")
             await ctx.respond(content=msg, ephemeral=True)
             return
 

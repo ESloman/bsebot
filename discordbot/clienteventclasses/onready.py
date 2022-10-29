@@ -35,7 +35,7 @@ class OnReadyEvent(BaseEvent):
         :return: None
         """
         self.logger.info("Beginning OnReady sequence")
-        
+
         self.logger.info("Syncing commands")
         await self.client.sync_commands(method="auto", guild_ids=self.guild_ids)
         self.logger.info("Synced commands")
@@ -47,7 +47,7 @@ class OnReadyEvent(BaseEvent):
         for guild_id in self.guild_ids:
             guild = self.client.get_guild(guild_id)  # type: discord.Guild
             self.logger.info(f"Checking guild: {guild.id} - {guild.name}")
-            
+
             self.logger.info("Checking guilds for new members")
             for member in guild.members:  # type: discord.Member
                 if member.bot:
@@ -191,7 +191,7 @@ class OnReadyEvent(BaseEvent):
             self.logger.info("Initialising event views")
             if events := self.events.get_open_events(guild_id):
                 if len(events) > 1:
-                    self.logger.info(f"???")
+                    self.logger.info("???")
                     continue
                 event = events[0]
                 view = RevolutionView(self.client, event, self.logger)
@@ -199,7 +199,7 @@ class OnReadyEvent(BaseEvent):
                 self.client.add_view(view)
                 message_id = event["message_id"]
                 channel_id = event["channel_id"]
-                
+
                 channel = await guild.fetch_channel(channel_id)
                 message = channel.get_partial_message(message_id)
 
@@ -213,7 +213,7 @@ class OnReadyEvent(BaseEvent):
                 channel_id = bet["channel_id"]
                 if not channel_id or not message_id:
                     continue
-                
+
                 try:
                     channel = await guild.fetch_channel(channel_id)
                 except discord.errors.NotFound:
@@ -242,15 +242,15 @@ class OnReadyEvent(BaseEvent):
             try:
                 commit_log = self.git_compare(guild_id)
                 self.logger.info("Got commit log successfully")
-                
+
                 if commit_log is not None:
                     if guild_id == BSE_SERVER_ID:
                         channel_id = BSEDDIES_REVOLUTION_CHANNEL
                     else:
                         channel_id = 291508460519161856
-                    
+
                     channel = await guild.fetch_channel(channel_id)
-                    
+
                     update_message = (
                         "I have just been updated and restarted. Here are the recent commits in this new update:\n\n"
                         "```diff\n"
@@ -260,7 +260,7 @@ class OnReadyEvent(BaseEvent):
                     try:
                         await channel.send(content=update_message)
                     except discord.errors.HTTPException:
-                        self.logger.info(f"Message is too long to send - skipping")
+                        self.logger.info("Message is too long to send - skipping")
             except Exception as e:
                 self.logger.exception(f"Error with doing the git thing: {e}")
 
@@ -281,7 +281,7 @@ class OnReadyEvent(BaseEvent):
                 path = os.path.expanduser("~/gitwork/bsebot/bsebot.git")
             else:
                 path = os.path.expanduser("~/gitwork/bsebot")
-        
+
         hash_doc = self.hashes.get_last_hash(guild_id)
         try:
             last_hash = hash_doc["hash"]
@@ -297,16 +297,16 @@ class OnReadyEvent(BaseEvent):
         except NotADirectoryError:
             self.logger.info(f"Got an error with the directory: {path}")
             return None
-        
+
         self.logger.info(f"{head_sha=}")
-        
+
         if last_hash == head_sha:
             self.logger.info(f"{last_hash=}, {head_sha=}")
             return None
-        
+
         if guild_id == BSE_SERVER_ID:
             path = "/home/gitwork/bsebot"
-        
+
         commit_log = subprocess.check_output([
             "git",
             "log",
@@ -314,7 +314,7 @@ class OnReadyEvent(BaseEvent):
         ], cwd=path).decode("utf8").strip("\n")
 
         self.logger.info(f"{commit_log=}")
-        
+
         # set the commit hash now
         self.hashes.update({"_id": hash_doc["_id"]}, {"$set": {"hash": head_sha}})
 

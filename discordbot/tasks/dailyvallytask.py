@@ -18,9 +18,10 @@ class AfterWorkVally(commands.Cog):
             "Anyone playing after-work {role} today?",
             "Who's about for after-work {role}?",
             "Anyone wanna get salty playing {role}?",
-            "Who's gonna grind some -insert map we don't like here- today {role}?",
+            "Who's gonna grind some `Breeze` today {role}?",
             "Anyone want to lose some RR {role}?",
-            "Who wants to roll some fat 1s {role}?"
+            "Who wants to roll some fat 1s playing {role}?",
+            "Can we get an after-work 5-stack today for {role}?"
         ]
 
     def cog_unload(self):
@@ -44,7 +45,7 @@ class AfterWorkVally(commands.Cog):
         if now.hour != 15 or not (45 <= now.minute <= 54):
             return
 
-        self.logger.info(f"Time to send vally message!")
+        self.logger.info("Time to send vally message!")
 
         if BSE_SERVER_ID not in self.guilds:
             return

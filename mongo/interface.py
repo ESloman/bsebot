@@ -177,7 +177,8 @@ def query(
     Searches a collection for documents based on given parameters.
     Parameters should be dictionaries : {key : search}. Where key is an existing key in the collection and
     search is either a value or an expression.
-    Expressions can either be {operator: value} or {"$regex": regex_expression}. Regex can only be used on string fields.
+    Expressions can either be {operator: value} or {"$regex": regex_expression}.
+    Regex can only be used on string fields.
     Valid operators: https://docs.mongodb.com/manual/reference/operator/query-comparison/
     Parameter examples:
         parameters = {"test_name": "tst_englishUK"}

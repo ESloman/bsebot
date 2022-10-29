@@ -9,8 +9,8 @@ class HighScoreBoardView(discord.ui.View):
         super().__init__(timeout=None)
 
     @discord.ui.button(
-        label="Expand", 
-        style=discord.ButtonStyle.primary, 
+        label="Expand",
+        style=discord.ButtonStyle.primary,
         custom_id="highscore_button",
         emoji="📄"
         )

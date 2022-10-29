@@ -9,8 +9,8 @@ class LeaderBoardView(discord.ui.View):
         super().__init__(timeout=None)
 
     @discord.ui.button(
-        label="Expand", 
-        style=discord.ButtonStyle.primary, 
+        label="Expand",
+        style=discord.ButtonStyle.primary,
         custom_id="leaderboard_button",
         emoji="📄")
     async def button_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:

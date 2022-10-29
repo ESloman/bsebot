@@ -139,27 +139,27 @@ class TaxRate(BestSummerEverPointsDB):
         doc = {"type": "tax", "value": 0.1}
         self.insert(doc)
         return doc
-    
+
     def get_tax_rate(self) -> float:
-        
+
         if self._cached_id:
-           ret = self.query({"_id": self._cached_id}) 
+            ret = self.query({"_id": self._cached_id})
         else:
             ret = self.query({"type": "tax"})
             if not ret:
                 ret = [self._set_default_doc(), ]
-        
+
         if ret:
             self._cached_id = ret[0]["_id"]
             return ret[0]["value"]
 
     def set_tax_rate(self, tax_rate: float) -> None:
-        
+
         if self._cached_id:
             update_doc = {"_id": self._cached_id}
         else:
             update_doc = {"type": "tax"}
-        
+
         self.update(update_doc, {"$set": {"value": tax_rate}})
 
 
@@ -173,7 +173,7 @@ class CommitHash(BestSummerEverPointsDB):
         """
         super().__init__()
         self._vault = interface.get_collection(self.database, "hashes")
-    
+
     def get_last_hash(self, guild_id: int) -> dict:
         ret = self.query({"type": "hash", "guild_id": guild_id})
         if ret:
@@ -184,18 +184,18 @@ class Awards(BestSummerEverPointsDB):
     def __init__(self):
         super().__init__()
         self._vault = interface.get_collection(self.database, "awards")
-    
+
     def document_stat(
-        self, 
+        self,
         guild_id: int,
-        stat: StatTypes, 
+        stat: StatTypes,
         month: str,
         value: Union[int, float, datetime.datetime],
         timestamp: datetime.datetime,
         short_name: str,
         **kwargs
     ) -> list:
-        
+
         doc = {
             "type": "stat",
             "guild_id": guild_id,
@@ -210,14 +210,14 @@ class Awards(BestSummerEverPointsDB):
             doc[key] = kwargs[key]
 
         return self.insert(doc)
-    
+
     def document_award(
-        self, 
-        guild_id: int, 
-        user_id: int, 
-        award: AwardsTypes, 
-        month: str, 
-        eddies: int, 
+        self,
+        guild_id: int,
+        user_id: int,
+        award: AwardsTypes,
+        month: str,
+        eddies: int,
         value: Union[int, float],
         short_name: str
     ) -> list:

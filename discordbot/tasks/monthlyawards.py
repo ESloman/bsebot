@@ -4,7 +4,7 @@ import discord
 from discord.ext import tasks, commands
 
 from discordbot.bot_enums import TransactionTypes
-from discordbot.constants import BSEDDIES_REVOLUTION_CHANNEL, BSE_SERVER_ID, MONTHLY_AWARDS_PRIZE, SLOMAN_SERVER_ID
+from discordbot.constants import BSEDDIES_REVOLUTION_CHANNEL, BSE_SERVER_ID, MONTHLY_AWARDS_PRIZE
 from discordbot.statsclasses import StatsGatherer
 from mongo.bsepoints import UserPoints
 from mongo.bsedataclasses import Awards

@@ -801,7 +801,7 @@ class StatsGatherer:
             Stat: twitter stat
         """
         messages = self._get_messages(guild_id, start, end)
-        
+
         tweet_users = {}
         for message in messages:
             if "twitter" in message["content"] and "link" in message["message_type"]:
@@ -809,7 +809,7 @@ class StatsGatherer:
                 if user_id not in tweet_users:
                     tweet_users[user_id] = 0
                 tweet_users[user_id] += 1
-        
+
         twitter_addict = sorted(tweet_users, key=lambda x: tweet_users[x], reverse=True)[0]
 
         data_class = Stat(

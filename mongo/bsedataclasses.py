@@ -199,7 +199,7 @@ class Awards(BestSummerEverPointsDB):
         if type(value) == datetime.date:
             # convert date into something MongoDB wants to parse
             value = value.strftime("%Y-%m-%d")
-        
+
         doc = {
             "type": "stat",
             "guild_id": guild_id,
@@ -247,7 +247,7 @@ class Awards(BestSummerEverPointsDB):
             "value": value,
             "short_name": short_name
         }
-        
+
         for key in kwargs:
             if key not in doc:
                 doc[key] = kwargs[key]

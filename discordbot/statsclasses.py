@@ -788,3 +788,31 @@ class StatsGatherer:
         )
 
         return data_class
+
+    def twitter_addict(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+
+        messages = self._get_messages(guild_id, start, end)
+        
+        tweet_users = {}
+        for message in messages:
+            if "twitter" in message["content"]:
+                user_id = message["user_id"]
+                if user_id not in tweet_users:
+                    tweet_users[user_id] = 0
+                tweet_users[user_id] += 1
+        
+        twitter_addict = sorted(tweet_users, key=lambda x: tweet_users[x], reverse=True)[0]
+
+        data_class = Stat(
+            type="award",
+            guild_id=guild_id,
+            user_id=twitter_addict,
+            award=AwardsTypes.TWITTER_ADDICT,
+            month=start.strftime("%b %y"),
+            value=tweet_users[twitter_addict],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="twitter_addict"
+        )
+
+        return data_class

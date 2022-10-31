@@ -4,7 +4,7 @@ import discord
 from discord.ext import tasks, commands
 
 from discordbot.bot_enums import TransactionTypes
-from discordbot.constants import BSEDDIES_REVOLUTION_CHANNEL, BSE_SERVER_ID
+from discordbot.constants import BSEDDIES_REVOLUTION_CHANNEL, BSE_SERVER_ID, MONTHLY_AWARDS_PRIZE
 from discordbot.statsclasses import StatsGatherer
 from mongo.bsepoints import UserPoints
 from mongo.bsedataclasses import Awards
@@ -97,6 +97,7 @@ class MonthlyBSEddiesAwards(commands.Cog):
         most_eddies_placed = self.stats.most_eddies_bet(*args)
         most_eddies_won = self.stats.most_eddies_won(*args)
         longest_king = self.stats.most_time_king(*args)
+        twitter_addict = self.stats.twitter_addict(*args)
 
         awards = [
             most_messages,
@@ -106,7 +107,8 @@ class MonthlyBSEddiesAwards(commands.Cog):
             most_bets,
             most_eddies_placed,
             most_eddies_won,
-            longest_king
+            longest_king,
+            twitter_addict
         ]
 
         user_id_dict = {}  # type: dict[int, discord.Member]
@@ -117,7 +119,8 @@ class MonthlyBSEddiesAwards(commands.Cog):
             user_id_dict[award.user_id] = member
 
         bseddies_awards = (
-            "Time for the monthly **BSEddies Awards** 🏆\n\n"
+            "Time for the monthly **BSEddies Awards** 🏆\n"
+            f"Each award has a prize of **{MONTHLY_AWARDS_PRIZE}** eddies.\n\n"
             "The _'won't shut up'_ award: "
             f"{user_id_dict[most_messages.user_id].mention} (`{most_messages.value}` messages sent)\n"
             "The _'can't find the enter key'_ award: "
@@ -134,7 +137,9 @@ class MonthlyBSEddiesAwards(commands.Cog):
             f"{user_id_dict[longest_king.user_id].mention} "
             f"(`{str(datetime.timedelta(seconds=longest_king.value))}` spent as KING)\n"
             "The _'participation'_ award: "
-            f"{user_id_dict[least_messages.user_id].mention} (`{least_messages.value}` messages sent)"
+            f"{user_id_dict[least_messages.user_id].mention} (`{least_messages.value}` messages sent)\n"
+            "The _'twitter addict'_ award: "
+            f"{user_id_dict[twitter_addict.user_id].mention} (`{twitter_addict.value}` tweets shared)"
         )
 
         channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)

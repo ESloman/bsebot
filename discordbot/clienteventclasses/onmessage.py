@@ -87,10 +87,9 @@ class OnMessage(BaseEvent):
             message_type.append("everyone_mention")
 
         if "https://" in message.content or "http://" in message_content:
-            if "gif" in message.content:
+            if ".gif" in message.content:
                 message_type.append("gif")
-            else:
-                message_type.append("link")
+            message_type.append("link")
 
         if not message.attachments:
             message_type.append("message")

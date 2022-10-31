@@ -190,11 +190,15 @@ class Awards(BestSummerEverPointsDB):
         guild_id: int,
         stat: StatTypes,
         month: str,
-        value: Union[int, float, datetime.datetime],
+        value: Union[int, float, datetime.datetime, datetime.date],
         timestamp: datetime.datetime,
         short_name: str,
         **kwargs
     ) -> list:
+
+        if type(value) == datetime.date:
+            # convert date into something MongoDB wants to parse
+            value = value.strftime("%Y-%m-%d")
 
         doc = {
             "type": "stat",
@@ -207,7 +211,8 @@ class Awards(BestSummerEverPointsDB):
         }
 
         for key in kwargs:
-            doc[key] = kwargs[key]
+            if key not in doc:
+                doc[key] = kwargs[key]
 
         return self.insert(doc)
 
@@ -219,7 +224,8 @@ class Awards(BestSummerEverPointsDB):
         month: str,
         eddies: int,
         value: Union[int, float],
-        short_name: str
+        short_name: str,
+        **kwargs
     ) -> list:
         """Insert an award into the DB
 
@@ -241,4 +247,9 @@ class Awards(BestSummerEverPointsDB):
             "value": value,
             "short_name": short_name
         }
+
+        for key in kwargs:
+            if key not in doc:
+                doc[key] = kwargs[key]
+
         return self.insert(doc)

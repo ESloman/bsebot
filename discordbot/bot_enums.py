@@ -92,6 +92,7 @@ class AwardsTypes(IntEnum):
     MOST_EDDIES_LOST = 7
     MOST_EDDIES_WON = 8
     LONGEST_KING = 9
+    TWITTER_ADDICT = 10
 
 
 class StatTypes(IntEnum):

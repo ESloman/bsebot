@@ -3,7 +3,7 @@ import discord
 
 from discordbot.bot_enums import ActivityTypes
 from discordbot.constants import HUMAN_MESSAGE_TYPES
-from discordbot.eddiegains import BSEddiesManager
+from discordbot.tasks.eddiegains import BSEddiesManager
 from discordbot.slashcommandeventclasses import BSEddies
 
 

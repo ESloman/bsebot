@@ -5,18 +5,18 @@ from typing import Union
 import discord
 
 import discordbot.views as views
+import discordbot.slashcommandeventclasses as slashcommands
 from discordbot.bot_enums import TransactionTypes, ActivityTypes
-from discordbot.slashcommandeventclasses import BSEddies, BSEddiesCloseBet
 
 
-class BSEddiesPlaceBet(BSEddies):
+class BSEddiesPlaceBet(slashcommands.BSEddies):
     """
     Class for handling `/bseddies bet place` commands
     """
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
-        self.bseddies_close = BSEddiesCloseBet(client, guilds, logger)
+        self.bseddies_close = slashcommands.BSEddiesCloseBet(client, guilds, logger)
 
     async def create_bet_view(
             self,

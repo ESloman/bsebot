@@ -4,7 +4,7 @@ import discord
 from discord.ext import tasks, commands
 
 from discordbot.bot_enums import TransactionTypes
-from discordbot.constants import BSEDDIES_REVOLUTION_CHANNEL, BSE_SERVER_ID, MONTHLY_AWARDS_PRIZE
+from discordbot.constants import BSEDDIES_REVOLUTION_CHANNEL, BSE_SERVER_ID, MONTHLY_AWARDS_PRIZE, SLOMAN_SERVER_ID
 from discordbot.statsclasses import StatsGatherer
 from mongo.bsepoints import UserPoints
 from mongo.bsedataclasses import Awards
@@ -69,7 +69,7 @@ class MonthlyBSEddiesAwards(commands.Cog):
         ]
 
         message = (
-            "Some server stats 📈 from last month:\n\n"
+            f"As it's the first of the month, here's some server stats 📈 from {start.strftime('%B')}:\n\n"
             f"**Number of messages sent**: `{number_messages.value}`\n"
             f"**Average message length**: Characters (`{avg_message_chars.value}`), "
             f"Words (`{avg_message_words.value}`)\n"
@@ -151,13 +151,13 @@ class MonthlyBSEddiesAwards(commands.Cog):
 
         for award in awards:
             self.user_points.append_to_transaction_history(
-               award.user_id,
-               award.guild_id,
-               {
-                   "type": TransactionTypes.MONTHLY_AWARDS_PRIZE,
-                   "timestamp": datetime.datetime.now(),
-                   "amount": award.eddies,
-               }
+              award.user_id,
+              award.guild_id,
+              {
+                  "type": TransactionTypes.MONTHLY_AWARDS_PRIZE,
+                  "timestamp": datetime.datetime.now(),
+                  "amount": award.eddies,
+              }
             )
             self.user_points.increment_points(award.user_id, award.guild_id, award.eddies)
             self.awards.document_award(**{k: v for k, v in award.__dict__.items() if v})

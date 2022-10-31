@@ -309,7 +309,7 @@ class StatsGatherer:
                 days[day] = 0
             days[day] += 1
 
-        busiest = sorted(days, key=lambda x: days[x], reverse=True)[0]
+        busiest = sorted(days, key=lambda x: days[x], reverse=True)[0]  # type: datetime.date
 
         data_class = Stat(
             "stat",
@@ -781,7 +781,7 @@ class StatsGatherer:
             user_id=longest_king,
             award=AwardsTypes.LONGEST_KING,
             month=start.strftime("%b %y"),
-            value=kings[longest_king],
+            value=int(kings[longest_king]),
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="longest_king"
@@ -790,12 +790,21 @@ class StatsGatherer:
         return data_class
 
     def twitter_addict(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """Calculates who's posted the most twitter links
 
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: twitter stat
+        """
         messages = self._get_messages(guild_id, start, end)
         
         tweet_users = {}
         for message in messages:
-            if "twitter" in message["content"]:
+            if "twitter" in message["content"] and "link" in message["message_type"]:
                 user_id = message["user_id"]
                 if user_id not in tweet_users:
                     tweet_users[user_id] = 0

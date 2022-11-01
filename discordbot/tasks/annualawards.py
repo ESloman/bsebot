@@ -4,46 +4,46 @@ import discord
 from discord.ext import tasks, commands
 
 from discordbot.bot_enums import TransactionTypes
-from discordbot.constants import BSEDDIES_REVOLUTION_CHANNEL, BSE_SERVER_ID, MONTHLY_AWARDS_PRIZE
+from discordbot.constants import BSEDDIES_REVOLUTION_CHANNEL, BSE_SERVER_ID, ANNUAL_AWARDS_AWARD
 from discordbot.statsclasses import StatsGatherer
 from mongo.bsepoints import UserPoints
 from mongo.bsedataclasses import Awards
 
 
-class MonthlyBSEddiesAwards(commands.Cog):
+class AnnualBSEddiesAwards(commands.Cog):
     def __init__(self, bot: discord.Client, guilds, logger):
         self.bot = bot
         self.logger = logger
         self.guilds = guilds
-        self.stats = StatsGatherer()
+        self.stats = StatsGatherer(annual=True)
         self.user_points = UserPoints()
         self.awards = Awards()
 
-        self.bseddies_awards.start()
+        self.annual_bseddies_awards.start()
 
     def cog_unload(self):
         """
         Method for cancelling the loop.
         :return:
         """
-        self.bseddies_awards.cancel()
+        self.annual_bseddies_awards.cancel()
 
     @tasks.loop(minutes=60)
-    async def bseddies_awards(self):
+    async def annual_bseddies_awards(self):
         now = datetime.datetime.now()
 
-        if not now.day == 1 or not now.hour == 11:
-            # we only want to trigger on the first of each month
-            # and also trigger at 11am
+        if not now.day == 1 or not now.hour == 14 or not now.month == 1:
+            # we only want to trigger on the first of each YEAR
+            # and also trigger at 2pm
             return
 
         if BSE_SERVER_ID not in self.guilds:
             # does not support other servers yet
             return
 
-        self.logger.info(f"It's the first of the month and about ~11ish - time to trigger the awards! {now=}")
+        self.logger.info(f"Time for the annual BSEddies awards! {now=}")
 
-        start, end = self.stats.get_monthly_datetime_objects()
+        start, end = self.stats.get_annual_datetime_objects()
 
         args = (BSE_SERVER_ID, start, end)
 
@@ -70,7 +70,7 @@ class MonthlyBSEddiesAwards(commands.Cog):
         ]
 
         message = (
-            f"As it's the first of the month, here's some server stats 📈 from {start.strftime('%B')}:\n\n"
+            f"As it's the first day of the year, here's some server stats 📈 from {start.strftime('%Y')}:\n\n"
             f"**Number of messages sent**: `{number_messages.value}`\n"
             f"**Average message length**: Characters (`{avg_message_chars.value}`), "
             f"Words (`{avg_message_words.value}`)\n"
@@ -120,8 +120,8 @@ class MonthlyBSEddiesAwards(commands.Cog):
             user_id_dict[award.user_id] = member
 
         bseddies_awards = (
-            "Time for the monthly **BSEddies Awards** 🏆\n"
-            f"Each award has a prize of **{MONTHLY_AWARDS_PRIZE}** eddies.\n\n"
+            "Time for the _Annual_ **BSEddies Awards** 🏆\n"
+            f"Each award has a prize of **{ANNUAL_AWARDS_AWARD}** eddies.\n\n"
             "The _'won't shut up'_ award: "
             f"{user_id_dict[most_messages.user_id].mention} (`{most_messages.value}` messages sent)\n"
             "The _'can't find the enter key'_ award: "
@@ -164,9 +164,9 @@ class MonthlyBSEddiesAwards(commands.Cog):
             self.awards.document_award(**{k: v for k, v in award.__dict__.items() if v})
             self.logger.info(f"{ {k: v for k, v in award.__dict__.items() if v} }")
 
-        self.logger.info("Sent messages! Until next month!")
+        self.logger.info("Sent messages! Until next year!")
 
-    @bseddies_awards.before_loop
+    @annual_bseddies_awards.before_loop
     async def before_thread_mute(self):
         """
         Make sure that websocket is open before we starting querying via it.

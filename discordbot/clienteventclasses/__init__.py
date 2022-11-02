@@ -9,3 +9,4 @@ from .onready import OnReadyEvent
 from .onstickercreate import OnStickerCreate
 from .onthreadcreate import OnThreadCreate
 from .onthreadupdate import OnThreadUpdate
+from .onvoicestatechange import OnVoiceStateChange

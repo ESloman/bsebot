@@ -193,6 +193,7 @@ class Awards(BestSummerEverPointsDB):
         value: Union[int, float, datetime.datetime, datetime.date],
         timestamp: datetime.datetime,
         short_name: str,
+        annual: bool,
         **kwargs
     ) -> list:
 
@@ -207,7 +208,8 @@ class Awards(BestSummerEverPointsDB):
             "timestamp": timestamp,
             "month": month,
             "value": value,
-            "short_name": short_name
+            "short_name": short_name,
+            "annual": annual
         }
 
         for key in kwargs:
@@ -225,6 +227,7 @@ class Awards(BestSummerEverPointsDB):
         eddies: int,
         value: Union[int, float],
         short_name: str,
+        annual: bool,
         **kwargs
     ) -> list:
         """Insert an award into the DB
@@ -245,7 +248,8 @@ class Awards(BestSummerEverPointsDB):
             "month": month,
             "eddies": eddies,
             "value": value,
-            "short_name": short_name
+            "short_name": short_name,
+            "annual": annual
         }
 
         for key in kwargs:

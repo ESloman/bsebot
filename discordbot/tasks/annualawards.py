@@ -29,8 +29,7 @@ class AnnualBSEddiesAwards(commands.Cog):
         if not now.day == 1 or not now.hour == 14 or not now.month == 1:
             # we only want to trigger on the first of each YEAR
             # and also trigger at 2pm
-            # return
-            pass
+            return
 
         if BSE_SERVER_ID not in self.guilds:
             # does not support other servers yet

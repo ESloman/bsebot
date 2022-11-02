@@ -28,8 +28,7 @@ class MonthlyBSEddiesAwards(commands.Cog):
         if not now.day == 1 or not now.hour == 11:
             # we only want to trigger on the first of each month
             # and also trigger at 11am
-            # return
-            pass
+            return
 
         if BSE_SERVER_ID not in self.guilds:
             # does not support other servers yet

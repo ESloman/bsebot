@@ -80,11 +80,11 @@ class StatsGatherer:
             Tuple[datetime.datetime, datetime.datetime]:
         """
         now = datetime.datetime.now()
-        # end = now.replace(day=1, hour=0, minute=0, second=0, microsecond=1, month=1)
-        # start = end.replace(year=end.year - 1)
 
-        start = now.replace(year=2022, month=1, day=1, hour=0, minute=0, second=0, microsecond=1)
-        end = now.replace(year=2023, month=1, day=1, hour=0, minute=0, second=0, microsecond=1)
+        # always create so it's the first of the month of the current year
+        end = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=1)
+        # always be the first of the previous year
+        start = end.replace(year=end.year - 1)
 
         return start, end
 

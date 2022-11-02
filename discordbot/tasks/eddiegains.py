@@ -206,6 +206,9 @@ class BSEddiesManager(object):
         message_types = []
         for r in user_results:
             if isinstance(r["message_type"], list):
+                # handle vc later
+                if "vc_joined" in r["message_type"] or "vc_streaming" in r["message_type"]:
+                    continue
                 message_types.extend(r["message_type"])
             else:
                 message_types.append(r["message_type"])
@@ -255,9 +258,37 @@ class BSEddiesManager(object):
         count = Counter(message_types)
         eddies_gained = self._calc_eddies(count, minimum)
 
+        # handle VC stuff here
+        # VC events are different as we want to work out eddies on time spent in VC
+        vc_joined_events = [vc for vc in user_results if "vc_joined" in vc["message_type"]]
+        vc_total_time = sum([vc["time_in_vc"] for vc in vc_joined_events])
+        vc_eddies = vc_total_time * MESSAGE_VALUES["vc_joined"]
+
+        if vc_total_time:
+            # add a minimum of 1 for each VC event
+            vc_eddies += len(vc_joined_events)
+
+        eddies_gained += vc_eddies
+
+        vc_streaming_events = [vc for vc in user_results if "vc_streaming" in vc["message_type"]]
+        stream_total_time = sum([vc["time_streaming"] for vc in vc_streaming_events])
+        stream_eddies = stream_total_time * MESSAGE_VALUES["vc_streaming"]
+
+        if stream_total_time:
+            # add a minimum of 2 for each streaming event
+            stream_eddies += (len(vc_streaming_events) * 2)
+
+        eddies_gained += stream_eddies
+
         eddies_gained = math.floor(eddies_gained)
 
         count["daily"] = minimum
+
+        if vc_total_time:
+            count["vc_joined"] = vc_total_time
+
+        if stream_total_time:
+            count["vc_streaming"] = stream_total_time
 
         return eddies_gained, count
 

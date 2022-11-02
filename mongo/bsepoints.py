@@ -718,6 +718,58 @@ class UserInteractions(BestSummerEverPointsDB):
             {"$pull": {"reactions": entry}},
         )
 
+    def add_voice_state_entry(
+        self,
+        guild_id: int,
+        user_id: int,
+        channel_id: int,
+        timestamp: datetime.datetime,
+        muted: bool,
+        deafened: bool,
+        streaming: bool,
+    ) -> list:
+
+        doc = {
+            "guild_id": guild_id,
+            "user_id": user_id,
+            "channel_id": channel_id,
+            "timestamp": timestamp,
+            "muted": muted,
+            "muted_time": None if not muted else timestamp,
+            "deafened": deafened,
+            "deafened_time": None if not deafened else timestamp,
+            "streaming": streaming,
+            "streaming_time": None if not streaming else timestamp,
+            "time_in_vc": 0,
+            "time_muted": 0,
+            "time_deafened": 0,
+            "time_streaming": 0,
+            "message_type": ["vc_joined", ],
+            "active": True,
+            "events": [{"timestamp": timestamp, "event": "joined"}]
+        }
+
+        return self.insert(doc)
+
+    def find_active_voice_state(
+        self,
+        guild_id: int,
+        user_id: int,
+        channel_id: int,
+        timestamp: datetime.datetime
+    ) -> Optional[dict]:
+
+        ret = self.query({
+            "guild_id": guild_id,
+            "user_id": user_id,
+            "channel_id": channel_id,
+            "active": True
+        })
+        if ret:
+            return ret[0]
+        else:
+            return None
+
 
 class ServerEmojis(BestSummerEverPointsDB):
     """

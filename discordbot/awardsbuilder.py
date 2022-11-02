@@ -76,7 +76,7 @@ class AwardsBuilder:
             f"Words (`{avg_message_words.value}`)\n"
             f"**Chattiest channel**: {busiest_channel_obj.mention} "
             f"(`{busiest_channel.messages}` messages from `{busiest_channel.users}` users)\n"
-            f"**Most popular channel**: `{popular_channel_obj.mention}` "
+            f"**Most popular channel**: {popular_channel_obj.mention} "
             f"(`{most_popular_channel.users}` unique users)\n"
             f"**Chattiest day**: {busiest_day_format} "
             f"(`{busiest_day.messages}` messages in `{busiest_day.channels}` "

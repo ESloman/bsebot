@@ -99,6 +99,9 @@ class AnnualBSEddiesAwards(commands.Cog):
         most_eddies_won = self.stats.most_eddies_won(*args)
         longest_king = self.stats.most_time_king(*args)
         twitter_addict = self.stats.twitter_addict(*args)
+        jerk_off_king = self.stats.jerk_off_contributor(*args)
+        big_memer = self.stats.big_memer(*args)
+        react_king = self.stats.react_king(*args)
 
         awards = [
             most_messages,
@@ -109,7 +112,10 @@ class AnnualBSEddiesAwards(commands.Cog):
             most_eddies_placed,
             most_eddies_won,
             longest_king,
-            twitter_addict
+            twitter_addict,
+            jerk_off_king,
+            big_memer,
+            react_king
         ]
 
         user_id_dict = {}  # type: dict[int, discord.Member]
@@ -118,6 +124,8 @@ class AnnualBSEddiesAwards(commands.Cog):
                 continue
             member = await guild.fetch_member(award.user_id)
             user_id_dict[award.user_id] = member
+        
+        jerk_off_channel = await self.bot.fetch_channel(JERK_OFF_CHAT)
 
         bseddies_awards = (
             "Time for the _Annual_ **BSEddies Awards** 🏆\n"
@@ -140,7 +148,14 @@ class AnnualBSEddiesAwards(commands.Cog):
             "The _'participation'_ award: "
             f"{user_id_dict[least_messages.user_id].mention} (`{least_messages.value}` messages sent)\n"
             "The _'twitter addict'_ award: "
-            f"{user_id_dict[twitter_addict.user_id].mention} (`{twitter_addict.value}` tweets shared)"
+            f"{user_id_dict[twitter_addict.user_id].mention} (`{twitter_addict.value}` tweets shared)\n"
+            "The _'jerk off mate'_ award: "
+            f"{user_id_dict[jerk_off_king.user_id].mention} "
+            f"(`{jerk_off_king.value}` contributions to {jerk_off_channel.mention})\n"
+            "The _'big memer'_ award: "
+            f"{user_id_dict[big_memer.user_id].mention} (`{big_memer.value}` reacts received)\n"
+            "The _'emoji is worth a thousand words'_ award: "
+            f"{user_id_dict[react_king.user_id].mention} (`{react_king.value}` reacts given)\n"
         )
 
         channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)

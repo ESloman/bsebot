@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import List, Optional, Tuple, Union
 
 from discordbot.bot_enums import ActivityTypes, AwardsTypes, StatTypes, TransactionTypes
-from discordbot.constants import ANNUAL_AWARDS_AWARD, BSE_BOT_ID, MONTHLY_AWARDS_PRIZE
+from discordbot.constants import ANNUAL_AWARDS_AWARD, BSE_BOT_ID, JERK_OFF_CHAT, MONTHLY_AWARDS_PRIZE
 from mongo.bsepoints import UserBets, UserInteractions, UserPoints
 
 
@@ -52,6 +52,9 @@ class StatsGatherer:
         self.__activity_cache = []  # type: List[dict]
         self.__activity_cache_time = None  # type: Optional[datetime.datetime]
 
+        self.__reactions_cache = []  # type: List[dict]
+        self.__reactions_cache_time = None  # type: Optional[datetime.datetime]
+
     @staticmethod
     def get_monthly_datetime_objects() -> Tuple[datetime.datetime, datetime.datetime]:
         """Returns two datetime objects that sandwich the previous month
@@ -77,8 +80,11 @@ class StatsGatherer:
             Tuple[datetime.datetime, datetime.datetime]:
         """
         now = datetime.datetime.now()
-        end = now.replace(day=1, hour=0, minute=0, second=0, microsecond=1)
-        start = end.replace(year=end.year - 1)
+        # end = now.replace(day=1, hour=0, minute=0, second=0, microsecond=1, month=1)
+        # start = end.replace(year=end.year - 1)
+        
+        start = now.replace(year=2022, month=1, day=1, hour=0, minute=0, second=0, microsecond=1)
+        end = now.replace(year=2023, month=1, day=1, hour=0, minute=0, second=0, microsecond=1)
 
         return start, end
 
@@ -103,14 +109,17 @@ class StatsGatherer:
         if self.__message_cache and (now - self.__message_cache_time).total_seconds() < 3600:
             return self.__message_cache
 
+        limit = 100000 if self.annual else 10000
+
         self.__message_cache = self.user_interactions.query(
             {
                 "guild_id": guild_id,
                 "timestamp": {"$gt": start, "$lt": end},
-                "message_type": {"$nin": ["emoji_used"]}
+                "message_type": {"$nin": ["emoji_used", "vc_joined", "vc_streaming"]}
             },
-            limit=10000
+            limit=limit
         )
+
         self.__message_cache_time = now
         return self.__message_cache
 
@@ -227,6 +236,38 @@ class StatsGatherer:
         self.__activity_cache = activity_history
         self.__activity_cache_time = now
         return self.__activity_cache
+
+    def _get_reactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
+        """Internal method to query for messages between a certain date
+        Will cache the messages on first parse and return the cache if cache was set less than an hour ago
+
+        Args:
+            guild_id (int): the guild ID to get messages for
+            start (datetime.datetime): start of timestamp query
+            end (datetime.datetime): end of timestamp query
+
+        Returns:
+            list: list of message dicts
+        """
+        now = datetime.datetime.now()
+
+        if start != self.__start_cache or end != self.__end_cache:
+            self.__reactions_cache = []
+
+        if self.__reactions_cache and (now - self.__reactions_cache_time).total_seconds() < 3600:
+            return self.__reactions_cache
+
+        limit = 100000 if self.annual else 10000
+
+        self.__reactions_cache = self.user_interactions.query(
+            {
+                "guild_id": guild_id,
+                "reactions.timestamp": {"$gt": start, "$lt": end}
+            },
+            limit=limit
+        )
+        self.__reactions_cache_time = now
+        return self.__reactions_cache
 
     # generic server stats
     def number_of_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
@@ -965,6 +1006,138 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="twitter_addict",
+            annual=self.annual
+        )
+
+        if self.annual:
+            data_class.month = None
+            data_class.year = start.strftime("%Y")
+            data_class.eddies = ANNUAL_AWARDS_AWARD
+
+        return data_class
+
+    def jerk_off_contributor(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """Calculates who's posted this most contributions in #jerk-off-chat
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: _description_
+        """
+        messages = self._get_messages(guild_id, start, end)
+        jerk_off_messages = [m for m in messages if m["channel_id"] == JERK_OFF_CHAT]
+
+        jerk_off_users = {}
+        for message in jerk_off_messages:
+            if any([a for a in ["link", "attachment"] if a in message["message_type"]]):
+                user_id = message["user_id"]
+                if user_id not in jerk_off_users:
+                    jerk_off_users[user_id] = 0
+                jerk_off_users[user_id] += 1
+
+        masturbator = sorted(jerk_off_users, key=lambda x: jerk_off_users[x], reverse=True)[0]
+
+        data_class = Stat(
+            type="award",
+            guild_id=guild_id,
+            user_id=masturbator,
+            award=AwardsTypes.MASTURBATOR,
+            month=start.strftime("%b %y"),
+            value=jerk_off_users[masturbator],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="masturbator",
+            annual=self.annual
+        )
+
+        if self.annual:
+            data_class.month = None
+            data_class.year = start.strftime("%Y")
+            data_class.eddies = ANNUAL_AWARDS_AWARD
+
+        return data_class
+
+    def big_memer(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: _description_
+        """
+        reaction_messages = self._get_reactions(guild_id, start, end)
+        
+        reaction_users = {}
+        for message in reaction_messages:
+            user_id = message["user_id"]
+            if user_id not in reaction_users:
+                reaction_users[user_id] = 0
+            reactions = [r for r in message["reactions"] if r["user_id"] != user_id]
+            reaction_users[user_id] += len(reactions)
+
+        big_memer = sorted(reaction_users, key=lambda x: reaction_users[x], reverse=True)[0]
+
+        data_class = Stat(
+            type="award",
+            guild_id=guild_id,
+            user_id=big_memer,
+            award=AwardsTypes.BIG_MEMER,
+            month=start.strftime("%b %y"),
+            value=reaction_users[big_memer],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="big_memer",
+            annual=self.annual
+        )
+
+        if self.annual:
+            data_class.month = None
+            data_class.year = start.strftime("%Y")
+            data_class.eddies = ANNUAL_AWARDS_AWARD
+
+        return data_class
+
+    def react_king(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: _description_
+        """
+        reaction_messages = self._get_reactions(guild_id, start, end)
+        reactions = []
+        for react in reaction_messages:
+            reactions.extend(react["reactions"])
+
+        reaction_users = {}
+        for reaction in reactions:
+            user_id = reaction["user_id"]
+            if user_id not in reaction_users:
+                reaction_users[user_id] = 0
+            reaction_users[user_id] += 1
+
+        react_king = sorted(reaction_users, key=lambda x: reaction_users[x], reverse=True)[0]
+
+        data_class = Stat(
+            type="award",
+            guild_id=guild_id,
+            user_id=react_king,
+            award=AwardsTypes.REACT_KING,
+            month=start.strftime("%b %y"),
+            value=reaction_users[react_king],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="react_king",
             annual=self.annual
         )
 

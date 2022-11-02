@@ -93,6 +93,9 @@ class AwardsTypes(IntEnum):
     MOST_EDDIES_WON = 8
     LONGEST_KING = 9
     TWITTER_ADDICT = 10
+    MASTURBATOR = 11
+    BIG_MEMER = 12
+    REACT_KING = 13
 
 
 class StatTypes(IntEnum):

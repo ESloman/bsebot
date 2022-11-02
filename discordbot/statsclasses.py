@@ -71,7 +71,7 @@ class StatsGatherer:
 
         end = now.replace(day=1, hour=0, minute=0, second=0, microsecond=1)
         return start, end
-    
+
     @staticmethod
     def get_annual_datetime_objects() -> Tuple[datetime.datetime, datetime.datetime]:
         """Returns two datetime objects that sandwich the previous year
@@ -82,7 +82,7 @@ class StatsGatherer:
         now = datetime.datetime.now()
         # end = now.replace(day=1, hour=0, minute=0, second=0, microsecond=1, month=1)
         # start = end.replace(year=end.year - 1)
-        
+
         start = now.replace(year=2022, month=1, day=1, hour=0, minute=0, second=0, microsecond=1)
         end = now.replace(year=2023, month=1, day=1, hour=0, minute=0, second=0, microsecond=1)
 
@@ -136,10 +136,10 @@ class StatsGatherer:
             list: list of bet dicts
         """
         now = datetime.datetime.now()
-        
+
         if start != self.__start_cache or end != self.__end_cache:
             self.__bet_cache = []
-        
+
         if self.__bet_cache and (now - self.__bet_cache_time).total_seconds() < 3600:
             return self.__bet_cache
 
@@ -153,7 +153,7 @@ class StatsGatherer:
         self.__bet_cache_time = now
         return self.__bet_cache
 
-    def _get_users(self, guild_id: int, start:datetime.datetime, end: datetime.datetime) -> List[dict]:
+    def _get_users(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
         """Internal method to query for users
         Will cache the users on first parse and return the cache if cache was set less than an hour ago
 
@@ -283,6 +283,9 @@ class StatsGatherer:
         """
         messages = self._get_messages(guild_id, start, end)
 
+        channel_ids = set([m["channel_id"] for m in messages])
+        user_ids = set([m["user_id"] for m in messages])
+
         data_class = Stat(
             "stat",
             guild_id,
@@ -293,6 +296,9 @@ class StatsGatherer:
             short_name="number_of_messages",
             annual=self.annual
         )
+
+        data_class.channels = len(channel_ids)
+        data_class.users = len(user_ids)
 
         if self.annual:
             data_class.month = None
@@ -370,13 +376,16 @@ class StatsGatherer:
         channels = {}
         for message in messages:
             channel_id = message["channel_id"]
+            user_id = message["user_id"]
             if not channel_id:
                 continue
             if channel_id not in channels:
-                channels[channel_id] = 0
-            channels[channel_id] += 1
+                channels[channel_id] = {"count": 0, "users": []}
+            channels[channel_id]["count"] += 1
+            if user_id not in channels[channel_id]["users"]:
+                channels[channel_id]["users"].append(user_id)
 
-        busiest = sorted(channels, key=lambda x: channels[x], reverse=True)[0]
+        busiest = sorted(channels, key=lambda x: channels[x]["count"], reverse=True)[0]
 
         data_class = Stat(
             "stat",
@@ -389,7 +398,8 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        data_class.messages = channels[busiest]
+        data_class.messages = channels[busiest]["count"]
+        data_class.users = len(channels[busiest]["users"])
 
         if self.annual:
             data_class.month = None
@@ -412,12 +422,19 @@ class StatsGatherer:
         messages = self._get_messages(guild_id, start, end)
         days = {}
         for message in messages:
+            channel_id = message["channel_id"]
+            user_id = message["user_id"]
             day = message["timestamp"].date()
             if day not in days:
-                days[day] = 0
-            days[day] += 1
+                days[day] = {"count": 0, "channels": [], "users": []}
+            days[day]["count"] += 1
 
-        busiest = sorted(days, key=lambda x: days[x], reverse=True)[0]  # type: datetime.date
+            if channel_id not in days[day]["channels"]:
+                days[day]["channels"].append(channel_id)
+            if user_id not in days[day]["users"]:
+                days[day]["users"].append(user_id)
+
+        busiest = sorted(days, key=lambda x: days[x]["count"], reverse=True)[0]  # type: datetime.date
 
         data_class = Stat(
             "stat",
@@ -430,7 +447,9 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        data_class.messages = days[busiest]
+        data_class.messages = days[busiest]["count"]
+        data_class.channels = len(days[busiest]["channels"])
+        data_class.users = len(days[busiest]["users"])
 
         if self.annual:
             data_class.month = None
@@ -600,6 +619,49 @@ class StatsGatherer:
             data_class_b.year = start.strftime("%Y")
 
         return data_class_a, data_class_b
+
+    def most_unique_channel_contributers(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """Calculates the channel with the most unique contributors
+
+        Args:
+            guild_id (int): _description_
+            start (datetime.datetime): _description_
+            end (datetime.datetime): _description_
+
+        Returns:
+            Stat: _description_
+        """
+        messages = self._get_messages(guild_id, start, end)
+
+        channels = {}
+        for message in messages:
+            channel_id = message["channel_id"]
+            user_id = message["user_id"]
+            if channel_id not in channels:
+                channels[channel_id] = []
+            if user_id not in channels[channel_id]:
+                channels[channel_id].append(user_id)
+
+        most_popular_channel = sorted(channels, key=lambda x: len(channels[x]), reverse=True)[0]
+
+        data_class = Stat(
+            "stat",
+            guild_id,
+            stat=StatTypes.MOST_POPULAR_CHANNEL,
+            month=start.strftime("%b %y"),
+            value=most_popular_channel,
+            timestamp=datetime.datetime.now(),
+            short_name="most_popular_channel",
+            annual=self.annual
+        )
+
+        data_class.users = len(channels[most_popular_channel])
+
+        if self.annual:
+            data_class.month = None
+            data_class.year = start.strftime("%Y")
+
+        return data_class
 
     # stats that can be won
     # messages
@@ -1072,7 +1134,7 @@ class StatsGatherer:
             Stat: _description_
         """
         reaction_messages = self._get_reactions(guild_id, start, end)
-        
+
         reaction_users = {}
         for message in reaction_messages:
             user_id = message["user_id"]

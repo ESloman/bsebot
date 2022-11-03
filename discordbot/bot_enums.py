@@ -110,3 +110,6 @@ class StatTypes(IntEnum):
     EDDIES_PLACED = 9
     EDDIES_WIN = 10
     MOST_POPULAR_CHANNEL = 11
+    TIME_SPENT_IN_VC = 12
+    VC_MOST_TIME = 13
+    VC_MOST_USERS = 14

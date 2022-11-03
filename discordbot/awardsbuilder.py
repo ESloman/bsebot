@@ -49,14 +49,20 @@ class AwardsBuilder:
         average_wordle = self.stats.average_wordle_victory(*args)
         eddies_placed, eddies_won = self.stats.bet_eddies_stats(*args)
         most_popular_channel = self.stats.most_unique_channel_contributers(*args)
+        time_spent_in_vc = self.stats.total_time_spent_in_vc(*args)
+        vc_most_time_spent = self.stats.vc_with_most_time_spent(*args)
+        vc_most_users = self.stats.vc_with_most_users(*args)
 
         busiest_channel_obj = await guild.fetch_channel(busiest_channel.value)
         busiest_day_format = busiest_day.value.strftime("%a %d %b")
         popular_channel_obj = await guild.fetch_channel(most_popular_channel.value)
+        vc_time_obj = await guild.fetch_channel(vc_most_time_spent.value)
+        vc_users_obj = await guild.fetch_channel(vc_most_users.value)
 
         stats = [
             number_messages, avg_message_chars, avg_message_words, busiest_channel, busiest_day,
-            num_bets, salary_gains, average_wordle, eddies_placed, eddies_won, most_popular_channel
+            num_bets, salary_gains, average_wordle, eddies_placed, eddies_won, most_popular_channel,
+            time_spent_in_vc, vc_most_time_spent, vc_most_users
         ]
 
         if not self.annual:
@@ -82,6 +88,12 @@ class AwardsBuilder:
             f"(`{busiest_day.messages}` messages in `{busiest_day.channels}` "
             f"channels from `{busiest_day.users}` users)\n"
             f"**Average wordle score**: `{average_wordle.value}`\n"
+            f"**Total time spent in VCs**: `{str(datetime.timedelta(time_spent_in_vc.value))}` "
+            f"(`in {time_spent_in_vc.channels}` channels from `{time_spent_in_vc.users}` users)\n"
+            f"**Talkiest VC**: {vc_time_obj.mention} (`{vc_most_time_spent.users}` users spent "
+            f"`{str(datetime.timedelta(vc_most_time_spent.time))}` in this VC)\n"
+            f"**Most popular VC**: {vc_users_obj.mention} (`{vc_most_users.users}` unique users spent "
+            f"`{str(datetime.timedelta(vc_most_users.time))}` in this VC)\n"
             f"**Bets created**: `{num_bets.value}`\n"
             f"**Eddies gained via salary**: `{salary_gains.value}`\n"
             f"**Eddies placed on bets**: `{eddies_placed.value}`\n"

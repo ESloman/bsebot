@@ -40,6 +40,9 @@ class StatsGatherer:
         self.__message_cache = []  # type: List[dict]
         self.__message_cache_time = None  # type: Optional[datetime.datetime]
 
+        self.__vc_cache = []  # type: List[dict]
+        self.__vc_cache_time = None  # type: Optional[datetime.datetime]
+
         self.__bet_cache = []  # type: List[dict]
         self.__bet_cache_time = None  # type: Optional[datetime.datetime]
 
@@ -122,6 +125,40 @@ class StatsGatherer:
 
         self.__message_cache_time = now
         return self.__message_cache
+
+    def _get_vc_interactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
+        """Internal method to query for VC interactions between a certain date
+        Will cache the messages on first parse and return the cache if cache was set less than an hour ago
+
+        Args:
+            guild_id (int): the guild ID to get messages for
+            start (datetime.datetime): start of timestamp query
+            end (datetime.datetime): end of timestamp query
+
+        Returns:
+            list: list of message dicts
+        """
+        now = datetime.datetime.now()
+
+        if start != self.__start_cache or end != self.__end_cache:
+            self.__vc_cache = []
+
+        if self.__vc_cache and (now - self.__vc_cache_time).total_seconds() < 3600:
+            return self.__vc_cache
+
+        limit = 100000 if self.annual else 10000
+
+        self.__vc_cache = self.user_interactions.query(
+            {
+                "guild_id": guild_id,
+                "timestamp": {"$gt": start, "$lt": end},
+                "message_type": "vc_joined"
+            },
+            limit=limit
+        )
+
+        self.__vc_cache_time = now
+        return self.__vc_cache
 
     def _get_bets(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
         """Internal method to query for bets between a certain date
@@ -624,9 +661,9 @@ class StatsGatherer:
         """Calculates the channel with the most unique contributors
 
         Args:
-            guild_id (int): _description_
-            start (datetime.datetime): _description_
-            end (datetime.datetime): _description_
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
 
         Returns:
             Stat: _description_
@@ -656,6 +693,144 @@ class StatsGatherer:
         )
 
         data_class.users = len(channels[most_popular_channel])
+
+        if self.annual:
+            data_class.month = None
+            data_class.year = start.strftime("%Y")
+
+        return data_class
+
+    def total_time_spent_in_vc(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """Calculates the total amount of time spent by everyone in all VCs
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: _description_
+        """
+        vc_interactions = self._get_vc_interactions(guild_id, start, end)
+        vc_time = 0
+        channels = []
+        users = []
+
+        for interaction in vc_interactions:
+            time_spent = interaction["time_in_vc"]
+            user_id = interaction["user_id"]
+            channel_id = interaction["channel_id"]
+            vc_time += time_spent
+            if channel_id not in channels:
+                channels.append(channel_id)
+            if user_id not in users:
+                users.append(user_id)
+
+        data_class = Stat(
+            "stat",
+            guild_id,
+            stat=StatTypes.TIME_SPENT_IN_VC,
+            month=start.strftime("%b %y"),
+            value=int(vc_time),
+            timestamp=datetime.datetime.now(),
+            short_name="total_time_spent_in_vc",
+            annual=self.annual
+        )
+
+        data_class.users = len(users)
+        data_class.channels = len(channels)
+
+        if self.annual:
+            data_class.month = None
+            data_class.year = start.strftime("%Y")
+
+        return data_class
+
+    def vc_with_most_time_spent(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """Calculates which VC had the most time spent in it
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: _description_
+        """
+        vc_interactions = self._get_vc_interactions(guild_id, start, end)
+
+        channels = {}
+
+        for interaction in vc_interactions:
+            time_spent = interaction["time_in_vc"]
+            user_id = interaction["user_id"]
+            channel_id = interaction["channel_id"]
+            if channel_id not in channels:
+                channels[channel_id] = {"count": 0, "users": []}
+            channels[channel_id]["count"] += time_spent
+            if user_id not in channels[channel_id]["users"]:
+                channels[channel_id]["users"].append(user_id)
+
+        vc_most_time = sorted(channels, key=lambda x: channels[x]["count"], reverse=True)[0]
+
+        data_class = Stat(
+            "stat",
+            guild_id,
+            stat=StatTypes.VC_MOST_TIME,
+            month=start.strftime("%b %y"),
+            value=vc_most_time,
+            timestamp=datetime.datetime.now(),
+            short_name="vc_most_time",
+            annual=self.annual
+        )
+
+        data_class.users = len(channels[vc_most_time]["users"])
+        data_class.time = channels[vc_most_time]["count"]
+
+        if self.annual:
+            data_class.month = None
+            data_class.year = start.strftime("%Y")
+
+        return data_class
+
+    def vc_with_most_users(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """Calculates which VC had the most unique users in it
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: _description_
+        """
+        vc_interactions = self._get_vc_interactions(guild_id, start, end)
+
+        channels = {}
+
+        for interaction in vc_interactions:
+            time_spent = interaction["time_in_vc"]
+            user_id = interaction["user_id"]
+            channel_id = interaction["channel_id"]
+            if channel_id not in channels:
+                channels[channel_id] = {"count": 0, "users": []}
+            channels[channel_id]["count"] += time_spent
+            if user_id not in channels[channel_id]["users"]:
+                channels[channel_id]["users"].append(user_id)
+
+        vc_most_users = sorted(channels, key=lambda x: len(channels[x]["users"]), reverse=True)[0]
+
+        data_class = Stat(
+            "stat",
+            guild_id,
+            stat=StatTypes.VC_MOST_TIME,
+            month=start.strftime("%b %y"),
+            value=vc_most_users,
+            timestamp=datetime.datetime.now(),
+            short_name="vc_most_time",
+            annual=self.annual
+        )
+        data_class.time = channels[vc_most_users]["count"]
 
         if self.annual:
             data_class.month = None

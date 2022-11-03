@@ -1,62 +1,18 @@
 
 import datetime
 import re
-from dataclasses import dataclass
-from typing import List, Optional, Tuple, Union
+from typing import Tuple
 
 from discordbot.bot_enums import ActivityTypes, AwardsTypes, StatTypes, TransactionTypes
 from discordbot.constants import ANNUAL_AWARDS_AWARD, BSE_BOT_ID, JERK_OFF_CHAT, MONTHLY_AWARDS_PRIZE
-from mongo.bsepoints import UserBets, UserInteractions, UserPoints
-
-
-@dataclass
-class Stat:
-    type: str
-    guild_id: int
-    short_name: str
-    timestamp: datetime.datetime
-    value: Union[int, float, datetime.datetime]
-    annual: bool
-    month: Optional[str] = None
-    year: Optional[str] = None
-    user_id: Optional[int] = None
-    award: Optional[AwardsTypes] = None
-    stat: Optional[StatTypes] = None
-    eddies: Optional[int] = None
-    kwargs: Optional[dict] = None
+from discordbot.stats.statsdatacache import StatsDataCache
+from discordbot.stats.statsdataclasses import Stat
 
 
 class StatsGatherer:
     def __init__(self, annual: bool = False) -> None:
-        self.user_bets = UserBets()
-        self.user_interactions = UserInteractions()
-        self.user_points = UserPoints()
-
         self.annual = annual
-
-        self.__start_cache = None  # type: Optional[datetime.datetime]
-        self.__end_cache = None  # type: Optional[datetime.datetime]
-
-        self.__message_cache = []  # type: List[dict]
-        self.__message_cache_time = None  # type: Optional[datetime.datetime]
-
-        self.__vc_cache = []  # type: List[dict]
-        self.__vc_cache_time = None  # type: Optional[datetime.datetime]
-
-        self.__bet_cache = []  # type: List[dict]
-        self.__bet_cache_time = None  # type: Optional[datetime.datetime]
-
-        self.__user_cache = []  # type: List[dict]
-        self.__user_cache_time = None  # type: Optional[datetime.datetime]
-
-        self.__transaction_cache = []  # type: List[dict]
-        self.__transaction_cache_time = None  # type: Optional[datetime.datetime]
-
-        self.__activity_cache = []  # type: List[dict]
-        self.__activity_cache_time = None  # type: Optional[datetime.datetime]
-
-        self.__reactions_cache = []  # type: List[dict]
-        self.__reactions_cache_time = None  # type: Optional[datetime.datetime]
+        self.cache = StatsDataCache(self.annual)
 
     @staticmethod
     def get_monthly_datetime_objects() -> Tuple[datetime.datetime, datetime.datetime]:
@@ -91,221 +47,6 @@ class StatsGatherer:
 
         return start, end
 
-    # caching functions
-    def _get_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
-        """Internal method to query for messages between a certain date
-        Will cache the messages on first parse and return the cache if cache was set less than an hour ago
-
-        Args:
-            guild_id (int): the guild ID to get messages for
-            start (datetime.datetime): start of timestamp query
-            end (datetime.datetime): end of timestamp query
-
-        Returns:
-            list: list of message dicts
-        """
-        now = datetime.datetime.now()
-
-        if start != self.__start_cache or end != self.__end_cache:
-            self.__message_cache = []
-
-        if self.__message_cache and (now - self.__message_cache_time).total_seconds() < 3600:
-            return self.__message_cache
-
-        limit = 100000 if self.annual else 10000
-
-        self.__message_cache = self.user_interactions.query(
-            {
-                "guild_id": guild_id,
-                "timestamp": {"$gt": start, "$lt": end},
-                "message_type": {"$nin": ["emoji_used", "vc_joined", "vc_streaming"]}
-            },
-            limit=limit
-        )
-
-        self.__message_cache_time = now
-        return self.__message_cache
-
-    def _get_vc_interactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
-        """Internal method to query for VC interactions between a certain date
-        Will cache the messages on first parse and return the cache if cache was set less than an hour ago
-
-        Args:
-            guild_id (int): the guild ID to get messages for
-            start (datetime.datetime): start of timestamp query
-            end (datetime.datetime): end of timestamp query
-
-        Returns:
-            list: list of message dicts
-        """
-        now = datetime.datetime.now()
-
-        if start != self.__start_cache or end != self.__end_cache:
-            self.__vc_cache = []
-
-        if self.__vc_cache and (now - self.__vc_cache_time).total_seconds() < 3600:
-            return self.__vc_cache
-
-        limit = 100000 if self.annual else 10000
-
-        self.__vc_cache = self.user_interactions.query(
-            {
-                "guild_id": guild_id,
-                "timestamp": {"$gt": start, "$lt": end},
-                "message_type": "vc_joined"
-            },
-            limit=limit
-        )
-
-        self.__vc_cache_time = now
-        return self.__vc_cache
-
-    def _get_bets(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
-        """Internal method to query for bets between a certain date
-        Will cache the bets on first parse and return the cache if cache was set less than an hour ago
-
-        Args:
-            guild_id (int): the guild ID to get bets for
-            start (datetime.datetime): start of timestamp query
-            end (datetime.datetime): end of timestamp query
-
-        Returns:
-            list: list of bet dicts
-        """
-        now = datetime.datetime.now()
-
-        if start != self.__start_cache or end != self.__end_cache:
-            self.__bet_cache = []
-
-        if self.__bet_cache and (now - self.__bet_cache_time).total_seconds() < 3600:
-            return self.__bet_cache
-
-        self.__bet_cache = self.user_bets.query(
-            {
-                "guild_id": guild_id,
-                "created": {"$gt": start, "$lt": end}
-            },
-            limit=10000
-        )
-        self.__bet_cache_time = now
-        return self.__bet_cache
-
-    def _get_users(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
-        """Internal method to query for users
-        Will cache the users on first parse and return the cache if cache was set less than an hour ago
-
-        Args:
-            guild_id (int): the guild ID to get users for
-
-        Returns:
-            list: list of users dicts
-        """
-        now = datetime.datetime.now()
-
-        if start != self.__start_cache or end != self.__end_cache:
-            self.__user_cache = []
-
-        if self.__user_cache and (now - self.__user_cache_time).total_seconds() < 3600:
-            return self.__user_cache
-
-        self.__user_cache = self.user_points.query({"guild_id": guild_id})
-        self.__user_cache_time = now
-        return self.__user_cache
-
-    def _get_transactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
-        """Internal method to query for transactions between a certain date
-        Will cache the transactions on first parse and return the cache if cache was set less than an hour ago
-
-        Args:
-            guild_id (int): the guild ID
-            start (datetime.datetime): the beginning of time period
-            end (datetime.datetime): the end of the time period
-
-        Returns:
-            List[dict]: a list of transactions
-        """
-        now = datetime.datetime.now()
-
-        if start != self.__start_cache or end != self.__end_cache:
-            self.__transaction_cache = []
-
-        if self.__transaction_cache and (now - self.__transaction_cache_time).total_seconds() < 3600:
-            return self.__transaction_cache
-
-        users = self._get_users(guild_id, start, end)
-        transaction_history = []
-        for user in users:
-            transactions = [t for t in user.get("transaction_history", []) if start < t["timestamp"] < end]
-            for _trans in transactions:
-                _trans["uid"] = user["uid"]
-            transaction_history.extend(transactions)
-        self.__transaction_cache = transaction_history
-        self.__transaction_cache_time = now
-        return self.__transaction_cache
-
-    def _get_activities(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
-        """Internal method to query for activities between a certain date
-        Will cache the activities on first parse and return the cache if cache was set less than an hour ago
-
-        Args:
-            guild_id (int): the guild ID
-            start (datetime.datetime): the beginning of time period
-            end (datetime.datetime): the end of the time period
-
-        Returns:
-            List[dict]: a list of activities
-        """
-        now = datetime.datetime.now()
-
-        if start != self.__start_cache or end != self.__end_cache:
-            self.__activity_cache = []
-
-        if self.__activity_cache and (now - self.__activity_cache_time).total_seconds() < 3600:
-            return self.__activity_cache
-
-        users = self._get_users(guild_id, start, end)
-        activity_history = []
-        for user in users:
-            activities = [t for t in user.get("activity_history", []) if start < t["timestamp"] < end]
-            for _act in activities:
-                _act["uid"] = user["uid"]
-            activity_history.extend(activities)
-        self.__activity_cache = activity_history
-        self.__activity_cache_time = now
-        return self.__activity_cache
-
-    def _get_reactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
-        """Internal method to query for messages between a certain date
-        Will cache the messages on first parse and return the cache if cache was set less than an hour ago
-
-        Args:
-            guild_id (int): the guild ID to get messages for
-            start (datetime.datetime): start of timestamp query
-            end (datetime.datetime): end of timestamp query
-
-        Returns:
-            list: list of message dicts
-        """
-        now = datetime.datetime.now()
-
-        if start != self.__start_cache or end != self.__end_cache:
-            self.__reactions_cache = []
-
-        if self.__reactions_cache and (now - self.__reactions_cache_time).total_seconds() < 3600:
-            return self.__reactions_cache
-
-        limit = 100000 if self.annual else 10000
-
-        self.__reactions_cache = self.user_interactions.query(
-            {
-                "guild_id": guild_id,
-                "reactions.timestamp": {"$gt": start, "$lt": end}
-            },
-            limit=limit
-        )
-        self.__reactions_cache_time = now
-        return self.__reactions_cache
-
     # generic server stats
     def number_of_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Returns the number of messages between two given time periods
@@ -318,7 +59,7 @@ class StatsGatherer:
         Returns:
             int: the number of messages
         """
-        messages = self._get_messages(guild_id, start, end)
+        messages = self.cache.get_messages(guild_id, start, end)
 
         channel_ids = set([m["channel_id"] for m in messages])
         user_ids = set([m["user_id"] for m in messages])
@@ -356,7 +97,7 @@ class StatsGatherer:
             Tuple[Stat, Stat]: returns a tuple of average message characters and average words per message
         """
 
-        messages = self._get_messages(guild_id, start, end)
+        messages = self.cache.get_messages(guild_id, start, end)
         lengths = []
         words = []
         for message in messages:
@@ -408,7 +149,7 @@ class StatsGatherer:
         Returns:
             Tuple[int, int]: float of channel ID and number of messages
         """
-        messages = self._get_messages(guild_id, start, end)
+        messages = self.cache.get_messages(guild_id, start, end)
 
         channels = {}
         for message in messages:
@@ -456,7 +197,7 @@ class StatsGatherer:
         Returns:
             Tuple[datetime.date, int]: The date with most messages and the number of messages
         """
-        messages = self._get_messages(guild_id, start, end)
+        messages = self.cache.get_messages(guild_id, start, end)
         days = {}
         for message in messages:
             channel_id = message["channel_id"]
@@ -505,7 +246,7 @@ class StatsGatherer:
         Returns:
             int: the number of bets
         """
-        bets = self._get_bets(guild_id, start, end)
+        bets = self.cache.get_bets(guild_id, start, end)
 
         data_class = Stat(
             "stat",
@@ -535,7 +276,7 @@ class StatsGatherer:
         Returns:
             int: _description_
         """
-        transactions = self._get_transactions(guild_id, start, end)
+        transactions = self.cache.get_transactions(guild_id, start, end)
         salary_total = 0
         for trans in transactions:
             if trans["type"] != TransactionTypes.DAILY_SALARY:
@@ -570,7 +311,7 @@ class StatsGatherer:
         Returns:
             float: The average wordle score
         """
-        messages = self._get_messages(guild_id, start, end)
+        messages = self.cache.get_messages(guild_id, start, end)
         wordle_messages = [m for m in messages if "wordle" in m["message_type"]]
 
         wordle_count = []
@@ -616,7 +357,7 @@ class StatsGatherer:
         Returns:
             Tuple[int, int]: returns a tuple of eddies placed and eddies won
         """
-        transactions = self._get_transactions(guild_id, start, end)
+        transactions = self.cache.get_transactions(guild_id, start, end)
 
         eddies_placed = 0
         eddies_won = 0
@@ -668,7 +409,7 @@ class StatsGatherer:
         Returns:
             Stat: _description_
         """
-        messages = self._get_messages(guild_id, start, end)
+        messages = self.cache.get_messages(guild_id, start, end)
 
         channels = {}
         for message in messages:
@@ -711,7 +452,7 @@ class StatsGatherer:
         Returns:
             Stat: _description_
         """
-        vc_interactions = self._get_vc_interactions(guild_id, start, end)
+        vc_interactions = self.cache.get_vc_interactions(guild_id, start, end)
         vc_time = 0
         channels = []
         users = []
@@ -757,7 +498,7 @@ class StatsGatherer:
         Returns:
             Stat: _description_
         """
-        vc_interactions = self._get_vc_interactions(guild_id, start, end)
+        vc_interactions = self.cache.get_vc_interactions(guild_id, start, end)
 
         channels = {}
 
@@ -804,7 +545,7 @@ class StatsGatherer:
         Returns:
             Stat: _description_
         """
-        vc_interactions = self._get_vc_interactions(guild_id, start, end)
+        vc_interactions = self.cache.get_vc_interactions(guild_id, start, end)
 
         channels = {}
 
@@ -851,7 +592,7 @@ class StatsGatherer:
         Returns:
             Stat: the most messages stat
         """
-        messages = self._get_messages(guild_id, start, end)
+        messages = self.cache.get_messages(guild_id, start, end)
 
         message_users = {}
         for message in messages:
@@ -892,7 +633,7 @@ class StatsGatherer:
         Returns:
             Stat: least messages stat
         """
-        messages = self._get_messages(guild_id, start, end)
+        messages = self.cache.get_messages(guild_id, start, end)
 
         message_users = {}
         for message in messages:
@@ -933,7 +674,7 @@ class StatsGatherer:
         Returns:
             Stat: the longest message stat
         """
-        messages = self._get_messages(guild_id, start, end)
+        messages = self.cache.get_messages(guild_id, start, end)
         longest_message = None
         for message in messages:
             if content := message["content"]:
@@ -974,7 +715,7 @@ class StatsGatherer:
         Returns:
             Stat: the wordle stat
         """
-        messages = self._get_messages(guild_id, start, end)
+        messages = self.cache.get_messages(guild_id, start, end)
         wordle_messages = [m for m in messages if "wordle" in m["message_type"]]
 
         wordle_count = {}
@@ -1034,7 +775,7 @@ class StatsGatherer:
         Returns:
             Stat: most bets stat
         """
-        bets = self._get_bets(guild_id, start, end)
+        bets = self.cache.get_bets(guild_id, start, end)
         bet_users = {}
         for bet in bets:
             u = bet["user"]
@@ -1075,7 +816,7 @@ class StatsGatherer:
         Returns:
             Stat: most eddies bet stat
         """
-        transactions = self._get_transactions(guild_id, start, end)
+        transactions = self.cache.get_transactions(guild_id, start, end)
 
         bet_users = {}
         for trans in transactions:
@@ -1119,7 +860,7 @@ class StatsGatherer:
         Returns:
             Stat: most eddies won stat
         """
-        transactions = self._get_transactions(guild_id, start, end)
+        transactions = self.cache.get_transactions(guild_id, start, end)
 
         bet_users = {}
         for trans in transactions:
@@ -1164,7 +905,7 @@ class StatsGatherer:
             Stat: longest King stat
         """
 
-        activity_history = self._get_activities(guild_id, start, end)
+        activity_history = self.cache.get_activities(guild_id, start, end)
         king_events = sorted(
             [a for a in activity_history if a["type"] in [ActivityTypes.KING_GAIN, ActivityTypes.KING_LOSS]],
             key=lambda x: x["timestamp"]
@@ -1221,7 +962,7 @@ class StatsGatherer:
         Returns:
             Stat: twitter stat
         """
-        messages = self._get_messages(guild_id, start, end)
+        messages = self.cache.get_messages(guild_id, start, end)
 
         tweet_users = {}
         for message in messages:
@@ -1264,7 +1005,7 @@ class StatsGatherer:
         Returns:
             Stat: _description_
         """
-        messages = self._get_messages(guild_id, start, end)
+        messages = self.cache.get_messages(guild_id, start, end)
         jerk_off_messages = [m for m in messages if m["channel_id"] == JERK_OFF_CHAT]
 
         jerk_off_users = {}
@@ -1308,7 +1049,7 @@ class StatsGatherer:
         Returns:
             Stat: _description_
         """
-        reaction_messages = self._get_reactions(guild_id, start, end)
+        reaction_messages = self.cache.get_reactions(guild_id, start, end)
 
         reaction_users = {}
         for message in reaction_messages:
@@ -1351,7 +1092,7 @@ class StatsGatherer:
         Returns:
             Stat: _description_
         """
-        reaction_messages = self._get_reactions(guild_id, start, end)
+        reaction_messages = self.cache.get_reactions(guild_id, start, end)
         reactions = []
         for react in reaction_messages:
             reactions.extend(react["reactions"])

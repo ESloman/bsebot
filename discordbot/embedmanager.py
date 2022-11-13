@@ -154,7 +154,7 @@ class EmbedManager(object):
             f"If you believe that {king_user.mention} hasn't done too bad a job then you can **SUPPORT** them to "
             "reduce the chances of revolution happening. If the King _loses_, then supporters will lose eddies "
             "alongside their King.\n"
-            "The KING may spend 10% of their eddies using the_Save Thyself_ "
+            "The KING may spend 10% of their eddies using the _Save Thyself_ "
             "button to reduce revolution chance by 15%.\n"
             f"**Event ID**: `{event['event_id']}`\n"
             f"**Success rate**: `{max(min(event['chance'], 100), 0)}%`\n"

@@ -70,16 +70,7 @@ class RevolutionView(discord.ui.View):
             await followup.edit_message(interaction.message.id, view=self)
             return
 
-        if user_id in event["supporters"]:
-            await followup.send(
-                content="You have already pledged to support - you can't change your mind!",
-                ephemeral=True
-            )
-            self.toggle_stuff(False)
-            await followup.edit_message(interaction.message.id, view=self)
-            return
-
-        if user_id in event["users"]:
+        if user_id in event["revolutionaries"]:
             await followup.send(
                 content="You've already acted on this - you cannot do so again",
                 ephemeral=True
@@ -88,12 +79,15 @@ class RevolutionView(discord.ui.View):
             await followup.edit_message(interaction.message.id, view=self)
             return
 
-        if user_id not in event["revolutionaries"]:
-            event["revolutionaries"].append(user_id)
+        if user_id in event["supporters"]:
+            event["chance"] += 15
+            event["supporters"].remove(user_id)
+
+        event["revolutionaries"].append(user_id)
+        event["chance"] += 15
 
         if user_id not in event["users"]:
             event["users"].append(user_id)
-            event["chance"] += 15
 
         self.revolutions.update(
             {"_id": event["_id"]},
@@ -173,16 +167,7 @@ class RevolutionView(discord.ui.View):
             await followup.edit_message(interaction.message.id, view=self)
             return
 
-        if user_id in event["revolutionaries"]:
-            await followup.send(
-                content="You have already pledged to overthrow - you can't change your mind!",
-                ephemeral=True
-            )
-            self.toggle_stuff(False)
-            await followup.edit_message(interaction.message.id, view=self)
-            return
-
-        if user_id in event["users"]:
+        if user_id in event["supporters"]:
             await followup.send(
                 content="You've already acted on this - you cannot do so again",
                 ephemeral=True
@@ -191,11 +176,16 @@ class RevolutionView(discord.ui.View):
             await followup.edit_message(interaction.message.id, view=self)
             return
 
+        if user_id in event["revolutionaries"]:
+            event["chance"] -= 15
+            event["revolutionaries"].remove(user_id)
+
         if user_id not in event["users"]:
             event["users"].append(user_id)
-            event["chance"] -= 15
+
         if user_id not in event["supporters"]:
             event["supporters"].append(user_id)
+            event["chance"] -= 15
 
         self.revolutions.update(
             {"_id": event["_id"]},
@@ -264,6 +254,7 @@ class RevolutionView(discord.ui.View):
             await followup.send(content="You're not the King - so you can't use this button.")
             self.toggle_stuff(False)
             await followup.edit_message(interaction.message.id, view=self)
+            return
 
         user_id = interaction.user.id
         guild_id = interaction.guild.id

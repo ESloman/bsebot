@@ -197,11 +197,10 @@ class RevolutionView(discord.ui.View):
             }}
         )
 
-
         self.user_points.append_to_transaction_history(
             user_id, guild_id,
             {
-            "type": TransactionTypes.REV_SUPPORT,
+                "type": TransactionTypes.REV_SUPPORT,
                 "event_id": event["event_id"],
                 "timestamp": datetime.datetime.now(),
             }

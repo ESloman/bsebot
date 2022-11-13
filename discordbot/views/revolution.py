@@ -264,6 +264,7 @@ class RevolutionView(discord.ui.View):
             await followup.send(content="You're not the King - so you can't use this button.")
             self.toggle_stuff(False)
             await followup.edit_message(interaction.message.id, view=self)
+            return
 
         user_id = interaction.user.id
         guild_id = interaction.guild.id

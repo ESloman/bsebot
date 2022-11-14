@@ -40,12 +40,21 @@ class OnMessage(BaseEvent):
         if reference := message.reference:
             referenced_message = self.client.get_message(reference.message_id)
             if not referenced_message:
-                referenced_message = await message.channel.fetch_message(reference.message_id)
-            if referenced_message.author.id != user_id:
+                if reference.channel_id != message.channel.id:
+                    ref_channel = await self.client.fetch_channel(reference.channel_id)
+                else:
+                    ref_channel = message.channel
+                try:
+                    referenced_message = await ref_channel.fetch_message(reference.message_id)
+                except discord.NotFound:
+                    # reference was deleted
+                    referenced_message = None
+            if referenced_message and referenced_message.author.id != user_id:
                 message_type.append("reply")
-                self.user_interactions.add_reply_to_message(
-                    reference.message_id, message.id, guild_id, user_id, message.created_at, message_content
-                )
+                if not message_type_only:
+                    self.user_interactions.add_reply_to_message(
+                        reference.message_id, message.id, guild_id, user_id, message.created_at, message_content
+                    )
 
         if stickers := message.stickers:
             for sticker in stickers:  # type: discord.StickerItem
@@ -56,15 +65,16 @@ class OnMessage(BaseEvent):
 
                     if user_id == sticker_obj["created_by"]:
                         continue
-                    self.user_interactions.add_entry(
-                        sticker_obj["stid"],
-                        guild_id,
-                        sticker_obj["created_by"],
-                        channel_id,
-                        ["sticker_used", ],
-                        message_content,
-                        datetime.datetime.now()
-                    )
+                    if not message_type_only:
+                        self.user_interactions.add_entry(
+                            sticker_obj["stid"],
+                            guild_id,
+                            sticker_obj["created_by"],
+                            channel_id,
+                            ["sticker_used", ],
+                            message_content,
+                            datetime.datetime.now()
+                        )
 
         if message.attachments:
             message_type.append("attachment")
@@ -91,8 +101,7 @@ class OnMessage(BaseEvent):
                 message_type.append("gif")
             message_type.append("link")
 
-        if not message.attachments:
-            message_type.append("message")
+        message_type.append("message")
 
         if re.match(r"Wordle \d?\d\d\d \d/\d\n\n", message.content):
             message_type.append("wordle")
@@ -106,15 +115,16 @@ class OnMessage(BaseEvent):
 
                     if user_id == emoji_obj["created_by"]:
                         continue
-                    self.user_interactions.add_entry(
-                        emoji_obj["eid"],
-                        guild_id,
-                        emoji_obj["created_by"],
-                        channel_id,
-                        ["emoji_used", ],
-                        message_content,
-                        datetime.datetime.now()
-                    )
+                    if not message_type_only:
+                        self.user_interactions.add_entry(
+                            emoji_obj["eid"],
+                            guild_id,
+                            emoji_obj["created_by"],
+                            channel_id,
+                            ["emoji_used", ],
+                            message_content,
+                            datetime.datetime.now()
+                        )
 
         if message_type_only:
             return message_type

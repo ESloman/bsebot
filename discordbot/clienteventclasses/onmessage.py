@@ -55,7 +55,7 @@ class OnMessage(BaseEvent):
                     message_type.append("custom_sticker")
 
                     if user_id == sticker_obj["created_by"]:
-                        return
+                        continue
                     self.user_interactions.add_entry(
                         sticker_obj["stid"],
                         guild_id,
@@ -105,7 +105,7 @@ class OnMessage(BaseEvent):
                     message_type.append("custom_emoji")
 
                     if user_id == emoji_obj["created_by"]:
-                        return
+                        continue
                     self.user_interactions.add_entry(
                         emoji_obj["eid"],
                         guild_id,

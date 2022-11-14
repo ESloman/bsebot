@@ -730,6 +730,18 @@ class ServerEmojis(BestSummerEverPointsDB):
         super().__init__()
         self._vault = interface.get_collection(self.database, "serveremojis")
 
+    def get_all_emojis(self, guild_id: int) -> list[dict]:
+        """Gets all emoji objects from the database
+
+        Args:
+            guild_id (int): the guild ID of the server we want emojis for
+
+        Returns:
+            list[dict]: a list of emoji dicts
+        """
+        ret = self.query({"guild_id": guild_id})
+        return ret
+
     def get_emoji(self, guild_id: int, emoji_id: int) -> Union[dict, None]:
         """
         Gets an already created emoji document from the database.

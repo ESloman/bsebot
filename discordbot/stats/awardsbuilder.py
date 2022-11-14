@@ -5,7 +5,7 @@ import discord
 
 from discordbot.bot_enums import TransactionTypes
 from discordbot.constants import ANNUAL_AWARDS_AWARD, BSEDDIES_REVOLUTION_CHANNEL, JERK_OFF_CHAT, MONTHLY_AWARDS_PRIZE
-from discordbot.statsclasses import Stat, StatsGatherer
+from discordbot.stats.statsclasses import Stat, StatsGatherer
 from mongo.bsedataclasses import Awards
 from mongo.bsepoints import UserPoints
 
@@ -17,7 +17,7 @@ class AwardsBuilder:
         self.logger = logger
         self.annual = annual
 
-        self.stats = StatsGatherer(annual)
+        self.stats = StatsGatherer(logger, annual)
         self.awards = Awards()
         self.user_points = UserPoints()
 
@@ -52,12 +52,14 @@ class AwardsBuilder:
         time_spent_in_vc = self.stats.total_time_spent_in_vc(*args)
         vc_most_time_spent = self.stats.vc_with_most_time_spent(*args)
         vc_most_users = self.stats.vc_with_most_users(*args)
+        most_used_server_emoji = self.stats.most_popular_server_emoji(*args)
 
         busiest_channel_obj = await guild.fetch_channel(busiest_channel.value)
         busiest_day_format = busiest_day.value.strftime("%a %d %b")
         popular_channel_obj = await guild.fetch_channel(most_popular_channel.value)
         vc_time_obj = await guild.fetch_channel(vc_most_time_spent.value)
         vc_users_obj = await guild.fetch_channel(vc_most_users.value)
+        emoji_obj = await guild.fetch_emoji(most_used_server_emoji.emoji_id)
 
         stats = [
             number_messages, avg_message_chars, avg_message_words, busiest_channel, busiest_day,
@@ -88,16 +90,17 @@ class AwardsBuilder:
             f"(`{busiest_day.messages}` messages in `{busiest_day.channels}` "
             f"channels from `{busiest_day.users}` users)\n"
             f"**Average wordle score**: `{average_wordle.value}`\n"
-            f"**Total time spent in VCs**: `{str(datetime.timedelta(time_spent_in_vc.value))}` "
+            f"**Total time spent in VCs**: `{str(datetime.timedelta(seconds=time_spent_in_vc.value))}` "
             f"(`in {time_spent_in_vc.channels}` channels from `{time_spent_in_vc.users}` users)\n"
             f"**Talkiest VC**: {vc_time_obj.mention} (`{vc_most_time_spent.users}` users spent "
-            f"`{str(datetime.timedelta(vc_most_time_spent.time))}` in this VC)\n"
+            f"`{str(datetime.timedelta(seconds=vc_most_time_spent.time))}` in this VC)\n"
             f"**Most popular VC**: {vc_users_obj.mention} (`{vc_most_users.users}` unique users spent "
-            f"`{str(datetime.timedelta(vc_most_users.time))}` in this VC)\n"
+            f"`{str(datetime.timedelta(seconds=vc_most_users.time))}` in this VC)\n"
             f"**Bets created**: `{num_bets.value}`\n"
             f"**Eddies gained via salary**: `{salary_gains.value}`\n"
             f"**Eddies placed on bets**: `{eddies_placed.value}`\n"
             f"**Eddies won on bets**: `{eddies_won.value}`\n"
+            f"**Most popular server emoji**: {emoji_obj} (`{most_used_server_emoji.count}`)"
         )
 
         return stats, message
@@ -241,7 +244,7 @@ class AwardsBuilder:
         channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
 
         # uncomment for debug
-        # channel = await self.bot.fetch_channel(291508460519161856)
+        channel = await self.bot.fetch_channel(291508460519161856)
 
         await channel.send(content=stats_message)
         await channel.send(content=awards_message)

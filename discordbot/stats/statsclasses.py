@@ -1,6 +1,7 @@
 
 import datetime
 import re
+from copy import deepcopy
 from typing import Tuple
 
 from discordbot.bot_enums import ActivityTypes, AwardsTypes, StatTypes, TransactionTypes
@@ -10,8 +11,9 @@ from discordbot.stats.statsdataclasses import Stat
 
 
 class StatsGatherer:
-    def __init__(self, annual: bool = False) -> None:
+    def __init__(self, logger, annual: bool = False) -> None:
         self.annual = annual
+        self.logger = logger
         self.cache = StatsDataCache(self.annual)
 
     @staticmethod
@@ -526,7 +528,7 @@ class StatsGatherer:
         )
 
         data_class.users = len(channels[vc_most_time]["users"])
-        data_class.time = channels[vc_most_time]["count"]
+        data_class.time = int(channels[vc_most_time]["count"])
 
         if self.annual:
             data_class.month = None
@@ -571,7 +573,70 @@ class StatsGatherer:
             short_name="vc_most_time",
             annual=self.annual
         )
-        data_class.time = channels[vc_most_users]["count"]
+        data_class.time = int(channels[vc_most_users]["count"])
+        data_class.users = len(channels[vc_most_users]["users"])
+
+        if self.annual:
+            data_class.month = None
+            data_class.year = start.strftime("%Y")
+
+        return data_class
+
+    def most_popular_server_emoji(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """Calculates the most popular server emoji for the given time frame
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: the ServerEmoji data class
+        """
+
+        reaction_messages = self.cache.get_reactions(guild_id, start, end)
+        messages = self.cache.get_messages(guild_id, start, end)
+
+        reactions = []
+        for react in reaction_messages:
+            reactions.extend(react["reactions"])
+
+        all_emojis = self.cache.get_emojis(guild_id, start, end)
+        all_emoji_names = [emoji["name"] for emoji in all_emojis]
+
+        emoji_count = {}
+        for reaction in reactions:
+            content = reaction["content"]
+            if content not in all_emoji_names:
+                continue
+            if content not in emoji_count:
+                emoji_count[content] = 0
+            emoji_count[content] += 1
+
+        for message in messages:
+            for emoji_name in all_emoji_names:
+                if f":{emoji_name}:" in message["content"]:
+                    if emoji_name not in emoji_count:
+                        emoji_count[emoji_name] = 0
+                    emoji_count[emoji_name] += 1
+
+        most_used_emoji = sorted(emoji_count, key=lambda x: emoji_count[x], reverse=True)[0]
+
+        emoji_id = [emoji["eid"] for emoji in all_emojis if emoji["name"] == most_used_emoji][0]
+
+        data_class = Stat(
+            type="stat",
+            guild_id=guild_id,
+            stat=StatTypes.MOST_POPULAR_SERVER_EMOJI,
+            month=start.strftime("%b %y"),
+            value=most_used_emoji,
+            timestamp=datetime.datetime.now(),
+            short_name="most_used_server_emoji",
+            annual=self.annual
+        )
+
+        data_class.count = emoji_count[most_used_emoji]
+        data_class.emoji_id = emoji_id
 
         if self.annual:
             data_class.month = None
@@ -718,6 +783,10 @@ class StatsGatherer:
         messages = self.cache.get_messages(guild_id, start, end)
         wordle_messages = [m for m in messages if "wordle" in m["message_type"]]
 
+        # number of days in the time period
+        days = (end - start).days
+        threshold = round(days / 2)
+
         wordle_count = {}
         for wordle in wordle_messages:
             uid = wordle["user_id"]
@@ -734,6 +803,16 @@ class StatsGatherer:
             guesses = int(guesses)
 
             wordle_count[uid].append(guesses)
+
+        worlde_count_old = deepcopy(wordle_count)
+        for uid in worlde_count_old:
+            if len(worlde_count_old[uid]) < threshold:
+                # user hasn't done enough wordles in this time period to be
+                # counted
+                print(
+                    f"Removing {uid} from wordle pool as they've only done {len(wordle_count[uid])} wordles."
+                )
+                wordle_count.pop(uid)
 
         wordle_avgs = {}
         for uid in wordle_count:
@@ -928,6 +1007,26 @@ class StatsGatherer:
 
             elif event["type"] == ActivityTypes.KING_GAIN:
                 previous_time = event["timestamp"]
+
+        if king_events[-1] == event and event["type"] == ActivityTypes.KING_GAIN:
+            # last thing someone did was become KING
+            uid = event["uid"]
+            # this section is the worst
+            try:
+                end_time = start.replace(day=31, hour=23, minute=59, second=59)
+            except ValueError:
+                try:
+                    end_time = start.replace(day=30, hour=23, minute=59, second=59)
+                except ValueError:
+                    try:
+                        end_time = start.replace(day=29, hour=23, minute=59, second=59)
+                    except ValueError:
+                        end_time = start.replace(day=28, hour=23, minute=59, second=59)
+            timestamp = event["timestamp"]  # type: datetime.datetime
+            time_king = (end_time - timestamp).total_seconds()
+            if uid not in kings:
+                kings[uid] = 0
+            kings[uid] += time_king
 
         longest_king = sorted(kings, key=lambda x: kings[x], reverse=True)[0]
 

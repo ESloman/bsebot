@@ -2,7 +2,8 @@
 import datetime
 from typing import List, Optional
 
-from mongo.bsepoints import UserBets, UserInteractions, UserPoints
+from discordbot.constants import BSE_BOT_ID
+from mongo.bsepoints import ServerEmojis, UserBets, UserInteractions, UserPoints
 
 
 class StatsDataCache:
@@ -10,6 +11,7 @@ class StatsDataCache:
         self.user_bets = UserBets()
         self.user_interactions = UserInteractions()
         self.user_points = UserPoints()
+        self.server_emojis = ServerEmojis()
 
         self.annual = annual
 
@@ -37,6 +39,9 @@ class StatsDataCache:
         self.__reactions_cache = []  # type: List[dict]
         self.__reactions_cache_time = None  # type: Optional[datetime.datetime]
 
+        self.__emoji_cache = []  # type: List[dict]
+        self.__emoji_cache_time = None  # type: Optional[datetime.datetime]
+
     # caching functions
     def get_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
         """Internal method to query for messages between a certain date
@@ -58,13 +63,14 @@ class StatsDataCache:
         if self.__message_cache and (now - self.__message_cache_time).total_seconds() < 3600:
             return self.__message_cache
 
-        limit = 100000 if self.annual else 10000
+        limit = 100000
 
         self.__message_cache = self.user_interactions.query(
             {
                 "guild_id": guild_id,
                 "timestamp": {"$gt": start, "$lt": end},
-                "message_type": {"$nin": ["emoji_used", "vc_joined", "vc_streaming"]}
+                "message_type": {"$nin": ["emoji_used", "vc_joined", "vc_streaming"]},
+                "user_id": {"$nin": [BSE_BOT_ID]}
             },
             limit=limit
         )
@@ -251,3 +257,27 @@ class StatsDataCache:
         )
         self.__reactions_cache_time = now
         return self.__reactions_cache
+
+    def get_emojis(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
+        """Internal method to query for server emojis
+        Will cache the emojis on first parse and return the cache if cache was set less than an hour ago
+
+        Args:
+            guild_id (int): the guild ID to get emojis for
+            start (datetime.datetime): start of timestamp query
+            end (datetime.datetime): end of timestamp query
+
+        Returns:
+            list: list of message dicts
+        """
+        now = datetime.datetime.now()
+
+        if start != self.__start_cache or end != self.__end_cache:
+            self.__emoji_cache = []
+
+        if self.__emoji_cache and (now - self.__emoji_cache_time).total_seconds() < 3600:
+            return self.__emoji_cache
+
+        self.__emoji_cache = self.server_emojis.get_all_emojis(guild_id)
+        self.__emoji_cache_time = now
+        return self.__emoji_cache

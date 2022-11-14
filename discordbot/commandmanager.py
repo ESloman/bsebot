@@ -8,13 +8,16 @@ import discord
 from apis.giphyapi import GiphyAPI
 from mongo.bsepoints import UserBets, UserPoints
 
+# client events
 from discordbot.clienteventclasses import OnDirectMessage, OnEmojiCreate, OnMemberJoin, OnMemberLeave
 from discordbot.clienteventclasses import OnMessage, OnReactionAdd, OnReadyEvent, OnStickerCreate
-from discordbot.clienteventclasses import OnThreadCreate, OnThreadUpdate
+from discordbot.clienteventclasses import OnThreadCreate, OnThreadUpdate, OnVoiceStateChange
 
 from discordbot.constants import BSE_SERVER_ID
 from discordbot.embedmanager import EmbedManager
 from discordbot.modals import BSEddiesBetCreateModal
+
+# slash commands
 from discordbot.slashcommandeventclasses import BSEddiesActive, BSEddiesAdminGive, BSEddiesAutoGenerate
 from discordbot.slashcommandeventclasses import BSEddiesCloseBet, BSEddiesGift, BSEddiesHighScore, BSEddiesLeaderboard
 from discordbot.slashcommandeventclasses import BSEddiesPending, BSEddiesPlaceBet, BSEddiesPredict, BSEddiesTaxRate
@@ -100,6 +103,7 @@ class CommandManager(object):
         self.on_thread_update = OnThreadUpdate(client, guilds, self.logger)
         self.on_emoji_create = OnEmojiCreate(client, guilds, self.logger)
         self.on_sticker_create = OnStickerCreate(client, guilds, self.logger)
+        self.on_voice_state_change = OnVoiceStateChange(client, guilds, self.logger)
 
         # slash command classes
         self.bseddies_active = BSEddiesActive(client, guilds, self.logger)
@@ -309,6 +313,21 @@ class CommandManager(object):
                 after (discord.Sequence[discord.Emoji]): list of stickers after
             """
             await self.on_sticker_create.on_stickers_update(guild.id, before, after)
+
+        @self.client.event
+        async def on_voice_state_update(
+            member: discord.Member,
+            before: discord.VoiceState,
+            after: discord.VoiceState
+        ) -> None:
+            """Logging time in VC
+
+            Args:
+                member (discord.Member): the Member object
+                before (discord.VoiceState): Voice state before
+                after (discord.VoiceState): Voice state after
+            """
+            await self.on_voice_state_change.on_voice_state_change(member, before, after)
 
     def _register_slash_commands(self, guilds: list) -> None:
         """

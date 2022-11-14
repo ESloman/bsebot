@@ -25,7 +25,9 @@ MESSAGE_TYPES = [
     "custom_emoji_reaction",
     "custom_emoji",
     "emoji_used",
-    "emoji_created"
+    "emoji_created",
+    "vc_joined",
+    "vc_streaming"
 ]
 
 HUMAN_MESSAGE_TYPES = {
@@ -51,7 +53,9 @@ HUMAN_MESSAGE_TYPES = {
     "emoji_created": "Emoji created",
     "custom_sticker": "Used a server sticker",
     "sticker_used": "Your server sticker used",
-    "sticker_created": "Sticker created"
+    "sticker_created": "Sticker created",
+    "vc_joined": "Spent time in VC",
+    "vc_streaming": "Spent time streaming",
 }
 
 MESSAGE_VALUES = {
@@ -75,7 +79,9 @@ MESSAGE_VALUES = {
     "emoji_created": 5,
     "custom_sticker": 1,
     "sticker_used": 2,
-    "sticker_created": 5
+    "sticker_created": 5,
+    "vc_joined": 0.0015,
+    "vc_streaming": 0.0025
 }
 
 WORDLE_VALUES = {

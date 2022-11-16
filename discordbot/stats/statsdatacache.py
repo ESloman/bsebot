@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from discordbot.constants import BSE_BOT_ID
 from mongo.bsepoints import ServerEmojis, UserBets, UserInteractions, UserPoints
-from mongo.datatypes import Activity, Bet, Emoji, Message, Reaction, Transaction, User
+from mongo.datatypes import Activity, Bet, Emoji, Message, Reaction, Transaction, User, VCInteraction
 
 
 class StatsDataCache:
@@ -22,7 +22,7 @@ class StatsDataCache:
         self.__message_cache = []  # type: List[Message]
         self.__message_cache_time = None  # type: Optional[datetime.datetime]
 
-        self.__vc_cache = []  # type: List[Message]
+        self.__vc_cache = []  # type: List[VCInteraction]
         self.__vc_cache_time = None  # type: Optional[datetime.datetime]
 
         self.__bet_cache = []  # type: List[Bet]
@@ -79,7 +79,7 @@ class StatsDataCache:
         self.__message_cache_time = now
         return self.__message_cache
 
-    def get_vc_interactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[Message]:
+    def get_vc_interactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[VCInteraction]:
         """Internal method to query for VC interactions between a certain date
         Will cache the messages on first parse and return the cache if cache was set less than an hour ago
 

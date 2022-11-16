@@ -49,6 +49,23 @@ class StatsGatherer:
 
         return start, end
 
+    def add_annual_changes(self, start: datetime.datetime, data_class: Stat) -> Stat:
+        """Adds changes for annual mode
+
+        Args:
+            start (datetime.datetime): start end time
+            data_class (Stat): data class to modify
+
+        Returns:
+            Stat: the modified dataclass
+        """
+        if self.annual:
+            data_class.month = None
+            data_class.year = start.strftime("%Y")
+            if data_class.type == "award":
+                data_class.eddies = ANNUAL_AWARDS_AWARD
+        return data_class
+
     # generic server stats
     def number_of_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Returns the number of messages between two given time periods
@@ -79,10 +96,7 @@ class StatsGatherer:
 
         data_class.channels = len(channel_ids)
         data_class.users = len(user_ids)
-
-        if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
+        data_class = self.add_annual_changes(start, data_class)
 
         return data_class
 
@@ -131,11 +145,8 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        if self.annual:
-            data_class_a.month = None
-            data_class_a.year = start.strftime("%Y")
-            data_class_b.month = None
-            data_class_b.year = start.strftime("%Y")
+        data_class_a = self.add_annual_changes(start, data_class_a)
+        data_class_b = self.add_annual_changes(start, data_class_b)
 
         return data_class_a, data_class_b
 
@@ -180,10 +191,7 @@ class StatsGatherer:
 
         data_class.messages = channels[busiest]["count"]
         data_class.users = len(channels[busiest]["users"])
-
-        if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
+        data_class = self.add_annual_changes(start, data_class)
 
         return data_class
 
@@ -230,10 +238,7 @@ class StatsGatherer:
         data_class.messages = days[busiest]["count"]
         data_class.channels = len(days[busiest]["channels"])
         data_class.users = len(days[busiest]["users"])
-
-        if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
+        data_class = self.add_annual_changes(start, data_class)
 
         return data_class
 
@@ -261,9 +266,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
+        data_class = self.add_annual_changes(start, data_class)
 
         return data_class
 
@@ -296,9 +299,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
+        data_class = self.add_annual_changes(start, data_class)
 
         return data_class
 
@@ -342,9 +343,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
+        data_class = self.add_annual_changes(start, data_class)
 
         return data_class
 
@@ -392,11 +391,8 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        if self.annual:
-            data_class_a.month = None
-            data_class_a.year = start.strftime("%Y")
-            data_class_b.month = None
-            data_class_b.year = start.strftime("%Y")
+        data_class_a = self.add_annual_changes(start, data_class_a)
+        data_class_b = self.add_annual_changes(start, data_class_b)
 
         return data_class_a, data_class_b
 
@@ -437,9 +433,7 @@ class StatsGatherer:
 
         data_class.users = len(channels[most_popular_channel])
 
-        if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
+        data_class = self.add_annual_changes(start, data_class)
 
         return data_class
 
@@ -483,9 +477,7 @@ class StatsGatherer:
         data_class.users = len(users)
         data_class.channels = len(channels)
 
-        if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
+        data_class = self.add_annual_changes(start, data_class)
 
         return data_class
 
@@ -530,9 +522,7 @@ class StatsGatherer:
         data_class.users = len(channels[vc_most_time]["users"])
         data_class.time = int(channels[vc_most_time]["count"])
 
-        if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
+        data_class = self.add_annual_changes(start, data_class)
 
         return data_class
 
@@ -576,9 +566,7 @@ class StatsGatherer:
         data_class.time = int(channels[vc_most_users]["count"])
         data_class.users = len(channels[vc_most_users]["users"])
 
-        if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
+        data_class = self.add_annual_changes(start, data_class)
 
         return data_class
 
@@ -638,9 +626,7 @@ class StatsGatherer:
         data_class.count = emoji_count[most_used_emoji]
         data_class.emoji_id = emoji_id
 
-        if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
+        data_class = self.add_annual_changes(start, data_class)
 
         return data_class
 
@@ -680,10 +666,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
-            data_class.eddies = ANNUAL_AWARDS_AWARD
+        data_class = self.add_annual_changes(start, data_class)
 
         return data_class
 
@@ -721,10 +704,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
-            data_class.eddies = ANNUAL_AWARDS_AWARD
+        data_class = self.add_annual_changes(start, data_class)
 
         return data_class
 
@@ -762,10 +742,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
-            data_class.eddies = ANNUAL_AWARDS_AWARD
+        data_class = self.add_annual_changes(start, data_class)
 
         return data_class
 
@@ -835,10 +812,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
-            data_class.eddies = ANNUAL_AWARDS_AWARD
+        data_class = self.add_annual_changes(start, data_class)
 
         return data_class
 
@@ -877,10 +851,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
-            data_class.eddies = ANNUAL_AWARDS_AWARD
+        data_class = self.add_annual_changes(start, data_class)
 
         return data_class
 
@@ -921,10 +892,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
-            data_class.eddies = ANNUAL_AWARDS_AWARD
+        data_class = self.add_annual_changes(start, data_class)
 
         return data_class
 
@@ -965,10 +933,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
-            data_class.eddies = ANNUAL_AWARDS_AWARD
+        data_class = self.add_annual_changes(start, data_class)
 
         return data_class
 
@@ -1043,10 +1008,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
-            data_class.eddies = ANNUAL_AWARDS_AWARD
+        data_class = self.add_annual_changes(start, data_class)
 
         return data_class
 
@@ -1086,10 +1048,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
-            data_class.eddies = ANNUAL_AWARDS_AWARD
+        data_class = self.add_annual_changes(start, data_class)
 
         return data_class
 
@@ -1130,10 +1089,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
-            data_class.eddies = ANNUAL_AWARDS_AWARD
+        data_class = self.add_annual_changes(start, data_class)
 
         return data_class
 
@@ -1173,10 +1129,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
-            data_class.eddies = ANNUAL_AWARDS_AWARD
+        data_class = self.add_annual_changes(start, data_class)
 
         return data_class
 
@@ -1218,9 +1171,97 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
-            data_class.eddies = ANNUAL_AWARDS_AWARD
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
+
+    # vc
+    def big_gamer(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: _description_
+        """
+        vc_interactions = self.cache.get_vc_interactions(guild_id, start, end)
+
+        user_dict = {}
+        for vc in vc_interactions:
+            user_id = vc["user_id"]
+            channel_id = vc["channel_id"]
+            
+            if user_id not in user_dict:
+                user_dict[user_id] = {"count": 0, "channels": []}
+
+            user_dict[user_id]["count"] += vc["time_in_vc"]
+            if channel_id not in user_dict[user_id]["channels"]:
+                user_dict[user_id]["channels"].append(channel_id)
+
+        big_gamer = sorted(user_dict, key=lambda x: user_dict[x]["count"], reverse=True)[0]
+
+        data_class = Stat(
+            type="award",
+            guild_id=guild_id,
+            user_id=big_gamer,
+            award=AwardsTypes.BIG_GAMER,
+            month=start.strftime("%b %y"),
+            value=int(user_dict[big_gamer]["count"]),
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="big_gamer",
+            annual=self.annual
+        )
+
+        data_class.channels = len(user_dict[big_gamer]["channels"])
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
+
+    def big_streamer(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: _description_
+        """
+        vc_interactions = self.cache.get_vc_interactions(guild_id, start, end)
+
+        user_dict = {}
+        for vc in vc_interactions:
+            user_id = vc["user_id"]
+            channel_id = vc["channel_id"]
+            
+            if user_id not in user_dict:
+                user_dict[user_id] = {"count": 0, "channels": []}
+
+            user_dict[user_id]["count"] += vc["time_streaming"]
+            if channel_id not in user_dict[user_id]["channels"] and vc["time_streaming"]:
+                user_dict[user_id]["channels"].append(channel_id)
+
+        big_streamer = sorted(user_dict, key=lambda x: user_dict[x]["count"], reverse=True)[0]
+
+        data_class = Stat(
+            type="award",
+            guild_id=guild_id,
+            user_id=big_streamer,
+            award=AwardsTypes.BIG_STREAMER,
+            month=start.strftime("%b %y"),
+            value=int(user_dict[big_streamer]["count"]),
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="big_streamer",
+            annual=self.annual
+        )
+
+        data_class.channels = len(user_dict[big_streamer]["channels"])
+        data_class = self.add_annual_changes(start, data_class)
 
         return data_class

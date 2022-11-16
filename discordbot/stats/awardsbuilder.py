@@ -64,7 +64,7 @@ class AwardsBuilder:
         stats = [
             number_messages, avg_message_chars, avg_message_words, busiest_channel, busiest_day,
             num_bets, salary_gains, average_wordle, eddies_placed, eddies_won, most_popular_channel,
-            time_spent_in_vc, vc_most_time_spent, vc_most_users
+            time_spent_in_vc, vc_most_time_spent, vc_most_users, most_used_server_emoji
         ]
 
         if not self.annual:
@@ -135,6 +135,8 @@ class AwardsBuilder:
         jerk_off_king = self.stats.jerk_off_contributor(*args)
         big_memer = self.stats.big_memer(*args)
         react_king = self.stats.react_king(*args)
+        big_gamer = self.stats.big_gamer(*args)
+        big_streamer = self.stats.big_streamer(*args)
 
         awards = [
             most_messages,
@@ -148,7 +150,9 @@ class AwardsBuilder:
             twitter_addict,
             jerk_off_king,
             big_memer,
-            react_king
+            react_king,
+            big_gamer,
+            big_streamer
         ]
 
         user_id_dict = {}  # type: dict[int, discord.Member]
@@ -196,6 +200,12 @@ class AwardsBuilder:
             f"{user_id_dict[big_memer.user_id].mention} (`{big_memer.value}` reacts received)\n"
             "The _'emoji is worth a thousand words'_ award: "
             f"{user_id_dict[react_king.user_id].mention} (`{react_king.value}` reacts given)\n"
+            "The _'big talker'_ award: "
+            f"{user_id_dict[big_gamer.user_id].mention} "
+            f"(`{str(datetime.timedelta(seconds=big_gamer.value))}` spent in {big_gamer.channels} channels)\n"
+            "The _'wannabe streamer'_ award: "
+            f"{user_id_dict[big_streamer.user_id].mention} (`{str(datetime.timedelta(seconds=big_streamer.value))}` "
+            f"spent streaming in {big_streamer.channels} channels)\n"
         )
 
         return awards, bseddies_awards

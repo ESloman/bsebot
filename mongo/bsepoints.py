@@ -598,7 +598,7 @@ class UserInteractions(BestSummerEverPointsDB):
             list[Message]: _description_
         """
         return self.query({"guild_id": guild_id, "channel_id": channel_id}, limit=100000)
-    
+
     def add_entry(
             self,
             message_id: int,

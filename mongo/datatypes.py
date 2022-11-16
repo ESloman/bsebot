@@ -156,6 +156,22 @@ class Message(TypedDict):
     """List of replies"""
 
 
+class VCInteraction(Message):
+    muted: bool
+    muted_time: datetime.datetime
+    deafened: bool
+    deafened_time: datetime.datetime
+    streaming: bool
+    streaming_time: datetime.datetime
+    time_in_vc: float
+    time_muted: float
+    time_deafened: float
+    time_streaming: float
+    active: bool
+    events: list[dict]
+    left: datetime.datetime
+
+
 class Emoji(TypedDict):
     _id: ObjectId
     """The internal DB ID"""

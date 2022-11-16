@@ -2,7 +2,6 @@
 import datetime
 from typing import List, Optional
 
-from discordbot.constants import BSE_BOT_ID
 from mongo.bsepoints import ServerEmojis, UserBets, UserInteractions, UserPoints
 from mongo.datatypes import Activity, Bet, Emoji, Message, Reaction, Transaction, User, VCInteraction
 
@@ -298,7 +297,7 @@ class StatsDataCache:
         Returns:
             List[Message]: list of messages
         """
-        
+
         all_messages = self.get_messages(guild_id, start, end)
         threaded = [mes for mes in all_messages if mes.get("is_thread")]
         return threaded

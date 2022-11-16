@@ -35,7 +35,7 @@ class OnMessage(BaseEvent):
             return
 
         message_type = []
-        
+
         is_thread = False
         if message.channel.type in [
             discord.ChannelType.public_thread,

@@ -597,7 +597,7 @@ class UserInteractions(BestSummerEverPointsDB):
             list[Message]: list of messages
         """
         return self.query({"guild_id": guild_id}, limit=500000)
-    
+
     def get_all_messages_for_channel(self, guild_id: int, channel_id: int) -> list[Message]:
         """Gets all messages for a given channel and guild
 

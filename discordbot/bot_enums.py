@@ -96,6 +96,8 @@ class AwardsTypes(IntEnum):
     MASTURBATOR = 11
     BIG_MEMER = 12
     REACT_KING = 13
+    BIG_GAMER = 14
+    BIG_STREAMER = 15
 
 
 class StatTypes(IntEnum):
@@ -110,3 +112,7 @@ class StatTypes(IntEnum):
     EDDIES_PLACED = 9
     EDDIES_WIN = 10
     MOST_POPULAR_CHANNEL = 11
+    TIME_SPENT_IN_VC = 12
+    VC_MOST_TIME = 13
+    VC_MOST_USERS = 14
+    MOST_POPULAR_SERVER_EMOJI = 15

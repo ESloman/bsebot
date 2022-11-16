@@ -10,6 +10,7 @@ This particular file contains Collection Classes for the 'bestsummereverpoints' 
 import datetime
 
 from mongo import interface
+from mongo.datatypes import RevolutionEvent
 from mongo.db_classes import BestSummerEverPointsDB
 
 
@@ -64,7 +65,7 @@ class RevolutionEvent(TicketedEvent):
             king_id: int,
             locked_in_eddies: int,
             channel_id: int = None,
-    ) -> dict:
+    ) -> RevolutionEvent:
         """
         Create event class. Puts an entry into the DB for future use.
 
@@ -136,7 +137,7 @@ class RevolutionEvent(TicketedEvent):
         """
         return self.update({"event_id": event_id, "guild_id": guild_id}, {"$push": {"ticket_buyers": user_id}})
 
-    def get_event(self, guild_id: int, event_id: str):
+    def get_event(self, guild_id: int, event_id: str) -> RevolutionEvent:
         """
         Returns the specified event for the given guild
 
@@ -148,7 +149,7 @@ class RevolutionEvent(TicketedEvent):
         if ret:
             return ret[0]
 
-    def get_open_events(self, guild_id: int):
+    def get_open_events(self, guild_id: int) -> list[RevolutionEvent]:
         """
         Gets all open events
 

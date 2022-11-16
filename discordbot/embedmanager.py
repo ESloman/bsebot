@@ -158,8 +158,8 @@ class EmbedManager(object):
             "button to reduce revolution chance by 15%.\n"
             f"**Event ID**: `{event['event_id']}`\n"
             f"**Success rate**: `{max(min(event['chance'], 100), 0)}%`\n"
-            f"**Revolutionaries**: `{', '.join(revos)}`\n"
-            f"**Supporters**: `{', '.join(supps)}`\n"
+            f"**Revolutionaries**: `{', '.join(revos) if revos else None}`\n"
+            f"**Supporters**: `{', '.join(supps) if supps else None}`\n"
             f"**Locked in KING eddies**: `{event.get('locked_in_eddies')}`\n"
             f"**Event time**: `{event['expired'].strftime('%d %b %y %H:%M:%S')}`"
         )

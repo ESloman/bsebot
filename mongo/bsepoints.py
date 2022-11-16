@@ -14,6 +14,7 @@ from bson import ObjectId
 from pymongo.results import UpdateResult
 
 from mongo import interface
+from mongo.datatypes import Bet, Emoji, Message, Sticker, User
 from mongo.db_classes import BestSummerEverPointsDB
 
 
@@ -41,7 +42,7 @@ class UserPoints(BestSummerEverPointsDB):
         if ret["points"] > ret.get("high_score", 0):
             self.update({"_id": ret["_id"]}, {"$set": {"high_score": ret["points"]}})
 
-    def find_user(self, user_id: int, guild_id: int, projection=None) -> Union[dict, None]:
+    def find_user(self, user_id: int, guild_id: int, projection=None) -> Union[User, None]:
         """
         Looks up a user in the collection.
 
@@ -77,7 +78,7 @@ class UserPoints(BestSummerEverPointsDB):
         ret = self.query({"uid": user_id, "guild_id": guild_id}, projection={"daily_minimum": True})
         return ret[0]["daily_minimum"]
 
-    def get_all_users_for_guild(self, guild_id: int, projection: Optional[dict] = None) -> list:
+    def get_all_users_for_guild(self, guild_id: int, projection: Optional[dict] = None) -> list[User]:
         """
         Gets all the users from a given guild.
 
@@ -243,7 +244,7 @@ class UserPoints(BestSummerEverPointsDB):
         """
         self.update({"uid": user_id, "guild_id": guild_id}, {"$set": {"king": value}})
 
-    def get_current_king(self, guild_id: int) -> dict:
+    def get_current_king(self, guild_id: int) -> User:
         """
 
         :param guild_id:
@@ -372,7 +373,7 @@ class UserBets(BestSummerEverPointsDB):
         self.update({"type": "counter", "guild_id": guild_id}, {"$inc": {"count": 1}})
         return f"{count:04d}"
 
-    def get_all_active_bets(self, guild_id: int) -> list:
+    def get_all_active_bets(self, guild_id: int) -> list[Bet]:
         """
         Gets all active bets.
 
@@ -382,7 +383,7 @@ class UserBets(BestSummerEverPointsDB):
         bets = self.query({"active": True, "guild_id": guild_id})
         return bets
 
-    def get_all_inactive_pending_bets(self, guild_id: int) -> list:
+    def get_all_inactive_pending_bets(self, guild_id: int) -> list[Bet]:
         """
         Gets all the bets that are not active without results
 
@@ -395,7 +396,7 @@ class UserBets(BestSummerEverPointsDB):
         bets = self.query({"active": False, "result": None, "guild_id": guild_id})
         return bets
 
-    def get_all_pending_bets(self, guild_id: int) -> list:
+    def get_all_pending_bets(self, guild_id: int) -> list[Bet]:
         """
         Gets all 'pending' bets - bets that don't have a result yet.
         Could be active or closed.
@@ -425,7 +426,7 @@ class UserBets(BestSummerEverPointsDB):
 
         return pending
 
-    def get_all_pending_bets_for_user(self, user_id: int, guild_id: int) -> list:
+    def get_all_pending_bets_for_user(self, user_id: int, guild_id: int) -> list[Bet]:
         """
         Gets all pending bets for a given user_id
 
@@ -443,7 +444,7 @@ class UserBets(BestSummerEverPointsDB):
                        options: list,
                        option_dict: dict,
                        timeout: Union[datetime.datetime, None] = None,
-                       private: bool = False) -> dict:
+                       private: bool = False) -> Bet:
         """
         Creates a new bet and inserts it into the DB.
 
@@ -477,7 +478,7 @@ class UserBets(BestSummerEverPointsDB):
         self.insert(bet_doc)
         return bet_doc
 
-    def get_bet_from_id(self, guild_id: int, bet_id: str) -> Union[dict, None]:
+    def get_bet_from_id(self, guild_id: int, bet_id: str) -> Union[Bet, None]:
         """
         Gets an already created bet document from the database.
 
@@ -585,6 +586,18 @@ class UserInteractions(BestSummerEverPointsDB):
         """
         super().__init__()
         self._vault = interface.get_collection(self.database, "userinteractions")
+
+    def get_all_messages_for_channel(self, guild_id: int, channel_id: int) -> list[Message]:
+        """Gets all messages for a given channel and guild
+
+        Args:
+            guild_id (int): _description_
+            channel_id (int): _description_
+
+        Returns:
+            list[Message]: _description_
+        """
+        return self.query({"guild_id": guild_id, "channel_id": channel_id}, limit=100000)
 
     def add_entry(
             self,
@@ -782,7 +795,19 @@ class ServerEmojis(BestSummerEverPointsDB):
         super().__init__()
         self._vault = interface.get_collection(self.database, "serveremojis")
 
-    def get_emoji(self, guild_id: int, emoji_id: int) -> Union[dict, None]:
+    def get_all_emojis(self, guild_id: int) -> list[Emoji]:
+        """Gets all emoji objects from the database
+
+        Args:
+            guild_id (int): the guild ID of the server we want emojis for
+
+        Returns:
+            list[dict]: a list of emoji dicts
+        """
+        ret = self.query({"guild_id": guild_id})
+        return ret
+
+    def get_emoji(self, guild_id: int, emoji_id: int) -> Union[Emoji, None]:
         """
         Gets an already created emoji document from the database.
 
@@ -796,7 +821,7 @@ class ServerEmojis(BestSummerEverPointsDB):
             return ret[0]
         return None
 
-    def get_emoji_from_name(self, guild_id: int, name: str) -> Union[dict, None]:
+    def get_emoji_from_name(self, guild_id: int, name: str) -> Union[Emoji, None]:
         """
 
         :param guild_id:
@@ -838,7 +863,7 @@ class ServerStickers(BestSummerEverPointsDB):
         super().__init__()
         self._vault = interface.get_collection(self.database, "serverstickers")
 
-    def get_sticker(self, guild_id: int, sticker_id: int) -> Union[dict, None]:
+    def get_sticker(self, guild_id: int, sticker_id: int) -> Union[Sticker, None]:
         """
         Gets an already created sticker document from the database.
 
@@ -852,7 +877,7 @@ class ServerStickers(BestSummerEverPointsDB):
             return ret[0]
         return None
 
-    def get_sticker_from_name(self, guild_id: int, name: str) -> Union[dict, None]:
+    def get_sticker_from_name(self, guild_id: int, name: str) -> Union[Sticker, None]:
         """
 
         :param guild_id:

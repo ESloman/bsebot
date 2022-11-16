@@ -3,8 +3,8 @@ import datetime
 import discord
 from discord.ext import tasks, commands
 
-from discordbot.awardsbuilder import AwardsBuilder
 from discordbot.constants import BSE_SERVER_ID
+from discordbot.stats.awardsbuilder import AwardsBuilder
 
 
 class AnnualBSEddiesAwards(commands.Cog):

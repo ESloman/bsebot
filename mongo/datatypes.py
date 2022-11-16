@@ -113,6 +113,26 @@ class Bet(TypedDict):
     """date the bet was closed"""
 
 
+class Reaction(TypedDict):
+    user_id: int
+    """The discord user ID of the user who sent the message"""
+    content: str
+    """The reaction"""
+    timestamp: datetime.datetime
+    """When the reaction happened"""
+
+
+class Reply(TypedDict):
+    user_id: int
+    """The discord user ID of the user who sent the reply"""
+    content: str
+    """The reply"""
+    timestamp: datetime.datetime
+    """When the reply happened"""
+    message_id: str
+    """The reply message ID"""
+
+
 class Message(TypedDict):
     _id: ObjectId
     """The internal DB ID"""
@@ -130,6 +150,10 @@ class Message(TypedDict):
     """Message content (fi anything)"""
     timestamp: datetime.datetime
     """When the message was sent"""
+    reactions: NotRequired[list[Reaction]]
+    """List of reactions"""
+    replies: NotRequired[list[Reply]]
+    """List of replies"""
 
 
 class Emoji(TypedDict):
@@ -160,3 +184,52 @@ class Sticker(TypedDict):
     """The discord user ID of the user who created the sticker"""
     created: datetime.datetime
     """When the sticker was created"""
+
+
+class RevolutionEvent(TypedDict):
+    _id: ObjectId
+    """The internal DB ID"""
+    type: str
+    """Event type"""
+    event_id: str
+    """The event ID"""
+    created: datetime.datetime
+    """When the event was created"""
+    expired: datetime.datetime
+    """When the event will expire and 'resolve'"""
+    chance: int
+    """The chance of success"""
+    ticket_cost: int
+    """DEPRECATED"""
+    ticket_buyers: list[int]
+    """DEPRECATED"""
+    supporters: list[int]
+    """list of those supporting the event"""
+    revolutionaries: list[int]
+    """list of those revolutioning the event"""
+    users: list[int]
+    """everyone who's subscribed to the event"""
+    open: bool
+    """whether the event is still open"""
+    message_id: int
+    """The event's discord message ID"""
+    channel_id: int
+    """The discord channel ID where the event is happening"""
+    guild_id: int
+    """The discord server ID of the server the event is in"""
+    king: int
+    """The king the event affects"""
+    points_distributed: int
+    """The number of eddies given out if the event succeeds"""
+    eddies_spent: int
+    """DEPRECATED"""
+    success: bool
+    """Whether the event was a success or not"""
+    locked_in_eddies: int
+    """Number of eddies the King had when the event triggered"""
+    times_saved: int
+    """Number of times the king tried to save themselves"""
+    one_hour: bool
+    """Whether the one hour warning was triggered"""
+    quarter_hour: bool
+    """Whether the 15 minute warning was triggered"""

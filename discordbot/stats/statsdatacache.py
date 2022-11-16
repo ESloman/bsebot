@@ -4,6 +4,7 @@ from typing import List, Optional
 
 from discordbot.constants import BSE_BOT_ID
 from mongo.bsepoints import ServerEmojis, UserBets, UserInteractions, UserPoints
+from mongo.datatypes import Activity, Bet, Emoji, Message, Reaction, Transaction, User
 
 
 class StatsDataCache:
@@ -18,32 +19,32 @@ class StatsDataCache:
         self.__start_cache = None  # type: Optional[datetime.datetime]
         self.__end_cache = None  # type: Optional[datetime.datetime]
 
-        self.__message_cache = []  # type: List[dict]
+        self.__message_cache = []  # type: List[Message]
         self.__message_cache_time = None  # type: Optional[datetime.datetime]
 
-        self.__vc_cache = []  # type: List[dict]
+        self.__vc_cache = []  # type: List[Message]
         self.__vc_cache_time = None  # type: Optional[datetime.datetime]
 
-        self.__bet_cache = []  # type: List[dict]
+        self.__bet_cache = []  # type: List[Bet]
         self.__bet_cache_time = None  # type: Optional[datetime.datetime]
 
-        self.__user_cache = []  # type: List[dict]
+        self.__user_cache = []  # type: List[User]
         self.__user_cache_time = None  # type: Optional[datetime.datetime]
 
-        self.__transaction_cache = []  # type: List[dict]
+        self.__transaction_cache = []  # type: List[Transaction]
         self.__transaction_cache_time = None  # type: Optional[datetime.datetime]
 
-        self.__activity_cache = []  # type: List[dict]
+        self.__activity_cache = []  # type: List[Activity]
         self.__activity_cache_time = None  # type: Optional[datetime.datetime]
 
-        self.__reactions_cache = []  # type: List[dict]
+        self.__reactions_cache = []  # type: List[Reaction]
         self.__reactions_cache_time = None  # type: Optional[datetime.datetime]
 
-        self.__emoji_cache = []  # type: List[dict]
+        self.__emoji_cache = []  # type: List[Emoji]
         self.__emoji_cache_time = None  # type: Optional[datetime.datetime]
 
     # caching functions
-    def get_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
+    def get_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[Message]:
         """Internal method to query for messages between a certain date
         Will cache the messages on first parse and return the cache if cache was set less than an hour ago
 
@@ -78,7 +79,7 @@ class StatsDataCache:
         self.__message_cache_time = now
         return self.__message_cache
 
-    def get_vc_interactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
+    def get_vc_interactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[Message]:
         """Internal method to query for VC interactions between a certain date
         Will cache the messages on first parse and return the cache if cache was set less than an hour ago
 
@@ -112,7 +113,7 @@ class StatsDataCache:
         self.__vc_cache_time = now
         return self.__vc_cache
 
-    def get_bets(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
+    def get_bets(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[Bet]:
         """Internal method to query for bets between a certain date
         Will cache the bets on first parse and return the cache if cache was set less than an hour ago
 
@@ -142,7 +143,7 @@ class StatsDataCache:
         self.__bet_cache_time = now
         return self.__bet_cache
 
-    def get_users(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
+    def get_users(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[User]:
         """Internal method to query for users
         Will cache the users on first parse and return the cache if cache was set less than an hour ago
 
@@ -164,7 +165,7 @@ class StatsDataCache:
         self.__user_cache_time = now
         return self.__user_cache
 
-    def get_transactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
+    def get_transactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[Transaction]:
         """Internal method to query for transactions between a certain date
         Will cache the transactions on first parse and return the cache if cache was set less than an hour ago
 
@@ -195,7 +196,7 @@ class StatsDataCache:
         self.__transaction_cache_time = now
         return self.__transaction_cache
 
-    def get_activities(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
+    def get_activities(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[Activity]:
         """Internal method to query for activities between a certain date
         Will cache the activities on first parse and return the cache if cache was set less than an hour ago
 
@@ -226,7 +227,7 @@ class StatsDataCache:
         self.__activity_cache_time = now
         return self.__activity_cache
 
-    def get_reactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
+    def get_reactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[Reaction]:
         """Internal method to query for messages between a certain date
         Will cache the messages on first parse and return the cache if cache was set less than an hour ago
 
@@ -258,7 +259,7 @@ class StatsDataCache:
         self.__reactions_cache_time = now
         return self.__reactions_cache
 
-    def get_emojis(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[dict]:
+    def get_emojis(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[Emoji]:
         """Internal method to query for server emojis
         Will cache the emojis on first parse and return the cache if cache was set less than an hour ago
 

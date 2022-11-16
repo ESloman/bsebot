@@ -14,7 +14,7 @@ from bson import ObjectId
 from pymongo.results import UpdateResult
 
 from mongo import interface
-from mongo.datatypes import Bet, Emoji, Sticker, User
+from mongo.datatypes import Bet, Emoji, Message, Sticker, User
 from mongo.db_classes import BestSummerEverPointsDB
 
 
@@ -587,6 +587,18 @@ class UserInteractions(BestSummerEverPointsDB):
         super().__init__()
         self._vault = interface.get_collection(self.database, "userinteractions")
 
+    def get_all_messages_for_channel(self, guild_id: int, channel_id: int) -> list[Message]:
+        """Gets all messages for a given channel and guild
+
+        Args:
+            guild_id (int): _description_
+            channel_id (int): _description_
+
+        Returns:
+            list[Message]: _description_
+        """
+        return self.query({"guild_id": guild_id, "channel_id": channel_id}, limit=100000)
+    
     def add_entry(
             self,
             message_id: int,

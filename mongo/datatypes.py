@@ -154,6 +154,8 @@ class Message(TypedDict):
     """List of reactions"""
     replies: NotRequired[list[Reply]]
     """List of replies"""
+    is_thread: NotRequired[bool]
+    """Whether the message happened in a thread or not"""
 
 
 class VCInteraction(Message):

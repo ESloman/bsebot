@@ -648,6 +648,8 @@ class StatsGatherer:
         message_users = {}
         for message in messages:
             uid = message["user_id"]
+            if uid == BSE_BOT_ID:
+                continue
             if uid not in message_users:
                 message_users[uid] = 0
             message_users[uid] += 1
@@ -686,6 +688,8 @@ class StatsGatherer:
         message_users = {}
         for message in messages:
             uid = message["user_id"]
+            if uid == BSE_BOT_ID:
+                continue
             if uid not in message_users:
                 message_users[uid] = 0
             message_users[uid] += 1
@@ -722,6 +726,8 @@ class StatsGatherer:
         messages = self.cache.get_messages(guild_id, start, end)
         longest_message = None
         for message in messages:
+            if message["user_id"] == BSE_BOT_ID:
+                continue
             if content := message["content"]:
                 if not longest_message:
                     longest_message = message
@@ -776,7 +782,7 @@ class StatsGatherer:
             guesses = result.split("/")[0]
 
             if guesses == "X":
-                guesses = "10"
+                guesses = "7"
             guesses = int(guesses)
 
             wordle_count[uid].append(guesses)

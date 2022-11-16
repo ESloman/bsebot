@@ -587,15 +587,26 @@ class UserInteractions(BestSummerEverPointsDB):
         super().__init__()
         self._vault = interface.get_collection(self.database, "userinteractions")
 
+    def get_all_messages_for_server(self, guild_id: int) -> list[Message]:
+        """Gets all messages for a given server
+
+        Args:
+            guild_id (int): the server Id to get messages for
+
+        Returns:
+            list[Message]: list of messages
+        """
+        return self.query({"guild_id": guild_id}, limit=500000)
+
     def get_all_messages_for_channel(self, guild_id: int, channel_id: int) -> list[Message]:
         """Gets all messages for a given channel and guild
 
         Args:
-            guild_id (int): _description_
-            channel_id (int): _description_
+            guild_id (int): the server Id to get messages for
+            channel_id (int): the channel Id to get messages for
 
         Returns:
-            list[Message]: _description_
+            list[Message]: list of messages
         """
         return self.query({"guild_id": guild_id, "channel_id": channel_id}, limit=100000)
 
@@ -608,7 +619,8 @@ class UserInteractions(BestSummerEverPointsDB):
             message_type: list,
             message_content: str,
             timestamp: datetime.datetime,
-            additional_keys: Optional[dict] = None
+            additional_keys: Optional[dict] = None,
+            is_thread: Optional[bool] = False
     ) -> None:
         """
         Adds an entry into our interactions DB with the corresponding message.
@@ -620,6 +632,7 @@ class UserInteractions(BestSummerEverPointsDB):
         :param message_content: str - message content
         :param timestamp: - datetime object
         :param additional_keys:
+        :param is_thread: whether the entry happened in a thread or not
         :return: None
         """
 
@@ -630,7 +643,8 @@ class UserInteractions(BestSummerEverPointsDB):
             "channel_id": channel_id,
             "message_type": message_type,
             "content": message_content,
-            "timestamp": timestamp
+            "timestamp": timestamp,
+            "is_thread": is_thread
         }
 
         if additional_keys:

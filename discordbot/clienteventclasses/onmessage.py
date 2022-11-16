@@ -73,7 +73,8 @@ class OnMessage(BaseEvent):
                             channel_id,
                             ["sticker_used", ],
                             message_content,
-                            datetime.datetime.now()
+                            message.created_at,
+                            additional_keys={"og_mid": message.id}
                         )
 
         if message.attachments:
@@ -123,7 +124,8 @@ class OnMessage(BaseEvent):
                             channel_id,
                             ["emoji_used", ],
                             message_content,
-                            datetime.datetime.now()
+                            message.created_at,
+                            additional_keys={"og_mid": message.id}
                         )
 
         if message_type_only:

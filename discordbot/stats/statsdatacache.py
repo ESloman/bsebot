@@ -70,8 +70,7 @@ class StatsDataCache:
             {
                 "guild_id": guild_id,
                 "timestamp": {"$gt": start, "$lt": end},
-                "message_type": {"$nin": ["emoji_used", "vc_joined", "vc_streaming"]},
-                "user_id": {"$nin": [BSE_BOT_ID]}
+                "message_type": {"$nin": ["emoji_used", "vc_joined", "vc_streaming"]}
             },
             limit=limit
         )
@@ -287,3 +286,19 @@ class StatsDataCache:
         self.__emoji_cache = self.server_emojis.get_all_emojis(guild_id)
         self.__emoji_cache_time = now
         return self.__emoji_cache
+
+    def get_threaded_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[Message]:
+        """_summary_
+
+        Args:
+            guild_id (int): the guild ID to get emojis for
+            start (datetime.datetime): start of timestamp query
+            end (datetime.datetime): end of timestamp query
+
+        Returns:
+            List[Message]: list of messages
+        """
+        
+        all_messages = self.get_messages(guild_id, start, end)
+        threaded = [mes for mes in all_messages if mes.get("is_thread")]
+        return threaded

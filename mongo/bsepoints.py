@@ -587,15 +587,26 @@ class UserInteractions(BestSummerEverPointsDB):
         super().__init__()
         self._vault = interface.get_collection(self.database, "userinteractions")
 
+    def get_all_messages_for_server(self, guild_id: int) -> list[Message]:
+        """Gets all messages for a given server
+
+        Args:
+            guild_id (int): the server Id to get messages for
+
+        Returns:
+            list[Message]: list of messages
+        """
+        return self.query({"guild_id": guild_id}, limit=500000)
+    
     def get_all_messages_for_channel(self, guild_id: int, channel_id: int) -> list[Message]:
         """Gets all messages for a given channel and guild
 
         Args:
-            guild_id (int): _description_
-            channel_id (int): _description_
+            guild_id (int): the server Id to get messages for
+            channel_id (int): the channel Id to get messages for
 
         Returns:
-            list[Message]: _description_
+            list[Message]: list of messages
         """
         return self.query({"guild_id": guild_id, "channel_id": channel_id}, limit=100000)
 

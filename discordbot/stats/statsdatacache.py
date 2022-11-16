@@ -79,7 +79,12 @@ class StatsDataCache:
         self.__message_cache_time = now
         return self.__message_cache
 
-    def get_vc_interactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[VCInteraction]:
+    def get_vc_interactions(
+        self,
+        guild_id: int,
+        start: datetime.datetime,
+        end: datetime.datetime
+    ) -> List[VCInteraction]:
         """Internal method to query for VC interactions between a certain date
         Will cache the messages on first parse and return the cache if cache was set less than an hour ago
 

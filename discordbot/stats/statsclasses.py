@@ -1193,7 +1193,7 @@ class StatsGatherer:
         for vc in vc_interactions:
             user_id = vc["user_id"]
             channel_id = vc["channel_id"]
-            
+
             if user_id not in user_dict:
                 user_dict[user_id] = {"count": 0, "channels": []}
 
@@ -1238,7 +1238,7 @@ class StatsGatherer:
         for vc in vc_interactions:
             user_id = vc["user_id"]
             channel_id = vc["channel_id"]
-            
+
             if user_id not in user_dict:
                 user_dict[user_id] = {"count": 0, "channels": []}
 

@@ -36,6 +36,14 @@ class OnMessage(BaseEvent):
 
         message_type = []
 
+        is_thread = False
+        if message.channel.type in [
+            discord.ChannelType.public_thread,
+            discord.ChannelType.private_thread,
+            discord.ChannelType.news_thread
+        ]:
+            is_thread = True
+
         if reference := message.reference:
             referenced_message = self.client.get_message(reference.message_id)
             if not referenced_message:
@@ -73,6 +81,7 @@ class OnMessage(BaseEvent):
                             ["sticker_used", ],
                             message_content,
                             message.created_at,
+                            is_thread=is_thread,
                             additional_keys={"og_mid": message.id}
                         )
 
@@ -124,6 +133,7 @@ class OnMessage(BaseEvent):
                             ["emoji_used", ],
                             message_content,
                             message.created_at,
+                            is_thread=is_thread,
                             additional_keys={"og_mid": message.id}
                         )
 
@@ -137,5 +147,6 @@ class OnMessage(BaseEvent):
             channel_id,
             message_type,
             message_content,
-            message.created_at
+            message.created_at,
+            is_thread=is_thread
         )

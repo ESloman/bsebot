@@ -40,5 +40,6 @@ class OnThreadCreate(BaseEvent):
             thread.parent_id,
             message_type,
             starting_message.content,
-            thread.created_at
+            thread.created_at,
+            is_thread=True
         )

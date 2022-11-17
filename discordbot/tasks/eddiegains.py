@@ -183,7 +183,7 @@ class BSEddiesManager(object):
 
         minimum = user_dict.get("daily_minimum", 4)
 
-        if not user_results:
+        if not user_results and not user_reactions and not user_reacted:
             if minimum == 0:
                 return 0, {}
 

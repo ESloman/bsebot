@@ -373,6 +373,21 @@ class UserBets(BestSummerEverPointsDB):
         self.update({"type": "counter", "guild_id": guild_id}, {"$inc": {"count": 1}})
         return f"{count:04d}"
 
+    @staticmethod
+    def count_eddies_for_bet(bet: Bet) -> int:
+        """Returns the number of eddies on a bet
+
+        Args:
+            bet (Bet): the Bet dict
+
+        Returns:
+            int: total eddies
+        """
+        eddies_bet = sum([
+            better["points"] for better in bet["betters"].values()
+        ])
+        return eddies_bet
+
     def get_all_active_bets(self, guild_id: int) -> list[Bet]:
         """
         Gets all active bets.

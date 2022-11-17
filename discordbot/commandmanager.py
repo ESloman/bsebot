@@ -26,6 +26,7 @@ from discordbot.slashcommandeventclasses import BSEddiesTransactionHistory, BSEd
 # task imports
 from discordbot.tasks.annualawards import AnnualBSEddiesAwards
 from discordbot.tasks.betcloser import BetCloser
+from discordbot.tasks.betreminder import BetReminder
 from discordbot.tasks.dailyvallytask import AfterWorkVally
 from discordbot.tasks.eddiegains import EddieGainMessager
 from discordbot.tasks.eddiekingtask import BSEddiesKingTask
@@ -122,6 +123,7 @@ class CommandManager(object):
 
         # tasks
         self.bet_closer_task = BetCloser(self.client, guilds, self.logger, self.bseddies_place, self.bseddies_close)
+        self.bet_reminder_task = BetReminder(self.client, guilds, self.logger)
         self.eddie_gain_message_task = EddieGainMessager(self.client, guilds, self.logger)
         self.eddie_king_task = BSEddiesKingTask(self.client, guilds, self.logger)
         self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger, self.giphy_token)

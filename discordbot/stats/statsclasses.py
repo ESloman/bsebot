@@ -195,6 +195,49 @@ class StatsGatherer:
 
         return data_class
 
+    def busiest_thread(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """_summary_
+
+        Args:
+            guild_id (int): the guild ID
+            start (datetime.datetime): beginning of the time period
+            end (datetime.datetime): end of the time period
+
+        Returns:
+            Stat: _description_
+        """
+        threaded = self.cache.get_threaded_messages(guild_id, start, end)
+
+        threads = {}
+        for thread_message in threaded:
+            thread_id = thread_message["channel_id"]
+            user_id = thread_message["user_id"]
+
+            if thread_id not in threads:
+                threads[thread_id] = {"count": 0, "users": []}
+            threads[thread_id]["count"] += 1
+
+            if user_id not in threads[thread_id]["users"]:
+                threads[thread_id]["users"].append(user_id)
+
+        busiest = sorted(threads, key=lambda x: threads[x]["count"], reverse=True)[0]
+
+        data_class = Stat(
+            "stat",
+            guild_id,
+            stat=StatTypes.BUSIEST_THREAD,
+            month=start.strftime("%b %y"),
+            value=busiest,
+            timestamp=datetime.datetime.now(),
+            short_name="busiest_thread",
+            annual=self.annual
+        )
+        data_class.messages = threads[busiest]["count"]
+        data_class.users = len(threads[busiest]["users"])
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
+
     def busiest_day(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Returns the day with the most messages sent for the given time period
         Returns a tuple of the date and number of messages
@@ -603,10 +646,10 @@ class StatsGatherer:
 
         for message in messages:
             for emoji_name in all_emoji_names:
-                if f":{emoji_name}:" in message["content"]:
+                if emojis := re.findall(f":{emoji_name}:", message["content"]):
                     if emoji_name not in emoji_count:
-                        emoji_count[emoji_name] = 0
-                    emoji_count[emoji_name] += 1
+                            emoji_count[emoji_name] = 0
+                    emoji_count[emoji_name] += len(emojis)
 
         most_used_emoji = sorted(emoji_count, key=lambda x: emoji_count[x], reverse=True)[0]
 

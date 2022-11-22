@@ -13,6 +13,7 @@ from typing import Optional, Union
 
 from discordbot.bot_enums import AwardsTypes, StatTypes
 from mongo import interface
+from mongo.datatypes import Thread
 from mongo.db_classes import BestSummerEverPointsDB
 
 
@@ -81,11 +82,25 @@ class SpoilerThreads(BestSummerEverPointsDB):
         super().__init__()
         self._vault = interface.get_collection(self.database, "spoilerthreads")
 
+    def get_all_threads(self, guild_id: int) -> list[Thread]:
+        """
+        Gets all threads from the DB
+
+        Args:
+            guild_id (int): the guild to get the threads for
+
+        Returns:
+            list: list of Threads
+        """
+        return self.query({"guild_id": guild_id})
+
     def insert_spoiler_thread(
             self,
             guild_id: int,
             thread_id: int,
             name: str,
+            created: datetime.datetime,
+            owner: int,
             new_episode_day: Optional[int] = None
     ) -> list:
         """
@@ -99,12 +114,14 @@ class SpoilerThreads(BestSummerEverPointsDB):
             "thread_id": thread_id,
             "name": name,
             "day": new_episode_day,
-            "active": True
+            "active": True,
+            "created": created,
+            "owner": owner
         }
 
         return self.insert(document)
 
-    def get_thread_by_id(self, guild_id: int, thread_id: int) -> Union[None, dict]:
+    def get_thread_by_id(self, guild_id: int, thread_id: int) -> Union[None, Thread]:
         """
 
         :param guild_id:

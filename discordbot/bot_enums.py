@@ -116,3 +116,4 @@ class StatTypes(IntEnum):
     VC_MOST_TIME = 13
     VC_MOST_USERS = 14
     MOST_POPULAR_SERVER_EMOJI = 15
+    BUSIEST_THREAD = 16

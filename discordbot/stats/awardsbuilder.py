@@ -43,6 +43,7 @@ class AwardsBuilder:
         number_messages = self.stats.number_of_messages(*args)
         avg_message_chars, avg_message_words = self.stats.average_message_length(*args)
         busiest_channel = self.stats.busiest_channel(*args)
+        busiest_thread = self.stats.busiest_thread(*args)
         busiest_day = self.stats.busiest_day(*args)
         num_bets = self.stats.number_of_bets(*args)
         salary_gains = self.stats.salary_gains(*args)
@@ -55,6 +56,7 @@ class AwardsBuilder:
         most_used_server_emoji = self.stats.most_popular_server_emoji(*args)
 
         busiest_channel_obj = await guild.fetch_channel(busiest_channel.value)
+        busiest_thread_obj = await guild.fetch_channel(busiest_thread.value)
         busiest_day_format = busiest_day.value.strftime("%a %d %b")
         popular_channel_obj = await guild.fetch_channel(most_popular_channel.value)
         vc_time_obj = await guild.fetch_channel(vc_most_time_spent.value)
@@ -64,7 +66,7 @@ class AwardsBuilder:
         stats = [
             number_messages, avg_message_chars, avg_message_words, busiest_channel, busiest_day,
             num_bets, salary_gains, average_wordle, eddies_placed, eddies_won, most_popular_channel,
-            time_spent_in_vc, vc_most_time_spent, vc_most_users, most_used_server_emoji
+            time_spent_in_vc, vc_most_time_spent, vc_most_users, most_used_server_emoji, busiest_thread
         ]
 
         if not self.annual:
@@ -73,7 +75,8 @@ class AwardsBuilder:
             )
         else:
             message_start = (
-                f"As it's the first day of the year, here's some server stats 📈 from {start.strftime('%Y')}:\n\n"
+                f"As it's the first day of the year, here's some server stats 📈 from {start.strftime('%Y')}:\n"
+                "_(Voice stats from Nov 22 onwards)_\n\n"
             )
 
         message = (
@@ -84,6 +87,8 @@ class AwardsBuilder:
             f"Words (`{avg_message_words.value}`)\n"
             f"**Chattiest channel**: {busiest_channel_obj.mention} "
             f"(`{busiest_channel.messages}` messages from `{busiest_channel.users}` users)\n"
+            f"**Chattiest thread**: {busiest_thread_obj.mention} "
+            f"(`{busiest_thread.messages}` messages from `{busiest_thread.users}` users)\n"
             f"**Most popular channel**: {popular_channel_obj.mention} "
             f"(`{most_popular_channel.users}` unique users)\n"
             f"**Chattiest day**: {busiest_day_format} "
@@ -168,7 +173,10 @@ class AwardsBuilder:
             message_start = "Time for the monthly **BSEddies Awards** 🏆\n"
             prize = MONTHLY_AWARDS_PRIZE
         else:
-            message_start = "Time for the _Annual_ **BSEddies Awards** 🏆\n"
+            message_start = (
+                "Time for the _Annual_ **BSEddies Awards** 🏆\n"
+                "_(Voice awards from Nov 22 onwards)_\n"
+            )
             prize = ANNUAL_AWARDS_AWARD
 
         bseddies_awards = (

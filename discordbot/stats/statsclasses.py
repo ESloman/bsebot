@@ -648,7 +648,7 @@ class StatsGatherer:
             for emoji_name in all_emoji_names:
                 if emojis := re.findall(f":{emoji_name}:", message["content"]):
                     if emoji_name not in emoji_count:
-                            emoji_count[emoji_name] = 0
+                        emoji_count[emoji_name] = 0
                     emoji_count[emoji_name] += len(emojis)
 
         most_used_emoji = sorted(emoji_count, key=lambda x: emoji_count[x], reverse=True)[0]

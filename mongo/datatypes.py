@@ -251,3 +251,22 @@ class RevolutionEvent(TypedDict):
     """Whether the one hour warning was triggered"""
     quarter_hour: bool
     """Whether the 15 minute warning was triggered"""
+
+
+class Thread(TypedDict):
+    _id: ObjectId
+    """The internal DB ID"""
+    guild_id: int
+    """The discord server ID of the server the thread is in"""
+    thread_id: int
+    """The discord thread ID of the thread"""
+    name: str
+    """Name of the thread"""
+    created: datetime.datetime
+    """When the thread was created"""
+    owner: int
+    """The discord user ID of the user who created the thread"""
+    day: int
+    """Only for SPOILER threads - the day a new ep comes out"""
+    active: bool
+    """Only for SPOILER threads - if we should still be posting spoiler warnings"""

@@ -186,6 +186,8 @@ class OnReadyEvent(BaseEvent):
                                 BSE_SERVER_ID,
                                 thread_id,
                                 thread.name,
+                                thread.created_at,
+                                thread.owner_id
                             )
 
             self.logger.info("Initialising event views")

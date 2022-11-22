@@ -12,6 +12,7 @@ from discordbot.embedmanager import EmbedManager
 from discordbot.views import RevolutionView
 from mongo.bsepoints import UserPoints
 from mongo.bseticketedevents import RevolutionEvent
+from mongo.datatypes import RevolutionEvent as RevolutionEventType
 
 
 class BSEddiesRevolutionTask(commands.Cog):
@@ -93,7 +94,7 @@ class BSEddiesRevolutionTask(commands.Cog):
             elif now.hour == 19 and now.minute == 15 and not event.get("quarter_house"):
                 await self.send_excited_gif(guild_id, event, "15 MINUTES", "quarter_hour")
 
-    async def send_excited_gif(self, guild_id: int, event: dict, hours_string: str, key: str):
+    async def send_excited_gif(self, guild_id: int, event: RevolutionEventType, hours_string: str, key: str):
         """
         Method for sending a countdown gif in regards to tickets and things
         :param guild_id:
@@ -112,7 +113,7 @@ class BSEddiesRevolutionTask(commands.Cog):
         await channel.send(content=gif)
         self.revolutions.update({"_id": event["_id"]}, {"$set": {key: True}})
 
-    async def create_event(self, guild_id: int, event: dict):
+    async def create_event(self, guild_id: int, event: RevolutionEventType):
         """
         Handle event creation - this takes a DB entry and posts the message into the channel.
 
@@ -141,7 +142,7 @@ class BSEddiesRevolutionTask(commands.Cog):
         gif = await self.giphy_api.random_gif("revolution")
         await channel.send(content=gif)
 
-    async def handle_resolving_bet(self, guild_id: int, event: dict):
+    async def handle_resolving_bet(self, guild_id: int, event: RevolutionEventType):
         """
         Method for handling an event that needs resolving.
 

@@ -53,7 +53,7 @@ class OnMessage(BaseEvent):
                     ref_channel = message.channel
                 try:
                     referenced_message = await ref_channel.fetch_message(reference.message_id)
-                except discord.NotFound:
+                except (discord.NotFound, discord.errors.HTTPException):
                     # reference was deleted
                     referenced_message = None
             if referenced_message and referenced_message.author.id != user_id:

@@ -763,6 +763,21 @@ class UserInteractions(BestSummerEverPointsDB):
             {"$pull": {"reactions": entry}},
         )
 
+    def get_message(self, guild_id: int, message_id: int) -> Optional[Message]:
+        """Retrieves a message from the DB cache with the specific guild ID and message ID
+
+        Args:
+            guild_id (int): guild to get the message for
+            message_id (int): message ID to get the message for
+
+        Returns:
+            Optional[Message]: The Message or None
+        """
+        ret = self.query({"guild_id": guild_id, "message_id": message_id})
+        if ret:
+            return ret[0]
+        return None
+
     def add_voice_state_entry(
         self,
         guild_id: int,

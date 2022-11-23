@@ -160,3 +160,5 @@ class OnMessage(BaseEvent):
             is_thread=is_thread,
             is_vc=is_vc
         )
+
+        return message_type

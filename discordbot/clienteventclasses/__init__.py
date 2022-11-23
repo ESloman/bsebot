@@ -4,6 +4,7 @@ from .onemojicreate import OnEmojiCreate
 from .onmemberjoin import OnMemberJoin
 from .onmemberleave import OnMemberLeave
 from .onmessage import OnMessage
+from .onmessageedit import OnMessageEdit
 from .onreactionadd import OnReactionAdd
 from .onready import OnReadyEvent
 from .onstickercreate import OnStickerCreate

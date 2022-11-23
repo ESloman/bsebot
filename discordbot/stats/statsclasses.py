@@ -1030,7 +1030,7 @@ class StatsGatherer:
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
-    
+
     def longest_message(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Returns the longest message from two given time periods
 

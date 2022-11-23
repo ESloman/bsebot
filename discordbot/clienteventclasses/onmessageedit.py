@@ -25,6 +25,16 @@ class OnMessageEdit(BaseEvent):
             before (Optional[discord.Message]): the message before
             after (discord.Message): the message after
         """
+        if after.channel.type not in [
+            discord.ChannelType.text,
+            discord.ChannelType.private,
+            discord.ChannelType.voice,
+            discord.ChannelType.public_thread,
+            discord.ChannelType.private_thread,
+            discord.ChannelType.news_thread
+        ]:
+            return
+
         db_message = self.user_interactions.get_message(after.guild.id, after.id)
 
         if not db_message:

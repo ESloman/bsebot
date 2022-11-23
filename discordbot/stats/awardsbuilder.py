@@ -39,10 +39,10 @@ class AwardsBuilder:
         args = (self.guild_id, start, end)
 
         guild = await self.bot.fetch_guild(self.guild_id)
-        
+
         # get a list of channel IDs here to use
         _channels = await guild.fetch_channels()
-        _channels = [c for c  in _channels if c.type in [discord.ChannelType.text, discord.ChannelType.private]]
+        _channels = [c for c in _channels if c.type in [discord.ChannelType.text, discord.ChannelType.private]]
         _channel_ids = [c.id for c in _channels]
 
         number_messages = self.stats.number_of_messages(*args)
@@ -75,7 +75,7 @@ class AwardsBuilder:
         vc_time_obj = await guild.fetch_channel(vc_most_time_spent.value)
         vc_users_obj = await guild.fetch_channel(vc_most_users.value)
         emoji_obj = await guild.fetch_emoji(most_used_server_emoji.emoji_id)
-        
+
         thread_objects = [
             await guild.fetch_channel(thread_id) for thread_id in threads_created.threads
         ]
@@ -107,7 +107,7 @@ class AwardsBuilder:
             f"Words (`{avg_message_words.value}`)\n"
             f"**Chattiest channel** 🖨️: {busiest_channel_obj.mention} "
             f"(`{busiest_channel.messages}` messages from `{busiest_channel.users}` users)\n"
-             f"**Quietest channel** 📭: {quietest_channel_obj.mention} "
+            f"**Quietest channel** 📭: {quietest_channel_obj.mention} "
             f"(`{quietest_channel.messages}` messages from `{quietest_channel.users}` users)\n"
             f"**Chattiest thread** 📧: {busiest_thread_obj.mention} "
             f"(`{busiest_thread.messages}` messages from `{busiest_thread.users}` users)\n"
@@ -193,7 +193,7 @@ class AwardsBuilder:
             serial_replier,
             conversation_starter
         ]
-        
+
         if self.annual:
             # add owner award for annual awards
             owner_award = self.stats.server_owner(guild, start)
@@ -234,7 +234,8 @@ class AwardsBuilder:
             "The _'serial replier'_ 📝 award: "
             f"{user_id_dict[serial_replier.user_id].mention} (`{serial_replier.value}` replies)\n"
             "The _'conversation started'_ 📥 award: "
-            f"{user_id_dict[conversation_starter.user_id].mention} (`{conversation_starter.value}` replies _received_)\n"
+            f"{user_id_dict[conversation_starter.user_id].mention} "
+            "(`{conversation_starter.value}` replies _received_)\n"
             "The _'twitter addict'_ 🐦 award: "
             f"{user_id_dict[twitter_addict.user_id].mention} (`{twitter_addict.value}` tweets shared)\n"
             "The _'jerk off mate'_ 🍆 award: "
@@ -260,7 +261,7 @@ class AwardsBuilder:
             f"{user_id_dict[longest_king.user_id].mention} "
             f"(`{str(datetime.timedelta(seconds=longest_king.value))}` spent as KING)"
         )
-        
+
         if self.annual:
             bseddies_awards = (
                 f"{bseddies_awards}\n"
@@ -315,7 +316,7 @@ class AwardsBuilder:
 
         # uncomment for debug
         channel = await self.bot.fetch_channel(291508460519161856)
-        
+
         self.logger.info(f"Stats message is {len(stats_message)} chars long")
         self.logger.info(f"Awards message is {len(awards_message)} chars long")
         await channel.send(content=stats_message)

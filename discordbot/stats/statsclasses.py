@@ -134,7 +134,7 @@ class StatsGatherer:
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
-    
+
     def average_message_length(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[Stat]:
         """Returns the average message length between two given time periods
 
@@ -318,7 +318,13 @@ class StatsGatherer:
 
         return data_class
 
-    def quietest_channel(self, guild_id: int, start: datetime.datetime, end: datetime.datetime, channel_ids: list[int]) -> Stat:
+    def quietest_channel(
+        self,
+        guild_id: int,
+        start: datetime.datetime,
+        end: datetime.datetime,
+        channel_ids: list[int]
+    ) -> Stat:
         """Returns the channel with the least messages for a given time period
 
         Args:
@@ -406,7 +412,7 @@ class StatsGatherer:
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
-    
+
     def quietest_day(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Returns the day with the least messages sent for the given time period
 

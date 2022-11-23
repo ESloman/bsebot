@@ -44,7 +44,7 @@ class OnMessage(BaseEvent):
             discord.ChannelType.news_thread
         ]:
             is_thread = True
-        
+
         if message.channel.type in [
             discord.ChannelType.voice,
             discord.ChannelType.stage_voice

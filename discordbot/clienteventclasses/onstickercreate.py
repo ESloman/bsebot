@@ -45,5 +45,5 @@ class OnStickerCreate(BaseEvent):
                 ["sticker_created", ],
                 sticker.name,
                 datetime.datetime.now(),
-                {"sticker_id": sticker.id, "created_at": sticker.created_at}
+                additional_keys={"sticker_id": sticker.id, "created_at": sticker.created_at}
             )

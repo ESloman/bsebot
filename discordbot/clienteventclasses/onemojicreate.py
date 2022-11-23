@@ -40,5 +40,5 @@ class OnEmojiCreate(BaseEvent):
                 ["emoji_created", ],
                 emoji.name,
                 datetime.datetime.now(),
-                {"emoji_id": emoji.id, "created_at": emoji.created_at}
+                additional_keys={"emoji_id": emoji.id, "created_at": emoji.created_at}
             )

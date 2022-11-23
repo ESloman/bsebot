@@ -37,12 +37,19 @@ class OnMessage(BaseEvent):
         message_type = []
 
         is_thread = False
+        is_vc = False
         if message.channel.type in [
             discord.ChannelType.public_thread,
             discord.ChannelType.private_thread,
             discord.ChannelType.news_thread
         ]:
             is_thread = True
+
+        if message.channel.type in [
+            discord.ChannelType.voice,
+            discord.ChannelType.stage_voice
+        ]:
+            is_vc = True
 
         if reference := message.reference:
             referenced_message = self.client.get_message(reference.message_id)
@@ -82,6 +89,7 @@ class OnMessage(BaseEvent):
                             message_content,
                             message.created_at,
                             is_thread=is_thread,
+                            is_vc=is_vc,
                             additional_keys={"og_mid": message.id}
                         )
 
@@ -134,6 +142,7 @@ class OnMessage(BaseEvent):
                             message_content,
                             message.created_at,
                             is_thread=is_thread,
+                            is_vc=is_vc,
                             additional_keys={"og_mid": message.id}
                         )
 
@@ -148,5 +157,6 @@ class OnMessage(BaseEvent):
             message_type,
             message_content,
             message.created_at,
-            is_thread=is_thread
+            is_thread=is_thread,
+            is_vc=is_vc
         )

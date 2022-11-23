@@ -101,7 +101,8 @@ if __name__ == "__main__":
         debug_guilds=IDS,
         intents=intents,
         activity=listening_activity,
-        auto_sync_commands=False
+        auto_sync_commands=False,
+        max_messages=5000
     )
 
     com = CommandManager(cli, IDS, logger, giphy_token=GIPHY_TOKEN)

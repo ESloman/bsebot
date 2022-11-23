@@ -2,6 +2,7 @@
 import datetime
 from typing import List, Optional
 
+from mongo.bsedataclasses import SpoilerThreads
 from mongo.bsepoints import ServerEmojis, UserBets, UserInteractions, UserPoints
 from mongo.datatypes import Activity, Bet, Emoji, Message, Reaction, Transaction, User, VCInteraction
 
@@ -12,6 +13,7 @@ class StatsDataCache:
         self.user_interactions = UserInteractions()
         self.user_points = UserPoints()
         self.server_emojis = ServerEmojis()
+        self.threads = SpoilerThreads()
 
         self.annual = annual
 
@@ -41,6 +43,9 @@ class StatsDataCache:
 
         self.__emoji_cache = []  # type: List[Emoji]
         self.__emoji_cache_time = None  # type: Optional[datetime.datetime]
+
+        self.__reply_cache = []  # type: List[Message]
+        self.__reply_cache_time = None  # type: Optional[datetime.datetime]
 
     # caching functions
     def get_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[Message]:
@@ -290,7 +295,7 @@ class StatsDataCache:
         """_summary_
 
         Args:
-            guild_id (int): the guild ID to get emojis for
+            guild_id (int): the guild ID to get threads for
             start (datetime.datetime): start of timestamp query
             end (datetime.datetime): end of timestamp query
 
@@ -301,3 +306,31 @@ class StatsDataCache:
         all_messages = self.get_messages(guild_id, start, end)
         threaded = [mes for mes in all_messages if mes.get("is_thread")]
         return threaded
+
+    def get_replies(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[Message]:
+        """_summary_
+
+        Args:
+            guild_id (int): the guild ID to get replies for
+            start (datetime.datetime): start of timestamp query
+            end (datetime.datetime): end of timestamp query
+
+        Returns:
+            List[Message]: _description_
+        """
+
+        now = datetime.datetime.now()
+
+        if start != self.__start_cache or end != self.__end_cache:
+            self.__reply_cache = []
+
+        if self.__reply_cache and (now - self.__reply_cache_time).total_seconds() < 3600:
+            return self.__reply_cache
+
+        self.__reply_cache = self.user_interactions.query({
+            "guild_id": guild_id,
+            "replies.timestamp": {"$gt": start, "$lt": end}
+        })
+
+        self.__reply_cache_time = now
+        return self.__reply_cache

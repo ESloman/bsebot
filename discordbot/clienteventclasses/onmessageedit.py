@@ -25,6 +25,11 @@ class OnMessageEdit(BaseEvent):
             before (Optional[discord.Message]): the message before
             after (discord.Message): the message after
         """
+        if after.type in [
+            discord.MessageType.application_command
+        ]:
+            return
+
         if after.channel.type not in [
             discord.ChannelType.text,
             discord.ChannelType.private,

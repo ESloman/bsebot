@@ -122,7 +122,7 @@ class OnReadyEvent(BaseEvent):
                         ["emoji_created", ],
                         emoji_obj.name,
                         datetime.datetime.now(),
-                        {"emoji_id": emoji_obj.id, "created_at": emoji_obj.created_at}
+                        additional_keys={"emoji_id": emoji_obj.id, "created_at": emoji_obj.created_at}
                     )
 
             self.logger.info("Checking guild stickers")
@@ -150,7 +150,7 @@ class OnReadyEvent(BaseEvent):
                         ["sticker_created", ],
                         stick_obj.name,
                         datetime.datetime.now(),
-                        {"sticker_id": stick_obj.id, "created_at": stick_obj.created_at}
+                        additional_keys={"sticker_id": stick_obj.id, "created_at": stick_obj.created_at}
                     )
 
             # join all threads

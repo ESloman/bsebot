@@ -4,6 +4,8 @@ import re
 from copy import deepcopy
 from typing import Tuple
 
+import discord
+
 from discordbot.bot_enums import ActivityTypes, AwardsTypes, StatTypes, TransactionTypes
 from discordbot.constants import ANNUAL_AWARDS_AWARD, BSE_BOT_ID, JERK_OFF_CHAT, MONTHLY_AWARDS_PRIZE
 from discordbot.stats.statsdatacache import StatsDataCache
@@ -76,7 +78,7 @@ class StatsGatherer:
             end (datetime.datetime): end of time period
 
         Returns:
-            int: the number of messages
+            Stat: the number of messages stat
         """
         messages = self.cache.get_messages(guild_id, start, end)
 
@@ -100,9 +102,41 @@ class StatsGatherer:
 
         return data_class
 
+    def number_of_threaded_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """Returns the number of messages sent in threads
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: the thread message stat
+        """
+        messages = self.cache.get_threaded_messages(guild_id, start, end)
+
+        channel_ids = set([m["channel_id"] for m in messages])
+        user_ids = set([m["user_id"] for m in messages])
+
+        data_class = Stat(
+            "stat",
+            guild_id,
+            stat=StatTypes.NUMBER_OF_THREAD_MESSAGES,
+            month=start.strftime("%b %y"),
+            value=len(messages),
+            timestamp=datetime.datetime.now(),
+            short_name="number_of_thread_messages",
+            annual=self.annual
+        )
+
+        data_class.channels = len(channel_ids)
+        data_class.users = len(user_ids)
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
+    
     def average_message_length(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[Stat]:
         """Returns the average message length between two given time periods
-        Returns a tuple of (AVERAGE_CHARACTERs, AVERAGE_WORDs)
 
         Args:
             guild_id (int): the guild ID
@@ -110,7 +144,7 @@ class StatsGatherer:
             end (datetime.datetime): end of the time period
 
         Returns:
-            Tuple[Stat, Stat]: returns a tuple of average message characters and average words per message
+            Tuple[Stat, Stat]: returns a tuple of average message characters and average words per message stats
         """
 
         messages = self.cache.get_messages(guild_id, start, end)
@@ -152,7 +186,6 @@ class StatsGatherer:
 
     def busiest_channel(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Returns the channel with the most messages for a given time period
-        Returns a float of the channel ID and the number of messages
 
         Args:
             guild_id (int): the guild ID
@@ -160,9 +193,10 @@ class StatsGatherer:
             end (datetime.datetime): end of the time period
 
         Returns:
-            Tuple[int, int]: float of channel ID and number of messages
+            Stat: the busiest channel stat
         """
         messages = self.cache.get_messages(guild_id, start, end)
+        messages = [m for m in messages if not m.get("is_thread") and not m.get("is_vc")]
 
         channels = {}
         for message in messages:
@@ -196,7 +230,7 @@ class StatsGatherer:
         return data_class
 
     def busiest_thread(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """_summary_
+        """Calculates the thread with most messages for the given time period
 
         Args:
             guild_id (int): the guild ID
@@ -204,7 +238,7 @@ class StatsGatherer:
             end (datetime.datetime): end of the time period
 
         Returns:
-            Stat: _description_
+            Stat: the stat class
         """
         threaded = self.cache.get_threaded_messages(guild_id, start, end)
 
@@ -240,7 +274,6 @@ class StatsGatherer:
 
     def busiest_day(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Returns the day with the most messages sent for the given time period
-        Returns a tuple of the date and number of messages
 
         Args:
             guild_id (int): the guild ID
@@ -248,7 +281,7 @@ class StatsGatherer:
             end (datetime.datetime): end of the time period
 
         Returns:
-            Tuple[datetime.date, int]: The date with most messages and the number of messages
+            Stat: the busiest day stat
         """
         messages = self.cache.get_messages(guild_id, start, end)
         days = {}
@@ -285,6 +318,141 @@ class StatsGatherer:
 
         return data_class
 
+    def quietest_channel(self, guild_id: int, start: datetime.datetime, end: datetime.datetime, channel_ids: list[int]) -> Stat:
+        """Returns the channel with the least messages for a given time period
+
+        Args:
+            guild_id (int): the guild ID
+            start (datetime.datetime): beginning of the time period
+            end (datetime.datetime): end of the time period
+            channel_ids (list[int]): list of channel IDs
+
+        Returns:
+            Stat: the quietest channel stat
+        """
+        messages = self.cache.get_messages(guild_id, start, end)
+        messages = [m for m in messages if not m.get("is_thread") and not m.get("is_vc")]
+
+        channels = {}
+        for message in messages:
+            channel_id = message["channel_id"]
+            user_id = message["user_id"]
+            if not channel_id or channel_id not in channel_ids:
+                continue
+            if channel_id not in channels:
+                channels[channel_id] = {"count": 0, "users": []}
+            channels[channel_id]["count"] += 1
+            if user_id not in channels[channel_id]["users"]:
+                channels[channel_id]["users"].append(user_id)
+
+        quietest = sorted(channels, key=lambda x: channels[x]["count"], reverse=False)[0]
+
+        data_class = Stat(
+            "stat",
+            guild_id,
+            stat=StatTypes.QUIETEST_CHANNEL,
+            month=start.strftime("%b %y"),
+            value=quietest,
+            timestamp=datetime.datetime.now(),
+            short_name="quietest_channel",
+            annual=self.annual
+        )
+
+        data_class.messages = channels[quietest]["count"]
+        data_class.users = len(channels[quietest]["users"])
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
+
+    def quietest_thread(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """Calculates the quietest thread
+
+        Args:
+            guild_id (int): the guild ID
+            start (datetime.datetime): beginning of the time period
+            end (datetime.datetime): end of the time period
+
+        Returns:
+            Stat: the quietest thread stat
+        """
+        threaded = self.cache.get_threaded_messages(guild_id, start, end)
+
+        threads = {}
+        for thread_message in threaded:
+            thread_id = thread_message["channel_id"]
+            user_id = thread_message["user_id"]
+
+            if thread_id not in threads:
+                threads[thread_id] = {"count": 0, "users": []}
+            threads[thread_id]["count"] += 1
+
+            if user_id not in threads[thread_id]["users"]:
+                threads[thread_id]["users"].append(user_id)
+
+        quietest = sorted(threads, key=lambda x: threads[x]["count"], reverse=False)[0]
+
+        data_class = Stat(
+            "stat",
+            guild_id,
+            stat=StatTypes.QUIETEST_THREAD,
+            month=start.strftime("%b %y"),
+            value=quietest,
+            timestamp=datetime.datetime.now(),
+            short_name="quietest_thread",
+            annual=self.annual
+        )
+        data_class.messages = threads[quietest]["count"]
+        data_class.users = len(threads[quietest]["users"])
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
+    
+    def quietest_day(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """Returns the day with the least messages sent for the given time period
+
+        Args:
+            guild_id (int): the guild ID
+            start (datetime.datetime): beginning of the time period
+            end (datetime.datetime): end of the time period
+
+        Returns:
+            Stat: the quietest day stat
+        """
+        messages = self.cache.get_messages(guild_id, start, end)
+        days = {}
+        for message in messages:
+            channel_id = message["channel_id"]
+            user_id = message["user_id"]
+            day = message["timestamp"].date()
+            if day not in days:
+                days[day] = {"count": 0, "channels": [], "users": []}
+            days[day]["count"] += 1
+
+            if channel_id not in days[day]["channels"]:
+                days[day]["channels"].append(channel_id)
+            if user_id not in days[day]["users"]:
+                days[day]["users"].append(user_id)
+
+        quietest = sorted(days, key=lambda x: days[x]["count"], reverse=False)[0]  # type: datetime.date
+
+        data_class = Stat(
+            "stat",
+            guild_id,
+            stat=StatTypes.QUIETEST_DAY,
+            month=start.strftime("%b %y"),
+            value=quietest,
+            timestamp=datetime.datetime.now(),
+            short_name="quietest_day",
+            annual=self.annual
+        )
+
+        data_class.messages = days[quietest]["count"]
+        data_class.channels = len(days[quietest]["channels"])
+        data_class.users = len(days[quietest]["users"])
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
+
     def number_of_bets(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Returns the number of bets between two given time periods
 
@@ -294,7 +462,7 @@ class StatsGatherer:
             end (datetime.datetime): end of time period
 
         Returns:
-            int: the number of bets
+            Stat: the number of bets stat
         """
         bets = self.cache.get_bets(guild_id, start, end)
 
@@ -322,7 +490,7 @@ class StatsGatherer:
             end (datetime.datetime): end of time period
 
         Returns:
-            int: _description_
+            Stat: the salary stat
         """
         transactions = self.cache.get_transactions(guild_id, start, end)
         salary_total = 0
@@ -355,7 +523,7 @@ class StatsGatherer:
             end (datetime.datetime): end of time period
 
         Returns:
-            float: The average wordle score
+            Stat: average wordle stat
         """
         messages = self.cache.get_messages(guild_id, start, end)
         wordle_messages = [m for m in messages if "wordle" in m["message_type"]]
@@ -399,7 +567,7 @@ class StatsGatherer:
             end (datetime.datetime): end of time period
 
         Returns:
-            Tuple[int, int]: returns a tuple of eddies placed and eddies won
+            Tuple[Stat, Stat]: returns a tuple of eddies placed and eddies won
         """
         transactions = self.cache.get_transactions(guild_id, start, end)
 
@@ -448,7 +616,7 @@ class StatsGatherer:
             end (datetime.datetime): end of time period
 
         Returns:
-            Stat: _description_
+            Stat: channel contrib stat
         """
         messages = self.cache.get_messages(guild_id, start, end)
 
@@ -489,7 +657,7 @@ class StatsGatherer:
             end (datetime.datetime): end of time period
 
         Returns:
-            Stat: _description_
+            Stat: time spent in VC stat
         """
         vc_interactions = self.cache.get_vc_interactions(guild_id, start, end)
         vc_time = 0
@@ -533,7 +701,7 @@ class StatsGatherer:
             end (datetime.datetime): end of time period
 
         Returns:
-            Stat: _description_
+            Stat: the VC stat
         """
         vc_interactions = self.cache.get_vc_interactions(guild_id, start, end)
 
@@ -578,7 +746,7 @@ class StatsGatherer:
             end (datetime.datetime): end of time period
 
         Returns:
-            Stat: _description_
+            Stat: the VC stat
         """
         vc_interactions = self.cache.get_vc_interactions(guild_id, start, end)
 
@@ -673,8 +841,70 @@ class StatsGatherer:
 
         return data_class
 
+    def threads_created(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """Calculates number of threads created in the given time period
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: the Stat data class
+        """
+        created_threads = []
+        all_threads = self.cache.threads.get_all_threads(guild_id)
+        for thread in all_threads:
+            if thread["created"] < start or end < thread["created"]:
+                # thread creation falls outside our time perioud
+                continue
+            created_threads.append(thread)
+
+        data_class = Stat(
+            type="stat",
+            guild_id=guild_id,
+            stat=StatTypes.THREADS_CREATED,
+            month=start.strftime("%b %y"),
+            value=len(created_threads),
+            timestamp=datetime.datetime.now(),
+            short_name="threads_created",
+            annual=self.annual
+        )
+
+        data_class.threads = [thread["thread_id"] for thread in created_threads]
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
+
     # stats that can be won
     # messages
+    def server_owner(self, guild: discord.Guild, start: datetime.datetime) -> Stat:
+        """Generates the server owner award
+
+        Args:
+            guild (discord.Guild): the guild object
+
+        Returns:
+            Stat: the server owner award
+        """
+        owner = guild.owner_id
+
+        data_class = Stat(
+            type="award",
+            guild_id=guild.id,
+            user_id=owner,
+            award=AwardsTypes.GUILD_OWNER_AWARD,
+            month=start.strftime("%b %y"),
+            value=guild.created_at,
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="guild_owner_award",
+            annual=self.annual
+        )
+
+        data_class = self.add_annual_changes(start, data_class)
+        return data_class
+
     def most_messages_sent(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Calculates the person who has sent the most messages in the server
 
@@ -755,6 +985,46 @@ class StatsGatherer:
 
         return data_class
 
+    def most_thread_messages_sent(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """Calculates the person who has sent the most threaded messages in the server
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: the most thread messages stat
+        """
+        messages = self.cache.get_threaded_messages(guild_id, start, end)
+
+        message_users = {}
+        for message in messages:
+            uid = message["user_id"]
+            if uid == BSE_BOT_ID:
+                continue
+            if uid not in message_users:
+                message_users[uid] = 0
+            message_users[uid] += 1
+        chattiest = sorted(message_users, key=lambda x: message_users[x], reverse=True)[0]
+
+        data_class = Stat(
+            type="award",
+            guild_id=guild_id,
+            user_id=chattiest,
+            award=AwardsTypes.MOST_MESSAGES,
+            month=start.strftime("%b %y"),
+            value=message_users[chattiest],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="most_thread_messages_sent",
+            annual=self.annual
+        )
+
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
+    
     def longest_message(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Returns the longest message from two given time periods
 
@@ -864,6 +1134,233 @@ class StatsGatherer:
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
+
+    def twitter_addict(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """Calculates who's posted the most twitter links
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: twitter stat
+        """
+        messages = self.cache.get_messages(guild_id, start, end)
+
+        tweet_users = {}
+        for message in messages:
+            if "twitter" in message["content"] and "link" in message["message_type"]:
+                user_id = message["user_id"]
+                if user_id not in tweet_users:
+                    tweet_users[user_id] = 0
+                tweet_users[user_id] += 1
+
+        twitter_addict = sorted(tweet_users, key=lambda x: tweet_users[x], reverse=True)[0]
+
+        data_class = Stat(
+            type="award",
+            guild_id=guild_id,
+            user_id=twitter_addict,
+            award=AwardsTypes.TWITTER_ADDICT,
+            month=start.strftime("%b %y"),
+            value=tweet_users[twitter_addict],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="twitter_addict",
+            annual=self.annual
+        )
+
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
+
+    def jerk_off_contributor(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """Calculates who's posted this most contributions in #jerk-off-chat
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: jerk off stat
+        """
+        messages = self.cache.get_messages(guild_id, start, end)
+        jerk_off_messages = [m for m in messages if m["channel_id"] == JERK_OFF_CHAT]
+
+        jerk_off_users = {}
+        for message in jerk_off_messages:
+            if any([a for a in ["link", "attachment"] if a in message["message_type"]]):
+                user_id = message["user_id"]
+                if user_id not in jerk_off_users:
+                    jerk_off_users[user_id] = 0
+                jerk_off_users[user_id] += 1
+
+        masturbator = sorted(jerk_off_users, key=lambda x: jerk_off_users[x], reverse=True)[0]
+
+        data_class = Stat(
+            type="award",
+            guild_id=guild_id,
+            user_id=masturbator,
+            award=AwardsTypes.MASTURBATOR,
+            month=start.strftime("%b %y"),
+            value=jerk_off_users[masturbator],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="masturbator",
+            annual=self.annual
+        )
+
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
+
+    def big_memer(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """Calculates which user had the most reactions for this time period
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: big memeer stat
+        """
+        reaction_messages = self.cache.get_reactions(guild_id, start, end)
+
+        reaction_users = {}
+        for message in reaction_messages:
+            user_id = message["user_id"]
+            if user_id not in reaction_users:
+                reaction_users[user_id] = 0
+            reactions = [r for r in message["reactions"] if r["user_id"] != user_id]
+            reaction_users[user_id] += len(reactions)
+
+        big_memer = sorted(reaction_users, key=lambda x: reaction_users[x], reverse=True)[0]
+
+        data_class = Stat(
+            type="award",
+            guild_id=guild_id,
+            user_id=big_memer,
+            award=AwardsTypes.BIG_MEMER,
+            month=start.strftime("%b %y"),
+            value=reaction_users[big_memer],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="big_memer",
+            annual=self.annual
+        )
+
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
+
+    def react_king(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """
+        Calculates who's given the most reactions
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: the react king award
+        """
+        reaction_messages = self.cache.get_reactions(guild_id, start, end)
+        reactions = []
+        for react in reaction_messages:
+            reactions.extend(react["reactions"])
+
+        reaction_users = {}
+        for reaction in reactions:
+            user_id = reaction["user_id"]
+            if user_id not in reaction_users:
+                reaction_users[user_id] = 0
+            reaction_users[user_id] += 1
+
+        react_king = sorted(reaction_users, key=lambda x: reaction_users[x], reverse=True)[0]
+
+        data_class = Stat(
+            type="award",
+            guild_id=guild_id,
+            user_id=react_king,
+            award=AwardsTypes.REACT_KING,
+            month=start.strftime("%b %y"),
+            value=reaction_users[react_king],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="react_king",
+            annual=self.annual
+        )
+
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
+
+    def most_replies(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[Stat, Stat]:
+        """
+        Calculates who's been replied to most and who's given the most replies
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Tuple[Stat, Stat]: the two reply Stat objects
+        """
+
+        messages_with_replies = self.cache.get_replies(guild_id, start, end)
+        replies = {}  # replies someone has done
+        replied_to = {}  # replies _received_
+        for message in messages_with_replies:
+            _replies = message["replies"]
+            m_user_id = message["user_id"]
+            if m_user_id not in replied_to:
+                replied_to[m_user_id] = 0
+            for reply in _replies:
+                if not (start < reply["timestamp"] < end):
+                    continue
+                replied_to[m_user_id] += 1
+                user_id = reply["user_id"]
+                if user_id not in replies:
+                    replies[user_id] = 0
+                replies[user_id] += 1
+
+        serial_replier = sorted(replies, key=lambda x: replies[x], reverse=True)[0]
+        conversation_starter = sorted(replied_to, key=lambda x: replied_to[x], reverse=True)[0]
+
+        replier_data_class = Stat(
+            type="award",
+            guild_id=guild_id,
+            user_id=serial_replier,
+            award=AwardsTypes.SERIAL_REPLIER,
+            month=start.strftime("%b %y"),
+            value=replies[serial_replier],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="serial_replier",
+            annual=self.annual
+        )
+
+        replier_data_class = self.add_annual_changes(start, replier_data_class)
+
+        conversation_data_class = Stat(
+            type="award",
+            guild_id=guild_id,
+            user_id=conversation_starter,
+            award=AwardsTypes.CONVERSATION_STARTER,
+            month=start.strftime("%b %y"),
+            value=replied_to[conversation_starter],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="conversation_starter",
+            annual=self.annual
+        )
+
+        conversation_data_class = self.add_annual_changes(start, conversation_data_class)
+
+        return replier_data_class, conversation_data_class
 
     # bets
     def most_bets_created(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
@@ -1025,17 +1522,9 @@ class StatsGatherer:
         if king_events[-1] == event and event["type"] == ActivityTypes.KING_GAIN:
             # last thing someone did was become KING
             uid = event["uid"]
-            # this section is the worst
-            try:
-                end_time = start.replace(day=31, hour=23, minute=59, second=59)
-            except ValueError:
-                try:
-                    end_time = start.replace(day=30, hour=23, minute=59, second=59)
-                except ValueError:
-                    try:
-                        end_time = start.replace(day=29, hour=23, minute=59, second=59)
-                    except ValueError:
-                        end_time = start.replace(day=28, hour=23, minute=59, second=59)
+            end_time = datetime.datetime.now()
+            if end_time > end:
+                end_time = end
             timestamp = event["timestamp"]  # type: datetime.datetime
             time_king = (end_time - timestamp).total_seconds()
             if uid not in kings:
@@ -1061,180 +1550,17 @@ class StatsGatherer:
 
         return data_class
 
-    def twitter_addict(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates who's posted the most twitter links
-
-        Args:
-            guild_id (int): the guild ID to query for
-            start (datetime.datetime): beginning of time period
-            end (datetime.datetime): end of time period
-
-        Returns:
-            Stat: twitter stat
-        """
-        messages = self.cache.get_messages(guild_id, start, end)
-
-        tweet_users = {}
-        for message in messages:
-            if "twitter" in message["content"] and "link" in message["message_type"]:
-                user_id = message["user_id"]
-                if user_id not in tweet_users:
-                    tweet_users[user_id] = 0
-                tweet_users[user_id] += 1
-
-        twitter_addict = sorted(tweet_users, key=lambda x: tweet_users[x], reverse=True)[0]
-
-        data_class = Stat(
-            type="award",
-            guild_id=guild_id,
-            user_id=twitter_addict,
-            award=AwardsTypes.TWITTER_ADDICT,
-            month=start.strftime("%b %y"),
-            value=tweet_users[twitter_addict],
-            timestamp=datetime.datetime.now(),
-            eddies=MONTHLY_AWARDS_PRIZE,
-            short_name="twitter_addict",
-            annual=self.annual
-        )
-
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
-
-    def jerk_off_contributor(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates who's posted this most contributions in #jerk-off-chat
-
-        Args:
-            guild_id (int): the guild ID to query for
-            start (datetime.datetime): beginning of time period
-            end (datetime.datetime): end of time period
-
-        Returns:
-            Stat: _description_
-        """
-        messages = self.cache.get_messages(guild_id, start, end)
-        jerk_off_messages = [m for m in messages if m["channel_id"] == JERK_OFF_CHAT]
-
-        jerk_off_users = {}
-        for message in jerk_off_messages:
-            if any([a for a in ["link", "attachment"] if a in message["message_type"]]):
-                user_id = message["user_id"]
-                if user_id not in jerk_off_users:
-                    jerk_off_users[user_id] = 0
-                jerk_off_users[user_id] += 1
-
-        masturbator = sorted(jerk_off_users, key=lambda x: jerk_off_users[x], reverse=True)[0]
-
-        data_class = Stat(
-            type="award",
-            guild_id=guild_id,
-            user_id=masturbator,
-            award=AwardsTypes.MASTURBATOR,
-            month=start.strftime("%b %y"),
-            value=jerk_off_users[masturbator],
-            timestamp=datetime.datetime.now(),
-            eddies=MONTHLY_AWARDS_PRIZE,
-            short_name="masturbator",
-            annual=self.annual
-        )
-
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
-
-    def big_memer(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """
-
-        Args:
-            guild_id (int): the guild ID to query for
-            start (datetime.datetime): beginning of time period
-            end (datetime.datetime): end of time period
-
-        Returns:
-            Stat: _description_
-        """
-        reaction_messages = self.cache.get_reactions(guild_id, start, end)
-
-        reaction_users = {}
-        for message in reaction_messages:
-            user_id = message["user_id"]
-            if user_id not in reaction_users:
-                reaction_users[user_id] = 0
-            reactions = [r for r in message["reactions"] if r["user_id"] != user_id]
-            reaction_users[user_id] += len(reactions)
-
-        big_memer = sorted(reaction_users, key=lambda x: reaction_users[x], reverse=True)[0]
-
-        data_class = Stat(
-            type="award",
-            guild_id=guild_id,
-            user_id=big_memer,
-            award=AwardsTypes.BIG_MEMER,
-            month=start.strftime("%b %y"),
-            value=reaction_users[big_memer],
-            timestamp=datetime.datetime.now(),
-            eddies=MONTHLY_AWARDS_PRIZE,
-            short_name="big_memer",
-            annual=self.annual
-        )
-
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
-
-    def react_king(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """
-
-        Args:
-            guild_id (int): the guild ID to query for
-            start (datetime.datetime): beginning of time period
-            end (datetime.datetime): end of time period
-
-        Returns:
-            Stat: _description_
-        """
-        reaction_messages = self.cache.get_reactions(guild_id, start, end)
-        reactions = []
-        for react in reaction_messages:
-            reactions.extend(react["reactions"])
-
-        reaction_users = {}
-        for reaction in reactions:
-            user_id = reaction["user_id"]
-            if user_id not in reaction_users:
-                reaction_users[user_id] = 0
-            reaction_users[user_id] += 1
-
-        react_king = sorted(reaction_users, key=lambda x: reaction_users[x], reverse=True)[0]
-
-        data_class = Stat(
-            type="award",
-            guild_id=guild_id,
-            user_id=react_king,
-            award=AwardsTypes.REACT_KING,
-            month=start.strftime("%b %y"),
-            value=reaction_users[react_king],
-            timestamp=datetime.datetime.now(),
-            eddies=MONTHLY_AWARDS_PRIZE,
-            short_name="react_king",
-            annual=self.annual
-        )
-
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
-
     # vc
     def big_gamer(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """
-
+        Calculates who spent the most time in VC
         Args:
             guild_id (int): the guild ID to query for
             start (datetime.datetime): beginning of time period
             end (datetime.datetime): end of time period
 
         Returns:
-            Stat: _description_
+            Stat: the VC stat
         """
         vc_interactions = self.cache.get_vc_interactions(guild_id, start, end)
 
@@ -1272,14 +1598,14 @@ class StatsGatherer:
 
     def big_streamer(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """
-
+        Calculates who spent the most time streaming
         Args:
             guild_id (int): the guild ID to query for
             start (datetime.datetime): beginning of time period
             end (datetime.datetime): end of time period
 
         Returns:
-            Stat: _description_
+            Stat: the award
         """
         vc_interactions = self.cache.get_vc_interactions(guild_id, start, end)
 

@@ -95,5 +95,5 @@ class OnReactionAdd(BaseEvent):
                 ["emoji_used", ],
                 reaction,
                 datetime.datetime.now(),
-                {"emoji_id": emoji_obj["eid"]}
+                additional_keys={"emoji_id": emoji_obj["eid"]}
             )

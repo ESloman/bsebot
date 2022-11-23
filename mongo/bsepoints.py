@@ -635,7 +635,8 @@ class UserInteractions(BestSummerEverPointsDB):
             message_content: str,
             timestamp: datetime.datetime,
             additional_keys: Optional[dict] = None,
-            is_thread: Optional[bool] = False
+            is_thread: Optional[bool] = False,
+            is_vc: Optional[bool] = False,
     ) -> None:
         """
         Adds an entry into our interactions DB with the corresponding message.
@@ -648,6 +649,7 @@ class UserInteractions(BestSummerEverPointsDB):
         :param timestamp: - datetime object
         :param additional_keys:
         :param is_thread: whether the entry happened in a thread or not
+        :param is_vc: whether the entry happened in a vc or not
         :return: None
         """
 
@@ -659,7 +661,8 @@ class UserInteractions(BestSummerEverPointsDB):
             "message_type": message_type,
             "content": message_content,
             "timestamp": timestamp,
-            "is_thread": is_thread
+            "is_thread": is_thread,
+            "is_vc": is_vc
         }
 
         if additional_keys:

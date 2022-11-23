@@ -474,7 +474,7 @@ class CommandManager(object):
                 logger=self.logger,
                 title="Create a bet"
             )
-            await ctx.send_modal(modal)
+            await ctx.response.send_modal(modal)
 
         @self.client.command(description="Autogenerate bets")
         async def autogenerate(ctx: discord.ApplicationContext):

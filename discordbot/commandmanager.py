@@ -10,7 +10,7 @@ from mongo.bsepoints import UserBets, UserPoints
 
 # client events
 from discordbot.clienteventclasses import OnDirectMessage, OnEmojiCreate, OnMemberJoin, OnMemberLeave
-from discordbot.clienteventclasses import OnMessage, OnReactionAdd, OnReadyEvent, OnStickerCreate
+from discordbot.clienteventclasses import OnMessage, OnMessageEdit, OnReactionAdd, OnReadyEvent, OnStickerCreate
 from discordbot.clienteventclasses import OnThreadCreate, OnThreadUpdate, OnVoiceStateChange
 
 from discordbot.constants import BSE_SERVER_ID
@@ -97,6 +97,7 @@ class CommandManager(object):
         self.on_ready = OnReadyEvent(client, guilds, self.logger)
         self.on_reaction_add = OnReactionAdd(client, guilds, self.logger)
         self.on_message = OnMessage(client, guilds, self.logger)
+        self.on_message_edit = OnMessageEdit(client, guilds, self.logger)
         self.on_member_join = OnMemberJoin(client, guilds, self.logger)
         self.on_member_leave = OnMemberLeave(client, guilds, self.logger)
         self.direct_message = OnDirectMessage(client, guilds, self.logger, self.giphyapi)
@@ -283,6 +284,33 @@ class CommandManager(object):
                 return
 
             await self.on_message.message_received(message)
+
+        @self.client.event
+        async def on_raw_message_edit(payload: discord.RawMessageUpdateEvent):
+            """Raw event for message edit events.
+
+            Args:
+                payload (discord.RawMessageUpdateEvent): the payload
+            """
+            cached_messages = self.__get_cached_messages_list()
+            if payload.message_id in cached_messages:
+                # message id is already in the cache
+                return
+
+            guild = self.client.get_guild(payload.guild_id)
+            channel = await guild.fetch_channel(payload.channel_id)
+            message = await channel.fetch_message(payload.message_id)
+            await self.on_message_edit.message_edit(None, message)
+
+        @self.client.event
+        async def on_message_edit(before: discord.Message, after: discord.Message):
+            """Listens to the on_message_edit event
+
+            Args:
+                before (discord.Message): the message _before_
+                after (discord.Message): _the message _after_
+            """
+            await self.on_message_edit.message_edit(before, after)
 
         @self.client.event
         async def on_guild_emojis_update(

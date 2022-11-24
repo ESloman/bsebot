@@ -69,8 +69,8 @@ class PersonalStatsBuilder:
 
         favourite_channel = sorted(channels, key=lambda x: channels[x], reverse=True)[0]
         fav_channel_obj = guild.get_channel(favourite_channel)
-
-       
+        least_fav_channel = sorted(channels, key=lambda x: channels[x], reverse=False)[0]
+        least_fav_channel_obj = guild.get_channel(least_fav_channel)
 
         all_thread_messages = self.cache.get_threaded_messages(guild_id, start, end)
         thread_messages_for_user = [m for m in all_thread_messages if m["user_id"] == user_id]
@@ -84,13 +84,23 @@ class PersonalStatsBuilder:
                 threads[thread_id] += 1
             fav_thread = sorted(threads, key=lambda x: threads[x], reverse=True)[0]
             fav_thread_obj = await guild.fetch_channel(fav_thread)
+            least_fav_thread = sorted(threads, key=lambda x: threads[x], reverse=False)[0]
+            least_fav_thread_obj = await guild.fetch_channel(least_fav_thread)
 
         msg = (
             "Here are your stats:\n"
-            f"**Messages sent**: {len(messages_for_user)} (in `{len(channels)}` channels{f' and `{len(threads)}` threads' if threads else ''})\n"
+            f"**Messages sent**: {len(messages_for_user)} "
+            f"(in `{len(channels)}` channels{f' and `{len(threads)}` threads' if threads else ''})\n"
             f"**Favourite channel**: {fav_channel_obj.mention} (`{channels[favourite_channel]}` messages sent)\n"
+            "**Least favourite channel**: "
+            f"{least_fav_channel_obj.mention} (`{channels[least_fav_channel]}` messages sent)\n"
         )
-         
-         msg += f"**Favourite thread**: {fav_thread_obj.mention} (`{threads[fav_thread]}` messages sent)\n"
+
+        if thread_messages_for_user:
+            msg += f"**Favourite thread**: {fav_thread_obj.mention} (`{threads[fav_thread]}` messages sent)\n"
+            msg += (
+                f"**Least favourite thread**: {least_fav_thread_obj.mention} "
+                f"(`{threads[least_fav_thread]}` messages sent)\n"
+            )
 
         return msg

@@ -21,7 +21,7 @@ from discordbot.modals import BSEddiesBetCreateModal
 from discordbot.slashcommandeventclasses import BSEddiesActive, BSEddiesAdminGive, BSEddiesAutoGenerate
 from discordbot.slashcommandeventclasses import BSEddiesCloseBet, BSEddiesGift, BSEddiesHighScore, BSEddiesLeaderboard
 from discordbot.slashcommandeventclasses import BSEddiesPending, BSEddiesPlaceBet, BSEddiesPredict, BSEddiesTaxRate
-from discordbot.slashcommandeventclasses import BSEddiesTransactionHistory, BSEddiesView
+from discordbot.slashcommandeventclasses import BSEddiesTransactionHistory, BSEddiesView, BSEddiesStats
 
 # task imports
 from discordbot.tasks.annualawards import AnnualBSEddiesAwards
@@ -121,6 +121,7 @@ class CommandManager(object):
         self.bseddies_predict = BSEddiesPredict(client, guilds, self.logger)
         self.bseddies_autogenerate = BSEddiesAutoGenerate(client, guilds, self.logger)
         self.bseddies_tax_rate = BSEddiesTaxRate(client, guilds, self.logger)
+        self.bseddies_stats = BSEddiesStats(client, guilds, self.logger)
 
         # tasks
         self.bet_closer_task = BetCloser(self.client, guilds, self.logger, self.bseddies_place, self.bseddies_close)
@@ -533,3 +534,12 @@ class CommandManager(object):
                 ctx (discord.ApplicationContext): _description_
             """
             await self.bseddies_tax_rate.create_tax_view(ctx)
+        
+        @self.client.command(description="See your server stats")
+        async def stats(ctx: discord.ApplicationContext):
+            """
+
+            Args:
+                ctx (discord.ApplicationContext): _description_
+            """
+            await self.bseddies_stats.stats(ctx)

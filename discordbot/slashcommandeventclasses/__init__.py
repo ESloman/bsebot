@@ -13,6 +13,7 @@ from .leaderboard import BSEddiesLeaderboard
 from .pending import BSEddiesPending
 from .place import BSEddiesPlaceBet
 from .predict import BSEddiesPredict
+from .stats import BSEddiesStats
 from .taxrate import BSEddiesTaxRate
 from .transactions import BSEddiesTransactionHistory
 from .view import BSEddiesView

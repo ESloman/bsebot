@@ -19,6 +19,7 @@ class StatsDataCache:
 
         self.__start_cache = None  # type: Optional[datetime.datetime]
         self.__end_cache = None  # type: Optional[datetime.datetime]
+        self.__user_id_cache = None  # type: Optional[int]
 
         self.__message_cache = []  # type: List[Message]
         self.__message_cache_time = None  # type: Optional[datetime.datetime]

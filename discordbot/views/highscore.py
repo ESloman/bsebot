@@ -23,7 +23,8 @@ class HighScoreBoardView(discord.ui.View):
         """
         msg = self.embeds.get_highscore_embed(
             interaction.guild,
-            None if button.label == "Expand" else 5
+            None if button.label == "Expand" else 5,
+            interaction.user.display_name
         )
 
         button.label = "Expand" if button.label == "Retract" else "Retract"

@@ -1,5 +1,5 @@
 import datetime
-from typing import Union
+from typing import Optional, Union
 
 import discord
 
@@ -54,7 +54,7 @@ class EmbedManager(object):
 
         return embed
 
-    def get_leaderboard_embed(self, guild: discord.Guild, number: Union[int, None]):
+    def get_leaderboard_embed(self, guild: discord.Guild, number: Union[int, None], username: Optional[str]):
         """
         Return a str that will be the leaderboard table
         :param guild:
@@ -74,8 +74,6 @@ class EmbedManager(object):
 
         message = (
             "**BSEddies Leaderboard**\n"
-            f"Leaderboard is correct as of: "
-            f"{datetime.datetime.now().strftime('%d %b %y %H:%M:%S')}\n"
         )
 
         for user in users[:number]:
@@ -85,9 +83,13 @@ class EmbedManager(object):
                 continue
             message += f"\n**{users.index(user) + 1})**  {name}  :  {user['points']}"
 
+        message += (
+            f"\n\nLast refreshed at `{datetime.datetime.now().strftime('%d %b %y %H:%M:%S')}` by _{username}_."
+        )
+
         return message
 
-    def get_highscore_embed(self, guild: discord.Guild, number: Union[int, None]):
+    def get_highscore_embed(self, guild: discord.Guild, number: Union[int, None], username: Optional[str]):
         """
         Return a str that will be the leaderboard table
         :param guild:
@@ -107,8 +109,6 @@ class EmbedManager(object):
 
         message = (
             "**BSEddies High Scores**\n"
-            f"This is correct as of: "
-            f"{datetime.datetime.now().strftime('%d %b %y %H:%M:%S')}\n"
         )
 
         for user in users[:number]:
@@ -117,6 +117,10 @@ class EmbedManager(object):
             except AttributeError:
                 continue
             message += f"\n**{users.index(user) + 1})**  {name}  :  {user.get('high_score', 0)}"
+
+        message += (
+            f"\n\nLast refreshed at `{datetime.datetime.now().strftime('%d %b %y %H:%M:%S')}` by _{username}_."
+        )
 
         return message
 

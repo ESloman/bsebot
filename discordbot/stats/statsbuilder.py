@@ -13,7 +13,7 @@ class PersonalStatsBuilder:
         self.bot = bot
         self.logger = logger
         self.cache = StatsDataCache()
-    
+
     @staticmethod
     def get_monthly_datetime_objects() -> Tuple[datetime.datetime, datetime.datetime]:
         """Returns two datetime objects that sandwich the previous month
@@ -47,7 +47,7 @@ class PersonalStatsBuilder:
         start = end.replace(year=end.year - 1)
 
         return start, end
-    
+
     async def get_stats_message_for_user(
         self,
         guild_id: int,
@@ -68,9 +68,9 @@ class PersonalStatsBuilder:
             channels[channel_id] += 1
 
         favourite_channel = sorted(channels, key=lambda x: channels[x], reverse=True)[0]
-        fav_channel_obj = guild.get_channel(favourite_channel)
+        fav_channel_obj = await guild.fetch_channel(favourite_channel)
         least_fav_channel = sorted(channels, key=lambda x: channels[x], reverse=False)[0]
-        least_fav_channel_obj = guild.get_channel(least_fav_channel)
+        least_fav_channel_obj = await guild.fetch_channel(least_fav_channel)
 
         all_thread_messages = self.cache.get_threaded_messages(guild_id, start, end)
         thread_messages_for_user = [m for m in all_thread_messages if m["user_id"] == user_id]
@@ -102,5 +102,24 @@ class PersonalStatsBuilder:
                 f"**Least favourite thread**: {least_fav_thread_obj.mention} "
                 f"(`{threads[least_fav_thread]}` messages sent)\n"
             )
+        
+        all_replies = self.cache.get_replies(guild_id, start, end)
+        our_messages_with_replies = [m for m in all_replies if m["user_id"] == user_id]
+        message_with_our_replies = [m for m in all_replies if any([r for r in m["replies"] if r["user_id"] == user_id])]
+        
+        replies_received = 0
+        for message in our_messages_with_replies:
+            for reply in message["replies"]:
+                replies_received += 1
+        
+        replies_given = 0
+        for message in message_with_our_replies:
+            for reply in message["replies"]:
+                if reply["user_id"] != user_id:
+                    continue
+                replies_given += 1
+
+        msg += f"**Replies generated**: {replies_received}\n"
+        msg += f"**Replies given**: {replies_given}\n"
 
         return msg

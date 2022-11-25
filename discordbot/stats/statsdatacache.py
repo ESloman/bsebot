@@ -1,6 +1,7 @@
 
 import datetime
-from typing import List, Optional
+# can ignore F401 here - we're using Optional in the type hints in variable declaration
+from typing import List, Optional  # noqa: F401
 
 from mongo.bsedataclasses import SpoilerThreads
 from mongo.bsepoints import ServerEmojis, UserBets, UserInteractions, UserPoints

@@ -71,10 +71,10 @@ class EddieGainMessager(commands.Cog):
                 try:
                     user = await guild.fetch_member(int(user_id))  # type: discord.Member
                 except discord.NotFound:
-                    msg += f"\n- `{user_id}` :  **{value}**"
+                    msg += f"\n- `{user_id}` :  **{value}** (tax: _{tax}_)"
                     continue
 
-                msg += f"\n- `{user_id}` {user.display_name} :  **{value}**"
+                msg += f"\n- `{user_id}` {user.display_name} :  **{value}** (tax: _{tax}_)"
                 text = f"Your daily salary of BSEDDIES is `{value}` (after tax).\n"
 
                 if user_id == current_king_id:
@@ -442,6 +442,7 @@ class BSEddiesManager(object):
             self.logger.info(f"{_user} gained {eddie_gain_dict[_user][0]}")
 
         eddie_gain_dict[current_king_id].append(tax_gains)
+        eddie_gain_dict[current_king_id][0] += tax_gains
 
         if real:
             self.user_points.increment_points(current_king_id, guild_id, eddie_gain_dict[current_king_id][0])

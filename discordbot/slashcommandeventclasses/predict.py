@@ -72,9 +72,9 @@ class BSEddiesPredict(BSEddies):
             try:
                 user = await ctx.guild.fetch_member(int(user_id))  # type: discord.Member
             except discord.NotFound:
-                msg += f"\n- `{user_id}` :  **{value}** (tax: _{tax}_)"
+                message += f"\n- `{user_id}` :  **{value}** (tax: _{tax}_)"
                 continue
 
-            msg += f"\n- `{user_id}` {user.display_name} :  **{value}** (tax: _{tax}_)"
+            message += f"\n- `{user_id}` {user.display_name} :  **{value}** (tax: _{tax}_)"
 
         await ctx.followup.send(content=message, ephemeral=True)

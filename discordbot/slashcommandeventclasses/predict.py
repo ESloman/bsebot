@@ -2,7 +2,7 @@
 import discord
 
 from discordbot.bot_enums import ActivityTypes
-from discordbot.constants import HUMAN_MESSAGE_TYPES
+from discordbot.constants import CREATOR, HUMAN_MESSAGE_TYPES
 from discordbot.tasks.eddiegains import BSEddiesManager
 from discordbot.slashcommandeventclasses import BSEddies
 
@@ -53,5 +53,28 @@ class BSEddiesPredict(BSEddies):
 
         for key in sorted(breakdown):
             message += f"\n - `{HUMAN_MESSAGE_TYPES[key]}`  :  **{breakdown[key]}**"
+
+        if ctx.author.id != CREATOR:
+            await ctx.followup.send(content=message, ephemeral=True)
+            return
+
+        message += "\n\nHere's everyone else's predicted eddies:\n"
+        for user_id in eddies_dict:
+            if user_id == ctx.author.id:
+                continue
+
+            value = eddies_dict[user_id][0]
+            tax = eddies_dict[user_id][2]
+
+            if value == 0:
+                continue
+
+            try:
+                user = await ctx.guild.fetch_member(int(user_id))  # type: discord.Member
+            except discord.NotFound:
+                msg += f"\n- `{user_id}` :  **{value}** (tax: _{tax}_)"
+                continue
+
+            msg += f"\n- `{user_id}` {user.display_name} :  **{value}** (tax: _{tax}_)"
 
         await ctx.followup.send(content=message, ephemeral=True)

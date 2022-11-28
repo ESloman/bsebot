@@ -97,6 +97,16 @@ class AwardsBuilder:
                 "_(Voice stats 🎤 from Nov 22 onwards)_\n\n"
             )
 
+        if busiest_thread_obj.archived:
+            b_thread_text = f"`#{busiest_thread_obj.name} (archived)`"
+        else:
+            b_thread_text = busiest_thread_obj.mention
+
+        if quietest_thread_obj.archived:
+            q_thread_text = f"`#{quietest_thread_obj.name} (archived)`"
+        else:
+            q_thread_text = quietest_thread_obj.mention
+
         message = (
             f"{message_start}"
             f"**Number of messages sent** 📬: `{number_messages.value}` "
@@ -109,9 +119,9 @@ class AwardsBuilder:
             f"(`{busiest_channel.messages}` messages from `{busiest_channel.users}` users)\n"
             f"**Quietest channel** 📭: {quietest_channel_obj.mention} "
             f"(`{quietest_channel.messages}` messages from `{quietest_channel.users}` users)\n"
-            f"**Chattiest thread** 📧: {busiest_thread_obj.mention} "
+            f"**Chattiest thread** 📧: {b_thread_text} "
             f"(`{busiest_thread.messages}` messages from `{busiest_thread.users}` users)\n"
-            f"**Quietest thread** 📖: {quietest_thread_obj.mention} "
+            f"**Quietest thread** 📖: {q_thread_text} "
             f"(`{quietest_thread.messages}` messages from `{quietest_thread.users}` users)\n"
             f"**Most popular channel** 💌: {popular_channel_obj.mention} "
             f"(`{most_popular_channel.users}` unique users)\n"

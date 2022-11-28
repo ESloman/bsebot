@@ -101,7 +101,7 @@ class AwardsBuilder:
             b_thread_text = f"`#{busiest_thread_obj.name} (archived)`"
         else:
             b_thread_text = busiest_thread_obj.mention
-        
+
         if quietest_thread_obj.archived:
             q_thread_text = f"`#{quietest_thread_obj.name} (archived)`"
         else:

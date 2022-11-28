@@ -5,7 +5,6 @@ from discord.ext import tasks, commands
 
 from discordbot.constants import BSE_SERVER_ID, GENERAL_CHAT
 from mongo.bsepoints import UserInteractions
-from mongo.datatypes import Message
 
 
 class WordleReminder(commands.Cog):
@@ -46,7 +45,7 @@ class WordleReminder(commands.Cog):
                 "message_type": "wordle",
                 "timestamp": {"gte": start, "lte": end}
             }
-        )  # type: list[Message]
+        )
 
         _start = start + datetime.timedelta(days=1)
         _end = end + datetime.timedelta(days=1)
@@ -56,11 +55,11 @@ class WordleReminder(commands.Cog):
                 "message_type": "wordle",
                 "timestamp": {"gte": _start, "lte": _end}
             }
-        )  # type: list[Message]
+        )
 
         today_ids = [m["user_id"] for m in wordles_today]
 
-        reminders_needed = []  # type: list[Message]
+        reminders_needed = []
         for message in wordles_yesterday:
             user_id = message["user_id"]
             if user_id in today_ids:

@@ -33,6 +33,7 @@ from discordbot.tasks.eddiekingtask import BSEddiesKingTask
 from discordbot.tasks.monthlyawards import MonthlyBSEddiesAwards
 from discordbot.tasks.revolutiontask import BSEddiesRevolutionTask
 from discordbot.tasks.threadmutetask import ThreadSpoilerTask
+from discordbot.tasks.wordlereminder import WordleReminder
 from discordbot.tasks.wordletask import WordleTask
 
 
@@ -135,6 +136,7 @@ class CommandManager(object):
             self.wordle_task = WordleTask(self.client, guilds, self.logger)
             self.monthly_awards_task = MonthlyBSEddiesAwards(self.client, guilds, self.logger)
             self.annual_awards_task = AnnualBSEddiesAwards(self.client, guilds, self.logger)
+            self.wordle_reminder = WordleReminder(self.client, guilds, self.logger)
 
         # call the methods that register the events we're listening for
         self._register_client_events()

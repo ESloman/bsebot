@@ -5,6 +5,7 @@ import discord
 
 import discordbot.clienteventclasses.onmessage
 from discordbot.baseeventclass import BaseEvent
+from discordbot.constants import BSE_BOT_ID
 from mongo.bsepoints import UserInteractions
 
 
@@ -30,6 +31,9 @@ class OnMessageEdit(BaseEvent):
         ]:
             return
 
+        if after.embeds and after.author.id == BSE_BOT_ID:
+            return
+
         if after.channel.type not in [
             discord.ChannelType.text,
             discord.ChannelType.private,
@@ -40,12 +44,19 @@ class OnMessageEdit(BaseEvent):
         ]:
             return
 
-        db_message = self.user_interactions.get_message(after.guild.id, after.id)
+        try:
+            guild_id = after.guild.id
+        except AttributeError:
+            # no guild id?
+            channel = await self.client.fetch_channel(after.channel.id)
+            guild_id = channel.guild.id
+
+        db_message = self.user_interactions.get_message(guild_id, after.id)
 
         if not db_message:
             # weird
             message_type = await self.on_message.message_received(after)
-            db_message = self.user_interactions.get_message(after.guild.id, after.id)
+            db_message = self.user_interactions.get_message(guild_id, after.id)
 
         message_type = await self.on_message.message_received(after, True)
 

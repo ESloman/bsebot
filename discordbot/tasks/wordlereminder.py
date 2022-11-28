@@ -37,13 +37,13 @@ class WordleReminder(commands.Cog):
             return
 
         start = now - datetime.timedelta(days=1)
-        start = start.replace(hour=0, minute=0, second=0, micro=1)
+        start = start.replace(hour=0, minute=0, second=0, microsecond=1)
         end = start.replace(hour=23, minute=59, second=59)
 
         wordles_yesterday = self.user_interactions.query(
             {
                 "message_type": "wordle",
-                "timestamp": {"gte": start, "lte": end}
+                "timestamp": {"$gte": start, "$lte": end}
             }
         )
 
@@ -53,7 +53,7 @@ class WordleReminder(commands.Cog):
         wordles_today = self.user_interactions.query(
             {
                 "message_type": "wordle",
-                "timestamp": {"gte": _start, "lte": _end}
+                "timestamp": {"$gte": _start, "$lte": _end}
             }
         )
 
@@ -63,7 +63,7 @@ class WordleReminder(commands.Cog):
         for message in wordles_yesterday:
             user_id = message["user_id"]
             if user_id in today_ids:
-                self.logger.info(f"{user_id} has already sent a wordle message today")
+                # self.logger.info(f"{user_id} has already sent a wordle message today")
                 continue
             else:
                 # user hasn't done a wordle
@@ -90,7 +90,7 @@ class WordleReminder(commands.Cog):
             )
 
             self.logger.info(msg)
-            # await y_message.reply(content=msg)
+            await y_message.reply(content=msg)
 
     @wordle_reminder.before_loop
     async def before_wordle_reminder(self):

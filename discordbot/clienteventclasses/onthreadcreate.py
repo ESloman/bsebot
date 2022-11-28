@@ -36,10 +36,10 @@ class OnThreadCreate(BaseEvent):
         message_type.append("thread_create")
 
         self.user_interactions.add_entry(
-            thread.id,
+            starting_message.id,
             thread.guild.id,
             thread.owner_id,
-            thread.parent_id,
+            thread.id,
             message_type,
             starting_message.content,
             thread.created_at,

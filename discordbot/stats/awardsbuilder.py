@@ -235,7 +235,7 @@ class AwardsBuilder:
             f"{user_id_dict[serial_replier.user_id].mention} (`{serial_replier.value}` replies)\n"
             "The _'conversation started'_ 📥 award: "
             f"{user_id_dict[conversation_starter.user_id].mention} "
-            "(`{conversation_starter.value}` replies _received_)\n"
+            f"(`{conversation_starter.value}` replies _received_)\n"
             "The _'twitter addict'_ 🐦 award: "
             f"{user_id_dict[twitter_addict.user_id].mention} (`{twitter_addict.value}` tweets shared)\n"
             "The _'jerk off mate'_ 🍆 award: "
@@ -315,7 +315,7 @@ class AwardsBuilder:
         channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
 
         # uncomment for debug
-        channel = await self.bot.fetch_channel(291508460519161856)
+        # channel = await self.bot.fetch_channel(291508460519161856)
 
         self.logger.info(f"Stats message is {len(stats_message)} chars long")
         self.logger.info(f"Awards message is {len(awards_message)} chars long")

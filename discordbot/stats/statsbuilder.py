@@ -4,6 +4,7 @@ from typing import Tuple
 import discord
 
 from discordbot.stats.statsdatacache import StatsDataCache
+from discordbot.stats.userstatsclasses import UserStatsGatherer
 from mongo.bsedataclasses import Awards
 from mongo.bsepoints import UserPoints
 
@@ -12,7 +13,7 @@ class PersonalStatsBuilder:
     def __init__(self, bot: discord.Client, logger):
         self.bot = bot
         self.logger = logger
-        self.cache = StatsDataCache()
+        self.stats = UserStatsGatherer(self.logger)
 
     @staticmethod
     def get_monthly_datetime_objects() -> Tuple[datetime.datetime, datetime.datetime]:
@@ -58,51 +59,34 @@ class PersonalStatsBuilder:
 
         guild = self.bot.get_guild(guild_id)
 
-        all_messages = self.cache.get_messages(guild_id, start, end)
-        messages_for_user = [m for m in all_messages if m["user_id"] == user_id]
-        channels = {}
-        for message in messages_for_user:
-            channel_id = message["channel_id"]
-            if channel_id not in channels:
-                channels[channel_id] = 0
-            channels[channel_id] += 1
+        channel_stats = self.stats.user_message_and_channel_stats(user_id, guild_id, start, end)
 
-        favourite_channel = sorted(channels, key=lambda x: channels[x], reverse=True)[0]
-        fav_channel_obj = await guild.fetch_channel(favourite_channel)
-        least_fav_channel = sorted(channels, key=lambda x: channels[x], reverse=False)[0]
-        least_fav_channel_obj = await guild.fetch_channel(least_fav_channel)
+        fav_channel_obj = await guild.fetch_channel(channel_stats["favourite_channel"])
+        least_fav_channel_obj = await guild.fetch_channel(channel_stats["least_favourite_channel"])
 
-        all_thread_messages = self.cache.get_threaded_messages(guild_id, start, end)
-        thread_messages_for_user = [m for m in all_thread_messages if m["user_id"] == user_id]
-
-        if thread_messages_for_user:
-            threads = {}
-            for message in thread_messages_for_user:
-                thread_id = message["channel_id"]
-                if channel_id not in threads:
-                    threads[thread_id] = 0
-                threads[thread_id] += 1
-            fav_thread = sorted(threads, key=lambda x: threads[x], reverse=True)[0]
-            fav_thread_obj = await guild.fetch_channel(fav_thread)
-            least_fav_thread = sorted(threads, key=lambda x: threads[x], reverse=False)[0]
-            least_fav_thread_obj = await guild.fetch_channel(least_fav_thread)
+        if channel_stats["thread_number"]:
+            fav_thread_obj = await guild.fetch_channel(channel_stats["favourite_thread"])
+            least_fav_thread_obj = await guild.fetch_channel(channel_stats["least_favourite_thread"])
+            
+        channel_text = f"`{channel_stats['total_channels']}` channels"
+        if channel_stats["thread_number"]:
+            channel_text += f" and `{channel_stats['total_threads']}` threads"
 
         msg = (
             "Here are your stats:\n"
-            f"**Messages sent**: {len(messages_for_user)} "
-            f"(in `{len(channels)}` channels{f' and `{len(threads)}` threads' if threads else ''})\n"
-            f"**Favourite channel**: {fav_channel_obj.mention} (`{channels[favourite_channel]}` messages sent)\n"
+            f"**Messages sent**: {channel_stats['number']} (in {channel_text})\n"
+            f"**Favourite channel**: {fav_channel_obj.mention} (`{channel_stats['fc_messages']}` messages sent)\n"
             "**Least favourite channel**: "
-            f"{least_fav_channel_obj.mention} (`{channels[least_fav_channel]}` messages sent)\n"
+            f"{least_fav_channel_obj.mention} (`{channel_stats['lfc_messages']}` messages sent)\n"
         )
 
-        if thread_messages_for_user:
-            msg += f"**Favourite thread**: {fav_thread_obj.mention} (`{threads[fav_thread]}` messages sent)\n"
+        if channel_stats["thread_number"]:
+            msg += f"**Favourite thread**: {fav_thread_obj.mention} (`{channel_stats['ft_messages']}` messages sent)\n"
             msg += (
                 f"**Least favourite thread**: {least_fav_thread_obj.mention} "
-                f"(`{threads[least_fav_thread]}` messages sent)\n"
+                f"(`{channel_stats['lft_messages']}` messages sent)\n"
             )
-        
+
         all_replies = self.cache.get_replies(guild_id, start, end)
         our_messages_with_replies = [m for m in all_replies if m["user_id"] == user_id]
         message_with_our_replies = [m for m in all_replies if any([r for r in m["replies"] if r["user_id"] == user_id])]

@@ -55,7 +55,7 @@ class BSEddiesPredict(BSEddies):
             message += f"\n - `{HUMAN_MESSAGE_TYPES[key]}`  :  **{breakdown[key]}**"
 
             if key in ["vc_joined", "vc_streaming"]:
-                text += " seconds"
+                message += " seconds"
 
         if ctx.author.id != CREATOR:
             await ctx.followup.send(content=message, ephemeral=True)

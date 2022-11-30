@@ -183,6 +183,7 @@ class AwardsBuilder:
         big_streamer = self.stats.big_streamer(*args)
         threadiest_user = self.stats.most_thread_messages_sent(*args)
         serial_replier, conversation_starter = self.stats.most_replies(*args)
+        owner_award = self.stats.server_owner(guild, start)
 
         awards = [
             most_messages,
@@ -201,13 +202,9 @@ class AwardsBuilder:
             big_streamer,
             threadiest_user,
             serial_replier,
-            conversation_starter
+            conversation_starter,
+            owner_award
         ]
-
-        if self.annual:
-            # add owner award for annual awards
-            owner_award = self.stats.server_owner(guild, start)
-            awards.append(owner_award)
 
         user_id_dict = {}  # type: dict[int, discord.Member]
         for award in awards:
@@ -269,15 +266,10 @@ class AwardsBuilder:
             f"{user_id_dict[most_eddies_won.user_id].mention} (`{most_eddies_won.value}` eddies won)\n"
             "The _'king of kings'_ 👑 award: "
             f"{user_id_dict[longest_king.user_id].mention} "
-            f"(`{str(datetime.timedelta(seconds=longest_king.value))}` spent as KING)"
+            f"(`{str(datetime.timedelta(seconds=longest_king.value))}` spent as KING)\n"
+            "The _'server owner'_ 👨‍👧‍👦 award: "
+            f"{user_id_dict[owner_award.user_id].mention}"
         )
-
-        if self.annual:
-            bseddies_awards = (
-                f"{bseddies_awards}\n"
-                "The _'server owner'_ 👨‍👧‍👦 award: "
-                f"{user_id_dict[owner_award.user_id].mention}"
-            )
 
         return awards, bseddies_awards
 

@@ -87,6 +87,9 @@ class EddieGainMessager(commands.Cog):
                 for key in sorted(breakdown):
                     text += f"\n - `{HUMAN_MESSAGE_TYPES[key]}`  :  **{breakdown[key]}**"
 
+                    if key in ["vc_joined", "vc_streaming"]:
+                        text += " seconds"
+
                 self.logger.info(f"{user.display_name} is gaining `{value} eddies`")
 
                 user_dict = self.user_points.find_user(int(user_id), guild.id)
@@ -285,10 +288,10 @@ class BSEddiesManager(object):
         count["daily"] = minimum
 
         if vc_total_time:
-            count["vc_joined"] = vc_total_time
+            count["vc_joined"] = int(vc_total_time)
 
         if stream_total_time:
-            count["vc_streaming"] = stream_total_time
+            count["vc_streaming"] = int(stream_total_time)
 
         return eddies_gained, count
 

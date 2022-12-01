@@ -291,8 +291,8 @@ class AwardsBuilder:
 
         for stat in stats:
             # comment out this for debug
-            self.awards.document_stat(**{k: v for k, v in stat.__dict__.items() if v})
-            self.logger.info(f"{ {k: v for k, v in stat.__dict__.items() if v} }")
+            self.awards.document_stat(**{k: v for k, v in stat.__dict__.items() if v is not None})
+            self.logger.info(f"{ {k: v for k, v in stat.__dict__.items() if v is not None} }")
 
         if not self.annual:
             transaction_type = TransactionTypes.MONTHLY_AWARDS_PRIZE
@@ -311,8 +311,8 @@ class AwardsBuilder:
                 }
             )
             self.user_points.increment_points(award.user_id, award.guild_id, award.eddies)
-            self.awards.document_award(**{k: v for k, v in award.__dict__.items() if v})
-            self.logger.info(f"{ {k: v for k, v in award.__dict__.items() if v} }")
+            self.awards.document_award(**{k: v for k, v in award.__dict__.items() if v is not None})
+            self.logger.info(f"{ {k: v for k, v in award.__dict__.items() if v is not None} }")
 
         channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
 

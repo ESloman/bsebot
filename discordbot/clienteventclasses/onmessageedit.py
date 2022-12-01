@@ -43,7 +43,7 @@ class OnMessageEdit(BaseEvent):
             discord.ChannelType.news_thread
         ]:
             return
-        
+
         if before and before.content == after.content and after.embeds and not before.embeds:
             # edit is just adding an embed - skip
             return

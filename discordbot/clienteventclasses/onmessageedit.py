@@ -44,6 +44,10 @@ class OnMessageEdit(BaseEvent):
         ]:
             return
 
+        if before and before.content == after.content and after.embeds and not before.embeds:
+            # edit is just adding an embed - skip
+            return
+
         try:
             guild_id = after.guild.id
         except AttributeError:
@@ -72,6 +76,9 @@ class OnMessageEdit(BaseEvent):
                 },
                 "$push": {
                     "content_old": db_message["content"]
+                },
+                "$inc": {
+                    "edit_count": 1
                 }
             }
         )

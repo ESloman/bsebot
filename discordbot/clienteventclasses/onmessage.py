@@ -26,7 +26,12 @@ class OnMessage(BaseEvent):
         :return:
         """
 
-        guild_id = message.guild.id
+        try:
+            guild_id = message.guild.id
+        except AttributeError:
+            # no guild id?
+            channel = await self.client.fetch_channel(message.channel.id)
+            guild_id = channel.guild.id
         user_id = message.author.id
         channel_id = message.channel.id
         message_content = message.content

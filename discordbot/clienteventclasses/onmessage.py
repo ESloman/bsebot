@@ -32,6 +32,7 @@ class OnMessage(BaseEvent):
             # no guild id?
             channel = await self.client.fetch_channel(message.channel.id)
             guild_id = channel.guild.id
+
         user_id = message.author.id
         channel_id = message.channel.id
         message_content = message.content

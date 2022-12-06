@@ -3,6 +3,7 @@ import datetime
 # can ignore F401 here - we're using Optional in the type hints in variable declaration
 from typing import List, Optional  # noqa: F401
 
+from discordbot.constants import BOT_IDS
 from mongo.bsedataclasses import SpoilerThreads
 from mongo.bsepoints import ServerEmojis, UserBets, UserInteractions, UserPoints
 from mongo.datatypes import Activity, Bet, Emoji, Message, Reaction, Transaction, User, VCInteraction
@@ -48,6 +49,9 @@ class StatsDataCache:
         self.__reply_cache = []  # type: List[Message]
         self.__reply_cache_time = None  # type: Optional[datetime.datetime]
 
+        self.__edit_cache = []  # type: List[Message]
+        self.__edit_cache_time = None  # type: Optional[datetime.datetime]
+
     # caching functions
     def get_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[Message]:
         """Internal method to query for messages between a certain date
@@ -75,13 +79,49 @@ class StatsDataCache:
             {
                 "guild_id": guild_id,
                 "timestamp": {"$gt": start, "$lt": end},
-                "message_type": {"$nin": ["emoji_used", "vc_joined", "vc_streaming"]}
+                "message_type": {"$nin": ["emoji_used", "vc_joined", "vc_streaming"]},
+                "user_id": {"$nin": BOT_IDS}
             },
             limit=limit
         )
 
         self.__message_cache_time = now
         return self.__message_cache
+
+    def get_edited_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[Message]:
+        """Internal method to query for edited messages between a certain date
+        Will cache the messages on first parse and return the cache if cache was set less than an hour ago
+
+        Args:
+            guild_id (int): the guild ID to get messages for
+            start (datetime.datetime): start of timestamp query
+            end (datetime.datetime): end of timestamp query
+
+        Returns:
+            list: list of message dicts
+        """
+        now = datetime.datetime.now()
+
+        if start != self.__start_cache or end != self.__end_cache:
+            self.__edit_cache = []
+
+        if self.__edit_cache and (now - self.__edit_cache_time).total_seconds() < 3600:
+            return self.__edit_cache
+
+        limit = 2000
+        self.__edit_cache = self.user_interactions.query(
+            {
+                "guild_id": guild_id,
+                "edited": {"$gt": start, "$lt": end},
+                "edit_count": {"$gte": 1},
+                "message_type": {"$nin": ["emoji_used", "vc_joined", "vc_streaming"]},
+                "user_id": {"$nin": BOT_IDS}
+            },
+            limit=limit
+        )
+
+        self.__edit_cache_time = now
+        return self.__edit_cache
 
     def get_vc_interactions(
         self,

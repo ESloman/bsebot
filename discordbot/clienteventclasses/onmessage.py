@@ -4,6 +4,7 @@ from typing import Optional
 import discord
 
 from discordbot.baseeventclass import BaseEvent
+from discordbot.constants import WORDLE_REGEX
 from mongo.bsepoints import UserInteractions
 
 
@@ -126,7 +127,7 @@ class OnMessage(BaseEvent):
 
         message_type.append("message")
 
-        if re.match(r"Wordle \d?\d\d\d \d/\d\n\n", message.content):
+        if re.match(WORDLE_REGEX, message.content):
             message_type.append("wordle")
 
         if emojis := re.findall(r"<:[a-zA-Z_0-9]*:\d*>", message.content):

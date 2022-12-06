@@ -4,6 +4,7 @@ from typing import Optional
 import discord
 
 from discordbot.baseeventclass import BaseEvent
+from discordbot.constants import WORDLE_REGEX
 from mongo.bsepoints import UserInteractions
 
 
@@ -26,7 +27,13 @@ class OnMessage(BaseEvent):
         :return:
         """
 
-        guild_id = message.guild.id
+        try:
+            guild_id = message.guild.id
+        except AttributeError:
+            # no guild id?
+            channel = await self.client.fetch_channel(message.channel.id)
+            guild_id = channel.guild.id
+
         user_id = message.author.id
         channel_id = message.channel.id
         message_content = message.content
@@ -120,7 +127,7 @@ class OnMessage(BaseEvent):
 
         message_type.append("message")
 
-        if re.match(r"Wordle \d?\d\d\d \d/\d\n\n", message.content):
+        if re.match(WORDLE_REGEX, message.content):
             message_type.append("wordle")
 
         if emojis := re.findall(r"<:[a-zA-Z_0-9]*:\d*>", message.content):

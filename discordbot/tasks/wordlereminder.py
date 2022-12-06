@@ -3,7 +3,7 @@ import datetime
 import discord
 from discord.ext import tasks, commands
 
-from discordbot.constants import BSE_SERVER_ID, GENERAL_CHAT
+from discordbot.constants import BSE_BOT_ID, BSE_SERVER_ID, GENERAL_CHAT
 from mongo.bsepoints import UserInteractions
 
 
@@ -76,6 +76,9 @@ class WordleReminder(commands.Cog):
         guild = await self.bot.fetch_guild(BSE_SERVER_ID)  # type: discord.Guild
         channel = await guild.fetch_channel(GENERAL_CHAT)
         for reminder in reminders_needed:
+            if reminder["user_id"] == BSE_BOT_ID:
+                # skip bot reminder
+                continue
             channel_id = reminder["channel_id"]
 
             if channel_id != channel.id:

@@ -539,7 +539,7 @@ class StatsGatherer:
             if wordle["user_id"] == BSE_BOT_ID:
                 continue
 
-            result = re.search(r"\d/\d", wordle["content"]).group()
+            result = re.search(r"[\dX]/\d", wordle["content"]).group()
             guesses = result.split("/")[0]
 
             if guesses == "X":
@@ -882,6 +882,37 @@ class StatsGatherer:
 
         return data_class
 
+    def emojis_created(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """
+        Gets all emojis created during the given time frame
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: the emojis created stat
+        """
+        all_server_emojis = self.cache.server_emojis.get_all_emojis(guild_id)
+        created = [e for e in all_server_emojis if start < e["created"] < end]
+
+        data_class = Stat(
+            type="stat",
+            guild_id=guild_id,
+            stat=StatTypes.EMOJIS_CREATED,
+            month=start.strftime("%b %y"),
+            value=len(created),
+            timestamp=datetime.datetime.now(),
+            short_name="emojis_created",
+            annual=self.annual
+        )
+
+        data_class.emoji_ids = [e["eid"] for e in created]
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
+
     # stats that can be won
     # messages
     def server_owner(self, guild: discord.Guild, start: datetime.datetime) -> Stat:
@@ -1097,7 +1128,7 @@ class StatsGatherer:
             if uid not in wordle_count:
                 wordle_count[uid] = []
 
-            result = re.search(r"\d/\d", wordle["content"]).group()
+            result = re.search(r"[\dX]/\d", wordle["content"]).group()
             guesses = result.split("/")[0]
 
             if guesses == "X":
@@ -1367,6 +1398,48 @@ class StatsGatherer:
         conversation_data_class = self.add_annual_changes(start, conversation_data_class)
 
         return replier_data_class, conversation_data_class
+
+    def most_edited_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """Calculates the user who's edited the most messages this period
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: the stat object
+        """
+
+        edited_messages = self.cache.get_edited_messages(guild_id, start, end)
+        message_users = {}
+        for message in edited_messages:
+            uid = message["user_id"]
+            if uid == BSE_BOT_ID:
+                continue
+            if uid not in message_users:
+                message_users[uid] = {"count": 0, "messages": 0}
+            message_users[uid]["count"] += message["edit_count"]
+            message_users[uid]["messages"] += 1
+        fattest_fingers = sorted(message_users, key=lambda x: message_users[x]["count"], reverse=True)[0]
+
+        data_class = Stat(
+            type="award",
+            guild_id=guild_id,
+            user_id=fattest_fingers,
+            award=AwardsTypes.FAT_FINGERS,
+            month=start.strftime("%b %y"),
+            value=message_users[fattest_fingers]["count"],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="most_messages_edited",
+            annual=self.annual
+        )
+        data_class.message_count = message_users[fattest_fingers]["messages"]
+
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
 
     # bets
     def most_bets_created(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:

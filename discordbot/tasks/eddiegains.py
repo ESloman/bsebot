@@ -352,7 +352,7 @@ class BSEddiesManager(object):
 
             try:
                 wordle_message = [w for w in user_results if "wordle" in w["message_type"]][0]
-                result = re.search(r"\d/\d", wordle_message["content"]).group()
+                result = re.search(r"[\dX]/\d", wordle_message["content"]).group()
                 guesses = result.split("/")[0]
 
                 if guesses != "X":
@@ -392,7 +392,7 @@ class BSEddiesManager(object):
         bot_guesses = 100  # arbitrarily high number
         if results:
             bot_message = results[0]
-            bot_result = re.search(r"\d/\d", bot_message["content"]).group()
+            bot_result = re.search(r"[\dX]/\d", bot_message["content"]).group()
             bot_guesses = bot_result.split("/")[0]
             if bot_guesses != "X":
                 bot_guesses = int(bot_guesses)

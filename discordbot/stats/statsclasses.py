@@ -1441,6 +1441,52 @@ class StatsGatherer:
 
         return data_class
 
+    def most_swears(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """Calculates who swore the most during the given time period
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: the most swears stat
+        """
+
+        swears = ["fuck", "shit", "cunt", "piss", "cock", "bollock", "dick", "twat"]
+        all_messages = self.cache.get_messages(guild_id, start, end)
+
+        swear_dict = {}
+        for message in all_messages:
+            uid = message["user_id"]
+            content = message.get("content")
+            if content is None or content is False:
+                continue
+
+            if uid not in swear_dict:
+                swear_dict[uid] = 0
+            swear_count = 0
+            for swear in swears:
+                swear_count += content.count(swear)
+            swear_dict[uid] += swear_count
+        most_swears = sorted(swear_dict, key=lambda x: swear_dict[x], reverse=True)[0]
+
+        data_class = Stat(
+            type="award",
+            guild_id=guild_id,
+            user_id=most_swears,
+            award=AwardsTypes.POTTY_MOUTH,
+            month=start.strftime("%b %y"),
+            value=swear_dict[most_swears],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="most_swears",
+            annual=self.annual
+        )
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
+
     # bets
     def most_bets_created(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Get the user who made the most bets

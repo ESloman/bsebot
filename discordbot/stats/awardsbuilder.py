@@ -206,6 +206,7 @@ class AwardsBuilder:
         serial_replier, conversation_starter = self.stats.most_replies(*args)
         owner_award = self.stats.server_owner(guild, start)
         fattest_fingers = self.stats.most_edited_messages(*args)
+        most_swears = self.stats.most_swears(*args)
 
         awards = [
             most_messages,
@@ -226,7 +227,8 @@ class AwardsBuilder:
             serial_replier,
             conversation_starter,
             owner_award,
-            fattest_fingers
+            fattest_fingers,
+            most_swears
         ]
 
         user_id_dict = {}  # type: dict[int, discord.Member]
@@ -313,7 +315,10 @@ class AwardsBuilder:
             # edited messages
             ("The _'fat fingers'_ 🖐🏼 award: "
              f"{user_id_dict[fattest_fingers.user_id].mention} (`{fattest_fingers.value}` edits to "
-             f"`{fattest_fingers.message_count}` messages)")
+             f"`{fattest_fingers.message_count}` messages)\n"),
+            # most swears
+            ("The _'dirtiest fingers'_ 🚽 award: "
+             f"{user_id_dict[most_swears.user_id].mention} (`{most_swears.value}` swears)")
         ]
 
         bseddies_awards = []

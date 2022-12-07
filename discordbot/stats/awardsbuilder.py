@@ -270,7 +270,7 @@ class AwardsBuilder:
             # the least messages sent
             ("The _'participation'_ 🥉 award: "
              f"{user_id_dict[least_messages.user_id].mention} (`{least_messages.value}` messages sent)\n"),
-             # most replies
+            # most replies
             ("The _'serial replier'_ 📝 award: "
              f"{user_id_dict[serial_replier.user_id].mention} (`{serial_replier.value}` replies)\n"),
             # most replied to
@@ -290,7 +290,7 @@ class AwardsBuilder:
              f"`{fattest_fingers.message_count}` messages)\n"),
             # most swears
             ("The _'dirtiest fingers'_ 🚽 award: "
-             f"{user_id_dict[most_swears.user_id].mention} (`{most_swears.value}` swears)")
+             f"{user_id_dict[most_swears.user_id].mention} (`{most_swears.value}` swears)\n"),
             # best wordle score
             ("The _'I have an English degree'_ 📑 award: "
              f"{user_id_dict[best_wordle.user_id].mention} (`{best_wordle.value}` average wordle score)\n"),
@@ -320,7 +320,7 @@ class AwardsBuilder:
             # most time king
             ("The _'king of kings'_ 👑 award: "
              f"{user_id_dict[longest_king.user_id].mention} "
-             f"(`{str(datetime.timedelta(seconds=longest_king.value))}` spent as KING)\n"),
+             f"(`{str(datetime.timedelta(seconds=longest_king.value))}` spent as KING)"),
         ]
 
         bseddies_awards = []

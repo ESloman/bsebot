@@ -225,6 +225,7 @@ class StatsGatherer:
 
         data_class.messages = channels[busiest]["count"]
         data_class.users = len(channels[busiest]["users"])
+        data_class.channels = channels
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -268,6 +269,7 @@ class StatsGatherer:
         )
         data_class.messages = threads[busiest]["count"]
         data_class.users = len(threads[busiest]["users"])
+        data_class.threads = threads
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -366,6 +368,7 @@ class StatsGatherer:
 
         data_class.messages = channels[quietest]["count"]
         data_class.users = len(channels[quietest]["users"])
+        data_class.channels = channels
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -409,6 +412,7 @@ class StatsGatherer:
         )
         data_class.messages = threads[quietest]["count"]
         data_class.users = len(threads[quietest]["users"])
+        data_class.threads = threads
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -737,6 +741,7 @@ class StatsGatherer:
         )
 
         data_class.users = len(channels[vc_most_time]["users"])
+        data_class.channels = channels
         data_class.time = int(channels[vc_most_time]["count"])
 
         data_class = self.add_annual_changes(start, data_class)
@@ -781,6 +786,7 @@ class StatsGatherer:
             annual=self.annual
         )
         data_class.time = int(channels[vc_most_users]["count"])
+        data_class.channels = channels
         data_class.users = len(channels[vc_most_users]["users"])
 
         data_class = self.add_annual_changes(start, data_class)
@@ -840,6 +846,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.emojis = emoji_count
         data_class.count = emoji_count[most_used_emoji]
         data_class.emoji_id = emoji_id
 
@@ -978,6 +985,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.message_users = message_users
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1018,6 +1026,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.message_users = message_users
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1058,6 +1067,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.message_users = message_users
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1168,6 +1178,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.wordle_avgs = wordle_avgs
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1208,6 +1219,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.twitter_addict = tweet_users
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1249,6 +1261,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.masturbators = jerk_off_users
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1289,6 +1302,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.reactees = reaction_users
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1331,6 +1345,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.reaction_users = reaction_users
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1380,6 +1395,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        replier_data_class.repliers = replies
         replier_data_class = self.add_annual_changes(start, replier_data_class)
 
         conversation_data_class = Stat(
@@ -1395,6 +1411,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        conversation_data_class.repliees = replied_to
         conversation_data_class = self.add_annual_changes(start, conversation_data_class)
 
         return replier_data_class, conversation_data_class
@@ -1435,6 +1452,7 @@ class StatsGatherer:
             short_name="most_messages_edited",
             annual=self.annual
         )
+        data_class.message_users = message_users
         data_class.message_count = message_users[fattest_fingers]["messages"]
 
         data_class = self.add_annual_changes(start, data_class)
@@ -1483,6 +1501,7 @@ class StatsGatherer:
             short_name="most_swears",
             annual=self.annual
         )
+        data_class.swears = swear_dict
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1522,6 +1541,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.bookies = bet_users
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1563,6 +1583,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.betters = bet_users
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1604,6 +1625,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.bet_winners = bet_users
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1671,6 +1693,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.kings = kings
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1716,6 +1739,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.users = user_dict
         data_class.channels = len(user_dict[big_gamer]["channels"])
         data_class = self.add_annual_changes(start, data_class)
 
@@ -1761,6 +1785,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.users = user_dict
         data_class.channels = len(user_dict[big_streamer]["channels"])
         data_class = self.add_annual_changes(start, data_class)
 

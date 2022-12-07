@@ -253,6 +253,11 @@ class AwardsBuilder:
         awards_parts = [
             message_start,
             f"Each award has a prize of **{prize}** eddies.\n\n",
+
+            # server owner award
+            ("The _'server owner'_ 👨‍👧‍👦 award: "
+             f"{user_id_dict[owner_award.user_id].mention}\n"),
+
             # most messages
             ("The _'won't shut up'_ 🤐 award: "
              f"{user_id_dict[most_messages.user_id].mention} (`{most_messages.value}` messages sent)\n"),
@@ -262,13 +267,10 @@ class AwardsBuilder:
             # most messages to a thread
             ("The _'best threads'_ 🧵 award: "
              f"{user_id_dict[threadiest_user.user_id].mention} (`{threadiest_user.value}` messages sent to threads)\n"),
-            # best wordle score
-            ("The _'I have an English degree'_ 📑 award: "
-             f"{user_id_dict[best_wordle.user_id].mention} (`{best_wordle.value}` average wordle score)\n"),
             # the least messages sent
             ("The _'participation'_ 🥉 award: "
              f"{user_id_dict[least_messages.user_id].mention} (`{least_messages.value}` messages sent)\n"),
-            # most replies
+             # most replies
             ("The _'serial replier'_ 📝 award: "
              f"{user_id_dict[serial_replier.user_id].mention} (`{serial_replier.value}` replies)\n"),
             # most replied to
@@ -282,6 +284,16 @@ class AwardsBuilder:
             ("The _'jerk off mate'_ 🍆 award: "
              f"{user_id_dict[jerk_off_king.user_id].mention} "
              f"(`{jerk_off_king.value}` contributions to {jerk_off_channel.mention})\n"),
+            # edited messages
+            ("The _'fat fingers'_ 🖐🏼 award: "
+             f"{user_id_dict[fattest_fingers.user_id].mention} (`{fattest_fingers.value}` edits to "
+             f"`{fattest_fingers.message_count}` messages)\n"),
+            # most swears
+            ("The _'dirtiest fingers'_ 🚽 award: "
+             f"{user_id_dict[most_swears.user_id].mention} (`{most_swears.value}` swears)")
+            # best wordle score
+            ("The _'I have an English degree'_ 📑 award: "
+             f"{user_id_dict[best_wordle.user_id].mention} (`{best_wordle.value}` average wordle score)\n"),
             # most reacts
             ("The _'big memer'_ 😎 award: "
              f"{user_id_dict[big_memer.user_id].mention} (`{big_memer.value}` reacts received)\n"),
@@ -309,16 +321,6 @@ class AwardsBuilder:
             ("The _'king of kings'_ 👑 award: "
              f"{user_id_dict[longest_king.user_id].mention} "
              f"(`{str(datetime.timedelta(seconds=longest_king.value))}` spent as KING)\n"),
-            # server owner award
-            ("The _'server owner'_ 👨‍👧‍👦 award: "
-             f"{user_id_dict[owner_award.user_id].mention}\n"),
-            # edited messages
-            ("The _'fat fingers'_ 🖐🏼 award: "
-             f"{user_id_dict[fattest_fingers.user_id].mention} (`{fattest_fingers.value}` edits to "
-             f"`{fattest_fingers.message_count}` messages)\n"),
-            # most swears
-            ("The _'dirtiest fingers'_ 🚽 award: "
-             f"{user_id_dict[most_swears.user_id].mention} (`{most_swears.value}` swears)")
         ]
 
         bseddies_awards = []

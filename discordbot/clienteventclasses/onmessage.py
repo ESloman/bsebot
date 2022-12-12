@@ -57,10 +57,10 @@ class OnMessage(BaseEvent):
         if message.mentions:
             mentions = [m.id for m in message.mentions if m.id == self.client.user.id]
             if mentions:
-                if any([a in message.content.lower() for a in _thank_you_terms]):
+                if any([re.match(rf"\b{a}\b", message.content.lower()) for a in _thank_you_terms]):
                     # yes! send message
                     send_message = True
-        elif any([a in message.content.lower() for a in _bot_thanks]):
+        elif any([re.match(rf"\b{a}\b", message.content.lower()) for a in _bot_thanks]):
             send_message = True
         elif message.reference:
             _reply = message.reference.cached_message
@@ -69,7 +69,7 @@ class OnMessage(BaseEvent):
                 _reply = await channel.fetch_message(message.reference.message_id)
             if _reply.author.id == self.client.user.id:
                 # we sent this message!
-                if any([a in message.content.lower() for a in _thank_you_terms]):
+                if any([re.match(rf"\b{a}\b", message.content.lower()) for a in _thank_you_terms]):
                     # yes! send message
                     send_message = True
         if not send_message:
@@ -230,7 +230,8 @@ class OnMessage(BaseEvent):
 
         try:
             if message.mentions or "thank" in message.content.lower() or "ty" in message.content.lower():
-                await self._handle_bot_reply(message)
+                if not message.author.id == self.client.user.id:
+                    await self._handle_bot_reply(message)
         except Exception as e:
             self.logger.debug(f"Something went wrong processing a possible bot reply: {e}")
 

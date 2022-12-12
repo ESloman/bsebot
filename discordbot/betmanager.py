@@ -108,13 +108,14 @@ class BetManager(object):
 
             self.logger.info(
                 f"{better} bet {points_bet} eddies and won {actual_amount_won} ({points_won}) - "
-                "getting taxed {tax_amount} so {eddies_won_minux_tax=}"
+                f"getting taxed {tax_amount} so {eddies_won_minux_tax=}"
             )
 
             ret_dict["winners"][better] = eddies_won_minux_tax
+            self.logger.info(f"{better} won - incrementing eddies by {eddies_won_minux_tax}")
             self.user_points.increment_points(int(better), guild_id, eddies_won_minux_tax)
             # add to transaction history
-            self.user_points.append_to_transaction_history(
+            update_result = self.user_points.append_to_transaction_history(
                 int(better),
                 guild_id,
                 {
@@ -124,6 +125,20 @@ class BetManager(object):
                     "bet_id": bet_id,
                 }
             )
+            self.logger.debug(f"Update result: {update_result.matched_count}, {update_result.modified_count}")
+            if not update_result.modified_count:
+                self.logger.debug("Update result was 0 - trying again without casting user to int")
+                update_result = self.user_points.append_to_transaction_history(
+                    better,
+                    guild_id,
+                    {
+                        "type": TransactionTypes.BET_WIN,
+                        "amount": eddies_won_minux_tax,
+                        "timestamp": datetime.datetime.now(),
+                        "bet_id": bet_id,
+                    }
+                )
+                self.logger.debug(f"Second {update_result}")
 
         # give taxed eddies to the King
         self.logger.info(

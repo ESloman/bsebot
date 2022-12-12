@@ -254,7 +254,7 @@ class UserPoints(BestSummerEverPointsDB):
         if ret:
             return ret[0]
 
-    def append_to_transaction_history(self, user_id: int, guild_id: int, activity: dict) -> None:
+    def append_to_transaction_history(self, user_id: int, guild_id: int, activity: dict) -> UpdateResult:
         """
         Add an item to a user's transaction history
 
@@ -273,7 +273,7 @@ class UserPoints(BestSummerEverPointsDB):
         :param activity: the activity dict to add to the transaction history
         :return: None
         """
-        self.update({"uid": user_id, "guild_id": guild_id}, {"$push": {"transaction_history": activity}})
+        return self.update({"uid": user_id, "guild_id": guild_id}, {"$push": {"transaction_history": activity}})
 
     def append_to_activity_history(self, user_id: int, guild_id: int, activity: dict) -> None:
         """

@@ -104,6 +104,8 @@ class AwardsTypes(IntEnum):
     CONVERSATION_STARTER = 19
     FAT_FINGERS = 20
     POTTY_MOUTH = 21
+    SINGLE_MINDED = 22
+    DIVERSE_PORTFOLIO = 23
 
 
 class StatTypes(IntEnum):

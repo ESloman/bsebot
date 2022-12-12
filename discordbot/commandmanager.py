@@ -27,6 +27,7 @@ from discordbot.slashcommandeventclasses import BSEddiesTransactionHistory, BSEd
 from discordbot.tasks.annualawards import AnnualBSEddiesAwards
 from discordbot.tasks.betcloser import BetCloser
 from discordbot.tasks.betreminder import BetReminder
+from discordbot.tasks.celebrations import Celebrations
 from discordbot.tasks.dailyvallytask import AfterWorkVally
 from discordbot.tasks.eddiegains import EddieGainMessager
 from discordbot.tasks.eddiekingtask import BSEddiesKingTask
@@ -137,6 +138,7 @@ class CommandManager(object):
             self.monthly_awards_task = MonthlyBSEddiesAwards(self.client, guilds, self.logger)
             self.annual_awards_task = AnnualBSEddiesAwards(self.client, guilds, self.logger)
             self.wordle_reminder = WordleReminder(self.client, guilds, self.logger)
+            self.celebrations_task = Celebrations(self.client, guilds, self.logger)
 
         # call the methods that register the events we're listening for
         self._register_client_events()

@@ -1,3 +1,4 @@
+import random
 import re
 from typing import Optional
 
@@ -16,6 +17,65 @@ class OnMessage(BaseEvent):
     def __init__(self, client, guild_ids, logger):
         super().__init__(client, guild_ids, logger)
         self.user_interactions = UserInteractions()
+
+    async def _handle_bot_reply(self, message: discord.Message) -> None:
+        """Sends a basic reply message if a message meets the requirements
+
+        Args:
+            message (discord.Message): the discord message object
+        """
+        _thank_you_terms = [
+            "thank you", "thanks", "ty", "cutie", "i love you",
+        ]
+        _bot_thanks = [
+            "thank you bot", "thank you bsebot",
+            "thanks bot", "thanks bsebot",
+            "ty bot", "ty bsebot"
+        ]
+
+        _possible_replies = [
+            "You are most welcome.",
+            "Your praise means everything to me.",
+            "I exist to serve.",
+            "Thank you ❤️",
+            "🥰",
+            "❤️",
+            "😍",
+            "You're welcome!",
+            "Anytime cute stuff.",
+            "No worries!",
+            "I am happy to assist.",
+            "I am happy that you're happy!",
+            "https://media.giphy.com/media/tXTqLBYNf0N7W/giphy.gif",
+            "https://media.giphy.com/media/l41lY4I8lZXH0vIe4/giphy.gif",
+            "https://media.giphy.com/media/1qfb3aFqldWklPQwS3/giphy.gif",
+            "https://media.giphy.com/media/e5nATuISYAZ4Q/giphy.gif",
+            "https://media.giphy.com/media/xT0Cyhi8GCSU91PvtC/giphy.gif",
+        ]
+
+        send_message = False
+        if message.mentions:
+            mentions = [m.id for m in message.mentions if m.id == self.client.user.id]
+            if mentions:
+                if any([a in message.content.lower() for a in _thank_you_terms]):
+                    # yes! send message
+                    send_message = True
+        elif any([a in message.content.lower() for a in _bot_thanks]):
+            send_message = True
+        elif message.reference:
+            _reply = message.reference.cached_message
+            if not _reply:
+                channel = await self.client.fetch_channel(message.reference.channel_id)
+                _reply = await channel.fetch_message(message.reference.message_id)
+            if _reply.author.id == self.client.user.id:
+                # we sent this message!
+                if any([a in message.content.lower() for a in _thank_you_terms]):
+                    # yes! send message
+                    send_message = True
+        if not send_message:
+            return
+
+        await message.reply(content=random.choice(_possible_replies))
 
     async def message_received(self, message: discord.Message, message_type_only=False) -> Optional[list]:
         """
@@ -167,5 +227,11 @@ class OnMessage(BaseEvent):
             is_thread=is_thread,
             is_vc=is_vc
         )
+
+        try:
+            if message.mentions or "thank" in message.content.lower() or "ty" in message.content.lower():
+                await self._handle_bot_reply(message)
+        except Exception as e:
+            self.logger.debug(f"Something went wrong processing a possible bot reply: {e}")
 
         return message_type

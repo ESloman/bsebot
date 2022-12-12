@@ -15,8 +15,7 @@ class BaseClass(object):
     """
     def __init__(
             self,
-            # ip: str = "127.0.0.1",
-            ip: str = "ec2-18-170-54-3.eu-west-2.compute.amazonaws.com",
+            ip: str = "127.0.0.1",
             username: str = None,
             password: str = None):
         """

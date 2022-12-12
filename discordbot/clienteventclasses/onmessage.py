@@ -230,7 +230,8 @@ class OnMessage(BaseEvent):
 
         try:
             if message.mentions or "thank" in message.content.lower() or "ty" in message.content.lower():
-                await self._handle_bot_reply(message)
+                if not message.author.id == self.client.user.id:
+                    await self._handle_bot_reply(message)
         except Exception as e:
             self.logger.debug(f"Something went wrong processing a possible bot reply: {e}")
 

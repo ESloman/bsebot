@@ -1506,6 +1506,113 @@ class StatsGatherer:
 
         return data_class
 
+    def most_messages_to_a_single_channel(
+        self,
+        guild_id: int,
+        start: datetime.datetime,
+        end: datetime.datetime
+    ) -> Stat:
+        """Calculates the user who sent most of their messages to one channel
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: the stat
+        """
+        messages = self.cache.get_messages(guild_id, start, end)
+
+        users = {}
+        for message in messages:
+            user_id = message["user_id"]
+            channel_id = message["channel_id"]
+
+            if user_id not in users:
+                users[user_id] = {"total": 0}
+            if channel_id not in users[user_id]:
+                users[user_id][channel_id] = 0
+
+            users[user_id][channel_id] += 1
+            users[user_id]["total"] += 1
+
+        # calc highest percentage
+        for user in users:
+            u_dict = users[user]
+            total = u_dict.pop("total")
+            top_channel_id = sorted(u_dict, key=lambda x: u_dict[x], reverse=True)[0]
+            percentage = (u_dict[top_channel_id] / total) * 100
+            u_dict["total"] = total
+            u_dict["percentage"] = percentage
+            u_dict["channel"] = top_channel_id
+
+        # sort the percentages
+        top = sorted(users, key=lambda x: users[x]["percentage"], reverse=True)[0]
+
+        data_class = Stat(
+            type="award",
+            guild_id=guild_id,
+            user_id=top,
+            award=AwardsTypes.SINGLE_MINDED,
+            month=start.strftime("%b %y"),
+            value=users[top]["percentage"],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="single_minded",
+            annual=self.annual
+        )
+        data_class.users = users
+        data_class.channel = users[top]["channel"]
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
+
+    def most_messages_to_most_channels(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """Calculates the user who sent most of their messages to the most diverse channels
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: the stat
+        """
+        messages = self.cache.get_messages(guild_id, start, end)
+
+        users = {}
+        for message in messages:
+            user_id = message["user_id"]
+            channel_id = message["channel_id"]
+
+            if user_id not in users:
+                users[user_id] = {"channels": [], "messages": 0}
+            if channel_id not in users[user_id]["channels"]:
+                users[user_id]["channels"].append(channel_id)
+            users[user_id]["messages"] += 1
+
+        # sort the channels
+        top = sorted(users, key=lambda x: len(users[x]["channels"]), reverse=True)[0]
+
+        data_class = Stat(
+            type="award",
+            guild_id=guild_id,
+            user_id=top,
+            award=AwardsTypes.DIVERSE_PORTFOLIO,
+            month=start.strftime("%b %y"),
+            value=len(users[top]["channels"]),
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="diverse_portfolio",
+            annual=self.annual
+        )
+        data_class.users = users
+        data_class.messages = users[top]["messages"]
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
+
     # bets
     def most_bets_created(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Get the user who made the most bets

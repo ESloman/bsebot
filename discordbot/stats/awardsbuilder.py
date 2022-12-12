@@ -207,6 +207,8 @@ class AwardsBuilder:
         owner_award = self.stats.server_owner(guild, start)
         fattest_fingers = self.stats.most_edited_messages(*args)
         most_swears = self.stats.most_swears(*args)
+        single_minded = self.stats.most_messages_to_a_single_channel(*args)
+        diverse_portfolio = self.stats.most_messages_to_most_channels(*args)
 
         awards = [
             most_messages,
@@ -228,7 +230,9 @@ class AwardsBuilder:
             conversation_starter,
             owner_award,
             fattest_fingers,
-            most_swears
+            most_swears,
+            single_minded,
+            diverse_portfolio
         ]
 
         user_id_dict = {}  # type: dict[int, discord.Member]
@@ -239,6 +243,7 @@ class AwardsBuilder:
             user_id_dict[award.user_id] = member
 
         jerk_off_channel = await self.bot.fetch_channel(JERK_OFF_CHAT)
+        single_minded_channel = await self.bot.fetch_channel(single_minded.channel)
 
         if not self.annual:
             message_start = "Time for the monthly **BSEddies Awards** 🏆\n"
@@ -270,6 +275,14 @@ class AwardsBuilder:
             # the least messages sent
             ("The _'participation'_ 🥉 award: "
              f"{user_id_dict[least_messages.user_id].mention} (`{least_messages.value}` messages sent)\n"),
+            # single minded
+            ("The _'single minded'_ 🧠 award: "
+             f"{user_id_dict[single_minded.user_id].mention} (`{single_minded.value}%` of messages "
+             f"sent to {single_minded_channel.mention})\n"),
+            # diverse portfolio
+            ("The _'diverse portfolio'_ 💼 award: "
+             f"{user_id_dict[diverse_portfolio.user_id].mention} (`{diverse_portfolio.messages}` sent to "
+             f"`{diverse_portfolio.value}` channels)\n"),
             # most replies
             ("The _'serial replier'_ 📝 award: "
              f"{user_id_dict[serial_replier.user_id].mention} (`{serial_replier.value}` replies)\n"),

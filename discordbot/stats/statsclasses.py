@@ -1452,6 +1452,7 @@ class StatsGatherer:
             short_name="most_messages_edited",
             annual=self.annual
         )
+
         data_class.message_users = message_users
         data_class.message_count = message_users[fattest_fingers]["messages"]
 

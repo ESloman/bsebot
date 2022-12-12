@@ -258,11 +258,9 @@ class AwardsBuilder:
         awards_parts = [
             message_start,
             f"Each award has a prize of **{prize}** eddies.\n\n",
-
             # server owner award
             ("The _'server owner'_ 👨‍👧‍👦 award: "
              f"{user_id_dict[owner_award.user_id].mention}\n"),
-
             # most messages
             ("The _'won't shut up'_ 🤐 award: "
              f"{user_id_dict[most_messages.user_id].mention} (`{most_messages.value}` messages sent)\n"),

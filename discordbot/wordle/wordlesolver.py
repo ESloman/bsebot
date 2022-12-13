@@ -10,6 +10,7 @@ from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import ElementNotInteractableException, StaleElementReferenceException
+from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service as FirefoxService
@@ -38,6 +39,7 @@ class WordleSolver():
     def __init__(self, logger) -> None:
         self.firefox_opts = Options()
         self.firefox_opts.headless = True
+        self.firefox_opts.add_argument("--no-sandbox")
         self.words = self._get_words()
         self.driver = None
         self.action_chain = None
@@ -54,7 +56,7 @@ class WordleSolver():
         Returns:
             webdriver.Firefox: the instantiated driver
         """
-        driver = webdriver.Firefox(
+        driver = webdriver.Chrome(
             service=FirefoxService(ChromeDriverManager().install()),
             options=self.firefox_opts
         )
@@ -212,7 +214,12 @@ class WordleSolver():
         board = self._get_board()
         rows = self._get_rows(board)
         # doing a click to focus the stuff
-        board.click()
+        try:
+            board.click()
+        except ElementClickInterceptedException:
+            self.logger.debug(f"Failed to press board - clicking container instead")
+            container = self.driver.find_element(By.CLASS_NAME, "App-module_gameContainer__EvHiJ")
+            container.click()
 
         while not solved:
             self.logger.info(f"Guess number: {row + 1}")

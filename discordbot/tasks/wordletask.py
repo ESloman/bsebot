@@ -1,12 +1,12 @@
 import datetime
 import random
-import re
 
 import discord
 from discord.ext import tasks, commands
 
 from discordbot.constants import BSE_SERVER_ID, GENERAL_CHAT
-from mongo.bsepoints import UserInteractions
+from discordbot.wordle.wordlesolver import WordleSolver
+from mongo.bsedataclasses import WordleAttempts
 
 
 class WordleTask(commands.Cog):
@@ -15,7 +15,7 @@ class WordleTask(commands.Cog):
         self.logger = logger
         self.guilds = guilds
         self.wordle_message.start()
-        self.user_interactions = UserInteractions()
+        self.wordles = WordleAttempts()
         self.set_wordle_activity = False
         self.sent_wordle = False
         self.wait_iters = None
@@ -68,7 +68,7 @@ class WordleTask(commands.Cog):
             self.set_wordle_activity = True
 
         if self.wait_iters is None:
-            self.wait_iters = random.randint(3, 11)
+            self.wait_iters = random.randint(0, 5)
             self.logger.info(f"Setting iterations to {self.wait_iters}")
             return
 
@@ -82,52 +82,38 @@ class WordleTask(commands.Cog):
 
         # actually do wordle now
 
-        earlier = now.replace(hour=0, minute=0, second=1)
+        wordle_solver = WordleSolver(self.logger)
+        await wordle_solver.get_driver()
 
-        wordles_today = self.user_interactions.query(
-            {
-                "guild_id": BSE_SERVER_ID,
-                "timestamp": {"$gt": earlier},
-                "message_type": "wordle"
-            }
+        self.logger.debug("Solving wordle...")
+        solved_wordle = await wordle_solver.solve()
+
+        attempts = 1
+        while not solved_wordle.solved and attempts < 5:
+            # if we fail - try again as there's some randomness to it
+            self.logger.debug(f"Failed wordle - attempting again: {attempts}")
+            wordle_solver = WordleSolver(self.logger)
+            await wordle_solver.get_driver()
+            solved_wordle = await wordle_solver.solve()
+            attempts += 1
+
+        # put it into dark mode
+        message = solved_wordle.share_text.replace("⬜", "⬛")
+        spoiler_message = (
+            f"Solved wordle in `{solved_wordle.guess_count}`, "
+            f"word was: || {solved_wordle.actual_word} ||"
         )
-
-        if not wordles_today:
-            # couldn't find any today yet
-            earlier = earlier - datetime.timedelta(days=1)
-            wordles_yesterday = self.user_interactions.query(
-                {
-                    "guild_id": BSE_SERVER_ID,
-                    "timestamp": {"$gt": earlier},
-                    "message_type": "wordle"
-                }
-            )
-            first = wordles_yesterday[0]
-            content = first["content"]
-            _match = re.match(r"Wordle \d+", content)
-            value = int(_match.group().split()[1]) + 1
-
-        else:
-            first = wordles_today[0]
-            content = first["content"]
-            _match = re.match(r"Wordle \d+", content)
-            value = _match.group().split()[1]
-
-        self.logger.info(f"Got wordle number to be: {value}")
-
-        random_wordle = list(self.user_interactions.vault.aggregate([
-            {"$match": {"message_type": "wordle"}},
-            {"$sample": {"size": 1}}
-        ]
-        ))[0]
-        content = random_wordle["content"]
-        message = re.sub(r"(?<= )\d+(?= )", f"{value}", content)
 
         guild = await self.bot.fetch_guild(BSE_SERVER_ID)
         channel = await guild.fetch_channel(GENERAL_CHAT)
 
         self.logger.info(f"Sending wordle message: {message}")
-        await channel.send(content=message)
+        sent_message = await channel.send(content=message)
+        if solved_wordle.solved:
+            await sent_message.reply(content=spoiler_message)
+
+        self.wordles.document_wordle(BSE_SERVER_ID, solved_wordle)
+
         self.sent_wordle = True
 
         self.logger.info("Setting activity back to default")

@@ -291,7 +291,7 @@ class WordleAttempts(BestSummerEverPointsDB):
         doc = {k: v for k, v in wordle_solve.__dict__.items() if v is not None}
 
         doc["game_state"] = {
-            str(k): v for k, v in doc["game_state"]
+            str(k): v for k, v in doc["game_state"].items()
         }
 
         doc["guild_id"] = guild_id

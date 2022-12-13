@@ -217,7 +217,7 @@ class WordleSolver():
         try:
             board.click()
         except ElementClickInterceptedException:
-            self.logger.debug(f"Failed to press board - clicking container instead")
+            self.logger.debug("Failed to press board - clicking container instead")
             container = self.driver.find_element(By.CLASS_NAME, "App-module_gameContainer__EvHiJ")
             container.click()
 

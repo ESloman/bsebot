@@ -6,7 +6,7 @@ ARG GIT_USER
 ARG GIT_PASS
 
 RUN apt-get update \
-    && apt-get install -yq tzdata nano \
+    && apt-get install -yq tzdata nano firefox-esr xclip \
     && ln -fs /usr/share/zoneinfo/Europe/London /etc/localtime \
     && dpkg-reconfigure -f noninteractive tzdata
 

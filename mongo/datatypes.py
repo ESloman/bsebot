@@ -1,6 +1,11 @@
 
 import datetime
-from typing import NotRequired, TypedDict, Union
+from typing import TypedDict, Union
+try:
+    from typing import NotRequired
+except ImportError:
+    from typing import Optional
+    NotRequired = Optional
 
 from bson import ObjectId
 

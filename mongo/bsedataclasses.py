@@ -289,6 +289,11 @@ class WordleAttempts(BestSummerEverPointsDB):
     ) -> list:
 
         doc = {k: v for k, v in wordle_solve.__dict__.items() if v is not None}
+
+        doc["game_state"] = {
+            str(k): v for k, v in doc["game_state"]
+        }
+
         doc["guild_id"] = guild_id
         doc["timestamp"] = doc["timestamp"].strftime("%Y-%m-%d")
 

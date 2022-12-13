@@ -4,7 +4,7 @@ import random
 import discord
 from discord.ext import tasks, commands
 
-# from discordbot.constants import BSE_SERVER_ID, GENERAL_CHAT
+from discordbot.constants import BSE_SERVER_ID, GENERAL_CHAT
 from discordbot.wordle.wordlesolver import WordleSolver
 from mongo.bsedataclasses import WordleAttempts
 
@@ -27,7 +27,7 @@ class WordleTask(commands.Cog):
         """
         self.wordle_message.cancel()
 
-    @tasks.loop(minutes=5)
+    @tasks.loop(minutes=10)
     async def wordle_message(self):
         """
         Loop that makes sure the King is assigned correctly
@@ -35,7 +35,7 @@ class WordleTask(commands.Cog):
         """
         now = datetime.datetime.now()
 
-        if now.hour < 21:
+        if now.hour < 8:
             self.wait_iters = None
             self.sent_wordle = False
             self.set_wordle_activity = False
@@ -44,7 +44,7 @@ class WordleTask(commands.Cog):
         if self.sent_wordle and not self.set_wordle_activity:
             return
 
-        if now.hour >= 22:
+        if now.hour >= 9:
             if self.set_wordle_activity:
                 self.logger.info("Setting activity back to default")
                 listening_activity = discord.Activity(
@@ -68,7 +68,7 @@ class WordleTask(commands.Cog):
             self.set_wordle_activity = True
 
         if self.wait_iters is None:
-            self.wait_iters = random.randint(1, 1)
+            self.wait_iters = random.randint(0, 0)
             self.logger.info(f"Setting iterations to {self.wait_iters}")
             return
 
@@ -104,15 +104,15 @@ class WordleTask(commands.Cog):
             f"word was: || {solved_wordle.actual_word} ||"
         )
 
-        guild = await self.bot.fetch_guild(291508460519161856)
-        channel = await guild.fetch_channel(291508460519161856)
+        guild = await self.bot.fetch_guild(BSE_SERVER_ID)
+        channel = await guild.fetch_channel(GENERAL_CHAT)
 
         self.logger.info(f"Sending wordle message: {message}")
         sent_message = await channel.send(content=message)
         if solved_wordle.solved:
             await sent_message.reply(content=spoiler_message)
 
-        self.wordles.document_wordle(291508460519161856, solved_wordle)
+        self.wordles.document_wordle(BSE_SERVER_ID, solved_wordle)
 
         self.sent_wordle = True
 

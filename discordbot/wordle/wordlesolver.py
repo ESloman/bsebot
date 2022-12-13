@@ -2,7 +2,6 @@ import asyncio
 import copy
 import datetime
 import os
-import time
 import random
 import re
 from dataclasses import dataclass
@@ -17,7 +16,7 @@ from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium.webdriver.remote.webelement import WebElement
 from webdriver_manager.firefox import GeckoDriverManager
 
-from discordbot.wordle.constants import WORDLE_GDPR_ACCEPT_ID, WORDLE_TUTORIAL_CLOSE_CLASS_NAME, WORDLE_SHARE_ID
+from discordbot.wordle.constants import WORDLE_GDPR_ACCEPT_ID, WORDLE_TUTORIAL_CLOSE_CLASS_NAME
 from discordbot.wordle.constants import WORDLE_BOARD_CLASS_NAME, WORDLE_ROWS_CLASS_NAME, WORDLE_URL, WORDLE_FOOTNOTE
 from discordbot.wordle.constants import WORDLE_STARTING_WORDS, WORDLE_SETTINGS_BUTTON
 
@@ -72,7 +71,7 @@ class WordleSolver():
             close_button.click()
         except (ElementNotInteractableException, StaleElementReferenceException):
             pass
-        
+
         self.driver = driver
         self.action_chain = ActionChains(self.driver)
 
@@ -136,7 +135,7 @@ class WordleSolver():
                 letter_regex = not_letters.format(letters=_letters)
             regex_search.append(letter_regex)
         pattern = "".join(regex_search)
-        
+
         for word in _word_list:
             if re.match(pattern, word):
                 # still need to filter to match 'present' letters
@@ -169,7 +168,7 @@ class WordleSolver():
     def _get_board(self) -> WebElement:
         board = self.driver.find_element(By.CLASS_NAME, WORDLE_BOARD_CLASS_NAME)
         return board
-    
+
     async def _get_wordle_number(self) -> str:
         """Gets the wordle number from the footnote
 
@@ -214,7 +213,7 @@ class WordleSolver():
         rows = self._get_rows(board)
         # doing a click to focus the stuff
         board.click()
-        
+
         while not solved:
             self.logger.info(f"Guess number: {row + 1}")
 
@@ -274,7 +273,7 @@ class WordleSolver():
 
             if row == 5:
                 # we failed
-                self.logger.debug(f"We failed to do the wordle...")
+                self.logger.debug("We failed to do the wordle...")
                 break
             row += 1
 

@@ -4,7 +4,7 @@ import random
 import discord
 from discord.ext import tasks, commands
 
-from discordbot.constants import BSE_SERVER_ID, GENERAL_CHAT
+# from discordbot.constants import BSE_SERVER_ID, GENERAL_CHAT
 from discordbot.wordle.wordlesolver import WordleSolver
 from mongo.bsedataclasses import WordleAttempts
 
@@ -84,10 +84,10 @@ class WordleTask(commands.Cog):
 
         wordle_solver = WordleSolver(self.logger)
         await wordle_solver.get_driver()
-        
+
         self.logger.debug("Solving wordle...")
         solved_wordle = await wordle_solver.solve()
-        
+
         attempts = 1
         while not solved_wordle.solved and attempts < 5:
             # if we fail - try again as there's some randomness to it

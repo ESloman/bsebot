@@ -12,6 +12,7 @@ import random
 from typing import Optional, Union
 
 from discordbot.bot_enums import AwardsTypes, StatTypes
+from discordbot.wordle.wordlesolver import WordleSolve
 from mongo import interface
 from mongo.datatypes import Thread
 from mongo.db_classes import BestSummerEverPointsDB
@@ -272,5 +273,23 @@ class Awards(BestSummerEverPointsDB):
         for key in kwargs:
             if key not in doc:
                 doc[key] = kwargs[key]
+
+        return self.insert(doc)
+
+
+class WordleAttempts(BestSummerEverPointsDB):
+    def __init__(self):
+        super().__init__()
+        self._vault = interface.get_collection(self.database, "wordles")
+
+    def document_wordle(
+        self,
+        guild_id: int,
+        wordle_solve: WordleSolve
+    ) -> list:
+
+        doc["guild_id"] = guild_id
+        doc = {k: v for k, v in wordle_solve.__dict__.items() if v is not None}
+        doc["timestamp"] = doc["timestamp"].strftime("%Y-%m-%d")
 
         return self.insert(doc)

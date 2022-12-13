@@ -130,13 +130,13 @@ class CommandManager(object):
         self.eddie_gain_message_task = EddieGainMessager(self.client, guilds, self.logger)
         self.eddie_king_task = BSEddiesKingTask(self.client, guilds, self.logger)
         self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger, self.giphy_token)
-        self.wordle_task = WordleTask(self.client, guilds, self.logger)
 
         if BSE_SERVER_ID in self.guilds:
             self.thread_task = ThreadSpoilerTask(self.client, guilds, self.logger)
             self.vally_task = AfterWorkVally(self.client, guilds, self.logger)
             self.monthly_awards_task = MonthlyBSEddiesAwards(self.client, guilds, self.logger)
             self.annual_awards_task = AnnualBSEddiesAwards(self.client, guilds, self.logger)
+            self.wordle_task = WordleTask(self.client, guilds, self.logger)
             self.wordle_reminder = WordleReminder(self.client, guilds, self.logger)
             self.celebrations_task = Celebrations(self.client, guilds, self.logger)
 

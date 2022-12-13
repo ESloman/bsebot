@@ -1,13 +1,12 @@
 import datetime
 import random
-import re
 
 import discord
 from discord.ext import tasks, commands
 
 from discordbot.constants import BSE_SERVER_ID, GENERAL_CHAT
 from discordbot.wordle.wordlesolver import WordleSolver
-from mongo.bsepoints import UserInteractions
+from mongo.bsedataclasses import WordleAttempts
 
 
 class WordleTask(commands.Cog):
@@ -16,7 +15,7 @@ class WordleTask(commands.Cog):
         self.logger = logger
         self.guilds = guilds
         self.wordle_message.start()
-        self.user_interactions = UserInteractions()
+        self.wordles = WordleAttempts()
         self.set_wordle_activity = False
         self.sent_wordle = False
         self.wait_iters = None
@@ -28,7 +27,7 @@ class WordleTask(commands.Cog):
         """
         self.wordle_message.cancel()
 
-    @tasks.loop(minutes=1)
+    @tasks.loop(minutes=5)
     async def wordle_message(self):
         """
         Loop that makes sure the King is assigned correctly
@@ -36,55 +35,67 @@ class WordleTask(commands.Cog):
         """
         now = datetime.datetime.now()
 
-        # if now.hour < 8:
-        #     self.wait_iters = None
-        #     self.sent_wordle = False
-        #     self.set_wordle_activity = False
-        #     return
+        if now.hour < 21:
+            self.wait_iters = None
+            self.sent_wordle = False
+            self.set_wordle_activity = False
+            return
 
-        # if self.sent_wordle and not self.set_wordle_activity:
-        #     return
+        if self.sent_wordle and not self.set_wordle_activity:
+            return
 
-        # if now.hour >= 10:
-        #     if self.set_wordle_activity:
-        #         self.logger.info("Setting activity back to default")
-        #         listening_activity = discord.Activity(
-        #             name="conversations",
-        #             state="Listening",
-        #             type=discord.ActivityType.listening,
-        #             details="Waiting for commands!"
-        #         )
-        #         await self.bot.change_presence(activity=listening_activity, status=discord.Status.online)
-        #         self.set_wordle_activity = False
+        if now.hour >= 22:
+            if self.set_wordle_activity:
+                self.logger.info("Setting activity back to default")
+                listening_activity = discord.Activity(
+                    name="conversations",
+                    state="Listening",
+                    type=discord.ActivityType.listening,
+                    details="Waiting for commands!"
+                )
+                await self.bot.change_presence(activity=listening_activity, status=discord.Status.online)
+                self.set_wordle_activity = False
 
-        #     return
+            return
 
-        # if self.sent_wordle:
-        #     return
+        if self.sent_wordle:
+            return
 
-        # if not self.set_wordle_activity:
-        #     self.logger.info("Setting wordle activity")
-        #     game = discord.Game("Wordle")
-        #     await self.bot.change_presence(status=discord.Status.online, activity=game)
-        #     self.set_wordle_activity = True
+        if not self.set_wordle_activity:
+            self.logger.info("Setting wordle activity")
+            game = discord.Game("Wordle")
+            await self.bot.change_presence(status=discord.Status.online, activity=game)
+            self.set_wordle_activity = True
 
-        # if self.wait_iters is None:
-        #     self.wait_iters = random.randint(3, 11)
-        #     self.logger.info(f"Setting iterations to {self.wait_iters}")
-        #     return
+        if self.wait_iters is None:
+            self.wait_iters = random.randint(1, 1)
+            self.logger.info(f"Setting iterations to {self.wait_iters}")
+            return
 
-        # if self.wait_iters != 0:
-        #     self.logger.info("Decrementing countdown...")
-        #     self.wait_iters -= 1
-        #     return
+        if self.wait_iters != 0:
+            self.logger.info("Decrementing countdown...")
+            self.wait_iters -= 1
+            return
 
-        # # wait iters is 0
-        # assert self.wait_iters == 0
+        # wait iters is 0
+        assert self.wait_iters == 0
 
         # actually do wordle now
 
         wordle_solver = WordleSolver(self.logger)
-        solved_wordle = wordle_solver.solve()
+        await wordle_solver.get_driver()
+        
+        self.logger.debug("Solving wordle...")
+        solved_wordle = await wordle_solver.solve()
+        
+        attempts = 1
+        while not solved_wordle.solved and attempts < 5:
+            # if we fail - try again as there's some randomness to it
+            self.logger.debug(f"Failed wordle - attempting again: {attempts}")
+            wordle_solver = WordleSolver(self.logger)
+            await wordle_solver.get_driver()
+            solved_wordle = await wordle_solver.solve()
+            attempts += 1
 
         # put it into dark mode
         message = solved_wordle.share_text.replace("⬜", "⬛")
@@ -101,17 +112,19 @@ class WordleTask(commands.Cog):
         if solved_wordle.solved:
             await sent_message.reply(content=spoiler_message)
 
-        # self.sent_wordle = True
+        self.wordles.document_wordle(291508460519161856, solved_wordle)
 
-        # self.logger.info("Setting activity back to default")
-        # listening_activity = discord.Activity(
-        #     name="conversations",
-        #     state="Listening",
-        #     type=discord.ActivityType.listening,
-        #     details="Waiting for commands!"
-        # )
-        # await self.bot.change_presence(activity=listening_activity, status=discord.Status.online)
-        # self.set_wordle_activity = False
+        self.sent_wordle = True
+
+        self.logger.info("Setting activity back to default")
+        listening_activity = discord.Activity(
+            name="conversations",
+            state="Listening",
+            type=discord.ActivityType.listening,
+            details="Waiting for commands!"
+        )
+        await self.bot.change_presence(activity=listening_activity, status=discord.Status.online)
+        self.set_wordle_activity = False
 
     @wordle_message.before_loop
     async def before_wordle_message(self):

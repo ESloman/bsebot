@@ -1,3 +1,4 @@
+import asyncio
 import copy
 import datetime
 import os
@@ -6,7 +7,6 @@ import random
 import re
 from dataclasses import dataclass
 
-import pyperclip
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
@@ -18,8 +18,8 @@ from selenium.webdriver.remote.webelement import WebElement
 from webdriver_manager.firefox import GeckoDriverManager
 
 from discordbot.wordle.constants import WORDLE_GDPR_ACCEPT_ID, WORDLE_TUTORIAL_CLOSE_CLASS_NAME, WORDLE_SHARE_ID
-from discordbot.wordle.constants import WORDLE_BOARD_CLASS_NAME, WORDLE_ROWS_CLASS_NAME, WORDLE_URL
-from discordbot.wordle.constants import WORDLE_STARTING_WORDS
+from discordbot.wordle.constants import WORDLE_BOARD_CLASS_NAME, WORDLE_ROWS_CLASS_NAME, WORDLE_URL, WORDLE_FOOTNOTE
+from discordbot.wordle.constants import WORDLE_STARTING_WORDS, WORDLE_SETTINGS_BUTTON
 
 
 @dataclass
@@ -32,37 +32,35 @@ class WordleSolve:
     game_state: dict
     timestamp: datetime.datetime
     share_text: str
+    wordle_num: int
 
 
 class WordleSolver():
     def __init__(self, logger) -> None:
-        firefox_opts = Options()
-        firefox_opts.headless = True
+        self.firefox_opts = Options()
+        self.firefox_opts.headless = True
         self.words = self._get_words()
-        self.driver = self._get_driver(firefox_opts)
-        self.action_chain = ActionChains(self.driver)
+        self.driver = None
+        self.action_chain = None
         self.possible_words = []
         self.logger = logger
 
-    def _get_driver(self, options: Options) -> webdriver.Firefox:
+    async def get_driver(self) -> None:
         """
         Gets the necessary driver using the driver manager (downloads and installs if necessary)
         Creates a WebDriver object
         Navigates to wordle web page
         Clears GDPR and tutorial
 
-        Args:
-            options (Options): options for firefox driver
-
         Returns:
             webdriver.Firefox: the instantiated driver
         """
         driver = webdriver.Firefox(
             service=FirefoxService(GeckoDriverManager().install()),
-            options=options
+            options=self.firefox_opts
         )
         driver.get(WORDLE_URL)
-        time.sleep(2)
+        await asyncio.sleep(2)
         try:
             accept_button = driver.find_element(By.ID, WORDLE_GDPR_ACCEPT_ID)
             accept_button.click()
@@ -74,8 +72,9 @@ class WordleSolver():
             close_button.click()
         except (ElementNotInteractableException, StaleElementReferenceException):
             pass
-
-        return driver
+        
+        self.driver = driver
+        self.action_chain = ActionChains(self.driver)
 
     @staticmethod
     def _get_words() -> list[str]:
@@ -162,30 +161,41 @@ class WordleSolver():
             if ds is not None:
                 responses.append(ds)
         return responses
-    
+
     def _terminate(self) -> None:
         self.driver.close()
         self.driver = None
-    
-    def _get_wordle_share(self) -> str:
-        share_button = self.driver.find_element(By.ID, WORDLE_SHARE_ID)
-        share_button.click()
-        text = pyperclip.paste()
-        return text
 
     def _get_board(self) -> WebElement:
         board = self.driver.find_element(By.CLASS_NAME, WORDLE_BOARD_CLASS_NAME)
         return board
+    
+    async def _get_wordle_number(self) -> str:
+        """Gets the wordle number from the footnote
 
-    def _submit_word(self, word: str) -> None:
+        Returns:
+            str: the wordle number
+        """
+        settings_button = self.driver.find_element(By.ID, WORDLE_SETTINGS_BUTTON)
+        settings_button.click()
+        await asyncio.sleep(1)
+        footnote = self.driver.find_element(By.CLASS_NAME, WORDLE_FOOTNOTE)
+        div_children = footnote.find_elements(By.TAG_NAME, "div")
+        number_div = div_children[1]
+        wordle_number = number_div.text.strip().strip("#")
+        self.action_chain.send_keys(Keys.ESCAPE).perform()
+        await asyncio.sleep(1)
+        return wordle_number
+
+    async def _submit_word(self, word: str) -> None:
         self.action_chain.send_keys(word).perform()
         self.action_chain.send_keys(Keys.ENTER).perform()
         # wait for animations
-        time.sleep(3)
+        await asyncio.sleep(3)
 
-    def solve(self) -> WordleSolve:
+    async def solve(self) -> WordleSolve:
         # wait to load
-        time.sleep(2)
+        await asyncio.sleep(2)
         solved = False
         row = 0
         actual_word = ["", "", "", "", ""]
@@ -197,9 +207,13 @@ class WordleSolver():
             4: {"answer": None, "cannot": []}
         }
         guesses = []
+        emoji_str = ""
+        wordle_number = await self._get_wordle_number()
 
         board = self._get_board()
         rows = self._get_rows(board)
+        # doing a click to focus the stuff
+        board.click()
         
         while not solved:
             self.logger.info(f"Guess number: {row + 1}")
@@ -214,7 +228,7 @@ class WordleSolver():
 
             self.logger.info(f"Selected {word}")
 
-            self._submit_word(word)
+            await self._submit_word(word)
             state = self._get_row_state(rows[row])
             idx = 0
             possible_denies = []
@@ -225,16 +239,20 @@ class WordleSolver():
                 if tile == "absent":
                     # this letter isn't anywhere
                     possible_denies.append(letter)
+                    emoji_str += "⬛"
                 elif tile == "correct":
                     # we found a letter!
                     actual_word[idx] = letter
                     game_state[idx]["answer"] = letter
                     correct_letters.append(letter)
+                    emoji_str += "🟩"
                 elif tile == "present":
                     # present somewhere but not where we are
                     present_letters.append(letter)
                     game_state[idx]["cannot"].append(letter)
+                    emoji_str += "🟨"
                 idx += 1
+            emoji_str += "\n"
 
             for letter in possible_denies:
                 if letter in present_letters:
@@ -256,14 +274,18 @@ class WordleSolver():
 
             if row == 5:
                 # we failed
-                print(f"We failed to do the wordle...")
+                self.logger.debug(f"We failed to do the wordle...")
                 break
             row += 1
 
-        # wait a bit of time before we grab the share thing
-        time.sleep(5)
-        share_text = self._get_wordle_share()
+        await asyncio.sleep(1)
+        guess_num = "X" if not solved else len(guesses)
+        share_text = (
+            f"Wordle {wordle_number} {guess_num}/6\n\n"
+            f"{emoji_str}"
+        )
 
+        self.logger.info(f"Got share text to be: {share_text}")
         self._terminate()
 
         data_class = WordleSolve(
@@ -274,7 +296,8 @@ class WordleSolver():
             actual_word,
             game_state,
             datetime.datetime.now(),
-            share_text
+            share_text,
+            int(wordle_number)
         )
 
         return data_class

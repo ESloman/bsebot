@@ -4,5 +4,4 @@ pymongo>=4.3.2
 xlsxwriter>=3.0.3
 py-cord[speed]>=2.3.1
 selenium>=4.7.2
-pyperclip>=1.8.2
 webdriver-manager>=3.8.5

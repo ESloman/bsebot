@@ -6,6 +6,12 @@ SLOMAN_SERVER_ID = 291508460519161856
 BSE_SERVER_ID = 181098823228063764
 BSE_BOT_ID = 809505325505576971
 
+# bots that aren't ours
+BOT_IDS = [
+    439103207210352650,  # patch bot
+    272937604339466240  # craig bot
+]
+
 MESSAGE_TYPES = [
     "message",
     "reply",
@@ -85,13 +91,13 @@ MESSAGE_VALUES = {
 }
 
 WORDLE_VALUES = {
-    6: 0,
-    5: 1,
-    4: 2,
-    3: 3,
-    2: 5,
-    1: 0,
-    "X": 0
+    6: 1,
+    5: 2,
+    4: 3,
+    3: 4,
+    2: 10,
+    1: 1,
+    "X": 1
 }
 
 BET_OUTCOME_COUNT_MODIFIER = {
@@ -154,3 +160,5 @@ AWS_GAME_SERVER_INSTANCE = "i-04bb3a992e54b1b6f"
 
 MONTHLY_AWARDS_PRIZE = 100
 ANNUAL_AWARDS_AWARD = 500
+
+WORDLE_REGEX = r"Wordle \d?\d\d\d [\dX]/\d\n\n"

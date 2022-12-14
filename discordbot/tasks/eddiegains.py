@@ -71,10 +71,10 @@ class EddieGainMessager(commands.Cog):
                 try:
                     user = await guild.fetch_member(int(user_id))  # type: discord.Member
                 except discord.NotFound:
-                    msg += f"\n- `{user_id}` :  **{value}**"
+                    msg += f"\n- `{user_id}` :  **{value}** (tax: _{tax}_)"
                     continue
 
-                msg += f"\n- `{user_id}` {user.display_name} :  **{value}**"
+                msg += f"\n- `{user_id}` {user.display_name} :  **{value}** (tax: _{tax}_)"
                 text = f"Your daily salary of BSEDDIES is `{value}` (after tax).\n"
 
                 if user_id == current_king_id:
@@ -86,6 +86,9 @@ class EddieGainMessager(commands.Cog):
 
                 for key in sorted(breakdown):
                     text += f"\n - `{HUMAN_MESSAGE_TYPES[key]}`  :  **{breakdown[key]}**"
+
+                    if key in ["vc_joined", "vc_streaming"]:
+                        text += " seconds"
 
                 self.logger.info(f"{user.display_name} is gaining `{value} eddies`")
 
@@ -285,10 +288,10 @@ class BSEddiesManager(object):
         count["daily"] = minimum
 
         if vc_total_time:
-            count["vc_joined"] = vc_total_time
+            count["vc_joined"] = int(vc_total_time)
 
         if stream_total_time:
-            count["vc_streaming"] = stream_total_time
+            count["vc_streaming"] = int(stream_total_time)
 
         return eddies_gained, count
 
@@ -349,7 +352,7 @@ class BSEddiesManager(object):
 
             try:
                 wordle_message = [w for w in user_results if "wordle" in w["message_type"]][0]
-                result = re.search(r"\d/\d", wordle_message["content"]).group()
+                result = re.search(r"[\dX]/\d", wordle_message["content"]).group()
                 guesses = result.split("/")[0]
 
                 if guesses != "X":
@@ -389,7 +392,7 @@ class BSEddiesManager(object):
         bot_guesses = 100  # arbitrarily high number
         if results:
             bot_message = results[0]
-            bot_result = re.search(r"\d/\d", bot_message["content"]).group()
+            bot_result = re.search(r"[\dX]/\d", bot_message["content"]).group()
             bot_guesses = bot_result.split("/")[0]
             if bot_guesses != "X":
                 bot_guesses = int(bot_guesses)
@@ -442,6 +445,7 @@ class BSEddiesManager(object):
             self.logger.info(f"{_user} gained {eddie_gain_dict[_user][0]}")
 
         eddie_gain_dict[current_king_id].append(tax_gains)
+        eddie_gain_dict[current_king_id][0] += tax_gains
 
         if real:
             self.user_points.increment_points(current_king_id, guild_id, eddie_gain_dict[current_king_id][0])

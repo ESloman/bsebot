@@ -27,12 +27,14 @@ from discordbot.slashcommandeventclasses import BSEddiesTransactionHistory, BSEd
 from discordbot.tasks.annualawards import AnnualBSEddiesAwards
 from discordbot.tasks.betcloser import BetCloser
 from discordbot.tasks.betreminder import BetReminder
+from discordbot.tasks.celebrations import Celebrations
 from discordbot.tasks.dailyvallytask import AfterWorkVally
 from discordbot.tasks.eddiegains import EddieGainMessager
 from discordbot.tasks.eddiekingtask import BSEddiesKingTask
 from discordbot.tasks.monthlyawards import MonthlyBSEddiesAwards
 from discordbot.tasks.revolutiontask import BSEddiesRevolutionTask
 from discordbot.tasks.threadmutetask import ThreadSpoilerTask
+from discordbot.tasks.wordlereminder import WordleReminder
 from discordbot.tasks.wordletask import WordleTask
 
 
@@ -133,9 +135,11 @@ class CommandManager(object):
         if BSE_SERVER_ID in self.guilds:
             self.thread_task = ThreadSpoilerTask(self.client, guilds, self.logger)
             self.vally_task = AfterWorkVally(self.client, guilds, self.logger)
-            self.wordle_task = WordleTask(self.client, guilds, self.logger)
             self.monthly_awards_task = MonthlyBSEddiesAwards(self.client, guilds, self.logger)
             self.annual_awards_task = AnnualBSEddiesAwards(self.client, guilds, self.logger)
+            self.wordle_task = WordleTask(self.client, guilds, self.logger)
+            self.wordle_reminder = WordleReminder(self.client, guilds, self.logger)
+            self.celebrations_task = Celebrations(self.client, guilds, self.logger)
 
         # call the methods that register the events we're listening for
         self._register_client_events()

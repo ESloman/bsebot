@@ -39,9 +39,12 @@ class AnnualBSEddiesAwards(commands.Cog):
 
         awards_builder = AwardsBuilder(self.bot, BSE_SERVER_ID, self.logger, True)
 
+        self.logger.debug("Calculating stats")
         stats, message = await awards_builder.build_stats_and_message()
+        self.logger.debug("Calculating awards")
         awards, bseddies_awards = await awards_builder.build_awards_and_message()
 
+        self.logger.debug("Logging to DB and sending messages")
         await awards_builder.send_stats_and_awards(
             stats, message,
             awards, bseddies_awards

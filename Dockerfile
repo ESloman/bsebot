@@ -5,8 +5,10 @@ ARG GIPHY_TOKEN
 ARG GIT_USER
 ARG GIT_PASS
 
-RUN apt-get update \
-    && apt-get install -yq tzdata nano \
+RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+    && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
+    && apt-get update \
+    && apt-get install -yq tzdata nano google-chrome-stable\
     && ln -fs /usr/share/zoneinfo/Europe/London /etc/localtime \
     && dpkg-reconfigure -f noninteractive tzdata
 
@@ -21,13 +23,7 @@ RUN cd /home/app \
 
 ENV PYTHONPATH=/home/app/
 
-RUN pip install cython \
-    && pip install cchardet \
-    && git clone https://github.com/Pycord-Development/pycord \
-    && cd pycord \
-    && pip install -U .[speed] \
-    && cd .. \
-    && pip install -r home/app/requirements.txt \
+RUN pip install -r home/app/requirements.txt \
     && touch /home/app/discordbot/.env \
     && echo "DEBUG_MODE=0" >> /home/app/discordbot/.env \
     && echo "DISCORD_TOKEN=${DISCORD_TOKEN}" >> /home/app/discordbot/.env \

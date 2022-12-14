@@ -225,6 +225,7 @@ class StatsGatherer:
 
         data_class.messages = channels[busiest]["count"]
         data_class.users = len(channels[busiest]["users"])
+        data_class.channels = channels
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -268,6 +269,7 @@ class StatsGatherer:
         )
         data_class.messages = threads[busiest]["count"]
         data_class.users = len(threads[busiest]["users"])
+        data_class.threads = threads
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -366,6 +368,7 @@ class StatsGatherer:
 
         data_class.messages = channels[quietest]["count"]
         data_class.users = len(channels[quietest]["users"])
+        data_class.channels = channels
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -409,6 +412,7 @@ class StatsGatherer:
         )
         data_class.messages = threads[quietest]["count"]
         data_class.users = len(threads[quietest]["users"])
+        data_class.threads = threads
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -539,7 +543,7 @@ class StatsGatherer:
             if wordle["user_id"] == BSE_BOT_ID:
                 continue
 
-            result = re.search(r"\d/\d", wordle["content"]).group()
+            result = re.search(r"[\dX]/\d", wordle["content"]).group()
             guesses = result.split("/")[0]
 
             if guesses == "X":
@@ -737,6 +741,7 @@ class StatsGatherer:
         )
 
         data_class.users = len(channels[vc_most_time]["users"])
+        data_class.channels = channels
         data_class.time = int(channels[vc_most_time]["count"])
 
         data_class = self.add_annual_changes(start, data_class)
@@ -781,6 +786,7 @@ class StatsGatherer:
             annual=self.annual
         )
         data_class.time = int(channels[vc_most_users]["count"])
+        data_class.channels = channels
         data_class.users = len(channels[vc_most_users]["users"])
 
         data_class = self.add_annual_changes(start, data_class)
@@ -840,6 +846,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.emojis = emoji_count
         data_class.count = emoji_count[most_used_emoji]
         data_class.emoji_id = emoji_id
 
@@ -878,6 +885,37 @@ class StatsGatherer:
         )
 
         data_class.threads = [thread["thread_id"] for thread in created_threads]
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
+
+    def emojis_created(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """
+        Gets all emojis created during the given time frame
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: the emojis created stat
+        """
+        all_server_emojis = self.cache.server_emojis.get_all_emojis(guild_id)
+        created = [e for e in all_server_emojis if start < e["created"] < end]
+
+        data_class = Stat(
+            type="stat",
+            guild_id=guild_id,
+            stat=StatTypes.EMOJIS_CREATED,
+            month=start.strftime("%b %y"),
+            value=len(created),
+            timestamp=datetime.datetime.now(),
+            short_name="emojis_created",
+            annual=self.annual
+        )
+
+        data_class.emoji_ids = [e["eid"] for e in created]
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -947,6 +985,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.message_users = message_users
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -987,6 +1026,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.message_users = message_users
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1027,6 +1067,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.message_users = message_users
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1097,7 +1138,7 @@ class StatsGatherer:
             if uid not in wordle_count:
                 wordle_count[uid] = []
 
-            result = re.search(r"\d/\d", wordle["content"]).group()
+            result = re.search(r"[\dX]/\d", wordle["content"]).group()
             guesses = result.split("/")[0]
 
             if guesses == "X":
@@ -1137,6 +1178,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.wordle_avgs = wordle_avgs
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1177,6 +1219,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.twitter_addict = tweet_users
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1218,6 +1261,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.masturbators = jerk_off_users
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1258,6 +1302,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.reactees = reaction_users
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1300,6 +1345,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.reaction_users = reaction_users
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1349,6 +1395,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        replier_data_class.repliers = replies
         replier_data_class = self.add_annual_changes(start, replier_data_class)
 
         conversation_data_class = Stat(
@@ -1364,9 +1411,208 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        conversation_data_class.repliees = replied_to
         conversation_data_class = self.add_annual_changes(start, conversation_data_class)
 
         return replier_data_class, conversation_data_class
+
+    def most_edited_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """Calculates the user who's edited the most messages this period
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: the stat object
+        """
+
+        edited_messages = self.cache.get_edited_messages(guild_id, start, end)
+        message_users = {}
+        for message in edited_messages:
+            uid = message["user_id"]
+            if uid == BSE_BOT_ID:
+                continue
+            if uid not in message_users:
+                message_users[uid] = {"count": 0, "messages": 0}
+            message_users[uid]["count"] += message["edit_count"]
+            message_users[uid]["messages"] += 1
+        fattest_fingers = sorted(message_users, key=lambda x: message_users[x]["count"], reverse=True)[0]
+
+        data_class = Stat(
+            type="award",
+            guild_id=guild_id,
+            user_id=fattest_fingers,
+            award=AwardsTypes.FAT_FINGERS,
+            month=start.strftime("%b %y"),
+            value=message_users[fattest_fingers]["count"],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="most_messages_edited",
+            annual=self.annual
+        )
+
+        data_class.message_users = message_users
+        data_class.message_count = message_users[fattest_fingers]["messages"]
+
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
+
+    def most_swears(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """Calculates who swore the most during the given time period
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: the most swears stat
+        """
+
+        swears = ["fuck", "shit", "cunt", "piss", "cock", "bollock", "dick", "twat"]
+        all_messages = self.cache.get_messages(guild_id, start, end)
+
+        swear_dict = {}
+        for message in all_messages:
+            uid = message["user_id"]
+            content = message.get("content")
+            if content is None or content is False:
+                continue
+
+            if uid not in swear_dict:
+                swear_dict[uid] = 0
+            swear_count = 0
+            for swear in swears:
+                swear_count += content.count(swear)
+            swear_dict[uid] += swear_count
+        most_swears = sorted(swear_dict, key=lambda x: swear_dict[x], reverse=True)[0]
+
+        data_class = Stat(
+            type="award",
+            guild_id=guild_id,
+            user_id=most_swears,
+            award=AwardsTypes.POTTY_MOUTH,
+            month=start.strftime("%b %y"),
+            value=swear_dict[most_swears],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="most_swears",
+            annual=self.annual
+        )
+        data_class.swears = swear_dict
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
+
+    def most_messages_to_a_single_channel(
+        self,
+        guild_id: int,
+        start: datetime.datetime,
+        end: datetime.datetime
+    ) -> Stat:
+        """Calculates the user who sent most of their messages to one channel
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: the stat
+        """
+        messages = self.cache.get_messages(guild_id, start, end)
+
+        users = {}
+        for message in messages:
+            user_id = message["user_id"]
+            channel_id = message["channel_id"]
+
+            if user_id not in users:
+                users[user_id] = {"total": 0}
+            if channel_id not in users[user_id]:
+                users[user_id][channel_id] = 0
+
+            users[user_id][channel_id] += 1
+            users[user_id]["total"] += 1
+
+        # calc highest percentage
+        for user in users:
+            u_dict = users[user]
+            total = u_dict.pop("total")
+            top_channel_id = sorted(u_dict, key=lambda x: u_dict[x], reverse=True)[0]
+            percentage = (u_dict[top_channel_id] / total) * 100
+            u_dict["total"] = total
+            u_dict["percentage"] = percentage
+            u_dict["channel"] = top_channel_id
+
+        # sort the percentages
+        top = sorted(users, key=lambda x: users[x]["percentage"], reverse=True)[0]
+
+        data_class = Stat(
+            type="award",
+            guild_id=guild_id,
+            user_id=top,
+            award=AwardsTypes.SINGLE_MINDED,
+            month=start.strftime("%b %y"),
+            value=users[top]["percentage"],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="single_minded",
+            annual=self.annual
+        )
+        data_class.users = users
+        data_class.channel = users[top]["channel"]
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
+
+    def most_messages_to_most_channels(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """Calculates the user who sent most of their messages to the most diverse channels
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: the stat
+        """
+        messages = self.cache.get_messages(guild_id, start, end)
+
+        users = {}
+        for message in messages:
+            user_id = message["user_id"]
+            channel_id = message["channel_id"]
+
+            if user_id not in users:
+                users[user_id] = {"channels": [], "messages": 0}
+            if channel_id not in users[user_id]["channels"]:
+                users[user_id]["channels"].append(channel_id)
+            users[user_id]["messages"] += 1
+
+        # sort the channels
+        top = sorted(users, key=lambda x: len(users[x]["channels"]), reverse=True)[0]
+
+        data_class = Stat(
+            type="award",
+            guild_id=guild_id,
+            user_id=top,
+            award=AwardsTypes.DIVERSE_PORTFOLIO,
+            month=start.strftime("%b %y"),
+            value=len(users[top]["channels"]),
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="diverse_portfolio",
+            annual=self.annual
+        )
+        data_class.users = users
+        data_class.messages = users[top]["messages"]
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
 
     # bets
     def most_bets_created(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
@@ -1403,6 +1649,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.bookies = bet_users
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1444,6 +1691,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.betters = bet_users
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1485,6 +1733,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.bet_winners = bet_users
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1552,6 +1801,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.kings = kings
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1597,6 +1847,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.users = user_dict
         data_class.channels = len(user_dict[big_gamer]["channels"])
         data_class = self.add_annual_changes(start, data_class)
 
@@ -1642,6 +1893,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.users = user_dict
         data_class.channels = len(user_dict[big_streamer]["channels"])
         data_class = self.add_annual_changes(start, data_class)
 

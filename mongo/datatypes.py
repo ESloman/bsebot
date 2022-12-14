@@ -1,6 +1,11 @@
 
 import datetime
-from typing import NotRequired, TypedDict, Union
+from typing import TypedDict, Union
+try:
+    from typing import NotRequired
+except ImportError:
+    from typing import Optional
+    NotRequired = Optional
 
 from bson import ObjectId
 
@@ -156,6 +161,12 @@ class Message(TypedDict):
     """List of replies"""
     is_thread: NotRequired[bool]
     """Whether the message happened in a thread or not"""
+    content_old: list[str]
+    """The list of previous message contents"""
+    edit_count: int
+    """Number of edits made to this message"""
+    edited_at: datetime.datetime
+    """When this message was last edited"""
 
 
 class VCInteraction(Message):

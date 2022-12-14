@@ -1,9 +1,11 @@
+import random
 import re
 from typing import Optional
 
 import discord
 
 from discordbot.baseeventclass import BaseEvent
+from discordbot.constants import WORDLE_REGEX
 from mongo.bsepoints import UserInteractions
 
 
@@ -16,6 +18,65 @@ class OnMessage(BaseEvent):
         super().__init__(client, guild_ids, logger)
         self.user_interactions = UserInteractions()
 
+    async def _handle_bot_reply(self, message: discord.Message) -> None:
+        """Sends a basic reply message if a message meets the requirements
+
+        Args:
+            message (discord.Message): the discord message object
+        """
+        _thank_you_terms = [
+            "thank you", "thanks", "ty", "cutie", "i love you",
+        ]
+        _bot_thanks = [
+            "thank you bot", "thank you bsebot",
+            "thanks bot", "thanks bsebot",
+            "ty bot", "ty bsebot"
+        ]
+
+        _possible_replies = [
+            "You are most welcome.",
+            "Your praise means everything to me.",
+            "I exist to serve.",
+            "Thank you ❤️",
+            "🥰",
+            "❤️",
+            "😍",
+            "You're welcome!",
+            "Anytime cute stuff.",
+            "No worries!",
+            "I am happy to assist.",
+            "I am happy that you're happy!",
+            "https://media.giphy.com/media/tXTqLBYNf0N7W/giphy.gif",
+            "https://media.giphy.com/media/l41lY4I8lZXH0vIe4/giphy.gif",
+            "https://media.giphy.com/media/1qfb3aFqldWklPQwS3/giphy.gif",
+            "https://media.giphy.com/media/e5nATuISYAZ4Q/giphy.gif",
+            "https://media.giphy.com/media/xT0Cyhi8GCSU91PvtC/giphy.gif",
+        ]
+
+        send_message = False
+        if message.mentions:
+            mentions = [m.id for m in message.mentions if m.id == self.client.user.id]
+            if mentions:
+                if any([re.match(rf"\b{a}\b", message.content.lower()) for a in _thank_you_terms]):
+                    # yes! send message
+                    send_message = True
+        elif any([re.match(rf"\b{a}\b", message.content.lower()) for a in _bot_thanks]):
+            send_message = True
+        elif message.reference:
+            _reply = message.reference.cached_message
+            if not _reply:
+                channel = await self.client.fetch_channel(message.reference.channel_id)
+                _reply = await channel.fetch_message(message.reference.message_id)
+            if _reply.author.id == self.client.user.id:
+                # we sent this message!
+                if any([re.match(rf"\b{a}\b", message.content.lower()) for a in _thank_you_terms]):
+                    # yes! send message
+                    send_message = True
+        if not send_message:
+            return
+
+        await message.reply(content=random.choice(_possible_replies))
+
     async def message_received(self, message: discord.Message, message_type_only=False) -> Optional[list]:
         """
         Main method for handling when we receive a message.
@@ -26,7 +87,13 @@ class OnMessage(BaseEvent):
         :return:
         """
 
-        guild_id = message.guild.id
+        try:
+            guild_id = message.guild.id
+        except AttributeError:
+            # no guild id?
+            channel = await self.client.fetch_channel(message.channel.id)
+            guild_id = channel.guild.id
+
         user_id = message.author.id
         channel_id = message.channel.id
         message_content = message.content
@@ -120,7 +187,7 @@ class OnMessage(BaseEvent):
 
         message_type.append("message")
 
-        if re.match(r"Wordle \d?\d\d\d \d/\d\n\n", message.content):
+        if re.match(WORDLE_REGEX, message.content):
             message_type.append("wordle")
 
         if emojis := re.findall(r"<:[a-zA-Z_0-9]*:\d*>", message.content):
@@ -160,5 +227,12 @@ class OnMessage(BaseEvent):
             is_thread=is_thread,
             is_vc=is_vc
         )
+
+        try:
+            if message.mentions or "thank" in message.content.lower() or "ty" in message.content.lower():
+                if not message.author.id == self.client.user.id:
+                    await self._handle_bot_reply(message)
+        except Exception as e:
+            self.logger.debug(f"Something went wrong processing a possible bot reply: {e}")
 
         return message_type

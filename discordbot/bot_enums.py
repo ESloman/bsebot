@@ -103,6 +103,10 @@ class AwardsTypes(IntEnum):
     GUILD_OWNER_AWARD = 17
     SERIAL_REPLIER = 18
     CONVERSATION_STARTER = 19
+    FAT_FINGERS = 20
+    POTTY_MOUTH = 21
+    SINGLE_MINDED = 22
+    DIVERSE_PORTFOLIO = 23
 
 
 class StatTypes(IntEnum):
@@ -127,3 +131,4 @@ class StatTypes(IntEnum):
     QUIETEST_CHANNEL = 19
     QUIETEST_THREAD = 20
     QUIETEST_DAY = 21
+    EMOJIS_CREATED = 22

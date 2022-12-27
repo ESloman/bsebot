@@ -10,7 +10,7 @@ from mongo.datatypes import Activity, Bet, Emoji, Message, Reaction, Transaction
 
 
 class StatsDataCache:
-    def __init__(self, annual: bool = False) -> None:
+    def __init__(self, annual: bool = False, uid: int = None) -> None:
         self.user_bets = UserBets()
         self.user_interactions = UserInteractions()
         self.user_points = UserPoints()
@@ -21,7 +21,7 @@ class StatsDataCache:
 
         self.__start_cache = None  # type: Optional[datetime.datetime]
         self.__end_cache = None  # type: Optional[datetime.datetime]
-        self.__user_id_cache = None  # type: Optional[int]
+        self.__user_id_cache = uid  # type: Optional[int]
 
         self.__message_cache = []  # type: List[Message]
         self.__message_cache_time = None  # type: Optional[datetime.datetime]
@@ -74,17 +74,17 @@ class StatsDataCache:
         if self.__message_cache and (now - self.__message_cache_time).total_seconds() < 3600:
             return self.__message_cache
 
-        limit = 100000
-
-        self.__message_cache = self.user_interactions.query(
+        self.__message_cache = self.user_interactions._paginated_query(
             {
                 "guild_id": guild_id,
                 "timestamp": {"$gt": start, "$lt": end},
                 "message_type": {"$nin": ["emoji_used", "vc_joined", "vc_streaming"]},
                 "user_id": {"$nin": BOT_IDS}
-            },
-            limit=limit
+            }
         )
+
+        if self.__user_id_cache:
+            self.__message_cache = [m for m in self.__message_cache if m["user_id"] == self.__user_id_cache]
 
         self.__message_cache_time = now
         return self.__message_cache
@@ -109,17 +109,18 @@ class StatsDataCache:
         if self.__edit_cache and (now - self.__edit_cache_time).total_seconds() < 3600:
             return self.__edit_cache
 
-        limit = 2000
-        self.__edit_cache = self.user_interactions.query(
+        self.__edit_cache = self.user_interactions._paginated_query(
             {
                 "guild_id": guild_id,
                 "edited": {"$gt": start, "$lt": end},
                 "edit_count": {"$gte": 1},
                 "message_type": {"$nin": ["emoji_used", "vc_joined", "vc_streaming"]},
                 "user_id": {"$nin": BOT_IDS}
-            },
-            limit=limit
+            }
         )
+
+        if self.__user_id_cache:
+            self.__edit_cache = [m for m in self.__edit_cache if m["user_id"] == self.__user_id_cache]
 
         self.__edit_cache_time = now
         return self.__edit_cache
@@ -149,16 +150,16 @@ class StatsDataCache:
         if self.__vc_cache and (now - self.__vc_cache_time).total_seconds() < 3600:
             return self.__vc_cache
 
-        limit = 100000 if self.annual else 10000
-
-        self.__vc_cache = self.user_interactions.query(
+        self.__vc_cache = self.user_interactions._paginated_query(
             {
                 "guild_id": guild_id,
                 "timestamp": {"$gt": start, "$lt": end},
                 "message_type": "vc_joined"
-            },
-            limit=limit
+            }
         )
+
+        if self.__user_id_cache:
+            self.__vc_cache = [m for m in self.__vc_cache if m["user_id"] == self.__user_id_cache]
 
         self.__vc_cache_time = now
         return self.__vc_cache
@@ -242,6 +243,8 @@ class StatsDataCache:
             for _trans in transactions:
                 _trans["uid"] = user["uid"]
             transaction_history.extend(transactions)
+        if self.__user_id_cache:
+            transaction_history = [t for t in transaction_history if t["uid"] == self.__user_id_cache]
         self.__transaction_cache = transaction_history
         self.__transaction_cache_time = now
         return self.__transaction_cache
@@ -297,15 +300,13 @@ class StatsDataCache:
         if self.__reactions_cache and (now - self.__reactions_cache_time).total_seconds() < 3600:
             return self.__reactions_cache
 
-        limit = 100000 if self.annual else 10000
-
-        self.__reactions_cache = self.user_interactions.query(
+        self.__reactions_cache = self.user_interactions._paginated_query(
             {
                 "guild_id": guild_id,
                 "reactions.timestamp": {"$gt": start, "$lt": end}
-            },
-            limit=limit
+            }
         )
+
         self.__reactions_cache_time = now
         return self.__reactions_cache
 
@@ -369,7 +370,7 @@ class StatsDataCache:
         if self.__reply_cache and (now - self.__reply_cache_time).total_seconds() < 3600:
             return self.__reply_cache
 
-        self.__reply_cache = self.user_interactions.query({
+        self.__reply_cache = self.user_interactions._paginated_query({
             "guild_id": guild_id,
             "replies.timestamp": {"$gt": start, "$lt": end}
         })

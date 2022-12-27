@@ -8,6 +8,7 @@ from discordbot.constants import BSE_SERVER_ID, JERK_OFF_CHAT
 from discordbot.slashcommandeventclasses import BSEddies
 from discordbot.stats.statsclasses import StatsGatherer
 from discordbot.stats.statsdatacache import StatsDataCache
+from discordbot.views.wrapped import WrappedView
 
 
 class BSEddiesStats(BSEddies):
@@ -50,7 +51,9 @@ class BSEddiesStats(BSEddies):
             f"<@!{uid}>'s **BSEWrapped _2022_**:\n\n"
             f"{replay_message}"
         )
-        await ctx.followup.send(content=replay_message, ephemeral=True)
+
+        wrapped_view = WrappedView()
+        await ctx.followup.send(content=replay_message, view=wrapped_view, ephemeral=True)
 
     async def stats(
         self,

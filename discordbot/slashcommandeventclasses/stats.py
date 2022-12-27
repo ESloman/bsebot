@@ -45,20 +45,27 @@ class BSEddiesStats(BSEddies):
         end = start.replace(month=1, year=year + 1)
 
         uid = ctx.author.id
-        replay_message = await self.stats(uid, start, end)
+        replay_message = await self.stats(uid, start, end, ctx.guild)
         replay_message = (
             f"<@!{uid}>'s **BSEWrapped _2022_**:\n\n"
             f"{replay_message}"
         )
         await ctx.followup.send(content=replay_message, ephemeral=True)
 
-    async def stats(self, user_id: int, start: datetime.datetime, end: datetime.datetime) -> None:
+    async def stats(
+        self,
+        user_id: int,
+        start: datetime.datetime,
+        end: datetime.datetime,
+        guild: discord.Guild
+    ) -> None:
         """
         Command for handling gathering stats for various Stats commands (/stats and /replayXXXX)
 
         :param user_id: the user ID to get stats for
         :param start: the start date for stats
         :param end: the end date for stats
+        :param guild: the guild object
         :return:
         """
         stats_gatherer = StatsGatherer(self.logger, True)
@@ -87,6 +94,7 @@ class BSEddiesStats(BSEddies):
         most_swears = stats_gatherer.most_swears(*args)
         diverse_portfolio = stats_gatherer.most_messages_to_most_channels(*args)
         busiest_day = stats_gatherer.busiest_day(*args)
+        most_used_emoji = stats_gatherer.most_popular_server_emoji(*args, user_id)
 
         _chan = sorted(
             diverse_portfolio.users[user_id]["channels"],
@@ -115,6 +123,11 @@ class BSEddiesStats(BSEddies):
             _least_fav_text = f"<#{_least_fav_chan}>"
 
         busiest_day_format = busiest_day.value.strftime("%a %d %b")
+
+        try:
+            emoji_obj = await guild.fetch_emoji(most_used_emoji.emoji_id)
+        except Exception:
+            emoji_obj = most_used_emoji.emoji_id
 
         message = (
             f"Messages sent: `{most_messages.value}` "
@@ -150,6 +163,8 @@ class BSEddiesStats(BSEddies):
             f"Number of edits: `{fattest_fingers.value}`\n"
 
             f"Number of swears: `{most_swears.value}`\n"
+
+            f"Your favourite server emoji: {emoji_obj} (`{most_used_emoji.count}`)\n"
 
             f"Time spent in VCs: `{str(datetime.timedelta(seconds=_vc_time))}`\n"
 

@@ -6,7 +6,7 @@ from typing import List, Optional  # noqa: F401
 from discordbot.constants import BOT_IDS
 from mongo.bsedataclasses import SpoilerThreads
 from mongo.bsepoints import ServerEmojis, UserBets, UserInteractions, UserPoints
-from mongo.datatypes import Activity, Bet, Emoji, Message, Reaction, Transaction, User, VCInteraction
+from mongo.datatypes import Activity, Bet, Emoji, Message, Transaction, User, VCInteraction
 
 
 class StatsDataCache:
@@ -41,7 +41,7 @@ class StatsDataCache:
         self.__activity_cache = []  # type: List[Activity]
         self.__activity_cache_time = None  # type: Optional[datetime.datetime]
 
-        self.__reactions_cache = []  # type: List[Reaction]
+        self.__reactions_cache = []  # type: List[Message]
         self.__reactions_cache_time = None  # type: Optional[datetime.datetime]
 
         self.__emoji_cache = []  # type: List[Emoji]
@@ -280,7 +280,7 @@ class StatsDataCache:
         self.__activity_cache_time = now
         return self.__activity_cache
 
-    def get_reactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[Reaction]:
+    def get_reactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[Message]:
         """Internal method to query for messages between a certain date
         Will cache the messages on first parse and return the cache if cache was set less than an hour ago
 

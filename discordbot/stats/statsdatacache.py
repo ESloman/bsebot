@@ -280,7 +280,7 @@ class StatsDataCache:
         self.__activity_cache_time = now
         return self.__activity_cache
 
-    def get_reactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[Reaction]:
+    def get_reactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> List[Message]:
         """Internal method to query for messages between a certain date
         Will cache the messages on first parse and return the cache if cache was set less than an hour ago
 

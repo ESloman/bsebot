@@ -539,15 +539,6 @@ class CommandManager(object):
             """
             await self.bseddies_tax_rate.create_tax_view(ctx)
 
-        @self.client.command(description="See your server stats")
-        async def stats(ctx: discord.ApplicationContext):
-            """
-
-            Args:
-                ctx (discord.ApplicationContext): _description_
-            """
-            await self.bseddies_stats.create_stats_view(ctx)
-
         @self.client.command(description="See your 2022 replay")
         async def replay22(ctx: discord.ApplicationContext):
             """_summary_

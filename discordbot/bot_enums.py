@@ -76,6 +76,7 @@ class ActivityTypes(IntEnum):
     BSEDDIES_ACTUAL_SET_TAX_RATE = 32
     BSEDDIES_BET_CANCEL = 33
     STATS = 34
+    REPLAY22 = 35
 
 
 class AwardsTypes(IntEnum):

@@ -1588,10 +1588,11 @@ class StatsGatherer:
             channel_id = message["channel_id"]
 
             if user_id not in users:
-                users[user_id] = {"channels": [], "messages": 0}
+                users[user_id] = {"channels": {}, "messages": 0}
             if channel_id not in users[user_id]["channels"]:
-                users[user_id]["channels"].append(channel_id)
+                users[user_id]["channels"][channel_id] = 0
             users[user_id]["messages"] += 1
+            users[user_id]["channels"][channel_id] += 1
 
         # sort the channels
         top = sorted(users, key=lambda x: len(users[x]["channels"]), reverse=True)[0]

@@ -18,16 +18,7 @@ class BSEddiesStats(BSEddies):
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
 
-    async def stats(self, ctx: discord.ApplicationContext) -> None:
-        """
-        Basic view method for handling view slash commands.
-
-        Sends an ephemeral message to the user with their total eddies and any "pending" eddies they
-        have tied up in bets.
-
-        :param ctx:
-        :return:
-        """
+    async def create_stats_view(self, ctx: discord.ApplicationContext) -> None:
         if not await self._handle_validation(ctx):
             return
 
@@ -35,17 +26,41 @@ class BSEddiesStats(BSEddies):
 
         self._add_event_type_to_activity_history(ctx.author, ctx.guild_id, ActivityTypes.STATS)
 
+    async def replay(self, ctx: discord.ApplicationContext, year: int) -> None:
+        """Generates a replay message and stats and sends that to the given user
+
+        Args:
+            ctx (discord.ApplicationContext): the application command context
+            year (int): the year to generate the replay for
+        """
+        if not await self._handle_validation(ctx):
+            return
+
+        await ctx.defer(ephemeral=True)
+
+        self._add_event_type_to_activity_history(ctx.author, ctx.guild_id, ActivityTypes.REPLAY22)
+
         now = datetime.datetime.now()
+        start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=1, year=year, month=1)
+        end = start.replace(month=1, year=year + 1)
+        replay_message = await self.stats(ctx.author.id, start, end)
+        replay_message = (
+            "Your **BSE REPLAY22**:\n\n"
+            f"{replay_message}"
+        )
+        await ctx.followup.send(content=replay_message, ephemeral=True)
 
-        start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=1, year=2022, month=1)
-        if start.month == 12:
-            new_month = 1
-        else:
-            new_month = start.month + 1
-        end = start.replace(month=1, year=2023)
+    async def stats(self, user_id: int, start: datetime.datetime, end: datetime.datetime) -> None:
+        """
+        Command for handling gathering stats for various Stats commands (/stats and /replayXXXX)
 
+        :param user_id: the user ID to get stats for
+        :param start: the start date for stats
+        :param end: the end date for stats
+        :return:
+        """
         stats_gatherer = StatsGatherer(self.logger, True)
-        cache = StatsDataCache(uid=ctx.author.id)
+        cache = StatsDataCache(uid=user_id)
 
         # set the gatherer's cache to one that limits to UID
         stats_gatherer.cache = cache
@@ -58,6 +73,7 @@ class BSEddiesStats(BSEddies):
         most_bets = stats_gatherer.most_bets_created(*args)
         most_eddies_placed = stats_gatherer.most_eddies_bet(*args)
         most_eddies_won = stats_gatherer.most_eddies_won(*args)
+        time_king = stats_gatherer.most_time_king(*args)
         twitter_addict = stats_gatherer.twitter_addict(*args)
         jerk_off_king = stats_gatherer.jerk_off_contributor(*args)
         big_memer = stats_gatherer.big_memer(*args)
@@ -69,19 +85,34 @@ class BSEddiesStats(BSEddies):
         most_swears = stats_gatherer.most_swears(*args)
         diverse_portfolio = stats_gatherer.most_messages_to_most_channels(*args)
 
+        _chan = sorted(
+            diverse_portfolio.users[user_id]["channels"],
+            key=lambda x: diverse_portfolio.users[user_id]["channels"][x], reverse=True
+        )[0]
+        _perc = diverse_portfolio.users[user_id]["channels"][_chan] / most_messages.value
+
         message = (
             f"Messages sent: `{most_messages.value}`\n"
+            f"Number of channels and threads participated in: `{diverse_portfolio.value}`\n"
+            f"Favourite channel: {_chan} ({f'{_perc}%'} of messages "
+            f"(`{diverse_portfolio.users[user_id]['channels'][_chan]}`) sent)\n"
             f"Your longest message: `{longest_message.value}`\n"
             f"Your wordle average: `{best_wordle.value}`\n"
             f"Number of twitter links shared: `{twitter_addict.value}`\n"
             f"Number of jerk-off-chat contribs: `{jerk_off_king.value}`\n"
-            f"Reactions received: `{big_memer.reactees[ctx.author.id]}`\n"
-            f"Reactions given: `{react_king.reaction_users[ctx.author.id]}`\n"
-            f"Replies received: `{conversation_starter.repliees[ctx.author.id]}`\n"
-            f"Replies given: `{serial_replier.repliers[ctx.author.id]}`\n"
+            f"Reactions received: `{big_memer.reactees[user_id]}`\n"
+            f"Reactions given: `{react_king.reaction_users[user_id]}`\n"
+            f"Replies received: `{conversation_starter.repliees[user_id]}`\n"
+            f"Replies given: `{serial_replier.repliers[user_id]}`\n"
             f"Number of edits: `{fattest_fingers.value}`\n"
             f"Number of swears: `{most_swears.value}`\n"
-            f"Number of channels: `{diverse_portfolio.value}`\n"
+            f"Time spent in VCs: `{str(datetime.timedelta(seconds=int(big_gamer.users[user_id]['count'])))}`\n"
+            "Time spent streaming: "
+            f"`{str(datetime.timedelta(seconds=int(big_streamer.users[user_id]['count'])))}`\n"
+            f"Time spent king: `{str(datetime.timedelta(seconds=int(time_king.kings[user_id])))}`\n"
+            f"Bets created: `{most_bets.bookies[user_id]}`\n"
+            f"Eddies placed on bets: `{most_eddies_placed.betters[user_id]}`\n"
+            f"Eddies won: `{most_eddies_won.bet_winners[user_id]}`"
         )
 
-        await ctx.followup.send(content=message, ephemeral=True)
+        return message

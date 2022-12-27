@@ -174,7 +174,7 @@ def query(
         projection: Union[dict, None] = None,
         as_gen: bool = True,
         skip: int = None
-    ) -> Union[list, Cursor]:
+) -> Union[list, Cursor]:
     """
     Searches a collection for documents based on given parameters.
     Parameters should be dictionaries : {key : search}. Where key is an existing key in the collection and

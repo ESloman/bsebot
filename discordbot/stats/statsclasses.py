@@ -793,13 +793,20 @@ class StatsGatherer:
 
         return data_class
 
-    def most_popular_server_emoji(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def most_popular_server_emoji(
+        self,
+        guild_id: int,
+        start: datetime.datetime,
+        end: datetime.datetime,
+        uid: int = None
+    ) -> Stat:
         """Calculates the most popular server emoji for the given time frame
 
         Args:
             guild_id (int): the guild ID to query for
             start (datetime.datetime): beginning of time period
             end (datetime.datetime): end of time period
+            uid (int): optional - filter reacts to a particular user
 
         Returns:
             Stat: the ServerEmoji data class
@@ -810,6 +817,9 @@ class StatsGatherer:
 
         reactions = []
         for react in reaction_messages:
+            if uid and react["user_id"] != uid:
+                # continue if we don't match given user
+                continue
             reactions.extend(react["reactions"])
 
         all_emojis = self.cache.get_emojis(guild_id, start, end)
@@ -831,9 +841,14 @@ class StatsGatherer:
                         emoji_count[emoji_name] = 0
                     emoji_count[emoji_name] += len(emojis)
 
-        most_used_emoji = sorted(emoji_count, key=lambda x: emoji_count[x], reverse=True)[0]
+        try:
+            most_used_emoji = sorted(emoji_count, key=lambda x: emoji_count[x], reverse=True)[0]
 
-        emoji_id = [emoji["eid"] for emoji in all_emojis if emoji["name"] == most_used_emoji][0]
+            emoji_id = [emoji["eid"] for emoji in all_emojis if emoji["name"] == most_used_emoji][0]
+        except IndexError:
+            most_used_emoji = 0
+            emoji_id = None
+            emoji_count[0] = None
 
         data_class = Stat(
             type="stat",

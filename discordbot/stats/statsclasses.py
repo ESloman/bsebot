@@ -817,10 +817,14 @@ class StatsGatherer:
 
         reactions = []
         for react in reaction_messages:
-            if uid and react["user_id"] != uid:
-                # continue if we don't match given user
-                continue
-            reactions.extend(react["reactions"])
+            if uid:
+                # filter the reactions to our uid
+                _reactions = [r for r in react["reactions"] if r["user_id"] == uid]
+                if not _reactions:
+                    continue
+            else:
+                _reactions = react["reactions"]
+            reactions.extend(_reactions)
 
         all_emojis = self.cache.get_emojis(guild_id, start, end)
         all_emoji_names = [emoji["name"] for emoji in all_emojis]

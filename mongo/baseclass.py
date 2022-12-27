@@ -87,7 +87,9 @@ class BaseClass(object):
             parameters: dict,
             limit: int = 1000,
             projection: dict = None,
-            as_gen: bool = False) -> Union[list, Cursor]:
+            as_gen: bool = False,
+            skip: int = None
+    ) -> Union[list, Cursor]:
         """
         Searches a collection for documents based on given parameters.
         Parameters should be dictionaries : {key : search}. Where key is an existing key in the collection and
@@ -106,11 +108,12 @@ class BaseClass(object):
             limit : max number of results to return
             projection : dict of keys to return for each result
             as_gen : True returns generator (mongoDB cursor obj) and false returns list of results
+            skip: number of items to skip at the start of the result set
         Returns a generator (cursor obj) if as_gen else returns a list of results
         """
         if self.vault is None:
             raise NoVaultError("No vault instantiated.")
-        return interface.query(self.vault, parameters, limit, projection, as_gen)
+        return interface.query(self.vault, parameters, limit, projection, as_gen, skip=skip)
 
     def get_collection_names(self) -> Union[None, list]:
         """

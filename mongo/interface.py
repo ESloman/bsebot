@@ -172,7 +172,9 @@ def query(
         parameters: dict,
         lim: int = 10000,
         projection: Union[dict, None] = None,
-        as_gen: bool = True) -> Union[list, Cursor]:
+        as_gen: bool = True,
+        skip: int = None
+) -> Union[list, Cursor]:
     """
     Searches a collection for documents based on given parameters.
     Parameters should be dictionaries : {key : search}. Where key is an existing key in the collection and
@@ -194,7 +196,9 @@ def query(
         as_gen : True returns generator (mongoDB cursor obj) and false returns list of results
     Returns a generator (cursor obj) if as_gen else returns a list of results
     """
-    results = collection.find(parameters, limit=lim, projection=projection)
+    if skip is None:
+        skip = 0
+    results = collection.find(parameters, limit=lim, projection=projection, skip=skip)
     return results if as_gen else list(results)
 
 

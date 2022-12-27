@@ -209,39 +209,12 @@ class AwardsBuilder:
         diverse_portfolio = self.stats.most_messages_to_most_channels(*args)
 
         awards = [
-            most_messages,
-            least_messages,
-            longest_message,
-            best_wordle,
-            most_bets,
-            most_eddies_placed,
-            most_eddies_won,
-            longest_king,
-            twitter_addict,
-            jerk_off_king,
-            big_memer,
-            react_king,
-            big_gamer,
-            big_streamer,
-            threadiest_user,
-            serial_replier,
-            conversation_starter,
-            owner_award,
-            fattest_fingers,
-            most_swears,
-            single_minded,
-            diverse_portfolio
+            most_messages, least_messages, longest_message, best_wordle, most_bets,
+            most_eddies_placed, most_eddies_won, longest_king, twitter_addict, jerk_off_king,
+            big_memer, react_king, big_gamer, big_streamer, threadiest_user,
+            serial_replier, conversation_starter, owner_award, fattest_fingers,
+            most_swears, single_minded, diverse_portfolio
         ]
-
-        user_id_dict = {}  # type: dict[int, discord.Member]
-        for award in awards:
-            if award.user_id in user_id_dict:
-                continue
-            member = await guild.fetch_member(award.user_id)
-            user_id_dict[award.user_id] = member
-
-        jerk_off_channel = await self.bot.fetch_channel(JERK_OFF_CHAT)
-        single_minded_channel = await self.bot.fetch_channel(single_minded.channel)
 
         if not self.annual:
             message_start = "Time for the monthly **BSEddies Awards** 🏆\n"
@@ -258,77 +231,77 @@ class AwardsBuilder:
             f"Each award has a prize of **{prize}** eddies.\n\n",
             # server owner award
             ("The _'server owner'_ 👨‍👧‍👦 award: "
-             f"{user_id_dict[owner_award.user_id].mention}\n"),
+             f"<@!{owner_award.user_id}>\n"),
             # most messages
             ("The _'won't shut up'_ 🤐 award: "
-             f"{user_id_dict[most_messages.user_id].mention} (`{most_messages.value}` messages sent)\n"),
+             f"<@!{most_messages.user_id}> (`{most_messages.value}` messages sent)\n"),
             # the longest message
             ("The _'can't find the enter key'_ ⌨️ award: "
-             f"{user_id_dict[longest_message.user_id].mention} (`{longest_message.value}` longest message length)\n"),
+             f"<@!{longest_message.user_id}> (`{longest_message.value}` longest message length)\n"),
             # most messages to a thread
             ("The _'best threads'_ 🧵 award: "
-             f"{user_id_dict[threadiest_user.user_id].mention} (`{threadiest_user.value}` messages sent to threads)\n"),
+             f"<@!{threadiest_user.user_id}> (`{threadiest_user.value}` messages sent to threads)\n"),
             # the least messages sent
             ("The _'participation'_ 🥉 award: "
-             f"{user_id_dict[least_messages.user_id].mention} (`{least_messages.value}` messages sent)\n"),
+             f"<@!{least_messages.user_id}> (`{least_messages.value}` messages sent)\n"),
             # single minded
             ("The _'single minded'_ 🧠 award: "
-             f"{user_id_dict[single_minded.user_id].mention} (`{single_minded.value}%` of messages "
-             f"sent to {single_minded_channel.mention})\n"),
+             f"<@!{single_minded.user_id}> (`{single_minded.value}%` of messages "
+             f"sent to <#{single_minded.channel}>)\n"),
             # diverse portfolio
             ("The _'diverse portfolio'_ 💼 award: "
-             f"{user_id_dict[diverse_portfolio.user_id].mention} (`{diverse_portfolio.messages}` sent to "
+             f"<@!{diverse_portfolio.user_id}> (`{diverse_portfolio.messages}` sent to "
              f"`{diverse_portfolio.value}` channels)\n"),
             # most replies
             ("The _'serial replier'_ 📝 award: "
-             f"{user_id_dict[serial_replier.user_id].mention} (`{serial_replier.value}` replies)\n"),
+             f"<@!{serial_replier.user_id}> (`{serial_replier.value}` replies)\n"),
             # most replied to
             ("The _'conversation started'_ 📥 award: "
-             f"{user_id_dict[conversation_starter.user_id].mention} "
+             f"<@!{conversation_starter.user_id}> "
              f"(`{conversation_starter.value}` replies _received_)\n"),
             # twitter links
             ("The _'twitter addict'_ 🐦 award: "
-             f"{user_id_dict[twitter_addict.user_id].mention} (`{twitter_addict.value}` tweets shared)\n"),
+             f"<@!{twitter_addict.user_id}> (`{twitter_addict.value}` tweets shared)\n"),
             # jerk-off-chat contribs
             ("The _'jerk off mate'_ 🍆 award: "
-             f"{user_id_dict[jerk_off_king.user_id].mention} "
-             f"(`{jerk_off_king.value}` contributions to {jerk_off_channel.mention})\n"),
+             f"<@!{jerk_off_king.user_id}> "
+             f"(`{jerk_off_king.value}` contributions to <#{JERK_OFF_CHAT}>)\n"),
             # edited messages
             ("The _'fat fingers'_ 🖐🏼 award: "
-             f"{user_id_dict[fattest_fingers.user_id].mention} (`{fattest_fingers.value}` edits to "
+             f"<@!{fattest_fingers.user_id}> (`{fattest_fingers.value}` edits to "
              f"`{fattest_fingers.message_count}` messages)\n"),
             # most swears
             ("The _'dirtiest fingers'_ 🚽 award: "
-             f"{user_id_dict[most_swears.user_id].mention} (`{most_swears.value}` swears)\n"),
+             f"<@!{most_swears.user_id}> (`{most_swears.value}` swears)\n"),
             # best wordle score
             ("The _'I have an English degree'_ 📑 award: "
-             f"{user_id_dict[best_wordle.user_id].mention} (`{best_wordle.value}` average wordle score)\n"),
+             f"<@!{best_wordle.user_id}> (`{best_wordle.value}` average wordle score)\n"),
             # most reacts
             ("The _'big memer'_ 😎 award: "
-             f"{user_id_dict[big_memer.user_id].mention} (`{big_memer.value}` reacts received)\n"),
+             f"<@!{big_memer.user_id}> (`{big_memer.value}` reacts received)\n"),
             # most reacts given
             ("The _'emoji is worth a thousand words'_ 😂 award: "
-             f"{user_id_dict[react_king.user_id].mention} (`{react_king.value}` reacts given)\n"),
+             f"<@!{react_king.user_id}> (`{react_king.value}` reacts given)\n"),
             # most time spent in VC
             ("The _'big talker'_ 🔊 award: "
-             f"{user_id_dict[big_gamer.user_id].mention} "
+             f"<@!{big_gamer.user_id}> "
              f"(`{str(datetime.timedelta(seconds=big_gamer.value))}` spent in {big_gamer.channels} channels)\n"),
             # most time streaming
             ("The _'wannabe streamer'_ 🖥️ award: "
-             f"{user_id_dict[big_streamer.user_id].mention} (`{str(datetime.timedelta(seconds=big_streamer.value))}` "
+             f"<@!{big_streamer.user_id}> (`{str(datetime.timedelta(seconds=big_streamer.value))}` "
              f"spent streaming in {big_streamer.channels} channels)\n"),
             # most bets created
             ("The _'bookie'_ 🤑 award: "
-             f"{user_id_dict[most_bets.user_id].mention} (`{most_bets.value}` bets created)\n"),
+             f"<@!{most_bets.user_id}> (`{most_bets.value}` bets created)\n"),
             # most eddies bet
             ("The _'just one more bet'_ 💵 award: "
-             f"{user_id_dict[most_eddies_placed.user_id].mention} (`{most_eddies_placed.value}` eddies bet)\n"),
+             f"<@!{most_eddies_placed.user_id}> (`{most_eddies_placed.value}` eddies bet)\n"),
             # most eddies won
             ("The _'rollin' in it'_ 💰 award: "
-             f"{user_id_dict[most_eddies_won.user_id].mention} (`{most_eddies_won.value}` eddies won)\n"),
+             f"<@!{most_eddies_won.user_id}> (`{most_eddies_won.value}` eddies won)\n"),
             # most time king
             ("The _'king of kings'_ 👑 award: "
-             f"{user_id_dict[longest_king.user_id].mention} "
+             f"<@!{longest_king.user_id}> "
              f"(`{str(datetime.timedelta(seconds=longest_king.value))}` spent as KING)"),
         ]
 

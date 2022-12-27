@@ -4,7 +4,7 @@ import datetime
 import discord
 
 from discordbot.bot_enums import ActivityTypes
-from discordbot.constants import BSE_SERVER_ID
+from discordbot.constants import BSE_SERVER_ID, JERK_OFF_CHAT
 from discordbot.slashcommandeventclasses import BSEddies
 from discordbot.stats.statsclasses import StatsGatherer
 from discordbot.stats.statsdatacache import StatsDataCache
@@ -43,9 +43,11 @@ class BSEddiesStats(BSEddies):
         now = datetime.datetime.now()
         start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=1, year=year, month=1)
         end = start.replace(month=1, year=year + 1)
-        replay_message = await self.stats(ctx.author.id, start, end)
+
+        uid = ctx.author.id
+        replay_message = await self.stats(uid, start, end)
         replay_message = (
-            "Your **BSE REPLAY22**:\n\n"
+            f"<@!{uid}>'s **BSEWrapped _2022_**:\n\n"
             f"{replay_message}"
         )
         await ctx.followup.send(content=replay_message, ephemeral=True)
@@ -84,35 +86,82 @@ class BSEddiesStats(BSEddies):
         fattest_fingers = stats_gatherer.most_edited_messages(*args)
         most_swears = stats_gatherer.most_swears(*args)
         diverse_portfolio = stats_gatherer.most_messages_to_most_channels(*args)
+        busiest_day = stats_gatherer.busiest_day(*args)
 
         _chan = sorted(
             diverse_portfolio.users[user_id]["channels"],
             key=lambda x: diverse_portfolio.users[user_id]["channels"][x], reverse=True
         )[0]
-        _perc = diverse_portfolio.users[user_id]["channels"][_chan] / most_messages.value
+        _least_fav_chan = sorted(
+            diverse_portfolio.users[user_id]["channels"],
+            key=lambda x: diverse_portfolio.users[user_id]["channels"][x], reverse=True
+        )[-1]
+        _perc = (diverse_portfolio.users[user_id]["channels"][_chan] / most_messages.value) * 100
+        _lf_perc = (diverse_portfolio.users[user_id]["channels"][_least_fav_chan] / most_messages.value) * 100
+
+        _vc_time = int(big_gamer.users.get(user_id, {'count': 0})['count'])
+        _king_time = int(time_king.kings.get(user_id, 0))
+        _streaming_time = int(big_streamer.users.get(user_id, {'count': 0})['count'])
+        _dv_num = diverse_portfolio.users.get(user_id, {'channels': {_chan: 0}})['channels'][_chan]
+        _lv_num = diverse_portfolio.users.get(user_id, {'channels': {_least_fav_chan: 0}})['channels'][_least_fav_chan]
+
+        try:
+            lft = await self.client.fetch_channel(_least_fav_chan)
+            if lft.archived:
+                _least_fav_text = f"`#{lft.name} (archived)`"
+            else:
+                _least_fav_text = f"<#{_least_fav_chan}>"
+        except Exception:
+            _least_fav_text = f"<#{_least_fav_chan}>"
+
+        busiest_day_format = busiest_day.value.strftime("%a %d %b")
 
         message = (
-            f"Messages sent: `{most_messages.value}`\n"
+            f"Messages sent: `{most_messages.value}` "
+            f"(in _{len(most_messages.message_users[user_id]['channels'])}_ channels and "
+            f"_{len(most_messages.message_users[user_id]['threads'])}_ threads)\n"
+
             f"Number of channels and threads participated in: `{diverse_portfolio.value}`\n"
-            f"Favourite channel: {_chan} ({f'{_perc}%'} of messages "
-            f"(`{diverse_portfolio.users[user_id]['channels'][_chan]}`) sent)\n"
+
+            f"Favourite channel: <#{_chan}> (**{f'{round(_perc, 2)}%'}** of messages (`{_dv_num}`) sent)\n"
+
+            f"Least favourite channel: {_least_fav_text} "
+            f"(**{f'{round(_lf_perc, 2)}%'}** of messages (`{_lv_num}`) sent)\n"
+
             f"Your longest message: `{longest_message.value}`\n"
+
+            f"Busiest day: `{busiest_day_format}` "
+            f"(**{busiest_day.messages}** messages in _{busiest_day.channels}_ channels)\n"
+
             f"Your wordle average: `{best_wordle.value}`\n"
+
             f"Number of twitter links shared: `{twitter_addict.value}`\n"
-            f"Number of jerk-off-chat contribs: `{jerk_off_king.value}`\n"
-            f"Reactions received: `{big_memer.reactees[user_id]}`\n"
-            f"Reactions given: `{react_king.reaction_users[user_id]}`\n"
-            f"Replies received: `{conversation_starter.repliees[user_id]}`\n"
-            f"Replies given: `{serial_replier.repliers[user_id]}`\n"
+
+            f"Number of contributions to <#{JERK_OFF_CHAT}>: `{jerk_off_king.value}`\n"
+
+            f"Reactions received: `{big_memer.reactees.get(user_id, 0)}`\n"
+
+            f"Reactions given: `{react_king.reaction_users.get(user_id, 0)}`\n"
+
+            f"Replies received: `{conversation_starter.repliees.get(user_id, 0)}`\n"
+
+            f"Replies given: `{serial_replier.repliers.get(user_id, 0)}`\n"
+
             f"Number of edits: `{fattest_fingers.value}`\n"
+
             f"Number of swears: `{most_swears.value}`\n"
-            f"Time spent in VCs: `{str(datetime.timedelta(seconds=int(big_gamer.users[user_id]['count'])))}`\n"
-            "Time spent streaming: "
-            f"`{str(datetime.timedelta(seconds=int(big_streamer.users[user_id]['count'])))}`\n"
-            f"Time spent king: `{str(datetime.timedelta(seconds=int(time_king.kings[user_id])))}`\n"
-            f"Bets created: `{most_bets.bookies[user_id]}`\n"
-            f"Eddies placed on bets: `{most_eddies_placed.betters[user_id]}`\n"
-            f"Eddies won: `{most_eddies_won.bet_winners[user_id]}`"
+
+            f"Time spent in VCs: `{str(datetime.timedelta(seconds=_vc_time))}`\n"
+
+            f"Time spent streaming: `{str(datetime.timedelta(seconds=_streaming_time))}`\n"
+
+            f"Time spent king: `{str(datetime.timedelta(seconds=_king_time))}`\n"
+
+            f"Bets created: `{most_bets.bookies.get(user_id, 0)}`\n"
+
+            f"Eddies placed on bets: `{most_eddies_placed.betters.get(user_id, 0)}`\n"
+
+            f"Eddies won: `{most_eddies_won.bet_winners.get(user_id, 0)}`"
         )
 
         return message

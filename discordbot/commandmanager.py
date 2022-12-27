@@ -540,7 +540,7 @@ class CommandManager(object):
             await self.bseddies_tax_rate.create_tax_view(ctx)
 
         @self.client.command(description="See your 2022 replay")
-        async def replay22(ctx: discord.ApplicationContext):
+        async def wrapped22(ctx: discord.ApplicationContext):
             """_summary_
 
             Args:

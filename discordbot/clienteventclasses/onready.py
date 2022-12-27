@@ -260,7 +260,9 @@ class OnReadyEvent(BaseEvent):
                         "```"
                     )
                     try:
-                        await channel.send(content=update_message)
+                        # await channel.send(content=update_message)
+                        self.logger.info("Not sending message...")
+                        self.logger.info(update_message)
                     except discord.errors.HTTPException:
                         self.logger.info("Message is too long to send - skipping")
             except Exception as e:

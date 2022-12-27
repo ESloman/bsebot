@@ -602,6 +602,27 @@ class UserInteractions(BestSummerEverPointsDB):
         super().__init__()
         self._vault = interface.get_collection(self.database, "userinteractions")
 
+    def _paginated_query(self, query_dict: dict) -> list[Message]:
+        """Performs a paginated query with the specified query dict
+
+        Args:
+            query_dict (dict): a dict of query operators
+
+        Returns:
+            list[Message]: a list of messages for the given query
+        """
+        _lim = 10000
+        messages = []
+        len_messages_ret = _lim
+        skip = 0
+        while len_messages_ret == _lim:
+            # keep looping
+            _messages = self.query(query_dict, limit=_lim, skip=skip)
+            skip += _lim
+            len_messages_ret = len(_messages)
+            messages.extend(_messages)
+        return messages
+
     def get_all_messages_for_server(self, guild_id: int) -> list[Message]:
         """Gets all messages for a given server
 
@@ -611,7 +632,8 @@ class UserInteractions(BestSummerEverPointsDB):
         Returns:
             list[Message]: list of messages
         """
-        return self.query({"guild_id": guild_id}, limit=500000)
+        messages = self._paginated_query({"guild_id": guild_id})
+        return messages
 
     def get_all_messages_for_channel(self, guild_id: int, channel_id: int) -> list[Message]:
         """Gets all messages for a given channel and guild
@@ -623,7 +645,8 @@ class UserInteractions(BestSummerEverPointsDB):
         Returns:
             list[Message]: list of messages
         """
-        return self.query({"guild_id": guild_id, "channel_id": channel_id}, limit=100000)
+        messages = self._paginated_query({"guild_id": guild_id, "channel_id": channel_id})
+        return messages
 
     def add_entry(
             self,

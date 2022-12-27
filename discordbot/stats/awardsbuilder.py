@@ -66,8 +66,6 @@ class AwardsBuilder:
         quietest_day = self.stats.quietest_day(*args)
         emojis_created = self.stats.emojis_created(*args)
 
-        busiest_channel_obj = await guild.fetch_channel(busiest_channel.value)
-        quietest_channel_obj = await guild.fetch_channel(quietest_channel.value)
         busiest_thread_obj = await guild.fetch_channel(busiest_thread.value)
         quietest_thread_obj = await guild.fetch_channel(quietest_thread.value)
         busiest_day_format = busiest_day.value.strftime("%a %d %b")
@@ -120,9 +118,9 @@ class AwardsBuilder:
              f"(in `{thread_messages.channels}` thread from `{thread_messages.users}` users)\n"),
             (f"**Average message length** 📰: Characters (`{avg_message_chars.value}`), "
              f"Words (`{avg_message_words.value}`)\n"),
-            (f"**Chattiest channel** 🖨️: {busiest_channel_obj.mention} "
+            (f"**Chattiest channel** 🖨️: <#{busiest_channel.value}> "
              f"(`{busiest_channel.messages}` messages from `{busiest_channel.users}` users)\n"),
-            (f"**Quietest channel** 📭: {quietest_channel_obj.mention} "
+            (f"**Quietest channel** 📭: <#{quietest_channel.value}> "
              f"(`{quietest_channel.messages}` messages from `{quietest_channel.users}` users)\n"),
             (f"**Chattiest thread** 📧: {b_thread_text} "
              f"(`{busiest_thread.messages}` messages from `{busiest_thread.users}` users)\n"),

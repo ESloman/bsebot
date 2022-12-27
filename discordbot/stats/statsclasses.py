@@ -968,9 +968,16 @@ class StatsGatherer:
             if uid == BSE_BOT_ID:
                 continue
             if uid not in message_users:
-                message_users[uid] = 0
-            message_users[uid] += 1
-        chattiest = sorted(message_users, key=lambda x: message_users[x], reverse=True)[0]
+                message_users[uid] = {"count": 0, "channels": [], "threads": []}
+            message_users[uid]["count"] += 1
+            if message.get("is_thread"):
+                if message["channel_id"] not in message_users[uid]["threads"]:
+                    message_users[uid]["threads"].append(message["channel_id"])
+            else:
+                if message["channel_id"] not in message_users[uid]["channels"]:
+                    message_users[uid]["channels"].append(message["channel_id"])
+
+        chattiest = sorted(message_users, key=lambda x: message_users[x]["count"], reverse=True)[0]
 
         data_class = Stat(
             type="award",
@@ -978,7 +985,7 @@ class StatsGatherer:
             user_id=chattiest,
             award=AwardsTypes.MOST_MESSAGES,
             month=start.strftime("%b %y"),
-            value=message_users[chattiest],
+            value=message_users[chattiest]["count"],
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="most_messages_sent",
@@ -1163,7 +1170,12 @@ class StatsGatherer:
             avg = round((sum(all_guesses) / len(all_guesses)), 2)
             wordle_avgs[uid] = avg
 
-        best_avg = sorted(wordle_avgs, key=lambda x: wordle_avgs[x])[0]
+        try:
+            best_avg = sorted(wordle_avgs, key=lambda x: wordle_avgs[x])[0]
+        except IndexError:
+            # no data - possible if they've never done a wordle
+            best_avg = 0
+            wordle_avgs[0] = None
 
         data_class = Stat(
             type="award",
@@ -1204,7 +1216,12 @@ class StatsGatherer:
                     tweet_users[user_id] = 0
                 tweet_users[user_id] += 1
 
-        twitter_addict = sorted(tweet_users, key=lambda x: tweet_users[x], reverse=True)[0]
+        try:
+            twitter_addict = sorted(tweet_users, key=lambda x: tweet_users[x], reverse=True)[0]
+        except IndexError:
+            # no data for anyone yet
+            twitter_addict = 0
+            tweet_users[0] = None
 
         data_class = Stat(
             type="award",
@@ -1246,7 +1263,12 @@ class StatsGatherer:
                     jerk_off_users[user_id] = 0
                 jerk_off_users[user_id] += 1
 
-        masturbator = sorted(jerk_off_users, key=lambda x: jerk_off_users[x], reverse=True)[0]
+        try:
+            masturbator = sorted(jerk_off_users, key=lambda x: jerk_off_users[x], reverse=True)[0]
+        except IndexError:
+            # no data
+            masturbator = 0
+            jerk_off_users[0] = None
 
         data_class = Stat(
             type="award",
@@ -1438,7 +1460,12 @@ class StatsGatherer:
                 message_users[uid] = {"count": 0, "messages": 0}
             message_users[uid]["count"] += message["edit_count"]
             message_users[uid]["messages"] += 1
-        fattest_fingers = sorted(message_users, key=lambda x: message_users[x]["count"], reverse=True)[0]
+
+        try:
+            fattest_fingers = sorted(message_users, key=lambda x: message_users[x]["count"], reverse=True)[0]
+        except IndexError:
+            fattest_fingers = 0
+            message_users = {0: {"count": 0, "messages": 0}}
 
         data_class = Stat(
             type="award",
@@ -1488,7 +1515,12 @@ class StatsGatherer:
             for swear in swears:
                 swear_count += content.count(swear)
             swear_dict[uid] += swear_count
-        most_swears = sorted(swear_dict, key=lambda x: swear_dict[x], reverse=True)[0]
+
+        try:
+            most_swears = sorted(swear_dict, key=lambda x: swear_dict[x], reverse=True)[0]
+        except IndexError:
+            most_swears = 0
+            swear_dict[0] = None
 
         data_class = Stat(
             type="award",
@@ -1588,10 +1620,11 @@ class StatsGatherer:
             channel_id = message["channel_id"]
 
             if user_id not in users:
-                users[user_id] = {"channels": [], "messages": 0}
+                users[user_id] = {"channels": {}, "messages": 0}
             if channel_id not in users[user_id]["channels"]:
-                users[user_id]["channels"].append(channel_id)
+                users[user_id]["channels"][channel_id] = 0
             users[user_id]["messages"] += 1
+            users[user_id]["channels"][channel_id] += 1
 
         # sort the channels
         top = sorted(users, key=lambda x: len(users[x]["channels"]), reverse=True)[0]
@@ -1676,7 +1709,11 @@ class StatsGatherer:
                 bet_users[uid] = 0
             bet_users[uid] -= trans["amount"]
 
-        most_placed = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
+        try:
+            most_placed = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
+        except IndexError:
+            most_placed = 0
+            bet_users[0] = None
 
         data_class = Stat(
             type="award",
@@ -1718,7 +1755,11 @@ class StatsGatherer:
                 bet_users[uid] = 0
             bet_users[uid] += trans["amount"]
 
-        most_placed = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
+        try:
+            most_placed = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
+        except IndexError:
+            most_placed = 0
+            bet_users[0] = None
 
         data_class = Stat(
             type="award",
@@ -1832,7 +1873,11 @@ class StatsGatherer:
             if channel_id not in user_dict[user_id]["channels"]:
                 user_dict[user_id]["channels"].append(channel_id)
 
-        big_gamer = sorted(user_dict, key=lambda x: user_dict[x]["count"], reverse=True)[0]
+        try:
+            big_gamer = sorted(user_dict, key=lambda x: user_dict[x]["count"], reverse=True)[0]
+        except IndexError:
+            big_gamer = 0
+            user_dict[0] = {"count": 0, "channels": {}}
 
         data_class = Stat(
             type="award",
@@ -1878,7 +1923,11 @@ class StatsGatherer:
             if channel_id not in user_dict[user_id]["channels"] and vc["time_streaming"]:
                 user_dict[user_id]["channels"].append(channel_id)
 
-        big_streamer = sorted(user_dict, key=lambda x: user_dict[x]["count"], reverse=True)[0]
+        try:
+            big_streamer = sorted(user_dict, key=lambda x: user_dict[x]["count"], reverse=True)[0]
+        except IndexError:
+            big_streamer = 0
+            user_dict[0] = {"count": 0, "channels": {}}
 
         data_class = Stat(
             type="award",

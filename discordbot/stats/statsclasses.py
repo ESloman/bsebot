@@ -1173,16 +1173,20 @@ class StatsGatherer:
 
             wordle_count[uid].append(guesses)
 
-        worlde_count_old = deepcopy(wordle_count)
-        for uid in worlde_count_old:
-            if len(worlde_count_old[uid]) < threshold:
-                # user hasn't done enough wordles in this time period to be
-                # counted
-                print(
-                    f"Removing {uid} from wordle pool as they've only done {len(wordle_count[uid])} wordles."
-                )
-                wordle_count.pop(uid)
-
+        if len(wordle_count) > 1:
+            wordle_count_old = deepcopy(wordle_count)
+            for uid in wordle_count_old:
+                if len(wordle_count_old[uid]) < threshold:
+                    # user hasn't done enough wordles in this time period to be
+                    # counted
+                    self.logger.info(
+                        f"Removing {uid} from wordle pool as they've only done {len(wordle_count[uid])} wordles."
+                    )
+                    wordle_count.pop(uid)
+        else:
+            self.logger.info(
+                f"Length of wordle count ({len(wordle_count)}) is less than one - skipping threshold"
+            )
         wordle_avgs = {}
         for uid in wordle_count:
             all_guesses = wordle_count[uid]

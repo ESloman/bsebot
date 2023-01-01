@@ -1587,10 +1587,10 @@ class StatsGatherer:
 
             if user_id not in users:
                 users[user_id] = {"total": 0}
-            if channel_id not in users[user_id]:
-                users[user_id][channel_id] = 0
+            if str(channel_id) not in users[user_id]:
+                users[user_id][str(channel_id)] = 0
 
-            users[user_id][channel_id] += 1
+            users[user_id][str(channel_id)] += 1
             users[user_id]["total"] += 1
 
         # calc highest percentage
@@ -1601,7 +1601,7 @@ class StatsGatherer:
             percentage = (u_dict[top_channel_id] / total) * 100
             u_dict["total"] = total
             u_dict["percentage"] = percentage
-            u_dict["channel"] = top_channel_id
+            u_dict["channel"] = int(top_channel_id)
 
         # sort the percentages
         top = sorted(users, key=lambda x: users[x]["percentage"], reverse=True)[0]
@@ -1644,10 +1644,10 @@ class StatsGatherer:
 
             if user_id not in users:
                 users[user_id] = {"channels": {}, "messages": 0}
-            if channel_id not in users[user_id]["channels"]:
-                users[user_id]["channels"][channel_id] = 0
+            if str(channel_id) not in users[user_id]["channels"]:
+                users[user_id]["channels"][str(channel_id)] = 0
             users[user_id]["messages"] += 1
-            users[user_id]["channels"][channel_id] += 1
+            users[user_id]["channels"][str(channel_id)] += 1
 
         # sort the channels
         top = sorted(users, key=lambda x: len(users[x]["channels"]), reverse=True)[0]

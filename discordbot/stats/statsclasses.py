@@ -28,11 +28,11 @@ class StatsGatherer:
         now = datetime.datetime.now()
         start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=1)
         try:
-            start = start.replace(month=start.month - 1)
+            start = start.replace(month=12, year=2022)
         except ValueError:
             start = start.replace(month=12)
 
-        end = now.replace(day=1, hour=0, minute=0, second=0, microsecond=1)
+        end = now.replace(day=1, hour=0, minute=0, second=0, microsecond=1, year=2023, month=1)
         return start, end
 
     @staticmethod
@@ -225,7 +225,7 @@ class StatsGatherer:
 
         data_class.messages = channels[busiest]["count"]
         data_class.users = len(channels[busiest]["users"])
-        data_class.channels = channels
+        data_class.channels = {str(k): v for k, v in channels.items()}
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -269,7 +269,7 @@ class StatsGatherer:
         )
         data_class.messages = threads[busiest]["count"]
         data_class.users = len(threads[busiest]["users"])
-        data_class.threads = threads
+        data_class.threads = {str(k): v for k, v in threads.items()}
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -368,7 +368,7 @@ class StatsGatherer:
 
         data_class.messages = channels[quietest]["count"]
         data_class.users = len(channels[quietest]["users"])
-        data_class.channels = channels
+        data_class.channels = {str(k): v for k, v in channels.items()}
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -412,7 +412,7 @@ class StatsGatherer:
         )
         data_class.messages = threads[quietest]["count"]
         data_class.users = len(threads[quietest]["users"])
-        data_class.threads = threads
+        data_class.threads = {str(k): v for k, v in threads.items()}
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -741,7 +741,7 @@ class StatsGatherer:
         )
 
         data_class.users = len(channels[vc_most_time]["users"])
-        data_class.channels = channels
+        data_class.channels = {str(k): v for k, v in channels.items()}
         data_class.time = int(channels[vc_most_time]["count"])
 
         data_class = self.add_annual_changes(start, data_class)
@@ -786,7 +786,7 @@ class StatsGatherer:
             annual=self.annual
         )
         data_class.time = int(channels[vc_most_users]["count"])
-        data_class.channels = channels
+        data_class.channels = {str(k): v for k, v in channels.items()}
         data_class.users = len(channels[vc_most_users]["users"])
 
         data_class = self.add_annual_changes(start, data_class)
@@ -1011,7 +1011,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        data_class.message_users = message_users
+        data_class.message_users = {str(k): v for k, v in message_users.items()}
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1052,7 +1052,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        data_class.message_users = message_users
+        data_class.message_users = {str(k): v for k, v in message_users.items()}
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1093,7 +1093,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        data_class.message_users = message_users
+        data_class.message_users = {str(k): v for k, v in message_users.items()}
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1213,7 +1213,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        data_class.wordle_avgs = wordle_avgs
+        data_class.wordle_avgs = {str(k): v for k, v in wordle_avgs.items()}
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1259,7 +1259,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        data_class.twitter_addict = tweet_users
+        data_class.twitter_addict = {str(k): v for k, v in tweet_users.items()}
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1306,7 +1306,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        data_class.masturbators = jerk_off_users
+        data_class.masturbators = {str(k): v for k, v in jerk_off_users.items()}
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1347,7 +1347,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        data_class.reactees = reaction_users
+        data_class.reactees = {str(k): v for k, v in reaction_users.items()}
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1390,7 +1390,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        data_class.reaction_users = reaction_users
+        data_class.reaction_users = {str(k): v for k, v in reaction_users.items()}
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1440,7 +1440,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        replier_data_class.repliers = replies
+        replier_data_class.repliers = {str(k): v for k, v in replies.items()}
         replier_data_class = self.add_annual_changes(start, replier_data_class)
 
         conversation_data_class = Stat(
@@ -1456,7 +1456,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        conversation_data_class.repliees = replied_to
+        conversation_data_class.repliees = {str(k): v for k, v in replied_to.items()}
         conversation_data_class = self.add_annual_changes(start, conversation_data_class)
 
         return replier_data_class, conversation_data_class
@@ -1503,7 +1503,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        data_class.message_users = message_users
+        data_class.message_users = {str(k): v for k, v in message_users.items()}
         data_class.message_count = message_users[fattest_fingers]["messages"]
 
         data_class = self.add_annual_changes(start, data_class)
@@ -1557,7 +1557,7 @@ class StatsGatherer:
             short_name="most_swears",
             annual=self.annual
         )
-        data_class.swears = swear_dict
+        data_class.swears = {str(k): v for k, v in swear_dict.items()}
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1618,7 +1618,7 @@ class StatsGatherer:
             short_name="single_minded",
             annual=self.annual
         )
-        data_class.users = users
+        data_class.users = {str(k): v for k, v in users.items()}
         data_class.channel = users[top]["channel"]
         data_class = self.add_annual_changes(start, data_class)
 
@@ -1664,7 +1664,7 @@ class StatsGatherer:
             short_name="diverse_portfolio",
             annual=self.annual
         )
-        data_class.users = users
+        data_class.users = {str(k): v for k, v in users.items()}
         data_class.messages = users[top]["messages"]
         data_class = self.add_annual_changes(start, data_class)
 
@@ -1705,7 +1705,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        data_class.bookies = bet_users
+        data_class.bookies = {str(k): v for k, v in bet_users.items()}
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1751,7 +1751,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        data_class.betters = bet_users
+        data_class.betters = {str(k): v for k, v in bet_users.items()}
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1797,7 +1797,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        data_class.bet_winners = bet_users
+        data_class.bet_winners = {str(k): v for k, v in bet_users.items()}
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1865,7 +1865,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        data_class.kings = kings
+        data_class.kings = {str(k): v for k, v in kings.items()}
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
@@ -1915,7 +1915,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        data_class.users = user_dict
+        data_class.users = {str(k): v for k, v in user_dict.items()}
         data_class.channels = len(user_dict[big_gamer]["channels"])
         data_class = self.add_annual_changes(start, data_class)
 
@@ -1965,7 +1965,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        data_class.users = user_dict
+        data_class.users = {str(k): v for k, v in user_dict.items()}
         data_class.channels = len(user_dict[big_streamer]["channels"])
         data_class = self.add_annual_changes(start, data_class)
 

@@ -28,11 +28,11 @@ class StatsGatherer:
         now = datetime.datetime.now()
         start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=1)
         try:
-            start = start.replace(month=12, year=2022)
+            start = start.replace(month=start.month - 1)
         except ValueError:
-            start = start.replace(month=12)
+            start = start.replace(month=12, year=start.year - 1)
 
-        end = now.replace(day=1, hour=0, minute=0, second=0, microsecond=1, year=2023, month=1)
+        end = now.replace(day=1, hour=0, minute=0, second=0, microsecond=1)
         return start, end
 
     @staticmethod

@@ -36,6 +36,8 @@ class AwardsBuilder:
         else:
             start, end = self.stats.get_annual_datetime_objects()
 
+        self.logger.info(f"Got start/end to be: {start}, {end}")
+
         args = (self.guild_id, start, end)
 
         guild = await self.bot.fetch_guild(self.guild_id)
@@ -181,6 +183,8 @@ class AwardsBuilder:
             start, end = self.stats.get_monthly_datetime_objects()
         else:
             start, end = self.stats.get_annual_datetime_objects()
+
+        self.logger.info(f"Got start/end to be: {start}, {end}")
 
         args = (self.guild_id, start, end)
 

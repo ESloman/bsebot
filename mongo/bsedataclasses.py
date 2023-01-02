@@ -212,7 +212,7 @@ class Awards(BestSummerEverPointsDB):
         short_name: str,
         annual: bool,
         month: Optional[str] = None,
-        year: Optional[str]= None,
+        year: Optional[str] = None,
         **kwargs
     ) -> list:
 
@@ -248,7 +248,7 @@ class Awards(BestSummerEverPointsDB):
         short_name: str,
         annual: bool,
         month: Optional[str] = None,
-        year: Optional[str]= None,
+        year: Optional[str] = None,
         **kwargs
     ) -> list:
         """Insert an award into the DB

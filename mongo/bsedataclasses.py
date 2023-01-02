@@ -207,11 +207,12 @@ class Awards(BestSummerEverPointsDB):
         self,
         guild_id: int,
         stat: StatTypes,
-        month: str,
         value: Union[int, float, datetime.datetime, datetime.date],
         timestamp: datetime.datetime,
         short_name: str,
         annual: bool,
+        month: Optional[str] = None,
+        year: Optional[str] = None,
         **kwargs
     ) -> list:
 
@@ -227,7 +228,8 @@ class Awards(BestSummerEverPointsDB):
             "month": month,
             "value": value,
             "short_name": short_name,
-            "annual": annual
+            "annual": annual,
+            "year": year
         }
 
         for key in kwargs:
@@ -241,11 +243,12 @@ class Awards(BestSummerEverPointsDB):
         guild_id: int,
         user_id: int,
         award: AwardsTypes,
-        month: str,
         eddies: int,
         value: Union[int, float],
         short_name: str,
         annual: bool,
+        month: Optional[str] = None,
+        year: Optional[str] = None,
         **kwargs
     ) -> list:
         """Insert an award into the DB
@@ -267,7 +270,8 @@ class Awards(BestSummerEverPointsDB):
             "eddies": eddies,
             "value": value,
             "short_name": short_name,
-            "annual": annual
+            "annual": annual,
+            "year": year
         }
 
         for key in kwargs:

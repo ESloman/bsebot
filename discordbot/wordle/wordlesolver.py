@@ -17,6 +17,7 @@ from selenium.webdriver.chrome.service import Service as FirefoxService
 from selenium.webdriver.remote.webelement import WebElement
 from webdriver_manager.chrome import ChromeDriverManager
 
+from discordbot.utilities import PlaceHolderLogger
 from discordbot.wordle.constants import WORDLE_GDPR_ACCEPT_ID, WORDLE_TUTORIAL_CLOSE_CLASS_NAME
 from discordbot.wordle.constants import WORDLE_BOARD_CLASS_NAME, WORDLE_ROWS_CLASS_NAME, WORDLE_URL, WORDLE_FOOTNOTE
 from discordbot.wordle.constants import WORDLE_STARTING_WORDS, WORDLE_SETTINGS_BUTTON
@@ -36,7 +37,7 @@ class WordleSolve:
 
 
 class WordleSolver():
-    def __init__(self, logger) -> None:
+    def __init__(self, logger=PlaceHolderLogger) -> None:
         self.firefox_opts = Options()
         self.firefox_opts.headless = True
         self.firefox_opts.add_argument("--no-sandbox")
@@ -69,7 +70,10 @@ class WordleSolver():
             pass
 
         try:
-            close_button = driver.find_element(By.CLASS_NAME, WORDLE_TUTORIAL_CLOSE_CLASS_NAME)
+            close_button = driver.find_element(
+                By.CSS_SELECTOR,
+                f"button[class*='{WORDLE_TUTORIAL_CLOSE_CLASS_NAME}']"
+            )
             close_button.click()
         except (ElementNotInteractableException, StaleElementReferenceException):
             pass
@@ -150,7 +154,10 @@ class WordleSolver():
 
     @staticmethod
     def _get_rows(board: WebElement) -> list[WebElement]:
-        rows = board.find_elements(By.CLASS_NAME, WORDLE_ROWS_CLASS_NAME)
+        rows = board.find_elements(
+            By.CSS_SELECTOR,
+            f"div[class*='{WORDLE_ROWS_CLASS_NAME}']"
+        )
         return rows
 
     @staticmethod
@@ -168,7 +175,10 @@ class WordleSolver():
         self.driver = None
 
     def _get_board(self) -> WebElement:
-        board = self.driver.find_element(By.CLASS_NAME, WORDLE_BOARD_CLASS_NAME)
+        board = self.driver.find_element(
+            By.CSS_SELECTOR,
+            f"div[class*='{WORDLE_BOARD_CLASS_NAME}']"
+        )
         return board
 
     async def _get_wordle_number(self) -> str:
@@ -180,7 +190,10 @@ class WordleSolver():
         settings_button = self.driver.find_element(By.ID, WORDLE_SETTINGS_BUTTON)
         settings_button.click()
         await asyncio.sleep(1)
-        footnote = self.driver.find_element(By.CLASS_NAME, WORDLE_FOOTNOTE)
+        footnote = self.driver.find_element(
+            By.CSS_SELECTOR,
+            f"div[class*='{WORDLE_FOOTNOTE}']"
+        )
         div_children = footnote.find_elements(By.TAG_NAME, "div")
         number_div = div_children[1]
         wordle_number = number_div.text.strip().strip("#")
@@ -218,7 +231,10 @@ class WordleSolver():
             board.click()
         except ElementClickInterceptedException:
             self.logger.debug("Failed to press board - clicking container instead")
-            container = self.driver.find_element(By.CLASS_NAME, "App-module_gameContainer__EvHiJ")
+            container = self.driver.find_element(
+                By.CSS_SELECTOR,
+                "div[class*='App-module_gameContainer__']"
+            )
             container.click()
 
         while not solved:

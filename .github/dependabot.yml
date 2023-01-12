@@ -11,3 +11,7 @@ updates:
       interval: "daily"
     reviewers:
       - "esloman"
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "daily"

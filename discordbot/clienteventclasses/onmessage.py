@@ -4,7 +4,7 @@ from typing import Optional
 
 import discord
 
-from discordbot.baseeventclass import BaseEvent
+from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from discordbot.constants import WORDLE_REGEX
 from mongo.bsepoints import UserInteractions
 

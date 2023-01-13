@@ -1,7 +1,7 @@
 
 import discord
 
-from discordbot.baseeventclass import BaseEvent
+from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from discordbot.clienteventclasses import OnMessage
 from mongo.bsedataclasses import SpoilerThreads
 from mongo.bsepoints import UserInteractions

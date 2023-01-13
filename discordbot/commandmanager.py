@@ -1,5 +1,11 @@
+
 """
-This file contains our class that registers all the events we listen to and do things with
+The purpose of `commandmanager.py`, and subsequently CommandManager, is have a singular place where we create all the
+listeners for our client events and where we also register all our slash commands.
+Each event/command has a corresponding python class that handles the primary logic - but we connect the discord events
+to those classes here in this file. It does the bulk of it's work in the __init__ method.
+
+Any new client events and slash commands will need to be added here.
 """
 
 import logging

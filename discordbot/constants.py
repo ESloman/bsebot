@@ -1,5 +1,7 @@
+
 """
-This file is for static variables throughout the project.
+This file contains a variety of different variables whose values aren't going to change. We use these in various places
+throughout the codebase so we define them here.
 """
 
 SLOMAN_SERVER_ID = 291508460519161856
@@ -12,6 +14,8 @@ BOT_IDS = [
     272937604339466240  # craig bot
 ]
 
+# the types of 'message' or 'interaction'
+# mostly used for calculating user salaries
 MESSAGE_TYPES = [
     "message",
     "reply",
@@ -36,6 +40,7 @@ MESSAGE_TYPES = [
     "vc_streaming"
 ]
 
+# a mapping of the above message types to a more human readable/understandable version
 HUMAN_MESSAGE_TYPES = {
     "message": "Messages",
     "reply": "Replies to messages",
@@ -64,6 +69,7 @@ HUMAN_MESSAGE_TYPES = {
     "vc_streaming": "Spent time streaming",
 }
 
+# a mapping of the above message types; and how many eddies they are worth for each individual occurence
 MESSAGE_VALUES = {
     "message": 0.15,
     "reply": 0.5,
@@ -90,6 +96,7 @@ MESSAGE_VALUES = {
     "vc_streaming": 0.0025
 }
 
+# the number of eddies a user received for each wordle score
 WORDLE_VALUES = {
     6: 1,
     5: 2,
@@ -100,6 +107,7 @@ WORDLE_VALUES = {
     "X": 1
 }
 
+# bet outcome coefficient
 BET_OUTCOME_COUNT_MODIFIER = {
     2: 0.04,
     3: 0.06,
@@ -110,55 +118,29 @@ BET_OUTCOME_COUNT_MODIFIER = {
     8: 0.16,
 }
 
-BETA_USERS = [
-    181098573579026433,
-    189458414764687360,
-    77458304837615616,
-    189405043018039297
-]
-
+# the user that created the bot (aka ESloman)
 CREATOR = 189458414764687360
 
+# BSE boys role
 THE_BOYS_ROLE = 724888354004533258
-
-PRIVATE_CHANNEL_IDS = [
-    181098823228063764,
-    470696533873000449,
-    651566692144775168,
-    725410607997780150,
-    728202427504787456,
-    784347380798717972,
-    809773876078575636,
-    814087061619212299,
-    823100959592415262,
-    824244254124933150,
-    884720128695107594,
-]
-
-BSEDDIES_DEVELOPMENT_CHANNEL = 814087061619212299
-BSEDDIES_REVOLUTION_CHANNEL = 817061592335122433
-BSE_SERVER_INFO_CHANNEL = 823100959592415262
-VALORANT_CHAT = 724550853620662302
+# BSE valorant role
 VALORANT_ROLE = 724885799119880272
+
+# BSE specific channel IDs
+BSEDDIES_REVOLUTION_CHANNEL = 817061592335122433
+VALORANT_CHAT = 724550853620662302
 GENERAL_CHAT = 181098823228063764
 JERK_OFF_CHAT = 470696533873000449
 
+# KING roles
 BSEDDIES_KING_ROLES = {
     SLOMAN_SERVER_ID: 322742107460861962,
     BSE_SERVER_ID: 813738204989227008,
 }
 
-SERVER_ADMINS = (
-    189458414764687360,
-    181098573579026433,
-    189435778315714560,
-    77458304837615616,
-    189405043018039297
-)
-
-AWS_GAME_SERVER_INSTANCE = "i-04bb3a992e54b1b6f"
-
+# the bseddies awards money
 MONTHLY_AWARDS_PRIZE = 100
 ANNUAL_AWARDS_AWARD = 500
 
+# regex for recognising a message is wordle
 WORDLE_REGEX = r"Wordle \d?\d\d\d [\dX]/\d\n\n"

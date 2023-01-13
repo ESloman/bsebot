@@ -3,7 +3,7 @@ from typing import List
 
 import discord
 
-from discordbot.baseeventclass import BaseEvent
+from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from mongo.bsepoints import UserInteractions
 
 

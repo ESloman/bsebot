@@ -5,7 +5,7 @@ from typing import Optional
 
 import discord
 
-from discordbot.baseeventclass import BaseEvent
+from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from discordbot.bot_enums import TransactionTypes, ActivityTypes
 from discordbot.constants import BSEDDIES_REVOLUTION_CHANNEL, THE_BOYS_ROLE, BSE_SERVER_ID, GENERAL_CHAT
 from discordbot.slashcommandeventclasses import BSEddiesPlaceBet, BSEddiesCloseBet

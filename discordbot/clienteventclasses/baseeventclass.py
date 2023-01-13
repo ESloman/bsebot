@@ -1,3 +1,10 @@
+
+"""
+Base event class.
+All client event classes inherit from this. Adds a bunch of useful classes for
+it's children to use.
+"""
+
 import datetime
 import logging
 

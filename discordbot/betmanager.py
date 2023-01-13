@@ -1,3 +1,9 @@
+
+"""
+The BetManager is for resolving bets
+Gives out winner eddies and also updates the DB accordingly
+"""
+
 import datetime
 import math
 import random

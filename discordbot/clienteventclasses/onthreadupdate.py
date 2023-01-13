@@ -1,7 +1,7 @@
 
 import discord
 
-from discordbot.baseeventclass import BaseEvent
+from discordbot.clienteventclasses.baseeventclass import BaseEvent
 
 
 class OnThreadUpdate(BaseEvent):

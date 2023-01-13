@@ -2,7 +2,7 @@ from typing import Union
 
 import discord
 
-from discordbot.baseeventclass import BaseEvent
+from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from discordbot.constants import CREATOR
 
 

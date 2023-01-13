@@ -1,7 +1,10 @@
 .dockerignore
 .gitignore
+.flake8
 Dockerfile
 LICENSE
 README.md
 .github
+.vscode
+docs
 datafiles

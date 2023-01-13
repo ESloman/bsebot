@@ -1,5 +1,6 @@
+
 """
-A file for enums
+A file full of useful enums that we use throughout the codebase
 """
 
 from enum import IntEnum
@@ -80,10 +81,8 @@ class ActivityTypes(IntEnum):
 
 
 class AwardsTypes(IntEnum):
-    """_summary_
-
-    Args:
-        IntEnum (_type_): _description_
+    """
+    The different BSEddies awards
     """
     MOST_MESSAGES = 1
     LEAST_MESSAGES = 2
@@ -111,6 +110,9 @@ class AwardsTypes(IntEnum):
 
 
 class StatTypes(IntEnum):
+    """
+    The different BSEddies stat types
+    """
     NUMBER_OF_MESSAGES = 1
     AVERAGE_MESSAGE_LENGTH_CHARS = 2
     AVERAGE_MESSAGE_LENGTH_WORDS = 3

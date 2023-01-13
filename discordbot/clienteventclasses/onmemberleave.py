@@ -2,7 +2,7 @@ import datetime
 
 import discord
 
-from discordbot.baseeventclass import BaseEvent
+from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from discordbot.bot_enums import ActivityTypes
 
 

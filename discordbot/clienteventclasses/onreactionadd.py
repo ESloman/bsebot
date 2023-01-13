@@ -3,7 +3,7 @@ import datetime
 import discord
 from discord.emoji import Emoji
 
-from discordbot.baseeventclass import BaseEvent
+from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from mongo.bsepoints import UserInteractions
 
 

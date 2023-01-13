@@ -1,5 +1,8 @@
+
 """
-This file is our "main" file. We run this file to run the bot and it handles everything else.
+This file is our "main" file and the entrypoint for our Discord bot.
+It creates the necessary discord.Bot class using our discord token and also an instance of our
+CommandManager class.
 
 This file also contains a _create_logger method that creates a logging.Logger object for us to use throughout the
 rest of the codebase.

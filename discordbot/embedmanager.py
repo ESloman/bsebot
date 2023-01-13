@@ -1,3 +1,8 @@
+
+"""
+Embed manager will generated embeds/text for the given situtation based on information given to it
+"""
+
 import datetime
 from typing import Optional, Union
 

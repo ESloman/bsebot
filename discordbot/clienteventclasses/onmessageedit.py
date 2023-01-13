@@ -61,6 +61,11 @@ class OnMessageEdit(BaseEvent):
             # weird
             message_type = await self.on_message.message_received(after)
             db_message = self.user_interactions.get_message(guild_id, after.id)
+            if not db_message:
+                self.logger.debug(
+                    f"Message couldn't be processed: {message_type} {after}"
+                )
+                return
 
         message_type = await self.on_message.message_received(after, True)
 

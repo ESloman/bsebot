@@ -1,3 +1,8 @@
+
+"""
+File for containing all the different UI select componenents the bot will create and use
+"""
+
 import datetime
 import math
 

@@ -1,4 +1,10 @@
 
+"""
+clienteventclasses/ contains all of the classes for different client events
+Each file contains a different class for handling an event that isn't dissimilar
+to the name of the file
+"""
+
 from .ondirectmessage import OnDirectMessage
 from .onemojicreate import OnEmojiCreate
 from .onmemberjoin import OnMemberJoin

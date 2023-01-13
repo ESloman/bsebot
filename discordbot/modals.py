@@ -1,3 +1,8 @@
+
+"""
+File for containing the UI modal dialogues that the bot will create
+"""
+
 import discord
 from discordbot.slashcommandeventclasses import BSEddiesCreateBet, BSEddiesPlaceBet, BSEddiesCloseBet
 

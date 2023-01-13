@@ -4,7 +4,7 @@ from typing import Optional
 import discord
 
 import discordbot.clienteventclasses.onmessage
-from discordbot.baseeventclass import BaseEvent
+from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from discordbot.constants import BSE_BOT_ID
 from mongo.bsepoints import UserInteractions
 

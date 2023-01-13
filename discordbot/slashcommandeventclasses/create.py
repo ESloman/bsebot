@@ -7,7 +7,6 @@ import discord
 
 import discordbot.views as views
 from discordbot.bot_enums import ActivityTypes
-from discordbot.constants import PRIVATE_CHANNEL_IDS
 from discordbot.slashcommandeventclasses import BSEddies
 
 
@@ -135,16 +134,13 @@ class BSEddiesCreateBet(BSEddies):
                 dt_key = {}
             timeout = datetime.datetime.now() + datetime.timedelta(**dt_key)
 
-        private = ctx.channel_id in PRIVATE_CHANNEL_IDS
-
         bet = self.user_bets.create_new_bet(
             ctx.guild.id,
             ctx.user.id,
             bet_title,
             options=list(option_dict.keys()),
             option_dict=option_dict,
-            timeout=timeout,
-            private=private
+            timeout=timeout
         )
 
         embed = self.embed_manager.get_bet_embed(ctx.guild, bet["bet_id"], bet)
@@ -154,7 +150,6 @@ class BSEddiesCreateBet(BSEddies):
 
         bet_view = views.BetView(bet, bseddies_place, bseddies_close)
 
-        # await ctx.send(content=f"Bet created: {bet_title}", hidden=True)
         message = await ctx.channel.send(content=content, embed=embed, view=bet_view)
 
         self.user_bets.update(

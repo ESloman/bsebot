@@ -3,6 +3,7 @@
 File for other small and useful classes that we may need in other parts of the code
 """
 
+
 class PlaceHolderLogger():
     """
     Placeholder logger for when we don't have a logging object

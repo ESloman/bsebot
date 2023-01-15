@@ -98,9 +98,6 @@ class OnMessage(BaseEvent):
         channel_id = message.channel.id
         message_content = message.content
 
-        if guild_id not in self.guild_ids:
-            return
-
         message_type = []
 
         is_thread = False

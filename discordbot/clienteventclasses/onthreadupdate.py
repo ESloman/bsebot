@@ -18,11 +18,9 @@ class OnThreadUpdate(BaseEvent):
         :param after:
         :return:
         """
-
-        if before.archived and not after.archived:
-            self.logger.info("Thread has been unarchived - joining")
-            thread_members = await after.fetch_members()
-            member_ids = [member.id for member in thread_members]
-            if self.client.user.id not in member_ids:
-                await after.join()
-                self.logger.info("Joining unarchived thread")
+        self.logger.info(f"Thread {after.name} has been updated - checking to see if it needs joining")
+        thread_members = await after.fetch_members()
+        member_ids = [member.id for member in thread_members]
+        if self.client.user.id not in member_ids:
+            await after.join()
+            self.logger.info(f"Joined {after.name}")

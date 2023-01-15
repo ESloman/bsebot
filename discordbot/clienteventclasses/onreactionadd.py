@@ -84,7 +84,7 @@ class OnReactionAdd(BaseEvent):
         )
 
         if emoji_obj := self.server_emojis.get_emoji_from_name(guild_id, reaction):
-            if author.id == emoji_obj["created_by"]:
+            if user.id == emoji_obj["created_by"]:
                 self.logger.info("user used their own emoji")
                 return
             self.user_interactions.add_entry(

@@ -4,7 +4,8 @@ import random
 import discord
 from discord.ext import tasks, commands
 
-from discordbot.constants import VALORANT_CHAT, VALORANT_ROLE, BSE_SERVER_ID
+from discordbot.constants import VALORANT_CHAT, VALORANT_ROLE, BSE_SERVER_ID, BSE_BOT_ID
+from mongo.bsepoints import UserInteractions
 
 
 class AfterWorkVally(commands.Cog):
@@ -12,6 +13,7 @@ class AfterWorkVally(commands.Cog):
         self.bot = bot
         self.logger = logger
         self.guilds = guilds
+        self.user_interactions = UserInteractions()
         self.vally_message.start()
 
         self.messages = [
@@ -37,6 +39,9 @@ class AfterWorkVally(commands.Cog):
         Loop that makes sure the King is assigned correctly
         :return:
         """
+        if BSE_SERVER_ID not in self.guilds:
+            return
+
         now = datetime.datetime.now()
 
         if now.weekday() not in [0, 1, 2, 3, 4]:
@@ -45,10 +50,32 @@ class AfterWorkVally(commands.Cog):
         if now.hour != 15 or not (45 <= now.minute <= 54):
             return
 
-        self.logger.info("Time to send vally message!")
+        self.logger.info("Checking for channel interactivity")
 
-        if BSE_SERVER_ID not in self.guilds:
+        latest_bot_message = list(self.user_interactions.vault.find(
+            {"user_id": BSE_BOT_ID, "channel_id": VALORANT_CHAT, "message_type": "role_mention"},
+            sort=[("timestamp", -1)],
+            limit=1
+        ))[0]
+
+        latest_time = latest_bot_message["timestamp"]
+
+        messages = self.user_interactions.query(
+            {
+                "timestamp": {"$gt": latest_time},
+                "channel_id": VALORANT_CHAT
+            }
+        )
+
+        if not messages:
+            self.logger.info(
+                f"Not been any messages in #valorant-chat since {latest_time} - skipping the daily vally message"
+            )
             return
+
+        self.logger.debug(f"{len(messages)} since our last vally rollcall")
+
+        self.logger.info("Time to send vally message!")
 
         guild = await self.bot.fetch_guild(BSE_SERVER_ID)  # type: discord.Guild
         channel = await guild.fetch_channel(VALORANT_CHAT)

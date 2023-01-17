@@ -33,7 +33,7 @@ def _create_logger() -> logging.Logger:
     _logger = logging.getLogger("bsebot")
     _logger.setLevel(logging.DEBUG)
 
-    formatting = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    formatting = "%(asctime)s - %(funcName)s: %(message)s"
     formatter = logging.Formatter(formatting)
 
     # this makes sure we're logging to the standard output too

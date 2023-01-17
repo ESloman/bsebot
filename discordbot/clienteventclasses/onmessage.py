@@ -18,7 +18,7 @@ class OnMessage(BaseEvent):
         super().__init__(client, guild_ids, logger)
         self.user_interactions = UserInteractions()
 
-    async def _handle_bot_reply(self, message: discord.Message) -> None:
+    async def _handle_bot_thank_you(self, message: discord.Message) -> None:
         """Sends a basic reply message if a message meets the requirements
 
         Args:
@@ -70,6 +70,52 @@ class OnMessage(BaseEvent):
             if _reply.author.id == self.client.user.id:
                 # we sent this message!
                 if any([re.match(rf"\b{a}\b", message.content.lower()) for a in _thank_you_terms]):
+                    # yes! send message
+                    send_message = True
+        if not send_message:
+            return
+
+        await message.reply(content=random.choice(_possible_replies))
+
+    async def _handle_bot_birthday_thank_you(self, message: discord.Message) -> None:
+        """Sends a basic reply message if a message meets the requirements
+
+        Args:
+            message (discord.Message): the discord message object
+        """
+        _bot_thanks = [
+            "happy birthday bot", "happy birthday bsebot",
+            "hb bot", "hb bsebot",
+        ]
+
+        _birthday = [
+            "happy birthday", "hb"
+        ]
+
+        _possible_replies = [
+            "Thank you ❤️",
+            "🥰",
+            "❤️",
+            "😍"
+        ]
+
+        send_message = False
+        if message.mentions:
+            mentions = [m.id for m in message.mentions if m.id == self.client.user.id]
+            if mentions:
+                if any([re.match(rf"\b{a}\b", message.content.lower()) for a in _bot_thanks + _birthday]):
+                    # yes! send message
+                    send_message = True
+        elif any([re.match(rf"\b{a}\b", message.content.lower()) for a in _bot_thanks]):
+            send_message = True
+        elif message.reference:
+            _reply = message.reference.cached_message
+            if not _reply:
+                channel = await self.client.fetch_channel(message.reference.channel_id)
+                _reply = await channel.fetch_message(message.reference.message_id)
+            if _reply.author.id == self.client.user.id:
+                # we sent this message!
+                if any([re.match(rf"\b{a}\b", message.content.lower()) for a in _bot_thanks + _birthday]):
                     # yes! send message
                     send_message = True
         if not send_message:
@@ -228,7 +274,15 @@ class OnMessage(BaseEvent):
         try:
             if message.mentions or "thank" in message.content.lower() or "ty" in message.content.lower():
                 if not message.author.id == self.client.user.id:
-                    await self._handle_bot_reply(message)
+                    await self._handle_bot_thank_you(message)
+        except Exception as e:
+            self.logger.debug(f"Something went wrong processing a possible bot reply: {e}")
+
+        try:
+            if message.mentions or "happy birthday" in message.content.lower() or "hb" in message.content.lower():
+                if message.created_at.month == 5 and message.created_at.day == 14:
+                    if not message.author.id == self.client.user.id:
+                        await self._handle_bot_thank_you(message)
         except Exception as e:
             self.logger.debug(f"Something went wrong processing a possible bot reply: {e}")
 

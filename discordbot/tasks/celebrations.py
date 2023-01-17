@@ -40,6 +40,7 @@ class Celebrations(commands.Cog):
             msg = "Merry Christmas to my favourite server ❤️🎄"
             channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
             await channel.send(content=msg)
+            return
 
         if now.month == 1 and now.day == 1:
             # new years day!!
@@ -50,6 +51,7 @@ class Celebrations(commands.Cog):
             msg = f"Happy New Year! May you be blessed with many eddies in {now.year}! 🎆🎉💋"
             channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
             await channel.send(content=msg)
+            return
 
         if now.month == 2 and now.day == 11:
             # my birthday!!
@@ -61,6 +63,19 @@ class Celebrations(commands.Cog):
             msg = f"It's my birthday today and I am `{age}` years old! 🍰🧁"
             channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
             await channel.send(content=msg)
+            return
+
+        if now.month == 5 and now.day == 14:
+            # BSE birthday
+            if now.hour != 10 or not (0 <= now.minute < 15):
+                # already in birthday so can exit func safely
+                return
+            bse_created_year = 2016
+            age = now.year - bse_created_year
+            msg = f"Happy birthday to **Best Summer Ever**! {age} years old today! 🍰🎆🎉"
+            channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
+            await channel.send(content=msg)
+            return
 
     @celebrations.before_loop
     async def before_celebrations(self):

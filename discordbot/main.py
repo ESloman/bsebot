@@ -95,7 +95,6 @@ if __name__ == "__main__":
 
     listening_activity = discord.Activity(
         name="conversations",
-        state="Listening",
         type=discord.ActivityType.listening,
         details="Waiting for commands!"
     )

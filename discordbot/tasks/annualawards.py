@@ -37,6 +37,14 @@ class AnnualBSEddiesAwards(commands.Cog):
 
         self.logger.info(f"Time for the annual BSEddies awards! {now=}")
 
+        # set some kind of activity here
+        activity = discord.Activity(
+            name="with some annual stats and awards ",
+            type=discord.ActivityType.playing,
+            details="Working out annual BSEddies awards"
+        )
+        await self.bot.change_presence(activity=activity)
+
         awards_builder = AwardsBuilder(self.bot, BSE_SERVER_ID, self.logger, True)
 
         self.logger.debug("Calculating stats")
@@ -49,6 +57,14 @@ class AnnualBSEddiesAwards(commands.Cog):
             stats, message,
             awards, bseddies_awards
         )
+
+        # set activity back
+        listening_activity = discord.Activity(
+            name="conversations",
+            type=discord.ActivityType.listening,
+            details="Waiting for commands!"
+        )
+        await self.bot.change_presence(activity=listening_activity)
 
         self.logger.info("Sent messages! Until next year!")
 

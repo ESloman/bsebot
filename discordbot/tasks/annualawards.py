@@ -3,7 +3,7 @@ import datetime
 import discord
 from discord.ext import tasks, commands
 
-from discordbot.constants import BSE_SERVER_ID
+from discordbot.constants import BSE_SERVER_ID, BSEDDIES_REVOLUTION_CHANNEL
 from discordbot.stats.awardsbuilder import AwardsBuilder
 
 
@@ -44,6 +44,10 @@ class AnnualBSEddiesAwards(commands.Cog):
             details="Working out annual BSEddies awards"
         )
         await self.bot.change_presence(activity=activity)
+
+        # put a "BSEBot is typing..." message
+        channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
+        await channel.trigger_typing()
 
         awards_builder = AwardsBuilder(self.bot, BSE_SERVER_ID, self.logger, True)
 

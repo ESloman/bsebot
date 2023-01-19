@@ -81,6 +81,9 @@ class WordleTask(commands.Cog):
 
         # actually do wordle now
 
+        channel = await self.bot.fetch_channel(GENERAL_CHAT)
+        await channel.trigger_typing()
+
         wordle_solver = WordleSolver(self.logger)
         await wordle_solver.get_driver()
 
@@ -91,6 +94,8 @@ class WordleTask(commands.Cog):
         while not solved_wordle.solved and attempts < 5:
             # if we fail - try again as there's some randomness to it
             self.logger.debug(f"Failed wordle - attempting again: {attempts}")
+            # trigger typing in case we take longer than 10 seconds
+            await channel.trigger_typing()
             wordle_solver = WordleSolver(self.logger)
             await wordle_solver.get_driver()
             solved_wordle = await wordle_solver.solve()

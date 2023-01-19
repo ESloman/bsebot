@@ -3,7 +3,7 @@ import datetime
 import discord
 from discord.ext import tasks, commands
 
-from discordbot.constants import BSE_SERVER_ID
+from discordbot.constants import BSE_SERVER_ID, BSEDDIES_REVOLUTION_CHANNEL
 from discordbot.stats.awardsbuilder import AwardsBuilder
 
 
@@ -36,6 +36,18 @@ class MonthlyBSEddiesAwards(commands.Cog):
 
         self.logger.info(f"It's the first of the month and about ~11ish - time to trigger the awards! {now=}")
 
+        # set some kind of activity here
+        activity = discord.Activity(
+            name="with some monthly stats and awards ",
+            type=discord.ActivityType.playing,
+            details="Working out monthly BSEddies awards"
+        )
+        await self.bot.change_presence(activity=activity)
+
+        # put a "BSEBot is typing..." message
+        channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
+        await channel.trigger_typing()
+
         awards_builder = AwardsBuilder(self.bot, BSE_SERVER_ID, self.logger, False)
 
         self.logger.debug("Calculating stats")
@@ -48,6 +60,14 @@ class MonthlyBSEddiesAwards(commands.Cog):
             stats, message,
             awards, bseddies_awards
         )
+
+        # set activity back
+        listening_activity = discord.Activity(
+            name="conversations",
+            type=discord.ActivityType.listening,
+            details="Waiting for commands!"
+        )
+        await self.bot.change_presence(activity=listening_activity)
 
         self.logger.info("Sent messages! Until next month!")
 

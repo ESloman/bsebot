@@ -85,7 +85,7 @@ class BSEddiesCreateBet(BSEddies):
             msg = ("If you're providing custom outcome names - you must provide at least two outcomes.\n"
                    "Additionally, you must provide the outcomes sequentially "
                    "(ie, outcome_one, then outcome_two, and then outcome_three, and then outcome_four.)")
-            await ctx.respond(content=msg, ephemeral=True)
+            await ctx.followup.send(content=msg, ephemeral=True)
             return
 
         option_dict = {
@@ -119,7 +119,7 @@ class BSEddiesCreateBet(BSEddies):
                 msg = ("Your timeout string was incorrectly formatted. Needs to be 1 - 5 digits "
                        "and then either a s, m, h, or d "
                        "to signify seconds, minutes, hours, or days respectively.")
-                await ctx.respond(content=msg, ephemeral=True)
+                await ctx.followup.send(content=msg, ephemeral=True)
                 return
             g = match.group()
             if "s" in g:

@@ -39,6 +39,7 @@ class BSEddiesBetCreateModal(discord.ui.Modal):
         :param interaction:
         :return:
         """
+        await interaction.response.defer(ephemeral=True)
 
         response_components = interaction.data["components"]
         bet_title_comp = response_components[0]
@@ -53,14 +54,14 @@ class BSEddiesBetCreateModal(discord.ui.Modal):
         self.logger.info(f"{bet_title}, {bet_outcomes}")
 
         if len(bet_outcomes) > 8:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 content="You have provided too many outcomes - please provide 8 or less.",
                 ephemeral=True
             )
             return
 
         elif len(bet_outcomes) < 2:
-            await interaction.response.send_message(
+            await interaction.followup.send(
                 content="You have provided too few outcomes - please provide at least 2.",
                 ephemeral=True
             )

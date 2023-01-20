@@ -1,5 +1,6 @@
 import asyncio
 import copy
+import csv
 import datetime
 import os
 import random
@@ -42,6 +43,7 @@ class WordleSolver():
         self.firefox_opts.headless = True
         self.firefox_opts.add_argument("--no-sandbox")
         self.words = self._get_words()
+        self.words_freq = self._get_word_frequency()
         self.driver = None
         self.action_chain = None
         self.possible_words = []
@@ -96,6 +98,29 @@ class WordleSolver():
         return sorted(words)
 
     @staticmethod
+    def _get_word_frequency() -> list[str]:
+        """
+        Returns a list of possible words
+
+        Returns:
+            _type_: Returns the list of possible words we can guess
+        """
+        fp = os.path.abspath(__file__)
+        path = os.path.join(os.path.dirname(fp), "unigram_freq.csv")
+        words_f = {}
+        with open(path) as f:
+            reader = csv.reader(f)
+            for row in reader:
+                if row[0] == "word" and row[1] == "count":
+                    continue
+                words_f[row[0]] = int(row[1])
+        _sum = sum([words_f[i] for i in words_f if len(i) == 5])
+        norm_words_f = {
+            word: float(words_f[word]) / _sum for word in words_f if len(word) == 5
+        }
+        return norm_words_f
+
+    @staticmethod
     def _pick_starting_word() -> str:
         """
         Returns a random starting word
@@ -112,7 +137,10 @@ class WordleSolver():
         Returns:
             str: _description_
         """
-        word = random.choice(self.possible_words)
+        word = random.choices(
+            self.possible_words,
+            weights=[self.words_freq.get(word, 0) for word in self.possible_words]
+        )
         return word
 
     def _filter_word_list(self, game_state: dict, present_letters: list, correct_letters: list) -> None:
@@ -245,6 +273,9 @@ class WordleSolver():
                 word = self._pick_starting_word()
             else:
                 word = self._pick_word_from_list()
+
+            if type(word) == list:
+                word = word[0]
 
             guesses.append(word)
 

@@ -15,7 +15,7 @@ from discordbot.utilities import PlaceHolderLogger
 
 
 class StatsGatherer:
-    def __init__(self, logger = PlaceHolderLogger, annual: bool = False) -> None:
+    def __init__(self, logger=PlaceHolderLogger, annual: bool = False) -> None:
         self.annual = annual
         self.logger = logger
         self.cache = StatsDataCache(self.annual)

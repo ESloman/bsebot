@@ -3,9 +3,10 @@ import re
 from typing import Optional
 
 import discord
+from discord import PartialEmoji
 
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
-from discordbot.constants import WORDLE_REGEX
+from discordbot.constants import BSE_SERVER_ID, SLOMAN_SERVER_ID, WORDLE_SCORE_REGEX, WORDLE_REGEX
 from mongo.bsepoints import UserInteractions
 
 
@@ -17,6 +18,30 @@ class OnMessage(BaseEvent):
     def __init__(self, client, guild_ids, logger):
         super().__init__(client, guild_ids, logger)
         self.user_interactions = UserInteractions()
+
+    async def _wordle_react(self, message: discord.Message) -> None:
+        content = message.content
+        result = re.search(WORDLE_SCORE_REGEX, content).group()
+        guesses = result.split("/")[0]
+
+        # change this to switch?
+        if message.guild.id == BSE_SERVER_ID:
+            x_emoji = PartialEmoji.from_str("<:grimace:883385299428855868>")
+            two_emoji = PartialEmoji.from_str("<a:pookpog:847380557469450281>")
+        elif message.guild.id == SLOMAN_SERVER_ID:
+            x_emoji = PartialEmoji.from_str("<:col:810442635650138132>")
+            two_emoji = PartialEmoji.from_str("<a:8194pepeyay:1065934308981887057>")
+        else:
+            # not sure on the guild - use a unicode emoji
+            x_emoji = "😞"
+            two_emoji = "🎉"
+
+        if guesses == "X":
+            # user failed - react with appropriate reaction
+            await message.add_reaction(x_emoji)
+        elif guesses == "2":
+            # user did very well - react accordingly
+            await message.add_reaction(two_emoji)
 
     async def _handle_bot_thank_you(self, message: discord.Message) -> None:
         """Sends a basic reply message if a message meets the requirements
@@ -273,6 +298,12 @@ class OnMessage(BaseEvent):
             is_vc=is_vc
         )
 
+        # handle message reacts
+        if "wordle" in message_type:
+            # we're wordle - have a look and see if we should reply
+            await self._wordle_react(message)
+
+        # handle messages replies
         try:
             if message.mentions or "thank" in message.content.lower() or "ty" in message.content.lower():
                 if not message.author.id == self.client.user.id:

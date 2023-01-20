@@ -8,7 +8,7 @@ from discord.ext import tasks, commands
 
 from discordbot.bot_enums import TransactionTypes
 from discordbot.constants import CREATOR, MESSAGE_TYPES, MESSAGE_VALUES, WORDLE_VALUES, HUMAN_MESSAGE_TYPES
-from discordbot.constants import GENERAL_CHAT
+from discordbot.constants import GENERAL_CHAT, WORDLE_SCORE_REGEX
 from mongo.bsedataclasses import TaxRate
 from mongo.bsepoints import ServerEmojis, UserPoints, UserInteractions
 
@@ -352,7 +352,7 @@ class BSEddiesManager(object):
 
             try:
                 wordle_message = [w for w in user_results if "wordle" in w["message_type"]][0]
-                result = re.search(r"[\dX]/\d", wordle_message["content"]).group()
+                result = re.search(WORDLE_SCORE_REGEX, wordle_message["content"]).group()
                 guesses = result.split("/")[0]
 
                 if guesses != "X":

@@ -78,6 +78,7 @@ class ActivityTypes(IntEnum):
     BSEDDIES_BET_CANCEL = 33
     STATS = 34
     REPLAY22 = 35
+    RENAME_KING = 36
 
 
 class AwardsTypes(IntEnum):

@@ -70,6 +70,7 @@ class ThreadSpoilerTask(commands.Cog):
                 # not the right day for this spoiler thread
                 continue
 
+            await thread.trigger_typing()
             message = "New episode today - remember to mute cuties @everyone xoxo"
             await thread.send(content=message, allowed_mentions=discord.AllowedMentions(everyone=True))
             self.logger.info(f"Sent message to {thread.id}, {thread.name}: {message}")

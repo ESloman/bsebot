@@ -75,6 +75,7 @@ class OnMessage(BaseEvent):
         if not send_message:
             return
 
+        await message.channel.trigger_typing()
         await message.reply(content=random.choice(_possible_replies))
 
     async def _handle_bot_birthday_thank_you(self, message: discord.Message) -> None:
@@ -121,6 +122,7 @@ class OnMessage(BaseEvent):
         if not send_message:
             return
 
+        await message.channel.trigger_typing()
         await message.reply(content=random.choice(_possible_replies))
 
     async def message_received(self, message: discord.Message, message_type_only=False) -> Optional[list]:

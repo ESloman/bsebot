@@ -1,7 +1,8 @@
 
 import discord
 
-from discordbot.selects import BetSelect, BetOutcomesSelect
+from discordbot.selects.bet import BetSelect
+from discordbot.selects.betoutcomes import BetOutcomesSelect
 
 
 class CloseABetView(discord.ui.View):

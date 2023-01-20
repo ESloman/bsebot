@@ -4,7 +4,7 @@ import discord
 
 from discordbot.bot_enums import ActivityTypes
 from discordbot.constants import BSE_SERVER_ID, BSEDDIES_REVOLUTION_CHANNEL
-from discordbot.selects import TaxRateSelect
+from discordbot.selects.taxrate import TaxRateSelect
 
 from mongo.bsedataclasses import TaxRate
 from mongo.bsepoints import UserPoints

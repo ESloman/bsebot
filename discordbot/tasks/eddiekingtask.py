@@ -115,6 +115,7 @@ class BSEddiesKingTask(commands.Cog):
 
                 if guild_id == BSE_SERVER_ID:
                     channel = guild.get_channel(BSEDDIES_REVOLUTION_CHANNEL)
+                    await channel.trigger_typing()
                     msg = f"{new.mention} is now the {role.mention}! 👑"
                     await channel.send(content=msg)
 

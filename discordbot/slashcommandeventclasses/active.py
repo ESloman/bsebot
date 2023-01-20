@@ -30,6 +30,8 @@ class BSEddiesActive(BSEddies):
 
         self._add_event_type_to_activity_history(ctx.author, ctx.guild_id, ActivityTypes.BSEDDIES_ACTIVE)
 
+        await ctx.channel.trigger_typing()
+
         bets = self.user_bets.get_all_pending_bets(ctx.guild.id)
 
         message = "Here are all the active bets:\n"

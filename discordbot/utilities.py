@@ -13,8 +13,10 @@ class PlaceHolderLogger():
     def info(msg: str) -> None:
         print(msg)
 
+    @staticmethod
     def debug(msg: str) -> None:
         print(msg)
 
+    @staticmethod
     def warning(msg: str) -> None:
         print(msg)

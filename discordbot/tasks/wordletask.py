@@ -101,15 +101,14 @@ class WordleTask(commands.Cog):
             solved_wordle = await wordle_solver.solve()
             attempts += 1
 
+        await channel.trigger_typing()
+
         # put it into dark mode
         message = solved_wordle.share_text.replace("⬜", "⬛")
         spoiler_message = (
             f"Solved wordle in `{solved_wordle.guess_count}`, "
             f"word was: || {solved_wordle.actual_word} ||"
         )
-
-        guild = await self.bot.fetch_guild(BSE_SERVER_ID)
-        channel = await guild.fetch_channel(GENERAL_CHAT)
 
         self.logger.info(f"Sending wordle message: {message}")
         sent_message = await channel.send(content=message)

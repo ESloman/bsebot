@@ -79,6 +79,7 @@ class AfterWorkVally(commands.Cog):
 
         guild = await self.bot.fetch_guild(BSE_SERVER_ID)  # type: discord.Guild
         channel = await guild.fetch_channel(VALORANT_CHAT)
+        await channel.trigger_typing()
         role = guild.get_role(VALORANT_ROLE)
 
         message = random.choice(self.messages)  # type: str

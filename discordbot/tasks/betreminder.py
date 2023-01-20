@@ -45,6 +45,7 @@ class BetReminder(commands.Cog):
                     # ~ 24 hours to go!
                     # send reminder here
                     channel = await guild_obj.fetch_channel(bet["channel_id"])
+                    await channel.trigger_typing()
                     message = await channel.fetch_message(bet["message_id"])
 
                     num_betters = len(bet["betters"].keys())

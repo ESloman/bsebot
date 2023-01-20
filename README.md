@@ -28,8 +28,6 @@ Bot was originally created for the `BSE` server to fulfill a need to have someth
     Whoever has the most eddies - is the King! They get a special named role and will earn taxes on everyone's salaries.
 
     ![king message](docs/readme_images/readme_king.PNG)
-    
-    ![king display](docs/readme_images/readme_king_display.png)
 
     ## `R E O V L U T I O N`
     Will the peasants overthrow the KING? Will the KING consolidate further power?

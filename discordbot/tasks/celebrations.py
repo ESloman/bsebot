@@ -39,6 +39,7 @@ class Celebrations(commands.Cog):
             # now we can send message!
             msg = "Merry Christmas to my favourite server ❤️🎄"
             channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
+            await channel.trigger_typing()
             await channel.send(content=msg)
             return
 
@@ -50,6 +51,7 @@ class Celebrations(commands.Cog):
             # now we can send message!
             msg = f"Happy New Year! May you be blessed with many eddies in {now.year}! 🎆🎉💋"
             channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
+            await channel.trigger_typing()
             await channel.send(content=msg)
             return
 
@@ -62,6 +64,7 @@ class Celebrations(commands.Cog):
             age = now.year - birth_year
             msg = f"It's my birthday today and I am `{age}` years old! 🍰🧁"
             channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
+            await channel.trigger_typing()
             await channel.send(content=msg)
             return
 
@@ -74,6 +77,7 @@ class Celebrations(commands.Cog):
             age = now.year - bse_created_year
             msg = f"Happy birthday to **Best Summer Ever**! {age} years old today! 🍰🎆🎉"
             channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
+            await channel.trigger_typing()
             await channel.send(content=msg)
             return
 

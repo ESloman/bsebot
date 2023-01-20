@@ -103,9 +103,8 @@ class BSEddiesRevolutionTask(commands.Cog):
         :param key:
         :return:
         """
-        guild_obj = await self.bot.fetch_guild(guild_id)  # type: discord.Guild
-        channels = await guild_obj.fetch_channels()
-        channel = [c for c in channels if c.id == event.get("channel_id", BSEDDIES_REVOLUTION_CHANNEL)][0]
+        channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
+        await channel.trigger_typing()
         gif = await self.giphy_api.random_gif("celebrate")
         await channel.send(
             content=f"Just under **{hours_string.upper()}** to go now - remember to choose your side!️"
@@ -127,8 +126,8 @@ class BSEddiesRevolutionTask(commands.Cog):
         king_user = await self.bot.fetch_user(king["uid"])  # type: discord.User
         guild_obj = await self.bot.fetch_guild(guild_id)  # type: discord.Guild
         role = guild_obj.get_role(BSEDDIES_KING_ROLES[guild_id])  # type: discord.Role
-        channels = await guild_obj.fetch_channels()
-        channel = [c for c in channels if c.id == event.get("channel_id", BSEDDIES_REVOLUTION_CHANNEL)][0]
+        channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
+        await channel.trigger_typing()
 
         revolution_view = RevolutionView(self.bot, event, self.logger)
 
@@ -158,13 +157,13 @@ class BSEddiesRevolutionTask(commands.Cog):
         revolutionaries = event["revolutionaries"]
         channel_id = event["channel_id"]
 
-        guild_obj = await self.bot.fetch_guild(guild_id)
-        channels = await guild_obj.fetch_channels()
-        channel = [c for c in channels if c.id == channel_id][0]
+        channel = await self.bot.fetch_channel(channel_id)
+
+        await channel.trigger_typing()
 
         self.rev_started = False
 
-        if len(_users) == 0:
+        if not _users:
             message = "No-one supported or overthrew the King - nothing happens."
             await channel.send(content=message)
             self.revolutions.close_event(event["event_id"], guild_id, False, 0)

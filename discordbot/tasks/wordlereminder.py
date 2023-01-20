@@ -73,9 +73,9 @@ class WordleReminder(commands.Cog):
             self.logger.info("Everyone has done their wordle today!")
             return
 
-        guild = await self.bot.fetch_guild(BSE_SERVER_ID)  # type: discord.Guild
-        channel = await guild.fetch_channel(GENERAL_CHAT)
+        channel = await self.bot.fetch_channel(GENERAL_CHAT)
         for reminder in reminders_needed:
+            await channel.trigger_typing()
             if reminder["user_id"] == BSE_BOT_ID:
                 # skip bot reminder
                 continue

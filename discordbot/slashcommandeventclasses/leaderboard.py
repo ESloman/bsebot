@@ -25,6 +25,8 @@ class BSEddiesLeaderboard(BSEddies):
 
         self._add_event_type_to_activity_history(ctx.author, ctx.guild_id, ActivityTypes.BSEDDIES_LEADERBOARD)
 
+        await ctx.channel.trigger_typing()
+
         leaderboard_view = views.LeaderBoardView(self.embed_manager)
         msg = self.embed_manager.get_leaderboard_embed(ctx.guild, 5, ctx.author.display_name)
         await ctx.respond(content=msg, view=leaderboard_view)

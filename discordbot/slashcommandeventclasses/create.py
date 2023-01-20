@@ -134,6 +134,8 @@ class BSEddiesCreateBet(BSEddies):
                 dt_key = {}
             timeout = datetime.datetime.now() + datetime.timedelta(**dt_key)
 
+        await ctx.channel.trigger_typing()
+
         bet = self.user_bets.create_new_bet(
             ctx.guild.id,
             ctx.user.id,

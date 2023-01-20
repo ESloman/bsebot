@@ -11,10 +11,11 @@ from discordbot.constants import ANNUAL_AWARDS_AWARD, BSE_BOT_ID, JERK_OFF_CHAT,
 from discordbot.constants import WORDLE_SCORE_REGEX
 from discordbot.stats.statsdatacache import StatsDataCache
 from discordbot.stats.statsdataclasses import Stat
+from discordbot.utilities import PlaceHolderLogger
 
 
 class StatsGatherer:
-    def __init__(self, logger, annual: bool = False) -> None:
+    def __init__(self, logger = PlaceHolderLogger, annual: bool = False) -> None:
         self.annual = annual
         self.logger = logger
         self.cache = StatsDataCache(self.annual)

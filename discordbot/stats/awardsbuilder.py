@@ -141,7 +141,8 @@ class AwardsBuilder:
             (f"**Quietest day** 📆: {quietest_day_format} "
              f"(`{quietest_day.messages}` messages in `{quietest_day.channels}` "
              f"channels from `{quietest_day.users}` users)\n"),
-            (f"**Average wordle score** 🟩: `{average_wordle.value}`\n"),
+            (f"**Average wordle score** 🟩: `{average_wordle.value}` "
+             f"(the bot's: `{average_wordle.bot_average}`)\n"),
             (f"**Total time spent in VCs** 📱: `{str(datetime.timedelta(seconds=time_spent_in_vc.value))}` "
              f"(`in {time_spent_in_vc.channels}` channels from `{time_spent_in_vc.users}` users)\n"),
             (f"**Talkiest VC** 💬: {vc_time_obj.mention} (`{vc_most_time_spent.users}` users spent "

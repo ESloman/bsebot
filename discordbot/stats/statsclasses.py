@@ -8,6 +8,7 @@ import discord
 
 from discordbot.bot_enums import ActivityTypes, AwardsTypes, StatTypes, TransactionTypes
 from discordbot.constants import ANNUAL_AWARDS_AWARD, BSE_BOT_ID, JERK_OFF_CHAT, MONTHLY_AWARDS_PRIZE
+from discordbot.constants import WORDLE_SCORE_REGEX
 from discordbot.stats.statsdatacache import StatsDataCache
 from discordbot.stats.statsdataclasses import Stat
 
@@ -543,7 +544,7 @@ class StatsGatherer:
             if wordle["user_id"] == BSE_BOT_ID:
                 continue
 
-            result = re.search(r"[\dX]/\d", wordle["content"]).group()
+            result = re.search(WORDLE_SCORE_REGEX, wordle["content"]).group()
             guesses = result.split("/")[0]
 
             if guesses == "X":
@@ -551,7 +552,20 @@ class StatsGatherer:
             guesses = int(guesses)
             wordle_count.append(guesses)
 
+        bot_wordle_count = []
+        for wordle in wordle_messages:
+            if wordle["user_id"] != BSE_BOT_ID:
+                continue
+
+            result = re.search(WORDLE_SCORE_REGEX, wordle["content"]).group()
+            guesses = result.split("/")[0]
+            if guesses == "X":
+                guesses = "10"
+            guesses = int(guesses)
+            bot_wordle_count.append(guesses)
+
         average_wordle = round((sum(wordle_count) / len(wordle_count)), 2)
+        average_bot_wordle = round((sum(bot_wordle_count) / len(bot_wordle_count)), 2)
 
         data_class = Stat(
             "stat",
@@ -564,6 +578,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
+        data_class.bot_average = average_bot_wordle
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class

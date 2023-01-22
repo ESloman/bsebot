@@ -28,6 +28,7 @@ from discordbot.slashcommandeventclasses import BSEddiesActive, BSEddiesAdminGiv
 from discordbot.slashcommandeventclasses import BSEddiesCloseBet, BSEddiesGift, BSEddiesHighScore, BSEddiesLeaderboard
 from discordbot.slashcommandeventclasses import BSEddiesPending, BSEddiesPlaceBet, BSEddiesPredict, BSEddiesTaxRate
 from discordbot.slashcommandeventclasses import BSEddiesTransactionHistory, BSEddiesView, BSEddiesStats
+from discordbot.slashcommandeventclasses import BSEddiesKingRename
 
 # task imports
 from discordbot.tasks.annualawards import AnnualBSEddiesAwards
@@ -130,6 +131,7 @@ class CommandManager(object):
         self.bseddies_autogenerate = BSEddiesAutoGenerate(client, guilds, self.logger)
         self.bseddies_tax_rate = BSEddiesTaxRate(client, guilds, self.logger)
         self.bseddies_stats = BSEddiesStats(client, guilds, self.logger)
+        self.bseddies_king_rename = BSEddiesKingRename(client, guilds, self.logger)
 
         # tasks
         self.bet_closer_task = BetCloser(self.client, guilds, self.logger, self.bseddies_place, self.bseddies_close)
@@ -544,6 +546,13 @@ class CommandManager(object):
                 ctx (discord.ApplicationContext): _description_
             """
             await self.bseddies_tax_rate.create_tax_view(ctx)
+
+        @self.client.command(description="Pay to rename the king role")
+        async def renameking(ctx: discord.ApplicationContext, name: str):
+            """
+            Slash command to rename the King role
+            """
+            await self.bseddies_king_rename.rename(ctx, name)
 
         @self.client.command(description="See your 2022 replay")
         async def wrapped22(ctx: discord.ApplicationContext):

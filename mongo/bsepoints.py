@@ -14,7 +14,7 @@ from bson import ObjectId
 from pymongo.results import UpdateResult
 
 from mongo import interface
-from mongo.datatypes import Bet, Emoji, Message, Sticker, User
+from mongo.datatypes import Bet, Emoji, GuildDB, Message, Sticker, User
 from mongo.db_classes import BestSummerEverPointsDB
 
 
@@ -973,6 +973,47 @@ class ServerStickers(BestSummerEverPointsDB):
             "created": created,
             "created_by": user_id,
             "guild_id": guild_id
+        }
+
+        return self.insert(doc)
+
+
+class Guilds(BestSummerEverPointsDB):
+    """
+    Class for interacting with the 'guilds' MongoDB collection in the 'bestsummereverpoints' DB
+    """
+    def __init__(self):
+        """
+        Constructor method for the class. Initialises the collection object
+        """
+        super().__init__()
+        self._vault = interface.get_collection(self.database, "guilds")
+
+    def get_guild(self, guild_id: int) -> Union[GuildDB, None]:
+        """
+        Gets an already created guild document from the database.
+
+        :param guild_id: int - The guild ID
+        :return: a dict of the guild or None if there's no matching ID
+        """
+
+        ret = self.query({"guild_id": guild_id})
+        if ret:
+            return ret[0]
+        return None
+
+    def insert_guild(
+            self,
+            guild_id: int,
+            name: str,
+            owner_id: int,
+            created: datetime.datetime,
+    ) -> list:
+        doc = {
+            "name": name,
+            "guild_id": guild_id,
+            "owner_id": owner_id,
+            "created": created
         }
 
         return self.insert(doc)

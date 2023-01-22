@@ -12,7 +12,7 @@ import discord
 
 from discordbot.bot_enums import ActivityTypes
 from discordbot.embedmanager import EmbedManager
-from mongo.bsepoints import ServerEmojis, ServerStickers, UserBets, UserPoints
+from mongo.bsepoints import Guilds, ServerEmojis, ServerStickers, UserBets, UserPoints
 from mongo.bseticketedevents import RevolutionEvent
 
 
@@ -39,6 +39,7 @@ class BaseEvent(object):
         self.server_emojis = ServerEmojis()
         self.server_stickers = ServerStickers()
         self.revolutions = RevolutionEvent()
+        self.guilds = Guilds()
         self.client = client
         self.guild_ids = guild_ids
         self.embed_manager = EmbedManager(logger)

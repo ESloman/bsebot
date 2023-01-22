@@ -12,7 +12,7 @@ from discordbot.slashcommandeventclasses import BSEddiesPlaceBet, BSEddiesCloseB
 from discordbot.views import LeaderBoardView, RevolutionView, BetView
 from mongo.bsedataclasses import CommitHash, SpoilerThreads
 from mongo.bseticketedevents import RevolutionEvent
-from mongo.bsepoints import UserInteractions, ServerEmojis
+from mongo.bsepoints import Guilds, UserInteractions, ServerEmojis
 
 
 class OnReadyEvent(BaseEvent):
@@ -28,6 +28,7 @@ class OnReadyEvent(BaseEvent):
         self.place = BSEddiesPlaceBet(client, guild_ids, self.logger)
         self.spoilers = SpoilerThreads()
         self.hashes = CommitHash()
+        self.guilds = Guilds()
 
     async def on_ready(self) -> None:
         """
@@ -40,13 +41,19 @@ class OnReadyEvent(BaseEvent):
         await self.client.sync_commands(method="auto", guild_ids=self.guild_ids)
         self.logger.info("Synced commands")
 
-        messages_to_delete = [
-            # ( message_id , channel_id )
-        ]
-
         for guild_id in self.guild_ids:
-            guild = self.client.get_guild(guild_id)  # type: discord.Guild
+            guild = await self.client.fetch_guild(guild_id)  # type: discord.Guild
             self.logger.info(f"Checking guild: {guild.id} - {guild.name}")
+
+            db_guild = self.guilds.get_guild(guild_id)
+            if not db_guild:
+                # gotta insert into database
+                db_guild = self.guilds.insert_guild(
+                    guild_id,
+                    guild.name,
+                    guild.owner_id,
+                    guild.created_at
+                )
 
             self.logger.info("Checking guilds for new members")
             for member in guild.members:  # type: discord.Member
@@ -82,20 +89,22 @@ class OnReadyEvent(BaseEvent):
 
             self.logger.info("Checking for users that have left")
             member_ids = [member.id for member in guild.members]
-            _users = self.user_points.get_all_users_for_guild(guild_id)
-            _users = [u for u in _users if not u.get("inactive")]
-            for user in _users:
-                if user["uid"] not in member_ids:
+            if member_ids:
+                # actually managed to get members
+                _users = self.user_points.get_all_users_for_guild(guild_id)
+                _users = [u for u in _users if not u.get("inactive")]
+                for user in _users:
+                    if user["uid"] not in member_ids:
 
-                    self.user_points.update({"_id": user["_id"]}, {"$set": {"inactive": True}})
-                    self.user_points.append_to_activity_history(
-                        user["uid"],
-                        guild_id,
-                        {
-                            "type": ActivityTypes.SERVER_LEAVE,
-                            "timestamp": datetime.datetime.now()
-                        }
-                    )
+                        self.user_points.update({"_id": user["_id"]}, {"$set": {"inactive": True}})
+                        self.user_points.append_to_activity_history(
+                            user["uid"],
+                            guild_id,
+                            {
+                                "type": ActivityTypes.SERVER_LEAVE,
+                                "timestamp": datetime.datetime.now()
+                            }
+                        )
 
             self.logger.info("Checking guild emojis")
             await guild.fetch_emojis()
@@ -228,15 +237,6 @@ class OnReadyEvent(BaseEvent):
                 embed = self.embed_manager.get_bet_embed(guild, bet["bet_id"], bet)
                 view = BetView(bet, self.place, self.close)
                 await message.edit(embed=embed, view=view)
-
-            self.logger.info("Deleting messages")
-            try:
-                for message in messages_to_delete:
-                    channel = await guild.fetch_channel(message[1])
-                    message_obj = channel.get_partial_message(message[0])
-                    await channel.delete_messages([message_obj, ])
-            except (discord.errors.InvalidData, discord.errors.NotFound):
-                pass
 
             self.client.add_view(LeaderBoardView(self.embed_manager))
 

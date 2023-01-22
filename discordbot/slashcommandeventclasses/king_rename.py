@@ -3,7 +3,7 @@ import datetime
 
 import discord
 
-from discordbot.bot_enums import ActivityTypes
+from discordbot.bot_enums import ActivityTypes, TransactionTypes
 from discordbot.slashcommandeventclasses import BSEddies
 
 
@@ -75,6 +75,19 @@ class BSEddiesKingRename(BSEddies):
             return
 
         self.user_points.decrement_points(ctx.author.id, ctx.guild.id, 500)
+
+        self.user_points.append_to_transaction_history(
+            ctx.author.id,
+            ctx.guild.id,
+            {
+                "type": TransactionTypes.GIFT_GIVE,
+                "amount": 500 * -1,
+                "timestamp": datetime.datetime.now(),
+                "role_id": role_id,
+                "guild_id": ctx.guild.id
+            }
+        )
+
         self.guilds.update({"guild_id": ctx.guild.id}, {"$set": {"rename_king": now}})
 
         channel_id = db_guild.get("channel")

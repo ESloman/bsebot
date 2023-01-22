@@ -36,6 +36,7 @@ class TransactionTypes(IntEnum):
     BET_TAX = 24
     MONTHLY_AWARDS_PRIZE = 25
     ANNUAL_AWARDS_PRIZE = 26
+    KING_RENAME = 27
     OVERRIDE = 99
 
 
@@ -78,6 +79,7 @@ class ActivityTypes(IntEnum):
     BSEDDIES_BET_CANCEL = 33
     STATS = 34
     REPLAY22 = 35
+    RENAME_KING = 36
 
 
 class AwardsTypes(IntEnum):

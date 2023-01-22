@@ -281,3 +281,9 @@ class Thread(TypedDict):
     """Only for SPOILER threads - the day a new ep comes out"""
     active: bool
     """Only for SPOILER threads - if we should still be posting spoiler warnings"""
+
+
+class GuildDB(TypedDict):
+    _id: ObjectId
+    guild_id: int
+    rename_king: datetime.datetime

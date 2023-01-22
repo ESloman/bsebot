@@ -89,20 +89,22 @@ class OnReadyEvent(BaseEvent):
 
             self.logger.info("Checking for users that have left")
             member_ids = [member.id for member in guild.members]
-            _users = self.user_points.get_all_users_for_guild(guild_id)
-            _users = [u for u in _users if not u.get("inactive")]
-            for user in _users:
-                if user["uid"] not in member_ids:
+            if member_ids:
+                # actually managed to get members
+                _users = self.user_points.get_all_users_for_guild(guild_id)
+                _users = [u for u in _users if not u.get("inactive")]
+                for user in _users:
+                    if user["uid"] not in member_ids:
 
-                    self.user_points.update({"_id": user["_id"]}, {"$set": {"inactive": True}})
-                    self.user_points.append_to_activity_history(
-                        user["uid"],
-                        guild_id,
-                        {
-                            "type": ActivityTypes.SERVER_LEAVE,
-                            "timestamp": datetime.datetime.now()
-                        }
-                    )
+                        self.user_points.update({"_id": user["_id"]}, {"$set": {"inactive": True}})
+                        self.user_points.append_to_activity_history(
+                            user["uid"],
+                            guild_id,
+                            {
+                                "type": ActivityTypes.SERVER_LEAVE,
+                                "timestamp": datetime.datetime.now()
+                            }
+                        )
 
             self.logger.info("Checking guild emojis")
             await guild.fetch_emojis()

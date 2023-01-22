@@ -4,7 +4,6 @@ import datetime
 import discord
 
 from discordbot.bot_enums import ActivityTypes
-from discordbot.constants import BSEDDIES_KING_ROLES
 from discordbot.slashcommandeventclasses import BSEddies
 
 
@@ -42,26 +41,48 @@ class BSEddiesKingRename(BSEddies):
             return
 
         db_guild = self.guilds.get_guild(ctx.guild.id)
+
+        if not db_guild:
+            # no guild info in DB ??
+            return
+
         last_king_rename = db_guild.get("rename_king")
         now = datetime.datetime.now()
         if last_king_rename:
             time_elapsed = now - last_king_rename
             if time_elapsed.total_seconds() < 3600:
                 # not been an hour yet
+                mins = round((3600 - time_elapsed.total_seconds()) / 60, 1)
                 message = (
                     "The KING role was renamed within the last hour can't be changed again - "
-                    f"need to wait another {3600 - time_elapsed.total_seconds()} seconds."
+                    f"need to wait another `{mins}` minutes."
                 )
                 await ctx.followup.send(content=message, ephemeral=True)
                 return
 
-        role = ctx.guild.get_role(BSEDDIES_KING_ROLES[ctx.guild.id])
+        role_id = db_guild.get("role")
+
+        if not role_id:
+            await ctx.followup.send("Guild role not set correctly.", ephemeral=True)
+            return
+        role = ctx.guild.get_role(role_id)
+
+        try:
+            await role.edit(name=name)
+        except discord.Forbidden:
+            message = "Don't have the required permissions to do this."
+            await ctx.followup.send(message, ephemeral=True)
+            return
 
         self.user_points.decrement_points(ctx.author.id, ctx.guild.id, 500)
-
-        await role.edit(name=name)
-
         self.guilds.update({"guild_id": ctx.guild.id}, {"$set": {"rename_king": now}})
+
+        channel_id = db_guild.get("channel")
+        if channel_id:
+            channel = await ctx.guild.fetch_channel(channel_id)
+            await channel.trigger_typing()
+            ann = f"{ctx.author.mention} changed the `bseddies` role name to {role.mention}!"
+            await channel.send(content=ann)
 
         message = f"Changed the role name to `{name}` for you."
         await ctx.followup.send(content=message, ephemeral=True)

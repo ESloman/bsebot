@@ -10,16 +10,26 @@ from mongo.bsedataclasses import WordleAttempts
 
 
 class WordleTask(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger):
+    def __init__(self, bot: discord.Client, guilds, logger, startup_tasks):
         self.bot = bot
         self.logger = logger
         self.guilds = guilds
+        self.startup_tasks = startup_tasks
         self.wordle_message.start()
         self.wordles = WordleAttempts()
         self.sent_wordle = False
         self.wait_iters = None
 
         self._set_wordle()
+
+    def _check_start_up_tasks(self) -> bool:
+        """
+        Checks start up tasks
+        """
+        for task in self.startup_tasks:
+            if not task.finished:
+                return False
+        return True
 
     def cog_unload(self):
         """
@@ -48,6 +58,9 @@ class WordleTask(commands.Cog):
         Wordle task
         :return:
         """
+        if not self._check_start_up_tasks():
+            self.logger.info("Startup tasks not complete - skipping loop")
+            return
         now = datetime.datetime.now()
 
         if now.hour < 9:

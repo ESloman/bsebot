@@ -9,9 +9,10 @@ from mongo.bsepoints import UserBets
 
 
 class BetCloser(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger, place, close):
+    def __init__(self, bot: discord.Client, guilds, logger, place, close, startup_tasks):
         self.bot = bot
         self.guilds = guilds
+        self.startup_tasks = startup_tasks
         self.user_bets = UserBets()
         self.logger = logger
         self.embed_manager = EmbedManager(self.logger)
@@ -27,6 +28,15 @@ class BetCloser(commands.Cog):
         """
         self.bet_closer.cancel()
 
+    def _check_start_up_tasks(self) -> bool:
+        """
+        Checks start up tasks
+        """
+        for task in self.startup_tasks:
+            if not task.finished:
+                return False
+        return True
+
     @tasks.loop(seconds=10.0)
     async def bet_closer(self):
         """
@@ -34,6 +44,10 @@ class BetCloser(commands.Cog):
         If they have expired - they get closed.
         :return:
         """
+        if not self._check_start_up_tasks():
+            self.logger.info("Startup tasks not complete - skipping loop")
+            return
+
         now = datetime.datetime.now()
         for guild in self.guilds:
             guild_obj = self.bot.get_guild(guild)  # type: discord.Guild

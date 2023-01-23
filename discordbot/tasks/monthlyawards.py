@@ -8,9 +8,10 @@ from discordbot.stats.awardsbuilder import AwardsBuilder
 
 
 class MonthlyBSEddiesAwards(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger):
+    def __init__(self, bot: discord.Client, guilds, logger, startup_tasks):
         self.bot = bot
         self.logger = logger
+        self.startup_tasks = startup_tasks
         self.guilds = guilds
         self.bseddies_awards.start()
 
@@ -21,8 +22,20 @@ class MonthlyBSEddiesAwards(commands.Cog):
         """
         self.bseddies_awards.cancel()
 
+    def _check_start_up_tasks(self) -> bool:
+        """
+        Checks start up tasks
+        """
+        for task in self.startup_tasks:
+            if not task.finished:
+                return False
+        return True
+
     @tasks.loop(minutes=60)
     async def bseddies_awards(self):
+        if not self._check_start_up_tasks():
+            self.logger.info("Startup tasks not complete - skipping loop")
+            return
         now = datetime.datetime.now()
 
         if not now.day == 1 or not now.hour == 11:

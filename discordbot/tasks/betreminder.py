@@ -7,11 +7,12 @@ from mongo.bsepoints import UserBets
 
 
 class BetReminder(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger):
+    def __init__(self, bot: discord.Client, guilds, logger, startup_tasks):
         self.bot = bot
         self.guilds = guilds
         self.user_bets = UserBets()
         self.logger = logger
+        self.startup_tasks = startup_tasks
         self.bet_reminder.start()
 
     def cog_unload(self):
@@ -21,12 +22,25 @@ class BetReminder(commands.Cog):
         """
         self.bet_reminder.cancel()
 
+    def _check_start_up_tasks(self) -> bool:
+        """
+        Checks start up tasks
+        """
+        for task in self.startup_tasks:
+            if not task.finished:
+                return False
+        return True
+
     @tasks.loop(minutes=60)
     async def bet_reminder(self):
         """
         Loop that takes all our active bets and sends a reminder message
         :return:
         """
+        if not self._check_start_up_tasks():
+            self.logger.info("Startup tasks not complete - skipping loop")
+            return
+
         now = datetime.datetime.now()
         for guild in self.guilds:
             guild_obj = self.bot.get_guild(guild)  # type: discord.Guild

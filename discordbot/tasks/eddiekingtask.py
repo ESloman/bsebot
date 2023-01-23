@@ -10,10 +10,11 @@ from mongo.bseticketedevents import RevolutionEvent
 
 
 class BSEddiesKingTask(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger):
+    def __init__(self, bot: discord.Client, guilds, logger, startup_tasks):
         self.bot = bot
         self.user_points = UserPoints()
         self.logger = logger
+        self.startup_tasks = startup_tasks
         self.guilds = guilds
         self.events = RevolutionEvent()
         self.king_checker.start()
@@ -26,12 +27,25 @@ class BSEddiesKingTask(commands.Cog):
         """
         self.king_checker.cancel()
 
+    def _check_start_up_tasks(self) -> bool:
+        """
+        Checks start up tasks
+        """
+        for task in self.startup_tasks:
+            if not task.finished:
+                return False
+        return True
+
     @tasks.loop(minutes=1)
     async def king_checker(self):
         """
         Loop that makes sure the King is assigned correctly
         :return:
         """
+        if not self._check_start_up_tasks():
+            self.logger.info("Startup tasks not complete - skipping loop")
+            return
+
         for guild_id in self.guilds:
 
             if events := self.events.get_open_events(guild_id):

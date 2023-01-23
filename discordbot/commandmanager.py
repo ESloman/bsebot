@@ -38,6 +38,7 @@ from discordbot.tasks.celebrations import Celebrations
 from discordbot.tasks.dailyvallytask import AfterWorkVally
 from discordbot.tasks.eddiegains import EddieGainMessager
 from discordbot.tasks.eddiekingtask import BSEddiesKingTask
+from discordbot.tasks.guildchecker import GuildChecker
 from discordbot.tasks.monthlyawards import MonthlyBSEddiesAwards
 from discordbot.tasks.revolutiontask import BSEddiesRevolutionTask
 from discordbot.tasks.threadmutetask import ThreadSpoilerTask
@@ -134,20 +135,26 @@ class CommandManager(object):
         self.bseddies_king_rename = BSEddiesKingRename(client, guilds, self.logger)
 
         # tasks
-        self.bet_closer_task = BetCloser(self.client, guilds, self.logger, self.bseddies_place, self.bseddies_close)
-        self.bet_reminder_task = BetReminder(self.client, guilds, self.logger)
-        self.eddie_gain_message_task = EddieGainMessager(self.client, guilds, self.logger)
-        self.eddie_king_task = BSEddiesKingTask(self.client, guilds, self.logger)
-        self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger, self.giphy_token)
+        self.guild_checker_task = GuildChecker(self.client, self.logger, self.on_ready)
+
+        startup_tasks = [self.guild_checker_task, ]
+
+        self.bet_closer_task = BetCloser(
+            self.client, guilds, self.logger, self.bseddies_place, self.bseddies_close, startup_tasks
+        )
+        self.bet_reminder_task = BetReminder(self.client, guilds, self.logger, startup_tasks)
+        self.eddie_gain_message_task = EddieGainMessager(self.client, guilds, self.logger, startup_tasks)
+        self.eddie_king_task = BSEddiesKingTask(self.client, guilds, self.logger, startup_tasks)
+        self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger, self.giphy_token, startup_tasks)
 
         if BSE_SERVER_ID in self.guilds:
-            self.thread_task = ThreadSpoilerTask(self.client, guilds, self.logger)
-            self.vally_task = AfterWorkVally(self.client, guilds, self.logger)
-            self.monthly_awards_task = MonthlyBSEddiesAwards(self.client, guilds, self.logger)
-            self.annual_awards_task = AnnualBSEddiesAwards(self.client, guilds, self.logger)
-            self.wordle_task = WordleTask(self.client, guilds, self.logger)
-            self.wordle_reminder = WordleReminder(self.client, guilds, self.logger)
-            self.celebrations_task = Celebrations(self.client, guilds, self.logger)
+            self.thread_task = ThreadSpoilerTask(self.client, guilds, self.logger, startup_tasks)
+            self.vally_task = AfterWorkVally(self.client, guilds, self.logger, startup_tasks)
+            self.monthly_awards_task = MonthlyBSEddiesAwards(self.client, guilds, self.logger, startup_tasks)
+            self.annual_awards_task = AnnualBSEddiesAwards(self.client, guilds, self.logger, startup_tasks)
+            self.wordle_task = WordleTask(self.client, guilds, self.logger, startup_tasks)
+            self.wordle_reminder = WordleReminder(self.client, guilds, self.logger, startup_tasks)
+            self.celebrations_task = Celebrations(self.client, guilds, self.logger, startup_tasks)
 
         # call the methods that register the events we're listening for
         self._register_client_events()

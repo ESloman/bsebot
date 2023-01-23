@@ -8,12 +8,12 @@ from mongo.bsedataclasses import SpoilerThreads
 
 
 class ThreadSpoilerTask(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger):
+    def __init__(self, bot: discord.Client, guilds, logger, startup_tasks):
         self.bot = bot
         self.logger = logger
         self.guilds = guilds
+        self.startup_tasks = startup_tasks
         self.spoilers = SpoilerThreads()
-
         self.thread_mute.start()
 
     def cog_unload(self):
@@ -23,12 +23,25 @@ class ThreadSpoilerTask(commands.Cog):
         """
         self.thread_mute.cancel()
 
+    def _check_start_up_tasks(self) -> bool:
+        """
+        Checks start up tasks
+        """
+        for task in self.startup_tasks:
+            if not task.finished:
+                return False
+        return True
+
     @tasks.loop(minutes=15)
     async def thread_mute(self):
         """
         Loop that makes sure the King is assigned correctly
         :return:
         """
+        if not self._check_start_up_tasks():
+            self.logger.info("Startup tasks not complete - skipping loop")
+            return
+
         now = datetime.datetime.now()
         if now.hour != 8 or not (0 <= now.minute < 15):
             return

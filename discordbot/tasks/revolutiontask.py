@@ -16,12 +16,13 @@ from mongo.datatypes import RevolutionEvent as RevolutionEventType
 
 
 class BSEddiesRevolutionTask(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger, giphy_token):
+    def __init__(self, bot: discord.Client, guilds, logger, giphy_token, startup_tasks):
         self.bot = bot
         self.user_points = UserPoints()
         self.revolutions = RevolutionEvent()
         self.embed_manager = EmbedManager(logger)
         self.logger = logger
+        self.startup_tasks = startup_tasks
         self.guilds = guilds
         self.giphy_api = GiphyAPI(giphy_token)
         self.rev_started = False
@@ -38,12 +39,25 @@ class BSEddiesRevolutionTask(commands.Cog):
         """
         self.revolution.cancel()
 
+    def _check_start_up_tasks(self) -> bool:
+        """
+        Checks start up tasks
+        """
+        for task in self.startup_tasks:
+            if not task.finished:
+                return False
+        return True
+
     @tasks.loop(minutes=1)
     async def revolution(self):
         """
         Constantly checks to make sure that all events have been closed properly or raised correctly
         :return:
         """
+        if not self._check_start_up_tasks():
+            self.logger.info("Startup tasks not complete - skipping loop")
+            return
+
         now = datetime.datetime.now()
 
         if not self.rev_started and (now.weekday() != 6 or now.hour != 16 or now.minute != 0):

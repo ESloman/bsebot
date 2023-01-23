@@ -7,10 +7,11 @@ from discordbot.constants import BSE_SERVER_ID, BSEDDIES_REVOLUTION_CHANNEL
 
 
 class Celebrations(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger):
+    def __init__(self, bot: discord.Client, guilds, logger, startup_tasks):
         self.bot = bot
         self.logger = logger
         self.guilds = guilds
+        self.startup_tasks = startup_tasks
         self.celebrations.start()
 
     def cog_unload(self):
@@ -20,12 +21,24 @@ class Celebrations(commands.Cog):
         """
         self.celebrations.cancel()
 
+    def _check_start_up_tasks(self) -> bool:
+        """
+        Checks start up tasks
+        """
+        for task in self.startup_tasks:
+            if not task.finished:
+                return False
+        return True
+
     @tasks.loop(minutes=15)
     async def celebrations(self):
         """
         Send celebration message
         :return:
         """
+        if not self._check_start_up_tasks():
+            self.logger.info("Startup tasks not complete - skipping loop")
+            return
         now = datetime.datetime.now()
 
         if BSE_SERVER_ID not in self.guilds:

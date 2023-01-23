@@ -9,10 +9,11 @@ from mongo.bsepoints import UserInteractions
 
 
 class AfterWorkVally(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger):
+    def __init__(self, bot: discord.Client, guilds, logger, startup_tasks):
         self.bot = bot
         self.logger = logger
         self.guilds = guilds
+        self.startup_tasks = startup_tasks
         self.user_interactions = UserInteractions()
         self.vally_message.start()
 
@@ -25,6 +26,15 @@ class AfterWorkVally(commands.Cog):
             "Who wants to roll some fat 1s playing {role}?",
             "Can we get an after-work 5-stack today for {role}?"
         ]
+
+    def _check_start_up_tasks(self) -> bool:
+        """
+        Checks start up tasks
+        """
+        for task in self.startup_tasks:
+            if not task.finished:
+                return False
+        return True
 
     def cog_unload(self):
         """
@@ -39,6 +49,10 @@ class AfterWorkVally(commands.Cog):
         Loop that makes sure the King is assigned correctly
         :return:
         """
+        if not self._check_start_up_tasks():
+            self.logger.info("Startup tasks not complete - skipping loop")
+            return
+
         if BSE_SERVER_ID not in self.guilds:
             return
 

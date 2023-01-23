@@ -51,7 +51,7 @@ class GuildChecker(commands.Cog):
         """
         self.guild_checker.cancel()
 
-    @tasks.loop(minutes=2)
+    @tasks.loop(hours=12)
     async def guild_checker(self):
         """
         Loop that makes sure that guild information is synced correctly
@@ -259,9 +259,9 @@ class GuildChecker(commands.Cog):
                         self.logger.info("Message is too long to send - skipping")
             except Exception as e:
                 self.logger.exception(f"Error with doing the git thing: {e}")
-
-            self.finished = True
             self.logger.info(f"Finishing checking {guild.name}")
+
+        self.finished = True
 
     @guild_checker.before_loop
     async def before_guild_checker(self):

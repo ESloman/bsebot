@@ -8,11 +8,12 @@ from typing import Optional, Union
 
 import discord
 
+from discordbot.utilities import PlaceHolderLogger
 from mongo.bsepoints import UserPoints
 
 
 class EmbedManager(object):
-    def __init__(self, logger):
+    def __init__(self, logger=PlaceHolderLogger):
         self.user_points = UserPoints()
         self.logger = logger
 

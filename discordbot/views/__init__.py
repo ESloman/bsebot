@@ -5,5 +5,6 @@ from .close import CloseABetView
 from .highscore import HighScoreBoardView
 from .leaderboard import LeaderBoardView
 from .place import PlaceABetView
+from .refresh import RefreshBetView
 from .revolution import RevolutionView
 from .taxrate import TaxRateView

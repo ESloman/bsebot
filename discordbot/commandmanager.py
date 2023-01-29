@@ -28,7 +28,7 @@ from discordbot.slashcommandeventclasses import BSEddiesActive, BSEddiesAdminGiv
 from discordbot.slashcommandeventclasses import BSEddiesCloseBet, BSEddiesGift, BSEddiesHighScore, BSEddiesLeaderboard
 from discordbot.slashcommandeventclasses import BSEddiesPending, BSEddiesPlaceBet, BSEddiesPredict, BSEddiesTaxRate
 from discordbot.slashcommandeventclasses import BSEddiesTransactionHistory, BSEddiesView, BSEddiesStats
-from discordbot.slashcommandeventclasses import BSEddiesKingRename
+from discordbot.slashcommandeventclasses import BSEddiesKingRename, BSEddiesRefreshBet
 
 # task imports
 from discordbot.tasks.annualawards import AnnualBSEddiesAwards
@@ -129,6 +129,7 @@ class CommandManager(object):
         self.bseddies_admin_give = BSEddiesAdminGive(client, guilds, self.logger)
         self.bseddies_high_score = BSEddiesHighScore(client, guilds, self.logger)
         self.bseddies_predict = BSEddiesPredict(client, guilds, self.logger)
+        self.bseddies_refresh = BSEddiesRefreshBet(client, guilds, self.logger)
         self.bseddies_autogenerate = BSEddiesAutoGenerate(client, guilds, self.logger)
         self.bseddies_tax_rate = BSEddiesTaxRate(client, guilds, self.logger)
         self.bseddies_stats = BSEddiesStats(client, guilds, self.logger)
@@ -142,6 +143,7 @@ class CommandManager(object):
         self.bet_closer_task = BetCloser(
             self.client, guilds, self.logger, self.bseddies_place, self.bseddies_close, startup_tasks
         )
+
         self.bet_reminder_task = BetReminder(self.client, guilds, self.logger, startup_tasks)
         self.eddie_gain_message_task = EddieGainMessager(self.client, guilds, self.logger, startup_tasks)
         self.eddie_king_task = BSEddiesKingTask(self.client, guilds, self.logger, startup_tasks)
@@ -560,6 +562,13 @@ class CommandManager(object):
             Slash command to rename the King role
             """
             await self.bseddies_king_rename.rename(ctx, name)
+
+        @self.client.command(description="Refresh a bet from the DB")
+        async def refresh(ctx: discord.ApplicationContext):
+            """
+            Slash command to refresh a bet
+            """
+            await self.bseddies_refresh.create_refresh_view(ctx, None)
 
         @self.client.command(description="See your 2022 replay")
         async def wrapped22(ctx: discord.ApplicationContext):

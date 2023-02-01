@@ -98,7 +98,8 @@ class BSEddiesKingRename(BSEddies):
             # get king user
             king_user = self.user_points.get_current_king(ctx.guild.id)
             user_id = king_user["uid"]
-            ann = f"{ctx.author.mention} changed the `bseddies` KING role name. <@{user_id}> is now {role.mention}!"
+            ann = (f"{ctx.author.mention} changed the `bseddies` KING role "
+                   f"name to **{name}**. <@{user_id}> is now {role.mention}!")
             await channel.send(content=ann)
 
         message = f"Changed the role name to `{name}` for you."

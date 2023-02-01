@@ -28,13 +28,22 @@ class OnMessage(BaseEvent):
         if message.guild.id == BSE_SERVER_ID:
             x_emoji = PartialEmoji.from_str("<:grimace:883385299428855868>")
             two_emoji = PartialEmoji.from_str("<a:pookpog:847380557469450281>")
+            six_emoji = PartialEmoji.from_str("<:grimace:883385299428855868>")
         elif message.guild.id == SLOMAN_SERVER_ID:
             x_emoji = PartialEmoji.from_str("<:col:810442635650138132>")
             two_emoji = PartialEmoji.from_str("<a:8194pepeyay:1065934308981887057>")
+            six_emoji = PartialEmoji.from_str("<a:8194pepeyay:1065934308981887057>")
         else:
             # not sure on the guild - use a unicode emoji
             x_emoji = "😞"
             two_emoji = "🎉"
+            six_emoji = "😬"
+
+        if "🟨" not in content:
+            # only greens
+            await message.add_reaction("🟩")
+        elif content.count("🟨") > content.count("🟩"):
+            await message.add_reaction("🟨")
 
         if guesses == "X":
             # user failed - react with appropriate reaction
@@ -42,6 +51,8 @@ class OnMessage(BaseEvent):
         elif guesses == "2":
             # user did very well - react accordingly
             await message.add_reaction(two_emoji)
+        elif guesses == "6":
+            await message.add_reaction(six_emoji)
 
     async def _handle_bot_thank_you(self, message: discord.Message) -> None:
         """Sends a basic reply message if a message meets the requirements

@@ -136,68 +136,6 @@ class SpoilerThreads(BestSummerEverPointsDB):
         return None
 
 
-class TaxRate(BestSummerEverPointsDB):
-    """
-    Class for interacting with the 'taxrate' MongoDB collection in the 'bestsummereverpoints' DB
-    """
-    def __init__(self):
-        """
-        Constructor method that initialises the vault object
-        """
-        super().__init__()
-        self._vault = interface.get_collection(self.database, "taxrate")
-        self._cached_id = None
-
-    def _set_default_doc(self) -> dict:
-        """_summary_
-
-        Returns:
-            _type_: _description_
-        """
-        doc = {"type": "tax", "value": 0.1}
-        self.insert(doc)
-        return doc
-
-    def get_tax_rate(self) -> float:
-
-        if self._cached_id:
-            ret = self.query({"_id": self._cached_id})
-        else:
-            ret = self.query({"type": "tax"})
-            if not ret:
-                ret = [self._set_default_doc(), ]
-
-        if ret:
-            self._cached_id = ret[0]["_id"]
-            return ret[0]["value"]
-
-    def set_tax_rate(self, tax_rate: float) -> None:
-
-        if self._cached_id:
-            update_doc = {"_id": self._cached_id}
-        else:
-            update_doc = {"type": "tax"}
-
-        self.update(update_doc, {"$set": {"value": tax_rate}})
-
-
-class CommitHash(BestSummerEverPointsDB):
-    """
-    Class for interacting with the 'taxrate' MongoDB collection in the 'bestsummereverpoints' DB
-    """
-    def __init__(self):
-        """
-        Constructor method that initialises the vault object
-        """
-        super().__init__()
-        self._vault = interface.get_collection(self.database, "hashes")
-
-    def get_last_hash(self, guild_id: int) -> dict:
-        ret = self.query({"type": "hash", "guild_id": guild_id})
-        if ret:
-            return ret[0]
-
-
 class Awards(BestSummerEverPointsDB):
     def __init__(self):
         super().__init__()

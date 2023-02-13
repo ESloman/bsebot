@@ -80,7 +80,7 @@ class BSEddiesKingRename(BSEddies):
             ctx.author.id,
             ctx.guild.id,
             {
-                "type": TransactionTypes.GIFT_GIVE,
+                "type": TransactionTypes.KING_RENAME,
                 "amount": 500 * -1,
                 "timestamp": datetime.datetime.now(),
                 "role_id": role_id,

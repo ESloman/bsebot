@@ -80,6 +80,8 @@ class ActivityTypes(IntEnum):
     STATS = 34
     REPLAY22 = 35
     RENAME_KING = 36
+    BSEDDIES_PLEDGE = 37
+    BSEDDIES_ACTUAL_PLEDGE = 38
 
 
 class AwardsTypes(IntEnum):
@@ -137,3 +139,12 @@ class StatTypes(IntEnum):
     QUIETEST_THREAD = 20
     QUIETEST_DAY = 21
     EMOJIS_CREATED = 22
+
+
+class SupporterType(IntEnum):
+    """
+    """
+    NEUTRAL = 0
+    SUPPORTER = 1
+    REVOLUTIONARY = 2
+    KING = -1

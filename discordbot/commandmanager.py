@@ -28,7 +28,7 @@ from discordbot.slashcommandeventclasses import BSEddiesActive, BSEddiesAdminGiv
 from discordbot.slashcommandeventclasses import BSEddiesCloseBet, BSEddiesGift, BSEddiesHighScore, BSEddiesLeaderboard
 from discordbot.slashcommandeventclasses import BSEddiesPending, BSEddiesPlaceBet, BSEddiesPredict, BSEddiesTaxRate
 from discordbot.slashcommandeventclasses import BSEddiesTransactionHistory, BSEddiesView, BSEddiesStats
-from discordbot.slashcommandeventclasses import BSEddiesKingRename, BSEddiesRefreshBet
+from discordbot.slashcommandeventclasses import BSEddiesKingRename, BSEddiesRefreshBet, BSEddiesPledge
 
 # task imports
 from discordbot.tasks.annualawards import AnnualBSEddiesAwards
@@ -134,6 +134,7 @@ class CommandManager(object):
         self.bseddies_tax_rate = BSEddiesTaxRate(client, guilds, self.logger)
         self.bseddies_stats = BSEddiesStats(client, guilds, self.logger)
         self.bseddies_king_rename = BSEddiesKingRename(client, guilds, self.logger)
+        self.bseddies_pledge = BSEddiesPledge(client, guilds, self.logger)
 
         # tasks
         self.guild_checker_task = GuildChecker(self.client, self.logger, self.on_ready)
@@ -569,6 +570,15 @@ class CommandManager(object):
             Slash command to refresh a bet
             """
             await self.bseddies_refresh.create_refresh_view(ctx, None)
+
+        @self.client.command(description="Pledge your support to the KING")
+        async def pledge(ctx: discord.ApplicationContext):
+            """_summary_
+
+            Args:
+                ctx (discord.ApplicationContext): _description_
+            """
+            await self.bseddies_pledge.create_pledge_view(ctx)
 
         @self.client.command(description="See your 2022 replay")
         async def wrapped22(ctx: discord.ApplicationContext):

@@ -9,7 +9,7 @@ except ImportError:
 
 from bson import ObjectId
 
-from discordbot.bot_enums import ActivityTypes, TransactionTypes
+from discordbot.bot_enums import ActivityTypes, TransactionTypes, SupporterType
 
 
 class Transaction(TypedDict):
@@ -68,6 +68,7 @@ class User(TypedDict):
     """*DEPRECATED*"""
     daily_minimum: int
     """The minimum amount of eddies the user is going to get each day"""
+    supporter_type: SupporterType
 
 
 class Better(TypedDict):
@@ -215,7 +216,7 @@ class Sticker(TypedDict):
     """When the sticker was created"""
 
 
-class RevolutionEvent(TypedDict):
+class RevolutionEventType(TypedDict):
     _id: ObjectId
     """The internal DB ID"""
     type: str
@@ -236,6 +237,8 @@ class RevolutionEvent(TypedDict):
     """list of those supporting the event"""
     revolutionaries: list[int]
     """list of those revolutioning the event"""
+    locked: list[int]
+    """Users who can't change their decision"""
     users: list[int]
     """everyone who's subscribed to the event"""
     open: bool
@@ -286,4 +289,20 @@ class Thread(TypedDict):
 class GuildDB(TypedDict):
     _id: ObjectId
     guild_id: int
+    created: datetime.datetime
     rename_king: datetime.datetime
+    owner_id: int
+    channel: int
+    wordle_channel: int
+    category: int
+    role: int
+    tax_rate: float
+    tax_rate_history: list[dict]
+    king: int
+    king_since: datetime.datetime
+    king_history: list[dict]
+    hash: str
+    update_messages: bool
+    supporter_role: int
+    revolutionary_role: int
+    pledged: list[int]

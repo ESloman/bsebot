@@ -8,17 +8,20 @@ from discordbot.bot_enums import TransactionTypes
 from discordbot.constants import BSEDDIES_KING_ROLES
 from discordbot.embedmanager import EmbedManager
 
-from mongo.bsepoints import UserPoints
+from mongo.bsepoints import Guilds, UserPoints
+from mongo.datatypes import RevolutionEventType
 from mongo.bseticketedevents import RevolutionEvent
 
 
 class RevolutionView(discord.ui.View):
-    def __init__(self, client: discord.Client, event: dict, logger):
+    def __init__(self, client: discord.Client, event: RevolutionEventType, logger):
         super().__init__(timeout=None)
         self.client = client
         self.event_id = event["event_id"]
+        self.locked_in = event["locked"]
         self.revolutions = RevolutionEvent()
         self.user_points = UserPoints()
+        self.guilds = Guilds()
         self.embeds = EmbedManager(logger)
         self.logger = logger
 
@@ -79,6 +82,15 @@ class RevolutionView(discord.ui.View):
             await followup.edit_message(interaction.message.id, view=self)
             return
 
+        if user_id in self.locked_in:
+            await followup.send(
+                content="You've pledged your support this week - you _cannot_ change your decision.",
+                ephemeral=True
+            )
+            self.toggle_stuff(False)
+            await followup.edit_message(interaction.message.id, view=self)
+            return
+
         if user_id in event["supporters"]:
             event["chance"] += 15
             event["supporters"].remove(user_id)
@@ -108,9 +120,9 @@ class RevolutionView(discord.ui.View):
             }
         )
 
-        king = self.user_points.get_current_king(guild_id)
+        king_id = self.guilds.get_king(guild_id)
 
-        king_user = await self.client.fetch_user(king["uid"])  # type: discord.User
+        king_user = await self.client.fetch_user(king_id)  # type: discord.User
         guild = self.client.get_guild(guild_id)
 
         role = guild.get_role(BSEDDIES_KING_ROLES[guild_id])
@@ -176,6 +188,15 @@ class RevolutionView(discord.ui.View):
             await followup.edit_message(interaction.message.id, view=self)
             return
 
+        if user_id in self.locked_in:
+            await followup.send(
+                content="You've pledged your support this week - you _cannot_ change your decision.",
+                ephemeral=True
+            )
+            self.toggle_stuff(False)
+            await followup.edit_message(interaction.message.id, view=self)
+            return
+
         if user_id in event["revolutionaries"]:
             event["chance"] -= 15
             event["revolutionaries"].remove(user_id)
@@ -206,9 +227,9 @@ class RevolutionView(discord.ui.View):
             }
         )
 
-        king = self.user_points.get_current_king(guild_id)
+        king_id = self.guilds.get_king(guild_id)
 
-        king_user = await self.client.fetch_user(king["uid"])  # type: discord.User
+        king_user = await self.client.fetch_user(king_id)  # type: discord.User
         guild = self.client.get_guild(guild_id)
 
         role = guild.get_role(BSEDDIES_KING_ROLES[guild_id])

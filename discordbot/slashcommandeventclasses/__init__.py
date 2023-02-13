@@ -19,6 +19,7 @@ from .king_rename import BSEddiesKingRename
 from .leaderboard import BSEddiesLeaderboard
 from .pending import BSEddiesPending
 from .place import BSEddiesPlaceBet
+from .pledge import BSEddiesPledge
 from .predict import BSEddiesPredict
 from .refresh import BSEddiesRefreshBet
 from .stats import BSEddiesStats

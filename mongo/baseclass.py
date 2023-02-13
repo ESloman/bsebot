@@ -3,7 +3,7 @@ from typing import Union
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.cursor import Cursor
-from pymongo.results import UpdateResult
+from pymongo.results import InsertOneResult, InsertManyResult, UpdateResult
 
 from mongo import interface
 
@@ -44,7 +44,7 @@ class BaseClass(object):
         """
         return self._vault
 
-    def insert(self, document: Union[dict, list]) -> list:
+    def insert(self, document: Union[dict, list]) -> InsertOneResult | InsertManyResult:
         """
         Inserts the given object into this class' Collection object.
         :param document: document(s) to insert as dict or list of dicts

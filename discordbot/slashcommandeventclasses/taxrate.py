@@ -5,14 +5,11 @@ import discordbot.views as views
 from discordbot.bot_enums import ActivityTypes
 from discordbot.slashcommandeventclasses import BSEddies
 
-from mongo.bsedataclasses import TaxRate
-
 
 class BSEddiesTaxRate(BSEddies):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
-        self.tax_rate = TaxRate()
 
     async def create_tax_view(self, ctx: discord.ApplicationContext) -> None:
 
@@ -24,14 +21,17 @@ class BSEddiesTaxRate(BSEddies):
         )
 
         guild_id = ctx.guild.id
-        king_user = self.user_points.get_current_king(guild_id)
+        guild_db = self.guilds.get_guild(guild_id)
+        king_id = guild_db["king"]
 
-        if ctx.user.id != king_user["uid"]:
+        if ctx.user.id != king_id:
             message = "You are not the King - you cannot set the tax rate."
             await ctx.respond(content=message, ephemeral=True)
             return
 
-        value = self.tax_rate.get_tax_rate()
-        view = views.TaxRateView(value)
+        value, supporter_value = self.guilds.get_tax_rate(guild_id)
+        view = views.TaxRateView(value, supporter_value)
 
-        await ctx.respond(view=view, ephemeral=True)
+        msg = f"Please select a tax rate for the peasants and a tax rate for your <@&{guild_db['supporter_role']}>."
+
+        await ctx.respond(content=msg, view=view, ephemeral=True)

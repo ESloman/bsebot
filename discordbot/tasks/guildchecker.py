@@ -10,12 +10,12 @@ from discord.ext import tasks, commands
 
 from discordbot.bot_enums import TransactionTypes, ActivityTypes
 from discordbot.clienteventclasses import OnReadyEvent
-from discordbot.constants import BSE_SERVER_ID, BSEDDIES_REVOLUTION_CHANNEL
+from discordbot.constants import BSE_SERVER_ID
 from discordbot.embedmanager import EmbedManager
 from discordbot.slashcommandeventclasses import BSEddiesPlaceBet, BSEddiesCloseBet
 from discordbot.views import LeaderBoardView, RevolutionView, BetView
 
-from mongo.bsedataclasses import CommitHash, SpoilerThreads
+from mongo.bsedataclasses import SpoilerThreads
 from mongo.bseticketedevents import RevolutionEvent
 from mongo.bsepoints import Guilds, UserInteractions, ServerEmojis, ServerStickers, UserBets, UserPoints
 
@@ -36,7 +36,6 @@ class GuildChecker(commands.Cog):
         self.user_bets = UserBets()
         self.user_points = UserPoints()
         self.embed_manager = EmbedManager(logger)
-        self.hashes = CommitHash()
 
         guild_ids = [g.id for g in self.bot.guilds]
         self.close = BSEddiesCloseBet(bot, guild_ids, self.logger)
@@ -72,6 +71,7 @@ class GuildChecker(commands.Cog):
                     guild.owner_id,
                     guild.created_at
                 )
+                self.guilds.update_tax_history(guild.id, 0.1, 0.0, self.bot.user.id)
 
             self.logger.info("Checking guilds for new members")
             members = await guild.fetch_members().flatten()
@@ -226,7 +226,10 @@ class GuildChecker(commands.Cog):
 
                 embed = self.embed_manager.get_bet_embed(guild, bet["bet_id"], bet)
                 view = BetView(bet, self.place, self.close)
-                await message.edit(embed=embed, view=view)
+                try:
+                    await message.edit(embed=embed, view=view)
+                except discord.NotFound:
+                    continue
 
             self.bot.add_view(LeaderBoardView(self.embed_manager))
 
@@ -236,24 +239,22 @@ class GuildChecker(commands.Cog):
                 self.logger.info("Got commit log successfully")
 
                 if commit_log is not None:
-                    if guild.id == BSE_SERVER_ID:
-                        channel_id = BSEDDIES_REVOLUTION_CHANNEL
-                    else:
-                        # should get channel from server collection
-                        # TODO: #79
-                        channel_id = 291508460519161856
-
-                    channel = await guild.fetch_channel(channel_id)
-
                     update_message = (
-                        "I have just been updated and restarted. Here are the recent commits in this new update:\n\n"
+                        "@silent I have just been updated and restarted."
+                        "Here are the recent commits in this new update:\n\n"
                         "```diff\n"
                         f"{commit_log}\n"
                         "```"
                     )
                     try:
-                        # await channel.send(content=update_message)
-                        self.logger.info("Not sending message...")
+                        send_message = self.guilds.get_update_message(guild.id)
+                        if send_message:
+                            channel_id = self.guilds.get_update_channel(guild.id)
+                            if channel_id:
+                                channel = await guild.fetch_channel(channel_id)
+                                await channel.send(content=update_message)
+                        else:
+                            self.logger.info("Not sending message...")
                         self.logger.info(update_message)
                     except discord.errors.HTTPException:
                         self.logger.info("Message is too long to send - skipping")
@@ -287,7 +288,7 @@ class GuildChecker(commands.Cog):
             else:
                 path = os.path.expanduser("~/gitwork/bsebot")
 
-        hash_doc = self.hashes.get_last_hash(guild_id)
+        hash_doc = self.guilds.get_last_hash(guild_id)
         try:
             last_hash = hash_doc["hash"]
         except TypeError:
@@ -321,6 +322,6 @@ class GuildChecker(commands.Cog):
         self.logger.info(f"{commit_log=}")
 
         # set the commit hash now
-        self.hashes.update({"_id": hash_doc["_id"]}, {"$set": {"hash": head_sha}})
+        self.guilds.set_last_hash(guild_id, head_sha)
 
         return commit_log

@@ -155,6 +155,8 @@ class BSEddiesCloseBet(BSEddies):
         for better in ret_dict["winners"]:
             desc += f"\n- {guild.get_member(int(better)).name} won `{ret_dict['winners'][better]}` eddies!"
 
+        desc += f"\n\nThe **KING** (<@{ret_dict['king']}>) gained _{ret_dict['king_tax']}_ eddies from tax."
+
         author = guild.get_member(ctx.user.id)
 
         # message the losers to tell them the bad news

@@ -13,7 +13,7 @@ from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.cursor import Cursor
 from pymongo.database import Database
-from pymongo.results import UpdateResult
+from pymongo.results import InsertOneResult, InsertManyResult, UpdateResult
 
 if sys.version_info[0] < 3:
     from urllib import quote_plus
@@ -102,7 +102,7 @@ def get_collection(
 def insert(
         collection: Collection,
         documents: Union[list, dict],
-        in_order: bool = True) -> list:
+        in_order: bool = True) -> InsertOneResult | InsertManyResult:
     """
     Inserts a given number of documents into a given collection.
     Returns a list of objectIDs of the items inserted.

@@ -2,33 +2,25 @@
 from discord import Interaction, SelectOption
 from discord.ui import Select
 
+from discordbot.bot_enums import SupporterType
 
-class TaxRateSelect(Select):
-    _amounts = [
-        5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90
-    ]
 
-    def __init__(self, current_val: float, tax_type: str):
+class PledgeSelect(Select):
+    _values = ["Neutral", "Supporter", "Revolutionary"]
 
-        if tax_type == "supporter":
-            placeholder = "Select supporter tax rate"
-            amounts = [nm for nm in range(0, 100, 5)]
-        else:
-            placeholder = "Select peasant tax rate"
-            amounts = self._amounts
-
+    def __init__(self, current: SupporterType):
         options = [
-            SelectOption(label=f"{opt}%", value=f"{opt / 100}" if opt != 0 else "0.0") for opt in amounts
+            SelectOption(label=opt, value=opt.lower()) for opt in self._values
         ]
 
         for option in options:
-            if float(option.value) == current_val:
+            if option.value == self._values[current].lower():
                 option.default = True
                 break
 
         super().__init__(
             disabled=False,
-            placeholder=placeholder,
+            placeholder="Select your side",
             min_values=1,
             max_values=1,
             options=options

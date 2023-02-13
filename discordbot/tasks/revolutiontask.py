@@ -10,9 +10,9 @@ from discordbot.bot_enums import TransactionTypes
 from discordbot.constants import BSEDDIES_KING_ROLES, BSEDDIES_REVOLUTION_CHANNEL
 from discordbot.embedmanager import EmbedManager
 from discordbot.views import RevolutionView
-from mongo.bsepoints import UserPoints
+from mongo.bsepoints import Guilds, UserPoints
 from mongo.bseticketedevents import RevolutionEvent
-from mongo.datatypes import RevolutionEvent as RevolutionEventType
+from mongo.datatypes import RevolutionEventType
 
 
 class BSEddiesRevolutionTask(commands.Cog):
@@ -23,13 +23,13 @@ class BSEddiesRevolutionTask(commands.Cog):
         self.embed_manager = EmbedManager(logger)
         self.logger = logger
         self.startup_tasks = startup_tasks
-        self.guilds = guilds
+        self.guilds = Guilds()
         self.giphy_api = GiphyAPI(giphy_token)
         self.rev_started = False
         self.revolution.start()
 
-        for guild_id in guilds:
-            if _ := self.revolutions.get_open_events(guild_id):
+        for guild in self.bot.guilds:
+            if _ := self.revolutions.get_open_events(guild.id):
                 self.rev_started = True
 
     def cog_unload(self):
@@ -63,15 +63,28 @@ class BSEddiesRevolutionTask(commands.Cog):
         if not self.rev_started and (now.weekday() != 6 or now.hour != 16 or now.minute != 0):
             return
 
-        for guild_id in self.guilds:
-
-            king_user = self.user_points.get_current_king(guild_id)
+        for guild in self.bot.guilds:
+            guild_db = self.guilds.get_guild(guild.id)
+            king_user = self.user_points.find_user(guild_db["king"], guild.id)
 
             user_points = king_user["points"]
 
             if not self.rev_started:
+                # only trigger if King was King for more than twenty four hours
+                king_since = guild_db["king_since"]
+                if (now - king_since).total_seconds() < 86400:
+                    # user hasn't been king for more than twenty four hours
+                    channel = await guild.fetch_channel(guild_db["channel"])
+                    await channel.send(
+                        content=(
+                            f"<@{guild_db['king']}> has been <@&{guild_db['role']}> for less than **24** hours. "
+                            "There will be no revolution today."
+                        )
+                    )
+                    return
+
                 event = self.revolutions.create_event(
-                    guild_id,
+                    guild.id,
                     datetime.datetime.now(),
                     datetime.datetime.now() + datetime.timedelta(hours=3, minutes=30),
                     king_user["uid"],
@@ -79,48 +92,40 @@ class BSEddiesRevolutionTask(commands.Cog):
                     BSEDDIES_REVOLUTION_CHANNEL
                 )
             else:
-                event = self.revolutions.get_open_events(guild_id)[0]
+                event = self.revolutions.get_open_events(guild.id)[0]
 
             self.rev_started = True
 
             message = event.get("message_id")
             if message is None:
-                await self.create_event(guild_id, event)
+                await self.create_event(guild.id, event)
                 continue
 
             if now > event["expired"]:
-                await self.handle_resolving_bet(guild_id, event)
+                await self.resolve_revolution(guild.id, event)
                 self.logger.info("Changing revolution task interval to 30 minutes.")
                 continue
 
-            # if (event["expired"] - now).total_seconds() < 10800 and not event.get("three_hours"):
-            #    await self.send_excited_gif(guild_id, event, "Three hours", "three_hours")
-
-            # elif now.hour == 17 and now.minute == 30 and not event.get("two_hours"):
-            #     await self.send_excited_gif(guild_id, event, "Two hours", "two_hours")
-
             elif now.hour == 18 and now.minute == 30 and not event.get("one_hour"):
-                await self.send_excited_gif(guild_id, event, "One hour", "one_hour")
-
-            # elif now.hour == 19 and now.minute == 0 and not event.get("half_hour"):
-            #     await self.send_excited_gif(guild_id, event, "HALF AN HOUR", "half_hour")
+                await self.send_excited_gif(guild.id, event, "One hour", "one_hour")
 
             elif now.hour == 19 and now.minute == 15 and not event.get("quarter_house"):
-                await self.send_excited_gif(guild_id, event, "15 MINUTES", "quarter_hour")
+                await self.send_excited_gif(guild.id, event, "15 MINUTES", "quarter_hour")
 
-    async def send_excited_gif(self, guild_id: int, event: RevolutionEventType, hours_string: str, key: str):
+    async def send_excited_gif(self, event: RevolutionEventType, hours_string: str, key: str):
         """
         Method for sending a countdown gif in regards to tickets and things
-        :param guild_id:
+        :param guild.id:
         :param event:
         :param hours_string:
         :param key:
         :return:
         """
         channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
+        _message = await channel.fetch_message(event["message_id"])
         await channel.trigger_typing()
         gif = await self.giphy_api.random_gif("celebrate")
-        await channel.send(
+        await _message.send(
             content=f"Just under **{hours_string.upper()}** to go now - remember to choose your side!️"
         )
         await channel.send(content=gif)
@@ -131,13 +136,13 @@ class BSEddiesRevolutionTask(commands.Cog):
         Handle event creation - this takes a DB entry and posts the message into the channel.
 
         We also set the Channel ID and the Message ID for the
-        :param guild_id:
+        :param guild.id:
         :param event:
         :return:
         """
-        king = self.user_points.get_current_king(guild_id)
+        king_id = self.guilds.get_king(guild_id)
 
-        king_user = await self.bot.fetch_user(king["uid"])  # type: discord.User
+        king = await self.bot.fetch_user(king_id)  # type: discord.User
         guild_obj = await self.bot.fetch_guild(guild_id)  # type: discord.Guild
         role = guild_obj.get_role(BSEDDIES_KING_ROLES[guild_id])  # type: discord.Role
         channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
@@ -145,7 +150,7 @@ class BSEddiesRevolutionTask(commands.Cog):
 
         revolution_view = RevolutionView(self.bot, event, self.logger)
 
-        message = self.embed_manager.get_revolution_message(king_user, role, event, guild_obj)
+        message = self.embed_manager.get_revolution_message(king, role, event, guild_obj)
         message_obj = await channel.send(content=message, view=revolution_view)  # type: discord.Message
 
         self.revolutions.update(
@@ -155,23 +160,27 @@ class BSEddiesRevolutionTask(commands.Cog):
         gif = await self.giphy_api.random_gif("revolution")
         await channel.send(content=gif)
 
-    async def handle_resolving_bet(self, guild_id: int, event: RevolutionEventType):
+    async def resolve_revolution(self, guild_id: int, event: RevolutionEventType):
         """
         Method for handling an event that needs resolving.
 
         We take the event chance and see if we generate a number between 0-100 that's lower than it. If it is, then
         we "win", otherwise we "lose". We handle both those conditions here too.
-        :param guild_id:
+        :param guild.id:
         :param event:
         :return:
         """
         chance = event["chance"]
-        king_id = event.get("king", self.user_points.get_current_king(guild_id)["uid"])
+        king_id = event.get("king", self.guilds.get_king(guild_id))
         _users = event["users"]
         revolutionaries = event["revolutionaries"]
+        supporters = event["supporters"]
         channel_id = event["channel_id"]
+        guild_db = self.guilds.get_guild(guild_id)
 
+        guild = await self.bot.fetch_guild(guild_id)
         channel = await self.bot.fetch_channel(channel_id)
+        _message = await channel.fetch_message(event["message_id"])
 
         await channel.trigger_typing()
 
@@ -182,8 +191,6 @@ class BSEddiesRevolutionTask(commands.Cog):
             await channel.send(content=message)
             self.revolutions.close_event(event["event_id"], guild_id, False, 0)
             return
-
-        king_user = await self.bot.fetch_user(king_id)
 
         val = (random.random() * 100)
         success = val <= chance
@@ -210,8 +217,6 @@ class BSEddiesRevolutionTask(commands.Cog):
             king_dict = self.user_points.find_user(king_id, guild_id, projection={"points": True})
             points_to_lose = math.floor(event.get('locked_in_eddies', king_dict["points"]) / 2)
 
-            supporters = event["supporters"]
-
             total_points_to_distribute = points_to_lose
             for supporter in supporters:
                 supporter_eddies = self.user_points.get_user_points(supporter, guild_id)
@@ -232,7 +237,7 @@ class BSEddiesRevolutionTask(commands.Cog):
             points_each = math.floor(total_points_to_distribute / len(revolutionaries))
 
             message = (f"SUCCESS! THE KING IS DEAD! We have successfully taken eddies away from the KING. "
-                       f"{king_user.mention} will lose **{points_to_lose}** and each of their supporters has lost"
+                       f"<@{king_id}> will lose **{points_to_lose}** and each of their supporters has lost"
                        f"`10%` of their eddies. Each revolutionary will gain `{points_each}` eddies.")
 
             self.user_points.decrement_points(king_id, guild_id, points_to_lose)
@@ -262,7 +267,39 @@ class BSEddiesRevolutionTask(commands.Cog):
                     }
                 )
 
-        await channel.send(content=message)
+        # reset those that pledged to support - users can now _not_ support if they want
+        self.guilds.reset_pledges(guild_id)
+
+        # do roles
+
+        supporter_role = await guild.get_role(guild_db["supporter_role"])  # type: discord.Role
+        revo_role = await guild.get_role(guild_db["revolutionary_role"])
+
+        # clear anyone that has the role already
+        for member in supporter_role.members:
+            if member.id not in supporters or success:
+                # only remove if the king was removed _or_ they didn't support
+                await member.remove_roles(supporter_role)
+
+        for member in revo_role.members:
+            if member.id not in revolutionaries:
+                await member.remove_roles(revo_role)
+
+        # supporters get Supporter role
+
+        for supporter in supporters:
+            supporter_guild = await guild.fetch_member(supporter)
+            if supporter_role not in supporter_guild.roles:
+                await supporter_guild.add_roles(supporter_role)
+
+        # revolutonaries get revolutionary role
+
+        for revolutionary in revolutionaries:
+            revolutionary_guild = await guild.fetch_member(revolutionary)
+            if revo_role not in revolutionary_guild.roles:
+                await revolutionary_guild.add_roles(revo_role)
+
+        await _message.reply(content=message)
         await channel.send(content=gif)
         self.revolutions.close_event(event["event_id"], guild_id, success, points_to_lose)
 

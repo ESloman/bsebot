@@ -6,11 +6,10 @@ from collections import Counter
 import discord
 from discord.ext import tasks, commands
 
-from discordbot.bot_enums import TransactionTypes
+from discordbot.bot_enums import TransactionTypes, SupporterType
 from discordbot.constants import CREATOR, MESSAGE_TYPES, MESSAGE_VALUES, WORDLE_VALUES, HUMAN_MESSAGE_TYPES
 from discordbot.constants import GENERAL_CHAT, WORDLE_SCORE_REGEX
-from mongo.bsedataclasses import TaxRate
-from mongo.bsepoints import ServerEmojis, UserPoints, UserInteractions
+from mongo.bsepoints import Guilds, ServerEmojis, UserPoints, UserInteractions
 
 
 class EddieGainMessager(commands.Cog):
@@ -71,7 +70,7 @@ class EddieGainMessager(commands.Cog):
 
             current_king_id = self.user_points.get_current_king(guild_id)["uid"]
 
-            msg = "Eddie gain summary:\n"
+            msg = "@silent Eddie gain summary:\n"
             for user_id in eddie_dict:
 
                 value = eddie_dict[user_id][0]
@@ -88,7 +87,7 @@ class EddieGainMessager(commands.Cog):
                     continue
 
                 msg += f"\n- `{user_id}` {user.display_name} :  **{value}** (tax: _{tax}_)"
-                text = f"Your daily salary of BSEDDIES is `{value}` (after tax).\n"
+                text = f"@silent Your daily salary of BSEDDIES is `{value}` (after tax).\n"
 
                 if user_id == current_king_id:
                     text += f"You gained an additional `{tax}` from tax gains\n"
@@ -141,7 +140,7 @@ class BSEddiesManager(object):
         self.user_interactions = UserInteractions()
         self.user_points = UserPoints()
         self.server_emojis = ServerEmojis()
-        self.tax_rate = TaxRate()
+        self.guilds = Guilds()
         self.bot = bot
         self.logger = logger
 
@@ -429,16 +428,19 @@ class BSEddiesManager(object):
         current_king_id = self.user_points.get_current_king(guild_id)["uid"]
         tax_gains = 0
 
-        tax_rate = self.tax_rate.get_tax_rate()
-        self.logger.info(f"Tax rate is: {tax_rate}")
+        tax_rate, supporter_tax_rate = self.guilds.get_tax_rate(guild_id)
+        self.logger.info(f"Tax rate is: {tax_rate=}, {supporter_tax_rate=}")
 
         for _user in eddie_gain_dict:
             if _user == "guild":
                 continue
 
+            user_db = self.user_points.find_user(_user, guild_id)
+            tr = supporter_tax_rate if user_db.get("supporter_type", 0) == SupporterType.SUPPORTER else tax_rate
+
             if _user != current_king_id:
                 # apply tax
-                taxed = math.floor(eddie_gain_dict[_user][0] * tax_rate)
+                taxed = math.floor(eddie_gain_dict[_user][0] * tr)
                 eddie_gain_dict[_user][0] -= taxed
                 eddie_gain_dict[_user].append(taxed)
                 tax_gains += taxed

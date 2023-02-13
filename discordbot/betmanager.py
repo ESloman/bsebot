@@ -8,10 +8,9 @@ import datetime
 import math
 import random
 
-from discordbot.bot_enums import TransactionTypes
+from discordbot.bot_enums import TransactionTypes, SupporterType
 from discordbot.constants import BET_OUTCOME_COUNT_MODIFIER
-from mongo.bsepoints import UserBets, UserPoints
-from mongo.bsedataclasses import TaxRate
+from mongo.bsepoints import Guilds, UserBets, UserPoints
 
 
 class BetManager(object):
@@ -19,7 +18,7 @@ class BetManager(object):
         self.logger = logger
         self.user_bets = UserBets()
         self.user_points = UserPoints()
-        self.tax_rate = TaxRate()
+        self.guilds = Guilds()
 
     def close_a_bet(self, bet_id: str, guild_id: int, emoji: str) -> dict:
         """
@@ -83,7 +82,7 @@ class BetManager(object):
             _extra_eddies = 0
 
         # get tax value
-        tax_value = self.tax_rate.get_tax_rate()
+        tax_value, supporter_tax = self.guilds.get_tax_rate(guild_id)
 
         # total eddies won and total taxes
         total_eddies_winnings = 0
@@ -105,10 +104,13 @@ class BetManager(object):
             except Exception:
                 pass
 
+            user_db = self.user_points.find_user(int(better), guild_id)
+            tr = supporter_tax if user_db.get("supporter_type", 0) == SupporterType.SUPPORTER else tax_value
+
             total_eddies_won += points_won
             actual_amount_won = points_won - points_bet  # the actual winnings without original bet
             total_eddies_winnings += actual_amount_won
-            tax_amount = math.floor((actual_amount_won * tax_value))
+            tax_amount = math.floor((actual_amount_won * tr))
             total_eddies_taxed += tax_amount
             eddies_won_minux_tax = points_won - tax_amount
 
@@ -154,7 +156,7 @@ class BetManager(object):
             f"Eddies taxed: {total_eddies_taxed}\n"
         )
 
-        king_id = self.user_points.get_current_king(guild_id)["uid"]
+        king_id = self.guilds.get_king(guild_id)
         self.user_points.increment_points(king_id, guild_id, total_eddies_taxed)
         self.user_points.append_to_transaction_history(
             king_id,

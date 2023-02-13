@@ -10,7 +10,8 @@ This particular file contains Collection Classes for the 'bestsummereverpoints' 
 import datetime
 
 from mongo import interface
-from mongo.datatypes import RevolutionEvent
+from mongo.bsepoints import Guilds
+from mongo.datatypes import RevolutionEventType
 from mongo.db_classes import BestSummerEverPointsDB
 
 
@@ -32,6 +33,7 @@ class RevolutionEvent(TicketedEvent):
     """
     def __init__(self):
         super().__init__()
+        self.guilds = Guilds()
 
     def __create_counter_document(self, guild_id: int) -> None:
         """
@@ -65,7 +67,7 @@ class RevolutionEvent(TicketedEvent):
             king_id: int,
             locked_in_eddies: int,
             channel_id: int = None,
-    ) -> RevolutionEvent:
+    ) -> RevolutionEventType:
         """
         Create event class. Puts an entry into the DB for future use.
 
@@ -85,7 +87,7 @@ class RevolutionEvent(TicketedEvent):
             "event_id": event_id,
             "created": created,
             "expired": expired,
-            "chance": 30,
+            "chance": 15,
             "revolutionaries": [],
             "supporters": [],
             "users": [],
@@ -101,6 +103,15 @@ class RevolutionEvent(TicketedEvent):
             "locked_in_eddies": locked_in_eddies,
             "times_saved": 0
         }
+
+        # add guild "pledges" to supporters by default and lock them in
+        guild_db = self.guilds.get_guild(guild_id)
+        pledges = guild_db.get("pledged", [])
+        event_doc["supporters"].extend(pledges)
+        event_doc["users"].extend(pledges)
+        event_doc["chance"] += (-15 * len(pledges))
+        event_doc["locked"] = pledges
+
         self.insert(document=event_doc)
         return event_doc
 
@@ -137,7 +148,7 @@ class RevolutionEvent(TicketedEvent):
         """
         return self.update({"event_id": event_id, "guild_id": guild_id}, {"$push": {"ticket_buyers": user_id}})
 
-    def get_event(self, guild_id: int, event_id: str) -> RevolutionEvent:
+    def get_event(self, guild_id: int, event_id: str) -> RevolutionEventType:
         """
         Returns the specified event for the given guild
 
@@ -149,7 +160,7 @@ class RevolutionEvent(TicketedEvent):
         if ret:
             return ret[0]
 
-    def get_open_events(self, guild_id: int) -> list[RevolutionEvent]:
+    def get_open_events(self, guild_id: int) -> list[RevolutionEventType]:
         """
         Gets all open events
 

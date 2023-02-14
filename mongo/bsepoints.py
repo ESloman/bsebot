@@ -1046,6 +1046,7 @@ class Guilds(BestSummerEverPointsDB):
         ret = self.query({"guild_id": guild_id}, {"channel": True})
         if not ret or "channel" not in ret[0]:
             return None
+        ret = ret[0]
         return ret["channel"]
 
     #
@@ -1067,6 +1068,7 @@ class Guilds(BestSummerEverPointsDB):
             # king ID not set
             return None
 
+        ret = ret[0]
         if not whole_class:
             return ret["king"]
 
@@ -1107,7 +1109,7 @@ class Guilds(BestSummerEverPointsDB):
         if not ret or "king" not in ret[0]:
             # king_since not set
             return None
-
+        ret = ret[0]
         return ret["king"]
 
     def add_pledger(self, guild_id: int, user_id: int) -> UpdateResult:
@@ -1161,8 +1163,9 @@ class Guilds(BestSummerEverPointsDB):
             Optional[str]: The hash or None
         """
         ret = self.query({"guild_id": guild_id}, projection={"hash": True})
-        if not ret or "hash" not in ret:
+        if not ret or "hash" not in ret[0]:
             return None
+        ret = ret[0]
         return ret["hash"]
 
     def set_last_hash(self, guild_id: int, hash: str) -> UpdateResult:
@@ -1251,4 +1254,5 @@ class Guilds(BestSummerEverPointsDB):
             self.set_tax_rate(guild_id, 0.1, 0.0)
             self.update_tax_history(guild_id, 0.1, 0.0, 0)
             return 0.1, 0.0
+        ret = ret[0]
         return ret["tax_rate"], ret["supporter_tax_rate"]

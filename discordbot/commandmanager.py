@@ -28,7 +28,7 @@ from discordbot.slashcommandeventclasses import BSEddiesActive, BSEddiesAdminGiv
 from discordbot.slashcommandeventclasses import BSEddiesCloseBet, BSEddiesGift, BSEddiesHighScore, BSEddiesLeaderboard
 from discordbot.slashcommandeventclasses import BSEddiesPending, BSEddiesPlaceBet, BSEddiesPredict, BSEddiesTaxRate
 from discordbot.slashcommandeventclasses import BSEddiesTransactionHistory, BSEddiesView, BSEddiesStats
-from discordbot.slashcommandeventclasses import BSEddiesKingRename, BSEddiesRefreshBet, BSEddiesPledge
+from discordbot.slashcommandeventclasses import BSEddiesKingRename, BSEddiesRefreshBet, BSEddiesPledge, BSEddiesBless
 
 # task imports
 from discordbot.tasks.annualawards import AnnualBSEddiesAwards
@@ -135,6 +135,7 @@ class CommandManager(object):
         self.bseddies_stats = BSEddiesStats(client, guilds, self.logger)
         self.bseddies_king_rename = BSEddiesKingRename(client, guilds, self.logger)
         self.bseddies_pledge = BSEddiesPledge(client, guilds, self.logger)
+        self.bseddies_bless = BSEddiesBless(client, guilds, self.logger)
 
         # tasks
         self.guild_checker_task = GuildChecker(self.client, self.logger, self.on_ready)
@@ -557,12 +558,16 @@ class CommandManager(object):
             """
             await self.bseddies_tax_rate.create_tax_view(ctx)
 
-        @self.client.command(description="Pay to rename the king role")
-        async def renameking(ctx: discord.ApplicationContext, name: str):
+        @self.client.command(description="Pay to rename one of the BSEddies roles")
+        async def rename(
+            ctx: discord.ApplicationContext,
+            name: str,
+            role: discord.Option(str, choices=["king", "supporter", "revolutionary"])  # noqa: F821
+        ):
             """
-            Slash command to rename the King role
+            Slash command to rename the BSEddies roles
             """
-            await self.bseddies_king_rename.rename(ctx, name)
+            await self.bseddies_king_rename.rename(ctx, name, role)
 
         @self.client.command(description="Refresh a bet from the DB")
         async def refresh(ctx: discord.ApplicationContext):
@@ -579,6 +584,12 @@ class CommandManager(object):
                 ctx (discord.ApplicationContext): _description_
             """
             await self.bseddies_pledge.create_pledge_view(ctx)
+
+        @self.client.command(description="Bless your supporters or the server")
+        async def bless(ctx: discord.ApplicationContext):
+            """
+            """
+            await self.bseddies_bless.create_bless_view(ctx)
 
         @self.client.command(description="See your 2022 replay")
         async def wrapped22(ctx: discord.ApplicationContext):

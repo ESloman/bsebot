@@ -1044,7 +1044,7 @@ class Guilds(BestSummerEverPointsDB):
             int: the channel ID
         """
         ret = self.query({"guild_id": guild_id}, {"channel": True})
-        if not ret or "channel" not in ret:
+        if not ret or "channel" not in ret[0]:
             return None
         return ret["channel"]
 
@@ -1063,7 +1063,7 @@ class Guilds(BestSummerEverPointsDB):
             int | dict: king ID, or the user dict
         """
         ret = self.query({"guild_id": guild_id}, projection={"king": True})
-        if not ret or "king" not in ret:
+        if not ret or "king" not in ret[0]:
             # king ID not set
             return None
 
@@ -1104,7 +1104,7 @@ class Guilds(BestSummerEverPointsDB):
             datetime.datetime: the datetime object
         """
         ret = self.query({"guild_id": guild_id}, projection={"king_since": True})
-        if not ret or "king" not in ret:
+        if not ret or "king" not in ret[0]:
             # king_since not set
             return None
 
@@ -1146,7 +1146,7 @@ class Guilds(BestSummerEverPointsDB):
         Gets whether or not we should send bot update messages to this guild. Default is false.
         """
         ret = self.query({"guild_id": guild_id}, projection={"update_messages": True})
-        if not ret or "update_messages" not in ret:
+        if not ret or "update_messages" not in ret[0]:
             return False
         return ret["update_messages"]
 
@@ -1246,8 +1246,8 @@ class Guilds(BestSummerEverPointsDB):
         Returns:
             float: tax rate as float
         """
-        ret = self.query({"guild_id": guild_id}, projection={"tax_rate": True})
-        if not ret or "tax_rate" not in ret:
+        ret = self.query({"guild_id": guild_id}, projection={"tax_rate": True, "supporter_tax_rate": True})
+        if not ret or "tax_rate" not in ret[0]:
             self.set_tax_rate(guild_id, 0.1, 0.0)
             self.update_tax_history(guild_id, 0.1, 0.0, 0)
             return 0.1, 0.0

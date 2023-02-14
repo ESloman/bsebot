@@ -115,9 +115,13 @@ class BSEddiesKingRename(BSEddies):
 
             # get king user
             king_id = db_guild["king"]
+            if role == "king":
+                _insert = f"<@{king_id}>"
+            else:
+                _insert = f"{role.capitalize()}"
             ann = (f"{ctx.author.mention} changed the `bseddies` {role.upper()} role "
-                   f"name to **{name}**. <@{king_id}> is now {role_obj.mention}!")
+                   f"name to **{name}**. {_insert} is now {role_obj.mention}!")
             await channel.send(content=ann)
 
         message = f"Changed the role name to `{name}` for you."
-        await ctx.followup.send(content=message, ephemeral=True)
+        await ctx.followup.send(content=message, ephemeral=True, silent=True)

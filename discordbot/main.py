@@ -17,9 +17,9 @@ import discord
 
 try:
     import dotenv
-    DOTENV = False
-except ImportError:
     DOTENV = True
+except ImportError:
+    DOTENV = False
 
 from discordbot.commandmanager import CommandManager
 from discordbot.constants import SLOMAN_SERVER_ID, BSE_SERVER_ID

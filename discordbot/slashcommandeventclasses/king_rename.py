@@ -45,7 +45,7 @@ class BSEddiesKingRename(BSEddies):
             # no guild info in DB ??
             return
 
-        match role:
+        match role:  # noqa
             case "king":
                 role_id = db_guild["role"]
                 spend = 500

@@ -45,7 +45,7 @@ class PledgeView(discord.ui.View):
 
         guild_db = self.guilds.get_guild(interaction.guild.id)
 
-        match value:
+        match value:  # noqa
             case "supporter":
                 self.guilds.add_pledger(interaction.guild.id, interaction.user.id)
                 role_id = guild_db["supporter_role"]

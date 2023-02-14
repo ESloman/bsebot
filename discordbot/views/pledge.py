@@ -94,10 +94,10 @@ class PledgeView(discord.ui.View):
 
         channel = interaction.guild.get_channel(guild_db["channel"])
         msg = (
-            f"@silent {interaction.user.mention} has pledged to support the KING "
+            f"{interaction.user.mention} has pledged to support the KING "
             f"and become a <@&{guild_db['supporter_role']}>"
         )
-        await channel.send(content=msg)
+        await channel.send(content=msg, silent=True)
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.gray, emoji="✖️", row=2)
     async def close_callback(self, button: discord.ui.Button, interaction: discord.Interaction):

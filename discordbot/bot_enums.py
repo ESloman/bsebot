@@ -82,6 +82,8 @@ class ActivityTypes(IntEnum):
     RENAME_KING = 36
     BSEDDIES_PLEDGE = 37
     BSEDDIES_ACTUAL_PLEDGE = 38
+    BLESS = 39
+    BLESS_ACTUAL = 40
 
 
 class AwardsTypes(IntEnum):

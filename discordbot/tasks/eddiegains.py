@@ -70,7 +70,7 @@ class EddieGainMessager(commands.Cog):
 
             current_king_id = self.user_points.get_current_king(guild_id)["uid"]
 
-            msg = "@silent Eddie gain summary:\n"
+            msg = "Eddie gain summary:\n"
             for user_id in eddie_dict:
 
                 value = eddie_dict[user_id][0]
@@ -87,7 +87,7 @@ class EddieGainMessager(commands.Cog):
                     continue
 
                 msg += f"\n- `{user_id}` {user.display_name} :  **{value}** (tax: _{tax}_)"
-                text = f"@silent Your daily salary of BSEDDIES is `{value}` (after tax).\n"
+                text = f"Your daily salary of BSEDDIES is `{value}` (after tax).\n"
 
                 if user_id == current_king_id:
                     text += f"You gained an additional `{tax}` from tax gains\n"
@@ -109,13 +109,13 @@ class EddieGainMessager(commands.Cog):
                 if user_dict.get("daily_eddies"):
                     self.logger.info(f"Sending message to {user.display_name} for {value}")
                     try:
-                        await user.send(content=text)
+                        await user.send(content=text, silent=True)
                     except discord.Forbidden:
                         continue
 
             user = await guild.fetch_member(CREATOR)  # type: discord.Member
             try:
-                await user.send(content=msg)
+                await user.send(content=msg, silent=True)
             except discord.Forbidden:
                 # can't send DM messages to this user
                 self.logger.info(f"{user.display_name} - {msg}")

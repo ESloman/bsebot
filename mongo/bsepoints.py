@@ -88,7 +88,14 @@ class UserPoints(BestSummerEverPointsDB):
         """
 
         if projection is None:
-            projection = {"points": True, "uid": True, "daily_minimum": True, "high_score": True, "inactive": True}
+            projection = {
+                "points": True,
+                "uid": True,
+                "daily_minimum": True,
+                "high_score": True,
+                "inactive": True,
+                "supporter_type": True
+            }
 
         ret = self.query(
             {"guild_id": guild_id},

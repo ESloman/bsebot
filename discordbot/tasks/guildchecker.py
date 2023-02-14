@@ -240,7 +240,7 @@ class GuildChecker(commands.Cog):
 
                 if commit_log is not None:
                     update_message = (
-                        "@silent I have just been updated and restarted."
+                        "I have just been updated and restarted."
                         "Here are the recent commits in this new update:\n\n"
                         "```diff\n"
                         f"{commit_log}\n"
@@ -252,7 +252,7 @@ class GuildChecker(commands.Cog):
                             channel_id = self.guilds.get_update_channel(guild.id)
                             if channel_id:
                                 channel = await guild.fetch_channel(channel_id)
-                                await channel.send(content=update_message)
+                                await channel.send(content=update_message, silent=True)
                         else:
                             self.logger.info("Not sending message...")
                         self.logger.info(update_message)

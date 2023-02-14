@@ -1,6 +1,7 @@
 
 from .autogenerate import AutoGenerateView
 from .bet import BetView
+from .bless import BlessView
 from .close import CloseABetView
 from .highscore import HighScoreBoardView
 from .leaderboard import LeaderBoardView

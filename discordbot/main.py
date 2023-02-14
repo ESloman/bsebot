@@ -14,7 +14,12 @@ import sys
 from logging.handlers import RotatingFileHandler
 
 import discord
-import dotenv
+
+try:
+    import dotenv
+    DOTENV = False
+except ImportError:
+    DOTENV = True
 
 from discordbot.commandmanager import CommandManager
 from discordbot.constants import SLOMAN_SERVER_ID, BSE_SERVER_ID
@@ -69,9 +74,21 @@ if __name__ == "__main__":
     Finally, we start the asyncio loop and start listening for events.
     """
 
-    TOKEN = dotenv.get_key(".env", "DISCORD_TOKEN")
-    DEBUG_MODE = dotenv.get_key(".env", "DEBUG_MODE")
-    GIPHY_TOKEN = dotenv.get_key(".env", "GIPHY_API_KEY")
+    if DOTENV:
+        TOKEN = dotenv.get_key(".env", "DISCORD_TOKEN")
+        DEBUG_MODE = dotenv.get_key(".env", "DEBUG_MODE")
+        GIPHY_TOKEN = dotenv.get_key(".env", "GIPHY_API_KEY")
+    else:
+        TOKEN = None
+        DEBUG_MODE = None
+        GIPHY_TOKEN = None
+
+    if not TOKEN:
+        TOKEN = os.environ.get("DISCORD_TOKEN")
+    if not DEBUG_MODE:
+        DEBUG_MODE = os.environ.get("DEBUG_MODE")
+    if not GIPHY_TOKEN:
+        GIPHY_TOKEN = os.environ.get("GIPHY_TOKEN")
 
     if TOKEN is None:
         exit(-1)

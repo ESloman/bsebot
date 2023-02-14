@@ -10,6 +10,7 @@ from .bseddies import BSEddies
 from .active import BSEddiesActive
 from .admin_give import BSEddiesAdminGive
 from .autogenerate import BSEddiesAutoGenerate
+from .bless import BSEddiesBless
 from .close import BSEddiesCloseBet
 from .create import BSEddiesCreateBet
 from .gift import BSEddiesGift

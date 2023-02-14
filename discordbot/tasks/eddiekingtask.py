@@ -135,9 +135,9 @@ class BSEddiesKingTask(commands.Cog):
                 self.user_points.set_king_flag(top_user["uid"], guild.id, True)
                 self.guilds.set_king(guild.id, top_user["uid"])
 
-                message = f"@silent You are now the KING of {guild.name}! :crown:"
+                message = f"You are now the KING of {guild.name}! :crown:"
                 try:
-                    await new.send(content=message)
+                    await new.send(content=message, silent=True)
                 except discord.Forbidden:
                     pass
 

@@ -15,7 +15,12 @@ class BSEddiesKingRename(BSEddies):
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
 
-    async def rename(self, ctx: discord.ApplicationContext, name: str) -> None:
+    async def rename(
+        self,
+        ctx: discord.ApplicationContext,
+        name: str,
+        role: str
+    ) -> None:
         """
         Method for a user to rename the BSEddies KING role for small cost.
         The role can't be changed more than once an hour.
@@ -34,19 +39,34 @@ class BSEddiesKingRename(BSEddies):
         ret = self.user_points.find_user(ctx.author.id, ctx.guild.id, projection={"points": True})
         points = ret["points"]
 
-        if points < 500:
-            # too little points
-            message = "Sadly, you don't have enough eddies to change the King's role. You need **500**"
-            await ctx.followup.send(content=message, ephemeral=True)
-            return
-
         db_guild = self.guilds.get_guild(ctx.guild.id)
 
         if not db_guild:
             # no guild info in DB ??
             return
 
-        last_king_rename = db_guild.get("rename_king")
+        match role:
+            case "king":
+                role_id = db_guild["role"]
+                spend = 500
+            case "supporter":
+                role_id = db_guild["supporter_role"]
+                spend = 250
+            case "revolutionary":
+                role_id = db_guild["revolutionary_role"]
+                spend = 250
+
+        if points < spend:
+            # too little points
+            message = (
+                "Sadly, you don't have enough eddies to change this role."
+                f" You need **{spend}** to change the {role.upper()} role."
+            )
+            await ctx.followup.send(content=message, ephemeral=True)
+            return
+
+        key = f"rename_{role}"
+        last_king_rename = db_guild.get(key)
         now = datetime.datetime.now()
         if last_king_rename:
             time_elapsed = now - last_king_rename
@@ -54,41 +74,39 @@ class BSEddiesKingRename(BSEddies):
                 # not been an hour yet
                 mins = round((3600 - time_elapsed.total_seconds()) / 60, 1)
                 message = (
-                    "The KING role was renamed within the last hour can't be changed again - "
+                    f"The {role.upper()} role was renamed within the last hour can't be changed again - "
                     f"need to wait another `{mins}` minutes."
                 )
                 await ctx.followup.send(content=message, ephemeral=True)
                 return
 
-        role_id = db_guild.get("role")
-
         if not role_id:
             await ctx.followup.send("Guild role not set correctly.", ephemeral=True)
             return
-        role = ctx.guild.get_role(role_id)
+        role_obj = ctx.guild.get_role(role_id)
 
         try:
-            await role.edit(name=name)
+            await role_obj.edit(name=name)
         except discord.Forbidden:
             message = "Don't have the required permissions to do this."
             await ctx.followup.send(message, ephemeral=True)
             return
 
-        self.user_points.decrement_points(ctx.author.id, ctx.guild.id, 500)
+        self.user_points.decrement_points(ctx.author.id, ctx.guild.id, spend)
 
         self.user_points.append_to_transaction_history(
             ctx.author.id,
             ctx.guild.id,
             {
                 "type": TransactionTypes.KING_RENAME,
-                "amount": 500 * -1,
+                "amount": spend * -1,
                 "timestamp": datetime.datetime.now(),
                 "role_id": role_id,
                 "guild_id": ctx.guild.id
             }
         )
 
-        self.guilds.update({"guild_id": ctx.guild.id}, {"$set": {"rename_king": now}})
+        self.guilds.update({"guild_id": ctx.guild.id}, {"$set": {key: now}})
 
         channel_id = db_guild.get("channel")
         if channel_id:
@@ -96,10 +114,9 @@ class BSEddiesKingRename(BSEddies):
             await channel.trigger_typing()
 
             # get king user
-            king_user = self.user_points.get_current_king(ctx.guild.id)
-            user_id = king_user["uid"]
-            ann = (f"{ctx.author.mention} changed the `bseddies` KING role "
-                   f"name to **{name}**. <@{user_id}> is now {role.mention}!")
+            king_id = db_guild["king"]
+            ann = (f"{ctx.author.mention} changed the `bseddies` {role.upper()} role "
+                   f"name to **{name}**. <@{king_id}> is now {role_obj.mention}!")
             await channel.send(content=ann)
 
         message = f"Changed the role name to `{name}` for you."

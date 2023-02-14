@@ -3,7 +3,6 @@ import datetime
 import discord
 
 from discordbot.bot_enums import ActivityTypes
-from discordbot.constants import BSE_SERVER_ID, BSEDDIES_REVOLUTION_CHANNEL
 from discordbot.selects.taxrate import TaxRateSelect
 
 from mongo.bsepoints import UserPoints, Guilds
@@ -59,8 +58,9 @@ class TaxRateView(discord.ui.View):
             view=None
         )
 
-        if interaction.guild_id == BSE_SERVER_ID:
-            channel = interaction.guild.get_channel(BSEDDIES_REVOLUTION_CHANNEL)
+        channel_id = self.guilds.get_channel(interaction.guild.id)
+        if channel_id:
+            channel = interaction.guild.get_channel(channel_id)
             msg = f"{interaction.user.mention} has changed the tax rate to `{value}`! 📈"
             await channel.send(content=msg)
 

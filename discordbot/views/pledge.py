@@ -67,8 +67,18 @@ class PledgeView(discord.ui.View):
             if role in interaction.user.roles:
                 await interaction.user.remove_roles(role)
 
+        # remove supporter role
+        if value in ["revolutionary", "neutral"]:
+            supporter_role = interaction.guild.get_role(guild_db["supporter_role"])
+            if supporter_role in interaction.user.roles:
+                await interaction.user.remove_roles(supporter_role)
+        elif value == "supporter":
+            revolutionary_role = interaction.guild.get_role(guild_db["revolutionary_role"])
+            if revolutionary_role in interaction.user.roles:
+                await interaction.user.remove_roles(revolutionary_role)
+
         self.user_points.update(
-            {"guild_id": interaction.guild.id},
+            {"guild_id": interaction.guild.id, "uid": interaction.user.id},
             {"$set": {"supporter_type": supporter_type}}
         )
 

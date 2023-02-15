@@ -24,6 +24,13 @@ class AutoGenerateView(discord.ui.View):
                 custom_id="bet_type_select"
             )
 
+        async def callback(self, interaction: Interaction):
+            selected = interaction.data["values"][0]
+            for option in self.options:
+                option.default = option.value == selected.lower()
+
+            await interaction.response.edit_message(view=self.view)
+
     class MethodSelect(discord.ui.Select):
         def __init__(self, method_options, auto: discord.ui.View):
             options = [
@@ -181,10 +188,14 @@ class AutoGenerateView(discord.ui.View):
         ]
 
         self.auto_class = auto_class
-        self.add_item(self.TypeSelect(["valorant"]))
-        self.add_item(self.TimeoutSelect())
-        method_select = self.MethodSelect(generation_methods, self)
-        self.add_item(method_select)
+
+        self.type_select = self.TypeSelect(["valorant", "rocket_league"])
+        self.timeout_select = self.TimeoutSelect()
+        self.method_select = self.MethodSelect(generation_methods, self)
+
+        self.add_item(self.type_select)
+        self.add_item(self.timeout_select)
+        self.add_item(self.method_select)
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=4, disabled=True, custom_id="submit_btn")
     async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -193,6 +204,9 @@ class AutoGenerateView(discord.ui.View):
         data = {"_ids": [], "number": 0, "timeout": "30m"}
 
         for child in self.children:
+            if child.custom_id == "bet_type_select":
+                data["type"] = child.values[0].lower()
+
             if child.custom_id == "generate_method":
                 data["method"] = child.values[0]
 
@@ -212,7 +226,7 @@ class AutoGenerateView(discord.ui.View):
                     data["timeout"] = [opt.value for opt in child.options if opt.default is True][0]
 
         await self.auto_class.autogenerate_wrapper(
-            interaction, data["method"], data["number"], data["_ids"], data["timeout"]
+            interaction, data["type"], data["method"], data["number"], data["_ids"], data["timeout"]
         )
         await interaction.followup.edit_message(content="Bets created", view=None, message_id=interaction.message.id)
 

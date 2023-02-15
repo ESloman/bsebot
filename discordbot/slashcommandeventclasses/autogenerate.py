@@ -32,6 +32,7 @@ class BSEddiesAutoGenerate(BSEddies):
     async def autogenerate_wrapper(
             self,
             ctx,
+            _type: str,
             method: str,
             number: int,
             bet_ids: list,
@@ -46,7 +47,7 @@ class BSEddiesAutoGenerate(BSEddies):
             validated_bets = []
             while method == "random" and len(validated_bets) < int(number):
                 # grab more than required in the hopes that we only have to do one API call to mongo here
-                bets = self.auto_bets.get_random_bets_for_type("valorant", int(number) + 2)
+                bets = self.auto_bets.get_random_bets_for_type(_type, int(number) + 2)
                 for bet in bets:
                     if len(validated_bets) == int(number):
                         # got the number requested already
@@ -65,7 +66,7 @@ class BSEddiesAutoGenerate(BSEddies):
                         continue
                     validated_bets.append(bet)
         else:
-            validated_bets = self.auto_bets.query({"type": "valorant", "_id": {"$in": [ObjectId(b) for b in bet_ids]}})
+            validated_bets = self.auto_bets.query({"type": _type, "_id": {"$in": [ObjectId(b) for b in bet_ids]}})
 
         bets = sorted(validated_bets, key=lambda x: x["title"])
 
@@ -77,7 +78,7 @@ class BSEddiesAutoGenerate(BSEddies):
                     for member in vc_channel.members:
                         bet["options"].append(member.display_name)
 
-                    if bet["type"] == "valorant" and len(bet["options"]) < 5 and bet.get("fill"):
+                    if bet["type"] == _type and len(bet["options"]) < 5 and bet.get("fill"):
                         bet["options"].append("a rando")
 
             except Exception as e:

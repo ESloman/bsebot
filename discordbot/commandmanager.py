@@ -43,6 +43,7 @@ from discordbot.tasks.eddiegains import EddieGainMessager
 from discordbot.tasks.eddiekingtask import BSEddiesKingTask
 from discordbot.tasks.guildchecker import GuildChecker
 from discordbot.tasks.monthlyawards import MonthlyBSEddiesAwards
+from discordbot.tasks.releasechecker import ReleaseChecker
 from discordbot.tasks.revolutiontask import BSEddiesRevolutionTask
 from discordbot.tasks.threadmutetask import ThreadSpoilerTask
 from discordbot.tasks.wordlereminder import WordleReminder
@@ -146,7 +147,7 @@ class CommandManager(object):
         self.bseddies_help = BSEddiesHelp(client, guilds, self.logger)
 
         # tasks
-        self.guild_checker_task = GuildChecker(self.client, self.logger, self.on_ready)
+        self.guild_checker_task = GuildChecker(self.client, self.logger, self.on_ready, self.githubapi)
 
         startup_tasks = [self.guild_checker_task, ]
 
@@ -158,6 +159,7 @@ class CommandManager(object):
         self.eddie_gain_message_task = EddieGainMessager(self.client, guilds, self.logger, startup_tasks)
         self.eddie_king_task = BSEddiesKingTask(self.client, guilds, self.logger, startup_tasks)
         self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger, self.giphy_token, startup_tasks)
+        self.release_task = ReleaseChecker(self.client, guilds, self.logger, startup_tasks, self.githubapi)
 
         if BSE_SERVER_ID in self.guilds:
             self.thread_task = ThreadSpoilerTask(self.client, guilds, self.logger, startup_tasks)

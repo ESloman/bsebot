@@ -306,3 +306,5 @@ class GuildDB(TypedDict):
     supporter_role: int
     revolutionary_role: int
     pledged: list[int]
+    release_ver: str
+    release_notes: bool

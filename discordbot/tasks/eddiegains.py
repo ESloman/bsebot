@@ -9,7 +9,11 @@ from discord.ext import tasks, commands
 from discordbot.bot_enums import TransactionTypes, SupporterType
 from discordbot.constants import CREATOR, MESSAGE_TYPES, MESSAGE_VALUES, WORDLE_VALUES, HUMAN_MESSAGE_TYPES
 from discordbot.constants import GENERAL_CHAT, WORDLE_SCORE_REGEX
-from mongo.bsepoints import Guilds, ServerEmojis, UserPoints, UserInteractions
+
+from mongo.bsepoints.emojis import ServerEmojis
+from mongo.bsepoints.guilds import Guilds
+from mongo.bsepoints.interactions import UserInteractions
+from mongo.bsepoints.points import UserPoints
 
 
 class EddieGainMessager(commands.Cog):

@@ -4,13 +4,11 @@ from typing import List
 import discord
 
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
-from mongo.bsepoints import UserInteractions
 
 
 class OnStickerCreate(BaseEvent):
     def __init__(self, client: discord.Bot, guild_ids, logger):
         super().__init__(client, guild_ids, logger)
-        self.user_interactions = UserInteractions()
 
     async def on_stickers_update(
             self,
@@ -37,7 +35,7 @@ class OnStickerCreate(BaseEvent):
                 guild_id
             )
 
-            self.user_interactions.add_entry(
+            self.interactions.add_entry(
                 sticker.id,
                 guild_id,
                 new_stick_obj.user.id,

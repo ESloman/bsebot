@@ -3,7 +3,6 @@ import datetime
 import discord
 
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
-from mongo.bsepoints import UserInteractions
 
 
 class OnVoiceStateChange(BaseEvent):
@@ -13,7 +12,6 @@ class OnVoiceStateChange(BaseEvent):
 
     def __init__(self, client: discord.Bot, guild_ids, logger):
         super().__init__(client, guild_ids, logger)
-        self.user_interactions = UserInteractions()
 
     async def on_voice_state_change(
         self,
@@ -61,7 +59,7 @@ class OnVoiceStateChange(BaseEvent):
         """
         self.logger.info(f"User {member.id}, {member.name} is joining {after.channel}")
 
-        self.user_interactions.add_voice_state_entry(
+        self.interactions.add_voice_state_entry(
             after.channel.guild.id,
             member.id,
             after.channel.id,
@@ -83,7 +81,7 @@ class OnVoiceStateChange(BaseEvent):
 
         now = datetime.datetime.now()
 
-        vc_doc = self.user_interactions.find_active_voice_state(
+        vc_doc = self.interactions.find_active_voice_state(
             before.channel.guild.id,
             member.id,
             before.channel.id,
@@ -111,7 +109,7 @@ class OnVoiceStateChange(BaseEvent):
             {"timestamp": now, "event": "left"}
         )
 
-        self.user_interactions.update(
+        self.interactions.update(
             {"_id": vc_doc["_id"]},
             {
                 "$set": {
@@ -141,7 +139,7 @@ class OnVoiceStateChange(BaseEvent):
         """
 
         now = datetime.datetime.now()
-        vc_doc = self.user_interactions.find_active_voice_state(
+        vc_doc = self.interactions.find_active_voice_state(
             before.channel.guild.id,
             member.id,
             before.channel.id,
@@ -198,7 +196,7 @@ class OnVoiceStateChange(BaseEvent):
             if "vc_streaming" not in vc_doc["message_type"]:
                 vc_doc["message_type"].append("vc_streaming")
 
-        self.user_interactions.update(
+        self.interactions.update(
             {"_id": vc_doc["_id"]},
             {
                 "$set": {

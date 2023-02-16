@@ -14,6 +14,7 @@ from .bless import BSEddiesBless
 from .close import BSEddiesCloseBet
 from .create import BSEddiesCreateBet
 from .gift import BSEddiesGift
+from .help import BSEddiesHelp
 from .highscore import BSEddiesHighScore
 from .king import BSEddiesKing
 from .king_rename import BSEddiesKingRename

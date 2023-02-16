@@ -9,7 +9,7 @@ from typing import Optional, Union
 import discord
 
 from discordbot.utilities import PlaceHolderLogger
-from mongo.bsepoints import UserPoints
+from mongo.bsepoints.points import UserPoints
 
 
 class EmbedManager(object):

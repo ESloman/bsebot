@@ -17,7 +17,13 @@ from discordbot.views import LeaderBoardView, RevolutionView, BetView
 
 from mongo.bsedataclasses import SpoilerThreads
 from mongo.bseticketedevents import RevolutionEvent
-from mongo.bsepoints import Guilds, UserInteractions, ServerEmojis, ServerStickers, UserBets, UserPoints
+
+from mongo.bsepoints.bets import UserBets
+from mongo.bsepoints.emojis import ServerEmojis
+from mongo.bsepoints.guilds import Guilds
+from mongo.bsepoints.interactions import UserInteractions
+from mongo.bsepoints.points import UserPoints
+from mongo.bsepoints.stickers import ServerStickers
 
 
 class GuildChecker(commands.Cog):

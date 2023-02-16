@@ -5,7 +5,8 @@ import discord
 from discordbot.bot_enums import ActivityTypes
 from discordbot.selects.taxrate import TaxRateSelect
 
-from mongo.bsepoints import UserPoints, Guilds
+from mongo.bsepoints.guilds import Guilds
+from mongo.bsepoints.points import UserPoints
 
 
 class TaxRateView(discord.ui.View):

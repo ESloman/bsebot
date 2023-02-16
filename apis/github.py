@@ -20,7 +20,7 @@ class GitHubAPI(object):
         title: str,
         body: str,
         _type: str
-    ) -> bool:
+    ) -> requests.Response:
         """
         Raises an issue in the specified repo
 
@@ -58,4 +58,4 @@ class GitHubAPI(object):
             json=data
         )
 
-        return ret.status_code == 201
+        return ret

@@ -78,10 +78,12 @@ if __name__ == "__main__":
         TOKEN = dotenv.get_key(".env", "DISCORD_TOKEN")
         DEBUG_MODE = dotenv.get_key(".env", "DEBUG_MODE")
         GIPHY_TOKEN = dotenv.get_key(".env", "GIPHY_API_KEY")
+        GITHUB_TOKEN = dotenv.get_key(".env", "GITHUB_API_KEY")
     else:
         TOKEN = None
         DEBUG_MODE = None
         GIPHY_TOKEN = None
+        GITHUB_TOKEN = None
 
     if not TOKEN:
         TOKEN = os.environ.get("DISCORD_TOKEN")
@@ -89,6 +91,8 @@ if __name__ == "__main__":
         DEBUG_MODE = os.environ.get("DEBUG_MODE")
     if not GIPHY_TOKEN:
         GIPHY_TOKEN = os.environ.get("GIPHY_TOKEN")
+    if not GITHUB_TOKEN:
+        GITHUB_TOKEN = os.environ.get("GITHUB_API_KEY")
 
     if TOKEN is None:
         exit(-1)
@@ -124,7 +128,7 @@ if __name__ == "__main__":
         max_messages=5000
     )
 
-    com = CommandManager(cli, IDS, logger, giphy_token=GIPHY_TOKEN)
+    com = CommandManager(cli, IDS, logger, giphy_token=GIPHY_TOKEN, github_token=GITHUB_TOKEN)
 
     user_bets = UserBets(IDS)
 

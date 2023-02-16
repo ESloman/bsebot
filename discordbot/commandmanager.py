@@ -12,6 +12,7 @@ import logging
 
 import discord
 from apis.giphyapi import GiphyAPI
+from apis.github import GitHubAPI
 from mongo.bsepoints import UserBets, UserPoints
 
 # client events
@@ -21,7 +22,7 @@ from discordbot.clienteventclasses import OnThreadCreate, OnThreadUpdate, OnVoic
 
 from discordbot.constants import BSE_SERVER_ID
 from discordbot.embedmanager import EmbedManager
-from discordbot.modals import BSEddiesBetCreateModal
+from discordbot.modals import BSEddiesBetCreateModal, BSEddiesImprovementSuggest
 
 # slash commands
 from discordbot.slashcommandeventclasses import BSEddiesActive, BSEddiesAdminGive, BSEddiesAutoGenerate
@@ -59,7 +60,8 @@ class CommandManager(object):
         client: discord.Bot,
         guilds: list,
         logger: logging.Logger,
-        giphy_token: str = None
+        giphy_token: str = None,
+        github_token: str = None
     ) -> None:
         """
         Constructor method. This does all the work in this class and no other methods need to be called.
@@ -86,16 +88,19 @@ class CommandManager(object):
         :param logger:  logger object for logging
         :param debug_mode: whether we're in debug mode or not
         :param giphy_token:
+        :param github_token:
         """
 
         self.client = client
         self.guilds = guilds
         self.logger = logger
         self.giphy_token = giphy_token
+        self.github_token = github_token
 
         self.embeds = EmbedManager(self.logger)
 
         self.giphyapi = GiphyAPI(self.giphy_token)
+        self.githubapi = GitHubAPI(self.github_token)
 
         # mongo interaction classes
         self.user_points = UserPoints()
@@ -590,6 +595,15 @@ class CommandManager(object):
             """
             """
             await self.bseddies_bless.create_bless_view(ctx)
+
+        @self.client.command(description="Suggest an improvement")
+        async def suggest(ctx: discord.ApplicationContext):
+            modal = BSEddiesImprovementSuggest(
+                logger=self.logger,
+                github_api=self.githubapi,
+                title="Suggest an improvement"
+            )
+            await ctx.response.send_modal(modal)
 
         @self.client.command(description="See your 2022 replay")
         async def wrapped22(ctx: discord.ApplicationContext):

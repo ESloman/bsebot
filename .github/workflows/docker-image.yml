@@ -43,3 +43,4 @@ jobs:
             DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}
             GIT_USER=ESloman
             GIT_PASS=${{ secrets.GIT_PASS }}
+            GITHUB_API_KEY=${{ secrets.GIT_API_KEY }}

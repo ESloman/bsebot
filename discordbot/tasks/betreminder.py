@@ -3,7 +3,7 @@ import datetime
 import discord
 from discord.ext import tasks, commands
 
-from mongo.bsepoints import UserBets
+from mongo.bsepoints.bets import UserBets
 
 
 class BetReminder(commands.Cog):

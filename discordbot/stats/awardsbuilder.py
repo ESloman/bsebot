@@ -7,7 +7,7 @@ from discordbot.bot_enums import TransactionTypes
 from discordbot.constants import ANNUAL_AWARDS_AWARD, BSEDDIES_REVOLUTION_CHANNEL, JERK_OFF_CHAT, MONTHLY_AWARDS_PRIZE
 from discordbot.stats.statsclasses import Stat, StatsGatherer
 from mongo.bsedataclasses import Awards
-from mongo.bsepoints import UserPoints
+from mongo.bsepoints.points import UserPoints
 
 
 class AwardsBuilder:

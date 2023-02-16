@@ -5,7 +5,7 @@ from discord.ext import tasks, commands
 
 from discordbot.embedmanager import EmbedManager
 from discordbot.views import BetView
-from mongo.bsepoints import UserBets
+from mongo.bsepoints.bets import UserBets
 
 
 class BetCloser(commands.Cog):

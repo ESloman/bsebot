@@ -5,7 +5,10 @@ from typing import List, Optional  # noqa: F401
 
 from discordbot.constants import BOT_IDS
 from mongo.bsedataclasses import SpoilerThreads
-from mongo.bsepoints import ServerEmojis, UserBets, UserInteractions, UserPoints
+from mongo.bsepoints.bets import UserBets
+from mongo.bsepoints.emojis import ServerEmojis
+from mongo.bsepoints.interactions import UserInteractions
+from mongo.bsepoints.points import UserPoints
 from mongo.datatypes import Activity, Bet, Emoji, Message, Transaction, User, VCInteraction
 
 

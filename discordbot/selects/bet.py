@@ -4,7 +4,7 @@ from discord.ui import Button, Select
 
 from discordbot.selects.betamount import BetSelectAmount
 from discordbot.selects.betoutcomes import BetOutcomesSelect
-from mongo.bsepoints import UserBets
+from mongo.bsepoints.bets import UserBets
 
 
 class BetSelect(Select):

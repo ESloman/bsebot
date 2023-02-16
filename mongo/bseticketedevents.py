@@ -10,7 +10,7 @@ This particular file contains Collection Classes for the 'bestsummereverpoints' 
 import datetime
 
 from mongo import interface
-from mongo.bsepoints import Guilds
+from mongo.bsepoints.guilds import Guilds
 from mongo.datatypes import RevolutionEventType
 from mongo.db_classes import BestSummerEverPointsDB
 

@@ -6,7 +6,6 @@ import discord
 import discordbot.clienteventclasses.onmessage
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from discordbot.constants import BSE_BOT_ID
-from mongo.bsepoints import UserInteractions
 
 
 class OnMessageEdit(BaseEvent):
@@ -16,7 +15,6 @@ class OnMessageEdit(BaseEvent):
 
     def __init__(self, client, guild_ids, logger):
         super().__init__(client, guild_ids, logger)
-        self.user_interactions = UserInteractions()
         self.on_message = discordbot.clienteventclasses.onmessage.OnMessage(client, guild_ids, logger)
 
     async def message_edit(self, before: Optional[discord.Message], after: discord.Message) -> None:
@@ -55,12 +53,12 @@ class OnMessageEdit(BaseEvent):
             channel = await self.client.fetch_channel(after.channel.id)
             guild_id = channel.guild.id
 
-        db_message = self.user_interactions.get_message(guild_id, after.id)
+        db_message = self.interactions.get_message(guild_id, after.id)
 
         if not db_message:
             # weird
             message_type = await self.on_message.message_received(after)
-            db_message = self.user_interactions.get_message(guild_id, after.id)
+            db_message = self.interactions.get_message(guild_id, after.id)
             if not db_message:
                 self.logger.debug(
                     f"Message couldn't be processed: {message_type} {after}"
@@ -71,7 +69,7 @@ class OnMessageEdit(BaseEvent):
 
         now = datetime.datetime.now()
 
-        self.user_interactions.update(
+        self.interactions.update(
             {"_id": db_message["_id"]},
             {
                 "$set": {

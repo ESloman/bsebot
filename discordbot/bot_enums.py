@@ -84,6 +84,8 @@ class ActivityTypes(IntEnum):
     BSEDDIES_ACTUAL_PLEDGE = 38
     BLESS = 39
     BLESS_ACTUAL = 40
+    HELP = 41
+    SUGGEST = 42
 
 
 class AwardsTypes(IntEnum):

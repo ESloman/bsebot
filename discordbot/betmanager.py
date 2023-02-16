@@ -10,7 +10,10 @@ import random
 
 from discordbot.bot_enums import TransactionTypes, SupporterType
 from discordbot.constants import BET_OUTCOME_COUNT_MODIFIER
-from mongo.bsepoints import Guilds, UserBets, UserPoints
+
+from mongo.bsepoints.bets import UserBets
+from mongo.bsepoints.guilds import Guilds
+from mongo.bsepoints.points import UserPoints
 
 
 class BetManager(object):

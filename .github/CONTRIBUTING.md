@@ -16,7 +16,7 @@ There's a form of documenation and an overview in the `docs/` directory but it i
 
 ### Starting requirements
 These are starting requirements that I assume you have met.
-1. python 3.9+ installed (ideally *3.11* )
+1. python 3.10+ installed (ideally *3.11* )
 2. git installed
 3. some kind of IDE installed
 4. discord installed (and a discord account)

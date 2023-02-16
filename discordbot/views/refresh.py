@@ -3,7 +3,7 @@ import discord
 from discordbot.embedmanager import EmbedManager
 from discordbot.selects.bet import BetSelect
 from discordbot.views import BetView
-from mongo.bsepoints import UserBets
+from mongo.bsepoints.bets import UserBets
 
 
 class RefreshBetView(discord.ui.View):

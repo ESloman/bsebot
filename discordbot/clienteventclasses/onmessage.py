@@ -7,7 +7,6 @@ from discord import PartialEmoji
 
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from discordbot.constants import BSE_SERVER_ID, SLOMAN_SERVER_ID, WORDLE_SCORE_REGEX, WORDLE_REGEX
-from mongo.bsepoints import UserInteractions
 
 
 class OnMessage(BaseEvent):
@@ -17,7 +16,6 @@ class OnMessage(BaseEvent):
 
     def __init__(self, client, guild_ids, logger):
         super().__init__(client, guild_ids, logger)
-        self.user_interactions = UserInteractions()
 
     async def _wordle_react(self, message: discord.Message) -> None:
         content = message.content
@@ -214,7 +212,7 @@ class OnMessage(BaseEvent):
             if referenced_message and referenced_message.author.id != user_id:
                 message_type.append("reply")
                 if not message_type_only:
-                    self.user_interactions.add_reply_to_message(
+                    self.interactions.add_reply_to_message(
                         reference.message_id, message.id, guild_id, user_id, message.created_at, message_content
                     )
 
@@ -228,7 +226,7 @@ class OnMessage(BaseEvent):
                     if user_id == sticker_obj["created_by"]:
                         continue
                     if not message_type_only:
-                        self.user_interactions.add_entry(
+                        self.interactions.add_entry(
                             sticker_obj["stid"],
                             guild_id,
                             sticker_obj["created_by"],
@@ -281,7 +279,7 @@ class OnMessage(BaseEvent):
                     if user_id == emoji_obj["created_by"]:
                         continue
                     if not message_type_only:
-                        self.user_interactions.add_entry(
+                        self.interactions.add_entry(
                             emoji_obj["eid"],
                             guild_id,
                             emoji_obj["created_by"],
@@ -297,7 +295,7 @@ class OnMessage(BaseEvent):
         if message_type_only:
             return message_type
 
-        self.user_interactions.add_entry(
+        self.interactions.add_entry(
             message.id,
             guild_id,
             user_id,

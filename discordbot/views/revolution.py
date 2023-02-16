@@ -8,7 +8,8 @@ from discordbot.bot_enums import TransactionTypes
 from discordbot.constants import BSEDDIES_KING_ROLES
 from discordbot.embedmanager import EmbedManager
 
-from mongo.bsepoints import Guilds, UserPoints
+from mongo.bsepoints.guilds import Guilds
+from mongo.bsepoints.points import UserPoints
 from mongo.datatypes import RevolutionEventType
 from mongo.bseticketedevents import RevolutionEvent
 
@@ -272,7 +273,7 @@ class RevolutionView(discord.ui.View):
             return
 
         if event["king"] != interaction.user.id:
-            await followup.send(content="You're not the King - so you can't use this button.")
+            await followup.send(content="You're not the King - so you can't use this button.", ephemeral=True)
             self.toggle_stuff(False)
             await followup.edit_message(interaction.message.id, view=self)
             return

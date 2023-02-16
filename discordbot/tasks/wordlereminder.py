@@ -4,7 +4,7 @@ import discord
 from discord.ext import tasks, commands
 
 from discordbot.constants import BSE_BOT_ID, BSE_SERVER_ID, GENERAL_CHAT
-from mongo.bsepoints import UserInteractions
+from mongo.bsepoints.interactions import UserInteractions
 
 
 class WordleReminder(commands.Cog):

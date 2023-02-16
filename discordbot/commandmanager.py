@@ -12,7 +12,9 @@ import logging
 
 import discord
 from apis.giphyapi import GiphyAPI
-from mongo.bsepoints import UserBets, UserPoints
+from apis.github import GitHubAPI
+from mongo.bsepoints.bets import UserBets
+from mongo.bsepoints.points import UserPoints
 
 # client events
 from discordbot.clienteventclasses import OnDirectMessage, OnEmojiCreate, OnMemberJoin, OnMemberLeave
@@ -21,7 +23,7 @@ from discordbot.clienteventclasses import OnThreadCreate, OnThreadUpdate, OnVoic
 
 from discordbot.constants import BSE_SERVER_ID
 from discordbot.embedmanager import EmbedManager
-from discordbot.modals import BSEddiesBetCreateModal
+from discordbot.modals import BSEddiesBetCreateModal, BSEddiesImprovementSuggest
 
 # slash commands
 from discordbot.slashcommandeventclasses import BSEddiesActive, BSEddiesAdminGive, BSEddiesAutoGenerate
@@ -29,6 +31,7 @@ from discordbot.slashcommandeventclasses import BSEddiesCloseBet, BSEddiesGift, 
 from discordbot.slashcommandeventclasses import BSEddiesPending, BSEddiesPlaceBet, BSEddiesPredict, BSEddiesTaxRate
 from discordbot.slashcommandeventclasses import BSEddiesTransactionHistory, BSEddiesView, BSEddiesStats
 from discordbot.slashcommandeventclasses import BSEddiesKingRename, BSEddiesRefreshBet, BSEddiesPledge, BSEddiesBless
+from discordbot.slashcommandeventclasses import BSEddiesHelp
 
 # task imports
 from discordbot.tasks.annualawards import AnnualBSEddiesAwards
@@ -59,7 +62,8 @@ class CommandManager(object):
         client: discord.Bot,
         guilds: list,
         logger: logging.Logger,
-        giphy_token: str = None
+        giphy_token: str = None,
+        github_token: str = None
     ) -> None:
         """
         Constructor method. This does all the work in this class and no other methods need to be called.
@@ -86,16 +90,19 @@ class CommandManager(object):
         :param logger:  logger object for logging
         :param debug_mode: whether we're in debug mode or not
         :param giphy_token:
+        :param github_token:
         """
 
         self.client = client
         self.guilds = guilds
         self.logger = logger
         self.giphy_token = giphy_token
+        self.github_token = github_token
 
         self.embeds = EmbedManager(self.logger)
 
         self.giphyapi = GiphyAPI(self.giphy_token)
+        self.githubapi = GitHubAPI(self.github_token)
 
         # mongo interaction classes
         self.user_points = UserPoints()
@@ -136,6 +143,7 @@ class CommandManager(object):
         self.bseddies_king_rename = BSEddiesKingRename(client, guilds, self.logger)
         self.bseddies_pledge = BSEddiesPledge(client, guilds, self.logger)
         self.bseddies_bless = BSEddiesBless(client, guilds, self.logger)
+        self.bseddies_help = BSEddiesHelp(client, guilds, self.logger)
 
         # tasks
         self.guild_checker_task = GuildChecker(self.client, self.logger, self.on_ready)
@@ -590,6 +598,24 @@ class CommandManager(object):
             """
             """
             await self.bseddies_bless.create_bless_view(ctx)
+
+        @self.client.command(description="Help")
+        async def help(ctx: discord.ApplicationContext):
+            """help command
+
+            Args:
+                ctx (discord.ApplicationContext): _description_
+            """
+            await self.bseddies_help.help(ctx)
+
+        @self.client.command(description="Suggest an improvement")
+        async def suggest(ctx: discord.ApplicationContext):
+            modal = BSEddiesImprovementSuggest(
+                logger=self.logger,
+                github_api=self.githubapi,
+                title="Suggest an improvement"
+            )
+            await ctx.response.send_modal(modal)
 
         @self.client.command(description="See your 2022 replay")
         async def wrapped22(ctx: discord.ApplicationContext):

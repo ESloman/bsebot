@@ -5,7 +5,7 @@ import discord
 from discord.ext import tasks, commands
 
 from discordbot.constants import VALORANT_CHAT, VALORANT_ROLE, BSE_SERVER_ID, BSE_BOT_ID
-from mongo.bsepoints import UserInteractions
+from mongo.bsepoints.interactions import UserInteractions
 
 
 class AfterWorkVally(commands.Cog):

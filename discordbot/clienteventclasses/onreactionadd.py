@@ -4,7 +4,6 @@ import discord
 from discord.emoji import Emoji
 
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
-from mongo.bsepoints import UserInteractions
 
 
 class OnReactionAdd(BaseEvent):
@@ -13,7 +12,6 @@ class OnReactionAdd(BaseEvent):
     """
     def __init__(self, client, guild_ids, logger):
         super().__init__(client, guild_ids, logger)
-        self.user_interactions = UserInteractions()
 
     async def handle_reaction_event(
             self,
@@ -73,7 +71,7 @@ class OnReactionAdd(BaseEvent):
         if isinstance(reaction, (Emoji, discord.PartialEmoji)):
             reaction = reaction.name
 
-        self.user_interactions.add_reaction_entry(
+        self.interactions.add_reaction_entry(
             message_id,
             guild_id,
             user.id,
@@ -87,7 +85,7 @@ class OnReactionAdd(BaseEvent):
             if user.id == emoji_obj["created_by"]:
                 self.logger.info("user used their own emoji")
                 return
-            self.user_interactions.add_entry(
+            self.interactions.add_entry(
                 message_id,
                 guild_id,
                 emoji_obj["created_by"],

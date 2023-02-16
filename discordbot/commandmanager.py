@@ -30,6 +30,7 @@ from discordbot.slashcommandeventclasses import BSEddiesCloseBet, BSEddiesGift, 
 from discordbot.slashcommandeventclasses import BSEddiesPending, BSEddiesPlaceBet, BSEddiesPredict, BSEddiesTaxRate
 from discordbot.slashcommandeventclasses import BSEddiesTransactionHistory, BSEddiesView, BSEddiesStats
 from discordbot.slashcommandeventclasses import BSEddiesKingRename, BSEddiesRefreshBet, BSEddiesPledge, BSEddiesBless
+from discordbot.slashcommandeventclasses import BSEddiesHelp
 
 # task imports
 from discordbot.tasks.annualawards import AnnualBSEddiesAwards
@@ -141,6 +142,7 @@ class CommandManager(object):
         self.bseddies_king_rename = BSEddiesKingRename(client, guilds, self.logger)
         self.bseddies_pledge = BSEddiesPledge(client, guilds, self.logger)
         self.bseddies_bless = BSEddiesBless(client, guilds, self.logger)
+        self.bseddies_help = BSEddiesHelp(client, guilds, self.logger)
 
         # tasks
         self.guild_checker_task = GuildChecker(self.client, self.logger, self.on_ready)
@@ -595,6 +597,15 @@ class CommandManager(object):
             """
             """
             await self.bseddies_bless.create_bless_view(ctx)
+
+        @self.client.command(description="Help")
+        async def help(ctx: discord.ApplicationContext):
+            """help command
+
+            Args:
+                ctx (discord.ApplicationContext): _description_
+            """
+            await self.bseddies_help.help(ctx)
 
         @self.client.command(description="Suggest an improvement")
         async def suggest(ctx: discord.ApplicationContext):

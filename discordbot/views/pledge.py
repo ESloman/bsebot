@@ -5,7 +5,8 @@ import discord
 from discordbot.bot_enums import ActivityTypes, SupporterType
 from discordbot.selects.pledge import PledgeSelect
 
-from mongo.bsepoints import UserPoints, Guilds
+from mongo.bsepoints.guilds import Guilds
+from mongo.bsepoints.points import UserPoints
 
 
 class PledgeView(discord.ui.View):

@@ -23,7 +23,7 @@ except ImportError:
 
 from discordbot.commandmanager import CommandManager
 from discordbot.constants import SLOMAN_SERVER_ID, BSE_SERVER_ID
-from mongo.bsepoints import UserBets
+from mongo.bsepoints.bets import UserBets
 
 
 def _create_logger() -> logging.Logger:

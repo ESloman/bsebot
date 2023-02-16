@@ -8,7 +8,8 @@ from discordbot.bot_enums import TransactionTypes
 from discordbot.constants import BSEDDIES_KING_ROLES
 from discordbot.embedmanager import EmbedManager
 
-from mongo.bsepoints import Guilds, UserPoints
+from mongo.bsepoints.guilds import Guilds
+from mongo.bsepoints.points import UserPoints
 from mongo.datatypes import RevolutionEventType
 from mongo.bseticketedevents import RevolutionEvent
 

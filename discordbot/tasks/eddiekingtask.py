@@ -4,7 +4,8 @@ import discord
 from discord.ext import tasks, commands
 
 from discordbot.bot_enums import ActivityTypes
-from mongo.bsepoints import Guilds, UserPoints
+from mongo.bsepoints.guilds import Guilds
+from mongo.bsepoints.points import UserPoints
 from mongo.bseticketedevents import RevolutionEvent
 
 

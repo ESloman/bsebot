@@ -13,7 +13,8 @@ import logging
 import discord
 from apis.giphyapi import GiphyAPI
 from apis.github import GitHubAPI
-from mongo.bsepoints import UserBets, UserPoints
+from mongo.bsepoints.bets import UserBets
+from mongo.bsepoints.points import UserPoints
 
 # client events
 from discordbot.clienteventclasses import OnDirectMessage, OnEmojiCreate, OnMemberJoin, OnMemberLeave

@@ -4,13 +4,11 @@ from typing import List
 import discord
 
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
-from mongo.bsepoints import UserInteractions
 
 
 class OnEmojiCreate(BaseEvent):
     def __init__(self, client: discord.Bot, guild_ids, logger):
         super().__init__(client, guild_ids, logger)
-        self.user_interactions = UserInteractions()
 
     async def on_emojis_update(self, guild_id: int, before: List[discord.Emoji], after: List[discord.Emoji]) -> None:
 
@@ -32,7 +30,7 @@ class OnEmojiCreate(BaseEvent):
                 guild_id
             )
 
-            self.user_interactions.add_entry(
+            self.interactions.add_entry(
                 emoji.id,
                 guild_id,
                 new_emoji_obj.user.id,

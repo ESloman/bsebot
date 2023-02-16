@@ -4,7 +4,6 @@ import discord
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from discordbot.clienteventclasses import OnMessage
 from mongo.bsedataclasses import SpoilerThreads
-from mongo.bsepoints import UserInteractions
 
 
 class OnThreadCreate(BaseEvent):
@@ -14,7 +13,6 @@ class OnThreadCreate(BaseEvent):
 
     def __init__(self, client: discord.Bot, guild_ids, logger):
         super().__init__(client, guild_ids, logger)
-        self.user_interactions = UserInteractions()
         self.on_message = OnMessage(client, guild_ids, logger)
         self.threads = SpoilerThreads()
 
@@ -35,7 +33,7 @@ class OnThreadCreate(BaseEvent):
         message_type = await self.on_message.message_received(starting_message, True)
         message_type.append("thread_create")
 
-        self.user_interactions.add_entry(
+        self.interactions.add_entry(
             starting_message.id,
             thread.guild.id,
             thread.owner_id,

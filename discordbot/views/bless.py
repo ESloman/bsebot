@@ -5,7 +5,8 @@ import discord
 from discordbot.bot_enums import ActivityTypes, SupporterType
 from discordbot.selects.bless import BlessAmountSelect, BlessClassSelect
 
-from mongo.bsepoints import UserPoints, Guilds
+from mongo.bsepoints.guilds import Guilds
+from mongo.bsepoints.points import UserPoints
 
 
 class BlessView(discord.ui.View):

@@ -10,7 +10,8 @@ from discordbot.bot_enums import TransactionTypes
 from discordbot.constants import BSEDDIES_KING_ROLES, BSEDDIES_REVOLUTION_CHANNEL
 from discordbot.embedmanager import EmbedManager
 from discordbot.views import RevolutionView
-from mongo.bsepoints import Guilds, UserPoints
+from mongo.bsepoints.guilds import Guilds
+from mongo.bsepoints.points import UserPoints
 from mongo.bseticketedevents import RevolutionEvent
 from mongo.datatypes import RevolutionEventType
 

@@ -299,6 +299,7 @@ class BSEddiesRevolutionTask(commands.Cog):
             if revo_role not in revolutionary_guild.roles:
                 await revolutionary_guild.add_roles(revo_role)
 
+        await _message.edit(content=_message.content, view=None)
         await _message.reply(content=message)
         await channel.send(content=gif)
         self.revolutions.close_event(event["event_id"], guild_id, success, points_to_lose)

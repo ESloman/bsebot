@@ -272,7 +272,7 @@ class RevolutionView(discord.ui.View):
             return
 
         if event["king"] != interaction.user.id:
-            await followup.send(content="You're not the King - so you can't use this button.")
+            await followup.send(content="You're not the King - so you can't use this button.", ephemeral=True)
             self.toggle_stuff(False)
             await followup.edit_message(interaction.message.id, view=self)
             return

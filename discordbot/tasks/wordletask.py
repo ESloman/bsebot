@@ -124,9 +124,9 @@ class WordleTask(commands.Cog):
         )
 
         self.logger.info(f"Sending wordle message: {message}")
-        sent_message = await channel.send(content=message)
+        sent_message = await channel.send(content=message, silent=True)
         if solved_wordle.solved:
-            await sent_message.reply(content=spoiler_message)
+            await sent_message.reply(content=spoiler_message, silent=True)
 
         self.wordles.document_wordle(BSE_SERVER_ID, solved_wordle)
 

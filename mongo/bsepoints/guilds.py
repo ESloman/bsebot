@@ -218,6 +218,53 @@ class Guilds(BestSummerEverPointsDB):
         return self.get_channel(guild_id)
 
     #
+    #  Release stuff
+    #
+
+    def get_release_flag(self, guild_id: int) -> bool:
+        """_summary_
+
+        Args:
+            guild_id (int): _description_
+
+        Returns:
+            bool: _description_
+        """
+        ret = self.query({"guild_id": guild_id}, projection={"release_notes": True})
+        if not ret or "release_notes" not in ret[0]:
+            self.update({"guild_id": guild_id}, {"$set": {"release_notes": False}})
+            return False
+        ret = ret[0]
+        return ret["release_notes"]
+
+    def get_latest_release(self, guild_id: int) -> Optional[str]:
+        """_summary_
+
+        Args:
+            guild_id (int): _description_
+
+        Returns:
+            bool: _description_
+        """
+        ret = self.query({"guild_id": guild_id}, projection={"release_ver": True})
+        if not ret or "release_ver" not in ret[0]:
+            return None
+        ret = ret[0]
+        return ret["release_ver"]
+
+    def set_latest_release(self, guild_id: int, release_ver: str) -> UpdateResult:
+        """_summary_
+
+        Args:
+            guild_id (int): _description_
+            release_ver (str): _description_
+
+        Returns:
+            UpdateResult: _description_
+        """
+        return self.update({"guild_id": guild_id}, {"$set": {"release_ver": release_ver}})
+
+    #
     #  Tax stuff
     #
 

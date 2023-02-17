@@ -60,3 +60,49 @@ class GitHubAPI(object):
         )
 
         return ret
+
+    def get_releases(
+        self,
+        owner: str,
+        repo: str
+    ) -> requests.Response:
+        """Gets the releases for a given repo
+
+        Args:
+            owner (str): _description_
+            repo (str): _description_
+
+        Returns:
+            requests.Response: _description_
+        """
+
+        url = f"{self.base_url}/repos/{owner}/{repo}/releases"
+        ret = requests.get(
+            url,
+            headers=self.headers
+        )
+
+        return ret
+
+    def get_latest_release(
+        self,
+        owner: str,
+        repo: str
+    ) -> requests.Response:
+        """Gets the latest releases for a given repo
+
+        Args:
+            owner (str): _description_
+            repo (str): _description_
+
+        Returns:
+            requests.Response: _description_
+        """
+
+        url = f"{self.base_url}/repos/{owner}/{repo}/releases/latest"
+        ret = requests.get(
+            url,
+            headers=self.headers
+        )
+
+        return ret

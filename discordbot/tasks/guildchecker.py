@@ -8,6 +8,8 @@ from typing import Optional
 import discord
 from discord.ext import tasks, commands
 
+from apis.github import GitHubAPI
+
 from discordbot.bot_enums import TransactionTypes, ActivityTypes
 from discordbot.clienteventclasses import OnReadyEvent
 from discordbot.constants import BSE_SERVER_ID
@@ -27,7 +29,7 @@ from mongo.bsepoints.stickers import ServerStickers
 
 
 class GuildChecker(commands.Cog):
-    def __init__(self, bot: discord.Client, logger, on_ready: OnReadyEvent):
+    def __init__(self, bot: discord.Client, logger, on_ready: OnReadyEvent, github_api: GitHubAPI):
         self.bot = bot
         self.logger = logger
         self.finished = False
@@ -42,6 +44,7 @@ class GuildChecker(commands.Cog):
         self.user_bets = UserBets()
         self.user_points = UserPoints()
         self.embed_manager = EmbedManager(logger)
+        self.github = github_api
 
         guild_ids = [g.id for g in self.bot.guilds]
         self.close = BSEddiesCloseBet(bot, guild_ids, self.logger)
@@ -63,6 +66,12 @@ class GuildChecker(commands.Cog):
         :return:
         """
         now = datetime.datetime.now()
+
+        if not self.finished:
+            # only need to do this once
+            releases_ret = self.github.get_latest_release("ESloman", "bsebot")
+        else:
+            releases_ret = None
 
         self.logger.info("Running guild sync")
         async for guild in self.bot.fetch_guilds():
@@ -266,6 +275,43 @@ class GuildChecker(commands.Cog):
                         self.logger.info("Message is too long to send - skipping")
             except Exception as e:
                 self.logger.exception(f"Error with doing the git thing: {e}")
+
+            # work out which release is the latest
+            release_info = releases_ret.json()
+            release_name = release_info["name"]
+
+            if db_guild.get("release_notes"):
+                # want to do release notes
+                last_ver = db_guild.get("release_ver")
+                if not last_ver:
+                    # set to default
+                    last_ver = release_name
+                    self.guilds.set_latest_release(guild.id, release_name)
+                if release_name != last_ver:
+                    release_body = release_info["body"]
+                    channel = await guild.fetch_channel(db_guild["channel"])
+
+                    split_body = release_body.split("\n")
+                    body = f"A new release: **{release_name}** has been published."
+                    body += "\nThis incorporates the latest changes made since the last release. "
+                    body += "Below are the generated change notes.\n\n"
+
+                    bodies = []
+                    for part in split_body:
+                        body += part
+                        body += "\n"
+                        if len(body) > 1900:
+                            bodies.append(body)
+                            body = ""
+
+                    bodies.append(body)
+
+                    for _body in bodies:
+                        print(len(_body))
+                        await channel.send(content=_body, silent=True, suppress=True)
+
+                    self.guilds.set_latest_release(guild.id, release_name)
+
             self.logger.info(f"Finishing checking {guild.name}")
 
         self.finished = True

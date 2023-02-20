@@ -90,10 +90,14 @@ class BSEddiesRevolutionTask(commands.Cog):
                     datetime.datetime.now() + datetime.timedelta(hours=3, minutes=30),
                     king_user["uid"],
                     user_points,
-                    BSEDDIES_REVOLUTION_CHANNEL
+                    guild.id
                 )
             else:
-                event = self.revolutions.get_open_events(guild.id)[0]
+                try:
+                    event = self.revolutions.get_open_events(guild.id)[0]
+                except IndexError:
+                    # this guild doesn't have an open event so let's skip for now
+                    continue
 
             self.rev_started = True
 

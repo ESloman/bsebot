@@ -275,8 +275,8 @@ class BSEddiesRevolutionTask(commands.Cog):
 
         # do roles
 
-        supporter_role = await guild.get_role(guild_db["supporter_role"])  # type: discord.Role
-        revo_role = await guild.get_role(guild_db["revolutionary_role"])
+        supporter_role = guild.get_role(guild_db["supporter_role"])  # type: discord.Role
+        revo_role = guild.get_role(guild_db["revolutionary_role"])
 
         # clear anyone that has the role already
         for member in supporter_role.members:

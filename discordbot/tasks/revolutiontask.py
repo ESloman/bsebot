@@ -24,13 +24,14 @@ class BSEddiesRevolutionTask(commands.Cog):
         self.embed_manager = EmbedManager(logger)
         self.logger = logger
         self.startup_tasks = startup_tasks
+        self.guild_ids = guilds
         self.guilds = Guilds()
         self.giphy_api = GiphyAPI(giphy_token)
         self.rev_started = False
         self.revolution.start()
 
-        for guild in self.bot.guilds:
-            if _ := self.revolutions.get_open_events(guild.id):
+        for guild_id in self.guild_ids:
+            if _ := self.revolutions.get_open_events(guild_id):
                 self.rev_started = True
 
     def cog_unload(self):

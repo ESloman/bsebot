@@ -145,14 +145,16 @@ class EmbedManager(object):
             if rev_info := guild.get_member(rev):
                 revos.append(rev_info.name)
             else:
-                revos.append(rev)
+                revos.append(str(rev))
 
         supps = []
         for sup in event.get('supporters', []):
             if sup_info := guild.get_member(sup):
                 supps.append(sup_info.name)
             else:
-                supps.append(sup)
+                supps.append(str(sup))
+
+        chance = max(min(event['chance'], 95), 5)
 
         message = (
             f"**REVOLUTION IS UPON US**\n\n"
@@ -167,7 +169,7 @@ class EmbedManager(object):
             "The KING may spend 10% of their eddies using the _Save Thyself_ "
             "button to reduce revolution chance by 15%.\n"
             f"**Event ID**: `{event['event_id']}`\n"
-            f"**Success rate**: `{max(min(event['chance'], 100), 0)}%`\n"
+            f"**Success rate**: `{chance}%`\n"
             f"**Revolutionaries**: `{', '.join(revos) if revos else None}`\n"
             f"**Supporters**: `{', '.join(supps) if supps else None}`\n"
             f"**Locked in KING eddies**: `{event.get('locked_in_eddies')}`\n"

@@ -194,6 +194,8 @@ class BSEddiesRevolutionTask(commands.Cog):
             return
 
         val = (random.random() * 100)
+        # cap and min chance so that each side _could_ always win
+        chance = max(min(chance, 95), 5)
         success = val <= chance
 
         self.logger.debug(f"Number was: {val} and chance was: {chance}")

@@ -67,7 +67,7 @@ class Guilds(BestSummerEverPointsDB):
         Returns:
             int: the channel ID
         """
-        ret = self.query({"guild_id": guild_id}, {"channel": True})
+        ret = self.query({"guild_id": guild_id}, projection={"channel": True})
         if not ret or "channel" not in ret[0]:
             return None
         ret = ret[0]

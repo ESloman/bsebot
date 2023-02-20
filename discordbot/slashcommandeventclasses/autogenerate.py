@@ -78,7 +78,7 @@ class BSEddiesAutoGenerate(BSEddies):
                     for member in vc_channel.members:
                         bet["options"].append(member.display_name)
 
-                    if bet["type"] == _type and len(bet["options"]) < 5 and bet.get("fill"):
+                    if bet["type"] == "valorant" and len(bet["options"]) < 5 and bet.get("fill"):
                         bet["options"].append("a rando")
 
             except Exception as e:

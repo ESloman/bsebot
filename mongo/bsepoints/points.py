@@ -32,7 +32,7 @@ class UserPoints(BestSummerEverPointsDB):
         if ret["points"] > ret.get("high_score", 0):
             self.update({"_id": ret["_id"]}, {"$set": {"high_score": ret["points"]}})
 
-    def find_user(self, user_id: int, guild_id: int, projection=None) -> Union[User, None]:
+    def find_user(self, user_id: int, guild_id: int, projection: Optional[dict] = None) -> Union[User, None]:
         """
         Looks up a user in the collection.
 

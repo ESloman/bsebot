@@ -108,10 +108,10 @@ class BSEddiesRevolutionTask(commands.Cog):
                 continue
 
             elif now.hour == 18 and now.minute == 30 and not event.get("one_hour"):
-                await self.send_excited_gif(guild.id, event, "One hour", "one_hour")
+                await self.send_excited_gif(event, "One hour", "one_hour")
 
             elif now.hour == 19 and now.minute == 15 and not event.get("quarter_house"):
-                await self.send_excited_gif(guild.id, event, "15 MINUTES", "quarter_hour")
+                await self.send_excited_gif(event, "15 MINUTES", "quarter_hour")
 
     async def send_excited_gif(self, event: RevolutionEventType, hours_string: str, key: str):
         """

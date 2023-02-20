@@ -72,7 +72,7 @@ class BSEddiesRevolutionTask(commands.Cog):
 
             if not self.rev_started:
                 # only trigger if King was King for more than twenty four hours
-                king_since = guild_db["king_since"]
+                king_since = guild_db.get("king_since", datetime.datetime.now() - datetime.timedelta(days=1))
                 if (now - king_since).total_seconds() < 86400:
                     # user hasn't been king for more than twenty four hours
                     channel = await guild.fetch_channel(guild_db["channel"])

@@ -13,6 +13,12 @@ There's a form of documenation and an overview in the `docs/` directory but it i
 - [Join my bot testing server](https://discord.gg/R39Kw7gXSa)
 - To see the BSEBot in action: [join the BSE server.](https://discord.gg/dGMPswqf49)
 
+## Code formatting
+I try to adhere to `PEP8` standards as much as possible but with a line length of **120**. Every commit will trigger a `flake8` GitHub action that will parse the code and fail that commit if it finds any flaws. 
+
+You can run `flake8` in the root directory `bsebot`. The configuration file already exists so it should pick that up.
+Additionally, we have a `ruff` pre-commit hook setup. You can install `pre-commit` and that should also lint your code before commit; it'll also attempt to fix any issues it's found. `ruff` is a relatively new linter so it doesn't have all the rules that `flake8` has so it's available in conjunction with `flake8`.
+
 
 ### Starting requirements
 These are starting requirements that I assume you have met.
@@ -21,6 +27,7 @@ These are starting requirements that I assume you have met.
 3. some kind of IDE installed
 4. discord installed (and a discord account)
 5. discord developer account (https://discord.com/developers)
+6. MongoDB installed
 
 ### Setup
 1. Clone the repo
@@ -40,5 +47,6 @@ You may need to add the `bsebot` repo to your pythonpath.
 
 ### Starting to contribute
 - Make yourself a new branch - you won't have permissions to commit to `main` directly.
+- If you're not a collaborator, you will have to fork first and then create a PR as you won't have push access or the ability to create branches.
 - Pick an issue from the list of issues (or create one if you have another idea of something you want to work on)
 - Start work!

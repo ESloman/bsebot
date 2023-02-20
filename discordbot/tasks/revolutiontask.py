@@ -6,7 +6,7 @@ import discord
 from discord.ext import tasks, commands
 
 from apis.giphyapi import GiphyAPI
-from discordbot.bot_enums import TransactionTypes
+from discordbot.bot_enums import SupporterType, TransactionTypes
 from discordbot.constants import BSEDDIES_KING_ROLES, BSEDDIES_REVOLUTION_CHANNEL
 from discordbot.embedmanager import EmbedManager
 from discordbot.views import RevolutionView
@@ -293,11 +293,12 @@ class BSEddiesRevolutionTask(commands.Cog):
                 await member.remove_roles(revo_role)
 
         # supporters get Supporter role
-
+        supporter_type = SupporterType.SUPPORTER
         for supporter in supporters:
             supporter_guild = await guild.fetch_member(supporter)
             if supporter_role not in supporter_guild.roles:
                 await supporter_guild.add_roles(supporter_role)
+            self.user_points.update({"uid": supporter}, {"$set": {"supporter_type": supporter_type}})
 
         # revolutonaries get revolutionary role
 

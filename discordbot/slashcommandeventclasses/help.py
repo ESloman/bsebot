@@ -55,6 +55,9 @@ class BSEddiesHelp(BSEddies):
             "`/suggest` - suggest an improvement/report a bug\n"
             "`/stats` (soon) - see your Best Summer Ever statistics\n"
             "`/wrapped22` - see your Best Summer Ever wrapped\n"
+            "\n"
+            "Context Menu Commands\n"
+            "`Pin message`: pin the clicked message\n"
             "\n\n"
             "Repo link: https://github.com/ESloman/bsebot"
         )

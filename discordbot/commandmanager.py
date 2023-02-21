@@ -173,6 +173,7 @@ class CommandManager(object):
         # call the methods that register the events we're listening for
         self._register_client_events()
         self._register_slash_commands(guilds)
+        self._register_context_commands()
 
     # noinspection PyProtectedMember
     def __get_cached_messages_list(self) -> list:
@@ -627,3 +628,24 @@ class CommandManager(object):
                 ctx (discord.ApplicationContext): _description_
             """
             await self.bseddies_stats.replay(ctx, 2022)
+
+    def _register_context_commands(self) -> None:
+        """Registers our context menu commands
+
+        Returns:
+            None
+        """
+        @self.client.message_command(name="Pin message")
+        async def pin_message(ctx: discord.ApplicationContext, message: discord.Message):
+            """
+            Allows users to pin a message
+
+            Args:
+                ctx (discord.ApplicationContext): command ctx
+                message (discord.Message): the message to pin
+            """
+            try:
+                await message.pin(reason=f"{ctx.author.name} has pinned this message")
+            except discord.HTTPException:
+                pass
+            await ctx.respond(content="Pinned", ephemeral=True)

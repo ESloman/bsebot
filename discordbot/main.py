@@ -25,7 +25,6 @@ from discordbot import utilities
 from mongo.bsepoints.bets import UserBets
 
 
-
 if __name__ == "__main__":
     """
     This is our primary entry point for getting the bot start.

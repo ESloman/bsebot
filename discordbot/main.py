@@ -10,8 +10,6 @@ rest of the codebase.
 
 import logging
 import os
-import sys
-from logging.handlers import RotatingFileHandler
 
 import discord
 
@@ -23,38 +21,9 @@ except ImportError:
 
 from discordbot.commandmanager import CommandManager
 from discordbot.constants import SLOMAN_SERVER_ID, BSE_SERVER_ID
+from discordbot import utilities
 from mongo.bsepoints.bets import UserBets
 
-
-def _create_logger() -> logging.Logger:
-    """
-    Creates a simple logger to use throughout the bot
-    :return: Logger object
-    """
-    fol = os.path.join(os.path.expanduser("~"), "bsebotlogs")
-    if not os.path.exists(fol):
-        os.makedirs(fol)
-
-    _logger = logging.getLogger("bsebot")
-    _logger.setLevel(logging.DEBUG)
-
-    formatting = "%(asctime)s - %(funcName)s: %(message)s"
-    formatter = logging.Formatter(formatting)
-
-    # this makes sure we're logging to the standard output too
-    stream_handler = logging.StreamHandler(stream=sys.stdout)
-    stream_handler.setFormatter(formatter)
-
-    # this makes sure we're logging to a file
-    file_handler = RotatingFileHandler(
-        os.path.join(fol, "bsebot.log"), maxBytes=10485760, backupCount=1
-    )
-    file_handler.setFormatter(formatter)
-
-    _logger.addHandler(stream_handler)
-    _logger.addHandler(file_handler)
-
-    return _logger
 
 
 if __name__ == "__main__":
@@ -107,7 +76,7 @@ if __name__ == "__main__":
     else:
         IDS = [BSE_SERVER_ID]  # actual IDS
 
-    logger = _create_logger()
+    logger = utilities.create_logger(logging.DEBUG if DEBUG_MODE else logging.INFO)
 
     intents = discord.Intents.all()
 

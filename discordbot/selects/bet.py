@@ -16,14 +16,18 @@ class BetSelect(Select):
 
         options = []
         for bet in bets:
-            label = f"{bet['bet_id']} - {bet['title']}"
+            title = bet["title"]
+            if len(bet["title"]) > 100:
+                title = title[:99]
+            label = f"{bet['bet_id']} - {title}"
             if len(label) > 100:
                 label = label[:99]
+
             options.append(
                 SelectOption(
                     label=label,
                     value=f"{bet['bet_id']}",
-                    description=bet['title']
+                    description=title
                 )
             )
 

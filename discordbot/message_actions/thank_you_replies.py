@@ -73,7 +73,7 @@ class ThankYouReplies(BaseMessageAction):
                     channel = await self.client.fetch_channel(message.reference.channel_id)
                     _reply = await channel.fetch_message(message.reference.message_id)
                 if self.client.user.id == _reply.author.id:
-                    send_message = True 
+                    send_message = True
         return send_message
 
     async def run(self, message: discord.Message) -> None:

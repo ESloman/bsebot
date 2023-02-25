@@ -330,7 +330,7 @@ class Guilds(BestSummerEverPointsDB):
 
     #
     # Ad stuff
-    # 
+    #
 
     def get_last_ad_time(self, guild_id: int) -> datetime.datetime:
         """

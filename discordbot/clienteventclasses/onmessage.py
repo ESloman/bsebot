@@ -6,7 +6,7 @@ import discord
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from discordbot.constants import WORDLE_REGEX
 from discordbot.message_actions.base import BaseMessageAction  # noqa
-from discordbot.message_actions import BirthdayReplies, ThankYouReplies, WordleMessageAction
+from discordbot.message_actions import BirthdayReplies, MarvelComicsAdAction, ThankYouReplies, WordleMessageAction
 
 
 class OnMessage(BaseEvent):
@@ -18,6 +18,7 @@ class OnMessage(BaseEvent):
         super().__init__(client, guild_ids, logger)
         self._post_message_action_classes = [
             BirthdayReplies(client),
+            MarvelComicsAdAction(client),
             ThankYouReplies(client),
             WordleMessageAction(client)
         ]  # type: list[BaseMessageAction]

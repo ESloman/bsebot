@@ -146,3 +146,6 @@ ANNUAL_AWARDS_AWARD = 500
 WORDLE_REGEX = r"Wordle \d?\d\d\d [\dX]/\d\n\n"
 # regex for getting wordle score
 WORDLE_SCORE_REGEX = r"[\dX]/\d"
+
+# cool down in seconds for marvel ad messages
+MARVEL_AD_COOLDOWN = 3600

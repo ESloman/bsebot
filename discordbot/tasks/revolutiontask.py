@@ -223,7 +223,7 @@ class BSEddiesRevolutionTask(commands.Cog):
 
         else:
             king_dict = self.user_points.find_user(king_id, guild_id, projection={"points": True})
-            points_to_lose = math.floor(event.get('locked_in_eddies', king_dict["points"]) / 2)
+            points_to_lose = math.floor(event.get("locked_in_eddies", king_dict["points"]) / 2)
 
             total_points_to_distribute = points_to_lose
             for supporter in supporters:

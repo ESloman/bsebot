@@ -32,7 +32,7 @@ class EmbedManager(object):
         )
 
         for option in bet["option_dict"]:
-            betters = [bet['betters'][b] for b in bet['betters'] if bet['betters'][b]["emoji"] == option]
+            betters = [bet["betters"][b] for b in bet["betters"] if bet["betters"][b]["emoji"] == option]
             if betters:
                 val = ""
                 for better in sorted(betters, key=lambda b: b["points"], reverse=True):
@@ -141,20 +141,20 @@ class EmbedManager(object):
         :return:
         """
         revos = []
-        for rev in event.get('revolutionaries', []):
+        for rev in event.get("revolutionaries", []):
             if rev_info := guild.get_member(rev):
                 revos.append(rev_info.name)
             else:
                 revos.append(str(rev))
 
         supps = []
-        for sup in event.get('supporters', []):
+        for sup in event.get("supporters", []):
             if sup_info := guild.get_member(sup):
                 supps.append(sup_info.name)
             else:
                 supps.append(str(sup))
 
-        chance = max(min(event['chance'], 95), 5)
+        chance = max(min(event["chance"], 95), 5)
 
         message = (
             f"**REVOLUTION IS UPON US**\n\n"

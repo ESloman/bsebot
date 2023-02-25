@@ -82,9 +82,9 @@ class OnMessage(BaseEvent):
             "I am happy that you're happy!",
             "https://media.giphy.com/media/tXTqLBYNf0N7W/giphy.gif",
             "https://media.giphy.com/media/l41lY4I8lZXH0vIe4/giphy.gif",
-            "https://media.giphy.com/media/1qfb3aFqldWklPQwS3/giphy.gif",
-            "https://media.giphy.com/media/e5nATuISYAZ4Q/giphy.gif",
-            "https://media.giphy.com/media/xT0Cyhi8GCSU91PvtC/giphy.gif",
+            "https://media.giphy.com/media/1qfb3aFqldWklPQwS3/giphy.gif"
+            "https://media.giphy.com/media/e5nATuISYAZ4Q/giphy.gif"
+            "https://media.giphy.com/media/xT0Cyhi8GCSU91PvtC/giphy.gif"
         ]
 
         send_message = False

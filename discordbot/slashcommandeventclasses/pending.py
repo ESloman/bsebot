@@ -34,7 +34,7 @@ class BSEddiesPending(BSEddies):
         message = "Here are all your pending bets:\n"
 
         for bet in bets:
-            if 'channel_id' not in bet or 'message_id' not in bet:
+            if "channel_id" not in bet or "message_id" not in bet:
                 continue
 
             link = f"https://discordapp.com/channels/{ctx.guild.id}/{bet['channel_id']}/{bet['message_id']}"

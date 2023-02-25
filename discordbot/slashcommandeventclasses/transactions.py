@@ -83,15 +83,15 @@ class BSEddiesTransactionHistory(BSEddies):
         for item in transaction_history:
             worksheet.write_row(
                 row, 0,
-                [row, TransactionTypes(item['type']).name, item['timestamp'].strftime('%d %b %y %H:%M:%S'),
+                [row, TransactionTypes(item["type"]).name, item["timestamp"].strftime("%d %b %y %H:%M:%S"),
                  item["amount"], item["points"], item.get("bet_id", "N/A"), item.get("loan_id", "N/A"),
                  item.get("user_id", "N/A"), item.get("comment", "No comment")]
             )
             row += 1
 
         center_format = workbook.add_format()
-        center_format.set_align('center')
-        center_format.set_align('vcenter')
+        center_format.set_align("center")
+        center_format.set_align("vcenter")
 
         worksheet.set_column("A:A", cell_format=center_format)
         worksheet.set_column("B:B", width=18)

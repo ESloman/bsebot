@@ -37,7 +37,7 @@ class BSEddiesActive(BSEddies):
         message = "Here are all the active bets:\n"
 
         for bet in bets:
-            if 'channel_id' not in bet or 'message_id' not in bet:
+            if "channel_id" not in bet or "message_id" not in bet:
                 continue
 
             if bet.get("private"):

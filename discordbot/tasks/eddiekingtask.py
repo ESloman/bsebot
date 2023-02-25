@@ -130,7 +130,7 @@ class BSEddiesKingTask(commands.Cog):
                     "comment": f"Taking King from {prev_king_id}"
                 }
 
-                self.user_points.append_to_activity_history(top_user['uid'], guild.id, activity)
+                self.user_points.append_to_activity_history(top_user["uid"], guild.id, activity)
                 await new.add_roles(role, reason="User is now KING!")
 
                 self.user_points.set_king_flag(top_user["uid"], guild.id, True)

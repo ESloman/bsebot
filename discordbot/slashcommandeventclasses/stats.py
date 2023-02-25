@@ -110,11 +110,11 @@ class BSEddiesStats(BSEddies):
         _perc = (diverse_portfolio.users[user_id]["channels"][_chan] / most_messages.value) * 100
         _lf_perc = (diverse_portfolio.users[user_id]["channels"][_least_fav_chan] / most_messages.value) * 100
 
-        _vc_time = int(big_gamer.users.get(user_id, {'count': 0})['count'])
+        _vc_time = int(big_gamer.users.get(user_id, {"count": 0})["count"])
         _king_time = int(time_king.kings.get(user_id, 0))
-        _streaming_time = int(big_streamer.users.get(user_id, {'count': 0})['count'])
-        _dv_num = diverse_portfolio.users.get(user_id, {'channels': {_chan: 0}})['channels'][_chan]
-        _lv_num = diverse_portfolio.users.get(user_id, {'channels': {_least_fav_chan: 0}})['channels'][_least_fav_chan]
+        _streaming_time = int(big_streamer.users.get(user_id, {"count": 0})["count"])
+        _dv_num = diverse_portfolio.users.get(user_id, {"channels": {_chan: 0}})["channels"][_chan]
+        _lv_num = diverse_portfolio.users.get(user_id, {"channels": {_least_fav_chan: 0}})["channels"][_least_fav_chan]
 
         try:
             lft = await self.client.fetch_channel(_least_fav_chan)

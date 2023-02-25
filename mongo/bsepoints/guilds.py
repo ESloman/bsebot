@@ -327,3 +327,37 @@ class Guilds(BestSummerEverPointsDB):
             return 0.1, 0.0
         ret = ret[0]
         return ret["tax_rate"], ret["supporter_tax_rate"]
+
+    #
+    # Ad stuff
+    #
+
+    def get_last_ad_time(self, guild_id: int) -> datetime.datetime:
+        """
+        Gets the last ad time
+
+        Args:
+            guild_id (int): the guild ID to do this for
+
+        Returns:
+            dateteime: the time this guild last had a marvel comics ad
+        """
+        ret = self.query({"guild_id": guild_id}, projection={"last_ad_time": True})
+        if not ret or "last_ad_time" not in ret[0]:
+            return None
+        ret = ret[0]
+        return ret["last_ad_time"]
+
+    def set_last_ad_time(self, guild_id: int, timestamp: datetime.datetime) -> UpdateResult:
+        """
+        Sets the last ad time
+
+        Args:
+            guild_id (int): the guild ID to do this for
+            timestamp (datetime): the timestamp to set
+
+        Returns:
+            UpdateResult: update result
+        """
+        ret = self.update({"guild_id": guild_id}, {"$set": {"last_ad_time": timestamp}})
+        return ret

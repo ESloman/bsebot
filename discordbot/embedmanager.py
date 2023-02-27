@@ -76,7 +76,11 @@ class EmbedManager(object):
         else:
             number = number if number < len(users) else len(users)
 
-        users = [user for user in users if user["points"] != 10 and not user.get("inactive")]
+        users = [user for user in users if not user.get("inactive")]
+
+        if len(users) > 10:
+            # only filter out users with ten points if the server has lots of users
+            users = [user for user in users if user["points"] != 10]
 
         message = (
             "**BSEddies Leaderboard**\n"
@@ -111,7 +115,11 @@ class EmbedManager(object):
         else:
             number = number if number < len(users) else len(users)
 
-        users = [user for user in users if user["points"] != 10 and not user.get("inactive")]
+        users = [user for user in users if not user.get("inactive")]
+
+        if len(users) > 10:
+            # only filter out users with ten points if the server has lots of users
+            users = [user for user in users if user["points"] != 10]
 
         message = (
             "**BSEddies High Scores**\n"

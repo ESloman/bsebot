@@ -42,7 +42,7 @@ class BSEddiesAdminGive(BSEddies):
         )
 
         try:
-            await user.send(content=f"You've been given {amount} eddies by an admin.")
+            await user.send(content=f"You've been given {amount} eddies by an admin.", silent=True)
         except (discord.Forbidden, discord.ApplicationCommandInvokeError):
             pass
 

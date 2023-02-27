@@ -75,8 +75,8 @@ class BetCloser(commands.Cog):
                     if not member.dm_channel:
                         await member.create_dm()
                     try:
-                        await member.send(content=msg)
-                    except discord.errors.Forbidden:
+                        await member.send(content=msg, silent=True)
+                    except discord.Forbidden:
                         pass
 
     @bet_closer.before_loop

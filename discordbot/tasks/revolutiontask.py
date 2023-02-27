@@ -7,13 +7,12 @@ from discord.ext import tasks, commands
 
 from apis.giphyapi import GiphyAPI
 from discordbot.bot_enums import SupporterType, TransactionTypes
-from discordbot.constants import BSEDDIES_KING_ROLES, BSEDDIES_REVOLUTION_CHANNEL
 from discordbot.embedmanager import EmbedManager
 from discordbot.views import RevolutionView
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.points import UserPoints
 from mongo.bseticketedevents import RevolutionEvent
-from mongo.datatypes import RevolutionEventType
+from mongo.datatypes import GuildDB, RevolutionEventType
 
 
 class BSEddiesRevolutionTask(commands.Cog):
@@ -27,12 +26,12 @@ class BSEddiesRevolutionTask(commands.Cog):
         self.guild_ids = guilds
         self.guilds = Guilds()
         self.giphy_api = GiphyAPI(giphy_token)
-        self.rev_started = False
+        self.rev_started = {}
         self.revolution.start()
 
         for guild_id in self.guild_ids:
             if _ := self.revolutions.get_open_events(guild_id):
-                self.rev_started = True
+                self.rev_started[guild_id] = True
 
     def cog_unload(self):
         """
@@ -62,7 +61,8 @@ class BSEddiesRevolutionTask(commands.Cog):
 
         now = datetime.datetime.now()
 
-        if not self.rev_started and (now.weekday() != 6 or now.hour != 16 or now.minute != 0):
+        if not any([self.rev_started[g] for g in self.rev_started]) \
+                and (now.weekday() != 6 or now.hour != 16 or now.minute != 0):
             return
 
         for guild in self.bot.guilds:
@@ -71,7 +71,7 @@ class BSEddiesRevolutionTask(commands.Cog):
 
             user_points = king_user["points"]
 
-            if not self.rev_started:
+            if not self.rev_started[guild.id]:
                 # only trigger if King was King for more than twenty four hours
                 king_since = guild_db.get("king_since", datetime.datetime.now() - datetime.timedelta(days=1))
                 if (now - king_since).total_seconds() < 86400:
@@ -81,7 +81,8 @@ class BSEddiesRevolutionTask(commands.Cog):
                         content=(
                             f"<@{guild_db['king']}> has been <@&{guild_db['role']}> for less than **24** hours. "
                             "There will be no revolution today."
-                        )
+                        ),
+                        silent=True
                     )
                     return
 
@@ -91,7 +92,7 @@ class BSEddiesRevolutionTask(commands.Cog):
                     datetime.datetime.now() + datetime.timedelta(hours=3, minutes=30),
                     king_user["uid"],
                     user_points,
-                    guild.id
+                    guild_db["channel"]
                 )
             else:
                 try:
@@ -100,7 +101,7 @@ class BSEddiesRevolutionTask(commands.Cog):
                     # this guild doesn't have an open event so let's skip for now
                     continue
 
-            self.rev_started = True
+            self.rev_started[guild.id] = True
 
             message = event.get("message_id")
             if message is None:
@@ -127,17 +128,17 @@ class BSEddiesRevolutionTask(commands.Cog):
         :param key:
         :return:
         """
-        channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
+        channel = await self.bot.fetch_channel(event["channel_id"])
         _message = await channel.fetch_message(event["message_id"])
         await channel.trigger_typing()
         gif = await self.giphy_api.random_gif("celebrate")
-        await _message.send(
+        await _message.reply(
             content=f"Just under **{hours_string.upper()}** to go now - remember to choose your side!️"
         )
         await channel.send(content=gif)
         self.revolutions.update({"_id": event["_id"]}, {"$set": {key: True}})
 
-    async def create_event(self, guild_id: int, event: RevolutionEventType):
+    async def create_event(self, guild_id: int, event: RevolutionEventType, guild_db: GuildDB):
         """
         Handle event creation - this takes a DB entry and posts the message into the channel.
 
@@ -150,8 +151,8 @@ class BSEddiesRevolutionTask(commands.Cog):
 
         king = await self.bot.fetch_user(king_id)  # type: discord.User
         guild_obj = await self.bot.fetch_guild(guild_id)  # type: discord.Guild
-        role = guild_obj.get_role(BSEDDIES_KING_ROLES[guild_id])  # type: discord.Role
-        channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
+        role = guild_obj.get_role(guild_db["role"])  # type: discord.Role
+        channel = await self.bot.fetch_channel(guild_db["channel"])
         await channel.trigger_typing()
 
         revolution_view = RevolutionView(self.bot, event, self.logger)
@@ -190,7 +191,7 @@ class BSEddiesRevolutionTask(commands.Cog):
 
         await channel.trigger_typing()
 
-        self.rev_started = False
+        self.rev_started[guild_id] = False
 
         if not _users:
             message = "No-one supported or overthrew the King - nothing happens."
@@ -296,17 +297,22 @@ class BSEddiesRevolutionTask(commands.Cog):
         # supporters get Supporter role
         supporter_type = SupporterType.SUPPORTER
         for supporter in supporters:
-            supporter_guild = await guild.fetch_member(supporter)
+            supporter_guild = guild.get_member(supporter)
+            if not supporter_guild:
+                supporter_guild = await guild.fetch_member(supporter)
             if supporter_role not in supporter_guild.roles:
                 await supporter_guild.add_roles(supporter_role)
             self.user_points.update({"uid": supporter}, {"$set": {"supporter_type": supporter_type}})
 
         # revolutonaries get revolutionary role
-
+        supporter_type = SupporterType.REVOLUTIONARY
         for revolutionary in revolutionaries:
-            revolutionary_guild = await guild.fetch_member(revolutionary)
+            revolutionary_guild = guild.get_member(revolutionary)
+            if not revolutionary_guild:
+                revolutionary_guild = await guild.fetch_member(revolutionary)
             if revo_role not in revolutionary_guild.roles:
                 await revolutionary_guild.add_roles(revo_role)
+            self.user_points.update({"uid": revolutionary}, {"$set": {"supporter_type": supporter_type}})
 
         await _message.edit(content=_message.content, view=None)
         await _message.reply(content=message)

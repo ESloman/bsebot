@@ -85,7 +85,7 @@ class GuildChecker(commands.Cog):
                     guild.name,
                     guild.owner_id,
                     guild.created_at
-                )
+                )[0]
                 self.guilds.update_tax_history(guild.id, 0.1, 0.0, self.bot.user.id)
 
             self.logger.info("Checking guilds for new members")

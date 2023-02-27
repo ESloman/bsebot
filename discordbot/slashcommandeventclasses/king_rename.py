@@ -124,4 +124,4 @@ class BSEddiesKingRename(BSEddies):
             await channel.send(content=ann)
 
         message = f"Changed the role name to `{name}` for you."
-        await ctx.followup.send(content=message, ephemeral=True, silent=True)
+        await ctx.followup.send(content=message, ephemeral=True)

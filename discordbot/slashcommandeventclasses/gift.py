@@ -48,8 +48,8 @@ class BSEddiesGift(BSEddies):
             await friend.create_dm()
         try:
             msg = f"**{ctx.author.name}** just gifted you `{amount}` eddies!!"
-            await friend.send(content=msg)
-        except discord.errors.Forbidden:
+            await friend.send(content=msg, silent=True)
+        except discord.Forbidden:
             pass
 
         self.user_points.decrement_points(ctx.author.id, ctx.guild.id, amount)

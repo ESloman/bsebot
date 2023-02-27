@@ -130,8 +130,8 @@ class BSEddiesCloseBet(BSEddies):
                     msg = ("Looks like you were the only person to bet on your bet and you _happened_ to win it. "
                            "As such, you have won **nothing**. However, you have been refunded the eddies that you "
                            "originally bet.")
-                    await author.send(content=msg)
-                except discord.errors.Forbidden:
+                    await author.send(content=msg, silent=True)
+                except discord.Forbidden:
                     pass
 
                 desc = (f"**{bet['title']}**\n\nThere were no winners on this bet. {author.mention} just _happened_ "
@@ -158,6 +158,8 @@ class BSEddiesCloseBet(BSEddies):
         desc += f"\n\nThe **KING** (<@{ret_dict['king']}>) gained _{ret_dict['king_tax']}_ eddies from tax."
 
         author = guild.get_member(ctx.user.id)
+        if not author:
+            author = await guild.fetch_member(ctx.user.id)
 
         # message the losers to tell them the bad news
         for loser in ret_dict["losers"]:
@@ -170,8 +172,8 @@ class BSEddiesCloseBet(BSEddies):
                        f"`[{bet_id}] - {bet['title']}` and the result was {emoji} "
                        f"(`{ret_dict['outcome_name']['val']})`.\n"
                        f"As this wasn't what you voted for - you have lost. You bet **{points_bet}** eddies.")
-                await mem.send(content=msg)
-            except discord.errors.Forbidden:
+                await mem.send(content=msg, silent=True)
+            except discord.Forbidden:
                 pass
 
         # message the winners to tell them the good news
@@ -185,8 +187,8 @@ class BSEddiesCloseBet(BSEddies):
                        f"(`{ret_dict['outcome_name']['val']})`.\n"
                        f"**This means you won!!** "
                        f"You have won `{ret_dict['winners'][winner]}` BSEDDIES!!")
-                await mem.send(content=msg)
-            except discord.errors.Forbidden:
+                await mem.send(content=msg, silent=True)
+            except discord.Forbidden:
                 pass
 
         # update the message to reflect that it's closed

@@ -89,10 +89,9 @@ if __name__ == "__main__":
     )
 
     cli = discord.Bot(
-        debug_guilds=IDS,
         intents=intents,
         activity=listening_activity,
-        auto_sync_commands=False,
+        auto_sync_commands=True,
         max_messages=5000
     )
 

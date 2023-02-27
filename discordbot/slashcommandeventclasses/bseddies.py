@@ -22,9 +22,6 @@ class BSEddies(BaseEvent):
         :param kwargs: the additional kwargs to use in validation
         :return: True or False
         """
-        if ctx.guild.id not in self.guild_ids:
-            return False
-
         if kwargs.get("admin") and ctx.author.id != CREATOR:
             msg = "You do not have the permissions to use this command."
             await ctx.respond(content=msg, ephemeral=True)

@@ -18,7 +18,7 @@ class BSEddiesKingTask(commands.Cog):
         self.guilds = Guilds()
         self.events = RevolutionEvent()
         self.king_checker.start()
-        self.event = None
+        self.events_cache = {}
 
     def cog_unload(self):
         """
@@ -50,17 +50,17 @@ class BSEddiesKingTask(commands.Cog):
 
             if events := self.events.get_open_events(guild.id):
                 # ongoing revolution event - not changing the King now
-                self.event = events[0]
+                self.events_cache[guild.id] = events[0]
                 continue
-            elif self.event is not None:
+            elif event := self.events_cache.get(guild.id):
                 # there was a recent event
                 now = datetime.datetime.now()
-                expiry_time = self.event["expired"]  # type: datetime.datetime
+                expiry_time = event["expired"]  # type: datetime.datetime
                 if (now - expiry_time).total_seconds() < 60:
                     # only been two minutes since the event - wait
-                    self.logger.info(f"The recent event {self.event} only finished {expiry_time} - waiting...")
+                    self.logger.info(f"The recent event {event} only finished {expiry_time} - waiting...")
                     continue
-                self.event = None
+                self.events_cache[guild.id] = None
 
             guild_db = self.guilds.get_guild(guild.id)
             guild = await self.bot.fetch_guild(guild.id)  # type: discord.Guild
@@ -90,13 +90,20 @@ class BSEddiesKingTask(commands.Cog):
                 continue
 
             new = guild.get_member(top_user["uid"])  # type: discord.Member
-            supporter_role = await guild.get_role(guild_db["supporter_role"])  # type: discord.Role
-            revo_role = await guild.get_role(guild_db["revolutionary_role"])  # type: discord.Role
+            if not new:
+                new = await guild.fetch_member(top_user["uid"])
+
+            supporter_role = guild.get_role(guild_db["supporter_role"])  # type: discord.Role
+            revo_role = guild.get_role(guild_db["revolutionary_role"])  # type: discord.Role
 
             # remove KING from current user
             if current_king is not None and top_user["uid"] != current_king:
                 prev_king_id = current_king
-                current = guild.get_member(current_king)  # type: discord.Member
+
+                current = guild.get_member(current_king)
+                if not current:
+                    current = await guild.fetch_member(current_king)  # type: discord.Member
+
                 self.logger.info(f"Removing a king: {current.display_name}")
 
                 await current.remove_roles(role, reason="User is not longer King!")
@@ -107,7 +114,7 @@ class BSEddiesKingTask(commands.Cog):
                            f"KING of {guild.name}! :crown:")
 
                 try:
-                    await current.send(content=message)
+                    await current.send(content=message, silent=True)
                 except discord.Forbidden:
                     pass
 
@@ -154,6 +161,8 @@ class BSEddiesKingTask(commands.Cog):
                     continue
 
                 channel = guild.get_channel(channel_id)
+                if not channel:
+                    channel = await guild.fetch_channel(channel_id)
                 await channel.trigger_typing()
                 msg = f"{new.mention} is now the {role.mention}! 👑"
                 await channel.send(content=msg)

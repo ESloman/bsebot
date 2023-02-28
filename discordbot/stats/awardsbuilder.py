@@ -3,6 +3,7 @@ from typing import List, Tuple
 
 import discord
 
+from discordbot.bsebot import BSEBot
 from discordbot.bot_enums import TransactionTypes
 from discordbot.constants import ANNUAL_AWARDS_AWARD, BSEDDIES_REVOLUTION_CHANNEL, JERK_OFF_CHAT, MONTHLY_AWARDS_PRIZE
 from discordbot.stats.statsclasses import Stat, StatsGatherer
@@ -11,7 +12,7 @@ from mongo.bsepoints.points import UserPoints
 
 
 class AwardsBuilder:
-    def __init__(self, bot: discord.Client, guild_id: int, logger, annual=False):
+    def __init__(self, bot: BSEBot, guild_id: int, logger, annual=False):
         self.bot = bot
         self.guild_id = guild_id
         self.logger = logger
@@ -68,17 +69,17 @@ class AwardsBuilder:
         quietest_day = self.stats.quietest_day(*args)
         emojis_created = self.stats.emojis_created(*args)
 
-        busiest_thread_obj = await guild.fetch_channel(busiest_thread.value)
-        quietest_thread_obj = await guild.fetch_channel(quietest_thread.value)
+        busiest_thread_obj = await self.bot.fetch_channel(busiest_thread.value)
+        quietest_thread_obj = await self.bot.fetch_channel(quietest_thread.value)
         busiest_day_format = busiest_day.value.strftime("%a %d %b")
         quietest_day_format = quietest_day.value.strftime("%a %d %b")
-        popular_channel_obj = await guild.fetch_channel(most_popular_channel.value)
-        vc_time_obj = await guild.fetch_channel(vc_most_time_spent.value)
-        vc_users_obj = await guild.fetch_channel(vc_most_users.value)
+        popular_channel_obj = await self.bot.fetch_channel(most_popular_channel.value)
+        vc_time_obj = await self.bot.fetch_channel(vc_most_time_spent.value)
+        vc_users_obj = await self.bot.fetch_channel(vc_most_users.value)
         emoji_obj = await guild.fetch_emoji(most_used_server_emoji.emoji_id)
 
         thread_objects = [
-            await guild.fetch_channel(thread_id) for thread_id in threads_created.threads
+            await self.bot.fetch_channel(thread_id) for thread_id in threads_created.threads
         ]
 
         emoji_objects = [

@@ -138,10 +138,7 @@ class BSEddiesCloseBet(BSEddies):
                         f"to win a bet they created and they were the only entry. They were refunded the amount of "
                         f"eddies that they originally bet.")
                 # update the message to reflect that it's closed
-                channel = guild.get_channel(bet["channel_id"])
-                if not channel:
-                    # channel is thread
-                    channel = guild.get_thread(bet["channel_id"])
+                channel = await self.client.fetch_channel(bet["channel_id"])
 
                 message = channel.get_partial_message(bet["message_id"])
                 await message.edit(content=desc, view=None, embeds=[])
@@ -192,10 +189,7 @@ class BSEddiesCloseBet(BSEddies):
                 pass
 
         # update the message to reflect that it's closed
-        channel = guild.get_channel(bet["channel_id"])
-        if not channel:
-            # channel is thread
-            channel = guild.get_thread(bet["channel_id"])
+        channel = await self.client.fetch_channel(bet["channel_id"])
         message = channel.get_partial_message(bet["message_id"])
 
         await message.edit(content=desc, view=None, embeds=[])
@@ -270,10 +264,7 @@ class BSEddiesCloseBet(BSEddies):
 
         self.user_bets.close_a_bet(bet["_id"], "cancelled")
         # update the message to reflect that it's closed
-        channel = guild.get_channel(bet["channel_id"])
-        if not channel:
-            # channel is thread
-            channel = guild.get_thread(bet["channel_id"])
+        channel = await self.client.fetch_channel(bet["channel_id"])
         message = channel.get_partial_message(bet["message_id"])
         await message.edit(
             content="Bet has been cancelled. Any bets were refunded to the betters.", view=None, embeds=[]

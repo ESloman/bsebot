@@ -1,6 +1,6 @@
 
-import discord
 
+from discordbot.bsebot import BSEBot
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
 
 
@@ -8,7 +8,7 @@ class OnReadyEvent(BaseEvent):
     """
     Class for handling on_ready event
     """
-    def __init__(self, client: discord.Bot, guild_ids, logger):
+    def __init__(self, client: BSEBot, guild_ids, logger):
         super().__init__(client, guild_ids, logger)
         self.finished = False
 

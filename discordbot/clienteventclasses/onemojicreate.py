@@ -3,11 +3,12 @@ from typing import List
 
 import discord
 
+from discordbot.bsebot import BSEBot
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
 
 
 class OnEmojiCreate(BaseEvent):
-    def __init__(self, client: discord.Bot, guild_ids, logger):
+    def __init__(self, client: BSEBot, guild_ids, logger):
         super().__init__(client, guild_ids, logger)
 
     async def on_emojis_update(self, guild_id: int, before: List[discord.Emoji], after: List[discord.Emoji]) -> None:

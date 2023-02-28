@@ -1,6 +1,7 @@
 
 import discord
 
+from discordbot.bsebot import BSEBot
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from discordbot.clienteventclasses import OnMessage
 from mongo.bsedataclasses import SpoilerThreads
@@ -11,7 +12,7 @@ class OnThreadCreate(BaseEvent):
         Class for handling on_thread_create event
         """
 
-    def __init__(self, client: discord.Bot, guild_ids, logger):
+    def __init__(self, client: BSEBot, guild_ids, logger):
         super().__init__(client, guild_ids, logger)
         self.on_message = OnMessage(client, guild_ids, logger)
         self.threads = SpoilerThreads()

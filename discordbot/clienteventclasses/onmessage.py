@@ -3,6 +3,7 @@ from typing import Optional
 
 import discord
 
+from discordbot.bsebot import BSEBot
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from discordbot.constants import WORDLE_REGEX
 from discordbot.message_actions.base import BaseMessageAction  # noqa
@@ -14,7 +15,7 @@ class OnMessage(BaseEvent):
     Class for handling on_message events from Discord
     """
 
-    def __init__(self, client: discord.Bot, guild_ids, logger):
+    def __init__(self, client: BSEBot, guild_ids, logger):
         super().__init__(client, guild_ids, logger)
         self._post_message_action_classes = [
             BirthdayReplies(client),

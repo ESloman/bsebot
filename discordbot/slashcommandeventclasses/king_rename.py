@@ -110,7 +110,7 @@ class BSEddiesKingRename(BSEddies):
 
         channel_id = db_guild.get("channel")
         if channel_id:
-            channel = await ctx.guild.fetch_channel(channel_id)
+            channel = await self.client.fetch_channel(channel_id)
             await channel.trigger_typing()
 
             # get king user

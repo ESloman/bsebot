@@ -9,6 +9,8 @@ from apis.giphyapi import GiphyAPI
 from discordbot.bot_enums import SupporterType, TransactionTypes
 from discordbot.embedmanager import EmbedManager
 from discordbot.views import RevolutionView
+
+from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.points import UserPoints
 from mongo.bseticketedevents import RevolutionEvent
@@ -20,6 +22,7 @@ class BSEddiesRevolutionTask(commands.Cog):
         self.bot = bot
         self.user_points = UserPoints()
         self.revolutions = RevolutionEvent()
+        self.activities = UserActivities()
         self.embed_manager = EmbedManager(logger)
         self.logger = logger
         self.startup_tasks = startup_tasks
@@ -210,18 +213,7 @@ class BSEddiesRevolutionTask(commands.Cog):
         if not success:
             # revolution FAILED
             message = "Sadly, our revolution has failed. THE KING LIVES :crown: Better luck next week!"
-
-            self.user_points.append_to_transaction_history(
-                king_id, guild_id,
-                {
-                    "type": TransactionTypes.REV_TICKET_KING_WIN,
-                    "event_id": event["event_id"],
-                    "timestamp": datetime.datetime.now(),
-                    "comment": "User survived a REVOLUTION",
-                }
-            )
             gif = await self.giphy_api.random_gif("disappointed")
-
         else:
             king_dict = self.user_points.find_user(king_id, guild_id, projection={"points": True})
             points_to_lose = math.floor(event.get("locked_in_eddies", king_dict["points"]) / 2)
@@ -231,16 +223,13 @@ class BSEddiesRevolutionTask(commands.Cog):
                 supporter_eddies = self.user_points.get_user_points(supporter, guild_id)
                 supporter_eddies_to_lose = math.floor(supporter_eddies * 0.1)
                 total_points_to_distribute += supporter_eddies_to_lose
-                self.user_points.decrement_points(supporter, guild_id, supporter_eddies_to_lose)
-                self.user_points.append_to_transaction_history(
-                    supporter, guild_id,
-                    {
-                        "type": TransactionTypes.SUPPORTER_LOST_REVOLUTION,
-                        "amount": supporter_eddies_to_lose * -1,
-                        "event_id": event["event_id"],
-                        "timestamp": datetime.datetime.now(),
-                        "comment": "Supporter lost a revolution",
-                    }
+                self.user_points.increment_points(
+                    supporter,
+                    guild_id,
+                    supporter_eddies_to_lose * -1,
+                    TransactionTypes.SUPPORTER_LOST_REVOLUTION,
+                    event_id=event["event_id"],
+                    comment="Supporter lost a revolution"
                 )
 
             points_each = math.floor(total_points_to_distribute / len(revolutionaries))
@@ -249,31 +238,25 @@ class BSEddiesRevolutionTask(commands.Cog):
                        f"<@{king_id}> will lose **{points_to_lose}** and each of their supporters has lost"
                        f"`10%` of their eddies. Each revolutionary will gain `{points_each}` eddies.")
 
-            self.user_points.decrement_points(king_id, guild_id, points_to_lose)
-            self.user_points.append_to_transaction_history(
-                king_id, guild_id,
-                {
-                    "type": TransactionTypes.REV_TICKET_KING_LOSS,
-                    "amount": points_to_lose * -1,
-                    "event_id": event["event_id"],
-                    "timestamp": datetime.datetime.now(),
-                    "comment": "King lost a REVOLUTION",
-                }
+            self.user_points.increment_points(
+                king_id,
+                guild_id,
+                points_to_lose * -1,
+                TransactionTypes.REV_TICKET_KING_LOSS,
+                event_id=event["event_id"],
+                comment="King lost a REVOLUTION"
             )
 
             gif = await self.giphy_api.random_gif("celebrate")
 
             for user_id in revolutionaries:
-                self.user_points.increment_points(user_id, guild_id, points_each)
-                self.user_points.append_to_transaction_history(
-                    user_id, guild_id,
-                    {
-                        "type": TransactionTypes.REV_TICKET_WIN,
-                        "amount": points_each,
-                        "event_id": event["event_id"],
-                        "timestamp": datetime.datetime.now(),
-                        "comment": "User won a REVOLUTION",
-                    }
+                self.user_points.increment_points(
+                    user_id,
+                    guild_id,
+                    points_each,
+                    TransactionTypes.REV_TICKET_WIN,
+                    event_id=event["event_id"],
+                    comment="User won a REVOLUTION"
                 )
 
         # reset those that pledged to support - users can now _not_ support if they want

@@ -451,15 +451,11 @@ class BSEddiesManager(object):
 
             if real:
                 self.logger.info(f"Incrementing {_user} by {eddie_gain_dict[_user][0]}")
-                self.user_points.increment_points(_user, guild_id, eddie_gain_dict[_user][0])
-                self.user_points.append_to_transaction_history(
+                self.user_points.increment_points(
                     _user,
                     guild_id,
-                    {
-                        "type": TransactionTypes.DAILY_SALARY,
-                        "amount": eddie_gain_dict[_user][0],
-                        "timestamp": datetime.datetime.now(),
-                    }
+                    eddie_gain_dict[_user][0],
+                    TransactionTypes.DAILY_SALARY
                 )
             self.logger.info(f"{_user} gained {eddie_gain_dict[_user][0]}")
 
@@ -467,15 +463,11 @@ class BSEddiesManager(object):
         eddie_gain_dict[current_king_id][0] += tax_gains
 
         if real:
-            self.user_points.increment_points(current_king_id, guild_id, eddie_gain_dict[current_king_id][0])
-            self.user_points.append_to_transaction_history(
+            self.user_points.increment_points(
                 current_king_id,
                 guild_id,
-                {
-                    "type": TransactionTypes.TAX_GAINS,
-                    "amount": eddie_gain_dict[current_king_id][2],
-                    "timestamp": datetime.datetime.now(),
-                }
+                eddie_gain_dict[current_king_id][0],
+                TransactionTypes.TAX_GAINS
             )
 
         return eddie_gain_dict

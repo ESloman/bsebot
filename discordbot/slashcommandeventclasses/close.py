@@ -1,5 +1,4 @@
 
-import datetime
 
 import discord
 
@@ -112,17 +111,13 @@ class BSEddiesCloseBet(BSEddies):
 
                 self.logger.info(f"{ctx.user.id} just won a bet ({bet_id}) where they were the only better...")
                 self.user_bets.close_a_bet(bet["_id"], emoji)
-                self.user_points.increment_points(author.id, guild.id, bet_dict["points"])
-                self.user_points.append_to_transaction_history(
-                    ctx.user.id,
+                self.user_points.increment_points(
+                    author.id,
                     guild.id,
-                    {
-                        "type": TransactionTypes.BET_REFUND,
-                        "amount": bet_dict["points"],
-                        "timestamp": datetime.datetime.now(),
-                        "bet_id": bet_id,
-                        "comment": "User won their own bet when no-one else entered."
-                    }
+                    bet_dict["points"],
+                    TransactionTypes.BET_REFUND,
+                    comment="User won their own bet when no-one else entered.",
+                    bet_id=bet_id
                 )
                 if not author.dm_channel:
                     await author.create_dm()
@@ -255,17 +250,13 @@ class BSEddiesCloseBet(BSEddies):
         if betters := bet.get("betters"):
             for better in betters:
                 bet_dict = betters[better]
-                self.user_points.increment_points(int(better), guild.id, bet_dict["points"])
-                self.user_points.append_to_transaction_history(
+                self.user_points.increment_points(
                     int(better),
                     guild.id,
-                    {
-                        "type": TransactionTypes.BET_REFUND,
-                        "amount": bet_dict["points"],
-                        "timestamp": datetime.datetime.now(),
-                        "bet_id": bet_id,
-                        "comment": "Bet was cancelled."
-                    }
+                    bet_dict["points"],
+                    TransactionTypes.BET_REFUND,
+                    comment="Bet was cancelled",
+                    bet_id=bet_id
                 )
 
         self.user_bets.close_a_bet(bet["_id"], "cancelled")

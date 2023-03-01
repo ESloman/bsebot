@@ -5,10 +5,12 @@ from typing import List, Optional  # noqa: F401
 
 from discordbot.constants import BOT_IDS
 from mongo.bsedataclasses import SpoilerThreads
+from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.bets import UserBets
 from mongo.bsepoints.emojis import ServerEmojis
 from mongo.bsepoints.interactions import UserInteractions
 from mongo.bsepoints.points import UserPoints
+from mongo.bsepoints.transactions import UserTransactions
 from mongo.datatypes import Activity, Bet, Emoji, Message, Transaction, User, VCInteraction
 
 
@@ -19,6 +21,8 @@ class StatsDataCache:
         self.user_points = UserPoints()
         self.server_emojis = ServerEmojis()
         self.threads = SpoilerThreads()
+        self.trans = UserTransactions()
+        self.activities = UserActivities()
 
         self.annual = annual
 
@@ -239,16 +243,12 @@ class StatsDataCache:
         if self.__transaction_cache and (now - self.__transaction_cache_time).total_seconds() < 3600:
             return self.__transaction_cache
 
-        users = self.get_users(guild_id, start, end)
-        transaction_history = []
-        for user in users:
-            transactions = [t for t in user.get("transaction_history", []) if start < t["timestamp"] < end]
-            for _trans in transactions:
-                _trans["uid"] = user["uid"]
-            transaction_history.extend(transactions)
+        # TODO: #337 make a function here that only gets transactions between datetime
+        _transactions = self.trans.get_all_guild_transactions(guild_id)
+        _transactions = [t for t in _transactions if start < t["timestamp"] < end]
         if self.__user_id_cache:
-            transaction_history = [t for t in transaction_history if t["uid"] == self.__user_id_cache]
-        self.__transaction_cache = transaction_history
+            _transactions = [t for t in _transactions if t["uid"] == self.__user_id_cache]
+        self.__transaction_cache = _transactions
         self.__transaction_cache_time = now
         return self.__transaction_cache
 
@@ -272,14 +272,12 @@ class StatsDataCache:
         if self.__activity_cache and (now - self.__activity_cache_time).total_seconds() < 3600:
             return self.__activity_cache
 
-        users = self.get_users(guild_id, start, end)
-        activity_history = []
-        for user in users:
-            activities = [t for t in user.get("activity_history", []) if start < t["timestamp"] < end]
-            for _act in activities:
-                _act["uid"] = user["uid"]
-            activity_history.extend(activities)
-        self.__activity_cache = activity_history
+        # TODO: #337 make a function here that only gets activities between datetime
+        _activities = self.activities.get_all_guild_activities(guild_id)
+        _activities = [a for a in _activities if start < a["timestamp"] < end]
+        if self.__user_id_cache:
+            _activities = [a for a in _activities if a["uid"] == self.__user_id_cache]
+        self.__activity_cache = _activities
         self.__activity_cache_time = now
         return self.__activity_cache
 

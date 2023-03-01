@@ -4,6 +4,7 @@ from typing import Union, Optional
 
 from bson import ObjectId
 
+from discordbot.bot_enums import TransactionTypes
 from mongo import interface
 from mongo.bsepoints.points import UserPoints
 from mongo.datatypes import Bet
@@ -226,7 +227,14 @@ class UserBets(BestSummerEverPointsDB):
                 "points": points,
             }
             self.update({"_id": ret["_id"]}, {"$set": {f"betters.{user_id}": doc}})
-            self.user_points.decrement_points(user_id, guild_id, points)
+            self.user_points.increment_points(
+                user_id,
+                guild_id,
+                points * -1,
+                TransactionTypes.BET_PLACE,
+                bet_id=bet_id,
+                comment="Bet placed through slash command"
+            )
             return {"success": True}
 
         # here we're checking if the user has already bet on the option they have selected
@@ -240,13 +248,28 @@ class UserBets(BestSummerEverPointsDB):
             {"$inc": {f"betters.{user_id}.points": points}, "$set": {"last_bet": datetime.datetime.now()}}
         )
 
-        self.user_points.decrement_points(user_id, guild_id, points)
+        self.user_points.increment_points(
+            user_id,
+            guild_id,
+            points * -1,
+            TransactionTypes.BET_PLACE,
+            bet_id=bet_id,
+            comment="Bet placed through slash command"
+        )
         new_points = self.user_points.get_user_points(user_id, guild_id)
 
         if new_points < 0:
             # transaction went wrong somewhere. Reverse all the transactions that we did
             # think this is a case of the user using reactions too quickly
-            self.user_points.increment_points(user_id, guild_id, points)
+            self.logger.info("Reversing a transaction due to an error")
+            self.user_points.increment_points(
+                user_id,
+                guild_id,
+                points,
+                TransactionTypes.BET_REFUND,
+                bet_id=bet_id,
+                comment="Place refund"
+            )
             self.update(
                 {"_id": ret["_id"]},
                 {"$inc": {f"betters.{user_id}.points": -1 * points}, "$set": {"last_bet": datetime.datetime.now()}}

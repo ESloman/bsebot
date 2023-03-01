@@ -1,10 +1,10 @@
-import datetime
 
 import discord
 
 from discordbot.bot_enums import ActivityTypes, SupporterType
 from discordbot.selects.pledge import PledgeSelect
 
+from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.points import UserPoints
 
@@ -18,19 +18,8 @@ class PledgeView(discord.ui.View):
         self.pledge_select = PledgeSelect(current=current)
         self.add_item(self.pledge_select)
         self.guilds = Guilds()
+        self.activities = UserActivities()
         self.user_points = UserPoints()
-
-    def _append_to_history(self, user_id, guild_id, _type: ActivityTypes, **params):
-
-        doc = {
-            "type": _type,
-            "timestamp": datetime.datetime.now(),
-        }
-        if params:
-            doc["comment"] = f"Command parameters: {', '.join([f'{key}: {params[key]}' for key in params])}"
-
-        doc["value"] = params["value"]
-        self.user_points.append_to_activity_history(user_id, guild_id, doc)
 
     @discord.ui.button(label="Pledge", style=discord.ButtonStyle.blurple, row=2)
     async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -40,8 +29,11 @@ class PledgeView(discord.ui.View):
         except (IndexError, AttributeError):
             value = [o for o in self.pledge_select.options if o.default][0].value
 
-        self._append_to_history(
-            interaction.user.id, interaction.guild.id, ActivityTypes.BSEDDIES_ACTUAL_PLEDGE, value=value
+        self.activities.add_activity(
+            interaction.user.id,
+            interaction.guild.id,
+            ActivityTypes.BSEDDIES_ACTUAL_PLEDGE,
+            value=value,
         )
 
         guild_db = self.guilds.get_guild(interaction.guild.id)

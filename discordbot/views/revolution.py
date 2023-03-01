@@ -4,10 +4,11 @@ import math
 
 import discord
 
-from discordbot.bot_enums import TransactionTypes
+from discordbot.bot_enums import ActivityTypes, TransactionTypes
 from discordbot.constants import BSEDDIES_KING_ROLES
 from discordbot.embedmanager import EmbedManager
 
+from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.points import UserPoints
 from mongo.datatypes import RevolutionEventType
@@ -24,6 +25,7 @@ class RevolutionView(discord.ui.View):
         self.user_points = UserPoints()
         self.guilds = Guilds()
         self.embeds = EmbedManager(logger)
+        self.activities = UserActivities()
         self.logger = logger
 
     def toggle_stuff(self, disable):
@@ -112,13 +114,11 @@ class RevolutionView(discord.ui.View):
             }}
         )
 
-        self.user_points.append_to_transaction_history(
-            user_id, guild_id,
-            {
-                "type": TransactionTypes.REV_OVERTHROW,
-                "event_id": event["event_id"],
-                "timestamp": datetime.datetime.now(),
-            }
+        self.activities.add_activity(
+            user_id,
+            guild_id,
+            ActivityTypes.REV_OVERTHROW,
+            event_id=event["event_id"]
         )
 
         king_id = self.guilds.get_king(guild_id)
@@ -219,13 +219,11 @@ class RevolutionView(discord.ui.View):
             }}
         )
 
-        self.user_points.append_to_transaction_history(
-            user_id, guild_id,
-            {
-                "type": TransactionTypes.REV_SUPPORT,
-                "event_id": event["event_id"],
-                "timestamp": datetime.datetime.now(),
-            }
+        self.activities.add_activity(
+            user_id,
+            guild_id,
+            ActivityTypes.REV_SUPPORT,
+            event_id=event["event_id"]
         )
 
         king_id = self.guilds.get_king(guild_id)
@@ -289,17 +287,18 @@ class RevolutionView(discord.ui.View):
 
         eddies = our_user["points"]
         amount_to_subtract = math.floor(eddies * 0.1)
-        self.user_points.decrement_points(user_id, guild_id, amount_to_subtract)
-
-        # add to transaction history
-        self.user_points.append_to_transaction_history(
+        self.user_points.increment_points(
             user_id,
             guild_id,
-            {
-                "type": TransactionTypes.GIFT_GIVE,
-                "amount": amount_to_subtract * -1,
-                "timestamp": datetime.datetime.now(),
-            }
+            amount_to_subtract * -1,
+            TransactionTypes.REVOLUTION_SAVE
+        )
+
+        self.activities.add_activity(
+            user_id,
+            guild_id,
+            ActivityTypes.REV_SAVE,
+            event_id=event["event_id"]
         )
 
         event["chance"] -= 15

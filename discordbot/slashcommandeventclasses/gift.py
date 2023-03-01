@@ -1,4 +1,3 @@
-import datetime
 
 import discord
 
@@ -52,30 +51,19 @@ class BSEddiesGift(BSEddies):
         except discord.Forbidden:
             pass
 
-        self.user_points.decrement_points(ctx.author.id, ctx.guild.id, amount)
-        self.user_points.increment_points(friend.id, ctx.guild.id, amount)
-
-        # add to transaction history
-        self.user_points.append_to_transaction_history(
+        self.user_points.increment_points(
             ctx.author.id,
             ctx.guild.id,
-            {
-                "type": TransactionTypes.GIFT_GIVE,
-                "amount": amount * -1,
-                "timestamp": datetime.datetime.now(),
-                "user_id": friend.id,
-            }
+            amount * -1,
+            TransactionTypes.GIFT_GIVE,
+            friend_id=friend.id
         )
-
-        self.user_points.append_to_transaction_history(
+        self.user_points.increment_points(
             friend.id,
             ctx.guild.id,
-            {
-                "type": TransactionTypes.GIFT_RECEIVE,
-                "amount": amount,
-                "timestamp": datetime.datetime.now(),
-                "user_id": ctx.author.id,
-            }
+            amount,
+            TransactionTypes.GIFT_RECEIVE,
+            friend_id=ctx.author.id
         )
 
         await ctx.respond(content=f"Eddies transferred to `{friend.name}`!", ephemeral=True)

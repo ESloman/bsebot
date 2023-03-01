@@ -5,7 +5,6 @@ All client event classes inherit from this. Adds a bunch of useful classes for
 it's children to use.
 """
 
-import datetime
 import logging
 
 import discord
@@ -13,6 +12,7 @@ import discord
 from discordbot.bot_enums import ActivityTypes
 from discordbot.embedmanager import EmbedManager
 
+from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.bets import UserBets
 from mongo.bsepoints.emojis import ServerEmojis
 from mongo.bsepoints.guilds import Guilds
@@ -40,6 +40,7 @@ class BaseEvent(object):
         :param guild_ids:
         :param logger:
         """
+        self.activities = UserActivities()
         self.user_bets = UserBets()
         self.user_points = UserPoints()
         self.server_emojis = ServerEmojis()
@@ -66,12 +67,9 @@ class BaseEvent(object):
 
         self.logger.info(f"{_type.name} triggered by {user.name} with {params}")
 
-        doc = {
-            "type": _type,
-            "timestamp": datetime.datetime.now(),
-        }
-
-        if params:
-            doc["comment"] = f"Command parameters: {', '.join([f'{key}: {params[key]}' for key in params])}"
-
-        self.user_points.append_to_activity_history(user.id, guild_id, doc)
+        self.activities.add_activity(
+            user.id,
+            guild_id,
+            _type,
+            **params
+        )

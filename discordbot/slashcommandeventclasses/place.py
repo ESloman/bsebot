@@ -1,12 +1,11 @@
 
-import datetime
 from typing import Union
 
 import discord
 
 import discordbot.views as views
 import discordbot.slashcommandeventclasses as slashcommands
-from discordbot.bot_enums import TransactionTypes, ActivityTypes
+from discordbot.bot_enums import ActivityTypes
 
 
 class BSEddiesPlaceBet(slashcommands.BSEddies):
@@ -120,16 +119,5 @@ class BSEddiesPlaceBet(slashcommands.BSEddies):
 
         message = channel.get_partial_message(bet["message_id"])
         embed = self.embed_manager.get_bet_embed(guild, bet_id, bet)
-        self.user_points.append_to_transaction_history(
-            ctx.user.id,
-            guild.id,
-            {
-                "type": TransactionTypes.BET_PLACE,
-                "amount": amount * -1,
-                "timestamp": datetime.datetime.now(),
-                "bet_id": bet_id,
-                "comment": "Bet placed through slash command",
-            }
-        )
         await message.edit(embed=embed, view=view)
         await response.edit_message(content="Placed the bet for you!", view=None)

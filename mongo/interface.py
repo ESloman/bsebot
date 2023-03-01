@@ -20,11 +20,14 @@ if sys.version_info[0] < 3:
 else:
     from urllib.parse import quote_plus
 
+CACHED_CLIENT = None  # type: MongoClient
+
 
 def get_client(
         ip: str = "127.0.0.1",
         user_name: Union[str, None] = None,
-        password: Union[str, None] = None) -> Union[MongoClient, bool]:
+        password: Union[str, None] = None
+    ) -> Union[MongoClient, bool]:
     """
     Returns a MongoDB Client connection for interacting with MongoDB Database Objects.
 
@@ -34,7 +37,9 @@ def get_client(
 
     :returns MongoClient object:
     """
-
+    global CACHED_CLIENT
+    if CACHED_CLIENT is not None:
+        return CACHED_CLIENT
     if user_name is None and password is None:
         connection = "mongodb://{}:27017".format(ip)
     elif user_name and password:
@@ -43,7 +48,10 @@ def get_client(
         connection = "mongodb://%s:%s@{}:27017".format(ip) % (u, p)
     else:
         return False
-    return MongoClient(connection, serverSelectionTimeoutMS=1000)
+    client = MongoClient(connection, serverSelectionTimeoutMS=1000)
+    CACHED_CLIENT = client
+    print(f"Setting cached mongo client to {client}: : {id(client)}")
+    return client
 
 
 def get_database_names(client: MongoClient) -> list:

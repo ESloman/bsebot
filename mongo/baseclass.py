@@ -14,11 +14,11 @@ class BaseClass(object):
     If not username or password is provided - authenticate without username and password.
     """
     def __init__(
-            self,
-            ip: str = "127.0.0.1",
-            # ip: str = "ec2-35-178-51-238.eu-west-2.compute.amazonaws.com",
-            username: str = None,
-            password: str = None):
+        self,
+        ip: str = "127.0.0.1",
+        username: str = None,
+        password: str = None
+    ):
         """
         Constructor method.
         :param ip: ip of instance to connect to
@@ -26,6 +26,7 @@ class BaseClass(object):
         :param password: password to login to instance with
         """
         self.cli = interface.get_client(ip, username, password)
+        print(f"Using client {self.cli}: {id(self.cli)}")
         self._vault = None
 
     @property

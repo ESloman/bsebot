@@ -14,11 +14,11 @@ class BaseClass(object):
     If not username or password is provided - authenticate without username and password.
     """
     def __init__(
-            self,
-            ip: str = "127.0.0.1",
-            username: str = None,
-            password: str = None
-        ):
+        self,
+        ip: str = "127.0.0.1",
+        username: str = None,
+        password: str = None
+    ):
         """
         Constructor method.
         :param ip: ip of instance to connect to

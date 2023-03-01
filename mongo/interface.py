@@ -24,10 +24,10 @@ CACHED_CLIENT = None  # type: MongoClient
 
 
 def get_client(
-        ip: str = "127.0.0.1",
-        user_name: Union[str, None] = None,
-        password: Union[str, None] = None
-    ) -> Union[MongoClient, bool]:
+    ip: str = "127.0.0.1",
+    user_name: Union[str, None] = None,
+    password: Union[str, None] = None
+) -> Union[MongoClient, bool]:
     """
     Returns a MongoDB Client connection for interacting with MongoDB Database Objects.
 

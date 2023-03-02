@@ -1,0 +1,51 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "cicd_*"]  # enable this workflow for cicd changes
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    environment: build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Log in to the Container registry
+        uses: docker/login-action@v4
+        with:
+          username: elliotsloman
+          password: ${{ secrets.dockerhub_token }}
+
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@507c2f2dc502c992ad446e3d7a5dfbe311567a96
+        with:
+          images: elliotsloman/bsebot
+          tags: |
+            type=sha
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            GIPHY_TOKEN=${{ secrets.GIPHY_TOKEN }}
+            DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}
+            GIT_USER=ESloman
+            GIT_PASS=${{ secrets.GIT_PASS }}
+            GITHUB_API_KEY=${{ secrets.GIT_API_KEY }}
+  test:
+    runs-on: ubuntu-latest
+    needs: build
+    services:
+      mongo:
+        image: mongo

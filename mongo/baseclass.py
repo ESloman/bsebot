@@ -26,7 +26,6 @@ class BaseClass(object):
         :param password: password to login to instance with
         """
         self.cli = interface.get_client(ip, username, password)
-        print(f"Using client {self.cli}: {id(self.cli)}")
         self._vault = None
 
     @property

@@ -5,19 +5,17 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  build_and_push:
     runs-on: ubuntu-latest
     environment: build
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
       - name: Log in to the Container registry
         uses: docker/login-action@v4
         with:
           username: elliotsloman
           password: ${{ secrets.dockerhub_token }}
-
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@507c2f2dc502c992ad446e3d7a5dfbe311567a96
@@ -26,7 +24,6 @@ jobs:
           tags: |
             type=sha
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
-
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:

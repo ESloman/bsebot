@@ -82,12 +82,14 @@ class GuildChecker(commands.Cog):
             db_guild = self.guilds.get_guild(guild.id)
             if not db_guild:
                 # gotta insert into database
-                db_guild = self.guilds.insert_guild(
+                self.guilds.insert_guild(
                     guild.id,
                     guild.name,
                     guild.owner_id,
                     guild.created_at
-                )[0]
+                )
+                # get new instance of db_guild
+                db_guild = self.guilds.get_guild(guild.id)
                 self.guilds.update_tax_history(guild.id, 0.1, 0.0, self.bot.user.id)
 
             self.logger.info("Checking guilds for new members")
@@ -101,7 +103,7 @@ class GuildChecker(commands.Cog):
                 if not user:
                     self.user_points.create_user(member.id, guild.id, False)
                     self.activities.add_activity(
-                        user["_id"],
+                        member.id,
                         guild.id,
                         ActivityTypes.SERVER_JOIN
                     )

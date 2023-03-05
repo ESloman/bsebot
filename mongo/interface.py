@@ -25,7 +25,7 @@ CACHED_CLIENT = None  # type: MongoClient
 
 class CachedMongoClient(object):
     """
-    Use a singleton class to handle the single MongoClient object that we need to create 
+    Use a singleton class to handle the single MongoClient object that we need to create
 
     Returns:
         _type_: CachedMongoClient
@@ -45,7 +45,7 @@ class CachedMongoClient(object):
                 serverSelectionTimeoutMS=1000,
             )
             print(f"Creating MongoClient instance: {id(self.client)}")
-    
+
     @property
     def client(self):
         return self._client

@@ -11,7 +11,7 @@ from discord.ext import tasks, commands
 from apis.github import GitHubAPI
 
 from discordbot.bsebot import BSEBot
-from discordbot.bot_enums import TransactionTypes, ActivityTypes
+from discordbot.bot_enums import ActivityTypes
 from discordbot.clienteventclasses import OnReadyEvent
 from discordbot.constants import BSE_SERVER_ID
 from discordbot.embedmanager import EmbedManager
@@ -21,6 +21,7 @@ from discordbot.views import LeaderBoardView, RevolutionView, BetView
 from mongo.bsedataclasses import SpoilerThreads
 from mongo.bseticketedevents import RevolutionEvent
 
+from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.bets import UserBets
 from mongo.bsepoints.emojis import ServerEmojis
 from mongo.bsepoints.guilds import Guilds
@@ -36,6 +37,7 @@ class GuildChecker(commands.Cog):
         self.finished = False
         self.on_ready = on_ready
 
+        self.activities = UserActivities()
         self.user_interactions = UserInteractions()
         self.events = RevolutionEvent()
         self.server_emojis = ServerEmojis()
@@ -66,7 +68,7 @@ class GuildChecker(commands.Cog):
         Loop that makes sure that guild information is synced correctly
         :return:
         """
-        now = datetime.datetime.now()
+        datetime.datetime.now()
 
         if not self.finished:
             # only need to do this once
@@ -81,12 +83,14 @@ class GuildChecker(commands.Cog):
             db_guild = self.guilds.get_guild(guild.id)
             if not db_guild:
                 # gotta insert into database
-                db_guild = self.guilds.insert_guild(
+                self.guilds.insert_guild(
                     guild.id,
                     guild.name,
                     guild.owner_id,
                     guild.created_at
-                )[0]
+                )
+                # get new instance of db_guild
+                db_guild = self.guilds.get_guild(guild.id)
                 self.guilds.update_tax_history(guild.id, 0.1, 0.0, self.bot.user.id)
 
             self.logger.info("Checking guilds for new members")
@@ -99,19 +103,13 @@ class GuildChecker(commands.Cog):
                 user = self.user_points.find_user(member.id, guild.id)
                 if not user:
                     self.user_points.create_user(member.id, guild.id, False)
-                    self.logger.info(
-                        f"Creating new user entry for {member.id} - {member.name} for {guild.id} - {guild.name}"
-                    )
-
-                    self.user_points.append_to_transaction_history(
+                    self.activities.add_activity(
                         member.id,
                         guild.id,
-                        {
-                            "type": TransactionTypes.USER_CREATE,
-                            "amount": 10,
-                            "timestamp": now,
-                            "comment": "User created",
-                        }
+                        ActivityTypes.SERVER_JOIN
+                    )
+                    self.logger.info(
+                        f"Creating new user entry for {member.id} - {member.name} for {guild.id} - {guild.name}"
                     )
                     continue
 
@@ -123,15 +121,11 @@ class GuildChecker(commands.Cog):
                 _users = [u for u in _users if not u.get("inactive")]
                 for user in _users:
                     if user["uid"] not in member_ids:
-
                         self.user_points.update({"_id": user["_id"]}, {"$set": {"inactive": True}})
-                        self.user_points.append_to_activity_history(
-                            user["uid"],
+                        self.activities.add_activity(
+                            user["_id"],
                             guild.id,
-                            {
-                                "type": ActivityTypes.SERVER_LEAVE,
-                                "timestamp": now
-                            }
+                            ActivityTypes.SERVER_LEAVE
                         )
 
             self.logger.info("Checking guild emojis")

@@ -5,6 +5,7 @@ from discord.ext import tasks, commands
 
 from discordbot.bsebot import BSEBot
 from discordbot.bot_enums import ActivityTypes
+from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.points import UserPoints
 from mongo.bseticketedevents import RevolutionEvent
@@ -18,6 +19,7 @@ class BSEddiesKingTask(commands.Cog):
         self.startup_tasks = startup_tasks
         self.guilds = Guilds()
         self.events = RevolutionEvent()
+        self.activities = UserActivities()
         self.king_checker.start()
         self.events_cache = {}
 
@@ -73,6 +75,13 @@ class BSEddiesKingTask(commands.Cog):
             role = guild.get_role(role_id)  # type: discord.Role
             current_king = guild_db.get("king")
             prev_king_id = None
+
+            if not role and not role_id:
+                self.logger.warning(
+                    f"No BSEddies role defined for {guild.id}: {guild.name}. Can't check KING so skipping."
+                )
+                continue
+
             if len(role.members) > 1:
                 self.logger.info("We have multiple people with this role - purging the list.")
                 for member in role.members:  # type: discord.Member
@@ -119,26 +128,25 @@ class BSEddiesKingTask(commands.Cog):
                 except discord.Forbidden:
                     pass
 
-                activity = {
-                    "type": ActivityTypes.KING_LOSS,
-                    "timestamp": datetime.datetime.now(),
-                    "comment": f"Losing King to {top_user['uid']}"
-                }
-
-                self.user_points.append_to_activity_history(current_king, guild.id, activity)
+                self.activities.add_activity(
+                    current_king,
+                    guild.id,
+                    ActivityTypes.KING_LOSS,
+                    comment=f"Losing King to {top_user['uid']}"
+                )
                 current_king = None
 
             # make a new KING
             if current_king is None:
                 self.logger.info(f"Adding a new king: {new.display_name}")
 
-                activity = {
-                    "type": ActivityTypes.KING_GAIN,
-                    "timestamp": datetime.datetime.now(),
-                    "comment": f"Taking King from {prev_king_id}"
-                }
+                self.activities.add_activity(
+                    top_user["uid"],
+                    guild.id,
+                    ActivityTypes.KING_GAIN,
+                    comment=f"Taking King from {prev_king_id}"
+                )
 
-                self.user_points.append_to_activity_history(top_user["uid"], guild.id, activity)
                 await new.add_roles(role, reason="User is now KING!")
 
                 self.user_points.set_king_flag(top_user["uid"], guild.id, True)

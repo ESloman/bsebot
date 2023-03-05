@@ -1,10 +1,10 @@
-import datetime
 
 import discord
 
-from discordbot.bot_enums import ActivityTypes, SupporterType
+from discordbot.bot_enums import ActivityTypes, SupporterType, TransactionTypes
 from discordbot.selects.bless import BlessAmountSelect, BlessClassSelect
 
+from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.points import UserPoints
 
@@ -18,18 +18,7 @@ class BlessView(discord.ui.View):
         self.add_item(self.amount_select)
         self.guilds = Guilds()
         self.user_points = UserPoints()
-
-    def _append_to_history(self, user_id, guild_id, _type: ActivityTypes, **params):
-
-        doc = {
-            "type": _type,
-            "timestamp": datetime.datetime.now(),
-        }
-        if params:
-            doc["comment"] = f"Command parameters: {', '.join([f'{key}: {params[key]}' for key in params])}"
-
-        doc["value"] = params["value"]
-        self.user_points.append_to_activity_history(user_id, guild_id, doc)
+        self.activities = UserActivities()
 
     @discord.ui.button(label="Bless", style=discord.ButtonStyle.blurple, emoji="📈", row=2)
     async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -41,8 +30,11 @@ class BlessView(discord.ui.View):
 
         class_value = [o for o in self.class_select.options if o.default][0].value
 
-        self._append_to_history(
-            interaction.user.id, interaction.guild.id, ActivityTypes.BLESS_ACTUAL, value=value,
+        self.activities.add_activity(
+            interaction.user.id,
+            interaction.guild.id,
+            ActivityTypes.BLESS_ACTUAL,
+            value=value,
             class_value=class_value
         )
 
@@ -91,12 +83,18 @@ class BlessView(discord.ui.View):
         eddies_given = 0
         for user in users:
             self.user_points.increment_points(
-                user["uid"], interaction.guild.id, eddies_each
+                user["uid"],
+                interaction.guild.id,
+                eddies_each,
+                TransactionTypes.BLESS_RECEIVE
             )
             eddies_given += eddies_each
 
-        self.user_points.decrement_points(
-            interaction.user.id, interaction.guild.id, eddies_given
+        self.user_points.increment_points(
+            interaction.user.id,
+            interaction.guild.id,
+            eddies_given * -1,
+            TransactionTypes.BLESS_GIVE
         )
 
         msg = (

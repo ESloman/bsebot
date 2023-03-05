@@ -353,16 +353,13 @@ class AwardsBuilder:
 
         for award in awards:
             # comment out this for debug
-            self.user_points.append_to_transaction_history(
+            self.user_points.increment_points(
                 award.user_id,
                 award.guild_id,
-                {
-                    "type": transaction_type,
-                    "timestamp": datetime.datetime.now(),
-                    "amount": award.eddies,
-                }
+                award.eddies,
+                transaction_type,
+                award_name=award.short_name
             )
-            self.user_points.increment_points(award.user_id, award.guild_id, award.eddies)
             self.awards.document_award(**{k: v for k, v in award.__dict__.items() if v is not None})
             self.logger.info(f"{ {k: v for k, v in award.__dict__.items() if v is not None} }")
 

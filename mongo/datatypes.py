@@ -16,6 +16,8 @@ class Transaction(TypedDict):
     """
     A dict representing a transaction
     """
+    uid: int
+    guild_id: int
     type: TransactionTypes
     """The type of transaction enum"""
     amount: int
@@ -29,6 +31,8 @@ class Transaction(TypedDict):
 
 
 class Activity(TypedDict):
+    uid: int
+    guild_id: int
     type: ActivityTypes
     """The activity type enum"""
     timestamp: datetime.datetime

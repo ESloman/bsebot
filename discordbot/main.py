@@ -54,14 +54,14 @@ if __name__ == "__main__":
         GIPHY_TOKEN = None
         GITHUB_TOKEN = None
 
-    if not TOKEN:
-        TOKEN = os.environ.get("DISCORD_TOKEN")
-    if not DEBUG_MODE:
-        DEBUG_MODE = os.environ.get("DEBUG_MODE")
-    if not GIPHY_TOKEN:
-        GIPHY_TOKEN = os.environ.get("GIPHY_TOKEN")
-    if not GITHUB_TOKEN:
-        GITHUB_TOKEN = os.environ.get("GITHUB_API_KEY")
+    if _token := os.environ.get("DISCORD_TOKEN"):
+        TOKEN = _token
+    if _debug := os.environ.get("DEBUG_MODE"):
+        DEBUG_MODE = _debug
+    if _giphy_token := os.environ.get("GIPHY_TOKEN"):
+        GIPHY_TOKEN = _giphy_token
+    if _github := os.environ.get("GITHUB_API_KEY"):
+        GITHUB_TOKEN = _github
 
     if TOKEN is None:
         exit(-1)

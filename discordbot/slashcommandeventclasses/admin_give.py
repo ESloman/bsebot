@@ -1,4 +1,3 @@
-import datetime
 
 import discord
 
@@ -29,16 +28,12 @@ class BSEddiesAdminGive(BSEddies):
             ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_ADMIN_GIVE, user_id=user.id, amount=amount
         )
 
-        self.user_points.increment_points(user.id, ctx.guild.id, amount)
-
-        self.user_points.append_to_transaction_history(
-            user.id, ctx.guild.id,
-            {
-                "type": TransactionTypes.ADMIN_GIVE,
-                "amount": amount,
-                "timestamp": datetime.datetime.now(),
-                "comment": "Admin override increment"
-            }
+        self.user_points.increment_points(
+            user.id,
+            ctx.guild.id,
+            amount,
+            TransactionTypes.ADMIN_GIVE,
+            comment="Admin override increment"
         )
 
         try:

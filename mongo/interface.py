@@ -50,7 +50,6 @@ def get_client(
         return False
     client = MongoClient(connection, serverSelectionTimeoutMS=1000)
     CACHED_CLIENT = client
-    print(f"Setting cached mongo client to {client}: : {id(client)}")
     return client
 
 

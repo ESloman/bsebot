@@ -74,7 +74,7 @@ class BSEddiesRevolutionTask(commands.Cog):
 
             user_points = king_user["points"]
 
-            if not self.rev_started[guild.id]:
+            if not self.rev_started.get(guild.id):
                 # only trigger if King was King for more than twenty four hours
                 king_since = guild_db.get("king_since", datetime.datetime.now() - datetime.timedelta(days=1))
                 if (now - king_since).total_seconds() < 86400:

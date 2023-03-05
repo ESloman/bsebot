@@ -74,6 +74,13 @@ class BSEddiesKingTask(commands.Cog):
             role = guild.get_role(role_id)  # type: discord.Role
             current_king = guild_db.get("king")
             prev_king_id = None
+
+            if not role and not role_id:
+                self.logger.warning(
+                    f"No BSEddies role defined for {guild.id}: {guild.name}. Can't check KING so skipping."
+                )
+                continue
+
             if len(role.members) > 1:
                 self.logger.info("We have multiple people with this role - purging the list.")
                 for member in role.members:  # type: discord.Member

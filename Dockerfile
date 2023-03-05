@@ -11,7 +11,10 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key
     && apt-get update \
     && apt-get install -yq tzdata nano google-chrome-stable\
     && ln -fs /usr/share/zoneinfo/Europe/London /etc/localtime \
-    && dpkg-reconfigure -f noninteractive tzdata
+    && dpkg-reconfigure -f noninteractive tzdata \
+    && apt-get autoremove  \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -vp /home/app
 

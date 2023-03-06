@@ -16,6 +16,8 @@ from apis.github import GitHubAPI
 from mongo.bsepoints.bets import UserBets
 from mongo.bsepoints.points import UserPoints
 
+from discordbot.bsebot import BSEBot
+
 # client events
 from discordbot.clienteventclasses import OnDirectMessage, OnEmojiCreate, OnMemberJoin, OnMemberLeave
 from discordbot.clienteventclasses import OnMessage, OnMessageEdit, OnReactionAdd, OnReadyEvent, OnStickerCreate
@@ -60,7 +62,7 @@ class CommandManager(object):
 
     def __init__(
         self,
-        client: discord.Bot,
+        client: BSEBot,
         guilds: list,
         logger: logging.Logger,
         giphy_token: str = None,
@@ -86,7 +88,7 @@ class CommandManager(object):
 
         And finally, we call the two methods that actually register all the events and slash commands.
 
-        :param client: discord.Client object that represents our bot
+        :param client: BSEBot object that represents our bot
         :param guilds: list of guild IDs that we're listening on
         :param logger:  logger object for logging
         :param debug_mode: whether we're in debug mode or not
@@ -247,16 +249,13 @@ class CommandManager(object):
                 # message id is already in the cache
                 return
 
-            guild = self.client.get_guild(payload.guild_id)  # type: discord.Guild
+            guild = await self.client.fetch_guild(payload.guild_id)  # type: discord.Guild
             user = await self.client.fetch_user(payload.user_id)  # type: discord.User
 
             if user.bot:
                 return
 
-            channel = guild.get_channel(payload.channel_id)  # type: discord.TextChannel
-            if not channel:
-                # channel is thread
-                channel = guild.get_thread(payload.channel_id)
+            channel = await self.client.fetch_channel(payload.channel_id)  # type: discord.TextChannel
             partial_message = channel.get_partial_message(payload.message_id)  # type: discord.PartialMessage
             message = await partial_message.fetch()  # type: discord.Message
 
@@ -332,8 +331,7 @@ class CommandManager(object):
                 # message id is already in the cache
                 return
 
-            guild = self.client.get_guild(payload.guild_id)
-            channel = await guild.fetch_channel(payload.channel_id)
+            channel = await self.client.fetch_channel(payload.channel_id)
             message = await channel.fetch_message(payload.message_id)
             await self.on_message_edit.message_edit(None, message)
 

@@ -3,12 +3,13 @@ import datetime
 import discord
 from discord.ext import tasks, commands
 
+from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_SERVER_ID, GENERAL_CHAT
 from mongo.bsedataclasses import SpoilerThreads
 
 
 class ThreadSpoilerTask(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger, startup_tasks):
+    def __init__(self, bot: BSEBot, guilds, logger, startup_tasks):
         self.bot = bot
         self.logger = logger
         self.guilds = guilds
@@ -50,8 +51,7 @@ class ThreadSpoilerTask(commands.Cog):
             return
 
         self.logger.info("Checking spoiler threads for mute messages")
-        guild = self.bot.get_guild(BSE_SERVER_ID)
-        general = await guild.fetch_channel(GENERAL_CHAT)
+        general = await self.bot.fetch_channel(GENERAL_CHAT)
         threads = general.threads
 
         if not threads:

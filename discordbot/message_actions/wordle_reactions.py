@@ -4,6 +4,7 @@ import re
 import discord
 from discord import PartialEmoji
 
+from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_SERVER_ID, SLOMAN_SERVER_ID, WORDLE_SCORE_REGEX
 from discordbot.message_actions.base import BaseMessageAction
 
@@ -12,7 +13,7 @@ class WordleMessageAction(BaseMessageAction):
     """
     Wordle message action class for adding reactions to wordle messages
     """
-    def __init__(self, client: discord.Bot) -> None:
+    def __init__(self, client: BSEBot) -> None:
         super().__init__(client)
 
     async def pre_condition(self, message: discord.Message, message_type: list) -> bool:

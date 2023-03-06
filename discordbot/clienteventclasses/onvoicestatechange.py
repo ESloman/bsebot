@@ -2,6 +2,7 @@ import datetime
 
 import discord
 
+from discordbot.bsebot import BSEBot
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
 
 
@@ -10,7 +11,7 @@ class OnVoiceStateChange(BaseEvent):
     Class for handling on_thread_update event
     """
 
-    def __init__(self, client: discord.Bot, guild_ids, logger):
+    def __init__(self, client: BSEBot, guild_ids, logger):
         super().__init__(client, guild_ids, logger)
 
     async def on_voice_state_change(

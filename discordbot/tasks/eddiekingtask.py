@@ -3,6 +3,7 @@ import datetime
 import discord
 from discord.ext import tasks, commands
 
+from discordbot.bsebot import BSEBot
 from discordbot.bot_enums import ActivityTypes
 from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.guilds import Guilds
@@ -11,7 +12,7 @@ from mongo.bseticketedevents import RevolutionEvent
 
 
 class BSEddiesKingTask(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger, startup_tasks):
+    def __init__(self, bot: BSEBot, guilds, logger, startup_tasks):
         self.bot = bot
         self.user_points = UserPoints()
         self.logger = logger
@@ -168,9 +169,7 @@ class BSEddiesKingTask(commands.Cog):
                 if not channel_id:
                     continue
 
-                channel = guild.get_channel(channel_id)
-                if not channel:
-                    channel = await guild.fetch_channel(channel_id)
+                channel = await self.bot.fetch_channel(channel_id)
                 await channel.trigger_typing()
                 msg = f"{new.mention} is now the {role.mention}! 👑"
                 await channel.send(content=msg)

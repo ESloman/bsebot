@@ -4,13 +4,14 @@ import random
 import discord
 from discord.ext import tasks, commands
 
+from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_SERVER_ID, GENERAL_CHAT
 from discordbot.wordle.wordlesolver import WordleSolver
 from mongo.bsedataclasses import WordleAttempts
 
 
 class WordleTask(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger, startup_tasks):
+    def __init__(self, bot: BSEBot, guilds, logger, startup_tasks):
         self.bot = bot
         self.logger = logger
         self.guilds = guilds

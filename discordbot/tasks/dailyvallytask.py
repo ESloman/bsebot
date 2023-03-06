@@ -1,15 +1,15 @@
 import datetime
 import random
 
-import discord
 from discord.ext import tasks, commands
 
+from discordbot.bsebot import BSEBot
 from discordbot.constants import VALORANT_CHAT, VALORANT_ROLE, BSE_SERVER_ID, BSE_BOT_ID
 from mongo.bsepoints.interactions import UserInteractions
 
 
 class AfterWorkVally(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger, startup_tasks):
+    def __init__(self, bot: BSEBot, guilds, logger, startup_tasks):
         self.bot = bot
         self.logger = logger
         self.guilds = guilds
@@ -97,7 +97,7 @@ class AfterWorkVally(commands.Cog):
         self.logger.info("Time to send vally message!")
 
         guild = await self.bot.fetch_guild(BSE_SERVER_ID)  # type: discord.Guild
-        channel = await guild.fetch_channel(VALORANT_CHAT)
+        channel = await self.bot.fetch_channel(VALORANT_CHAT)
         await channel.trigger_typing()
         role = guild.get_role(VALORANT_ROLE)
 

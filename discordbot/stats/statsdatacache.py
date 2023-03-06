@@ -80,7 +80,7 @@ class StatsDataCache:
         if self.__message_cache and (now - self.__message_cache_time).total_seconds() < 3600:
             return self.__message_cache
 
-        self.__message_cache = self.user_interactions._paginated_query(
+        self.__message_cache = self.user_interactions.paginated_query(
             {
                 "guild_id": guild_id,
                 "timestamp": {"$gt": start, "$lt": end},
@@ -115,7 +115,7 @@ class StatsDataCache:
         if self.__edit_cache and (now - self.__edit_cache_time).total_seconds() < 3600:
             return self.__edit_cache
 
-        self.__edit_cache = self.user_interactions._paginated_query(
+        self.__edit_cache = self.user_interactions.paginated_query(
             {
                 "guild_id": guild_id,
                 "edited": {"$gt": start, "$lt": end},
@@ -156,7 +156,7 @@ class StatsDataCache:
         if self.__vc_cache and (now - self.__vc_cache_time).total_seconds() < 3600:
             return self.__vc_cache
 
-        self.__vc_cache = self.user_interactions._paginated_query(
+        self.__vc_cache = self.user_interactions.paginated_query(
             {
                 "guild_id": guild_id,
                 "timestamp": {"$gt": start, "$lt": end},
@@ -242,9 +242,7 @@ class StatsDataCache:
         if self.__transaction_cache and (now - self.__transaction_cache_time).total_seconds() < 3600:
             return self.__transaction_cache
 
-        # TODO: #337 make a function here that only gets transactions between datetime
-        _transactions = self.trans.get_all_guild_transactions(guild_id)
-        _transactions = [t for t in _transactions if start < t["timestamp"] < end]
+        _transactions = self.trans.get_guild_transactions_by_timestamp(guild_id, start, end)
         if self.__user_id_cache:
             _transactions = [t for t in _transactions if t["uid"] == self.__user_id_cache]
         self.__transaction_cache = _transactions
@@ -271,9 +269,7 @@ class StatsDataCache:
         if self.__activity_cache and (now - self.__activity_cache_time).total_seconds() < 3600:
             return self.__activity_cache
 
-        # TODO: #337 make a function here that only gets activities between datetime
-        _activities = self.activities.get_all_guild_activities(guild_id)
-        _activities = [a for a in _activities if start < a["timestamp"] < end]
+        _activities = self.activities.get_guild_activities_by_timestamp(guild_id, start, end)
         if self.__user_id_cache:
             _activities = [a for a in _activities if a["uid"] == self.__user_id_cache]
         self.__activity_cache = _activities

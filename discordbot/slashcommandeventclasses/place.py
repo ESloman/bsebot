@@ -111,7 +111,7 @@ class BSEddiesPlaceBet(slashcommands.BSEddies):
             return False
 
         bet = self.user_bets.get_bet_from_id(guild.id, bet_id)
-        channel = guild.get_channel(bet["channel_id"])
+        channel = await self.client.fetch_channel(bet["channel_id"])
 
         if not channel:
             # channel is thread

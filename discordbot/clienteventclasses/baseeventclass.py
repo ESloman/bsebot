@@ -9,6 +9,7 @@ import logging
 
 import discord
 
+from discordbot.bsebot import BSEBot
 from discordbot.bot_enums import ActivityTypes
 from discordbot.embedmanager import EmbedManager
 
@@ -30,7 +31,7 @@ class BaseEvent(object):
     """
     def __init__(
         self,
-        client: discord.Client,
+        client: BSEBot,
         guild_ids: list,
         logger: logging.Logger
     ):

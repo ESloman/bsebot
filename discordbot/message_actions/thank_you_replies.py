@@ -4,6 +4,7 @@ import re
 
 import discord
 
+from discordbot.bsebot import BSEBot
 from discordbot.message_actions.base import BaseMessageAction
 
 
@@ -11,7 +12,7 @@ class ThankYouReplies(BaseMessageAction):
     """
     Message action class for sending thank you messages
     """
-    def __init__(self, client: discord.Bot) -> None:
+    def __init__(self, client: BSEBot) -> None:
         super().__init__(client)
         self._thank_you_terms = [
             "thank you",

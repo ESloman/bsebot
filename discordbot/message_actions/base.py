@@ -1,12 +1,14 @@
 
 import discord
 
+from discordbot.bsebot import BSEBot
+
 
 class BaseMessageAction():
     """
     Base message action class to be inherited from
     """
-    def __init__(self, client: discord.Bot) -> None:
+    def __init__(self, client: BSEBot) -> None:
         self.client = client
 
     async def pre_condition(self, message: discord.Message, message_type: list) -> bool:

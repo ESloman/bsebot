@@ -3,12 +3,13 @@ import datetime
 import discord
 from discord.ext import tasks, commands
 
+from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_SERVER_ID, BSEDDIES_REVOLUTION_CHANNEL
 from discordbot.stats.awardsbuilder import AwardsBuilder
 
 
 class AnnualBSEddiesAwards(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger, startup_tasks):
+    def __init__(self, bot: BSEBot, guilds, logger, startup_tasks):
         self.bot = bot
         self.logger = logger
         self.guilds = guilds

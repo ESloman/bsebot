@@ -92,7 +92,8 @@ if __name__ == "__main__":
     cli = BSEBot(
         intents=intents,
         activity=listening_activity,
-        max_messages=5000
+        max_messages=5000,
+        logger=logger
     )
 
     com = CommandManager(cli, IDS, logger, giphy_token=GIPHY_TOKEN, github_token=GITHUB_TOKEN)

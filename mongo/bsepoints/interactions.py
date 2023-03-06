@@ -119,6 +119,7 @@ class UserInteractions(BestSummerEverPointsDB):
             user_id: int,
             timestamp: datetime.datetime,
             content: str,
+            is_bot: bool = False
     ):
         """
 
@@ -128,6 +129,7 @@ class UserInteractions(BestSummerEverPointsDB):
         :param message_id:
         :param timestamp:
         :param content:
+        :param is_bot:
         :return:
         """
         entry = {
@@ -135,6 +137,7 @@ class UserInteractions(BestSummerEverPointsDB):
             "content": content,
             "timestamp": timestamp,
             "message_id": message_id,
+            "is_bot": is_bot
         }
 
         self.update(

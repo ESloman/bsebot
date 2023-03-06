@@ -46,6 +46,7 @@ class OnMessage(BaseEvent):
 
         message_type = []
 
+        is_bot = message.author.bot
         is_thread = False
         is_vc = False
         if message.channel.type in [
@@ -168,7 +169,8 @@ class OnMessage(BaseEvent):
             message_content,
             message.created_at,
             is_thread=is_thread,
-            is_vc=is_vc
+            is_vc=is_vc,
+            is_bot=is_bot
         )
 
         # see if we need to act on this messages

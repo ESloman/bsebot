@@ -75,6 +75,7 @@ class UserInteractions(BestSummerEverPointsDB):
             additional_keys: Optional[dict] = None,
             is_thread: Optional[bool] = False,
             is_vc: Optional[bool] = False,
+            is_bot: Optional[bool] = False,
     ) -> None:
         """
         Adds an entry into our interactions DB with the corresponding message.
@@ -88,6 +89,7 @@ class UserInteractions(BestSummerEverPointsDB):
         :param additional_keys:
         :param is_thread: whether the entry happened in a thread or not
         :param is_vc: whether the entry happened in a vc or not
+        :param is_bot: whether the message came from a bot or not
         :return: None
         """
 
@@ -100,7 +102,8 @@ class UserInteractions(BestSummerEverPointsDB):
             "content": message_content,
             "timestamp": timestamp,
             "is_thread": is_thread,
-            "is_vc": is_vc
+            "is_vc": is_vc,
+            "is_bot": is_bot
         }
 
         if additional_keys:

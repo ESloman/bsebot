@@ -36,5 +36,34 @@ class UserActivities(BestSummerEverPointsDB):
         doc.update(kwargs)
         self.insert(doc)
 
+    def get_guild_activities_by_timestamp(
+        self,
+        guild_id: int,
+        start: datetime.datetime,
+        end: datetime.datetime
+    ) -> list[Activity]:
+        """Get guild activities between two timestamps
+
+        Args:
+            guild_id (int): the guild ID
+            start (datetime.datetime): start time
+            end (datetime.datetime): end time
+
+        Returns:
+            list[Activity]: activities between those times
+        """
+        return self.query(
+            {"guild_id": guild_id, "timestamp": {"$gt": start, "$lt": end}},
+            limit=10000
+        )
+
     def get_all_guild_activities(self, guild_id: int) -> list[Activity]:
+        """Get all activities for the given guild ID
+
+        Args:
+            guild_id (int): the guild ID
+
+        Returns:
+            list[Activity]: the activities
+        """
         return self.query({"guild_id": guild_id}, limit=10000)

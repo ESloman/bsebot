@@ -2,11 +2,11 @@ import datetime
 import math
 import random
 
-import discord
 from discord.ext import tasks, commands
 
 from apis.giphyapi import GiphyAPI
 from discordbot.bot_enums import SupporterType, TransactionTypes
+from discordbot.bsebot import BSEBot
 from discordbot.embedmanager import EmbedManager
 from discordbot.views import RevolutionView
 
@@ -18,7 +18,7 @@ from mongo.datatypes import GuildDB, RevolutionEventType
 
 
 class BSEddiesRevolutionTask(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger, giphy_token, startup_tasks):
+    def __init__(self, bot: BSEBot, guilds, logger, giphy_token, startup_tasks):
         self.bot = bot
         self.user_points = UserPoints()
         self.revolutions = RevolutionEvent()
@@ -80,7 +80,7 @@ class BSEddiesRevolutionTask(commands.Cog):
                 king_since = guild_db.get("king_since", datetime.datetime.now() - datetime.timedelta(days=1))
                 if (now - king_since).total_seconds() < 86400:
                     # user hasn't been king for more than twenty four hours
-                    channel = await guild.fetch_channel(guild_db["channel"])
+                    channel = await self.bot.fetch_channel(guild_db["channel"])
                     await channel.send(
                         content=(
                             f"<@{guild_db['king']}> has been <@&{guild_db['role']}> for less than **24** hours. "

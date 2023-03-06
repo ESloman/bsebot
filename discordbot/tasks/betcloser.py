@@ -3,13 +3,14 @@ import datetime
 import discord
 from discord.ext import tasks, commands
 
+from discordbot.bsebot import BSEBot
 from discordbot.embedmanager import EmbedManager
 from discordbot.views import BetView
 from mongo.bsepoints.bets import UserBets
 
 
 class BetCloser(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger, place, close, startup_tasks):
+    def __init__(self, bot: BSEBot, guilds, logger, place, close, startup_tasks):
         self.bot = bot
         self.guilds = guilds
         self.startup_tasks = startup_tasks
@@ -49,9 +50,9 @@ class BetCloser(commands.Cog):
             return
 
         now = datetime.datetime.now()
-        for guild in self.guilds:
-            guild_obj = self.bot.get_guild(guild)  # type: discord.Guild
-            active = self.user_bets.get_all_active_bets(guild)
+        for guild in self.bot.guilds:
+            guild_obj = await self.bot.fetch_guild(guild.id)  # type: discord.Guild
+            active = self.user_bets.get_all_active_bets(guild.id)
             for bet in active:
                 if timeout := bet.get("timeout"):
                     if timeout > now:
@@ -59,7 +60,7 @@ class BetCloser(commands.Cog):
                     # set the bet to no longer active ??
                     self.user_bets.update({"_id": bet["_id"]}, {"$set": {"active": False}})
                     member = guild_obj.get_member(bet["user"])
-                    channel = await guild_obj.fetch_channel(bet["channel_id"])
+                    channel = await self.bot.fetch_channel(bet["channel_id"])
                     message = await channel.fetch_message(bet["message_id"])  # type: discord.Message
                     bet["active"] = False
 

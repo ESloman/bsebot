@@ -1,13 +1,13 @@
 import datetime
 
-import discord
 from discord.ext import tasks, commands
 
+from discordbot.bsebot import BSEBot
 from mongo.bsepoints.bets import UserBets
 
 
 class BetReminder(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger, startup_tasks):
+    def __init__(self, bot: BSEBot, guilds, logger, startup_tasks):
         self.bot = bot
         self.guilds = guilds
         self.user_bets = UserBets()
@@ -42,9 +42,9 @@ class BetReminder(commands.Cog):
             return
 
         now = datetime.datetime.now()
-        for guild in self.guilds:
-            guild_obj = self.bot.get_guild(guild)  # type: discord.Guild
-            active = self.user_bets.get_all_active_bets(guild)
+        for guild in self.bot.guilds:
+            await self.bot.fetch_guild(guild.id)  # type: discord.Guild
+            active = self.user_bets.get_all_active_bets(guild.id)
             for bet in active:
                 timeout = bet["timeout"]
                 created = bet["created"]
@@ -58,7 +58,7 @@ class BetReminder(commands.Cog):
                 if 82800 <= diff.total_seconds() <= 86400:
                     # ~ 24 hours to go!
                     # send reminder here
-                    channel = await guild_obj.fetch_channel(bet["channel_id"])
+                    channel = await self.bot.fetch_channel(bet["channel_id"])
                     await channel.trigger_typing()
                     message = await channel.fetch_message(bet["message_id"])
 

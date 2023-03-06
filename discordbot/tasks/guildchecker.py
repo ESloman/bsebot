@@ -10,6 +10,7 @@ from discord.ext import tasks, commands
 
 from apis.github import GitHubAPI
 
+from discordbot.bsebot import BSEBot
 from discordbot.bot_enums import ActivityTypes
 from discordbot.clienteventclasses import OnReadyEvent
 from discordbot.constants import BSE_SERVER_ID
@@ -30,7 +31,7 @@ from mongo.bsepoints.stickers import ServerStickers
 
 
 class GuildChecker(commands.Cog):
-    def __init__(self, bot: discord.Client, logger, on_ready: OnReadyEvent, github_api: GitHubAPI):
+    def __init__(self, bot: BSEBot, logger, on_ready: OnReadyEvent, github_api: GitHubAPI):
         self.bot = bot
         self.logger = logger
         self.finished = False
@@ -210,7 +211,7 @@ class GuildChecker(commands.Cog):
                 message_id = event["message_id"]
                 channel_id = event["channel_id"]
 
-                channel = await guild.fetch_channel(channel_id)
+                channel = await self.bot.fetch_channel(channel_id)
                 message = channel.get_partial_message(message_id)
 
             # find all open bets
@@ -225,7 +226,7 @@ class GuildChecker(commands.Cog):
                     continue
 
                 try:
-                    channel = await guild.fetch_channel(channel_id)
+                    channel = await self.bot.fetch_channel(channel_id)
                 except discord.errors.NotFound:
                     # possible the channel no longer exists
                     self.logger.debug(f"Issue with fetching channel: {channel_id=}, {bet=}")
@@ -260,7 +261,7 @@ class GuildChecker(commands.Cog):
                         if send_message:
                             channel_id = self.guilds.get_update_channel(guild.id)
                             if channel_id:
-                                channel = await guild.fetch_channel(channel_id)
+                                channel = await self.bot.fetch_channel(channel_id)
                                 await channel.send(content=update_message, silent=True)
                         else:
                             self.logger.info("Not sending message...")
@@ -283,7 +284,7 @@ class GuildChecker(commands.Cog):
                     self.guilds.set_latest_release(guild.id, release_name)
                 if release_name != last_ver:
                     release_body = release_info["body"]
-                    channel = await guild.fetch_channel(db_guild["channel"])
+                    channel = await self.bot.fetch_channel(db_guild["channel"])
 
                     split_body = release_body.split("\n")
                     body = f"A new release: **{release_name}** has been published."

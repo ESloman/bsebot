@@ -1,14 +1,14 @@
 import datetime
 
-import discord
 from discord.ext import tasks, commands
 
 from apis.github import GitHubAPI
+from discordbot.bsebot import BSEBot
 from mongo.bsepoints.guilds import Guilds
 
 
 class ReleaseChecker(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger, startup_tasks, github_api: GitHubAPI):
+    def __init__(self, bot: BSEBot, guilds, logger, startup_tasks, github_api: GitHubAPI):
         self.bot = bot
         self.logger = logger
         self.startup_tasks = startup_tasks
@@ -95,7 +95,7 @@ class ReleaseChecker(commands.Cog):
                 # same as last release name
                 continue
 
-            channel = await guild.fetch_channel(guild_db["channel"])
+            channel = await self.bot.fetch_channel(guild_db["channel"])
             for _body in bodies:
                 await channel.send(content=_body, silent=True, suppress=True)
 

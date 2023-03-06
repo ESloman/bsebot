@@ -4,6 +4,7 @@ import re
 
 import discord
 
+from discordbot.bsebot import BSEBot
 from discordbot.message_actions.base import BaseMessageAction
 
 
@@ -11,7 +12,7 @@ class BirthdayReplies(BaseMessageAction):
     """
     Message action class for handling birthday reply messages for the bot
     """
-    def __init__(self, client: discord.Bot) -> None:
+    def __init__(self, client: BSEBot) -> None:
         super().__init__(client)
         self._birthday_terms = [
             "happy birthday",

@@ -4,6 +4,7 @@ import math
 
 import discord
 
+from discordbot.bsebot import BSEBot
 from discordbot.bot_enums import ActivityTypes, TransactionTypes
 from discordbot.constants import BSEDDIES_KING_ROLES
 from discordbot.embedmanager import EmbedManager
@@ -16,7 +17,7 @@ from mongo.bseticketedevents import RevolutionEvent
 
 
 class RevolutionView(discord.ui.View):
-    def __init__(self, client: discord.Client, event: RevolutionEventType, logger):
+    def __init__(self, client: BSEBot, event: RevolutionEventType, logger):
         super().__init__(timeout=None)
         self.client = client
         self.event_id = event["event_id"]
@@ -124,7 +125,7 @@ class RevolutionView(discord.ui.View):
         king_id = self.guilds.get_king(guild_id)
 
         king_user = await self.client.fetch_user(king_id)  # type: discord.User
-        guild = self.client.get_guild(guild_id)
+        guild = await self.client.fetch_guild(guild_id)
 
         role = guild.get_role(BSEDDIES_KING_ROLES[guild_id])
 
@@ -229,7 +230,7 @@ class RevolutionView(discord.ui.View):
         king_id = self.guilds.get_king(guild_id)
 
         king_user = await self.client.fetch_user(king_id)  # type: discord.User
-        guild = self.client.get_guild(guild_id)
+        guild = await self.client.fetch_guild(guild_id)
 
         role = guild.get_role(BSEDDIES_KING_ROLES[guild_id])
 
@@ -311,7 +312,7 @@ class RevolutionView(discord.ui.View):
             }}
         )
 
-        guild = self.client.get_guild(guild_id)
+        guild = await self.client.fetch_guild(guild_id)
 
         role = guild.get_role(BSEDDIES_KING_ROLES[guild_id])
 

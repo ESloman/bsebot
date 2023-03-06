@@ -38,5 +38,34 @@ class UserTransactions(BestSummerEverPointsDB):
         doc.update(kwargs)
         self.insert(doc)
 
+    def get_guild_transactions_by_timestamp(
+        self,
+        guild_id: int,
+        start: datetime.datetime,
+        end: datetime.datetime
+    ) -> list[Transaction]:
+        """Get guild transactions between two timestamps
+
+        Args:
+            guild_id (int): the guild ID
+            start (datetime.datetime): start time
+            end (datetime.datetime): end time
+
+        Returns:
+            list[Transaction]: transactions between those times
+        """
+        return self.query(
+            {"guild_id": guild_id, "timestamp": {"$gt": start, "$lt": end}},
+            limit=10000
+        )
+
     def get_all_guild_transactions(self, guild_id: int) -> list[Transaction]:
+        """Get all transactions for a given guild ID
+
+        Args:
+            guild_id (int): the guild ID
+
+        Returns:
+            list[Transaction]: list of transactions
+        """
         return self.query({"guild_id": guild_id}, limit=10000)

@@ -135,10 +135,17 @@ class BaseClass(object):
         len_ret = limit
         while len_ret == limit:
             # keep looping
-            _messages = self.query(query_dict, limit=limit, skip=skip)
+            ret = interface.query(
+                self.vault,
+                query_dict,
+                limit=limit,
+                projection=None,
+                as_gen=False,
+                skip=skip
+            )
             skip += limit
-            len_ret = len(_messages)
-            docs.extend(_messages)
+            len_ret = len(ret)
+            docs.extend(ret)
         return docs
 
     def get_collection_names(self) -> Union[None, list]:

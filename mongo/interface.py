@@ -23,13 +23,42 @@ else:
 CACHED_CLIENT = None  # type: MongoClient
 
 
+class CachedMongoClient(object):
+    """
+    Use a singleton class to handle the single MongoClient object that we need to create
+
+    Returns:
+        _type_: CachedMongoClient
+    """
+    _instance = None
+    _client = None
+
+    def __new__(cls, *args):
+        if cls._instance is None:
+            cls._instance = super(CachedMongoClient, cls).__new__(cls)
+        return cls._instance
+
+    def __init__(self, connection: str):
+        if not self._client:
+            self._client = MongoClient(
+                connection,
+                serverSelectionTimeoutMS=1000,
+            )
+            print(f"Creating MongoClient instance: {id(self.client)}")
+
+    @property
+    def client(self):
+        return self._client
+
+
 def get_client(
     ip: str = "127.0.0.1",
     user_name: Union[str, None] = None,
-    password: Union[str, None] = None
+    password: Union[str, None] = None,
+    port: str = "27017"
 ) -> Union[MongoClient, bool]:
     """
-    Returns a MongoDB Client connection for interacting with MongoDB Database Objects.
+    Returns the MongoDB Client connection for interacting with MongoDB Database Objects.
 
     :param ip: STR - IP address of mongo instance to get client for
     :param user_name: STR - user name to login to instance with
@@ -37,19 +66,17 @@ def get_client(
 
     :returns MongoClient object:
     """
-    global CACHED_CLIENT
-    if CACHED_CLIENT is not None:
-        return CACHED_CLIENT
+
     if user_name is None and password is None:
-        connection = "mongodb://{}:27017".format(ip)
+        connection = f"mongodb://{ip}:{port}"
     elif user_name and password:
         u = quote_plus(user_name)
         p = quote_plus(password)
-        connection = "mongodb://%s:%s@{}:27017".format(ip) % (u, p)
+        connection = f"mongodb://{u}:{p}@{ip}:{port}"
     else:
         return False
-    client = MongoClient(connection, serverSelectionTimeoutMS=1000)
-    CACHED_CLIENT = client
+    client_cls = CachedMongoClient(connection)
+    client = client_cls.client
     return client
 
 

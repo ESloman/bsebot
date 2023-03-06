@@ -3,7 +3,6 @@ import datetime
 # can ignore F401 here - we're using Optional in the type hints in variable declaration
 from typing import List, Optional  # noqa: F401
 
-from discordbot.constants import BOT_IDS
 from mongo.bsedataclasses import SpoilerThreads
 from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.bets import UserBets
@@ -81,12 +80,12 @@ class StatsDataCache:
         if self.__message_cache and (now - self.__message_cache_time).total_seconds() < 3600:
             return self.__message_cache
 
-        self.__message_cache = self.user_interactions._paginated_query(
+        self.__message_cache = self.user_interactions.paginated_query(
             {
                 "guild_id": guild_id,
                 "timestamp": {"$gt": start, "$lt": end},
                 "message_type": {"$nin": ["emoji_used", "vc_joined", "vc_streaming"]},
-                "user_id": {"$nin": BOT_IDS}
+                "is_bot": {"$ne": True},
             }
         )
 
@@ -116,13 +115,13 @@ class StatsDataCache:
         if self.__edit_cache and (now - self.__edit_cache_time).total_seconds() < 3600:
             return self.__edit_cache
 
-        self.__edit_cache = self.user_interactions._paginated_query(
+        self.__edit_cache = self.user_interactions.paginated_query(
             {
                 "guild_id": guild_id,
                 "edited": {"$gt": start, "$lt": end},
                 "edit_count": {"$gte": 1},
                 "message_type": {"$nin": ["emoji_used", "vc_joined", "vc_streaming"]},
-                "user_id": {"$nin": BOT_IDS}
+                "is_bot": {"$ne": True},
             }
         )
 
@@ -157,7 +156,7 @@ class StatsDataCache:
         if self.__vc_cache and (now - self.__vc_cache_time).total_seconds() < 3600:
             return self.__vc_cache
 
-        self.__vc_cache = self.user_interactions._paginated_query(
+        self.__vc_cache = self.user_interactions.paginated_query(
             {
                 "guild_id": guild_id,
                 "timestamp": {"$gt": start, "$lt": end},
@@ -243,9 +242,7 @@ class StatsDataCache:
         if self.__transaction_cache and (now - self.__transaction_cache_time).total_seconds() < 3600:
             return self.__transaction_cache
 
-        # TODO: #337 make a function here that only gets transactions between datetime
-        _transactions = self.trans.get_all_guild_transactions(guild_id)
-        _transactions = [t for t in _transactions if start < t["timestamp"] < end]
+        _transactions = self.trans.get_guild_transactions_by_timestamp(guild_id, start, end)
         if self.__user_id_cache:
             _transactions = [t for t in _transactions if t["uid"] == self.__user_id_cache]
         self.__transaction_cache = _transactions
@@ -272,9 +269,7 @@ class StatsDataCache:
         if self.__activity_cache and (now - self.__activity_cache_time).total_seconds() < 3600:
             return self.__activity_cache
 
-        # TODO: #337 make a function here that only gets activities between datetime
-        _activities = self.activities.get_all_guild_activities(guild_id)
-        _activities = [a for a in _activities if start < a["timestamp"] < end]
+        _activities = self.activities.get_guild_activities_by_timestamp(guild_id, start, end)
         if self.__user_id_cache:
             _activities = [a for a in _activities if a["uid"] == self.__user_id_cache]
         self.__activity_cache = _activities

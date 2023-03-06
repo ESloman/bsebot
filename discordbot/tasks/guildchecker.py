@@ -302,7 +302,6 @@ class GuildChecker(commands.Cog):
                     bodies.append(body)
 
                     for _body in bodies:
-                        print(len(_body))
                         await channel.send(content=_body, silent=True, suppress=True)
 
                     self.guilds.set_latest_release(guild.id, release_name)

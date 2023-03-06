@@ -47,6 +47,7 @@ class OnMessage(BaseEvent):
 
         message_type = []
 
+        is_bot = message.author.bot
         is_thread = False
         is_vc = False
         if message.channel.type in [
@@ -78,14 +79,14 @@ class OnMessage(BaseEvent):
                 message_type.append("reply")
                 if not message_type_only:
                     self.interactions.add_reply_to_message(
-                        reference.message_id, message.id, guild_id, user_id, message.created_at, message_content
+                        reference.message_id, message.id, guild_id, user_id, message.created_at, message_content, is_bot
                     )
 
         if stickers := message.stickers:
             for sticker in stickers:  # type: discord.StickerItem
                 sticker_id = sticker.id
                 if sticker_obj := self.server_stickers.get_sticker(guild_id, sticker_id):
-                    # used a custom emoji!
+                    # used a custom sticker!
                     message_type.append("custom_sticker")
 
                     if user_id == sticker_obj["created_by"]:
@@ -169,7 +170,8 @@ class OnMessage(BaseEvent):
             message_content,
             message.created_at,
             is_thread=is_thread,
-            is_vc=is_vc
+            is_vc=is_vc,
+            is_bot=is_bot
         )
 
         # see if we need to act on this messages

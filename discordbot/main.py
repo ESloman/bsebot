@@ -76,7 +76,7 @@ if __name__ == "__main__":
     else:
         IDS = [BSE_SERVER_ID]  # actual IDS
 
-    logger = utilities.create_logger(logging.DEBUG if DEBUG_MODE else logging.INFO)
+    logger = utilities.create_logger(logging.DEBUG)
 
     intents = discord.Intents.all()
 

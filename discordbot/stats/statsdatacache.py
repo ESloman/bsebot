@@ -3,7 +3,6 @@ import datetime
 # can ignore F401 here - we're using Optional in the type hints in variable declaration
 from typing import List, Optional  # noqa: F401
 
-from discordbot.constants import BOT_IDS
 from mongo.bsedataclasses import SpoilerThreads
 from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.bets import UserBets
@@ -86,7 +85,7 @@ class StatsDataCache:
                 "guild_id": guild_id,
                 "timestamp": {"$gt": start, "$lt": end},
                 "message_type": {"$nin": ["emoji_used", "vc_joined", "vc_streaming"]},
-                "user_id": {"$nin": BOT_IDS}
+                "is_bot": {"$ne": True},
             }
         )
 
@@ -122,7 +121,7 @@ class StatsDataCache:
                 "edited": {"$gt": start, "$lt": end},
                 "edit_count": {"$gte": 1},
                 "message_type": {"$nin": ["emoji_used", "vc_joined", "vc_streaming"]},
-                "user_id": {"$nin": BOT_IDS}
+                "is_bot": {"$ne": True},
             }
         )
 

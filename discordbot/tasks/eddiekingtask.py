@@ -1,25 +1,25 @@
+
+import asyncio
 import datetime
+from logging import Logger
 
 import discord
-from discord.ext import tasks, commands
-
+from discord.ext import tasks
 from discordbot.bsebot import BSEBot
 from discordbot.bot_enums import ActivityTypes
-from mongo.bsepoints.activities import UserActivities
-from mongo.bsepoints.guilds import Guilds
-from mongo.bsepoints.points import UserPoints
-from mongo.bseticketedevents import RevolutionEvent
+from discordbot.tasks.basetask import BaseTask
 
 
-class BSEddiesKingTask(commands.Cog):
-    def __init__(self, bot: BSEBot, guilds, logger, startup_tasks):
-        self.bot = bot
-        self.user_points = UserPoints()
-        self.logger = logger
-        self.startup_tasks = startup_tasks
-        self.guilds = Guilds()
-        self.events = RevolutionEvent()
-        self.activities = UserActivities()
+class BSEddiesKingTask(BaseTask):
+    def __init__(
+        self,
+        bot: BSEBot,
+        guild_ids: list[int],
+        logger: Logger,
+        startup_tasks: list[BaseTask]
+    ):
+
+        super().__init__(bot, guild_ids, logger, startup_tasks)
         self.king_checker.start()
         self.events_cache = {}
 
@@ -30,28 +30,16 @@ class BSEddiesKingTask(commands.Cog):
         """
         self.king_checker.cancel()
 
-    def _check_start_up_tasks(self) -> bool:
-        """
-        Checks start up tasks
-        """
-        for task in self.startup_tasks:
-            if not task.finished:
-                return False
-        return True
-
     @tasks.loop(minutes=1)
     async def king_checker(self):
         """
         Loop that makes sure the King is assigned correctly
         :return:
         """
-        if not self._check_start_up_tasks():
-            self.logger.info("Startup tasks not complete - skipping loop")
-            return
 
         for guild in self.bot.guilds:
 
-            if events := self.events.get_open_events(guild.id):
+            if events := self.revolutions.get_open_events(guild.id):
                 # ongoing revolution event - not changing the King now
                 self.events_cache[guild.id] = events[0]
                 continue
@@ -181,3 +169,5 @@ class BSEddiesKingTask(commands.Cog):
         :return:
         """
         await self.bot.wait_until_ready()
+        while not self._check_start_up_tasks():
+            await asyncio.sleep(5)

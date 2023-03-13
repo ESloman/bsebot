@@ -1,18 +1,24 @@
-import datetime
 
-from discord.ext import tasks, commands
+import asyncio
+import datetime
+from logging import Logger
+
+from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
-from mongo.bsepoints.bets import UserBets
+from discordbot.tasks.basetask import BaseTask
 
 
-class BetReminder(commands.Cog):
-    def __init__(self, bot: BSEBot, guilds, logger, startup_tasks):
-        self.bot = bot
-        self.guilds = guilds
-        self.user_bets = UserBets()
-        self.logger = logger
-        self.startup_tasks = startup_tasks
+class BetReminder(BaseTask):
+    def __init__(
+        self,
+        bot: BSEBot,
+        guild_ids: list[int],
+        logger: Logger,
+        startup_tasks: list[BaseTask]
+    ):
+
+        super().__init__(bot, guild_ids, logger, startup_tasks)
         self.bet_reminder.start()
 
     def cog_unload(self):
@@ -22,24 +28,12 @@ class BetReminder(commands.Cog):
         """
         self.bet_reminder.cancel()
 
-    def _check_start_up_tasks(self) -> bool:
-        """
-        Checks start up tasks
-        """
-        for task in self.startup_tasks:
-            if not task.finished:
-                return False
-        return True
-
     @tasks.loop(minutes=60)
     async def bet_reminder(self):
         """
         Loop that takes all our active bets and sends a reminder message
         :return:
         """
-        if not self._check_start_up_tasks():
-            self.logger.info("Startup tasks not complete - skipping loop")
-            return
 
         now = datetime.datetime.now()
         for guild in self.bot.guilds:
@@ -78,3 +72,5 @@ class BetReminder(commands.Cog):
         :return:
         """
         await self.bot.wait_until_ready()
+        while not self._check_start_up_tasks():
+            await asyncio.sleep(5)

@@ -14,7 +14,7 @@ class BSEddiesPredict(BSEddies):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
-        self.manager = BSEddiesManager(client, logger)
+        self.manager = BSEddiesManager(client, guilds, logger, [])
 
     async def predict(self, ctx: discord.ApplicationContext) -> None:
         """

@@ -1,33 +1,34 @@
+
+import asyncio
 import datetime
 import math
 import random
+from logging import Logger
 
-from discord.ext import tasks, commands
+from discord.ext import tasks
 
 from apis.giphyapi import GiphyAPI
 from discordbot.bot_enums import SupporterType, TransactionTypes
 from discordbot.bsebot import BSEBot
 from discordbot.embedmanager import EmbedManager
+from discordbot.tasks.basetask import BaseTask
 from discordbot.views import RevolutionView
 
-from mongo.bsepoints.activities import UserActivities
-from mongo.bsepoints.guilds import Guilds
-from mongo.bsepoints.points import UserPoints
-from mongo.bseticketedevents import RevolutionEvent
 from mongo.datatypes import GuildDB, RevolutionEventType
 
 
-class BSEddiesRevolutionTask(commands.Cog):
-    def __init__(self, bot: BSEBot, guilds, logger, giphy_token, startup_tasks):
-        self.bot = bot
-        self.user_points = UserPoints()
-        self.revolutions = RevolutionEvent()
-        self.activities = UserActivities()
+class BSEddiesRevolutionTask(BaseTask):
+    def __init__(
+        self,
+        bot: BSEBot,
+        guild_ids: list[int],
+        logger: Logger,
+        startup_tasks: list[BaseTask],
+        giphy_token: str
+    ):
+
+        super().__init__(bot, guild_ids, logger, startup_tasks)
         self.embed_manager = EmbedManager(logger)
-        self.logger = logger
-        self.startup_tasks = startup_tasks
-        self.guild_ids = guilds
-        self.guilds = Guilds()
         self.giphy_api = GiphyAPI(giphy_token)
         self.rev_started = {}
         self.revolution.start()
@@ -42,15 +43,6 @@ class BSEddiesRevolutionTask(commands.Cog):
         :return:
         """
         self.revolution.cancel()
-
-    def _check_start_up_tasks(self) -> bool:
-        """
-        Checks start up tasks
-        """
-        for task in self.startup_tasks:
-            if not task.finished:
-                return False
-        return True
 
     @tasks.loop(minutes=1)
     async def revolution(self):
@@ -109,7 +101,7 @@ class BSEddiesRevolutionTask(commands.Cog):
 
             message = event.get("message_id")
             if message is None:
-                await self.create_event(guild.id, event)
+                await self.create_event(guild.id, event, guild_db)
                 continue
 
             if now > event["expired"]:
@@ -310,3 +302,5 @@ class BSEddiesRevolutionTask(commands.Cog):
         :return:
         """
         await self.bot.wait_until_ready()
+        while not self._check_start_up_tasks():
+            await asyncio.sleep(5)

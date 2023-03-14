@@ -1,31 +1,30 @@
-import datetime
 
-from discord.ext import tasks, commands
+import asyncio
+import datetime
+from logging import Logger
+
+from discord.ext import tasks
 
 from apis.github import GitHubAPI
 from discordbot.bsebot import BSEBot
-from mongo.bsepoints.guilds import Guilds
+from discordbot.tasks.basetask import BaseTask
 
 
-class ReleaseChecker(commands.Cog):
-    def __init__(self, bot: BSEBot, guilds, logger, startup_tasks, github_api: GitHubAPI):
-        self.bot = bot
-        self.logger = logger
-        self.startup_tasks = startup_tasks
-        self.github = github_api
-        self.guilds = Guilds()
+class ReleaseChecker(BaseTask):
+    def __init__(
+        self,
+        bot: BSEBot,
+        guild_ids: list[int],
+        logger: Logger,
+        startup_tasks: list[BaseTask],
+        github_api: GitHubAPI
+    ):
+
+        super().__init__(bot, guild_ids, logger, startup_tasks)
         self.last_release_name = None
+        self.github = github_api
 
         self.release_checker.start()
-
-    def _check_start_up_tasks(self) -> bool:
-        """
-        Checks start up tasks
-        """
-        for task in self.startup_tasks:
-            if not task.finished:
-                return False
-        return True
 
     def cog_unload(self):
         """
@@ -40,9 +39,6 @@ class ReleaseChecker(commands.Cog):
         Task to check github releases and post release notes when we get a new one
         :return:
         """
-        if not self._check_start_up_tasks():
-            self.logger.info("Startup tasks not complete - skipping loop")
-            return
 
         now = datetime.datetime.now()
 
@@ -108,3 +104,5 @@ class ReleaseChecker(commands.Cog):
         :return:
         """
         await self.bot.wait_until_ready()
+        while not self._check_start_up_tasks():
+            await asyncio.sleep(5)

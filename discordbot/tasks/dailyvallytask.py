@@ -1,20 +1,26 @@
+
+import asyncio
 import datetime
 import random
+from logging import Logger
 
-from discord.ext import tasks, commands
+from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
 from discordbot.constants import VALORANT_CHAT, VALORANT_ROLE, BSE_SERVER_ID, BSE_BOT_ID
-from mongo.bsepoints.interactions import UserInteractions
+from discordbot.tasks.basetask import BaseTask
 
 
-class AfterWorkVally(commands.Cog):
-    def __init__(self, bot: BSEBot, guilds, logger, startup_tasks):
-        self.bot = bot
-        self.logger = logger
-        self.guilds = guilds
-        self.startup_tasks = startup_tasks
-        self.user_interactions = UserInteractions()
+class AfterWorkVally(BaseTask):
+    def __init__(
+        self,
+        bot: BSEBot,
+        guild_ids: list[int],
+        logger: Logger,
+        startup_tasks: list[BaseTask]
+    ):
+
+        super().__init__(bot, guild_ids, logger, startup_tasks)
         self.vally_message.start()
 
         self.messages = [
@@ -32,15 +38,6 @@ class AfterWorkVally(commands.Cog):
             "Balls. {role}"
         ]
 
-    def _check_start_up_tasks(self) -> bool:
-        """
-        Checks start up tasks
-        """
-        for task in self.startup_tasks:
-            if not task.finished:
-                return False
-        return True
-
     def cog_unload(self):
         """
         Method for cancelling the loop.
@@ -54,11 +51,8 @@ class AfterWorkVally(commands.Cog):
         Loop that makes sure the King is assigned correctly
         :return:
         """
-        if not self._check_start_up_tasks():
-            self.logger.info("Startup tasks not complete - skipping loop")
-            return
 
-        if BSE_SERVER_ID not in self.guilds:
+        if BSE_SERVER_ID not in self.guild_ids:
             return
 
         now = datetime.datetime.now()
@@ -71,7 +65,7 @@ class AfterWorkVally(commands.Cog):
 
         self.logger.info("Checking for channel interactivity")
 
-        latest_bot_message = list(self.user_interactions.vault.find(
+        latest_bot_message = list(self.interactions.vault.find(
             {"user_id": BSE_BOT_ID, "channel_id": VALORANT_CHAT, "message_type": "role_mention"},
             sort=[("timestamp", -1)],
             limit=1
@@ -79,7 +73,7 @@ class AfterWorkVally(commands.Cog):
 
         latest_time = latest_bot_message["timestamp"]
 
-        messages = self.user_interactions.query(
+        messages = self.interactions.query(
             {
                 "timestamp": {"$gt": latest_time},
                 "channel_id": VALORANT_CHAT
@@ -96,12 +90,12 @@ class AfterWorkVally(commands.Cog):
 
         self.logger.info("Time to send vally message!")
 
-        guild = await self.bot.fetch_guild(BSE_SERVER_ID)  # type: discord.Guild
+        guild = await self.bot.fetch_guild(BSE_SERVER_ID)
         channel = await self.bot.fetch_channel(VALORANT_CHAT)
         await channel.trigger_typing()
         role = guild.get_role(VALORANT_ROLE)
 
-        message = random.choice(self.messages)  # type: str
+        message = random.choice(self.messages)
         message = message.format(role=role.mention)
 
         self.logger.info(f"Sending daily vally message: {message}")
@@ -114,3 +108,5 @@ class AfterWorkVally(commands.Cog):
         :return:
         """
         await self.bot.wait_until_ready()
+        while not self._check_start_up_tasks():
+            await asyncio.sleep(5)

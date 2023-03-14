@@ -1,36 +1,34 @@
+
+import asyncio
 import datetime
+from logging import Logger
 import random
 
 import discord
-from discord.ext import tasks, commands
+from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
-from discordbot.constants import BSE_SERVER_ID, GENERAL_CHAT
+from discordbot.constants import BSE_SERVER_ID
+from discordbot.tasks.basetask import BaseTask
 from discordbot.wordle.wordlesolver import WordleSolver
-from mongo.bsedataclasses import WordleAttempts
 
 
-class WordleTask(commands.Cog):
-    def __init__(self, bot: BSEBot, guilds, logger, startup_tasks):
-        self.bot = bot
-        self.logger = logger
-        self.guilds = guilds
-        self.startup_tasks = startup_tasks
+class WordleTask(BaseTask):
+    def __init__(
+        self,
+        bot: BSEBot,
+        guild_ids: list[int],
+        logger: Logger,
+        startup_tasks: list[BaseTask]
+    ):
+
+        super().__init__(bot, guild_ids, logger, startup_tasks)
+
         self.wordle_message.start()
-        self.wordles = WordleAttempts()
         self.sent_wordle = False
         self.wait_iters = None
 
         self._set_wordle()
-
-    def _check_start_up_tasks(self) -> bool:
-        """
-        Checks start up tasks
-        """
-        for task in self.startup_tasks:
-            if not task.finished:
-                return False
-        return True
 
     def cog_unload(self):
         """
@@ -59,9 +57,7 @@ class WordleTask(commands.Cog):
         Wordle task
         :return:
         """
-        if not self._check_start_up_tasks():
-            self.logger.info("Startup tasks not complete - skipping loop")
-            return
+
         now = datetime.datetime.now()
 
         if now.hour < 9:
@@ -95,9 +91,6 @@ class WordleTask(commands.Cog):
 
         # actually do wordle now
 
-        channel = await self.bot.fetch_channel(GENERAL_CHAT)
-        await channel.trigger_typing()
-
         wordle_solver = WordleSolver(self.logger)
         await wordle_solver.get_driver()
 
@@ -108,14 +101,10 @@ class WordleTask(commands.Cog):
         while not solved_wordle.solved and attempts < 5:
             # if we fail - try again as there's some randomness to it
             self.logger.debug(f"Failed wordle - attempting again: {attempts}")
-            # trigger typing in case we take longer than 10 seconds
-            await channel.trigger_typing()
             wordle_solver = WordleSolver(self.logger)
             await wordle_solver.get_driver()
             solved_wordle = await wordle_solver.solve()
             attempts += 1
-
-        await channel.trigger_typing()
 
         # put it into dark mode
         message = solved_wordle.share_text.replace("⬜", "⬛")
@@ -125,11 +114,23 @@ class WordleTask(commands.Cog):
         )
 
         self.logger.info(f"Sending wordle message: {message}")
-        sent_message = await channel.send(content=message, silent=True)
-        if solved_wordle.solved:
-            await sent_message.reply(content=spoiler_message, silent=True)
+        for guild in self.bot.guilds:
 
-        self.wordles.document_wordle(BSE_SERVER_ID, solved_wordle)
+            guild_db = self.guilds.get_guild(guild.id)
+
+            channel_id = guild_db.get("wordle_channel")
+            if not channel_id:
+                self.logger.info(f"{guild.name} hasn't get a wordle channel configured - skipping")
+
+            channel = await self.bot.fetch_channel(channel_id)
+            await channel.trigger_typing()
+
+            sent_message = await channel.send(content=message, silent=True)
+
+            if solved_wordle.solved:
+                await sent_message.reply(content=spoiler_message, silent=True)
+
+            self.wordles.document_wordle(guild.id, solved_wordle)
 
         self.sent_wordle = True
 
@@ -149,3 +150,5 @@ class WordleTask(commands.Cog):
         :return:
         """
         await self.bot.wait_until_ready()
+        while not self._check_start_up_tasks():
+            await asyncio.sleep(5)

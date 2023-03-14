@@ -1,20 +1,26 @@
+
+import asyncio
 import datetime
+from logging import Logger
 
 import discord
-from discord.ext import tasks, commands
+from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_SERVER_ID, GENERAL_CHAT
-from mongo.bsedataclasses import SpoilerThreads
+from discordbot.tasks.basetask import BaseTask
 
 
-class ThreadSpoilerTask(commands.Cog):
-    def __init__(self, bot: BSEBot, guilds, logger, startup_tasks):
-        self.bot = bot
-        self.logger = logger
-        self.guilds = guilds
-        self.startup_tasks = startup_tasks
-        self.spoilers = SpoilerThreads()
+class ThreadSpoilerTask(BaseTask):
+    def __init__(
+        self,
+        bot: BSEBot,
+        guild_ids: list[int],
+        logger: Logger,
+        startup_tasks: list[BaseTask],
+    ):
+
+        super().__init__(bot, guild_ids, logger, startup_tasks)
         self.thread_mute.start()
 
     def cog_unload(self):
@@ -24,30 +30,18 @@ class ThreadSpoilerTask(commands.Cog):
         """
         self.thread_mute.cancel()
 
-    def _check_start_up_tasks(self) -> bool:
-        """
-        Checks start up tasks
-        """
-        for task in self.startup_tasks:
-            if not task.finished:
-                return False
-        return True
-
     @tasks.loop(minutes=15)
     async def thread_mute(self):
         """
         Loop that makes sure the King is assigned correctly
         :return:
         """
-        if not self._check_start_up_tasks():
-            self.logger.info("Startup tasks not complete - skipping loop")
-            return
 
         now = datetime.datetime.now()
         if now.hour != 8 or not (0 <= now.minute < 15):
             return
 
-        if BSE_SERVER_ID not in self.guilds:
+        if BSE_SERVER_ID not in self.guild_ids:
             return
 
         self.logger.info("Checking spoiler threads for mute messages")
@@ -95,3 +89,5 @@ class ThreadSpoilerTask(commands.Cog):
         :return:
         """
         await self.bot.wait_until_ready()
+        while not self._check_start_up_tasks():
+            await asyncio.sleep(5)

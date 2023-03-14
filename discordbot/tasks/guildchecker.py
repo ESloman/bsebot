@@ -1,12 +1,12 @@
 
-import asyncio
 import datetime
 import os
 import subprocess
+from logging import Logger
 from typing import Optional
 
 import discord
-from discord.ext import tasks, commands
+from discord.ext import tasks
 
 from apis.github import GitHubAPI
 
@@ -16,42 +16,31 @@ from discordbot.clienteventclasses import OnReadyEvent
 from discordbot.constants import BSE_SERVER_ID
 from discordbot.embedmanager import EmbedManager
 from discordbot.slashcommandeventclasses import BSEddiesPlaceBet, BSEddiesCloseBet
+from discordbot.tasks.basetask import BaseTask
 from discordbot.views import LeaderBoardView, RevolutionView, BetView
 
-from mongo.bsedataclasses import SpoilerThreads
-from mongo.bseticketedevents import RevolutionEvent
 
-from mongo.bsepoints.activities import UserActivities
-from mongo.bsepoints.bets import UserBets
-from mongo.bsepoints.emojis import ServerEmojis
-from mongo.bsepoints.guilds import Guilds
-from mongo.bsepoints.interactions import UserInteractions
-from mongo.bsepoints.points import UserPoints
-from mongo.bsepoints.stickers import ServerStickers
+class GuildChecker(BaseTask):
+    def __init__(
+        self,
+        bot: BSEBot,
+        guild_ids: list[int],
+        logger: Logger,
+        startup_tasks: list[BaseTask],
+        on_ready: OnReadyEvent,
+        github_api: GitHubAPI,
+        place: BSEddiesPlaceBet,
+        close: BSEddiesCloseBet
+    ):
 
+        super().__init__(bot, guild_ids, logger, startup_tasks)
 
-class GuildChecker(commands.Cog):
-    def __init__(self, bot: BSEBot, logger, on_ready: OnReadyEvent, github_api: GitHubAPI):
-        self.bot = bot
-        self.logger = logger
-        self.finished = False
         self.on_ready = on_ready
-
-        self.activities = UserActivities()
-        self.user_interactions = UserInteractions()
-        self.events = RevolutionEvent()
-        self.server_emojis = ServerEmojis()
-        self.server_stickers = ServerStickers()
-        self.guilds = Guilds()
-        self.spoilers = SpoilerThreads()
-        self.user_bets = UserBets()
-        self.user_points = UserPoints()
         self.embed_manager = EmbedManager(logger)
         self.github = github_api
 
-        guild_ids = [g.id for g in self.bot.guilds]
-        self.close = BSEddiesCloseBet(bot, guild_ids, self.logger)
-        self.place = BSEddiesPlaceBet(bot, guild_ids, self.logger)
+        self.close = close
+        self.place = place
 
         self.guild_checker.start()
 
@@ -200,7 +189,7 @@ class GuildChecker(commands.Cog):
             # don't need to do the update log either
 
             self.logger.info("Initialising event views")
-            if events := self.events.get_open_events(guild.id):
+            if events := self.revolutions.get_open_events(guild.id):
                 if len(events) > 1:
                     self.logger.info("???")
                     continue
@@ -317,9 +306,6 @@ class GuildChecker(commands.Cog):
         :return:
         """
         await self.bot.wait_until_ready()
-        while not self.on_ready.finished:
-            self.logger.info("Waiting for on_ready to complete")
-            await asyncio.sleep(5)
 
     def git_compare(self, guild_id: int) -> Optional[str]:
         """Returns

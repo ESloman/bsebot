@@ -41,7 +41,7 @@ class WordleReminder(BaseTask):
         if now.hour != 19:
             return
 
-        if BSE_SERVER_ID not in self.guilds:
+        if BSE_SERVER_ID not in self.guild_ids:
             return
 
         start = now - datetime.timedelta(days=1)

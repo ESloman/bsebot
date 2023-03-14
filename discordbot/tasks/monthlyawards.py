@@ -41,7 +41,7 @@ class MonthlyBSEddiesAwards(BaseTask):
             # and also trigger at 11am
             return
 
-        if BSE_SERVER_ID not in self.guilds:
+        if BSE_SERVER_ID not in self.guild_ids:
             # does not support other servers yet
             return
 

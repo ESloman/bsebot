@@ -41,7 +41,7 @@ class ThreadSpoilerTask(BaseTask):
         if now.hour != 8 or not (0 <= now.minute < 15):
             return
 
-        if BSE_SERVER_ID not in self.guilds:
+        if BSE_SERVER_ID not in self.guild_ids:
             return
 
         self.logger.info("Checking spoiler threads for mute messages")

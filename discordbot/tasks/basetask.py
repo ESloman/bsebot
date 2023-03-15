@@ -13,6 +13,7 @@ from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.interactions import UserInteractions
 from mongo.bsepoints.points import UserPoints
 from mongo.bsepoints.stickers import ServerStickers
+from mongo.bsedataclasses import SpoilerThreads
 from mongo.bsedataclasses import WordleAttempts
 from mongo.bseticketedevents import RevolutionEvent
 
@@ -45,6 +46,7 @@ class BaseTask(commands.Cog):
         self.revolutions = RevolutionEvent()
         self.interactions = UserInteractions()
         self.guilds = Guilds()
+        self.spoilers = SpoilerThreads()
         self.wordles = WordleAttempts()
 
     def _check_start_up_tasks(self) -> bool:

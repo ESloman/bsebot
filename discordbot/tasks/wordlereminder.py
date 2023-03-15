@@ -48,7 +48,7 @@ class WordleReminder(BaseTask):
         start = start.replace(hour=0, minute=0, second=0, microsecond=1)
         end = start.replace(hour=23, minute=59, second=59)
 
-        wordles_yesterday = self.user_interactions.query(
+        wordles_yesterday = self.interactions.query(
             {
                 "message_type": "wordle",
                 "timestamp": {"$gte": start, "$lte": end}
@@ -58,7 +58,7 @@ class WordleReminder(BaseTask):
         _start = start + datetime.timedelta(days=1)
         _end = end + datetime.timedelta(days=1)
 
-        wordles_today = self.user_interactions.query(
+        wordles_today = self.interactions.query(
             {
                 "message_type": "wordle",
                 "timestamp": {"$gte": _start, "$lte": _end}

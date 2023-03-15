@@ -15,9 +15,12 @@ from discordbot.bot_enums import ActivityTypes
 from discordbot.clienteventclasses import OnReadyEvent
 from discordbot.constants import BSE_SERVER_ID
 from discordbot.embedmanager import EmbedManager
-from discordbot.slashcommandeventclasses import BSEddiesPlaceBet, BSEddiesCloseBet
+from discordbot.slashcommandeventclasses.close import BSEddiesCloseBet
+from discordbot.slashcommandeventclasses.place import BSEddiesPlaceBet
 from discordbot.tasks.basetask import BaseTask
-from discordbot.views import LeaderBoardView, RevolutionView, BetView
+from discordbot.views.bet import BetView
+from discordbot.views.leaderboard import LeaderBoardView
+from discordbot.views.revolution import RevolutionView
 
 
 class GuildChecker(BaseTask):

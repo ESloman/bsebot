@@ -93,6 +93,7 @@ class ActivityTypes(IntEnum):
     REV_SUPPORT = 44
     REV_NEUTRAL = 45
     REV_SAVE = 46
+    CONFIG = 47
 
 
 class AwardsTypes(IntEnum):

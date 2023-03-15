@@ -27,12 +27,26 @@ from discordbot.embedmanager import EmbedManager
 from discordbot.modals import BSEddiesBetCreateModal, BSEddiesImprovementSuggest
 
 # slash commands
-from discordbot.slashcommandeventclasses import BSEddiesActive, BSEddiesAdminGive, BSEddiesAutoGenerate
-from discordbot.slashcommandeventclasses import BSEddiesCloseBet, BSEddiesGift, BSEddiesHighScore, BSEddiesLeaderboard
-from discordbot.slashcommandeventclasses import BSEddiesPending, BSEddiesPlaceBet, BSEddiesPredict, BSEddiesTaxRate
-from discordbot.slashcommandeventclasses import BSEddiesTransactionHistory, BSEddiesView, BSEddiesStats
-from discordbot.slashcommandeventclasses import BSEddiesKingRename, BSEddiesRefreshBet, BSEddiesPledge, BSEddiesBless
-from discordbot.slashcommandeventclasses import BSEddiesHelp
+from discordbot.slashcommandeventclasses.active import BSEddiesActive
+from discordbot.slashcommandeventclasses.admin_give import BSEddiesAdminGive
+from discordbot.slashcommandeventclasses.autogenerate import BSEddiesAutoGenerate
+from discordbot.slashcommandeventclasses.bless import BSEddiesBless
+from discordbot.slashcommandeventclasses.close import BSEddiesCloseBet
+from discordbot.slashcommandeventclasses.gift import BSEddiesGift
+from discordbot.slashcommandeventclasses.help import BSEddiesHelp
+from discordbot.slashcommandeventclasses.highscore import BSEddiesHighScore
+from discordbot.slashcommandeventclasses.leaderboard import BSEddiesLeaderboard
+from discordbot.slashcommandeventclasses.king_rename import BSEddiesKingRename
+from discordbot.slashcommandeventclasses.pending import BSEddiesPending
+from discordbot.slashcommandeventclasses.place import BSEddiesPlaceBet
+from discordbot.slashcommandeventclasses.pledge import BSEddiesPledge
+from discordbot.slashcommandeventclasses.predict import BSEddiesPredict
+from discordbot.slashcommandeventclasses.refresh import BSEddiesRefreshBet
+from discordbot.slashcommandeventclasses.stats import BSEddiesStats
+from discordbot.slashcommandeventclasses.taxrate import BSEddiesTaxRate
+from discordbot.slashcommandeventclasses.transactions import BSEddiesTransactionHistory
+from discordbot.slashcommandeventclasses.view import BSEddiesView
+
 
 # task imports
 from discordbot.tasks.annualawards import AnnualBSEddiesAwards

@@ -1,9 +1,9 @@
 
 import discord
 
-import discordbot.views as views
 from discordbot.bot_enums import ActivityTypes
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
+from discordbot.views.taxrate import TaxRateView
 
 
 class BSEddiesTaxRate(BSEddies):
@@ -30,7 +30,7 @@ class BSEddiesTaxRate(BSEddies):
             return
 
         value, supporter_value = self.guilds.get_tax_rate(guild_id)
-        view = views.TaxRateView(value, supporter_value)
+        view = TaxRateView(value, supporter_value)
 
         msg = f"Please select a tax rate for the peasants and a tax rate for your <@&{guild_db['supporter_role']}>."
 

@@ -5,9 +5,9 @@ from typing import Union
 
 import discord
 
-import discordbot.views as views
 from discordbot.bot_enums import ActivityTypes
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
+from discordbot.views.bet import BetView
 
 
 class BSEddiesCreateBet(BSEddies):
@@ -150,7 +150,7 @@ class BSEddiesCreateBet(BSEddies):
         member = ctx.guild.get_member(ctx.user.id)
         content = f"Bet created by {member.mention}"
 
-        bet_view = views.BetView(bet, bseddies_place, bseddies_close)
+        bet_view = BetView(bet, bseddies_place, bseddies_close)
 
         message = await ctx.channel.send(content=content, embed=embed, view=bet_view)
 

@@ -4,7 +4,7 @@ import datetime
 import discord
 
 from discordbot.bot_enums import ActivityTypes, TransactionTypes
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
 class BSEddiesKingRename(BSEddies):

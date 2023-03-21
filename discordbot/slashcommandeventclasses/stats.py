@@ -5,7 +5,7 @@ import discord
 
 from discordbot.bot_enums import ActivityTypes
 from discordbot.constants import BSE_SERVER_ID, JERK_OFF_CHAT
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.stats.statsclasses import StatsGatherer
 from discordbot.stats.statsdatacache import StatsDataCache
 from discordbot.views.wrapped import WrappedView

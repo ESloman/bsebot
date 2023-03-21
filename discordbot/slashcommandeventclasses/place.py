@@ -4,18 +4,20 @@ from typing import Union
 import discord
 
 import discordbot.views as views
-import discordbot.slashcommandeventclasses as slashcommands
 from discordbot.bot_enums import ActivityTypes
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
+from discordbot.slashcommandeventclasses.close import BSEddiesCloseBet
+from discordbot.views.place import PlaceABetView
 
 
-class BSEddiesPlaceBet(slashcommands.BSEddies):
+class BSEddiesPlaceBet(BSEddies):
     """
     Class for handling `/bseddies bet place` commands
     """
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
-        self.bseddies_close = slashcommands.BSEddiesCloseBet(client, guilds, logger)
+        self.bseddies_close = BSEddiesCloseBet(client, guilds, logger)
 
     async def create_bet_view(
             self,
@@ -40,7 +42,7 @@ class BSEddiesPlaceBet(slashcommands.BSEddies):
             ctx.user.id, ctx.guild_id
         )
 
-        place_bet_view = views.PlaceABetView(bet_ids, points, submit_callback=self.place_bet)
+        place_bet_view = PlaceABetView(bet_ids, points, submit_callback=self.place_bet)
         try:
             await ctx.respond(content="**Placing a bet**", view=place_bet_view, ephemeral=True)
         except AttributeError:

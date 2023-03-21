@@ -2,7 +2,7 @@
 import discord
 from discordbot.embedmanager import EmbedManager
 from discordbot.selects.bet import BetSelect
-from discordbot.views import BetView
+from discordbot.views.bet import BetView
 from mongo.bsepoints.bets import UserBets
 
 

@@ -12,7 +12,7 @@ from discordbot.bot_enums import SupporterType, TransactionTypes
 from discordbot.bsebot import BSEBot
 from discordbot.embedmanager import EmbedManager
 from discordbot.tasks.basetask import BaseTask
-from discordbot.views import RevolutionView
+from discordbot.views.revolution import RevolutionView
 
 from mongo.datatypes import GuildDB, RevolutionEventType
 

@@ -1,13 +1,16 @@
 
 import discord
 
+from discordbot.slashcommandeventclasses.close import BSEddiesCloseBet
+from discordbot.slashcommandeventclasses.place import BSEddiesPlaceBet
+
 
 class BetView(discord.ui.View):
     def __init__(
         self,
         bet: dict,
-        bseddies_place,
-        bseddies_close
+        bseddies_place: BSEddiesPlaceBet,
+        bseddies_close: BSEddiesCloseBet
     ):
         super().__init__(timeout=None)
         self.bet = bet

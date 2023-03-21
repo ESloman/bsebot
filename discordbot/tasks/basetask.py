@@ -48,6 +48,7 @@ class BaseTask(commands.Cog):
         self.guilds = Guilds()
         self.spoilers = SpoilerThreads()
         self.wordles = WordleAttempts()
+        self.spoilers = SpoilerThreads()
 
     def _check_start_up_tasks(self) -> bool:
         """

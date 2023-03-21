@@ -5,13 +5,13 @@ from discord.ui import Select
 
 class ConfigSelect(Select):
     _values = [
-        "Spoiler Threads"
+        ("Spoiler Threads", "0"),
     ]
 
     def __init__(self):
 
         options = [
-            SelectOption(label=opt, value=opt.lower()) for opt in self._values
+            SelectOption(label=opt[0], value=opt[1]) for opt in self._values
         ]
 
         super().__init__(

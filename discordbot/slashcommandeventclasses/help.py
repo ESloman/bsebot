@@ -52,6 +52,7 @@ class BSEddiesHelp(BSEddies):
             "\n"
             "Misc commnads\n"
             "`/help` - this command\n"
+            "`/config` - configure BSEBot settings\n"
             "`/suggest` - suggest an improvement/report a bug\n"
             "`/stats` (soon) - see your Best Summer Ever statistics\n"
             "`/wrapped22` - see your Best Summer Ever wrapped\n"

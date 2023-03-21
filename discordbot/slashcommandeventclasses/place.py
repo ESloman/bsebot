@@ -3,10 +3,10 @@ from typing import Union
 
 import discord
 
+import discordbot.views as views
 from discordbot.bot_enums import ActivityTypes
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.slashcommandeventclasses.close import BSEddiesCloseBet
-from discordbot.views.bet import BetView
 from discordbot.views.place import PlaceABetView
 
 
@@ -86,7 +86,7 @@ class BSEddiesPlaceBet(BSEddies):
             await response.edit_message(content=msg, view=None)
             return
 
-        view = BetView(bet, self, self.bseddies_close)
+        view = views.BetView(bet, self, self.bseddies_close)
 
         if not bet["active"]:
             msg = f"Your reaction on **Bet {bet_id}** failed as the bet is closed for new bets."

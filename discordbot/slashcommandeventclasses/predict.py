@@ -4,7 +4,7 @@ import discord
 from discordbot.bot_enums import ActivityTypes
 from discordbot.constants import CREATOR, HUMAN_MESSAGE_TYPES
 from discordbot.tasks.eddiegains import BSEddiesManager
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
 class BSEddiesPredict(BSEddies):

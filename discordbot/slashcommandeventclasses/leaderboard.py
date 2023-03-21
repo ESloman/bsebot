@@ -1,9 +1,9 @@
 
 import discord
 
-import discordbot.views as views
 from discordbot.bot_enums import ActivityTypes
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
+from discordbot.views.leaderboard import LeaderBoardView
 
 
 class BSEddiesLeaderboard(BSEddies):
@@ -27,6 +27,6 @@ class BSEddiesLeaderboard(BSEddies):
 
         await ctx.channel.trigger_typing()
 
-        leaderboard_view = views.LeaderBoardView(self.embed_manager)
+        leaderboard_view = LeaderBoardView(self.embed_manager)
         msg = self.embed_manager.get_leaderboard_embed(ctx.guild, 5, ctx.author.display_name)
         await ctx.respond(content=msg, view=leaderboard_view)

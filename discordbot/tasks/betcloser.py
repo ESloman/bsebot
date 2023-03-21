@@ -11,7 +11,7 @@ from discordbot.embedmanager import EmbedManager
 from discordbot.slashcommandeventclasses.close import BSEddiesCloseBet
 from discordbot.slashcommandeventclasses.place import BSEddiesPlaceBet
 from discordbot.tasks.basetask import BaseTask
-from discordbot.views import BetView
+from discordbot.views.bet import BetView
 
 
 class BetCloser(BaseTask):

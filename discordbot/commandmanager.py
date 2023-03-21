@@ -27,12 +27,27 @@ from discordbot.embedmanager import EmbedManager
 from discordbot.modals import BSEddiesBetCreateModal, BSEddiesImprovementSuggest
 
 # slash commands
-from discordbot.slashcommandeventclasses import BSEddiesActive, BSEddiesAdminGive, BSEddiesAutoGenerate
-from discordbot.slashcommandeventclasses import BSEddiesCloseBet, BSEddiesGift, BSEddiesHighScore, BSEddiesLeaderboard
-from discordbot.slashcommandeventclasses import BSEddiesPending, BSEddiesPlaceBet, BSEddiesPredict, BSEddiesTaxRate
-from discordbot.slashcommandeventclasses import BSEddiesTransactionHistory, BSEddiesView, BSEddiesStats
-from discordbot.slashcommandeventclasses import BSEddiesKingRename, BSEddiesRefreshBet, BSEddiesPledge, BSEddiesBless
-from discordbot.slashcommandeventclasses import BSEddiesHelp
+from discordbot.slashcommandeventclasses.active import BSEddiesActive
+from discordbot.slashcommandeventclasses.admin_give import BSEddiesAdminGive
+from discordbot.slashcommandeventclasses.autogenerate import BSEddiesAutoGenerate
+from discordbot.slashcommandeventclasses.bless import BSEddiesBless
+from discordbot.slashcommandeventclasses.close import BSEddiesCloseBet
+from discordbot.slashcommandeventclasses.config import BSEddiesConfig
+from discordbot.slashcommandeventclasses.gift import BSEddiesGift
+from discordbot.slashcommandeventclasses.help import BSEddiesHelp
+from discordbot.slashcommandeventclasses.highscore import BSEddiesHighScore
+from discordbot.slashcommandeventclasses.leaderboard import BSEddiesLeaderboard
+from discordbot.slashcommandeventclasses.king_rename import BSEddiesKingRename
+from discordbot.slashcommandeventclasses.pending import BSEddiesPending
+from discordbot.slashcommandeventclasses.place import BSEddiesPlaceBet
+from discordbot.slashcommandeventclasses.pledge import BSEddiesPledge
+from discordbot.slashcommandeventclasses.predict import BSEddiesPredict
+from discordbot.slashcommandeventclasses.refresh import BSEddiesRefreshBet
+from discordbot.slashcommandeventclasses.stats import BSEddiesStats
+from discordbot.slashcommandeventclasses.taxrate import BSEddiesTaxRate
+from discordbot.slashcommandeventclasses.transactions import BSEddiesTransactionHistory
+from discordbot.slashcommandeventclasses.view import BSEddiesView
+
 
 # task imports
 from discordbot.tasks.annualawards import AnnualBSEddiesAwards
@@ -132,6 +147,7 @@ class CommandManager(object):
         self.bseddies_view = BSEddiesView(client, guilds, self.logger)
         self.bseddies_leaderboard = BSEddiesLeaderboard(client, guilds, self.logger)
         self.bseddies_close = BSEddiesCloseBet(client, guilds, self.logger)
+        self.bseddies_config = BSEddiesConfig(client, guilds, self.logger)
         self.bseddies_place = BSEddiesPlaceBet(client, guilds, self.logger)
         self.bseddies_pending = BSEddiesPending(client, guilds, self.logger)
         self.bseddies_transactions = BSEddiesTransactionHistory(client, guilds, self.logger)
@@ -309,6 +325,21 @@ class CommandManager(object):
             await self.on_thread_update.on_update(before, after)
 
         @self.client.event
+        async def on_raw_thread_update(payload: discord.RawThreadUpdateEvent):
+            """
+            Raw on_raw_thread_update
+
+            Args:
+                payload (discord.RawThreadUpdateEvent): _description_
+            """
+            if payload.thread:
+                # already in internal cache - so on_thread_update can handle that
+                return
+
+            thread = await self.client.fetch_channel(payload.thread_id)  # type: discord.Thread
+            await self.on_thread_update.on_update(thread, thread)
+
+        @self.client.event
         async def on_message(message: discord.Message):
             """
             This is the 'message' event. Whenever a message is sent in a guild that the bot is listening for -
@@ -316,8 +347,13 @@ class CommandManager(object):
             :param message:
             :return:
             """
+            if message.flags.ephemeral:
+                # message is ephemeral - do nothing with it
+                return
 
-            if message.channel.type.value == 1:
+            if message.author.id != self.client.user.id and \
+                    type(message.channel) == discord.channel.DMChannel and \
+                    message.type != discord.MessageType.application_command:
                 # this means we've received a Direct message!
                 # we'll have to handle this differently
                 self.logger.debug(f"{message} - {message.content}")
@@ -606,6 +642,12 @@ class CommandManager(object):
             """
             """
             await self.bseddies_bless.create_bless_view(ctx)
+
+        @self.client.command(description="Configure BSEBot")
+        async def config(ctx: discord.ApplicationContext):
+            """
+            """
+            await self.bseddies_config.root_config(ctx)
 
         @self.client.command(description="Help")
         async def help(ctx: discord.ApplicationContext):

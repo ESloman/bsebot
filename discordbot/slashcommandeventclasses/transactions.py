@@ -6,7 +6,7 @@ import discord
 import xlsxwriter
 
 from discordbot.bot_enums import TransactionTypes, ActivityTypes
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
 class BSEddiesTransactionHistory(BSEddies):

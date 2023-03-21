@@ -1,19 +1,21 @@
 
 import discord
 
-import discordbot.views as views
-import discordbot.slashcommandeventclasses as slashcommands
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
+from discordbot.slashcommandeventclasses.close import BSEddiesCloseBet
+from discordbot.slashcommandeventclasses.place import BSEddiesPlaceBet
+from discordbot.views.refresh import RefreshBetView
 
 
-class BSEddiesRefreshBet(slashcommands.BSEddies):
+class BSEddiesRefreshBet(BSEddies):
     """
     Class for handling `/refresh` commands
     """
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
-        self.bseddies_close = slashcommands.BSEddiesCloseBet(client, guilds, logger)
-        self.bseddies_place = slashcommands.BSEddiesPlaceBet(client, guilds, logger)
+        self.bseddies_close = BSEddiesCloseBet(client, guilds, logger)
+        self.bseddies_place = BSEddiesPlaceBet(client, guilds, logger)
 
     async def create_refresh_view(
             self,
@@ -38,5 +40,5 @@ class BSEddiesRefreshBet(slashcommands.BSEddies):
             await ctx.respond(content="There are no active bets to bet on right now.", ephemeral=True)
             return
 
-        refresh_bet_view = views.RefreshBetView(bet_ids, self.bseddies_place, self.bseddies_close)
+        refresh_bet_view = RefreshBetView(bet_ids, self.bseddies_place, self.bseddies_close)
         await ctx.respond(content="**Choose bet to refresh**", view=refresh_bet_view, ephemeral=True)

@@ -4,7 +4,7 @@ import discord
 
 from discordbot.bot_enums import ActivityTypes
 from discordbot.constants import BSEDDIES_KING_ROLES
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
 class BSEddiesKing(BSEddies):

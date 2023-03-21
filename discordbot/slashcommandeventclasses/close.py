@@ -2,10 +2,10 @@
 
 import discord
 
-import discordbot.views as views
 from discordbot.betmanager import BetManager
 from discordbot.bot_enums import TransactionTypes, ActivityTypes
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
+from discordbot.views.close import CloseABetView
 
 
 class BSEddiesCloseBet(BSEddies):
@@ -40,7 +40,7 @@ class BSEddiesCloseBet(BSEddies):
             bet_ids = sorted(bet_ids, key=lambda x: x["created"], reverse=True)
             bet_ids = bet_ids[:24]
 
-        close_bet_view = views.CloseABetView(bet_ids, submit_callback=self.close_bet)
+        close_bet_view = CloseABetView(bet_ids, submit_callback=self.close_bet)
         try:
             await ctx.respond(content="**Closing a bet**", view=close_bet_view, ephemeral=True)
         except AttributeError:

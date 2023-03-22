@@ -50,6 +50,8 @@ class User(TypedDict):
     """The discord user ID"""
     guild_id: int
     """The discord server ID the user belongs to"""
+    name: str
+    """The nickname for the guild or the user name"""
     points: int
     """The amount of eddies the user has in the server"""
     pending_points: int

@@ -4,8 +4,8 @@ from discordbot.constants import CREATOR
 from discordbot.selects.config import ConfigSelect
 from discordbot.views.config_threads import ThreadConfigView
 
-
 from mongo.bsedataclasses import SpoilerThreads
+from mongo.bsepoints.guilds import Guilds
 
 
 class ConfigView(discord.ui.View):
@@ -14,6 +14,7 @@ class ConfigView(discord.ui.View):
     ):
         super().__init__(timeout=120)
         self.spoiler_threads = SpoilerThreads()
+        self.guilds = Guilds()
         self.config_select = ConfigSelect()
         self.add_item(self.config_select)
 
@@ -71,6 +72,19 @@ class ConfigView(discord.ui.View):
             )
 
         return msg, view
+
+    def _get_wordle_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
+        """_summary_
+
+        Args:
+            interaction (discord.Interaction): _description_
+
+        Returns:
+            tuple[str, discord.ui.View]: _description_
+        """
+        guild_db = self.guilds.get_guild(interaction.guild_id)
+        guild_db["wordle_channel"]
+
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, emoji="✖️", row=2)
     async def cancel_ballback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:

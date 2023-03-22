@@ -6,6 +6,7 @@ from discord.ui import Select
 class ConfigSelect(Select):
     _values = [
         ("Spoiler Threads", "0"),
+        ("Wordle Config", "1")
     ]
 
     def __init__(self):

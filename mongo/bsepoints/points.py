@@ -157,18 +157,20 @@ class UserPoints(BestSummerEverPointsDB):
         """
         return self.increment_daily_minimum(user_id, guild_id, amount * -1)
 
-    def create_user(self, user_id: int, guild_id: int, dailies: bool = False) -> None:
+    def create_user(self, user_id: int, guild_id: int, name: str, dailies: bool = False) -> None:
         """
         Create basic user points document.
 
         :param dailies:
         :param user_id: int - The ID of the user to look for
+        :param name: str - username
         :param guild_id: int - The guild ID that the user belongs in
         :return: None
         """
         user_doc = {
             "uid": user_id,
             "guild_id": guild_id,
+            "name": name,
             "points": 10,
             "pending_points": 0,
             "inactive": False,

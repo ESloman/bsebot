@@ -359,6 +359,10 @@ class CommandManager(object):
                 self.logger.debug(f"{message} - {message.content}")
                 await self.direct_message.dm_received(message)
                 return
+            elif type(message.channel) == discord.channel.DMChannel and \
+                    message.author.id == self.client.user.id:
+                # message in DM channel from ourselves
+                return
 
             await self.on_message.message_received(message)
 

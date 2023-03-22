@@ -32,5 +32,6 @@ class OnMemberJoin(BaseEvent):
             self.logger.info(f"Activating BSEddies account for existing user - {user_id} - {member.display_name}")
             return
 
-        self.user_points.create_user(user_id, member.guild.id)
+        name = member.nick or member.name
+        self.user_points.create_user(user_id, member.guild.id, name)
         self.logger.info(f"Creating BSEddies account for new user - {user_id} - {member.display_name}")

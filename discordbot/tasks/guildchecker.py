@@ -79,11 +79,15 @@ class GuildChecker(BaseTask):
                     guild.id,
                     guild.name,
                     guild.owner_id,
-                    guild.created_at
+                    guild.created_at,
                 )
                 # get new instance of db_guild
                 db_guild = self.guilds.get_guild(guild.id)
                 self.guilds.update_tax_history(guild.id, 0.1, 0.0, self.bot.user.id)
+
+            if db_guild.get("name") != guild.name:
+                self.logger.info(f"Updating db name for {guild.name}")
+                self.guilds.update({"_id": db_guild["_id"]}, {"$set": {"name": guild.name}})
 
             self.logger.info("Checking guilds for new members")
             members = await guild.fetch_members().flatten()

@@ -302,6 +302,7 @@ class GuildDB(TypedDict):
     wordle_channel: int
     category: int
     role: int
+    name: str
     tax_rate: float
     tax_rate_history: list[dict]
     king: int

@@ -35,6 +35,19 @@ class UserPoints(BestSummerEverPointsDB):
         if ret["points"] > ret.get("high_score", 0):
             self.update({"_id": ret["_id"]}, {"$set": {"high_score": ret["points"]}})
 
+    def find_user_guildless(self, user_id: int) -> list[User]:
+        """
+        Returns all matching user objects for the given ID
+
+        Args:
+            user_id (int): the user ID to search for
+
+        Returns:
+            list[User]: the user objects for each guild the user belongs to
+        """
+        ret = self.query({"uid": user_id})
+        return ret
+
     def find_user(self, user_id: int, guild_id: int, projection: Optional[dict] = None) -> Union[User, None]:
         """
         Looks up a user in the collection.

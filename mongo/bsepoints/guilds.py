@@ -48,7 +48,11 @@ class Guilds(BestSummerEverPointsDB):
             "owner_id": owner_id,
             "created": created,
             "tax_rate": 0.1,
-            "update_messages": False
+            "update_messages": False,
+            "release_notes": False,
+            "wordle": False,
+            "valorant_rollcall": False,
+            "wordle_reminders": False
         }
 
         return self.insert(doc)
@@ -360,4 +364,33 @@ class Guilds(BestSummerEverPointsDB):
             UpdateResult: update result
         """
         ret = self.update({"guild_id": guild_id}, {"$set": {"last_ad_time": timestamp}})
+        return ret
+
+    #
+    # Wordle stuff
+    #
+
+    def set_wordle_config(
+        self,
+        guild_id: int,
+        active: bool,
+        channel: int = None,
+        reminders: bool = False
+    ) -> UpdateResult:
+        """
+        Sets wordle config options
+
+        Args:
+            guild_id (int): guild ID to set for
+            active (bool): whether wordle is turned on/off for guild
+            channel (int, optional): channel ID of channel to post in. Defaults to None.
+            reminders (bool, optional): whether reminders are on/off for guild. Defaults to False.
+
+        Returns:
+            UpdateResult: update result
+        """
+        ret = self.update(
+            {"guild_id": guild_id},
+            {"$set": {"wordle": active, "wordle_channel": channel, "wordle_reminders": reminders}}
+        )
         return ret

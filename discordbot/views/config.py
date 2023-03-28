@@ -3,6 +3,7 @@ import discord
 from discordbot.constants import CREATOR
 from discordbot.selects.config import ConfigSelect
 from discordbot.views.config_threads import ThreadConfigView
+from discordbot.views.config_wordle import WordleConfigView
 
 from mongo.bsedataclasses import SpoilerThreads
 from mongo.bsepoints.guilds import Guilds
@@ -31,6 +32,9 @@ class ConfigView(discord.ui.View):
             case 0:
                 # 0 is for threads
                 msg, view = self._get_thread_message_and_view(interaction)
+            case 1:
+                # 1 is for wordle
+                msg, view = self._get_wordle_message_and_view(interaction)
             case _:
                 # default case
                 msg = "unknown"
@@ -83,8 +87,17 @@ class ConfigView(discord.ui.View):
             tuple[str, discord.ui.View]: _description_
         """
         guild_db = self.guilds.get_guild(interaction.guild_id)
-        guild_db["wordle_channel"]
-
+        _chan = guild_db.get("wordle_channel")
+        chan_mention = f"<#{_chan}>" if _chan else "_None_"
+        view = WordleConfigView(guild_db["guild_id"])
+        msg = (
+            "**Wordle Config**\n\n"
+            "Select the following options:\n"
+            "1.) Whether doing the daily wordle is enabled or not\n"
+            f"2.) If the above is true, which channel should the wordle be posted in? (Current: {chan_mention})\n"
+            "3.) Whether to remind users to do their daily Wordle if they forget.\n"
+        )
+        return msg, view
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, emoji="✖️", row=2)
     async def cancel_ballback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:

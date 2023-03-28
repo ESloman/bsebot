@@ -1,51 +1,79 @@
 import discord
 
+from discordbot.selects.wordleconfig import WordleActiveSelect, WordleChannelSelect, WordleReminderSelect
+
+from mongo.bsepoints.guilds import Guilds
+
 
 class WordleConfigView(discord.ui.View):
     def __init__(
-        self
+        self,
+        guild_id
     ):
         super().__init__(timeout=120)
+        self.guilds = Guilds()
 
-    @discord.ui.select(
-            discord.ComponentType.channel_select,
-            placeholder="Select channel for daily Wordle message",
-            channel_types=[
-                discord.ChannelType.text, discord.ChannelType.private
-            ],
-            row=3,
-            max_values=1,
-            min_values=1
-    )
-    async def select_callback(self, select: discord.ui.Select, interaction: discord.Interaction) -> None:
-        selected_amount = interaction.data["values"][0]
-        for option in self.options:
-            option.default = option.value == selected_amount
-        await interaction.response.edit_message(view=self.view)
+        guild_db = self.guilds.get_guild(guild_id)
+        active = "1" if guild_db.get("wordle") else "0"
+
+        self.active_select = WordleActiveSelect(active)
+        self.channel_select = WordleChannelSelect()
+
+        if int(active):
+            self.channel_select.disabled = False
+
+        reminder = "1" if guild_db.get("wordle_reminders") else "0"
+        self.reminder_select = WordleReminderSelect(reminder)
+
+        self.add_item(self.active_select)
+        self.add_item(self.channel_select)
+        self.add_item(self.reminder_select)
+
+    async def update(self, interaction: discord.Interaction):
+
+        try:
+            active_val = self.active_select.values[0]
+        except IndexError:
+            for opt in self.active_select.options:
+                if opt.default:
+                    active_val = bool(int(opt.value))
+                    break
+
+        self.channel_select.disabled = not active_val
+        await interaction.response.edit_message(content=interaction.message.content, view=self)
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=4)
     async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
-        [t for t in self.threads if str(t["thread_id"]) == self.thread_select._selected_values[0]][0]
 
         try:
-            day = int(self.day_select._selected_values[0])
+            active_val = bool(int(self.active_select.values[0]))
         except IndexError:
-            # look for default as user didn't select one explicitly
-            for opt in self.day_select.options:
+            for opt in self.active_select.options:
                 if opt.default:
-                    day = int(opt.value)
+                    active_val = bool(int(opt.value))
                     break
 
-        if day == 7:
-            # 7 is for when user doesn't want a day set
-            day = None
+        channel = None
+        try:
+            channel = self.channel_select.values[0]
+        except IndexError:
+            for opt in self.channel_select.options:
+                if opt.default:
+                    channel = opt.value
+                    break
+
+        if channel and type(channel) != int:
+            channel = channel.id
 
         try:
-            bool(int(self.active_select._selected_values[0]))
+            reminders = bool(int(self.reminder_select.values[0]))
         except IndexError:
-            # user didn't select a value
-            # true is default here
-            pass
+            for opt in self.reminder_select.options:
+                if opt.default:
+                    reminders = bool(int(opt.value))
+                    break
+
+        self.guilds.set_wordle_config(interaction.guild_id, active_val, channel, reminders)
 
         await interaction.response.edit_message(
             content="Wordle config updated.",

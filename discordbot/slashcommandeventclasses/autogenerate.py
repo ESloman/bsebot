@@ -35,7 +35,8 @@ class BSEddiesAutoGenerate(BSEddies):
             method: str,
             number: int,
             bet_ids: list,
-            timeout_str: str = "30m"
+            timeout_str: str = "30m",
+            channel: int = None
     ) -> None:
 
         self._add_event_type_to_activity_history(
@@ -58,7 +59,7 @@ class BSEddiesAutoGenerate(BSEddies):
                         validated_bets.append(bet)
                         continue
                     # validate that we can use this bet
-                    vc_channel = await self.client.fetch_channel(bet.get("voice_channel"))
+                    vc_channel = await self.client.fetch_channel(channel)
                     member_ids = [m.id for m in vc_channel.members]
                     if not all([c_m in member_ids for c_m in bet["channel_members"]]):
                         self.logger.info(f"Can't use bet {bet} as not all required members are present")
@@ -73,7 +74,7 @@ class BSEddiesAutoGenerate(BSEddies):
             try:
                 if not bet["options"] and bet.get("voice_channel"):
                     # bet has no options but should be constructed from channel members
-                    vc_channel = await self.client.fetch_channel(bet.get("voice_channel"))
+                    vc_channel = await self.client.fetch_channel(channel)
                     for member in vc_channel.members:
                         bet["options"].append(member.display_name)
 

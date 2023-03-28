@@ -31,9 +31,9 @@ class BSEddiesBetCreateModal(discord.ui.Modal):
         )
         self.add_item(
             discord.ui.InputText(
-                label="Timeout: DIGITS + (s|m|h|d) (Optional)",
+                label="Timeout: DIGITS + (s|m|h|d|w) (Optional)",
                 required=False,
-                placeholder="Examples: 25m, 2d, 8h, etc..."
+                placeholder="Examples: 25m, 2d, 8h, 6h30m, 1w3d2h, etc..."
             )
         )
 

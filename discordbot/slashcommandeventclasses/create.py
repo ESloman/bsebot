@@ -1,10 +1,10 @@
 
 import datetime
-import re
 from typing import Union
 
 import discord
 
+from discordbot import utilities
 from discordbot.bot_enums import ActivityTypes
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.views.bet import BetView
@@ -114,25 +114,22 @@ class BSEddiesCreateBet(BSEddies):
             timeout = datetime.datetime.now() + datetime.timedelta(minutes=10)
         else:
             timeout_str = timeout_str.strip()
-            match = re.match(r"\d{1,5}([smhd])", timeout_str)
-            if not match:
+            try:
+                _seconds = utilities.convert_time_str(timeout_str)
+            except (IndexError, AttributeError, Exception) as e:
+                # leaving Exception in for now until we're sure that all exception types have been caught
+                if type(e) not in (IndexError, AttributeError):
+                    self.logger.debug(f"Got an error with a timestring: {e}")
+                _seconds = None
+
+            if not _seconds:
                 msg = ("Your timeout string was incorrectly formatted. Needs to be 1 - 5 digits "
                        "and then either a s, m, h, or d "
                        "to signify seconds, minutes, hours, or days respectively.")
                 await ctx.followup.send(content=msg, ephemeral=True)
                 return
-            g = match.group()
-            if "s" in g:
-                dt_key = {"seconds": int(g.replace("s", ""))}
-            elif "m" in g:
-                dt_key = {"minutes": int(g.replace("m", ""))}
-            elif "h" in g:
-                dt_key = {"hours": int(g.replace("h", ""))}
-            elif "d" in g:
-                dt_key = {"days": int(g.replace("d", ""))}
-            else:
-                dt_key = {}
-            timeout = datetime.datetime.now() + datetime.timedelta(**dt_key)
+
+            timeout = datetime.datetime.now() + datetime.timedelta(seconds=_seconds)
 
         await ctx.channel.trigger_typing()
 

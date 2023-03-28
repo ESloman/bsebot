@@ -6,7 +6,7 @@ from logging import Logger
 from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
-from discordbot.constants import BSE_BOT_ID, GENERAL_CHAT
+from discordbot.constants import BSE_BOT_ID
 from discordbot.tasks.basetask import BaseTask
 
 
@@ -98,7 +98,7 @@ class WordleReminder(BaseTask):
 
                 if channel_id != channel.id:
                     self.logger.info(
-                        f"{channel_id} for wordle message ({reminder['message_id']}) didn't match {GENERAL_CHAT}"
+                        f"{channel_id} for wordle message ({reminder['message_id']}) didn't match {channel.id}"
                     )
                     continue
                 y_message = await channel.fetch_message(reminder["message_id"])

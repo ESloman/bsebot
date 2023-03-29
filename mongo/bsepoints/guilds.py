@@ -269,6 +269,46 @@ class Guilds(BestSummerEverPointsDB):
         return self.update({"guild_id": guild_id}, {"$set": {"release_ver": release_ver}})
 
     #
+    # Salary stuff
+    #
+
+    def get_daily_minimum(
+        self,
+        guild_id: int
+    ) -> int:
+        """
+        Gets daily minimum for the given guild
+
+        Args:
+            guild_id (int): guild ID to get min for
+
+        Returns:
+            int: the minimum
+        """
+        ret = self.query({"guild_id": guild_id})
+        if ret:
+            return ret[0].get("daily_minimum")
+        return None
+
+    def set_daily_minimum(
+        self,
+        guild_id: int,
+        amount: int
+    ) -> UpdateResult:
+        """
+        Updates daily minimum salary for given guild ID with given amount
+
+        Args:
+            guild_id (int): guild ID to update
+            amount (int): amount to set daily minimum to
+
+        Returns:
+            UpdateResult: update result
+        """
+        ret = self.update({"guild_id": guild_id}, {"$set": {"daily_minimum": amount}})
+        return ret
+
+    #
     #  Tax stuff
     #
 

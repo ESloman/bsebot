@@ -2,6 +2,7 @@ import discord
 
 from discordbot.constants import CREATOR
 from discordbot.selects.config import ConfigSelect
+from discordbot.views.config_salary import SalaryConfigView
 from discordbot.views.config_threads import ThreadConfigView
 from discordbot.views.config_wordle import WordleConfigView
 
@@ -28,12 +29,12 @@ class ConfigView(discord.ui.View):
             delete_after=2
         )
 
-        match int(value):
-            case 0:
-                # 0 is for threads
+        match value:
+            case "salary":
+                msg, view = self._get_daily_minimum_message_and_view(interaction)
+            case "threads":
                 msg, view = self._get_thread_message_and_view(interaction)
-            case 1:
-                # 1 is for wordle
+            case "wordle":
                 msg, view = self._get_wordle_message_and_view(interaction)
             case _:
                 # default case
@@ -96,6 +97,25 @@ class ConfigView(discord.ui.View):
             "1.) Whether doing the daily wordle is enabled or not\n"
             f"2.) If the above is true, which channel should the wordle be posted in? (Current: {chan_mention})\n"
             "3.) Whether to remind users to do their daily Wordle if they forget.\n"
+        )
+        return msg, view
+
+    def _get_daily_minimum_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
+        """_summary_
+
+        Args:
+            interaction (discord.Interaction): _description_
+
+        Returns:
+            tuple[str, discord.ui.View]: _description_
+        """
+        guild_db = self.guilds.get_guild(interaction.guild_id)
+        _min = guild_db.get("daily_minimum", 4)
+        view = SalaryConfigView(_min)
+        msg = (
+            "**Salary Config**\n\n"
+            "Select the daily minimum salary for users in this guild. This amount is deprecated by one each day for "
+            "each user that doesn't interact with the guild. This is reset for the user upon interaction.\n"
         )
         return msg, view
 

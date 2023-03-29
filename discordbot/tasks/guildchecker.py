@@ -85,6 +85,10 @@ class GuildChecker(BaseTask):
                 db_guild = self.guilds.get_guild(guild.id)
                 self.guilds.update_tax_history(guild.id, 0.1, 0.0, self.bot.user.id)
 
+            self.logger.info("Checking guild salary minimum")
+            if db_guild.get("daily_minimum") is None:
+                self.guilds.set_daily_minimum(guild.id, 4)
+
             self.logger.info("Checking guilds for new members")
             members = await guild.fetch_members().flatten()
             for member in members:  # type: discord.Member

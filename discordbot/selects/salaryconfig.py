@@ -3,22 +3,23 @@ from discord import Interaction, SelectOption
 from discord.ui import Select
 
 
-class ConfigSelect(Select):
-    _values = [
-        ("Salary", "salary"),
-        ("Spoiler Threads", "threads"),
-        ("Wordle Config", "wordle")
-    ]
+class SalaryMinimumSelect(Select):
+    _amounts = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 50]
 
-    def __init__(self):
-
+    def __init__(self, current_amount: int = None):
         options = [
-            SelectOption(label=opt[0], value=opt[1]) for opt in self._values
+            SelectOption(label=str(a), value=str(a)) for a in self._amounts
         ]
+
+        if current_amount:
+            for opt in options:
+                if int(opt.value) == current_amount:
+                    opt.default = True
+                    break
 
         super().__init__(
             disabled=False,
-            placeholder="Select item to configure...",
+            placeholder="Select minimum salary amount",
             min_values=1,
             max_values=1,
             options=options

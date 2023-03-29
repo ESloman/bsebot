@@ -302,6 +302,7 @@ class GuildDB(TypedDict):
     wordle_reminders: bool
     category: int
     role: int
+    daily_minimum: int
     tax_rate: float
     tax_rate_history: list[dict]
     king: int

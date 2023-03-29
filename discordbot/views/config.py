@@ -51,7 +51,7 @@ class ConfigView(discord.ui.View):
 
         # is user the server owner
         if interaction.user.id == guild_db["owner_id"]:
-           return True
+            return True
 
         # is user in server admins
         if interaction.user.id in guild_db.get("admins", []):

@@ -7,6 +7,7 @@ class ConfigSelect(Select):
     _values = [
         ("Salary", "salary"),
         ("Spoiler Threads", "threads"),
+        ("Valorant", "valorant"),
         ("Wordle Config", "wordle")
     ]
 

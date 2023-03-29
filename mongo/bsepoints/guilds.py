@@ -407,6 +407,35 @@ class Guilds(BestSummerEverPointsDB):
         return ret
 
     #
+    # Valorant stuff
+    #
+
+    def set_valorant_config(
+        self,
+        guild_id: int,
+        active: bool,
+        channel: int = None,
+        role: int = None
+    ) -> UpdateResult:
+        """
+        Sets valorant config options
+
+        Args:
+            guild_id (int): guild ID to set for
+            active (bool): whether valorant roll call is turned on/off for guild
+            channel (int, optional): channel ID of channel to post in. Defaults to None.
+            role (int, optional): role ID of role to mention
+
+        Returns:
+            UpdateResult: update result
+        """
+        ret = self.update(
+            {"guild_id": guild_id},
+            {"$set": {"valorant_rollcall": active, "valorant_channel": channel, "valorant_role": role}}
+        )
+        return ret
+
+    #
     # Wordle stuff
     #
 

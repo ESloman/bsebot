@@ -317,3 +317,4 @@ class GuildDB(TypedDict):
     release_notes: bool
     valorant_rollcall: bool
     valorant_channel: int
+    valorant_role: int

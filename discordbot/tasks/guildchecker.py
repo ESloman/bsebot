@@ -79,7 +79,7 @@ class GuildChecker(BaseTask):
                     guild.id,
                     guild.name,
                     guild.owner_id,
-                    guild.created_at
+                    guild.created_at,
                 )
                 # get new instance of db_guild
                 db_guild = self.guilds.get_guild(guild.id)
@@ -89,6 +89,10 @@ class GuildChecker(BaseTask):
             if db_guild.get("daily_minimum") is None:
                 self.guilds.set_daily_minimum(guild.id, 4)
 
+            if db_guild.get("name") != guild.name:
+                self.logger.info(f"Updating db name for {guild.name}")
+                self.guilds.update({"_id": db_guild["_id"]}, {"$set": {"name": guild.name}})
+
             self.logger.info("Checking guilds for new members")
             members = await guild.fetch_members().flatten()
             for member in members:  # type: discord.Member
@@ -96,9 +100,10 @@ class GuildChecker(BaseTask):
                     continue
 
                 self.logger.info(f"Checking {member.id} - {member.name}")
+                name = member.nick or member.name
                 user = self.user_points.find_user(member.id, guild.id)
                 if not user:
-                    self.user_points.create_user(member.id, guild.id, False)
+                    self.user_points.create_user(member.id, guild.id, name, False)
                     self.activities.add_activity(
                         member.id,
                         guild.id,
@@ -108,6 +113,9 @@ class GuildChecker(BaseTask):
                         f"Creating new user entry for {member.id} - {member.name} for {guild.id} - {guild.name}"
                     )
                     continue
+                elif name != user.get("name"):
+                    self.logger.info(f"Updating db name for {name}")
+                    self.user_points.update({"_id": user["_id"]}, {"$set": {"name": name}})
 
             self.logger.info("Checking for users that have left")
             member_ids = [member.id for member in members]
@@ -174,7 +182,7 @@ class GuildChecker(BaseTask):
                         await thread.join()
                         self.logger.info(f"Joined {thread.name}")
 
-                    thread_info = self.spoilers.get_thread_by_id(BSE_SERVER_ID, thread.id)
+                    thread_info = self.spoilers.get_thread_by_id(guild.id, thread.id)
 
                     if not thread_info:
                         self.logger.info(f"No info for thread {thread.id}, {thread.name}. Inserting now.")

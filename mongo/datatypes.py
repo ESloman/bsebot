@@ -294,6 +294,7 @@ class Thread(TypedDict):
 
 class GuildDB(TypedDict):
     _id: ObjectId
+    admins: list[int]
     guild_id: int
     created: datetime.datetime
     rename_king: datetime.datetime

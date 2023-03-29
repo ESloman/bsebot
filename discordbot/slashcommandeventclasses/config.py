@@ -28,7 +28,7 @@ class BSEddiesConfig(BSEddies):
 
         self._add_event_type_to_activity_history(ctx.author, ctx.guild_id, ActivityTypes.CONFIG)
 
-        config_view = ConfigView()
+        config_view = ConfigView(self.logger)
         msg = (
             "**BSEBot Configuration**\n\n"
             "What would you like to configure?"

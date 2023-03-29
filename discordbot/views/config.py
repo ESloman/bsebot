@@ -1,7 +1,10 @@
 import discord
+from logging import Logger
 
 from discordbot.constants import CREATOR
 from discordbot.selects.config import ConfigSelect
+from discordbot.utilities import PlaceHolderLogger
+from discordbot.views.config_admin import AdminConfigView
 from discordbot.views.config_salary import SalaryConfigView
 from discordbot.views.config_threads import ThreadConfigView
 from discordbot.views.config_valorant import ValorantConfigView
@@ -14,12 +17,57 @@ from mongo.bsepoints.guilds import Guilds
 class ConfigView(discord.ui.View):
     def __init__(
         self,
+        logger: Logger = PlaceHolderLogger
     ):
         super().__init__(timeout=120)
+        self.logger = logger
         self.spoiler_threads = SpoilerThreads()
         self.guilds = Guilds()
         self.config_select = ConfigSelect()
         self.add_item(self.config_select)
+
+    def _check_perms(self, value: str, interaction: discord.Interaction) -> bool:
+        """
+        Checks if the user has the right perms to configure this item
+
+        Args:
+            value (str): the configurable item
+            interaction (discord.Interaction): the interaction
+
+        Returns:
+            bool: whether they do or don't
+        """
+
+        # is option in options that allow normal users to use it
+        if value in ["threads", ]:
+            return True
+
+        # is user the creator
+        if interaction.user.id == CREATOR:
+            return True
+
+        # now we check server perms
+        guild_db = self.guilds.get_guild(interaction.guild_id)
+
+        # is user the server owner
+        if interaction.user.id == guild_db["owner_id"]:
+            return True
+
+        # is user in server admins
+        if interaction.user.id in guild_db.get("admins", []):
+            return True
+
+        return False
+
+    async def _send_no_perms_message(self, interaction: discord.Interaction) -> None:
+        """
+        Sends a message stating they don't have perm
+
+        Args:
+            interaction (discord.Interaction): the interaction
+        """
+        msg = "You do not have the required permissions to configure this option."
+        await interaction.followup.send(msg, ephemeral=True)
 
     @discord.ui.button(label="Select", style=discord.ButtonStyle.green, row=2)
     async def place_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
@@ -30,7 +78,13 @@ class ConfigView(discord.ui.View):
             delete_after=2
         )
 
+        if not self._check_perms(value, interaction):
+            self.logger.info(f"User {interaction.user} tried to configure {value} without the right perms")
+            return await self._send_no_perms_message(interaction)
+
         match value:
+            case "admins":
+                msg, view = self._get_admins_message_and_view(interaction)
             case "salary":
                 msg, view = self._get_daily_minimum_message_and_view(interaction)
             case "threads":
@@ -61,11 +115,23 @@ class ConfigView(discord.ui.View):
         """
 
         threads = self.spoiler_threads.get_all_threads(interaction.guild_id)
-        threads = [
-            t for t in threads
-            if (t.get("owner", t.get("creator", CREATOR)) == interaction.user.id or interaction.user.id == CREATOR)
-            and t.get("active")
-        ]
+
+        guild_db = self.guilds.get_guild(interaction.guild_id)
+        admins = guild_db.get("admins", [])
+
+        threads = []
+        for thread in threads:
+            if not thread.get("active"):
+                continue
+            if interaction.user.id == CREATOR:
+                threads.append(thread)
+                continue
+            elif interaction.user.id in admins:
+                threads.append(thread)
+                continue
+            elif interaction.user.id == thread.get("owner", thread.get("creator", CREATOR)):
+                threads.append(thread)
+                continue
 
         if not threads:
             view = None
@@ -148,6 +214,37 @@ class ConfigView(discord.ui.View):
             "**Salary Config**\n\n"
             "Select the daily minimum salary for users in this guild. This amount is deprecated by one each day for "
             "each user that doesn't interact with the guild. This is reset for the user upon interaction.\n\n"
+        )
+        return msg, view
+
+    def _get_admins_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
+        """
+        Handle admin message/view
+
+        Args:
+            interaction (discord.Interaction): the interaction
+
+        Returns:
+            tuple[str, discord.ui.View]: the message and view
+        """
+        guild_db = self.guilds.get_guild(interaction.guild_id)
+        admins = guild_db.get("admins", [])
+
+        view = AdminConfigView()
+
+        if not admins:
+            _admins = "_None_"
+        else:
+            _admins = ", ".join([f"<@{a}>" for a in admins])
+
+        msg = (
+            "**Admins Config**\n\n"
+            "Select the users that should be BSEBot Admins and be able to perform administrative functions. "
+            "Select _all_ users you want to be admins - including existing ones if you wish for them "
+            "to remain as admins.\n\n"
+            f"Current admins: {_admins}\n\n"
+            "**Note**: the server owner and the BSEBot creator are _always_ considered as admins regardless of your "
+            "selection.\n"
         )
         return msg, view
 

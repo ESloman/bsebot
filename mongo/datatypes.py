@@ -299,9 +299,12 @@ class GuildDB(TypedDict):
     rename_king: datetime.datetime
     owner_id: int
     channel: int
+    wordle: bool
     wordle_channel: int
+    wordle_reminders: bool
     category: int
     role: int
+    daily_minimum: int
     name: str
     tax_rate: float
     tax_rate_history: list[dict]
@@ -315,3 +318,6 @@ class GuildDB(TypedDict):
     pledged: list[int]
     release_ver: str
     release_notes: bool
+    valorant_rollcall: bool
+    valorant_channel: int
+    valorant_role: int

@@ -142,6 +142,8 @@ class BSEddiesManager(BaseTask):
     ):
 
         super().__init__(bot, guild_ids, logger, startup_tasks)
+        # default minimum
+        self.server_min = 4
 
     @staticmethod
     def get_datetime_objects(days=1):
@@ -195,7 +197,7 @@ class BSEddiesManager(BaseTask):
         :return:
         """
 
-        minimum = user_dict.get("daily_minimum", 4)
+        minimum = user_dict.get("daily_minimum", self.server_min)
 
         if not user_results and not user_reactions and not user_reacted:
             if minimum == 0:
@@ -212,10 +214,10 @@ class BSEddiesManager(BaseTask):
             if minimum == 0:
                 return 0, {}
         else:
-            if minimum != 4:
-                minimum = 4
+            if minimum != self.server_min:
+                minimum = self.server_min
                 if real:
-                    self.user_points.set_daily_minimum(user, guild_id, 4)
+                    self.user_points.set_daily_minimum(user, guild_id, minimum)
 
         message_types = []
         for r in user_results:
@@ -315,6 +317,11 @@ class BSEddiesManager(BaseTask):
         :return:
         """
         start, end = self.get_datetime_objects(days)
+
+        server_min = self.guilds.get_daily_minimum(guild_id)
+        if not server_min:
+            server_min = 4
+        self.server_min = server_min
 
         # query gets all messages yesterday
         results = self.interactions.query(

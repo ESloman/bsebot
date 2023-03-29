@@ -7,7 +7,7 @@ from logging import Logger
 from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
-from discordbot.constants import VALORANT_CHAT, VALORANT_ROLE, BSE_SERVER_ID, BSE_BOT_ID
+from discordbot.constants import BSE_SERVER_ID
 from discordbot.tasks.basetask import BaseTask
 
 
@@ -63,43 +63,64 @@ class AfterWorkVally(BaseTask):
         if now.hour != 15 or not (45 <= now.minute <= 54):
             return
 
-        self.logger.info("Checking for channel interactivity")
+        for guild in self.bot.guilds:
+            # set this up for theoretically working with other guilds
+            # but only work for BSE Server for now
+            if guild.id != BSE_SERVER_ID:
+                continue
 
-        latest_bot_message = list(self.interactions.vault.find(
-            {"user_id": BSE_BOT_ID, "channel_id": VALORANT_CHAT, "message_type": "role_mention"},
-            sort=[("timestamp", -1)],
-            limit=1
-        ))[0]
+            guild_db = self.guilds.get_guild(guild.id)
 
-        latest_time = latest_bot_message["timestamp"]
+            if not guild_db.get("valorant_rollcall"):
+                self.logger.info("Valorant rollcall is disabled")
+                continue
 
-        messages = self.interactions.query(
-            {
-                "timestamp": {"$gt": latest_time},
-                "channel_id": VALORANT_CHAT
-            }
-        )
+            valorant_channel = guild_db.get("valorant_channel")
+            if not valorant_channel:
+                self.logger.info("Valorant channel isn't configured")
+                continue
 
-        if not messages:
-            self.logger.info(
-                f"Not been any messages in #valorant-chat since {latest_time} - skipping the daily vally message"
+            self.logger.info("Checking for channel interactivity")
+
+            latest_bot_message = list(self.interactions.vault.find(
+                {"user_id": self.bot.user.id, "channel_id": valorant_channel, "message_type": "role_mention"},
+                sort=[("timestamp", -1)],
+                limit=1
+            ))[0]
+
+            latest_time = latest_bot_message["timestamp"]
+
+            messages = self.interactions.query(
+                {
+                    "timestamp": {"$gt": latest_time},
+                    "channel_id": valorant_channel
+                }
             )
-            return
 
-        self.logger.debug(f"{len(messages)} since our last vally rollcall")
+            if not messages:
+                self.logger.info(
+                    f"Not been any messages in #valorant-chat since {latest_time} - skipping the daily vally message"
+                )
+                continue
 
-        self.logger.info("Time to send vally message!")
+            self.logger.debug(f"{len(messages)} since our last vally rollcall")
+            self.logger.info("Time to send vally message!")
 
-        guild = await self.bot.fetch_guild(BSE_SERVER_ID)
-        channel = await self.bot.fetch_channel(VALORANT_CHAT)
-        await channel.trigger_typing()
-        role = guild.get_role(VALORANT_ROLE)
+            guild = await self.bot.fetch_guild(guild.id)
+            channel = await self.bot.fetch_channel(valorant_channel)
+            await channel.trigger_typing()
 
-        message = random.choice(self.messages)
-        message = message.format(role=role.mention)
+            if role_id := guild_db.get("valorant_role"):
+                role = guild.get_role(role_id)
+                _mention = role.mention
+            else:
+                _mention = "`Valorant`"
 
-        self.logger.info(f"Sending daily vally message: {message}")
-        await channel.send(content=message)
+            message = random.choice(self.messages)
+            message = message.format(role=_mention)
+
+            self.logger.info(f"Sending daily vally message: {message}")
+            await channel.send(content=message)
 
     @vally_message.before_loop
     async def before_vally_message(self):

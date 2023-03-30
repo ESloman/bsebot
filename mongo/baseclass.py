@@ -138,7 +138,7 @@ class BaseClass(object):
             ret = interface.query(
                 self.vault,
                 query_dict,
-                limit=limit,
+                lim=limit,
                 projection=None,
                 as_gen=False,
                 skip=skip

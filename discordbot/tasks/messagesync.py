@@ -106,7 +106,7 @@ class MessageSync(BaseTask):
 
             for message in unsynced:
                 _trigger_actions = False
-                if (message.created_at - now).total_seconds < 120:
+                if (datetime.datetime.now(tz=datetime.timezone.utc) - message.created_at).total_seconds() < 120:
                     # if message is relatively new; trigger actions
                     # for when we miss a message during a restart
                     self.logger.info(f"{message.id} was created less than two minutes ago - WILL trigger actions")

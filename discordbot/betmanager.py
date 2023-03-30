@@ -23,7 +23,7 @@ class BetManager(object):
         self.user_points = UserPoints()
         self.guilds = Guilds()
 
-    def close_a_bet(self, bet_id: str, guild_id: int, emoji: str) -> dict:
+    def close_a_bet(self, bet_id: str, guild_id: int, emoji: list[str]) -> dict:
         """
         Close a bet from a bet ID.
         Here we also calculate who the winners are and allocate their winnings to them.
@@ -40,16 +40,18 @@ class BetManager(object):
 
         ret_dict = {
             "result": emoji,
-            "outcome_name": ret["option_dict"][emoji],
+            "outcome_name": [ret["option_dict"][e] for e in emoji],
             "timestamp": datetime.datetime.now(),
-            "losers": {b: ret["betters"][b]["points"]
-                       for b in ret["betters"] if ret["betters"][b]["emoji"] != emoji},
+            "losers": {
+                b: ret["betters"][b]["points"]
+                for b in ret["betters"] if ret["betters"][b]["emoji"] not in emoji
+            },
             "winners": {}
         }
 
         total_eddies_bet = sum([ret["betters"][b]["points"] for b in ret["betters"]])
         winning_outcome_eddies = sum(
-            [ret["betters"][b]["points"] for b in ret["betters"] if ret["betters"][b]["emoji"] == emoji]
+            [ret["betters"][b]["points"] for b in ret["betters"] if ret["betters"][b]["emoji"] in emoji]
         )
 
         try:
@@ -93,7 +95,7 @@ class BetManager(object):
         total_eddies_taxed = 0
 
         # assign winning points to the users who got the answer right
-        winners = [b for b in ret["betters"] if ret["betters"][b]["emoji"] == emoji]
+        winners = [b for b in ret["betters"] if ret["betters"][b]["emoji"] in emoji]
         for better in winners:
             points_bet = ret["betters"][better]["points"]
             points_won = math.ceil(((m * points_bet) + c) * points_bet)

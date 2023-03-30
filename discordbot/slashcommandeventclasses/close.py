@@ -50,7 +50,7 @@ class BSEddiesCloseBet(BSEddies):
             self,
             ctx: discord.Interaction,
             bet_id: str,
-            emoji: str
+            emoji: list[str]
     ) -> None:
         """
         This is the method for handling when we close a bet.
@@ -97,17 +97,17 @@ class BSEddiesCloseBet(BSEddies):
             await ctx.followup.edit_message(content=msg, view=None, message_id=ctx.message.id)
             return
 
-        emoji = emoji.strip()
-
-        if emoji not in bet["option_dict"]:
-            msg = f"{emoji} isn't a valid outcome so the bet can't be closed."
-            await ctx.followup.edit_message(content=msg, view=None, message_id=ctx.message.id)
-            return
+        for _emoji in emoji:
+            _emoji = _emoji.strip()
+            if _emoji not in bet["option_dict"]:
+                msg = f"{_emoji} isn't a valid outcome so the bet can't be closed."
+                await ctx.followup.edit_message(content=msg, view=None, message_id=ctx.message.id)
+                return
 
         # the logic in this if statement only applies if the user "won" their own bet and they were the only better
         # they just get refunded the eddies that put in
         if bet_dict := bet["betters"].get(str(author.id), None):
-            if len(bet["betters"]) == 1 and bet_dict["emoji"] == emoji:
+            if len(bet["betters"]) == 1 and bet_dict["emoji"] in emoji:
 
                 self.logger.info(f"{ctx.user.id} just won a bet ({bet_id}) where they were the only better...")
                 self.user_bets.close_a_bet(bet["_id"], emoji)
@@ -142,7 +142,7 @@ class BSEddiesCloseBet(BSEddies):
 
         ret_dict = self.bet_manager.close_a_bet(bet_id, guild.id, emoji)
 
-        desc = f"**{bet['title']}**\n{emoji} - **{ret_dict['outcome_name']['val']}** won!\n\n"
+        desc = f"**{bet['title']}**\n{emoji} - **{', '.join([n['val'] for n in ret_dict['outcome_name']])}** won!\n\n"
 
         for better in ret_dict["winners"]:
             desc += f"\n- {guild.get_member(int(better)).name} won `{ret_dict['winners'][better]}` eddies!"
@@ -162,7 +162,7 @@ class BSEddiesCloseBet(BSEddies):
                 points_bet = ret_dict["losers"][loser]
                 msg = (f"**{author.name}** just closed bet "
                        f"`[{bet_id}] - {bet['title']}` and the result was {emoji} "
-                       f"(`{ret_dict['outcome_name']['val']})`.\n"
+                       f"(`{', '.join([n['val'] for n in ret_dict['outcome_name']])})`.\n"
                        f"As this wasn't what you voted for - you have lost. You bet **{points_bet}** eddies.")
                 await mem.send(content=msg, silent=True)
             except discord.Forbidden:
@@ -176,7 +176,7 @@ class BSEddiesCloseBet(BSEddies):
             try:
                 msg = (f"**{author.name}** just closed bet "
                        f"`[{bet_id}] - {bet['title']}` and the result was {emoji} "
-                       f"(`{ret_dict['outcome_name']['val']})`.\n"
+                       f"(`{', '.join([n['val'] for n in ret_dict['outcome_name']])})`.\n"
                        f"**This means you won!!** "
                        f"You have won `{ret_dict['winners'][winner]}` BSEDDIES!!")
                 await mem.send(content=msg, silent=True)

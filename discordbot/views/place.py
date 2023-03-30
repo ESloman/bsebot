@@ -33,7 +33,7 @@ class PlaceABetView(discord.ui.View):
         await self.message.edit(content="This `place` command timed out - please _place_ another one", view=None)
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=3, disabled=True, emoji="💰")
-    async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def submit_button_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
 
         data = {}
         for child in self.children:

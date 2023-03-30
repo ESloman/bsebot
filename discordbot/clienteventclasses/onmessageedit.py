@@ -24,6 +24,10 @@ class OnMessageEdit(BaseEvent):
             before (Optional[discord.Message]): the message before
             after (discord.Message): the message after
         """
+
+        if after.flags.ephemeral:
+            return
+
         if after.type in [
             discord.MessageType.application_command
         ]:

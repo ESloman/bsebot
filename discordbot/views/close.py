@@ -22,11 +22,11 @@ class CloseABetView(discord.ui.View):
         else:
             options = []
 
-        self.add_item(BetOutcomesSelect(options, discord.ui.Button))
-        self.submit_callback = submit_callback
+        self.add_item(BetOutcomesSelect(options, discord.ui.Button, True))
+        self._submit_callback = submit_callback
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=2, disabled=True)
-    async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def submit_button_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
 
         data = {}
         for child in self.children:
@@ -37,10 +37,10 @@ class CloseABetView(discord.ui.View):
                     # this means that this was default
                     data["bet_id"] = child.options[0].value
             elif type(child) == BetOutcomesSelect:
-                data["emoji"] = child.values[0]
+                data["emoji"] = child.values
 
         # call the callback that actually places the bet
-        await self.submit_callback(
+        await self._submit_callback(
             interaction,
             data["bet_id"],
             data["emoji"]

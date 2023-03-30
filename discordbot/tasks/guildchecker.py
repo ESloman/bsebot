@@ -1,9 +1,6 @@
 
 import datetime
-import os
-import subprocess
 from logging import Logger
-from typing import Optional
 
 import discord
 from discord.ext import tasks
@@ -13,7 +10,6 @@ from apis.github import GitHubAPI
 from discordbot.bsebot import BSEBot
 from discordbot.bot_enums import ActivityTypes
 from discordbot.clienteventclasses import OnReadyEvent
-from discordbot.constants import BSE_SERVER_ID
 from discordbot.embedmanager import EmbedManager
 from discordbot.slashcommandeventclasses.close import BSEddiesCloseBet
 from discordbot.slashcommandeventclasses.place import BSEddiesPlaceBet
@@ -61,12 +57,6 @@ class GuildChecker(BaseTask):
         :return:
         """
         datetime.datetime.now()
-
-        if not self.finished:
-            # only need to do this once
-            releases_ret = self.github.get_latest_release("ESloman", "bsebot")
-        else:
-            releases_ret = None
 
         self.logger.info("Running guild sync")
         async for guild in self.bot.fetch_guilds():
@@ -201,7 +191,6 @@ class GuildChecker(BaseTask):
             # only care about the stuff below on first run
             # theoretically event views should be initialised now
             # same for all the open bet views
-            # don't need to do the update log either
 
             self.logger.info("Initialising event views")
             if events := self.revolutions.get_open_events(guild.id):
@@ -247,69 +236,6 @@ class GuildChecker(BaseTask):
 
             self.bot.add_view(LeaderBoardView(self.embed_manager))
 
-            self.logger.info("Trying to do the git thing")
-            try:
-                commit_log = self.git_compare(guild.id)
-                self.logger.info("Got commit log successfully")
-
-                if commit_log is not None:
-                    update_message = (
-                        "I have just been updated and restarted."
-                        "Here are the recent commits in this new update:\n\n"
-                        "```diff\n"
-                        f"{commit_log}\n"
-                        "```"
-                    )
-                    try:
-                        send_message = self.guilds.get_update_message(guild.id)
-                        if send_message:
-                            channel_id = self.guilds.get_update_channel(guild.id)
-                            if channel_id:
-                                channel = await self.bot.fetch_channel(channel_id)
-                                await channel.send(content=update_message, silent=True)
-                        else:
-                            self.logger.info("Not sending message...")
-                        self.logger.info(update_message)
-                    except discord.errors.HTTPException:
-                        self.logger.info("Message is too long to send - skipping")
-            except Exception as e:
-                self.logger.exception(f"Error with doing the git thing: {e}")
-
-            # work out which release is the latest
-            release_info = releases_ret.json()
-            release_name = release_info["name"]
-
-            if db_guild.get("release_notes"):
-                # want to do release notes
-                last_ver = db_guild.get("release_ver")
-                if not last_ver:
-                    # set to default
-                    last_ver = release_name
-                    self.guilds.set_latest_release(guild.id, release_name)
-                if release_name != last_ver:
-                    release_body = release_info["body"]
-                    channel = await self.bot.fetch_channel(db_guild["channel"])
-
-                    split_body = release_body.split("\n")
-                    body = f"A new release: **{release_name}** has been published."
-                    body += "\nThis incorporates the latest changes made since the last release. "
-                    body += "Below are the generated change notes.\n\n"
-
-                    bodies = []
-                    for part in split_body:
-                        body += part
-                        body += "\n"
-                        if len(body) > 1900:
-                            bodies.append(body)
-                            body = ""
-
-                    bodies.append(body)
-
-                    for _body in bodies:
-                        await channel.send(content=_body, silent=True, suppress=True)
-
-                    self.guilds.set_latest_release(guild.id, release_name)
-
             self.logger.info(f"Finishing checking {guild.name}")
 
         self.finished = True
@@ -321,54 +247,3 @@ class GuildChecker(BaseTask):
         :return:
         """
         await self.bot.wait_until_ready()
-
-    def git_compare(self, guild_id: int) -> Optional[str]:
-        """Returns
-
-        Returns:
-        """
-        if guild_id == BSE_SERVER_ID:
-            path = "/home/app"
-        else:
-            if os.name == "posix":
-                path = os.path.expanduser("~/gitwork/bsebot/bsebot.git")
-            else:
-                path = os.path.expanduser("~/gitwork/bsebot")
-
-        hash_doc = self.guilds.get_last_hash(guild_id)
-        try:
-            last_hash = hash_doc["hash"]
-        except TypeError:
-            # typically in testing mode - there's no hash doc to compare against
-            return None
-
-        try:
-            head_sha = subprocess.check_output(
-                ["git", "rev-parse", "HEAD"],
-                cwd=path
-                ).decode("utf8").strip("\n")
-        except NotADirectoryError:
-            self.logger.info(f"Got an error with the directory: {path}")
-            return None
-
-        self.logger.info(f"{head_sha=}")
-
-        if last_hash == head_sha:
-            self.logger.info(f"{last_hash=}, {head_sha=}")
-            return None
-
-        if guild_id == BSE_SERVER_ID:
-            path = "/home/gitwork/bsebot"
-
-        commit_log = subprocess.check_output([
-            "git",
-            "log",
-            f"{last_hash}..{head_sha}"
-        ], cwd=path).decode("utf8").strip("\n")
-
-        self.logger.info(f"{commit_log=}")
-
-        # set the commit hash now
-        self.guilds.set_last_hash(guild_id, head_sha)
-
-        return commit_log

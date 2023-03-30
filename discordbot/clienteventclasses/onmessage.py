@@ -24,13 +24,19 @@ class OnMessage(BaseEvent):
             WordleMessageAction(client)
         ]  # type: list[BaseMessageAction]
 
-    async def message_received(self, message: discord.Message, message_type_only=False) -> Optional[list]:
+    async def message_received(
+        self,
+        message: discord.Message,
+        message_type_only: bool = False,
+        trigger_actions: bool = True
+    ) -> Optional[list]:
         """
         Main method for handling when we receive a message.
         Mostly just extracts data and puts it into the DB.
         We also work out what "type" of message it is.
         :param message:
         :param message_type_only:
+        :param trigger_actions:
         :return:
         """
 
@@ -174,8 +180,9 @@ class OnMessage(BaseEvent):
             is_bot=is_bot
         )
 
-        # see if we need to act on this messages
-        await self.post_message_actions(message, message_type)
+        if trigger_actions:
+            # see if we need to act on this messages
+            await self.post_message_actions(message, message_type)
 
         return message_type
 

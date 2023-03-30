@@ -48,6 +48,8 @@ from discordbot.slashcommandeventclasses.taxrate import BSEddiesTaxRate
 from discordbot.slashcommandeventclasses.transactions import BSEddiesTransactionHistory
 from discordbot.slashcommandeventclasses.view import BSEddiesView
 
+# context commands
+from discordbot.contextcommands.message_delete import ContextDeleteMessage
 
 # task imports
 from discordbot.tasks.annualawards import AnnualBSEddiesAwards
@@ -163,6 +165,9 @@ class CommandManager(object):
         self.bseddies_pledge = BSEddiesPledge(client, guilds, self.logger)
         self.bseddies_bless = BSEddiesBless(client, guilds, self.logger)
         self.bseddies_help = BSEddiesHelp(client, guilds, self.logger)
+
+        # context commands
+        self.message_delete = ContextDeleteMessage(client, guilds, self.logger)
 
         # tasks
         self.guild_checker_task = GuildChecker(
@@ -701,3 +706,13 @@ class CommandManager(object):
             except discord.HTTPException:
                 pass
             await ctx.respond(content="Pinned", ephemeral=True)
+
+        @self.client.message_command(name="Delete message")
+        async def delete_message(ctx: discord.ApplicationCommand, message: discord.Message):
+            """_summary_
+
+            Args:
+                ctx (discord.ApplicationCommand): _description_
+                message (discord.Message): _description_
+            """
+            await self.message_delete.message_delete(ctx, message)

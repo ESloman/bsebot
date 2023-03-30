@@ -105,7 +105,7 @@ class MessageSync(BaseTask):
             self.logger.info(f"Found {len(unsynced)} unsynced messages in {channel.name}")
 
             for message in unsynced:
-                await self.on_message.message_received(message, False)
+                await self.on_message.message_received(message, False, False)
 
             before = offset
             offset_days += 30
@@ -128,13 +128,19 @@ class MessageSync(BaseTask):
                 if type(channel) not in [discord.TextChannel, discord.Thread]:
                     continue
 
-                await self._message_sync(channel)
-
+                try:
+                    await self._message_sync(channel)
+                except discord.Forbidden:
+                    self.logger.info(f"Don't have permissions to access {channel.name}")
+                    continue
                 # check threads for channel
                 archived = await channel.archived_threads().flatten()
                 for thread in channel.threads + archived:
-                    await self._message_sync(thread)
-
+                    try:
+                        await self._message_sync(thread)
+                    except discord.Forbidden:
+                        self.logger.info(f"Don't have permissions to access {channel.name}")
+                        continue
             self.logger.info(f"Finished sync for {guild.name}")
 
     @message_sync.before_loop

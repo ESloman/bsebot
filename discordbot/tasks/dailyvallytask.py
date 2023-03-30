@@ -93,13 +93,14 @@ class AfterWorkVally(BaseTask):
             messages = self.interactions.query(
                 {
                     "timestamp": {"$gt": latest_time},
-                    "channel_id": valorant_channel
+                    "channel_id": valorant_channel,
+                    "is_bot": False,
                 }
             )
 
             if not messages:
                 self.logger.info(
-                    f"Not been any messages in #valorant-chat since {latest_time} - skipping the daily vally message"
+                    f"Not been any messages in the channel since {latest_time} - skipping the daily vally message"
                 )
                 continue
 

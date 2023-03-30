@@ -105,7 +105,13 @@ class MessageSync(BaseTask):
             self.logger.info(f"Found {len(unsynced)} unsynced messages in {channel.name}")
 
             for message in unsynced:
-                await self.on_message.message_received(message, False, False)
+                _trigger_actions = False
+                if (message.created_at - now).total_seconds < 120:
+                    # if message is relatively new; trigger actions
+                    # for when we miss a message during a restart
+                    self.logger.info(f"{message.id} was created less than two minutes ago - WILL trigger actions")
+                    _trigger_actions = True
+                await self.on_message.message_received(message, False, _trigger_actions)
 
             before = offset
             offset_days += 30

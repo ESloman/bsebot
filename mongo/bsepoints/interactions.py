@@ -30,7 +30,7 @@ class UserInteractions(BestSummerEverPointsDB):
         Returns:
             list[Message]: list of messages
         """
-        messages = self._paginated_query({"guild_id": guild_id})
+        messages = self.paginated_query({"guild_id": guild_id})
         return messages
 
     def get_all_messages_for_channel(self, guild_id: int, channel_id: int) -> list[Message]:
@@ -43,7 +43,7 @@ class UserInteractions(BestSummerEverPointsDB):
         Returns:
             list[Message]: list of messages
         """
-        messages = self._paginated_query({"guild_id": guild_id, "channel_id": channel_id})
+        messages = self.paginated_query({"guild_id": guild_id, "channel_id": channel_id})
         return messages
 
     def add_entry(

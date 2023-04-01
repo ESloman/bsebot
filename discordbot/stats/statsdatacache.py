@@ -296,7 +296,7 @@ class StatsDataCache:
         if self.__reactions_cache and (now - self.__reactions_cache_time).total_seconds() < 3600:
             return self.__reactions_cache
 
-        self.__reactions_cache = self.user_interactions._paginated_query(
+        self.__reactions_cache = self.user_interactions.paginated_query(
             {
                 "guild_id": guild_id,
                 "reactions.timestamp": {"$gt": start, "$lt": end}
@@ -366,7 +366,7 @@ class StatsDataCache:
         if self.__reply_cache and (now - self.__reply_cache_time).total_seconds() < 3600:
             return self.__reply_cache
 
-        self.__reply_cache = self.user_interactions._paginated_query({
+        self.__reply_cache = self.user_interactions.paginated_query({
             "guild_id": guild_id,
             "replies.timestamp": {"$gt": start, "$lt": end}
         })

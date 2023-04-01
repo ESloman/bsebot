@@ -553,8 +553,16 @@ class StatsGatherer:
             guesses = int(guesses)
             wordle_count.append(guesses)
 
+        bot_wordles = self.cache.user_interactions.paginated_query(
+            {
+                "guild_id": guild_id,
+                "timestamp": {"$gt": start, "$lt": end},
+                "message_type": "wordle",
+                "is_bot": True
+            }
+        )
         bot_wordle_count = []
-        for wordle in wordle_messages:
+        for wordle in bot_wordles:
             if wordle["user_id"] != BSE_BOT_ID:
                 continue
 

@@ -3,6 +3,7 @@
 File for other small and useful classes that we may need in other parts of the code
 """
 
+import datetime
 import logging
 import os
 import re
@@ -135,3 +136,20 @@ def convert_time_str(time_str: str) -> int:
         amount = val * time_dict[unit]
         total_time += amount
     return total_time
+
+
+def get_utc_offset() -> int:
+    d = datetime.datetime.now(datetime.timezone.utc).astimezone()
+    utc_offset = d.utcoffset() // datetime.timedelta(seconds=1)
+    return utc_offset
+
+
+def add_utc_offset(date: datetime.datetime) -> datetime.datetime:
+    offset = get_utc_offset()
+    new_date = date - datetime.timedelta(seconds=offset)
+    return new_date
+
+
+def is_utc(date: datetime.datetime) -> bool:
+    now_utc = datetime.datetime.now(tz=datetime.timezone.utc)
+    return now_utc.hour == date.hour

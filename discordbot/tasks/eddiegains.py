@@ -9,6 +9,7 @@ from logging import Logger
 import discord
 from discord.ext import tasks
 
+from discordbot import utilities
 from discordbot.bsebot import BSEBot
 from discordbot.bot_enums import TransactionTypes, SupporterType
 from discordbot.constants import CREATOR, MESSAGE_TYPES, MESSAGE_VALUES, WORDLE_VALUES, HUMAN_MESSAGE_TYPES
@@ -155,6 +156,12 @@ class BSEddiesManager(BaseTask):
         yesterday = now - datetime.timedelta(days=days)
         start = yesterday.replace(hour=0, minute=0, second=0)
         end = yesterday.replace(hour=23, minute=59, second=59)
+
+        if not utilities.is_utc(now):
+            # need to add UTC offset
+            start = utilities.add_utc_offset(start)
+            end = utilities.add_utc_offset(end)
+
         return start, end
 
     def _calc_eddies(self, counter, start=4):

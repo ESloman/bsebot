@@ -5,6 +5,7 @@ from logging import Logger
 
 from discord.ext import tasks
 
+from discordbot import utilities
 from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_BOT_ID
 from discordbot.tasks.basetask import BaseTask
@@ -44,6 +45,11 @@ class WordleReminder(BaseTask):
         start = now - datetime.timedelta(days=1)
         start = start.replace(hour=0, minute=0, second=0, microsecond=1)
         end = start.replace(hour=23, minute=59, second=59)
+
+        if not utilities.is_utc(now):
+            # need to add UTC offset
+            start = utilities.add_utc_offset(start)
+            end = utilities.add_utc_offset(end)
 
         for guild in self.bot.guilds:
 

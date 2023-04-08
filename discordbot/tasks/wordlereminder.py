@@ -102,9 +102,9 @@ class WordleReminder(commands.Cog):
             y_message = await channel.fetch_message(reminder["message_id"])
 
             msg = [
-                f"Hey {y_message.author.mention}, don't forget to do your Wordle today!"
-                "Hey {y.message.author.mention}, you absolute knob, you haven't done your Wordle yet!"
-                "Guess what? {f.message.author.mention} is a fucking prick. Also, they didn't do their Wordle."
+                f"Hey {y_message.author.mention}, don't forget to do your Wordle today!",
+                "Hey {y.message.author.mention}, you absolute knob, you haven't done your Wordle yet!",
+                "Guess what? {f.message.author.mention} is a fucking prick. Also, they didn't do their Wordle.",
                 "Do your Wordle or die, {f.message.author.mention}."
             ]
 

@@ -113,8 +113,8 @@ class WordleReminder(commands.Cog):
             message = random.choice(self.messages) 
             message = message.format(mention=y_message.author.mention)
             
-            self.logger.info(msg)
-            await y_message.reply(content=msg)
+            self.logger.info(message)
+            await y_message.reply(content=message)
 
     @wordle_reminder.before_loop
     async def before_wordle_reminder(self):

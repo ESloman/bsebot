@@ -16,6 +16,7 @@ class WordleReminder(commands.Cog):
         self.startup_tasks = startup_tasks
         self.user_interactions = UserInteractions()
         self.wordle_reminder.start()
+        self.messages = message
 
     def _check_start_up_tasks(self) -> bool:
         """
@@ -110,7 +111,7 @@ class WordleReminder(commands.Cog):
             ]
             
             message = random.choice(self.messages) 
-            message = message.format(mention=_mention)]
+            message = message.format(mention=y_message.author.mention)
             
             self.logger.info(msg)
             await y_message.reply(content=msg)

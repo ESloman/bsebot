@@ -1,22 +1,23 @@
 
-import datetime
 from typing import Union
 
 import discord
 
-import discordbot.views as views
-import discordbot.slashcommandeventclasses as slashcommands
-from discordbot.bot_enums import TransactionTypes, ActivityTypes
+import discordbot.views.bet
+from discordbot.bot_enums import ActivityTypes
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
+from discordbot.slashcommandeventclasses.close import BSEddiesCloseBet
+from discordbot.views.place import PlaceABetView
 
 
-class BSEddiesPlaceBet(slashcommands.BSEddies):
+class BSEddiesPlaceBet(BSEddies):
     """
     Class for handling `/bseddies bet place` commands
     """
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
-        self.bseddies_close = slashcommands.BSEddiesCloseBet(client, guilds, logger)
+        self.bseddies_close = BSEddiesCloseBet(client, guilds, logger)
 
     async def create_bet_view(
             self,
@@ -41,7 +42,7 @@ class BSEddiesPlaceBet(slashcommands.BSEddies):
             ctx.user.id, ctx.guild_id
         )
 
-        place_bet_view = views.PlaceABetView(bet_ids, points, submit_callback=self.place_bet)
+        place_bet_view = PlaceABetView(bet_ids, points, submit_callback=self.place_bet)
         try:
             await ctx.respond(content="**Placing a bet**", view=place_bet_view, ephemeral=True)
         except AttributeError:
@@ -85,7 +86,7 @@ class BSEddiesPlaceBet(slashcommands.BSEddies):
             await response.edit_message(content=msg, view=None)
             return
 
-        view = views.BetView(bet, self, self.bseddies_close)
+        view = discordbot.views.bet.BetView(bet, self, self.bseddies_close)
 
         if not bet["active"]:
             msg = f"Your reaction on **Bet {bet_id}** failed as the bet is closed for new bets."
@@ -112,7 +113,7 @@ class BSEddiesPlaceBet(slashcommands.BSEddies):
             return False
 
         bet = self.user_bets.get_bet_from_id(guild.id, bet_id)
-        channel = guild.get_channel(bet["channel_id"])
+        channel = await self.client.fetch_channel(bet["channel_id"])
 
         if not channel:
             # channel is thread
@@ -120,16 +121,5 @@ class BSEddiesPlaceBet(slashcommands.BSEddies):
 
         message = channel.get_partial_message(bet["message_id"])
         embed = self.embed_manager.get_bet_embed(guild, bet_id, bet)
-        self.user_points.append_to_transaction_history(
-            ctx.user.id,
-            guild.id,
-            {
-                "type": TransactionTypes.BET_PLACE,
-                "amount": amount * -1,
-                "timestamp": datetime.datetime.now(),
-                "bet_id": bet_id,
-                "comment": "Bet placed through slash command",
-            }
-        )
         await message.edit(embed=embed, view=view)
         await response.edit_message(content="Placed the bet for you!", view=None)

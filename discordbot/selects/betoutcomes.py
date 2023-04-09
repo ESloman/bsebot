@@ -6,7 +6,7 @@ from discordbot.selects.betamount import BetSelectAmount
 
 
 class BetOutcomesSelect(Select):
-    def __init__(self, outcomes: list, enable_type=BetSelectAmount):
+    def __init__(self, outcomes: list, enable_type=BetSelectAmount, close: bool = False):
         """
 
         :param outcomes:
@@ -23,7 +23,7 @@ class BetOutcomesSelect(Select):
             disabled=not outcomes,
             placeholder="Select an outcome",
             min_values=1,
-            max_values=1,
+            max_values=len(options) if close else 1,
             options=options
         )
 
@@ -36,9 +36,9 @@ class BetOutcomesSelect(Select):
         :param interaction:
         :return:
         """
-        selected_outcome = interaction.data["values"][0]
+        selected_outcomes = interaction.data["values"]
         for option in self.options:
-            option.default = option.value == selected_outcome
+            option.default = option.value in selected_outcomes
 
         for child in self.view.children:
             if type(child) == self.enable:

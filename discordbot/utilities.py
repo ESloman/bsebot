@@ -3,8 +3,10 @@
 File for other small and useful classes that we may need in other parts of the code
 """
 
+import datetime
 import logging
 import os
+import re
 import sys
 from logging.handlers import RotatingFileHandler
 
@@ -103,3 +105,51 @@ def create_logger(level: int = None) -> logging.Logger:
     _logger.addHandler(file_handler)
 
     return _logger
+
+
+def convert_time_str(time_str: str) -> int:
+    """
+    Converts a given time string into the number of seconds.
+
+    Time strings are strings in the format:
+    - 1w7d24h60m60s
+
+    Where each unit is optional to provide and the numbers can be as large as required.
+
+    Args:
+        time_str (str): the time string to convert
+
+    Returns:
+        int: total seconds
+    """
+    # dict for converting a unit into number of seconds for each unit
+    time_dict = {"s": 1, "m": 60, "h": 3600, "d": 86400, "w": 604800}
+    # this pattern looks for days, hours, minutes, seconds in the string, etc
+    regex_pattern = r"^(?P<week>\d+w)?(?P<day>\d+d)?(?P<hour>\d+h)?(?P<minute>\d+m)?(?P<second>\d+s)?"
+    matches = re.match(regex_pattern, time_str)
+    total_time = 0
+    for group in matches.groups():
+        if not group:
+            continue
+        unit = group[-1]
+        val = int(group[:-1])
+        amount = val * time_dict[unit]
+        total_time += amount
+    return total_time
+
+
+def get_utc_offset() -> int:
+    d = datetime.datetime.now(datetime.timezone.utc).astimezone()
+    utc_offset = d.utcoffset() // datetime.timedelta(seconds=1)
+    return utc_offset
+
+
+def add_utc_offset(date: datetime.datetime) -> datetime.datetime:
+    offset = get_utc_offset()
+    new_date = date - datetime.timedelta(seconds=offset)
+    return new_date
+
+
+def is_utc(date: datetime.datetime) -> bool:
+    now_utc = datetime.datetime.now(tz=datetime.timezone.utc)
+    return now_utc.hour == date.hour

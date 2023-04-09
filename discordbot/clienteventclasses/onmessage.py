@@ -3,6 +3,7 @@ from typing import Optional
 
 import discord
 
+from discordbot.bsebot import BSEBot
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from discordbot.constants import WORDLE_REGEX
 from discordbot.message_actions.base import BaseMessageAction  # noqa
@@ -14,7 +15,7 @@ class OnMessage(BaseEvent):
     Class for handling on_message events from Discord
     """
 
-    def __init__(self, client: discord.Bot, guild_ids, logger):
+    def __init__(self, client: BSEBot, guild_ids, logger):
         super().__init__(client, guild_ids, logger)
         self._post_message_action_classes = [
             BirthdayReplies(client),
@@ -23,13 +24,19 @@ class OnMessage(BaseEvent):
             WordleMessageAction(client)
         ]  # type: list[BaseMessageAction]
 
-    async def message_received(self, message: discord.Message, message_type_only=False) -> Optional[list]:
+    async def message_received(
+        self,
+        message: discord.Message,
+        message_type_only: bool = False,
+        trigger_actions: bool = True
+    ) -> Optional[list]:
         """
         Main method for handling when we receive a message.
         Mostly just extracts data and puts it into the DB.
         We also work out what "type" of message it is.
         :param message:
         :param message_type_only:
+        :param trigger_actions:
         :return:
         """
 
@@ -46,6 +53,7 @@ class OnMessage(BaseEvent):
 
         message_type = []
 
+        is_bot = message.author.bot
         is_thread = False
         is_vc = False
         if message.channel.type in [
@@ -77,14 +85,14 @@ class OnMessage(BaseEvent):
                 message_type.append("reply")
                 if not message_type_only:
                     self.interactions.add_reply_to_message(
-                        reference.message_id, message.id, guild_id, user_id, message.created_at, message_content
+                        reference.message_id, message.id, guild_id, user_id, message.created_at, message_content, is_bot
                     )
 
         if stickers := message.stickers:
             for sticker in stickers:  # type: discord.StickerItem
                 sticker_id = sticker.id
                 if sticker_obj := self.server_stickers.get_sticker(guild_id, sticker_id):
-                    # used a custom emoji!
+                    # used a custom sticker!
                     message_type.append("custom_sticker")
 
                     if user_id == sticker_obj["created_by"]:
@@ -168,11 +176,13 @@ class OnMessage(BaseEvent):
             message_content,
             message.created_at,
             is_thread=is_thread,
-            is_vc=is_vc
+            is_vc=is_vc,
+            is_bot=is_bot
         )
 
-        # see if we need to act on this messages
-        await self.post_message_actions(message, message_type)
+        if trigger_actions:
+            # see if we need to act on this messages
+            await self.post_message_actions(message, message_type)
 
         return message_type
 

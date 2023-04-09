@@ -3,12 +3,13 @@ import datetime
 # can ignore F401 here - we're using Optional in the type hints in variable declaration
 from typing import List, Optional  # noqa: F401
 
-from discordbot.constants import BOT_IDS
 from mongo.bsedataclasses import SpoilerThreads
+from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.bets import UserBets
 from mongo.bsepoints.emojis import ServerEmojis
 from mongo.bsepoints.interactions import UserInteractions
 from mongo.bsepoints.points import UserPoints
+from mongo.bsepoints.transactions import UserTransactions
 from mongo.datatypes import Activity, Bet, Emoji, Message, Transaction, User, VCInteraction
 
 
@@ -19,6 +20,8 @@ class StatsDataCache:
         self.user_points = UserPoints()
         self.server_emojis = ServerEmojis()
         self.threads = SpoilerThreads()
+        self.trans = UserTransactions()
+        self.activities = UserActivities()
 
         self.annual = annual
 
@@ -77,12 +80,12 @@ class StatsDataCache:
         if self.__message_cache and (now - self.__message_cache_time).total_seconds() < 3600:
             return self.__message_cache
 
-        self.__message_cache = self.user_interactions._paginated_query(
+        self.__message_cache = self.user_interactions.paginated_query(
             {
                 "guild_id": guild_id,
                 "timestamp": {"$gt": start, "$lt": end},
                 "message_type": {"$nin": ["emoji_used", "vc_joined", "vc_streaming"]},
-                "user_id": {"$nin": BOT_IDS}
+                "is_bot": {"$ne": True},
             }
         )
 
@@ -112,13 +115,13 @@ class StatsDataCache:
         if self.__edit_cache and (now - self.__edit_cache_time).total_seconds() < 3600:
             return self.__edit_cache
 
-        self.__edit_cache = self.user_interactions._paginated_query(
+        self.__edit_cache = self.user_interactions.paginated_query(
             {
                 "guild_id": guild_id,
                 "edited": {"$gt": start, "$lt": end},
                 "edit_count": {"$gte": 1},
                 "message_type": {"$nin": ["emoji_used", "vc_joined", "vc_streaming"]},
-                "user_id": {"$nin": BOT_IDS}
+                "is_bot": {"$ne": True},
             }
         )
 
@@ -153,7 +156,7 @@ class StatsDataCache:
         if self.__vc_cache and (now - self.__vc_cache_time).total_seconds() < 3600:
             return self.__vc_cache
 
-        self.__vc_cache = self.user_interactions._paginated_query(
+        self.__vc_cache = self.user_interactions.paginated_query(
             {
                 "guild_id": guild_id,
                 "timestamp": {"$gt": start, "$lt": end},
@@ -239,16 +242,10 @@ class StatsDataCache:
         if self.__transaction_cache and (now - self.__transaction_cache_time).total_seconds() < 3600:
             return self.__transaction_cache
 
-        users = self.get_users(guild_id, start, end)
-        transaction_history = []
-        for user in users:
-            transactions = [t for t in user.get("transaction_history", []) if start < t["timestamp"] < end]
-            for _trans in transactions:
-                _trans["uid"] = user["uid"]
-            transaction_history.extend(transactions)
+        _transactions = self.trans.get_guild_transactions_by_timestamp(guild_id, start, end)
         if self.__user_id_cache:
-            transaction_history = [t for t in transaction_history if t["uid"] == self.__user_id_cache]
-        self.__transaction_cache = transaction_history
+            _transactions = [t for t in _transactions if t["uid"] == self.__user_id_cache]
+        self.__transaction_cache = _transactions
         self.__transaction_cache_time = now
         return self.__transaction_cache
 
@@ -272,14 +269,10 @@ class StatsDataCache:
         if self.__activity_cache and (now - self.__activity_cache_time).total_seconds() < 3600:
             return self.__activity_cache
 
-        users = self.get_users(guild_id, start, end)
-        activity_history = []
-        for user in users:
-            activities = [t for t in user.get("activity_history", []) if start < t["timestamp"] < end]
-            for _act in activities:
-                _act["uid"] = user["uid"]
-            activity_history.extend(activities)
-        self.__activity_cache = activity_history
+        _activities = self.activities.get_guild_activities_by_timestamp(guild_id, start, end)
+        if self.__user_id_cache:
+            _activities = [a for a in _activities if a["uid"] == self.__user_id_cache]
+        self.__activity_cache = _activities
         self.__activity_cache_time = now
         return self.__activity_cache
 
@@ -303,7 +296,7 @@ class StatsDataCache:
         if self.__reactions_cache and (now - self.__reactions_cache_time).total_seconds() < 3600:
             return self.__reactions_cache
 
-        self.__reactions_cache = self.user_interactions._paginated_query(
+        self.__reactions_cache = self.user_interactions.paginated_query(
             {
                 "guild_id": guild_id,
                 "reactions.timestamp": {"$gt": start, "$lt": end}
@@ -373,7 +366,7 @@ class StatsDataCache:
         if self.__reply_cache and (now - self.__reply_cache_time).total_seconds() < 3600:
             return self.__reply_cache
 
-        self.__reply_cache = self.user_interactions._paginated_query({
+        self.__reply_cache = self.user_interactions.paginated_query({
             "guild_id": guild_id,
             "replies.timestamp": {"$gt": start, "$lt": end}
         })

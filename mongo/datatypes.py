@@ -16,6 +16,8 @@ class Transaction(TypedDict):
     """
     A dict representing a transaction
     """
+    uid: int
+    guild_id: int
     type: TransactionTypes
     """The type of transaction enum"""
     amount: int
@@ -29,6 +31,8 @@ class Transaction(TypedDict):
 
 
 class Activity(TypedDict):
+    uid: int
+    guild_id: int
     type: ActivityTypes
     """The activity type enum"""
     timestamp: datetime.datetime
@@ -46,6 +50,8 @@ class User(TypedDict):
     """The discord user ID"""
     guild_id: int
     """The discord server ID the user belongs to"""
+    name: str
+    """The nickname for the guild or the user name"""
     points: int
     """The amount of eddies the user has in the server"""
     pending_points: int
@@ -288,14 +294,19 @@ class Thread(TypedDict):
 
 class GuildDB(TypedDict):
     _id: ObjectId
+    admins: list[int]
     guild_id: int
     created: datetime.datetime
     rename_king: datetime.datetime
     owner_id: int
     channel: int
+    wordle: bool
     wordle_channel: int
+    wordle_reminders: bool
     category: int
     role: int
+    daily_minimum: int
+    name: str
     tax_rate: float
     tax_rate_history: list[dict]
     king: int
@@ -308,3 +319,6 @@ class GuildDB(TypedDict):
     pledged: list[int]
     release_ver: str
     release_notes: bool
+    valorant_rollcall: bool
+    valorant_channel: int
+    valorant_role: int

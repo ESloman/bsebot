@@ -1,8 +1,8 @@
 import discord
 
-import discordbot.views as views
 from discordbot.bot_enums import ActivityTypes
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
+from discordbot.views.pledge import PledgeView
 
 
 class BSEddiesPledge(BSEddies):
@@ -37,7 +37,7 @@ class BSEddiesPledge(BSEddies):
         user_db = self.user_points.find_user(ctx.user.id, guild_id)
         current = user_db.get("supporter_type", 0)
 
-        view = views.PledgeView(current)
+        view = PledgeView(current)
 
         msg = (
             "Pledge to be a supporter or a revolutionary. "

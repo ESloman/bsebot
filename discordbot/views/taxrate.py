@@ -1,10 +1,10 @@
-import datetime
 
 import discord
 
 from discordbot.bot_enums import ActivityTypes
 from discordbot.selects.taxrate import TaxRateSelect
 
+from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.points import UserPoints
 
@@ -18,18 +18,7 @@ class TaxRateView(discord.ui.View):
         self.add_item(self.supporter_tax_select)
         self.guilds = Guilds()
         self.user_points = UserPoints()
-
-    def _append_to_history(self, user_id, guild_id, _type: ActivityTypes, **params):
-
-        doc = {
-            "type": _type,
-            "timestamp": datetime.datetime.now(),
-        }
-        if params:
-            doc["comment"] = f"Command parameters: {', '.join([f'{key}: {params[key]}' for key in params])}"
-
-        doc["value"] = params["value"]
-        self.user_points.append_to_activity_history(user_id, guild_id, doc)
+        self.activities = UserActivities()
 
     @discord.ui.button(label="Set Tax Rate", style=discord.ButtonStyle.blurple, emoji="📈", row=2)
     async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
@@ -44,8 +33,11 @@ class TaxRateView(discord.ui.View):
         except (IndexError, AttributeError):
             supporter_value = float([o for o in self.supporter_tax_select.options if o.default][0].value)
 
-        self._append_to_history(
-            interaction.user.id, interaction.guild.id, ActivityTypes.BSEDDIES_ACTUAL_SET_TAX_RATE, value=value,
+        self.activities.add_activity(
+            interaction.user.id,
+            interaction.guild.id,
+            ActivityTypes.BSEDDIES_ACTUAL_SET_TAX_RATE,
+            value=value,
             supporter_value=supporter_value
         )
 
@@ -62,7 +54,10 @@ class TaxRateView(discord.ui.View):
         channel_id = self.guilds.get_channel(interaction.guild.id)
         if channel_id:
             channel = interaction.guild.get_channel(channel_id)
-            msg = f"{interaction.user.mention} has changed the tax rate to `{value}`! 📈"
+            msg = (
+                f"{interaction.user.mention} has changed the tax rate to `{value}` "
+                "and the supporter tax rate to `{supporter_value}`! 📈"
+            )
             await channel.send(content=msg)
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.gray, emoji="✖️", row=2)

@@ -1,9 +1,8 @@
-import datetime
 
 import discord
 
 from discordbot.bot_enums import TransactionTypes, ActivityTypes
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
 class BSEddiesAdminGive(BSEddies):
@@ -29,20 +28,16 @@ class BSEddiesAdminGive(BSEddies):
             ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_ADMIN_GIVE, user_id=user.id, amount=amount
         )
 
-        self.user_points.increment_points(user.id, ctx.guild.id, amount)
-
-        self.user_points.append_to_transaction_history(
-            user.id, ctx.guild.id,
-            {
-                "type": TransactionTypes.ADMIN_GIVE,
-                "amount": amount,
-                "timestamp": datetime.datetime.now(),
-                "comment": "Admin override increment"
-            }
+        self.user_points.increment_points(
+            user.id,
+            ctx.guild.id,
+            amount,
+            TransactionTypes.ADMIN_GIVE,
+            comment="Admin override increment"
         )
 
         try:
-            await user.send(content=f"You've been given {amount} eddies by an admin.")
+            await user.send(content=f"You've been given {amount} eddies by an admin.", silent=True)
         except (discord.Forbidden, discord.ApplicationCommandInvokeError):
             pass
 

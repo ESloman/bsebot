@@ -1,7 +1,7 @@
 
 """
 This file is our "main" file and the entrypoint for our Discord bot.
-It creates the necessary discord.Bot class using our discord token and also an instance of our
+It creates the necessary BSEBot class using our discord token and also an instance of our
 CommandManager class.
 
 This file also contains a _create_logger method that creates a logging.Logger object for us to use throughout the
@@ -19,6 +19,7 @@ try:
 except ImportError:
     DOTENV = False
 
+from bsebot import BSEBot
 from discordbot.commandmanager import CommandManager
 from discordbot.constants import SLOMAN_SERVER_ID, BSE_SERVER_ID
 from discordbot import utilities
@@ -53,14 +54,14 @@ if __name__ == "__main__":
         GIPHY_TOKEN = None
         GITHUB_TOKEN = None
 
-    if not TOKEN:
-        TOKEN = os.environ.get("DISCORD_TOKEN")
-    if not DEBUG_MODE:
-        DEBUG_MODE = os.environ.get("DEBUG_MODE")
-    if not GIPHY_TOKEN:
-        GIPHY_TOKEN = os.environ.get("GIPHY_TOKEN")
-    if not GITHUB_TOKEN:
-        GITHUB_TOKEN = os.environ.get("GITHUB_API_KEY")
+    if _token := os.environ.get("DISCORD_TOKEN"):
+        TOKEN = _token
+    if _debug := os.environ.get("DEBUG_MODE"):
+        DEBUG_MODE = _debug
+    if _giphy_token := os.environ.get("GIPHY_TOKEN"):
+        GIPHY_TOKEN = _giphy_token
+    if _github := os.environ.get("GITHUB_API_KEY"):
+        GITHUB_TOKEN = _github
 
     if TOKEN is None:
         exit(-1)
@@ -75,7 +76,7 @@ if __name__ == "__main__":
     else:
         IDS = [BSE_SERVER_ID]  # actual IDS
 
-    logger = utilities.create_logger(logging.DEBUG if DEBUG_MODE else logging.INFO)
+    logger = utilities.create_logger(logging.DEBUG)
 
     intents = discord.Intents.all()
 
@@ -88,12 +89,11 @@ if __name__ == "__main__":
         details="Waiting for commands!"
     )
 
-    cli = discord.Bot(
-        debug_guilds=IDS,
+    cli = BSEBot(
         intents=intents,
         activity=listening_activity,
-        auto_sync_commands=False,
-        max_messages=5000
+        max_messages=5000,
+        logger=logger
     )
 
     com = CommandManager(cli, IDS, logger, giphy_token=GIPHY_TOKEN, github_token=GITHUB_TOKEN)

@@ -1,18 +1,27 @@
+
+import asyncio
 import datetime
+from logging import Logger
 
 import discord
-from discord.ext import tasks, commands
+from discord.ext import tasks
 
+from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_SERVER_ID, BSEDDIES_REVOLUTION_CHANNEL
 from discordbot.stats.awardsbuilder import AwardsBuilder
+from discordbot.tasks.basetask import BaseTask
 
 
-class MonthlyBSEddiesAwards(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger, startup_tasks):
-        self.bot = bot
-        self.logger = logger
-        self.startup_tasks = startup_tasks
-        self.guilds = guilds
+class MonthlyBSEddiesAwards(BaseTask):
+    def __init__(
+        self,
+        bot: BSEBot,
+        guild_ids: list[int],
+        logger: Logger,
+        startup_tasks: list[BaseTask]
+    ):
+
+        super().__init__(bot, guild_ids, logger, startup_tasks)
         self.bseddies_awards.start()
 
     def cog_unload(self):
@@ -22,20 +31,9 @@ class MonthlyBSEddiesAwards(commands.Cog):
         """
         self.bseddies_awards.cancel()
 
-    def _check_start_up_tasks(self) -> bool:
-        """
-        Checks start up tasks
-        """
-        for task in self.startup_tasks:
-            if not task.finished:
-                return False
-        return True
-
     @tasks.loop(minutes=60)
     async def bseddies_awards(self):
-        if not self._check_start_up_tasks():
-            self.logger.info("Startup tasks not complete - skipping loop")
-            return
+
         now = datetime.datetime.now()
 
         if not now.day == 1 or not now.hour == 11:
@@ -43,7 +41,7 @@ class MonthlyBSEddiesAwards(commands.Cog):
             # and also trigger at 11am
             return
 
-        if BSE_SERVER_ID not in self.guilds:
+        if BSE_SERVER_ID not in self.guild_ids:
             # does not support other servers yet
             return
 
@@ -91,3 +89,5 @@ class MonthlyBSEddiesAwards(commands.Cog):
         :return:
         """
         await self.bot.wait_until_ready()
+        while not self._check_start_up_tasks():
+            await asyncio.sleep(5)

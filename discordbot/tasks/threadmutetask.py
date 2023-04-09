@@ -1,19 +1,26 @@
+
+import asyncio
 import datetime
+from logging import Logger
 
 import discord
-from discord.ext import tasks, commands
+from discord.ext import tasks
 
-from discordbot.constants import BSE_SERVER_ID, GENERAL_CHAT
-from mongo.bsedataclasses import SpoilerThreads
+from discordbot.bsebot import BSEBot
+from discordbot.constants import BSE_SERVER_ID
+from discordbot.tasks.basetask import BaseTask
 
 
-class ThreadSpoilerTask(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger, startup_tasks):
-        self.bot = bot
-        self.logger = logger
-        self.guilds = guilds
-        self.startup_tasks = startup_tasks
-        self.spoilers = SpoilerThreads()
+class ThreadSpoilerTask(BaseTask):
+    def __init__(
+        self,
+        bot: BSEBot,
+        guild_ids: list[int],
+        logger: Logger,
+        startup_tasks: list[BaseTask],
+    ):
+
+        super().__init__(bot, guild_ids, logger, startup_tasks)
         self.thread_mute.start()
 
     def cog_unload(self):
@@ -23,68 +30,42 @@ class ThreadSpoilerTask(commands.Cog):
         """
         self.thread_mute.cancel()
 
-    def _check_start_up_tasks(self) -> bool:
-        """
-        Checks start up tasks
-        """
-        for task in self.startup_tasks:
-            if not task.finished:
-                return False
-        return True
-
     @tasks.loop(minutes=15)
     async def thread_mute(self):
         """
         Loop that makes sure the King is assigned correctly
         :return:
         """
-        if not self._check_start_up_tasks():
-            self.logger.info("Startup tasks not complete - skipping loop")
-            return
 
         now = datetime.datetime.now()
         if now.hour != 8 or not (0 <= now.minute < 15):
             return
 
-        if BSE_SERVER_ID not in self.guilds:
+        if BSE_SERVER_ID not in self.guild_ids:
             return
 
         self.logger.info("Checking spoiler threads for mute messages")
-        guild = self.bot.get_guild(BSE_SERVER_ID)
-        general = await guild.fetch_channel(GENERAL_CHAT)
-        threads = general.threads
+        all_threads = self.spoilers.get_all_threads(BSE_SERVER_ID)
+        all_threads = [a for a in all_threads if a["active"]]
 
-        if not threads:
-            self.logger.info("Found no threads to parse")
-            # no threads
-            return
-
-        for thread in general.threads:
-            self.logger.info(f"Checking {thread.name} for spoiler message")
-            if "spoiler" not in thread.name.lower():
-                self.logger.info("Thread doesn't have spoiler name")
-                continue
-
-            thread_id = thread.id
-            thread_info = self.spoilers.get_thread_by_id(BSE_SERVER_ID, thread_id)
-
-            if not thread_info:
-                self.logger.info(f"No info for thread {thread_id}, {thread.name}")
-                continue
-
-            if not thread_info["active"]:
-                # thread is no longer active
-                self.logger.info("Thread is no longer active")
-                continue
+        for thread_info in all_threads:
+            self.logger.info(f"Checking {thread_info['name']} for spoiler message")
 
             day = thread_info["day"]
             if now.weekday() != day:
-                self.logger.info(f"Not the right day for {thread.name}: our day: {now.weekday()}, required: {day}")
+                self.logger.info(
+                    f"Not the right day for {thread_info['name']}: our day: {now.weekday()}, required: {day}"
+                )
                 # not the right day for this spoiler thread
                 continue
 
+            thread = await self.bot.fetch_channel(thread_info["thread_id"])
             await thread.trigger_typing()
-            message = "New episode today - remember to mute cuties @everyone xoxo"
+            message = (
+                "New episode today - remember to mute cuties xoxo\n\n"
+                "Show ended? The thread creator can use the `/config` command to "
+                "disable mute reminders for this thread."
+            )
             await thread.send(content=message, allowed_mentions=discord.AllowedMentions(everyone=True))
             self.logger.info(f"Sent message to {thread.id}, {thread.name}: {message}")
 
@@ -95,3 +76,5 @@ class ThreadSpoilerTask(commands.Cog):
         :return:
         """
         await self.bot.wait_until_ready()
+        while not self._check_start_up_tasks():
+            await asyncio.sleep(5)

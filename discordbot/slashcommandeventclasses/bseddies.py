@@ -14,6 +14,7 @@ class BSEddies(BaseEvent):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.dmable = False
 
     async def _handle_validation(self, ctx: Union[discord.ApplicationContext, discord.Interaction], **kwargs) -> bool:
         """
@@ -22,7 +23,9 @@ class BSEddies(BaseEvent):
         :param kwargs: the additional kwargs to use in validation
         :return: True or False
         """
-        if ctx.guild.id not in self.guild_ids:
+        if not ctx.guild and not self.dmable:
+            msg = "This command doesn't work in DMs (yet)."
+            await ctx.respond(content=msg, ephemeral=True)
             return False
 
         if kwargs.get("admin") and ctx.author.id != CREATOR:

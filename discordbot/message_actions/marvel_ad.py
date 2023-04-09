@@ -4,6 +4,7 @@ import re
 
 import discord
 
+from discordbot.bsebot import BSEBot
 from discordbot.constants import MARVEL_AD_COOLDOWN
 from discordbot.message_actions.base import BaseMessageAction
 from mongo.bsepoints.guilds import Guilds
@@ -13,7 +14,7 @@ class MarvelComicsAdAction(BaseMessageAction):
     """
     Marvel comic add message action
     """
-    def __init__(self, client: discord.Bot) -> None:
+    def __init__(self, client: BSEBot) -> None:
         super().__init__(client)
         self.guilds = Guilds()
 

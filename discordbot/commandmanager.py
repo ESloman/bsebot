@@ -16,22 +16,40 @@ from apis.github import GitHubAPI
 from mongo.bsepoints.bets import UserBets
 from mongo.bsepoints.points import UserPoints
 
+from discordbot.bsebot import BSEBot
+
 # client events
 from discordbot.clienteventclasses import OnDirectMessage, OnEmojiCreate, OnMemberJoin, OnMemberLeave
 from discordbot.clienteventclasses import OnMessage, OnMessageEdit, OnReactionAdd, OnReadyEvent, OnStickerCreate
 from discordbot.clienteventclasses import OnThreadCreate, OnThreadUpdate, OnVoiceStateChange
 
-from discordbot.constants import BSE_SERVER_ID
 from discordbot.embedmanager import EmbedManager
 from discordbot.modals import BSEddiesBetCreateModal, BSEddiesImprovementSuggest
 
 # slash commands
-from discordbot.slashcommandeventclasses import BSEddiesActive, BSEddiesAdminGive, BSEddiesAutoGenerate
-from discordbot.slashcommandeventclasses import BSEddiesCloseBet, BSEddiesGift, BSEddiesHighScore, BSEddiesLeaderboard
-from discordbot.slashcommandeventclasses import BSEddiesPending, BSEddiesPlaceBet, BSEddiesPredict, BSEddiesTaxRate
-from discordbot.slashcommandeventclasses import BSEddiesTransactionHistory, BSEddiesView, BSEddiesStats
-from discordbot.slashcommandeventclasses import BSEddiesKingRename, BSEddiesRefreshBet, BSEddiesPledge, BSEddiesBless
-from discordbot.slashcommandeventclasses import BSEddiesHelp
+from discordbot.slashcommandeventclasses.active import BSEddiesActive
+from discordbot.slashcommandeventclasses.admin_give import BSEddiesAdminGive
+from discordbot.slashcommandeventclasses.autogenerate import BSEddiesAutoGenerate
+from discordbot.slashcommandeventclasses.bless import BSEddiesBless
+from discordbot.slashcommandeventclasses.close import BSEddiesCloseBet
+from discordbot.slashcommandeventclasses.config import BSEddiesConfig
+from discordbot.slashcommandeventclasses.gift import BSEddiesGift
+from discordbot.slashcommandeventclasses.help import BSEddiesHelp
+from discordbot.slashcommandeventclasses.highscore import BSEddiesHighScore
+from discordbot.slashcommandeventclasses.leaderboard import BSEddiesLeaderboard
+from discordbot.slashcommandeventclasses.king_rename import BSEddiesKingRename
+from discordbot.slashcommandeventclasses.pending import BSEddiesPending
+from discordbot.slashcommandeventclasses.place import BSEddiesPlaceBet
+from discordbot.slashcommandeventclasses.pledge import BSEddiesPledge
+from discordbot.slashcommandeventclasses.predict import BSEddiesPredict
+from discordbot.slashcommandeventclasses.refresh import BSEddiesRefreshBet
+from discordbot.slashcommandeventclasses.stats import BSEddiesStats
+from discordbot.slashcommandeventclasses.taxrate import BSEddiesTaxRate
+from discordbot.slashcommandeventclasses.transactions import BSEddiesTransactionHistory
+from discordbot.slashcommandeventclasses.view import BSEddiesView
+
+# context commands
+from discordbot.contextcommands.message_delete import ContextDeleteMessage
 
 # task imports
 from discordbot.tasks.annualawards import AnnualBSEddiesAwards
@@ -42,6 +60,7 @@ from discordbot.tasks.dailyvallytask import AfterWorkVally
 from discordbot.tasks.eddiegains import EddieGainMessager
 from discordbot.tasks.eddiekingtask import BSEddiesKingTask
 from discordbot.tasks.guildchecker import GuildChecker
+from discordbot.tasks.messagesync import MessageSync
 from discordbot.tasks.monthlyawards import MonthlyBSEddiesAwards
 from discordbot.tasks.releasechecker import ReleaseChecker
 from discordbot.tasks.revolutiontask import BSEddiesRevolutionTask
@@ -60,7 +79,7 @@ class CommandManager(object):
 
     def __init__(
         self,
-        client: discord.Bot,
+        client: BSEBot,
         guilds: list,
         logger: logging.Logger,
         giphy_token: str = None,
@@ -86,7 +105,7 @@ class CommandManager(object):
 
         And finally, we call the two methods that actually register all the events and slash commands.
 
-        :param client: discord.Client object that represents our bot
+        :param client: BSEBot object that represents our bot
         :param guilds: list of guild IDs that we're listening on
         :param logger:  logger object for logging
         :param debug_mode: whether we're in debug mode or not
@@ -131,6 +150,7 @@ class CommandManager(object):
         self.bseddies_view = BSEddiesView(client, guilds, self.logger)
         self.bseddies_leaderboard = BSEddiesLeaderboard(client, guilds, self.logger)
         self.bseddies_close = BSEddiesCloseBet(client, guilds, self.logger)
+        self.bseddies_config = BSEddiesConfig(client, guilds, self.logger)
         self.bseddies_place = BSEddiesPlaceBet(client, guilds, self.logger)
         self.bseddies_pending = BSEddiesPending(client, guilds, self.logger)
         self.bseddies_transactions = BSEddiesTransactionHistory(client, guilds, self.logger)
@@ -146,29 +166,40 @@ class CommandManager(object):
         self.bseddies_bless = BSEddiesBless(client, guilds, self.logger)
         self.bseddies_help = BSEddiesHelp(client, guilds, self.logger)
 
+        # context commands
+        self.message_delete = ContextDeleteMessage(client, guilds, self.logger)
+
         # tasks
-        self.guild_checker_task = GuildChecker(self.client, self.logger, self.on_ready, self.githubapi)
+        self.guild_checker_task = GuildChecker(
+            self.client,
+            guilds,
+            self.logger,
+            [],
+            self.on_ready,
+            self.githubapi,
+            self.bseddies_place,
+            self.bseddies_close
+            )
 
         startup_tasks = [self.guild_checker_task, ]
 
         self.bet_closer_task = BetCloser(
-            self.client, guilds, self.logger, self.bseddies_place, self.bseddies_close, startup_tasks
+            self.client, guilds, self.logger, startup_tasks, self.bseddies_place, self.bseddies_close,
         )
 
         self.bet_reminder_task = BetReminder(self.client, guilds, self.logger, startup_tasks)
         self.eddie_gain_message_task = EddieGainMessager(self.client, guilds, self.logger, startup_tasks)
         self.eddie_king_task = BSEddiesKingTask(self.client, guilds, self.logger, startup_tasks)
-        self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger, self.giphy_token, startup_tasks)
+        self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger, startup_tasks, self.giphy_token)
         self.release_task = ReleaseChecker(self.client, guilds, self.logger, startup_tasks, self.githubapi)
-
-        if BSE_SERVER_ID in self.guilds:
-            self.thread_task = ThreadSpoilerTask(self.client, guilds, self.logger, startup_tasks)
-            self.vally_task = AfterWorkVally(self.client, guilds, self.logger, startup_tasks)
-            self.monthly_awards_task = MonthlyBSEddiesAwards(self.client, guilds, self.logger, startup_tasks)
-            self.annual_awards_task = AnnualBSEddiesAwards(self.client, guilds, self.logger, startup_tasks)
-            self.wordle_task = WordleTask(self.client, guilds, self.logger, startup_tasks)
-            self.wordle_reminder = WordleReminder(self.client, guilds, self.logger, startup_tasks)
-            self.celebrations_task = Celebrations(self.client, guilds, self.logger, startup_tasks)
+        self.thread_task = ThreadSpoilerTask(self.client, guilds, self.logger, startup_tasks)
+        self.message_sync = MessageSync(self.client, guilds, self.logger, startup_tasks, self.on_message)
+        self.vally_task = AfterWorkVally(self.client, guilds, self.logger, startup_tasks)
+        self.monthly_awards_task = MonthlyBSEddiesAwards(self.client, guilds, self.logger, startup_tasks)
+        self.annual_awards_task = AnnualBSEddiesAwards(self.client, guilds, self.logger, startup_tasks)
+        self.wordle_task = WordleTask(self.client, guilds, self.logger, startup_tasks)
+        self.wordle_reminder = WordleReminder(self.client, guilds, self.logger, startup_tasks)
+        self.celebrations_task = Celebrations(self.client, guilds, self.logger, startup_tasks)
 
         # call the methods that register the events we're listening for
         self._register_client_events()
@@ -247,16 +278,13 @@ class CommandManager(object):
                 # message id is already in the cache
                 return
 
-            guild = self.client.get_guild(payload.guild_id)  # type: discord.Guild
+            guild = await self.client.fetch_guild(payload.guild_id)  # type: discord.Guild
             user = await self.client.fetch_user(payload.user_id)  # type: discord.User
 
             if user.bot:
                 return
 
-            channel = guild.get_channel(payload.channel_id)  # type: discord.TextChannel
-            if not channel:
-                # channel is thread
-                channel = guild.get_thread(payload.channel_id)
+            channel = await self.client.fetch_channel(payload.channel_id)  # type: discord.TextChannel
             partial_message = channel.get_partial_message(payload.message_id)  # type: discord.PartialMessage
             message = await partial_message.fetch()  # type: discord.Message
 
@@ -303,6 +331,21 @@ class CommandManager(object):
             await self.on_thread_update.on_update(before, after)
 
         @self.client.event
+        async def on_raw_thread_update(payload: discord.RawThreadUpdateEvent):
+            """
+            Raw on_raw_thread_update
+
+            Args:
+                payload (discord.RawThreadUpdateEvent): _description_
+            """
+            if payload.thread:
+                # already in internal cache - so on_thread_update can handle that
+                return
+
+            thread = await self.client.fetch_channel(payload.thread_id)  # type: discord.Thread
+            await self.on_thread_update.on_update(thread, thread)
+
+        @self.client.event
         async def on_message(message: discord.Message):
             """
             This is the 'message' event. Whenever a message is sent in a guild that the bot is listening for -
@@ -310,12 +353,21 @@ class CommandManager(object):
             :param message:
             :return:
             """
+            if message.flags.ephemeral:
+                # message is ephemeral - do nothing with it
+                return
 
-            if message.channel.type.value == 1:
+            if message.author.id != self.client.user.id and \
+                    type(message.channel) == discord.channel.DMChannel and \
+                    message.type != discord.MessageType.application_command:
                 # this means we've received a Direct message!
                 # we'll have to handle this differently
                 self.logger.debug(f"{message} - {message.content}")
                 await self.direct_message.dm_received(message)
+                return
+            elif type(message.channel) == discord.channel.DMChannel and \
+                    message.author.id == self.client.user.id:
+                # message in DM channel from ourselves
                 return
 
             await self.on_message.message_received(message)
@@ -332,8 +384,7 @@ class CommandManager(object):
                 # message id is already in the cache
                 return
 
-            guild = self.client.get_guild(payload.guild_id)
-            channel = await guild.fetch_channel(payload.channel_id)
+            channel = await self.client.fetch_channel(payload.channel_id)
             message = await channel.fetch_message(payload.message_id)
             await self.on_message_edit.message_edit(None, message)
 
@@ -602,6 +653,12 @@ class CommandManager(object):
             """
             await self.bseddies_bless.create_bless_view(ctx)
 
+        @self.client.command(description="Configure BSEBot")
+        async def config(ctx: discord.ApplicationContext):
+            """
+            """
+            await self.bseddies_config.root_config(ctx)
+
         @self.client.command(description="Help")
         async def help(ctx: discord.ApplicationContext):
             """help command
@@ -649,3 +706,13 @@ class CommandManager(object):
             except discord.HTTPException:
                 pass
             await ctx.respond(content="Pinned", ephemeral=True)
+
+        @self.client.message_command(name="Delete message")
+        async def delete_message(ctx: discord.ApplicationCommand, message: discord.Message):
+            """_summary_
+
+            Args:
+                ctx (discord.ApplicationCommand): _description_
+                message (discord.Message): _description_
+            """
+            await self.message_delete.message_delete(ctx, message)

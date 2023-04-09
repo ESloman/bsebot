@@ -23,7 +23,7 @@ class BetManager(object):
         self.user_points = UserPoints()
         self.guilds = Guilds()
 
-    def close_a_bet(self, bet_id: str, guild_id: int, emoji: str) -> dict:
+    def close_a_bet(self, bet_id: str, guild_id: int, emoji: list[str]) -> dict:
         """
         Close a bet from a bet ID.
         Here we also calculate who the winners are and allocate their winnings to them.
@@ -40,16 +40,18 @@ class BetManager(object):
 
         ret_dict = {
             "result": emoji,
-            "outcome_name": ret["option_dict"][emoji],
+            "outcome_name": [ret["option_dict"][e] for e in emoji],
             "timestamp": datetime.datetime.now(),
-            "losers": {b: ret["betters"][b]["points"]
-                       for b in ret["betters"] if ret["betters"][b]["emoji"] != emoji},
+            "losers": {
+                b: ret["betters"][b]["points"]
+                for b in ret["betters"] if ret["betters"][b]["emoji"] not in emoji
+            },
             "winners": {}
         }
 
         total_eddies_bet = sum([ret["betters"][b]["points"] for b in ret["betters"]])
         winning_outcome_eddies = sum(
-            [ret["betters"][b]["points"] for b in ret["betters"] if ret["betters"][b]["emoji"] == emoji]
+            [ret["betters"][b]["points"] for b in ret["betters"] if ret["betters"][b]["emoji"] in emoji]
         )
 
         try:
@@ -93,7 +95,7 @@ class BetManager(object):
         total_eddies_taxed = 0
 
         # assign winning points to the users who got the answer right
-        winners = [b for b in ret["betters"] if ret["betters"][b]["emoji"] == emoji]
+        winners = [b for b in ret["betters"] if ret["betters"][b]["emoji"] in emoji]
         for better in winners:
             points_bet = ret["betters"][better]["points"]
             points_won = math.ceil(((m * points_bet) + c) * points_bet)
@@ -124,32 +126,13 @@ class BetManager(object):
 
             ret_dict["winners"][better] = eddies_won_minux_tax
             self.logger.info(f"{better} won - incrementing eddies by {eddies_won_minux_tax}")
-            self.user_points.increment_points(int(better), guild_id, eddies_won_minux_tax)
-            # add to transaction history
-            update_result = self.user_points.append_to_transaction_history(
+            self.user_points.increment_points(
                 int(better),
                 guild_id,
-                {
-                    "type": TransactionTypes.BET_WIN,
-                    "amount": eddies_won_minux_tax,
-                    "timestamp": datetime.datetime.now(),
-                    "bet_id": bet_id,
-                }
+                eddies_won_minux_tax,
+                TransactionTypes.BET_WIN,
+                bet_id=bet_id
             )
-            self.logger.debug(f"Update result: {update_result.matched_count}, {update_result.modified_count}")
-            if not update_result.modified_count:
-                self.logger.debug("Update result was 0 - trying again without casting user to int")
-                update_result = self.user_points.append_to_transaction_history(
-                    better,
-                    guild_id,
-                    {
-                        "type": TransactionTypes.BET_WIN,
-                        "amount": eddies_won_minux_tax,
-                        "timestamp": datetime.datetime.now(),
-                        "bet_id": bet_id,
-                    }
-                )
-                self.logger.debug(f"Second {update_result}")
 
         # give taxed eddies to the King
         self.logger.info(
@@ -160,16 +143,12 @@ class BetManager(object):
         )
 
         king_id = self.guilds.get_king(guild_id)
-        self.user_points.increment_points(king_id, guild_id, total_eddies_taxed)
-        self.user_points.append_to_transaction_history(
+        self.user_points.increment_points(
             king_id,
             guild_id,
-            {
-                "type": TransactionTypes.BET_TAX,
-                "amount": total_eddies_taxed,
-                "timestamp": datetime.datetime.now(),
-                "bet_id": bet_id,
-            }
+            total_eddies_taxed,
+            TransactionTypes.BET_TAX,
+            bet_id=bet_id
         )
 
         ret_dict["king_tax"] = total_eddies_taxed

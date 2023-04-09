@@ -1,20 +1,31 @@
+
+import asyncio
 import datetime
+from logging import Logger
 
 import discord
-from discord.ext import tasks, commands
+from discord.ext import tasks
 
+from discordbot.bsebot import BSEBot
 from discordbot.embedmanager import EmbedManager
-from discordbot.views import BetView
-from mongo.bsepoints.bets import UserBets
+from discordbot.slashcommandeventclasses.close import BSEddiesCloseBet
+from discordbot.slashcommandeventclasses.place import BSEddiesPlaceBet
+from discordbot.tasks.basetask import BaseTask
+from discordbot.views.bet import BetView
 
 
-class BetCloser(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger, place, close, startup_tasks):
-        self.bot = bot
-        self.guilds = guilds
-        self.startup_tasks = startup_tasks
-        self.user_bets = UserBets()
-        self.logger = logger
+class BetCloser(BaseTask):
+    def __init__(
+        self,
+        bot: BSEBot,
+        guild_ids: list[int],
+        logger: Logger,
+        startup_tasks: list[BaseTask],
+        place: BSEddiesPlaceBet,
+        close: BSEddiesCloseBet
+    ):
+        super().__init__(bot, guild_ids, logger, startup_tasks)
+
         self.embed_manager = EmbedManager(self.logger)
         self.bet_closer.start()
 
@@ -28,15 +39,6 @@ class BetCloser(commands.Cog):
         """
         self.bet_closer.cancel()
 
-    def _check_start_up_tasks(self) -> bool:
-        """
-        Checks start up tasks
-        """
-        for task in self.startup_tasks:
-            if not task.finished:
-                return False
-        return True
-
     @tasks.loop(seconds=10.0)
     async def bet_closer(self):
         """
@@ -44,14 +46,11 @@ class BetCloser(commands.Cog):
         If they have expired - they get closed.
         :return:
         """
-        if not self._check_start_up_tasks():
-            self.logger.info("Startup tasks not complete - skipping loop")
-            return
 
         now = datetime.datetime.now()
-        for guild in self.guilds:
-            guild_obj = self.bot.get_guild(guild)  # type: discord.Guild
-            active = self.user_bets.get_all_active_bets(guild)
+        for guild in self.bot.guilds:
+            guild_obj = await self.bot.fetch_guild(guild.id)  # type: discord.Guild
+            active = self.user_bets.get_all_active_bets(guild.id)
             for bet in active:
                 if timeout := bet.get("timeout"):
                     if timeout > now:
@@ -59,7 +58,7 @@ class BetCloser(commands.Cog):
                     # set the bet to no longer active ??
                     self.user_bets.update({"_id": bet["_id"]}, {"$set": {"active": False}})
                     member = guild_obj.get_member(bet["user"])
-                    channel = await guild_obj.fetch_channel(bet["channel_id"])
+                    channel = await self.bot.fetch_channel(bet["channel_id"])
                     message = await channel.fetch_message(bet["message_id"])  # type: discord.Message
                     bet["active"] = False
 
@@ -75,8 +74,8 @@ class BetCloser(commands.Cog):
                     if not member.dm_channel:
                         await member.create_dm()
                     try:
-                        await member.send(content=msg)
-                    except discord.errors.Forbidden:
+                        await member.send(content=msg, silent=True)
+                    except discord.Forbidden:
                         pass
 
     @bet_closer.before_loop
@@ -86,3 +85,5 @@ class BetCloser(commands.Cog):
         :return:
         """
         await self.bot.wait_until_ready()
+        while not self._check_start_up_tasks():
+            await asyncio.sleep(5)

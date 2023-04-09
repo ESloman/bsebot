@@ -1,18 +1,24 @@
+
+import asyncio
 import datetime
+from logging import Logger
 
-import discord
-from discord.ext import tasks, commands
+from discord.ext import tasks
 
-from mongo.bsepoints.bets import UserBets
+from discordbot.bsebot import BSEBot
+from discordbot.tasks.basetask import BaseTask
 
 
-class BetReminder(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger, startup_tasks):
-        self.bot = bot
-        self.guilds = guilds
-        self.user_bets = UserBets()
-        self.logger = logger
-        self.startup_tasks = startup_tasks
+class BetReminder(BaseTask):
+    def __init__(
+        self,
+        bot: BSEBot,
+        guild_ids: list[int],
+        logger: Logger,
+        startup_tasks: list[BaseTask]
+    ):
+
+        super().__init__(bot, guild_ids, logger, startup_tasks)
         self.bet_reminder.start()
 
     def cog_unload(self):
@@ -22,29 +28,17 @@ class BetReminder(commands.Cog):
         """
         self.bet_reminder.cancel()
 
-    def _check_start_up_tasks(self) -> bool:
-        """
-        Checks start up tasks
-        """
-        for task in self.startup_tasks:
-            if not task.finished:
-                return False
-        return True
-
     @tasks.loop(minutes=60)
     async def bet_reminder(self):
         """
         Loop that takes all our active bets and sends a reminder message
         :return:
         """
-        if not self._check_start_up_tasks():
-            self.logger.info("Startup tasks not complete - skipping loop")
-            return
 
         now = datetime.datetime.now()
-        for guild in self.guilds:
-            guild_obj = self.bot.get_guild(guild)  # type: discord.Guild
-            active = self.user_bets.get_all_active_bets(guild)
+        for guild in self.bot.guilds:
+            await self.bot.fetch_guild(guild.id)  # type: discord.Guild
+            active = self.user_bets.get_all_active_bets(guild.id)
             for bet in active:
                 timeout = bet["timeout"]
                 created = bet["created"]
@@ -58,7 +52,7 @@ class BetReminder(commands.Cog):
                 if 82800 <= diff.total_seconds() <= 86400:
                     # ~ 24 hours to go!
                     # send reminder here
-                    channel = await guild_obj.fetch_channel(bet["channel_id"])
+                    channel = await self.bot.fetch_channel(bet["channel_id"])
                     await channel.trigger_typing()
                     message = await channel.fetch_message(bet["message_id"])
 
@@ -78,3 +72,5 @@ class BetReminder(commands.Cog):
         :return:
         """
         await self.bot.wait_until_ready()
+        while not self._check_start_up_tasks():
+            await asyncio.sleep(5)

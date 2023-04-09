@@ -6,7 +6,7 @@ import discord
 import xlsxwriter
 
 from discordbot.bot_enums import TransactionTypes, ActivityTypes
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
 class BSEddiesTransactionHistory(BSEddies):
@@ -101,7 +101,11 @@ class BSEddiesTransactionHistory(BSEddies):
         workbook.close()
 
         try:
-            await ctx.author.send(content="Here's your full transaction history:", file=discord.File(full_name, f_name))
+            await ctx.author.send(
+                content="Here's your full transaction history:",
+                file=discord.File(full_name, f_name),
+                silent=True
+            )
         except discord.Forbidden:
             # user doesn't allow DMs
             pass

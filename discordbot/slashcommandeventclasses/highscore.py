@@ -1,9 +1,9 @@
 
 import discord
 
-import discordbot.views as views
 from discordbot.bot_enums import ActivityTypes
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
+from discordbot.views.highscore import HighScoreBoardView
 
 
 class BSEddiesHighScore(BSEddies):
@@ -27,6 +27,6 @@ class BSEddiesHighScore(BSEddies):
 
         await ctx.channel.trigger_typing()
 
-        highscore_view = views.HighScoreBoardView(self.embed_manager)
+        highscore_view = HighScoreBoardView(self.embed_manager)
         msg = self.embed_manager.get_highscore_embed(ctx.guild, 5, ctx.author.display_name)
         await ctx.respond(content=msg, view=highscore_view)

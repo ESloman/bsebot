@@ -6,6 +6,7 @@ from typing import Tuple
 
 import discord
 
+from discordbot import utilities
 from discordbot.bot_enums import ActivityTypes, AwardsTypes, StatTypes, TransactionTypes
 from discordbot.constants import ANNUAL_AWARDS_AWARD, BSE_BOT_ID, JERK_OFF_CHAT, MONTHLY_AWARDS_PRIZE
 from discordbot.constants import WORDLE_SCORE_REGEX
@@ -35,6 +36,12 @@ class StatsGatherer:
             start = start.replace(month=12, year=start.year - 1)
 
         end = now.replace(day=1, hour=0, minute=0, second=0, microsecond=1)
+
+        if not utilities.is_utc(now):
+            # need to add UTC offset
+            start = utilities.add_utc_offset(start)
+            end = utilities.add_utc_offset(end)
+
         return start, end
 
     @staticmethod
@@ -553,8 +560,16 @@ class StatsGatherer:
             guesses = int(guesses)
             wordle_count.append(guesses)
 
+        bot_wordles = self.cache.user_interactions.paginated_query(
+            {
+                "guild_id": guild_id,
+                "timestamp": {"$gt": start, "$lt": end},
+                "message_type": "wordle",
+                "is_bot": True
+            }
+        )
         bot_wordle_count = []
-        for wordle in wordle_messages:
+        for wordle in bot_wordles:
             if wordle["user_id"] != BSE_BOT_ID:
                 continue
 

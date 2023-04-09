@@ -14,11 +14,11 @@ class BaseClass(object):
     If not username or password is provided - authenticate without username and password.
     """
     def __init__(
-            self,
-            ip: str = "127.0.0.1",
-            # ip: str = "ec2-35-178-51-238.eu-west-2.compute.amazonaws.com",
-            username: str = None,
-            password: str = None):
+        self,
+        ip: str = "127.0.0.1",
+        username: str = None,
+        password: str = None
+    ):
         """
         Constructor method.
         :param ip: ip of instance to connect to
@@ -89,7 +89,8 @@ class BaseClass(object):
             limit: int = 1000,
             projection: dict = None,
             as_gen: bool = False,
-            skip: int = None
+            skip: int = None,
+            use_paginated: bool = False
     ) -> Union[list, Cursor]:
         """
         Searches a collection for documents based on given parameters.
@@ -110,11 +111,42 @@ class BaseClass(object):
             projection : dict of keys to return for each result
             as_gen : True returns generator (mongoDB cursor obj) and false returns list of results
             skip: number of items to skip at the start of the result set
+            use_paginated: whether to use a paginated query by default to get all things
         Returns a generator (cursor obj) if as_gen else returns a list of results
         """
         if self.vault is None:
             raise NoVaultError("No vault instantiated.")
-        return interface.query(self.vault, parameters, limit, projection, as_gen, skip=skip)
+        if not projection or as_gen or not use_paginated:
+            return interface.query(self.vault, parameters, limit, projection, as_gen, skip=skip)
+        return self.paginated_query(parameters, limit, skip)
+
+    def paginated_query(self, query_dict: dict, limit=1000, skip=0) -> list[dict]:
+        """Performs a paginated query with the specified query dict
+
+        Args:
+            query_dict (dict): a dict of query operators
+            limit (int): limit of items to retrieve at a time
+            skip (int): number of documents to skip at the start
+
+        Returns:
+            list[any]: a list of documents from the DB
+        """
+        docs = []
+        len_ret = limit
+        while len_ret == limit:
+            # keep looping
+            ret = interface.query(
+                self.vault,
+                query_dict,
+                lim=limit,
+                projection=None,
+                as_gen=False,
+                skip=skip
+            )
+            skip += limit
+            len_ret = len(ret)
+            docs.extend(ret)
+        return docs
 
     def get_collection_names(self) -> Union[None, list]:
         """

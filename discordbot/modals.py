@@ -6,7 +6,9 @@ File for containing the UI modal dialogues that the bot will create
 import discord
 
 from apis.github import GitHubAPI
-from discordbot.slashcommandeventclasses import BSEddiesCreateBet, BSEddiesPlaceBet, BSEddiesCloseBet
+from discordbot.slashcommandeventclasses.close import BSEddiesCloseBet
+from discordbot.slashcommandeventclasses.create import BSEddiesCreateBet
+from discordbot.slashcommandeventclasses.place import BSEddiesPlaceBet
 
 
 class BSEddiesBetCreateModal(discord.ui.Modal):
@@ -29,9 +31,9 @@ class BSEddiesBetCreateModal(discord.ui.Modal):
         )
         self.add_item(
             discord.ui.InputText(
-                label="Timeout: DIGITS + (s|m|h|d) (Optional)",
+                label="Timeout: DIGITS + (s|m|h|d|w) (Optional)",
                 required=False,
-                placeholder="Examples: 25m, 2d, 8h, etc..."
+                placeholder="Examples: 25m, 2d, 8h, 6h30m, 1w3d2h, etc..."
             )
         )
 

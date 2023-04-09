@@ -4,7 +4,7 @@ import datetime
 import discord
 
 from discordbot.bot_enums import ActivityTypes, TransactionTypes
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
 class BSEddiesKingRename(BSEddies):
@@ -92,25 +92,20 @@ class BSEddiesKingRename(BSEddies):
             await ctx.followup.send(message, ephemeral=True)
             return
 
-        self.user_points.decrement_points(ctx.author.id, ctx.guild.id, spend)
-
-        self.user_points.append_to_transaction_history(
+        self.user_points.increment_points(
             ctx.author.id,
             ctx.guild.id,
-            {
-                "type": TransactionTypes.KING_RENAME,
-                "amount": spend * -1,
-                "timestamp": datetime.datetime.now(),
-                "role_id": role_id,
-                "guild_id": ctx.guild.id
-            }
+            spend * -1,
+            TransactionTypes.KING_RENAME,
+            comment=f"Change {role_id} to {name}",
+            role_id=role_id
         )
 
         self.guilds.update({"guild_id": ctx.guild.id}, {"$set": {key: now}})
 
         channel_id = db_guild.get("channel")
         if channel_id:
-            channel = await ctx.guild.fetch_channel(channel_id)
+            channel = await self.client.fetch_channel(channel_id)
             await channel.trigger_typing()
 
             # get king user
@@ -124,4 +119,4 @@ class BSEddiesKingRename(BSEddies):
             await channel.send(content=ann)
 
         message = f"Changed the role name to `{name}` for you."
-        await ctx.followup.send(content=message, ephemeral=True, silent=True)
+        await ctx.followup.send(content=message, ephemeral=True)

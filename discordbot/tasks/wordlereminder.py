@@ -1,4 +1,5 @@
 import datetime
+import random
 
 import discord
 from discord.ext import tasks, commands
@@ -100,13 +101,16 @@ class WordleReminder(commands.Cog):
                 )
                 continue
             y_message = await channel.fetch_message(reminder["message_id"])
-
-            msg = [
-                f"Hey {y_message.author.mention}, don't forget to do your Wordle today!",
-                "Hey {y.message.author.mention}, you absolute knob, you haven't done your Wordle yet!",
-                "Guess what? {y.message.author.mention} is a fucking prick. Also, they didn't do their Wordle.",
-                "Do your Wordle or die, {y.message.author.mention}."
+            
+            self.messages=[
+                "Hey {mention}, don't forget to do your Wordle today!",
+                "Hey {mention}, you absolute knob, you haven't done your Wordle yet!",
+                "Guess what? {mention} is a fucking prick. Also, they didn't do their Wordle.",
+                "Do your Wordle or die, {mention}."
             ]
+            
+            message = random.choice(self.messages) 
+            message = message.format(mention=_mention) 
 
             self.logger.info(msg)
             await y_message.reply(content=msg)

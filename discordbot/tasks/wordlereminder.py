@@ -1,7 +1,10 @@
 
 import asyncio
 import datetime
+import random
+
 from logging import Logger
+
 
 from discord.ext import tasks
 
@@ -19,8 +22,13 @@ class WordleReminder(BaseTask):
         logger: Logger,
         startup_tasks: list[BaseTask]
     ):
-
         super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.messages = [
+            "Hey {mention}, don't forget to do your Wordle today!",
+            "Hey {mention}, you absolute knob, you haven't done your Wordle yet!",
+            "Guess what? {mention} is a fucking prick. Also, they didn't do their Wordle.",
+            "Do your Wordle or die, {mention}."
+        ]
         self.wordle_reminder.start()
 
     def cog_unload(self):
@@ -69,7 +77,6 @@ class WordleReminder(BaseTask):
 
             _start = start + datetime.timedelta(days=1)
             _end = end + datetime.timedelta(days=1)
-
             wordles_today = self.interactions.query(
                 {
                     "guild_id": guild.id,
@@ -107,19 +114,19 @@ class WordleReminder(BaseTask):
                         f"{channel_id} for wordle message ({reminder['message_id']}) didn't match {channel.id}"
                     )
                     continue
+
                 y_message = await channel.fetch_message(reminder["message_id"])
 
-                msg = (
-                    f"Hey {y_message.author.mention}, don't forget to do your Wordle today!"
-                )
+                message = random.choice(self.messages)
+                message = message.format(mention=y_message.author.mention)
 
-                self.logger.debug(msg)
-                await y_message.reply(content=msg)
+                self.logger.info(message)
+                await y_message.reply(content=message)
 
     @wordle_reminder.before_loop
     async def before_wordle_reminder(self):
         """
-        Make sure that websocket is open before we starting querying via it.
+        Make sure that websocket is open before we start querying via it.
         :return:
         """
         await self.bot.wait_until_ready()

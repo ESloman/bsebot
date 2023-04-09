@@ -16,7 +16,7 @@ class WordleReminder(commands.Cog):
         self.startup_tasks = startup_tasks
         self.user_interactions = UserInteractions()
         self.wordle_reminder.start()
-        self.messages= [
+        self.messages = [
             "Hey {mention}, don't forget to do your Wordle today!",
             "Hey {mention}, you absolute knob, you haven't done your Wordle yet!",
             "Guess what? {mention} is a fucking prick. Also, they didn't do their Wordle.",

@@ -16,7 +16,12 @@ class WordleReminder(commands.Cog):
         self.startup_tasks = startup_tasks
         self.user_interactions = UserInteractions()
         self.wordle_reminder.start()
-        self.messages = message
+        self.messages=[
+            "Hey {mention}, don't forget to do your Wordle today!",
+            "Hey {mention}, you absolute knob, you haven't done your Wordle yet!",
+            "Guess what? {mention} is a fucking prick. Also, they didn't do their Wordle.",
+            "Do your Wordle or die, {mention}."
+            ]
 
     def _check_start_up_tasks(self) -> bool:
         """
@@ -103,13 +108,6 @@ class WordleReminder(commands.Cog):
                 continue
             y_message = await channel.fetch_message(reminder["message_id"])
             
-            self.messages=[
-                "Hey {mention}, don't forget to do your Wordle today!",
-                "Hey {mention}, you absolute knob, you haven't done your Wordle yet!",
-                "Guess what? {mention} is a fucking prick. Also, they didn't do their Wordle.",
-                "Do your Wordle or die, {mention}."
-            ]
-            
             message = random.choice(self.messages) 
             message = message.format(mention=y_message.author.mention)
             
@@ -119,7 +117,7 @@ class WordleReminder(commands.Cog):
     @wordle_reminder.before_loop
     async def before_wordle_reminder(self):
         """
-        Make sure that websocket is open before we starting querying via it.
+        Make sure that websocket is open before we start querying via it.
         :return:
         """
         await self.bot.wait_until_ready()

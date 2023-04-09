@@ -109,8 +109,6 @@ class WordleReminder(commands.Cog):
                 "Do your Wordle or die, {mention}."
             ]
             
-            _mention="user_id"
-            
             message = random.choice(self.messages) 
             message = message.format(mention=_mention)]
             

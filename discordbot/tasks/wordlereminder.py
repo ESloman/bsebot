@@ -16,7 +16,7 @@ class WordleReminder(commands.Cog):
         self.startup_tasks = startup_tasks
         self.user_interactions = UserInteractions()
         self.wordle_reminder.start()
-        self.messages=[
+        self.messages= [
             "Hey {mention}, don't forget to do your Wordle today!",
             "Hey {mention}, you absolute knob, you haven't done your Wordle yet!",
             "Guess what? {mention} is a fucking prick. Also, they didn't do their Wordle.",
@@ -107,10 +107,10 @@ class WordleReminder(commands.Cog):
                 )
                 continue
             y_message = await channel.fetch_message(reminder["message_id"])
-            
-            message = random.choice(self.messages) 
+
+            message = random.choice(self.messages)
             message = message.format(mention=y_message.author.mention)
-            
+
             self.logger.info(message)
             await y_message.reply(content=message)
 

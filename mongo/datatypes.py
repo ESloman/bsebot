@@ -314,6 +314,7 @@ class GuildDB(TypedDict):
     king_history: list[dict]
     hash: str
     update_messages: bool
+    revolution: bool
     supporter_role: int
     revolutionary_role: int
     pledged: list[int]

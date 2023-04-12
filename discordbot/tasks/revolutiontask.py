@@ -62,6 +62,12 @@ class BSEddiesRevolutionTask(BaseTask):
 
         for guild in self.bot.guilds:
             guild_db = self.guilds.get_guild(guild.id)
+
+            if not guild_db.get("revolution", True):
+                # revolution event has been disabled
+                self.logger.debug(f"Revolution event has been disabled for {guild.name}")
+                continue
+
             king_user = self.user_points.find_user(guild_db["king"], guild.id)
 
             user_points = king_user["points"]

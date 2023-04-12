@@ -5,6 +5,7 @@ from discordbot.constants import CREATOR
 from discordbot.selects.config import ConfigSelect
 from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.config_admin import AdminConfigView
+from discordbot.views.config_revolution import RevolutionConfigView
 from discordbot.views.config_salary import SalaryConfigView
 from discordbot.views.config_threads import ThreadConfigView
 from discordbot.views.config_valorant import ValorantConfigView
@@ -85,6 +86,8 @@ class ConfigView(discord.ui.View):
         match value:
             case "admins":
                 msg, view = self._get_admins_message_and_view(interaction)
+            case "revolution":
+                msg, view = self._get_revolution_message_and_view(interaction)
             case "salary":
                 msg, view = self._get_daily_minimum_message_and_view(interaction)
             case "threads":
@@ -245,6 +248,24 @@ class ConfigView(discord.ui.View):
             f"Current admins: {_admins}\n\n"
             "**Note**: the server owner and the BSEBot creator are _always_ considered as admins regardless of your "
             "selection.\n"
+        )
+        return msg, view
+
+    def _get_revolution_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
+        """Handle revolution message/view
+
+        Args:
+            interaction (discord.Interaction): the interaction
+
+        Returns:
+            tuple[str, discord.ui.View]: the message and view
+        """
+        guild_db = self.guilds.get_guild(interaction.guild_id)
+        rev_enabled = guild_db.get("revolution", True)
+        view = RevolutionConfigView(rev_enabled)
+        msg = (
+            "**Revolution Config**\n\n"
+            "Select whether the revolution event is enabled or not."
         )
         return msg, view
 

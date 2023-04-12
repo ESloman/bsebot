@@ -167,6 +167,20 @@ class Guilds(BestSummerEverPointsDB):
 
         return self.update({"guild_id": guild_id}, {"$set": {"pledged": []}})
 
+    def set_revolution_toggle(self, guild_id: int, enabled: bool) -> UpdateResult:
+        """
+        Set the bool the enables/disables the revolution event
+
+        Args:
+            guild_id (int): the guild ID
+            enabled (bool): whether the revolution event is enabled/disabled
+
+        Returns:
+            UpdateResult: return result
+        """
+
+        return self.update({"guild_id": guild_id}, {"$set": {"revolution": enabled}})
+
     #
     # Hash stuff
     #

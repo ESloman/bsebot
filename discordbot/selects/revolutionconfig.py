@@ -3,25 +3,17 @@ from discord import Interaction, SelectOption
 from discord.ui import Select
 
 
-class ConfigSelect(Select):
-    _values = [
-        ("Admins", "admins"),
-        ("Revolution Event", "revolution"),
-        ("Salary", "salary"),
-        ("Spoiler Threads", "threads"),
-        ("Valorant", "valorant"),
-        ("Wordle Config", "wordle")
-    ]
+class RevolutionEnableSelect(Select):
 
-    def __init__(self):
-
+    def __init__(self, enabled: bool = True):
         options = [
-            SelectOption(label=opt[0], value=opt[1]) for opt in self._values
+            SelectOption(label="Enabled", value="enabled", default=enabled),
+            SelectOption(label="Disabled", value="disabled", default=not enabled)
         ]
 
         super().__init__(
             disabled=False,
-            placeholder="Select item to configure...",
+            placeholder="Whether revolution event is enabled/disabled",
             min_values=1,
             max_values=1,
             options=options

@@ -112,7 +112,13 @@ class OnMessage(BaseEvent):
                         )
 
         if message.attachments:
-            message_type.append("attachment")
+            for attachment in message.attachments:
+                message_type.append("attachment")
+
+                # this is only a temporary fix until https://github.com/Pycord-Development/pycord/pull/2016 is merged
+                # and pycord officially supports voice messages
+                if attachment.filename == "voice-message.ogg":
+                    message_type.append("voice_message")
 
         if role_mentions := message.role_mentions:
             for _ in role_mentions:

@@ -37,7 +37,8 @@ MESSAGE_TYPES = [
     "emoji_used",
     "emoji_created",
     "vc_joined",
-    "vc_streaming"
+    "vc_streaming",
+    "voice_message"
 ]
 
 # a mapping of the above message types to a more human readable/understandable version
@@ -67,6 +68,7 @@ HUMAN_MESSAGE_TYPES = {
     "sticker_created": "Sticker created",
     "vc_joined": "Spent time in VC",
     "vc_streaming": "Spent time streaming",
+    "voice_message": "Voice Message"
 }
 
 # a mapping of the above message types; and how many eddies they are worth for each individual occurence
@@ -93,7 +95,8 @@ MESSAGE_VALUES = {
     "sticker_used": 2,
     "sticker_created": 5,
     "vc_joined": 0.0015,
-    "vc_streaming": 0.0025
+    "vc_streaming": 0.0025,
+    "voice_message": 4
 }
 
 # the number of eddies a user received for each wordle score

@@ -142,14 +142,11 @@ class BSEddiesCreateBet(BSEddies):
             timeout=timeout
         )
 
-        embed = self.embed_manager.get_bet_embed(ctx.guild, bet["bet_id"], bet)
-
-        member = ctx.guild.get_member(ctx.user.id)
-        content = f"Bet created by {member.mention}"
+        content = self.embed_manager.get_bet_embed(ctx.guild, bet["bet_id"], bet)
 
         bet_view = BetView(bet, bseddies_place, bseddies_close)
 
-        message = await ctx.channel.send(content=content, embed=embed, view=bet_view)
+        message = await ctx.channel.send(content=content, view=bet_view)
 
         self.user_bets.update(
             {"_id": bet["_id"]},

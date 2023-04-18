@@ -227,10 +227,10 @@ class GuildChecker(BaseTask):
 
                 message = channel.get_partial_message(message_id)
 
-                embed = self.embed_manager.get_bet_embed(guild, bet["bet_id"], bet)
+                content = self.embed_manager.get_bet_embed(guild, bet["bet_id"], bet)
                 view = BetView(bet, self.place, self.close)
                 try:
-                    await message.edit(embed=embed, view=view)
+                    await message.edit(content=content, view=view, embeds=[])
                 except discord.NotFound:
                     continue
 

@@ -17,8 +17,7 @@ class EmbedManager(object):
         self.user_points = UserPoints()
         self.logger = logger
 
-    @staticmethod
-    def get_bet_embed(guild: discord.Guild, bet_id, bet: dict):
+    def get_bet_embed(self, guild: discord.Guild, bet_id, bet: dict):
         """
         Gets the bet embed and returns that
         :param guild:
@@ -26,9 +25,9 @@ class EmbedManager(object):
         :param bet:
         :return:
         """
-        embed = discord.Embed(
-            description=f"**{bet['title']}**\n\nBet ID: {bet_id}",
-            color=discord.Color.blue(),
+        msg = (
+            f"# {bet['title']}\n"
+            f"Bet ID: {bet_id}\n"
         )
 
         for option in bet["option_dict"]:
@@ -39,26 +38,22 @@ class EmbedManager(object):
                     if val:
                         val += "\n"
                     better_info = guild.get_member(better["user_id"])
-                    val += f"- {better_info.name if better_info else better['user_id']} - {better['points']}"
+                    if not better_info:
+                        _better = self.user_points.find_user(better["user_id"], guild.id)
+                    val += f"- **{better_info.name if better_info else _better['name']}** (_{better['points']}_)"
             else:
-                val = "No-one has bet on this option yet."
-            embed.add_field(
-                name=f"{option} - {bet['option_dict'][option]['val']}",
-                value=val,
-                inline=False
-            )
+                val = "- No-one has bet on this option yet."
+            msg += f"\n## {option} - {bet['option_dict'][option]['val']}\n"
+            msg += val
+
+        msg += f"\n\n_Created by <@{bet['user']}>_"
 
         if not bet["active"]:
-            footer = "This bet is closed for new bets. Awaiting results from the bet creator."
+            msg += "\n\nThis bet is closed for new bets. Awaiting results from the bet creator."
         elif timeout := bet.get("timeout"):
-            footer = f"This bet will stop taking bets on {timeout.strftime('%d %b %y %H:%M:%S')} "
-        else:
-            footer = None
+            msg += f"\n\nThis bet will stop taking bets on {timeout.strftime('%d %b %y %H:%M:%S')}."
 
-        if footer is not None:
-            embed.set_footer(text=footer)
-
-        return embed
+        return msg
 
     def get_leaderboard_embed(self, guild: discord.Guild, number: Union[int, None], username: Optional[str]):
         """
@@ -83,7 +78,7 @@ class EmbedManager(object):
             users = [user for user in users if user["points"] != 10]
 
         message = (
-            "**BSEddies Leaderboard**\n"
+            "# BSEddies Leaderboard\n"
         )
 
         for user in users[:number]:
@@ -91,7 +86,7 @@ class EmbedManager(object):
                 name = guild.get_member(user["uid"]).name
             except AttributeError:
                 continue
-            message += f"\n**{users.index(user) + 1})**  {name}  :  {user['points']}"
+            message += f"\n- **{users.index(user) + 1})**  {name}  :  {user['points']}"
 
         message += (
             f"\n\nLast refreshed at `{datetime.datetime.now().strftime('%d %b %y %H:%M:%S')}` by _{username}_."
@@ -122,7 +117,7 @@ class EmbedManager(object):
             users = [user for user in users if user["points"] != 10]
 
         message = (
-            "**BSEddies High Scores**\n"
+            "# BSEddies High Scores\n"
         )
 
         for user in users[:number]:
@@ -130,7 +125,7 @@ class EmbedManager(object):
                 name = guild.get_member(user["uid"]).name
             except AttributeError:
                 continue
-            message += f"\n**{users.index(user) + 1})**  {name}  :  {user.get('high_score', 0)}"
+            message += f"\n- **{users.index(user) + 1})**  {name}  :  {user.get('high_score', 0)}"
 
         message += (
             f"\n\nLast refreshed at `{datetime.datetime.now().strftime('%d %b %y %H:%M:%S')}` by _{username}_."
@@ -165,7 +160,7 @@ class EmbedManager(object):
         chance = max(min(event["chance"], 95), 5)
 
         message = (
-            f"**REVOLUTION IS UPON US**\n\n"
+            f"# REVOLUTION IS UPON US \n\n"
             f"@everyone - Yet again, we must try to overthrow our {role.mention}. {king_user.mention} has ruled "
             "tyranically for far too long and we are now offered a chance to take their BSEddies and knock him down "
             "a peg or two.\n\n"

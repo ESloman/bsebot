@@ -35,7 +35,7 @@ class AfterWorkVally(BaseTask):
             "Jingle bells, jingle bells, jingle all the IT'S TIME TO PLAY VALORANT {role}",
             "Valorant? Valorant? VALORANT? VALROARANT? RAVALROANT? {role}",
             "I'm a little bot, it's time to get mad and play {role}?",
-            "Balls. {role}"
+            "# Balls. {role}"
         ]
 
     def cog_unload(self):

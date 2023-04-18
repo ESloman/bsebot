@@ -35,9 +35,13 @@ class RefreshBetView(discord.ui.View):
         bet = self.bets.get_bet_from_id(interaction.guild_id, bet_id)
         channel = await interaction.guild.fetch_channel(bet["channel_id"])
         message = await channel.fetch_message(bet["message_id"])
-        content = self.embed_manager.get_bet_embed(interaction.guild, bet_id, bet)
+        embed = self.embed_manager.get_bet_embed(interaction.guild, bet_id, bet)
+        content = (
+            f"# {bet['title']}\n"
+            f"_Created by <@{bet['user']}>_"
+        )
         view = BetView(bet, self.bseddies_place, self.bseddies_close)
-        await message.edit(content=content, view=view)
+        await message.edit(content=content, view=view, embed=embed)
         await interaction.response.edit_message(content="Refreshed the bet for you.", view=None)
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=3, disabled=False, emoji="✖️")

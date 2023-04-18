@@ -62,13 +62,17 @@ class BetCloser(BaseTask):
                     message = await channel.fetch_message(bet["message_id"])  # type: discord.Message
                     bet["active"] = False
 
-                    content = self.embed_manager.get_bet_embed(guild_obj, bet["bet_id"], bet)
+                    embed = self.embed_manager.get_bet_embed(guild_obj, bet["bet_id"], bet)
+                    content = (
+                        f"# {bet['title']}\n"
+                        f"_Created by <@{bet['user']}>_"
+                    )
                     bet_view = BetView(bet, self.place, self.close)
 
                     # disable bet button
                     bet_view.children[0].disabled = True
 
-                    await message.edit(content=content, view=bet_view)
+                    await message.edit(content=content, embed=embed, view=bet_view)
                     msg = (f"[Your bet](<{message.jump_url}>) `{bet['bet_id']} - {bet['title']}` "
                            f"is now closed for bets and is waiting a result from you.")
                     if not member.dm_channel:

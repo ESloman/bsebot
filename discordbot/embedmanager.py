@@ -17,7 +17,7 @@ class EmbedManager(object):
         self.user_points = UserPoints()
         self.logger = logger
 
-    def get_bet_embed(self, guild: discord.Guild, bet_id, bet: dict):
+    def get_bet_embed(self, guild: discord.Guild, bet_id, bet: dict) -> discord.Embed:
         """
         Gets the bet embed and returns that
         :param guild:
@@ -25,9 +25,9 @@ class EmbedManager(object):
         :param bet:
         :return:
         """
-        msg = (
-            f"# {bet['title']}\n"
-            f"Bet ID: {bet_id}\n"
+
+        embed = discord.Embed(
+            description=f"Bet ID: {bet_id}"
         )
 
         for option in bet["option_dict"]:
@@ -40,20 +40,25 @@ class EmbedManager(object):
                     better_info = guild.get_member(better["user_id"])
                     if not better_info:
                         _better = self.user_points.find_user(better["user_id"], guild.id)
-                    val += f"- **{better_info.name if better_info else _better['name']}** (_{better['points']}_)"
+                    val += f"**{better_info.name if better_info else _better['name']}** (_{better['points']}_)"
             else:
-                val = "- No-one has bet on this option yet."
-            msg += f"\n## {option} - {bet['option_dict'][option]['val']}\n"
-            msg += val
+                val = "No-one has bet on this option yet."
+            embed.add_field(
+                name=f"{option} - {bet['option_dict'][option]['val']}",
+                value=val,
+                inline=False
+            )
 
-        msg += f"\n\n_Created by <@{bet['user']}>_"
-
+        footer = None
         if not bet["active"]:
-            msg += "\n\nThis bet is closed for new bets. Awaiting results from the bet creator."
+            footer = "This bet is closed for new bets. Awaiting results from the bet creator."
         elif timeout := bet.get("timeout"):
-            msg += f"\n\nThis bet will stop taking bets on {timeout.strftime('%d %b %y %H:%M:%S')}."
+            footer = f"This bet will stop taking bets on {timeout.strftime('%d %b %y %H:%M:%S')}."
 
-        return msg
+        if footer:
+            embed.set_footer(text=footer)
+
+        return embed
 
     def get_leaderboard_embed(self, guild: discord.Guild, number: Union[int, None], username: Optional[str]):
         """

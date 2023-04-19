@@ -323,3 +323,15 @@ class GuildDB(TypedDict):
     valorant_rollcall: bool
     valorant_channel: int
     valorant_role: int
+
+
+class Reminder(TypedDict):
+    _id: ObjectId
+    guild_id: int
+    created: datetime.datetime
+    user_id: int
+    timeout: datetime.datetime
+    active: bool
+    reason: str
+    channel_id: int
+    message_id: int

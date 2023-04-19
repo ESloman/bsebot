@@ -50,11 +50,13 @@ class BSEddiesHelp(BSEddies):
             "## Misc commnads\n"
             "- `/help` - this command\n"
             "- `/config` - configure BSEBot settings\n"
+            "- `/remindme` - set a reminder for yourself\n"
             "- `/suggest` - suggest an improvement/report a bug\n"
             "- `/stats` (soon) - see your Best Summer Ever statistics\n"
             "- `/wrapped22` - see your Best Summer Ever wrapped\n"
             "## Context Menu Commands\n"
             "- `Pin message`: pin the clicked message\n"
+            "- `Remind me`: set a reminder for yourself for a given message\n"
             "\n"
             "[Repo link](<https://github.com/ESloman/bsebot>)."
         )

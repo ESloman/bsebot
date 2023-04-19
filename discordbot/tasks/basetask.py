@@ -12,6 +12,7 @@ from mongo.bsepoints.emojis import ServerEmojis
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.interactions import UserInteractions
 from mongo.bsepoints.points import UserPoints
+from mongo.bsepoints.reminders import ServerReminders
 from mongo.bsepoints.stickers import ServerStickers
 from mongo.bsedataclasses import SpoilerThreads
 from mongo.bsedataclasses import WordleAttempts
@@ -46,9 +47,9 @@ class BaseTask(commands.Cog):
         self.revolutions = RevolutionEvent()
         self.interactions = UserInteractions()
         self.guilds = Guilds()
+        self.server_reminders = ServerReminders()
         self.spoilers = SpoilerThreads()
         self.wordles = WordleAttempts()
-        self.spoilers = SpoilerThreads()
 
     def _check_start_up_tasks(self) -> bool:
         """

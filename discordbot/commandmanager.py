@@ -24,7 +24,7 @@ from discordbot.clienteventclasses import OnMessage, OnMessageEdit, OnReactionAd
 from discordbot.clienteventclasses import OnThreadCreate, OnThreadUpdate, OnVoiceStateChange
 
 from discordbot.embedmanager import EmbedManager
-from discordbot.modals import BSEddiesBetCreateModal, BSEddiesImprovementSuggest
+from discordbot.modals import BSEddiesBetCreateModal, BSEddiesImprovementSuggest, ReminderModal
 
 # slash commands
 from discordbot.slashcommandeventclasses.active import BSEddiesActive
@@ -63,6 +63,7 @@ from discordbot.tasks.guildchecker import GuildChecker
 from discordbot.tasks.messagesync import MessageSync
 from discordbot.tasks.monthlyawards import MonthlyBSEddiesAwards
 from discordbot.tasks.releasechecker import ReleaseChecker
+from discordbot.tasks.reminders import RemindersTask
 from discordbot.tasks.revolutiontask import BSEddiesRevolutionTask
 from discordbot.tasks.threadmutetask import ThreadSpoilerTask
 from discordbot.tasks.wordlereminder import WordleReminder
@@ -200,6 +201,7 @@ class CommandManager(object):
         self.wordle_task = WordleTask(self.client, guilds, self.logger, startup_tasks)
         self.wordle_reminder = WordleReminder(self.client, guilds, self.logger, startup_tasks)
         self.celebrations_task = Celebrations(self.client, guilds, self.logger, startup_tasks)
+        self.reminders_task = RemindersTask(self.client, guilds, self.logger, startup_tasks)
 
         # call the methods that register the events we're listening for
         self._register_client_events()
@@ -677,6 +679,15 @@ class CommandManager(object):
             )
             await ctx.response.send_modal(modal)
 
+        @self.client.command(description="Set a reminder")
+        async def remindme(ctx: discord.ApplicationContext):
+            modal = ReminderModal(
+                self.logger,
+                None,
+                title="Set a reminder"
+            )
+            await ctx.response.send_modal(modal)
+
         @self.client.command(description="See your 2022 replay")
         async def wrapped22(ctx: discord.ApplicationContext):
             """_summary_
@@ -709,10 +720,26 @@ class CommandManager(object):
 
         @self.client.message_command(name="Delete message")
         async def delete_message(ctx: discord.ApplicationCommand, message: discord.Message):
-            """_summary_
+            """Allows BSEddies admins to delete a message
 
             Args:
                 ctx (discord.ApplicationCommand): _description_
                 message (discord.Message): _description_
             """
             await self.message_delete.message_delete(ctx, message)
+
+        @self.client.message_command(name="Remind me")
+        async def remind_me(ctx: discord.ApplicationCommand, message: discord.Message):
+            """
+            Allows triggering of the reminder modal using an existing message.
+
+            Args:
+                ctx (discord.ApplicationCommand): _description_
+                message (discord.Message): _description_
+            """
+            modal = ReminderModal(
+                self.logger,
+                message.id,
+                title="Set a reminder"
+            )
+            await ctx.response.send_modal(modal)

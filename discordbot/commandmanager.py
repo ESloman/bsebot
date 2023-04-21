@@ -34,7 +34,11 @@ from discordbot.clienteventclasses.onthreadupdate import OnThreadUpdate
 from discordbot.clienteventclasses.onvoicestatechange import OnVoiceStateChange
 
 from discordbot.embedmanager import EmbedManager
-from discordbot.modals import BSEddiesBetCreateModal, BSEddiesImprovementSuggest, ReminderModal
+
+# modals
+from discordbot.modals.betcreate import BetCreateModal
+from discordbot.modals.reminder import ReminderModal
+from discordbot.modals.suggest import SuggestModal
 
 # slash commands
 from discordbot.slashcommandeventclasses.active import BSEddiesActive
@@ -583,7 +587,7 @@ class CommandManager(object):
 
         @self.client.command(description="Create a bet")
         async def create(ctx: discord.ApplicationContext):
-            modal = BSEddiesBetCreateModal(
+            modal = BetCreateModal(
                 client=self.client,
                 guilds=self.guilds,
                 logger=self.logger,
@@ -699,7 +703,7 @@ class CommandManager(object):
 
         @self.client.command(description="Suggest an improvement")
         async def suggest(ctx: discord.ApplicationContext):
-            modal = BSEddiesImprovementSuggest(
+            modal = SuggestModal(
                 logger=self.logger,
                 github_api=self.githubapi,
                 title="Suggest an improvement"

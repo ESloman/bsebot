@@ -7,7 +7,12 @@ from discordbot.bsebot import BSEBot
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from discordbot.constants import WORDLE_REGEX
 from discordbot.message_actions.base import BaseMessageAction  # noqa
-from discordbot.message_actions import BirthdayReplies, MarvelComicsAdAction, ThankYouReplies, WordleMessageAction
+
+# message actions
+from discordbot.message_actions.birthday_replies import BirthdayReplies
+from discordbot.message_actions.marvel_ad import MarvelComicsAdAction
+from discordbot.message_actions.thank_you_replies import ThankYouReplies
+from discordbot.message_actions.wordle_reactions import WordleMessageAction
 
 
 class OnMessage(BaseEvent):

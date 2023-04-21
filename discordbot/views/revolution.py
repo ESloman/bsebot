@@ -252,7 +252,10 @@ class RevolutionView(discord.ui.View):
         self.toggle_stuff(False)
 
         await followup.edit_message(interaction.message.id, view=self, content=edited_message)
-        await followup.send(content=msg, ephemeral=True)
+
+        if button.label != "Save THYSELF":
+            # only send followup for users
+            await followup.send(content=msg, ephemeral=True)
 
     @discord.ui.button(
         label="OVERTHROW",

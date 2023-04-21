@@ -19,20 +19,13 @@ class BetReminder(BaseTask):
     ):
 
         super().__init__(bot, guild_ids, logger, startup_tasks)
-        self.bet_reminder.start()
-
-    def cog_unload(self):
-        """
-        Method for cancelling the loop.
-        :return:
-        """
-        self.bet_reminder.cancel()
+        self.task = self.bet_reminder
+        self.task.start()
 
     @tasks.loop(minutes=60)
     async def bet_reminder(self):
         """
         Loop that takes all our active bets and sends a reminder message
-        :return:
         """
 
         now = datetime.datetime.now()
@@ -68,8 +61,7 @@ class BetReminder(BaseTask):
     @bet_reminder.before_loop
     async def before_bet_reminder(self):
         """
-        Make sure that websocket is open before we starting querying via it.
-        :return:
+        Make sure that websocket is open before we start querying via it.
         """
         await self.bot.wait_until_ready()
         while not self._check_start_up_tasks():

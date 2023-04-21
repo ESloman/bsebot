@@ -28,27 +28,22 @@ class BSEddiesRevolutionTask(BaseTask):
     ):
 
         super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.task = self.revolution
         self.embed_manager = EmbedManager(logger)
         self.giphy_api = GiphyAPI(giphy_token)
         self.rev_started = {}
-        self.revolution.start()
 
         for guild_id in self.guild_ids:
             if _ := self.revolutions.get_open_events(guild_id):
                 self.rev_started[guild_id] = True
 
-    def cog_unload(self):
-        """
-        Method for cancelling the loop.
-        :return:
-        """
-        self.revolution.cancel()
+        self.task.start()
 
     @tasks.loop(minutes=1)
     async def revolution(self):
         """
-        Constantly checks to make sure that all events have been closed properly or raised correctly
-        :return:
+        Our revolution task. Creates a revolution event weekly and then handles the
+        closing/resolving of that event.
         """
         if not self._check_start_up_tasks():
             self.logger.info("Startup tasks not complete - skipping loop")
@@ -151,16 +146,16 @@ class BSEddiesRevolutionTask(BaseTask):
         """
         king_id = self.guilds.get_king(guild_id)
 
-        king = await self.bot.fetch_user(king_id)  # type: discord.User
-        guild_obj = await self.bot.fetch_guild(guild_id)  # type: discord.Guild
-        role = guild_obj.get_role(guild_db["role"])  # type: discord.Role
+        king = await self.bot.fetch_user(king_id)
+        guild_obj = await self.bot.fetch_guild(guild_id)
+        role = guild_obj.get_role(guild_db["role"])
         channel = await self.bot.fetch_channel(guild_db["channel"])
         await channel.trigger_typing()
 
         revolution_view = RevolutionView(self.bot, event, self.logger)
 
         message = self.embed_manager.get_revolution_message(king, role, event, guild_obj)
-        message_obj = await channel.send(content=message, view=revolution_view)  # type: discord.Message
+        message_obj = await channel.send(content=message, view=revolution_view)
 
         self.revolutions.update(
             {"_id": event["_id"]}, {"$set": {"message_id": message_obj.id, "channel_id": message_obj.channel.id}}
@@ -169,7 +164,7 @@ class BSEddiesRevolutionTask(BaseTask):
         gif = await self.giphy_api.random_gif("revolution")
         await channel.send(content=gif)
 
-    async def resolve_revolution(self, guild_id: int, event: RevolutionEventType):
+    async def resolve_revolution(self, guild_id: int, event: RevolutionEventType) -> None:
         """
         Method for handling an event that needs resolving.
 
@@ -263,7 +258,7 @@ class BSEddiesRevolutionTask(BaseTask):
 
         # do roles
 
-        supporter_role = guild.get_role(guild_db["supporter_role"])  # type: discord.Role
+        supporter_role = guild.get_role(guild_db["supporter_role"])
         revo_role = guild.get_role(guild_db["revolutionary_role"])
 
         # clear anyone that has the role already
@@ -304,8 +299,7 @@ class BSEddiesRevolutionTask(BaseTask):
     @revolution.before_loop
     async def before_revolution(self):
         """
-        Make sure that websocket is open before we starting querying via it.
-        :return:
+        Make sure that websocket is open before we start querying via it.
         """
         await self.bot.wait_until_ready()
         while not self._check_start_up_tasks():

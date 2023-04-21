@@ -1,5 +1,8 @@
-import discord
+
+import datetime
 from logging import Logger
+
+import discord
 
 from discordbot.constants import CREATOR
 from discordbot.selects.config import ConfigSelect
@@ -157,26 +160,29 @@ class ConfigView(discord.ui.View):
         guild_db = self.guilds.get_guild(interaction.guild_id)
         admins = guild_db.get("admins", [])
 
-        threads = []
+        now = datetime.datetime.now()
+
+        configurable_threads = []
         for thread in threads:
-            if not thread.get("active"):
+            if not thread.get("active") and (now - thread["created"]).days >= 30:
+                # only exclude non-active ones if they're super old
                 continue
             if interaction.user.id == CREATOR:
-                threads.append(thread)
+                configurable_threads.append(thread)
                 continue
             elif interaction.user.id in admins:
-                threads.append(thread)
+                configurable_threads.append(thread)
                 continue
             elif interaction.user.id == thread.get("owner", thread.get("creator", CREATOR)):
-                threads.append(thread)
+                configurable_threads.append(thread)
                 continue
 
-        if not threads:
+        if not configurable_threads:
             view = None
             msg = "No available threads for you to configure."
 
         else:
-            view = ThreadConfigView(threads)
+            view = ThreadConfigView(configurable_threads)
             msg = (
                 "_Thread Configuration_\n"
                 "Select a thread to configure, and then select whether it should send mute reminders and "

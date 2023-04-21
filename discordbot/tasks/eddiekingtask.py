@@ -20,21 +20,14 @@ class BSEddiesKingTask(BaseTask):
     ):
 
         super().__init__(bot, guild_ids, logger, startup_tasks)
-        self.king_checker.start()
+        self.task = self.king_checker
+        self.task.start()
         self.events_cache = {}
-
-    def cog_unload(self):
-        """
-        Method for cancelling the loop.
-        :return:
-        """
-        self.king_checker.cancel()
 
     @tasks.loop(minutes=1)
     async def king_checker(self):
         """
         Loop that makes sure the King is assigned correctly
-        :return:
         """
 
         for guild in self.bot.guilds:
@@ -165,8 +158,7 @@ class BSEddiesKingTask(BaseTask):
     @king_checker.before_loop
     async def before_king_checker(self):
         """
-        Make sure that websocket is open before we starting querying via it.
-        :return:
+        Make sure that websocket is open before we start querying via it.
         """
         await self.bot.wait_until_ready()
         while not self._check_start_up_tasks():

@@ -23,19 +23,13 @@ class WordleTask(BaseTask):
     ):
 
         super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.task = self.wordle_message
 
-        self.wordle_message.start()
         self.sent_wordle = False
         self.wait_iters = None
 
         self._set_wordle()
-
-    def cog_unload(self):
-        """
-        Method for cancelling the loop.
-        :return:
-        """
-        self.wordle_message.cancel()
+        self.task.start()
 
     def _set_wordle(self):
         """
@@ -54,8 +48,7 @@ class WordleTask(BaseTask):
     @tasks.loop(minutes=10)
     async def wordle_message(self):
         """
-        Wordle task
-        :return:
+        Task that does the daily wordle
         """
 
         now = datetime.datetime.now()
@@ -150,8 +143,7 @@ class WordleTask(BaseTask):
     @wordle_message.before_loop
     async def before_wordle_message(self):
         """
-        Make sure that websocket is open before we starting querying via it.
-        :return:
+        Make sure that websocket is open before we start querying via it.
         """
         await self.bot.wait_until_ready()
         while not self._check_start_up_tasks():

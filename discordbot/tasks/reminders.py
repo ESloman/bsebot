@@ -19,20 +19,13 @@ class RemindersTask(BaseTask):
     ):
 
         super().__init__(bot, guild_ids, logger, startup_tasks)
-        self.reminders.start()
-
-    def cog_unload(self):
-        """
-        Method for cancelling the loop.
-        :return:
-        """
-        self.reminders.cancel()
+        self.task = self.reminders
+        self.task.start()
 
     @tasks.loop(minutes=1)
     async def reminders(self):
         """
-        Loop that triggers reminders
-        :return:
+        Loop that triggers reminders from the database
         """
 
         now = datetime.datetime.now()
@@ -56,7 +49,6 @@ class RemindersTask(BaseTask):
     async def before_reminders(self):
         """
         Make sure that websocket is open before we start querying via it.
-        :return:
         """
         await self.bot.wait_until_ready()
         while not self._check_start_up_tasks():

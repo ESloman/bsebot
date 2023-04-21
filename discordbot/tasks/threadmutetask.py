@@ -21,20 +21,13 @@ class ThreadSpoilerTask(BaseTask):
     ):
 
         super().__init__(bot, guild_ids, logger, startup_tasks)
-        self.thread_mute.start()
-
-    def cog_unload(self):
-        """
-        Method for cancelling the loop.
-        :return:
-        """
-        self.thread_mute.cancel()
+        self.task = self.thread_mute
+        self.task.start()
 
     @tasks.loop(minutes=15)
     async def thread_mute(self):
         """
-        Loop that makes sure the King is assigned correctly
-        :return:
+        Task that sends daily "remember to mute this spoiler thread" messages.
         """
 
         now = datetime.datetime.now()
@@ -72,8 +65,7 @@ class ThreadSpoilerTask(BaseTask):
     @thread_mute.before_loop
     async def before_thread_mute(self):
         """
-        Make sure that websocket is open before we starting querying via it.
-        :return:
+        Make sure that websocket is open before we start querying via it.
         """
         await self.bot.wait_until_ready()
         while not self._check_start_up_tasks():

@@ -6,8 +6,8 @@ from discord.ui import Select
 class ConfigSelect(Select):
     _values = [
         ("Admins", "admins"),
+        ("Daily Salary", "salary"),
         ("Revolution Event", "revolution"),
-        ("Salary", "salary"),
         ("Spoiler Threads", "threads"),
         ("Valorant", "valorant"),
         ("Wordle Config", "wordle")

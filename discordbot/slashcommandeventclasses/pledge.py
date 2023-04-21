@@ -5,7 +5,7 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.views.pledge import PledgeView
 
 
-class BSEddiesPledge(BSEddies):
+class Pledge(BSEddies):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)

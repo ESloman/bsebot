@@ -6,18 +6,18 @@ import discord
 import discordbot.views.bet
 from discordbot.bot_enums import ActivityTypes
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
-from discordbot.slashcommandeventclasses.close import BSEddiesCloseBet
+from discordbot.slashcommandeventclasses.close import CloseBet
 from discordbot.views.place import PlaceABetView
 
 
-class BSEddiesPlaceBet(BSEddies):
+class PlaceBet(BSEddies):
     """
     Class for handling `/bseddies bet place` commands
     """
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
-        self.bseddies_close = BSEddiesCloseBet(client, guilds, logger)
+        self.bseddies_close = CloseBet(client, guilds, logger)
 
     async def create_bet_view(
             self,

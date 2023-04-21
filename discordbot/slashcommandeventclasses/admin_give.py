@@ -5,7 +5,7 @@ from discordbot.bot_enums import TransactionTypes, ActivityTypes
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
-class BSEddiesAdminGive(BSEddies):
+class AdminGive(BSEddies):
     """
     Class for handling `/bseddies admin give` command
     """

@@ -6,7 +6,7 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from mongo.datatypes import User
 
 
-class BSEddiesView(BSEddies):
+class View(BSEddies):
     """
     Class for handling `/view` commands
     """

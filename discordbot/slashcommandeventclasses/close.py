@@ -8,7 +8,7 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.views.close import CloseABetView
 
 
-class BSEddiesCloseBet(BSEddies):
+class CloseBet(BSEddies):
     """
     Class for handling `/bseddies bet close` commands
     """

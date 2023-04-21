@@ -8,7 +8,7 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.views.config import ConfigView
 
 
-class BSEddiesConfig(BSEddies):
+class Config(BSEddies):
     """
     Class for handling `/view` commands
     """

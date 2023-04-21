@@ -11,7 +11,7 @@ from discordbot.stats.statsdatacache import StatsDataCache
 from discordbot.views.wrapped import WrappedView
 
 
-class BSEddiesStats(BSEddies):
+class Stats(BSEddies):
     """
     Class for handling `/stats` commands
     """

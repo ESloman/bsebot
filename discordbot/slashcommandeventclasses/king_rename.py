@@ -7,7 +7,7 @@ from discordbot.bot_enums import ActivityTypes, TransactionTypes
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
-class BSEddiesKingRename(BSEddies):
+class KingRename(BSEddies):
     """
     Class for handling `/renameking` commands
     """

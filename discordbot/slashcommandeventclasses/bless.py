@@ -6,7 +6,7 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.views.bless import BlessView
 
 
-class BSEddiesBless(BSEddies):
+class Bless(BSEddies):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)

@@ -6,7 +6,7 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.views.highscore import HighScoreBoardView
 
 
-class BSEddiesHighScore(BSEddies):
+class HighScore(BSEddies):
     """
     Class for handling `/bseddies highscore` commands
     """

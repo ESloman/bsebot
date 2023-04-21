@@ -1,9 +1,9 @@
 
 import discord
 
-from discordbot.slashcommandeventclasses.close import BSEddiesCloseBet
-from discordbot.slashcommandeventclasses.create import BSEddiesCreateBet
-from discordbot.slashcommandeventclasses.place import BSEddiesPlaceBet
+from discordbot.slashcommandeventclasses.close import CloseBet
+from discordbot.slashcommandeventclasses.create import CreateBet
+from discordbot.slashcommandeventclasses.place import PlaceBet
 
 
 class BetCreateModal(discord.ui.Modal):
@@ -12,9 +12,9 @@ class BetCreateModal(discord.ui.Modal):
 
         self.logger = logger
 
-        self.bseddies_create = BSEddiesCreateBet(client, guilds, logger)
-        self.bseddies_place = BSEddiesPlaceBet(client, guilds, logger)
-        self.bseddies_close = BSEddiesCloseBet(client, guilds, logger)
+        self.bseddies_create = CreateBet(client, guilds, logger)
+        self.bseddies_place = PlaceBet(client, guilds, logger)
+        self.bseddies_close = CloseBet(client, guilds, logger)
 
         self.add_item(discord.ui.InputText(label="Bet title", placeholder="Enter your bet title here"))
         self.add_item(

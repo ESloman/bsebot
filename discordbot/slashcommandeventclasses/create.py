@@ -10,7 +10,7 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.views.bet import BetView
 
 
-class BSEddiesCreateBet(BSEddies):
+class CreateBet(BSEddies):
     """
     Class for handling `/bseddies bet create` command
     """

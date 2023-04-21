@@ -11,8 +11,8 @@ from discordbot.bsebot import BSEBot
 from discordbot.bot_enums import ActivityTypes
 from discordbot.clienteventclasses.onready import OnReadyEvent
 from discordbot.embedmanager import EmbedManager
-from discordbot.slashcommandeventclasses.close import BSEddiesCloseBet
-from discordbot.slashcommandeventclasses.place import BSEddiesPlaceBet
+from discordbot.slashcommandeventclasses.close import CloseBet
+from discordbot.slashcommandeventclasses.place import PlaceBet
 from discordbot.tasks.basetask import BaseTask
 from discordbot.views.bet import BetView
 from discordbot.views.leaderboard import LeaderBoardView
@@ -28,8 +28,8 @@ class GuildChecker(BaseTask):
         startup_tasks: list[BaseTask],
         on_ready: OnReadyEvent,
         github_api: GitHubAPI,
-        place: BSEddiesPlaceBet,
-        close: BSEddiesCloseBet
+        place: PlaceBet,
+        close: CloseBet
     ):
 
         super().__init__(bot, guild_ids, logger, startup_tasks)

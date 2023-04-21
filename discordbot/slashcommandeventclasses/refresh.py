@@ -2,20 +2,20 @@
 import discord
 
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
-from discordbot.slashcommandeventclasses.close import BSEddiesCloseBet
-from discordbot.slashcommandeventclasses.place import BSEddiesPlaceBet
+from discordbot.slashcommandeventclasses.close import CloseBet
+from discordbot.slashcommandeventclasses.place import PlaceBet
 from discordbot.views.refresh import RefreshBetView
 
 
-class BSEddiesRefreshBet(BSEddies):
+class RefreshBet(BSEddies):
     """
     Class for handling `/refresh` commands
     """
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
-        self.bseddies_close = BSEddiesCloseBet(client, guilds, logger)
-        self.bseddies_place = BSEddiesPlaceBet(client, guilds, logger)
+        self.bseddies_close = CloseBet(client, guilds, logger)
+        self.bseddies_place = PlaceBet(client, guilds, logger)
 
     async def create_refresh_view(
             self,

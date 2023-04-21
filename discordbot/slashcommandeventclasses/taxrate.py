@@ -6,7 +6,7 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.views.taxrate import TaxRateView
 
 
-class BSEddiesTaxRate(BSEddies):
+class TaxRate(BSEddies):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)

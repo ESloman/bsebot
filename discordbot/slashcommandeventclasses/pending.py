@@ -5,7 +5,7 @@ from discordbot.bot_enums import ActivityTypes
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
-class BSEddiesPending(BSEddies):
+class Pending(BSEddies):
     """
     Class for handling `/bseddies pending` commands
     """

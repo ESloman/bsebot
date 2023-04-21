@@ -9,7 +9,7 @@ from apis.github import GitHubAPI
 
 from discordbot.bsebot import BSEBot
 from discordbot.bot_enums import ActivityTypes
-from discordbot.clienteventclasses import OnReadyEvent
+from discordbot.clienteventclasses.onready import OnReadyEvent
 from discordbot.embedmanager import EmbedManager
 from discordbot.slashcommandeventclasses.close import BSEddiesCloseBet
 from discordbot.slashcommandeventclasses.place import BSEddiesPlaceBet

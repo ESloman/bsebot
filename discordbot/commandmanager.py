@@ -20,9 +20,18 @@ from mongo.bsepoints.points import UserPoints
 from discordbot.bsebot import BSEBot
 
 # client events
-from discordbot.clienteventclasses import OnDirectMessage, OnEmojiCreate, OnMemberJoin, OnMemberLeave
-from discordbot.clienteventclasses import OnMessage, OnMessageEdit, OnReactionAdd, OnReadyEvent, OnStickerCreate
-from discordbot.clienteventclasses import OnThreadCreate, OnThreadUpdate, OnVoiceStateChange
+from discordbot.clienteventclasses.ondirectmessage import OnDirectMessage
+from discordbot.clienteventclasses.onemojicreate import OnEmojiCreate
+from discordbot.clienteventclasses.onmemberjoin import OnMemberJoin
+from discordbot.clienteventclasses.onmemberleave import OnMemberLeave
+from discordbot.clienteventclasses.onmessage import OnMessage
+from discordbot.clienteventclasses.onmessageedit import OnMessageEdit
+from discordbot.clienteventclasses.onreactionadd import OnReactionAdd
+from discordbot.clienteventclasses.onready import OnReadyEvent
+from discordbot.clienteventclasses.onstickercreate import OnStickerCreate
+from discordbot.clienteventclasses.onthreadcreate import OnThreadCreate
+from discordbot.clienteventclasses.onthreadupdate import OnThreadUpdate
+from discordbot.clienteventclasses.onvoicestatechange import OnVoiceStateChange
 
 from discordbot.embedmanager import EmbedManager
 from discordbot.modals import BSEddiesBetCreateModal, BSEddiesImprovementSuggest, ReminderModal

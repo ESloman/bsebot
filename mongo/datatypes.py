@@ -243,6 +243,8 @@ class RevolutionEventType(TypedDict):
     """list of those supporting the event"""
     revolutionaries: list[int]
     """list of those revolutioning the event"""
+    neutrals: list[int]
+    """list of those impartial to the event"""
     locked: list[int]
     """Users who can't change their decision"""
     users: list[int]

@@ -22,15 +22,9 @@ class MessageSync(BaseTask):
     ):
 
         super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.task = self.message_sync
         self.on_message = on_message
-        self.message_sync.start()
-
-    def cog_unload(self):
-        """
-        Method for cancelling the loop.
-        :return:
-        """
-        self.message_sync.cancel()
+        self.task.start()
 
     async def get_unsynced_messages(
         self,
@@ -70,7 +64,7 @@ class MessageSync(BaseTask):
     async def _message_sync(
         self,
         channel: discord.TextChannel | discord.Thread
-    ):
+    ) -> None:
         """
         Checks a given channel for unsynced messages
         Initially goes back a week to find unsynced messages, but will go back further
@@ -122,7 +116,6 @@ class MessageSync(BaseTask):
     async def message_sync(self):
         """
         Loop that makes sure all messages are synced correctly
-        :return:
         """
 
         for guild in self.bot.guilds:
@@ -152,8 +145,7 @@ class MessageSync(BaseTask):
     @message_sync.before_loop
     async def before_message_sync(self):
         """
-        Make sure that websocket is open before we starting querying via it.
-        :return:
+        Make sure that websocket is open before we start querying via it.
         """
         await self.bot.wait_until_ready()
         while not self._check_start_up_tasks():

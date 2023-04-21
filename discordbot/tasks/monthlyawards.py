@@ -22,18 +22,15 @@ class MonthlyBSEddiesAwards(BaseTask):
     ):
 
         super().__init__(bot, guild_ids, logger, startup_tasks)
-        self.bseddies_awards.start()
-
-    def cog_unload(self):
-        """
-        Method for cancelling the loop.
-        :return:
-        """
-        self.bseddies_awards.cancel()
+        self.task = self.bseddies_awards
+        self.task.start()
 
     @tasks.loop(minutes=60)
     async def bseddies_awards(self):
-
+        """
+        Loop that triggers our monthly awards. This will trigger on the 1st of a month.
+        Calculates guild stats/awards.
+        """
         now = datetime.datetime.now()
 
         if not now.day == 1 or not now.hour == 11:
@@ -85,8 +82,7 @@ class MonthlyBSEddiesAwards(BaseTask):
     @bseddies_awards.before_loop
     async def before_thread_mute(self):
         """
-        Make sure that websocket is open before we starting querying via it.
-        :return:
+        Make sure that websocket is open before we start querying via it.
         """
         await self.bot.wait_until_ready()
         while not self._check_start_up_tasks():

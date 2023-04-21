@@ -25,26 +25,19 @@ class BetCloser(BaseTask):
         close: BSEddiesCloseBet
     ):
         super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.task = self.bet_closer
 
         self.embed_manager = EmbedManager(self.logger)
-        self.bet_closer.start()
+        self.task.start()
 
         self.place = place
         self.close = close
-
-    def cog_unload(self):
-        """
-        Method for cancelling the loop.
-        :return:
-        """
-        self.bet_closer.cancel()
 
     @tasks.loop(seconds=10.0)
     async def bet_closer(self):
         """
         Loop that takes all our active bets and ensures they haven't expired.
         If they have expired - they get closed.
-        :return:
         """
 
         now = datetime.datetime.now()
@@ -81,8 +74,7 @@ class BetCloser(BaseTask):
     @bet_closer.before_loop
     async def before_bet_closer(self):
         """
-        Make sure that websocket is open before we starting querying via it.
-        :return:
+        Make sure that websocket is open before we start querying via it.
         """
         await self.bot.wait_until_ready()
         while not self._check_start_up_tasks():

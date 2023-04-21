@@ -90,6 +90,7 @@ class RevolutionEvent(TicketedEvent):
             "chance": 15,
             "revolutionaries": [],
             "supporters": [],
+            "neutrals": [],
             "users": [],
             "ticket_buyers": [],
             "open": True,

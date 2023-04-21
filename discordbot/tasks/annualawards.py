@@ -82,7 +82,7 @@ class AnnualBSEddiesAwards(BaseTask):
     @annual_bseddies_awards.before_loop
     async def before_thread_mute(self):
         """
-        Make sure that websocket is open before we starting querying via it.
+        Make sure that websocket is open before we start querying via it.
         """
         await self.bot.wait_until_ready()
         while not self._check_start_up_tasks():

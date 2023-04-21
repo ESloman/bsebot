@@ -8,6 +8,7 @@ to those classes here in this file. It does the bulk of it's work in the __init_
 Any new client events and slash commands will need to be added here.
 """
 
+import inspect
 import logging
 
 import discord
@@ -53,6 +54,7 @@ from discordbot.contextcommands.message_delete import ContextDeleteMessage
 
 # task imports
 from discordbot.tasks.annualawards import AnnualBSEddiesAwards
+from discordbot.tasks.basetask import BaseTask
 from discordbot.tasks.betcloser import BetCloser
 from discordbot.tasks.betreminder import BetReminder
 from discordbot.tasks.celebrations import Celebrations
@@ -204,22 +206,11 @@ class CommandManager(object):
         self.celebrations_task = Celebrations(self.client, guilds, self.logger, startup_tasks)
         self.reminders_task = RemindersTask(self.client, guilds, self.logger, startup_tasks)
 
-        _all_tasks = [
-            self.guild_checker_task,
-            self.bet_closer_task,
-            self.bet_reminder_task,
-            self.eddie_gain_message_task,
-            self.eddie_king_task,
-            self.revolution_task,
-            self.release_task,
-            self.thread_task,
-            self.message_sync,
-            self.vally_task,
-            self.monthly_awards_task,
-            self.annual_awards_task,
-            self.wordle_task,
-            self.wordle_reminder,
-            self.celebrations_task
+        # dynamically gets all the defined tasks
+        # from the class attributes
+        all_tasks = [
+            attr[1] for attr in inspect.getmembers(self, lambda x: not inspect.isroutine(x))
+            if isinstance(attr[1], BaseTask)
         ]
 
         self.task_manager = TaskManager(
@@ -227,7 +218,7 @@ class CommandManager(object):
             guilds,
             self.logger,
             startup_tasks,
-            _all_tasks
+            all_tasks
         )
 
         # call the methods that register the events we're listening for

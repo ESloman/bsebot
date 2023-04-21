@@ -1,4 +1,5 @@
 
+import asyncio
 import datetime
 from logging import Logger
 
@@ -60,3 +61,12 @@ class TaskManager(BaseTask):
 
             else:
                 self.task_error_logs[task_name]["last_running"] = now
+
+    @task_checker.before_loop
+    async def before_task_checker(self):
+        """
+        Make sure that websocket is open before we start querying via it.
+        """
+        await self.bot.wait_until_ready()
+        while not self._check_start_up_tasks():
+            await asyncio.sleep(5)

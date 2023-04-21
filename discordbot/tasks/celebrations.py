@@ -20,14 +20,8 @@ class Celebrations(BaseTask):
     ):
 
         super().__init__(bot, guild_ids, logger, startup_tasks)
-        self.celebrations.start()
-
-    def cog_unload(self):
-        """
-        Method for cancelling the loop.
-        :return:
-        """
-        self.celebrations.cancel()
+        self.task = self.celebrations
+        self.task.start()
 
     @tasks.loop(minutes=15)
     async def celebrations(self):
@@ -94,8 +88,7 @@ class Celebrations(BaseTask):
     @celebrations.before_loop
     async def before_celebrations(self):
         """
-        Make sure that websocket is open before we starting querying via it.
-        :return:
+        Make sure that websocket is open before we start querying via it.
         """
         await self.bot.wait_until_ready()
         while not self._check_start_up_tasks():

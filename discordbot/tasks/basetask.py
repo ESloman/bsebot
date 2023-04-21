@@ -1,7 +1,15 @@
 
+"""
+This is our implementation of BaseTask.
+It should provide a common descendant for all tasks.
+This is where we should initialise all the database Collection classes we want to use
+in the various tasks.
+"""
+
 from logging import Logger
 
 from discord.ext import commands
+from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
 from discordbot.utilities import PlaceHolderLogger
@@ -27,15 +35,17 @@ class BaseTask(commands.Cog):
         startup_tasks: list = None
     ) -> None:
 
-        self.bot = bot
-        self.guild_ids = guild_ids
-        self.logger = logger
-        self.finished = False
+        self.bot: BSEBot = bot
+        self.guild_ids: list[int] = guild_ids
+        self.logger: Logger = logger
+        self.finished: bool = False
 
         if startup_tasks is None:
             startup_tasks = []
 
-        self.startup_tasks = startup_tasks
+        self.startup_tasks: list[BaseTask] = startup_tasks
+
+        self._task = None
 
         # database classes
         self.activities = UserActivities()
@@ -58,3 +68,17 @@ class BaseTask(commands.Cog):
             if not task.finished:
                 return False
         return True
+
+    @property
+    def task(self) -> tasks.Loop:
+        return self._task
+
+    @task.setter
+    def task(self, task: tasks.Loop) -> None:
+        self._task = task
+
+    def cog_unload(self):
+        """
+        Method for cancelling the loop.
+        """
+        self.task.cancel()

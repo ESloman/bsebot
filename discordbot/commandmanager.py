@@ -64,6 +64,7 @@ from discordbot.tasks.messagesync import MessageSync
 from discordbot.tasks.monthlyawards import MonthlyBSEddiesAwards
 from discordbot.tasks.releasechecker import ReleaseChecker
 from discordbot.tasks.revolutiontask import BSEddiesRevolutionTask
+from discordbot.tasks.taskmanager import TaskManager
 from discordbot.tasks.threadmutetask import ThreadSpoilerTask
 from discordbot.tasks.wordlereminder import WordleReminder
 from discordbot.tasks.wordletask import WordleTask
@@ -200,6 +201,32 @@ class CommandManager(object):
         self.wordle_task = WordleTask(self.client, guilds, self.logger, startup_tasks)
         self.wordle_reminder = WordleReminder(self.client, guilds, self.logger, startup_tasks)
         self.celebrations_task = Celebrations(self.client, guilds, self.logger, startup_tasks)
+
+        _all_tasks = [
+            self.guild_checker_task,
+            self.bet_closer_task,
+            self.bet_reminder_task,
+            self.eddie_gain_message_task,
+            self.eddie_king_task,
+            self.revolution_task,
+            self.release_task,
+            self.thread_task,
+            self.message_sync,
+            self.vally_task,
+            self.monthly_awards_task,
+            self.annual_awards_task,
+            self.wordle_task,
+            self.wordle_reminder,
+            self.celebrations_task
+        ]
+
+        self.task_manager = TaskManager(
+            self.client,
+            guilds,
+            self.logger,
+            startup_tasks,
+            _all_tasks
+        )
 
         # call the methods that register the events we're listening for
         self._register_client_events()

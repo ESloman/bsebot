@@ -152,7 +152,11 @@ class BSEddiesManager(BaseTask):
         points = start
         for message_type in MESSAGE_TYPES:
             if val := counter.get(message_type):
-                t_points = val * MESSAGE_VALUES[message_type]
+                message_worth = MESSAGE_VALUES.get(message_type, 0)
+                if not message_worth:
+                    self.logger.debug(f"'{message_type}' doesn't have a value associated with it - skipping")
+                    continue
+                t_points = val * message_worth
                 points += t_points
                 self.logger.info(f"{t_points} for {message_type}")
         return points

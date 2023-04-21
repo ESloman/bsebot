@@ -25,13 +25,13 @@ class BSEddiesPledge(BSEddies):
 
         if ctx.user.id == king_id:
             message = "You are not the King - you cannot pledge."
-            await ctx.respond(content=message, ephemeral=True)
+            await ctx.respond(content=message, ephemeral=True, delete_after=10)
             return
 
         if ctx.user.id in guild_db.get("pledged", []):
             # can't pledge again when they've already pledged support
             message = "You're already locked in to support the King this week."
-            await ctx.respond(content=message, ephemeral=True)
+            await ctx.respond(content=message, ephemeral=True, delete_after=10)
             return
 
         user_db = self.user_points.find_user(ctx.user.id, guild_id)

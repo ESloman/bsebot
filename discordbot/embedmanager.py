@@ -94,7 +94,7 @@ class EmbedManager(object):
             message += f"\n**{users.index(user) + 1})**  {name}  :  {user['points']}"
 
         message += (
-            f"\n\nLast refreshed at `{datetime.datetime.now().strftime('%d %b %y %H:%M:%S')}` by _{username}_."
+            f"\n\nLast refreshed at `{datetime.datetime.now().strftime('%d %b %y %H:%M')}` by _{username}_."
         )
 
         return message
@@ -133,7 +133,7 @@ class EmbedManager(object):
             message += f"\n**{users.index(user) + 1})**  {name}  :  {user.get('high_score', 0)}"
 
         message += (
-            f"\n\nLast refreshed at `{datetime.datetime.now().strftime('%d %b %y %H:%M:%S')}` by _{username}_."
+            f"\n\nLast refreshed at `{datetime.datetime.now().strftime('%d %b %y %H:%M')}` by _{username}_."
         )
 
         return message
@@ -176,12 +176,10 @@ class EmbedManager(object):
             "alongside their King.\n"
             "The KING may spend 10% of their eddies using the _Save Thyself_ "
             "button to reduce revolution chance by 15%.\n"
-            f"**Event ID**: `{event['event_id']}`\n"
             f"**Success rate**: `{chance}%`\n"
             f"**Revolutionaries**: `{', '.join(revos) if revos else None}`\n"
             f"**Supporters**: `{', '.join(supps) if supps else None}`\n"
-            f"**Locked in KING eddies**: `{event.get('locked_in_eddies')}`\n"
-            f"**Event time**: `{event['expired'].strftime('%d %b %y %H:%M:%S')}`"
+            f"**Locked in KING eddies**: `{event.get('locked_in_eddies')}`"
         )
 
         return message

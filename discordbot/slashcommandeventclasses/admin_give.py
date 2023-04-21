@@ -41,4 +41,4 @@ class BSEddiesAdminGive(BSEddies):
         except (discord.Forbidden, discord.ApplicationCommandInvokeError):
             pass
 
-        await ctx.respond(content=f"Given {user.display_name} {amount} eddies.", ephemeral=True)
+        await ctx.respond(content=f"Given {user.display_name} {amount} eddies.", ephemeral=True, delete_after=10)

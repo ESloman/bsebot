@@ -83,33 +83,33 @@ class BSEddiesPlaceBet(BSEddies):
 
         if not bet:
             msg = "This bet doesn't exist."
-            await response.edit_message(content=msg, view=None)
+            await response.edit_message(content=msg, view=None, delete_after=10)
             return
 
         view = discordbot.views.bet.BetView(bet, self, self.bseddies_close)
 
         if not bet["active"]:
             msg = f"Your reaction on **Bet {bet_id}** failed as the bet is closed for new bets."
-            await response.edit_message(content=msg, view=view)
+            await response.edit_message(content=msg, view=None, delete_after=10)
             return
 
         emoji = emoji.strip()
 
         if emoji not in bet["option_dict"]:
             msg = f"Your reaction on **Bet {bet_id}** failed as that reaction isn't a valid outcome."
-            await response.edit_message(content=msg, view=view)
+            await response.edit_message(content=msg, view=None, delete_after=10)
             return
 
         if amount <= 0:
             msg = "Cannot bet negative eddies or 0 eddies."
-            await response.edit_message(content=msg, view=view)
+            await response.edit_message(content=msg, view=None, delete_after=10)
             return
 
         success = self.user_bets.add_better_to_bet(bet_id, guild.id, ctx.user.id, emoji, amount)
 
         if not success["success"]:
             msg = f"Your bet on **Bet {bet_id}** failed cos __{success['reason']}__?"
-            await response.edit_message(content=msg, view=view)
+            await response.edit_message(content=msg, view=None, delete_after=10)
             return False
 
         bet = self.user_bets.get_bet_from_id(guild.id, bet_id)
@@ -122,4 +122,4 @@ class BSEddiesPlaceBet(BSEddies):
         message = channel.get_partial_message(bet["message_id"])
         embed = self.embed_manager.get_bet_embed(guild, bet_id, bet)
         await message.edit(embed=embed, view=view)
-        await response.edit_message(content="Placed the bet for you!", view=None)
+        await response.edit_message(content="Placed the bet for you!", view=None, delete_after=10)

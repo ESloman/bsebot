@@ -734,7 +734,7 @@ class CommandManager(object):
                 await message.pin(reason=f"{ctx.author.name} has pinned this message")
             except discord.HTTPException:
                 pass
-            await ctx.respond(content="Pinned", ephemeral=True)
+            await ctx.respond(content="Pinned", ephemeral=True, delete_after=5)
 
         @self.client.message_command(name="Delete message")
         async def delete_message(ctx: discord.ApplicationCommand, message: discord.Message):

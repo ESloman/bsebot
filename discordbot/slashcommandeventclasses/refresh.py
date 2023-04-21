@@ -37,7 +37,7 @@ class BSEddiesRefreshBet(BSEddies):
             bet_ids = _bets
 
         if len(bet_ids) == 0:
-            await ctx.respond(content="There are no active bets to bet on right now.", ephemeral=True)
+            await ctx.respond(content="There are no active bets to bet on right now.", ephemeral=True, delete_after=10)
             return
 
         refresh_bet_view = RefreshBetView(bet_ids, self.bseddies_place, self.bseddies_close)

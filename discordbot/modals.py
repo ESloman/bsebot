@@ -186,7 +186,7 @@ class ReminderModal(discord.ui.Modal):
 
         reminder_msg = (
             f"{interaction.user.mention} you will be reminded about **{reason}** "
-            f"at {str(timeout_date)}"
+            f"at {timeout_date.strftime('%d %b %y %H:%M')}"
         )
 
         if not self.message_id:
@@ -207,4 +207,4 @@ class ReminderModal(discord.ui.Modal):
         )
 
         if not self.message_id:
-            await interaction.followup.send(content="Reminder set.", ephemeral=True)
+            await interaction.followup.send(content="Reminder set.", ephemeral=True, delete_after=5)

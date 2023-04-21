@@ -26,5 +26,5 @@ class BetView(discord.ui.View):
         await self.close.create_bet_view(interaction, [self.bet, ])
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, emoji="✖️")
-    async def cancel_ballback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
+    async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
         await self.close.cancel_bet(interaction, self.bet["bet_id"])

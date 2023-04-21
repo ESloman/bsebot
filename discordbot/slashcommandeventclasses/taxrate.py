@@ -26,7 +26,7 @@ class BSEddiesTaxRate(BSEddies):
 
         if ctx.user.id != king_id:
             message = "You are not the King - you cannot set the tax rate."
-            await ctx.respond(content=message, ephemeral=True)
+            await ctx.respond(content=message, ephemeral=True, delete_after=10)
             return
 
         value, supporter_value = self.guilds.get_tax_rate(guild_id)

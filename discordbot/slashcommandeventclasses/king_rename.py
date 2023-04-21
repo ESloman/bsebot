@@ -77,11 +77,11 @@ class BSEddiesKingRename(BSEddies):
                     f"The {role.upper()} role was renamed within the last hour can't be changed again - "
                     f"need to wait another `{mins}` minutes."
                 )
-                await ctx.followup.send(content=message, ephemeral=True)
+                await ctx.followup.send(content=message, ephemeral=True, delete_after=20)
                 return
 
         if not role_id:
-            await ctx.followup.send("Guild role not set correctly.", ephemeral=True)
+            await ctx.followup.send("Guild role not set correctly.", ephemeral=True, delete_after=20)
             return
         role_obj = ctx.guild.get_role(role_id)
 
@@ -89,7 +89,7 @@ class BSEddiesKingRename(BSEddies):
             await role_obj.edit(name=name)
         except discord.Forbidden:
             message = "Don't have the required permissions to do this."
-            await ctx.followup.send(message, ephemeral=True)
+            await ctx.followup.send(message, ephemeral=True, delete_after=30)
             return
 
         self.user_points.increment_points(
@@ -119,4 +119,4 @@ class BSEddiesKingRename(BSEddies):
             await channel.send(content=ann)
 
         message = f"Changed the role name to `{name}` for you."
-        await ctx.followup.send(content=message, ephemeral=True)
+        await ctx.followup.send(content=message, ephemeral=True, delete_after=20)

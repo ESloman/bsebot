@@ -115,7 +115,9 @@ class ConfigView(discord.ui.View):
             delete_after=2
         )
 
-        if not self._check_perms(value, interaction):
+        guild_id = interaction.guild.id if interaction.guild else None
+
+        if not self._check_perms(value, interaction.user.id, guild_id):
             self.logger.info(f"User {interaction.user} tried to configure {value} without the right perms")
             return await self._send_no_perms_message(interaction)
 

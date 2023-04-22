@@ -59,16 +59,17 @@ class BaseClass(object):
         rets = interface.insert(self._vault, document)
         return rets
 
-    def update(self, parameters: dict, updated_vals: dict) -> UpdateResult:
+    def update(self, parameters: dict, updated_vals: dict, many: bool = False) -> UpdateResult:
         """
         Updates all documents based on the given parameters with the provided values.
         :param parameters:
         :param updated_vals:
+        :param many:
         :return: UpdateResult object
         """
         if self.vault is None:
             raise NoVaultError("No vault instantiated.")
-        rets = interface.update(self.vault, parameters, updated_vals)
+        rets = interface.update(self.vault, parameters, updated_vals, many)
         return rets
 
     def delete(self, parameters: dict, many: bool = True) -> int:
@@ -90,7 +91,8 @@ class BaseClass(object):
             projection: dict = None,
             as_gen: bool = False,
             skip: int = None,
-            use_paginated: bool = False
+            use_paginated: bool = False,
+            sort: list[tuple] = None
     ) -> Union[list, Cursor]:
         """
         Searches a collection for documents based on given parameters.
@@ -117,7 +119,7 @@ class BaseClass(object):
         if self.vault is None:
             raise NoVaultError("No vault instantiated.")
         if not projection or as_gen or not use_paginated:
-            return interface.query(self.vault, parameters, limit, projection, as_gen, skip=skip)
+            return interface.query(self.vault, parameters, limit, projection, as_gen, skip=skip, sort=sort)
         return self.paginated_query(parameters, limit, skip)
 
     def paginated_query(self, query_dict: dict, limit=1000, skip=0) -> list[dict]:

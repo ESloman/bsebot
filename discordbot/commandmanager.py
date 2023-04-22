@@ -20,34 +20,47 @@ from mongo.bsepoints.points import UserPoints
 from discordbot.bsebot import BSEBot
 
 # client events
-from discordbot.clienteventclasses import OnDirectMessage, OnEmojiCreate, OnMemberJoin, OnMemberLeave
-from discordbot.clienteventclasses import OnMessage, OnMessageEdit, OnReactionAdd, OnReadyEvent, OnStickerCreate
-from discordbot.clienteventclasses import OnThreadCreate, OnThreadUpdate, OnVoiceStateChange
+from discordbot.clienteventclasses.ondirectmessage import OnDirectMessage
+from discordbot.clienteventclasses.onemojicreate import OnEmojiCreate
+from discordbot.clienteventclasses.onmemberjoin import OnMemberJoin
+from discordbot.clienteventclasses.onmemberleave import OnMemberLeave
+from discordbot.clienteventclasses.onmessage import OnMessage
+from discordbot.clienteventclasses.onmessageedit import OnMessageEdit
+from discordbot.clienteventclasses.onreactionadd import OnReactionAdd
+from discordbot.clienteventclasses.onready import OnReadyEvent
+from discordbot.clienteventclasses.onstickercreate import OnStickerCreate
+from discordbot.clienteventclasses.onthreadcreate import OnThreadCreate
+from discordbot.clienteventclasses.onthreadupdate import OnThreadUpdate
+from discordbot.clienteventclasses.onvoicestatechange import OnVoiceStateChange
 
 from discordbot.embedmanager import EmbedManager
-from discordbot.modals import BSEddiesBetCreateModal, BSEddiesImprovementSuggest, ReminderModal
+
+# modals
+from discordbot.modals.betcreate import BetCreateModal
+from discordbot.modals.reminder import ReminderModal
+from discordbot.modals.suggest import SuggestModal
 
 # slash commands
-from discordbot.slashcommandeventclasses.active import BSEddiesActive
-from discordbot.slashcommandeventclasses.admin_give import BSEddiesAdminGive
-from discordbot.slashcommandeventclasses.autogenerate import BSEddiesAutoGenerate
-from discordbot.slashcommandeventclasses.bless import BSEddiesBless
-from discordbot.slashcommandeventclasses.close import BSEddiesCloseBet
-from discordbot.slashcommandeventclasses.config import BSEddiesConfig
-from discordbot.slashcommandeventclasses.gift import BSEddiesGift
-from discordbot.slashcommandeventclasses.help import BSEddiesHelp
-from discordbot.slashcommandeventclasses.highscore import BSEddiesHighScore
-from discordbot.slashcommandeventclasses.leaderboard import BSEddiesLeaderboard
-from discordbot.slashcommandeventclasses.king_rename import BSEddiesKingRename
-from discordbot.slashcommandeventclasses.pending import BSEddiesPending
-from discordbot.slashcommandeventclasses.place import BSEddiesPlaceBet
-from discordbot.slashcommandeventclasses.pledge import BSEddiesPledge
-from discordbot.slashcommandeventclasses.predict import BSEddiesPredict
-from discordbot.slashcommandeventclasses.refresh import BSEddiesRefreshBet
-from discordbot.slashcommandeventclasses.stats import BSEddiesStats
-from discordbot.slashcommandeventclasses.taxrate import BSEddiesTaxRate
-from discordbot.slashcommandeventclasses.transactions import BSEddiesTransactionHistory
-from discordbot.slashcommandeventclasses.view import BSEddiesView
+from discordbot.slashcommandeventclasses.active import Active
+from discordbot.slashcommandeventclasses.admin_give import AdminGive
+from discordbot.slashcommandeventclasses.autogenerate import AutoGenerate
+from discordbot.slashcommandeventclasses.bless import Bless
+from discordbot.slashcommandeventclasses.close import CloseBet
+from discordbot.slashcommandeventclasses.config import Config
+from discordbot.slashcommandeventclasses.gift import Gift
+from discordbot.slashcommandeventclasses.help import Help
+from discordbot.slashcommandeventclasses.highscore import HighScore
+from discordbot.slashcommandeventclasses.leaderboard import Leaderboard
+from discordbot.slashcommandeventclasses.king_rename import KingRename
+from discordbot.slashcommandeventclasses.pending import Pending
+from discordbot.slashcommandeventclasses.place import PlaceBet
+from discordbot.slashcommandeventclasses.pledge import Pledge
+from discordbot.slashcommandeventclasses.predict import Predict
+from discordbot.slashcommandeventclasses.refresh import RefreshBet
+from discordbot.slashcommandeventclasses.stats import Stats
+from discordbot.slashcommandeventclasses.taxrate import TaxRate
+from discordbot.slashcommandeventclasses.transactions import TransactionHistory
+from discordbot.slashcommandeventclasses.view import View
 
 # context commands
 from discordbot.contextcommands.message_delete import ContextDeleteMessage
@@ -149,26 +162,26 @@ class CommandManager(object):
         self.on_voice_state_change = OnVoiceStateChange(client, guilds, self.logger)
 
         # slash command classes
-        self.bseddies_active = BSEddiesActive(client, guilds, self.logger)
-        self.bseddies_gift = BSEddiesGift(client, guilds, self.logger)
-        self.bseddies_view = BSEddiesView(client, guilds, self.logger)
-        self.bseddies_leaderboard = BSEddiesLeaderboard(client, guilds, self.logger)
-        self.bseddies_close = BSEddiesCloseBet(client, guilds, self.logger)
-        self.bseddies_config = BSEddiesConfig(client, guilds, self.logger)
-        self.bseddies_place = BSEddiesPlaceBet(client, guilds, self.logger)
-        self.bseddies_pending = BSEddiesPending(client, guilds, self.logger)
-        self.bseddies_transactions = BSEddiesTransactionHistory(client, guilds, self.logger)
-        self.bseddies_admin_give = BSEddiesAdminGive(client, guilds, self.logger)
-        self.bseddies_high_score = BSEddiesHighScore(client, guilds, self.logger)
-        self.bseddies_predict = BSEddiesPredict(client, guilds, self.logger)
-        self.bseddies_refresh = BSEddiesRefreshBet(client, guilds, self.logger)
-        self.bseddies_autogenerate = BSEddiesAutoGenerate(client, guilds, self.logger)
-        self.bseddies_tax_rate = BSEddiesTaxRate(client, guilds, self.logger)
-        self.bseddies_stats = BSEddiesStats(client, guilds, self.logger)
-        self.bseddies_king_rename = BSEddiesKingRename(client, guilds, self.logger)
-        self.bseddies_pledge = BSEddiesPledge(client, guilds, self.logger)
-        self.bseddies_bless = BSEddiesBless(client, guilds, self.logger)
-        self.bseddies_help = BSEddiesHelp(client, guilds, self.logger)
+        self.bseddies_active = Active(client, guilds, self.logger)
+        self.bseddies_gift = Gift(client, guilds, self.logger)
+        self.bseddies_view = View(client, guilds, self.logger)
+        self.bseddies_leaderboard = Leaderboard(client, guilds, self.logger)
+        self.bseddies_close = CloseBet(client, guilds, self.logger)
+        self.bseddies_config = Config(client, guilds, self.logger)
+        self.bseddies_place = PlaceBet(client, guilds, self.logger)
+        self.bseddies_pending = Pending(client, guilds, self.logger)
+        self.bseddies_transactions = TransactionHistory(client, guilds, self.logger)
+        self.bseddies_admin_give = AdminGive(client, guilds, self.logger)
+        self.bseddies_high_score = HighScore(client, guilds, self.logger)
+        self.bseddies_predict = Predict(client, guilds, self.logger)
+        self.bseddies_refresh = RefreshBet(client, guilds, self.logger)
+        self.bseddies_autogenerate = AutoGenerate(client, guilds, self.logger)
+        self.bseddies_tax_rate = TaxRate(client, guilds, self.logger)
+        self.bseddies_stats = Stats(client, guilds, self.logger)
+        self.bseddies_king_rename = KingRename(client, guilds, self.logger)
+        self.bseddies_pledge = Pledge(client, guilds, self.logger)
+        self.bseddies_bless = Bless(client, guilds, self.logger)
+        self.bseddies_help = Help(client, guilds, self.logger)
 
         # context commands
         self.message_delete = ContextDeleteMessage(client, guilds, self.logger)
@@ -574,7 +587,7 @@ class CommandManager(object):
 
         @self.client.command(description="Create a bet")
         async def create(ctx: discord.ApplicationContext):
-            modal = BSEddiesBetCreateModal(
+            modal = BetCreateModal(
                 client=self.client,
                 guilds=self.guilds,
                 logger=self.logger,
@@ -690,7 +703,7 @@ class CommandManager(object):
 
         @self.client.command(description="Suggest an improvement")
         async def suggest(ctx: discord.ApplicationContext):
-            modal = BSEddiesImprovementSuggest(
+            modal = SuggestModal(
                 logger=self.logger,
                 github_api=self.githubapi,
                 title="Suggest an improvement"
@@ -734,7 +747,7 @@ class CommandManager(object):
                 await message.pin(reason=f"{ctx.author.name} has pinned this message")
             except discord.HTTPException:
                 pass
-            await ctx.respond(content="Pinned", ephemeral=True)
+            await ctx.respond(content="Pinned", ephemeral=True, delete_after=5)
 
         @self.client.message_command(name="Delete message")
         async def delete_message(ctx: discord.ApplicationCommand, message: discord.Message):

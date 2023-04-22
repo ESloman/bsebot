@@ -25,30 +25,30 @@ class BSEddies(BaseEvent):
         """
         if not ctx.guild and not self.dmable:
             msg = "This command doesn't work in DMs (yet)."
-            await ctx.respond(content=msg, ephemeral=True)
+            await ctx.respond(content=msg)
             return False
 
         if kwargs.get("admin") and ctx.author.id != CREATOR:
             msg = "You do not have the permissions to use this command."
-            await ctx.respond(content=msg, ephemeral=True)
+            await ctx.respond(content=msg, ephemeral=True, delete_after=10)
             return False
 
         if "friend" in kwargs and (
                 isinstance(kwargs["friend"], discord.User) or isinstance(kwargs["friend"], discord.Member)):
             if kwargs["friend"].bot:
                 msg = "Bots cannot be gifted eddies."
-                await ctx.respond(content=msg, ephemeral=True)
+                await ctx.respond(content=msg, ephemeral=True, delete_after=10)
                 return False
 
             if kwargs["friend"].id == ctx.author.id:
                 msg = "You can't gift yourself points."
-                await ctx.respond(content=msg, ephemeral=True)
+                await ctx.respond(content=msg, ephemeral=True, delete_after=10)
                 return False
 
         if "amount" in kwargs and isinstance(kwargs["amount"], int):
             if kwargs["amount"] < 0:
                 msg = "You can't _\"gift\"_ someone negative points."
-                await ctx.respond(content=msg, ephemeral=True)
+                await ctx.respond(content=msg, ephemeral=True, delete_after=10)
                 return False
 
         return True

@@ -8,7 +8,7 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.views.close import CloseABetView
 
 
-class BSEddiesCloseBet(BSEddies):
+class CloseBet(BSEddies):
     """
     Class for handling `/bseddies bet close` commands
     """
@@ -31,9 +31,9 @@ class BSEddiesCloseBet(BSEddies):
 
         if len(bet_ids) == 0:
             try:
-                await ctx.respond(content="You have no bets to close.", ephemeral=True)
+                await ctx.respond(content="You have no bets to close.", ephemeral=True, delete_after=10)
             except AttributeError:
-                await ctx.response.send_message(content="You have no bets to close.", ephemeral=True)
+                await ctx.response.send_message(content="You have no bets to close.", ephemeral=True, delete_after=10)
             return
 
         if len(bet_ids) > 25:
@@ -232,13 +232,13 @@ class BSEddiesCloseBet(BSEddies):
 
         if not bet["active"] and bet["result"] is not None:
             msg = "You cannot cancel a bet that is already closed."
-            await ctx.followup.send(content=msg, ephemeral=True)
+            await ctx.followup.send(content=msg, ephemeral=True, delete_after=10)
             await ctx.followup.edit_message(view=None, message_id=ctx.message.id, embeds=[])
             return
 
         if bet["user"] != author.id:
             msg = "You cannot cancel a bet that isn't yours."
-            await ctx.followup.send(content=msg, ephemeral=True)
+            await ctx.followup.send(content=msg, ephemeral=True, delete_after=10)
             return
 
         if betters := bet.get("betters"):

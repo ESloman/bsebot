@@ -8,8 +8,8 @@ from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
 from discordbot.embedmanager import EmbedManager
-from discordbot.slashcommandeventclasses.close import BSEddiesCloseBet
-from discordbot.slashcommandeventclasses.place import BSEddiesPlaceBet
+from discordbot.slashcommandeventclasses.close import CloseBet
+from discordbot.slashcommandeventclasses.place import PlaceBet
 from discordbot.tasks.basetask import BaseTask
 from discordbot.views.bet import BetView
 
@@ -21,8 +21,8 @@ class BetCloser(BaseTask):
         guild_ids: list[int],
         logger: Logger,
         startup_tasks: list[BaseTask],
-        place: BSEddiesPlaceBet,
-        close: BSEddiesCloseBet
+        place: PlaceBet,
+        close: CloseBet
     ):
         super().__init__(bot, guild_ids, logger, startup_tasks)
         self.task = self.bet_closer

@@ -3,7 +3,7 @@ import discord
 
 from discordbot.bsebot import BSEBot
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
-from discordbot.clienteventclasses import OnMessage
+from discordbot.clienteventclasses.onmessage import OnMessage
 
 from mongo.bsedataclasses import SpoilerThreads
 

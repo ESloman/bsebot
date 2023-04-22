@@ -84,6 +84,10 @@ class EddieGainMessager(BaseTask):
 
                 self.logger.info(f"{user.display_name} is gaining `{value} eddies`")
 
+                text += (
+                    "\n\nWant to turn these notifications off? Use `/config` to disable."
+                )
+
                 user_dict = self.user_points.find_user(int(user_id), guild.id)
 
                 if user_dict.get("daily_eddies"):

@@ -6,7 +6,7 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.views.leaderboard import LeaderBoardView
 
 
-class BSEddiesLeaderboard(BSEddies):
+class Leaderboard(BSEddies):
     """
     Class for handling `/leaderboard` commands
     """

@@ -9,7 +9,7 @@ from discordbot.bot_enums import TransactionTypes, ActivityTypes
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
-class BSEddiesTransactionHistory(BSEddies):
+class TransactionHistory(BSEddies):
     """
     Class for handling `/bseddies transactions` command
     """

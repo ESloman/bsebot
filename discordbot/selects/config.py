@@ -7,16 +7,20 @@ class ConfigSelect(Select):
     _values = [
         ("Admins", "admins"),
         ("Daily Salary", "salary"),
+        ("Daily Salary Message", "daily_salary"),
         ("Revolution Event", "revolution"),
         ("Spoiler Threads", "threads"),
         ("Valorant", "valorant"),
         ("Wordle Config", "wordle")
     ]
 
-    def __init__(self):
+    def __init__(self, configurable_items: list = None):
+
+        if not configurable_items:
+            configurable_items = self._values
 
         options = [
-            SelectOption(label=opt[0], value=opt[1]) for opt in self._values
+            SelectOption(label=opt[0], value=opt[1]) for opt in configurable_items
         ]
 
         super().__init__(

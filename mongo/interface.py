@@ -207,7 +207,8 @@ def query(
         lim: int = 10000,
         projection: Union[dict, None] = None,
         as_gen: bool = True,
-        skip: int = None
+        skip: int = None,
+        sort: list[tuple] = None
 ) -> Union[list, Cursor]:
     """
     Searches a collection for documents based on given parameters.
@@ -232,7 +233,7 @@ def query(
     """
     if skip is None:
         skip = 0
-    results = collection.find(parameters, limit=lim, projection=projection, skip=skip)
+    results = collection.find(parameters, limit=lim, projection=projection, skip=skip, sort=sort)
     return results if as_gen else list(results)
 
 

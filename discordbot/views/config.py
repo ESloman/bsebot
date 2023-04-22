@@ -1,5 +1,8 @@
-import discord
+
+import datetime
 from logging import Logger
+
+import discord
 
 from discordbot.constants import CREATOR
 from discordbot.selects.config import ConfigSelect
@@ -7,55 +10,88 @@ from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.config_admin import AdminConfigView
 from discordbot.views.config_revolution import RevolutionConfigView
 from discordbot.views.config_salary import SalaryConfigView
+from discordbot.views.config_salary_message import DailyMessageView
 from discordbot.views.config_threads import ThreadConfigView
 from discordbot.views.config_valorant import ValorantConfigView
 from discordbot.views.config_wordle import WordleConfigView
 
 from mongo.bsedataclasses import SpoilerThreads
 from mongo.bsepoints.guilds import Guilds
+from mongo.bsepoints.points import UserPoints
+from mongo.datatypes import GuildDB
 
 
 class ConfigView(discord.ui.View):
     def __init__(
         self,
-        logger: Logger = PlaceHolderLogger
+        logger: Logger = PlaceHolderLogger,
+        user_id: int = None,
+        guild_id: int = None
     ):
         super().__init__(timeout=120)
         self.logger = logger
         self.spoiler_threads = SpoilerThreads()
         self.guilds = Guilds()
-        self.config_select = ConfigSelect()
+        self.user_points = UserPoints()
+
+        # build a list of configurable items to show the user
+        # don't show the user options they can't actually configure
+        # reduces complexity somewhat
+        configurable_items = []
+        if user_id:
+            guild_db = self.guilds.get_guild(guild_id) if guild_id else None
+            for value in ConfigSelect._values:
+                if self._check_perms(value[1], user_id, guild_db=guild_db):
+                    configurable_items.append(value)
+
+        self.config_select = ConfigSelect(configurable_items)
         self.add_item(self.config_select)
 
-    def _check_perms(self, value: str, interaction: discord.Interaction) -> bool:
+    def _check_perms(
+        self,
+        value: str,
+        user_id: int,
+        guild_id: int = None,
+        guild_db: GuildDB = None
+    ) -> bool:
         """
         Checks if the user has the right perms to configure this item
 
         Args:
             value (str): the configurable item
-            interaction (discord.Interaction): the interaction
+            user_id (int): the user ID
+            guild_id (int): guild ID
+            guild_db (GuildDB): guild dict
 
         Returns:
             bool: whether they do or don't
         """
 
+        # check we have a guild
+        if not guild_id and not guild_db:
+            # no guild specified - these are the non-guild options that can be configured
+            if value in ["daily_salary", ]:
+                return True
+            return False
+
         # is option in options that allow normal users to use it
-        if value in ["threads", ]:
+        if value in ["threads", "daily_salary"]:
             return True
 
         # is user the creator
-        if interaction.user.id == CREATOR:
+        if user_id == CREATOR:
             return True
 
         # now we check server perms
-        guild_db = self.guilds.get_guild(interaction.guild_id)
+        if not guild_db:
+            guild_db = self.guilds.get_guild(guild_id)
 
         # is user the server owner
-        if interaction.user.id == guild_db["owner_id"]:
+        if user_id == guild_db["owner_id"]:
             return True
 
         # is user in server admins
-        if interaction.user.id in guild_db.get("admins", []):
+        if user_id in guild_db.get("admins", []):
             return True
 
         return False
@@ -68,7 +104,7 @@ class ConfigView(discord.ui.View):
             interaction (discord.Interaction): the interaction
         """
         msg = "You do not have the required permissions to configure this option."
-        await interaction.followup.send(msg, ephemeral=True)
+        await interaction.followup.send(msg, ephemeral=True, delete_after=10)
 
     @discord.ui.button(label="Select", style=discord.ButtonStyle.green, row=2)
     async def place_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
@@ -96,6 +132,8 @@ class ConfigView(discord.ui.View):
                 msg, view = self._get_valorant_message_and_view(interaction)
             case "wordle":
                 msg, view = self._get_wordle_message_and_view(interaction)
+            case "daily_salary":
+                msg, view = self._get_daily_salary_message_and_view(interaction)
             case _:
                 # default case
                 msg = "unknown"
@@ -122,26 +160,29 @@ class ConfigView(discord.ui.View):
         guild_db = self.guilds.get_guild(interaction.guild_id)
         admins = guild_db.get("admins", [])
 
-        threads = []
+        now = datetime.datetime.now()
+
+        configurable_threads = []
         for thread in threads:
-            if not thread.get("active"):
+            if not thread.get("active") and (now - thread["created"]).days >= 30:
+                # only exclude non-active ones if they're super old
                 continue
             if interaction.user.id == CREATOR:
-                threads.append(thread)
+                configurable_threads.append(thread)
                 continue
             elif interaction.user.id in admins:
-                threads.append(thread)
+                configurable_threads.append(thread)
                 continue
             elif interaction.user.id == thread.get("owner", thread.get("creator", CREATOR)):
-                threads.append(thread)
+                configurable_threads.append(thread)
                 continue
 
-        if not threads:
+        if not configurable_threads:
             view = None
             msg = "No available threads for you to configure."
 
         else:
-            view = ThreadConfigView(threads)
+            view = ThreadConfigView(configurable_threads)
             msg = (
                 "_Thread Configuration_\n"
                 "Select a thread to configure, and then select whether it should send mute reminders and "
@@ -269,6 +310,33 @@ class ConfigView(discord.ui.View):
         )
         return msg, view
 
+    def _get_daily_salary_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
+        """
+        Handle daily salary message message/view
+
+        Args:
+            interaction (discord.Interaction): the interaction
+
+        Returns:
+            tuple[str, discord.ui.View]: the message and view
+        """
+        if interaction.guild:
+            user = self.user_points.find_user(interaction.user.id, interaction.guild.id)
+            daily_eddies = user["daily_eddies"]
+        else:
+            users = self.user_points.query({"uid": interaction.user.id})
+            daily_eddies = False
+            for user in users:
+                if user["daily_eddies"]:
+                    daily_eddies = True
+
+        view = DailyMessageView(daily_eddies)
+        msg = (
+            "# Daily Salary Message\n\n"
+            "Select whether you want to receive the _(silent)_ daily salary message or not."
+        )
+        return msg, view
+
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, emoji="✖️", row=2)
-    async def cancel_ballback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
+    async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
         await interaction.response.edit_message(content="Cancelled", view=None)

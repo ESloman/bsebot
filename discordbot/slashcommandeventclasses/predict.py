@@ -7,7 +7,7 @@ from discordbot.tasks.eddiegains import BSEddiesManager
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
-class BSEddiesPredict(BSEddies):
+class Predict(BSEddies):
     """
     Class for handling `/bseddies predict` command
     """

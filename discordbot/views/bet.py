@@ -1,16 +1,16 @@
 
 import discord
 
-from discordbot.slashcommandeventclasses.close import BSEddiesCloseBet
-from discordbot.slashcommandeventclasses.place import BSEddiesPlaceBet
+from discordbot.slashcommandeventclasses.close import CloseBet
+from discordbot.slashcommandeventclasses.place import PlaceBet
 
 
 class BetView(discord.ui.View):
     def __init__(
         self,
         bet: dict,
-        bseddies_place: BSEddiesPlaceBet,
-        bseddies_close: BSEddiesCloseBet
+        bseddies_place: PlaceBet,
+        bseddies_close: CloseBet
     ):
         super().__init__(timeout=None)
         self.bet = bet
@@ -26,5 +26,5 @@ class BetView(discord.ui.View):
         await self.close.create_bet_view(interaction, [self.bet, ])
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, emoji="✖️")
-    async def cancel_ballback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
+    async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
         await self.close.cancel_bet(interaction, self.bet["bet_id"])

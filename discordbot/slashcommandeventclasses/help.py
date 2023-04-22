@@ -4,7 +4,7 @@ from discordbot.bot_enums import ActivityTypes
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
-class BSEddiesHelp(BSEddies):
+class Help(BSEddies):
     """
     Class for handling `/help` commands
     """

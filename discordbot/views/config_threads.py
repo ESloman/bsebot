@@ -79,5 +79,5 @@ class ThreadConfigView(discord.ui.View):
         )
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, emoji="✖️", row=4)
-    async def cancel_ballback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
+    async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
         await interaction.response.edit_message(content="Cancelled", view=None)

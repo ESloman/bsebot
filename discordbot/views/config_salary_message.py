@@ -1,20 +1,19 @@
+
 import discord
 
-from discordbot.selects.revolutionconfig import RevolutionEnableSelect
-from mongo.bsepoints.guilds import Guilds
+from discordbot.selects.salaryconfig import DailySalaryMessageSelect
 from mongo.bsepoints.points import UserPoints
 
 
-class RevolutionConfigView(discord.ui.View):
+class DailyMessageView(discord.ui.View):
     def __init__(
         self,
-        enabled: bool = True
+        enabled: bool = False
     ):
         super().__init__(timeout=120)
-        self.guilds = Guilds()
         self.user_points = UserPoints()
 
-        self.enabled_select = RevolutionEnableSelect(enabled)
+        self.enabled_select = DailySalaryMessageSelect(enabled)
         self.add_item(self.enabled_select)
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=4)
@@ -31,10 +30,17 @@ class RevolutionConfigView(discord.ui.View):
 
         enabled_bool = enabled == "enabled"
 
-        self.guilds.set_revolution_toggle(interaction.guild_id, enabled_bool)
+        if interaction.guild:
+            # we have a guild - great
+            guild_id = interaction.guild.id
+        else:
+            # handle where we don't have a guild
+            guild_id = 0
+
+        self.user_points.set_daily_eddies_toggle(interaction.user.id, guild_id, enabled_bool)
 
         await interaction.response.edit_message(
-            content=f"Revolution event {enabled}",
+            content=f"Daily salary message `{enabled}`.",
             view=None,
             delete_after=10
         )

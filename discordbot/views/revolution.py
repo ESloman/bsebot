@@ -86,14 +86,14 @@ class RevolutionView(discord.ui.View):
 
         # check event is still valid
         if not event["open"]:
-            await followup.send(content="Unfortunately, this event has expired", ephemeral=True)
+            await followup.send(content="Unfortunately, this event has expired", ephemeral=True, delete_after=10)
             # leave it disabled
             return
 
         now = datetime.datetime.now()
 
         if event["expired"] < now:
-            await followup.send(content="Unfortunately, this event has expired", ephemeral=True)
+            await followup.send(content="Unfortunately, this event has expired", ephemeral=True, delete_after=10)
             # leave it disabled
             return
 
@@ -107,7 +107,8 @@ class RevolutionView(discord.ui.View):
         if (user_id == king_id) and button.label != "Save THYSELF":
             await followup.send(
                 content="You ARE the King - you can't overthrow/support yourself.",
-                ephemeral=True
+                ephemeral=True,
+                delete_after=10
             )
             self.toggle_stuff(False)
             await followup.edit_message(interaction.message.id, view=self)
@@ -115,7 +116,11 @@ class RevolutionView(discord.ui.View):
 
         # check that users aren't using buttons they shouldn't
         if button.label == "Save THYSELF" and (user_id != king_id):
-            await followup.send(content="You're not the King - so you can't use this button.", ephemeral=True)
+            await followup.send(
+                content="You're not the King - so you can't use this button.",
+                ephemeral=True,
+                delete_after=10
+            )
             self.toggle_stuff(False)
             await followup.edit_message(interaction.message.id, view=self)
             return
@@ -152,7 +157,8 @@ class RevolutionView(discord.ui.View):
             if user_id in event.get(faction_event_key, []):
                 await followup.send(
                     content="You've already acted on this - you cannot do so again",
-                    ephemeral=True
+                    ephemeral=True,
+                    delete_after=10
                 )
                 self.toggle_stuff(False)
                 await followup.edit_message(interaction.message.id, view=self)
@@ -162,7 +168,8 @@ class RevolutionView(discord.ui.View):
             if user_id in self.locked_in:
                 await followup.send(
                     content="You've pledged your support this week - you _cannot_ change your decision.",
-                    ephemeral=True
+                    ephemeral=True,
+                    delete_after=10
                 )
                 self.toggle_stuff(False)
                 await followup.edit_message(interaction.message.id, view=self)
@@ -255,7 +262,7 @@ class RevolutionView(discord.ui.View):
 
         if button.label != "Save THYSELF":
             # only send followup for users
-            await followup.send(content=msg, ephemeral=True)
+            await followup.send(content=msg, ephemeral=True, delete_after=10)
 
     @discord.ui.button(
         label="OVERTHROW",

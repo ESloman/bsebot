@@ -1,6 +1,8 @@
 .dockerignore
 .gitignore
 .flake8
+.pre-commit-config.yaml
+.ruff_cache
 Dockerfile
 LICENSE
 README.md
@@ -8,3 +10,6 @@ README.md
 .vscode
 docs
 datafiles
+*.sh
+test-requirements.txt
+pyproject.toml

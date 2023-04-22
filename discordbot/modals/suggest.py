@@ -53,7 +53,7 @@ class SuggestModal(discord.ui.Modal):
             )
             return
 
-        msg = f"Created an issue for you. Link: {ret.json()['url'].replace('api.', '').replace('repos/', '')}"
+        msg = f"Created an issue for you. [Link]({ret.json()['url'].replace('api.', '').replace('repos/', '')})."
         await interaction.followup.send(
             content=msg,
             ephemeral=True

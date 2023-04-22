@@ -6,7 +6,7 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.views.bless import BlessView
 
 
-class BSEddiesBless(BSEddies):
+class Bless(BSEddies):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
@@ -26,7 +26,7 @@ class BSEddiesBless(BSEddies):
 
         if ctx.user.id != king_id:
             message = "You are not the King - you cannot bless."
-            await ctx.respond(content=message, ephemeral=True)
+            await ctx.respond(content=message, ephemeral=True, delete_after=10)
             return
 
         view = BlessView()

@@ -10,7 +10,7 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.views.bet import BetView
 
 
-class BSEddiesCreateBet(BSEddies):
+class CreateBet(BSEddies):
     """
     Class for handling `/bseddies bet create` command
     """
@@ -157,4 +157,4 @@ class BSEddiesCreateBet(BSEddies):
             {"$set": {"message_id": message.id, "channel_id": message.channel.id}}
         )
 
-        await ctx.followup.send(content="Created bet for you.", ephemeral=True)
+        await ctx.followup.send(content="Created bet for you.", ephemeral=True, delete_after=5)

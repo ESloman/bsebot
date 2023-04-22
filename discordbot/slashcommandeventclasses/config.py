@@ -8,7 +8,7 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.views.config import ConfigView
 
 
-class BSEddiesConfig(BSEddies):
+class Config(BSEddies):
     """
     Class for handling `/view` commands
     """
@@ -20,6 +20,7 @@ class BSEddiesConfig(BSEddies):
             logger: Logger
     ):
         super().__init__(client, guild_ids, logger)
+        self.dmable = True
 
     async def root_config(self, ctx: discord.ApplicationContext) -> None:
 
@@ -28,7 +29,7 @@ class BSEddiesConfig(BSEddies):
 
         self._add_event_type_to_activity_history(ctx.author, ctx.guild_id, ActivityTypes.CONFIG)
 
-        config_view = ConfigView(self.logger)
+        config_view = ConfigView(self.logger, ctx.user.id, ctx.guild_id)
         msg = (
             "**BSEBot Configuration**\n\n"
             "What would you like to configure?"

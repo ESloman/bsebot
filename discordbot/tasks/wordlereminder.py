@@ -23,6 +23,7 @@ class WordleReminder(BaseTask):
         startup_tasks: list[BaseTask]
     ):
         super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.task = self.wordle_reminder
         self.messages = [
             "Hey {mention}, don't forget to do your Wordle today!",
             "Don't forget to do your wordle today {mention}.",
@@ -33,20 +34,14 @@ class WordleReminder(BaseTask):
             "Guess what? {mention} is a fucking prick. Also, they didn't do their Wordle.",
             "Do your Wordle or die, {mention}."
         ]
-        self.wordle_reminder.start()
-
-    def cog_unload(self):
-        """
-        Method for cancelling the loop.
-        :return:
-        """
-        self.wordle_reminder.cancel()
+        self.task.start()
 
     @tasks.loop(minutes=60)
     async def wordle_reminder(self):
         """
-        Loop that makes sure the King is assigned correctly
-        :return:
+        Loop that reminds users to do their wordle.
+        Only reminds users that did their wordle the day before,
+        and haven't done it by ~7pm GMT/BST.
         """
 
         now = datetime.datetime.now()
@@ -131,7 +126,6 @@ class WordleReminder(BaseTask):
     async def before_wordle_reminder(self):
         """
         Make sure that websocket is open before we start querying via it.
-        :return:
         """
         await self.bot.wait_until_ready()
         while not self._check_start_up_tasks():

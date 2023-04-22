@@ -9,10 +9,10 @@ from apis.github import GitHubAPI
 
 from discordbot.bsebot import BSEBot
 from discordbot.bot_enums import ActivityTypes
-from discordbot.clienteventclasses import OnReadyEvent
+from discordbot.clienteventclasses.onready import OnReadyEvent
 from discordbot.embedmanager import EmbedManager
-from discordbot.slashcommandeventclasses.close import BSEddiesCloseBet
-from discordbot.slashcommandeventclasses.place import BSEddiesPlaceBet
+from discordbot.slashcommandeventclasses.close import CloseBet
+from discordbot.slashcommandeventclasses.place import PlaceBet
 from discordbot.tasks.basetask import BaseTask
 from discordbot.views.bet import BetView
 from discordbot.views.leaderboard import LeaderBoardView
@@ -28,11 +28,12 @@ class GuildChecker(BaseTask):
         startup_tasks: list[BaseTask],
         on_ready: OnReadyEvent,
         github_api: GitHubAPI,
-        place: BSEddiesPlaceBet,
-        close: BSEddiesCloseBet
+        place: PlaceBet,
+        close: CloseBet
     ):
 
         super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.task = self.guild_checker
 
         self.on_ready = on_ready
         self.embed_manager = EmbedManager(logger)
@@ -41,20 +42,12 @@ class GuildChecker(BaseTask):
         self.close = close
         self.place = place
 
-        self.guild_checker.start()
-
-    def cog_unload(self):
-        """
-        Method for cancelling the loop.
-        :return:
-        """
-        self.guild_checker.cancel()
+        self.task.start()
 
     @tasks.loop(hours=12)
     async def guild_checker(self):
         """
         Loop that makes sure that guild information is synced correctly
-        :return:
         """
         datetime.datetime.now()
 
@@ -247,7 +240,6 @@ class GuildChecker(BaseTask):
     @guild_checker.before_loop
     async def before_guild_checker(self):
         """
-        Make sure that websocket is open before we starting querying via it.
-        :return:
+        Make sure that websocket is open before we start querying via it.
         """
         await self.bot.wait_until_ready()

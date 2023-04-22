@@ -19,4 +19,4 @@ class ContextDeleteMessage(BaseContextCommand):
         self.logger.info(f"{ctx.user.name} deleted {message.id}")
         _reason = f"{ctx.user.id}: {ctx.user.name} requested this message be deleted"
         await message.delete(reason=_reason)
-        await ctx.respond(content="Message deleted", ephemeral=True)
+        await ctx.respond(content="Message deleted", ephemeral=True, delete_after=10)

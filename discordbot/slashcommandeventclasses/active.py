@@ -5,7 +5,7 @@ from discordbot.bot_enums import ActivityTypes
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
-class BSEddiesActive(BSEddies):
+class Active(BSEddies):
     """
     Class for handling `/active` commands
     """

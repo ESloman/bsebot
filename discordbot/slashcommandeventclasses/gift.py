@@ -5,7 +5,7 @@ from discordbot.bot_enums import TransactionTypes, ActivityTypes
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
-class BSEddiesGift(BSEddies):
+class Gift(BSEddies):
     """
     Class for handling `/bseddies gift` command
     """
@@ -40,7 +40,7 @@ class BSEddiesGift(BSEddies):
         points = self.user_points.get_user_points(ctx.author.id, ctx.guild.id)
         if points < amount:
             msg = "You have insufficient points to perform that action."
-            await ctx.respond(content=msg, ephemeral=True)
+            await ctx.respond(content=msg, ephemeral=True, delete_after=10)
             return
 
         if not friend.dm_channel:
@@ -66,4 +66,4 @@ class BSEddiesGift(BSEddies):
             friend_id=ctx.author.id
         )
 
-        await ctx.respond(content=f"Eddies transferred to `{friend.name}`!", ephemeral=True)
+        await ctx.respond(content=f"Eddies transferred to `{friend.name}`!", ephemeral=True, delete_after=10)

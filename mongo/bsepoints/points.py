@@ -211,7 +211,10 @@ class UserPoints(BestSummerEverPointsDB):
         :param value: bool - whether or not the messages should be sent
         :return:
         """
-        self.update({"uid": user_id, "guild_id": guild_id}, {"$set": {"daily_eddies": value}})
+        if guild_id:
+            self.update({"uid": user_id, "guild_id": guild_id}, {"$set": {"daily_eddies": value}})
+        else:
+            self.update({"uid": user_id}, {"$set": {"daily_eddies": value}}, many=True)
 
     def set_king_flag(self, user_id: int, guild_id: int, value: bool) -> None:
         """

@@ -21,23 +21,16 @@ class ReleaseChecker(BaseTask):
     ):
 
         super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.task = self.release_checker
         self.last_release_name = None
         self.github = github_api
 
-        self.release_checker.start()
-
-    def cog_unload(self):
-        """
-        Method for cancelling the loop.
-        :return:
-        """
-        self.release_checker.cancel()
+        self.task.start()
 
     @tasks.loop(minutes=60)
     async def release_checker(self):
         """
         Task to check github releases and post release notes when we get a new one
-        :return:
         """
 
         now = datetime.datetime.now()
@@ -100,8 +93,7 @@ class ReleaseChecker(BaseTask):
     @release_checker.before_loop
     async def before_release_checker(self):
         """
-        Make sure that websocket is open before we starting querying via it.
-        :return:
+        Make sure that websocket is open before we start querying via it.
         """
         await self.bot.wait_until_ready()
         while not self._check_start_up_tasks():

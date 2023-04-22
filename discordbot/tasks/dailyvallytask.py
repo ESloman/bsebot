@@ -21,7 +21,8 @@ class AfterWorkVally(BaseTask):
     ):
 
         super().__init__(bot, guild_ids, logger, startup_tasks)
-        self.vally_message.start()
+        self.task = self.vally_message
+        self.task.start()
 
         self.messages = [
             "Anyone playing after-work {role} today?",
@@ -38,18 +39,10 @@ class AfterWorkVally(BaseTask):
             "# Balls. {role}"
         ]
 
-    def cog_unload(self):
-        """
-        Method for cancelling the loop.
-        :return:
-        """
-        self.vally_message.cancel()
-
     @tasks.loop(minutes=10)
     async def vally_message(self):
         """
-        Loop that makes sure the King is assigned correctly
-        :return:
+        Loop that sends the daily vally rollcall
         """
 
         if BSE_SERVER_ID not in self.guild_ids:
@@ -126,8 +119,7 @@ class AfterWorkVally(BaseTask):
     @vally_message.before_loop
     async def before_vally_message(self):
         """
-        Make sure that websocket is open before we starting querying via it.
-        :return:
+        Make sure that websocket is open before we start querying via it.
         """
         await self.bot.wait_until_ready()
         while not self._check_start_up_tasks():

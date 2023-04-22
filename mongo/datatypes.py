@@ -243,6 +243,8 @@ class RevolutionEventType(TypedDict):
     """list of those supporting the event"""
     revolutionaries: list[int]
     """list of those revolutioning the event"""
+    neutrals: list[int]
+    """list of those impartial to the event"""
     locked: list[int]
     """Users who can't change their decision"""
     users: list[int]
@@ -323,3 +325,15 @@ class GuildDB(TypedDict):
     valorant_rollcall: bool
     valorant_channel: int
     valorant_role: int
+
+
+class Reminder(TypedDict):
+    _id: ObjectId
+    guild_id: int
+    created: datetime.datetime
+    user_id: int
+    timeout: datetime.datetime
+    active: bool
+    reason: str
+    channel_id: int
+    message_id: int

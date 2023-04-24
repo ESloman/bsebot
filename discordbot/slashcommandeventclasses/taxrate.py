@@ -17,7 +17,7 @@ class TaxRate(BSEddies):
             return
 
         self._add_event_type_to_activity_history(
-            ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_SET_TAX_RATE, user_id=ctx.user.id
+            ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_SET_TAX_RATE
         )
 
         guild_id = ctx.guild.id

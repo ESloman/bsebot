@@ -1,6 +1,7 @@
 
 import datetime
 from typing import TypedDict, Union
+
 try:
     from typing import NotRequired
 except ImportError:

@@ -1,6 +1,7 @@
 
 import asyncio
 import datetime
+import random
 from logging import Logger
 
 import discord
@@ -8,6 +9,7 @@ from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_SERVER_ID
+from discordbot.message_strings.thread_mute_reminders import MESSAGES
 from discordbot.tasks.basetask import BaseTask
 
 
@@ -54,9 +56,12 @@ class ThreadSpoilerTask(BaseTask):
 
             thread = await self.bot.fetch_channel(thread_info["thread_id"])
             await thread.trigger_typing()
-            message = (
-                "New episode today - remember to mute cuties xoxo\n\n"
-                "Show ended? The thread creator can use the `/config` command to "
+
+            message = random.choice(MESSAGES)
+
+            # always add the config disclaimer to the end
+            message += (
+                "\n\nShow ended? The thread creator can use the `/config` command to "
                 "disable mute reminders for this thread."
             )
             await thread.send(content=message, allowed_mentions=discord.AllowedMentions(everyone=True))

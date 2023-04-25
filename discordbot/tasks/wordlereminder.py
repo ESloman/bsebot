@@ -11,6 +11,7 @@ from discord.ext import tasks
 from discordbot import utilities
 from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_BOT_ID
+from discordbot.message_strings.wordle_reminders import MESSAGES
 from discordbot.tasks.basetask import BaseTask
 
 
@@ -24,12 +25,6 @@ class WordleReminder(BaseTask):
     ):
         super().__init__(bot, guild_ids, logger, startup_tasks)
         self.task = self.wordle_reminder
-        self.messages = [
-            "Hey {mention}, don't forget to do your Wordle today!",
-            "Hey {mention}, you absolute knob, you haven't done your Wordle yet!",
-            "Guess what? {mention} is a fucking prick. Also, they didn't do their Wordle.",
-            "Do your Wordle or die, {mention}."
-        ]
         self.task.start()
 
     @tasks.loop(minutes=60)
@@ -112,7 +107,7 @@ class WordleReminder(BaseTask):
 
                 y_message = await channel.fetch_message(reminder["message_id"])
 
-                message = random.choice(self.messages)
+                message = random.choice(MESSAGES)
                 message = message.format(mention=y_message.author.mention)
 
                 self.logger.info(message)

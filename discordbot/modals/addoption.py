@@ -80,6 +80,7 @@ class AddBetOption(discord.ui.Modal):
             _index = outcome_count + outcomes.index(outcome)
             _emoji = self.multiple_options_emojis[_index]
             self.bet["option_dict"][_emoji] = {"val": outcome}
+            self.bet["option_vals"].append(outcome)
 
         # extend bet's timeout
         created = self.bet["created"]
@@ -97,7 +98,8 @@ class AddBetOption(discord.ui.Modal):
                     "options": self.bet["options"],
                     "option_dict": self.bet["option_dict"],
                     "updated": now,
-                    "timeout": ending
+                    "timeout": ending,
+                    "option_vals": self.bet["option_vals"]
                 }
             }
         )

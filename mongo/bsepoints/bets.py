@@ -170,6 +170,11 @@ class UserBets(BestSummerEverPointsDB):
             "channel_id": None,
             "message_id": None,
             "private": private,
+            "updated": datetime.datetime.now(),
+            "users": [],
+            "option_vals": [
+                option_dict[o]["val"] for o in option_dict
+            ]
         }
         self.insert(bet_doc)
         return bet_doc
@@ -217,6 +222,9 @@ class UserBets(BestSummerEverPointsDB):
         if (points > cur_points) or cur_points == 0:
             return {"success": False, "reason": "not enough points"}
 
+        if user_id not in ret.get("users", []):
+            ret["users"].append(user_id)
+
         # this section is the logic if the user hasn't bet on this bet yet
         if str(user_id) not in betters:
             doc = {
@@ -226,7 +234,10 @@ class UserBets(BestSummerEverPointsDB):
                 "last_bet": datetime.datetime.now(),
                 "points": points,
             }
-            self.update({"_id": ret["_id"]}, {"$set": {f"betters.{user_id}": doc}})
+            self.update(
+                {"_id": ret["_id"]},
+                {"$set": {f"betters.{user_id}": doc, "users": ret["users"]}}
+            )
             self.user_points.increment_points(
                 user_id,
                 guild_id,
@@ -245,7 +256,10 @@ class UserBets(BestSummerEverPointsDB):
 
         self.update(
             {"_id": ret["_id"]},
-            {"$inc": {f"betters.{user_id}.points": points}, "$set": {"last_bet": datetime.datetime.now()}}
+            {
+                "$inc": {f"betters.{user_id}.points": points},
+                "$set": {"last_bet": datetime.datetime.now(), "users": ret["users"]}
+            }
         )
 
         self.user_points.increment_points(

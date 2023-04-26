@@ -56,7 +56,7 @@ class BetView(discord.ui.View):
 
         _bet = self.user_bets.get_bet_from_id(self.bet["guild_id"], self.bet["bet_id"])
 
-        if str(interaction.user.id) not in _bet["betters"]:
+        if interaction.user.id not in _bet["users"]:
             message = "You can't change your bet for a bet you haven't bet on yet."
             await interaction.response.send_message(content=message, ephemeral=True, delete_after=10)
             return
@@ -70,7 +70,7 @@ class BetView(discord.ui.View):
 
         first_bet_time = _bet["betters"][str(interaction.user.id)]["first_bet"]
         now = datetime.datetime.now()
-        if (now - first_bet_time).seconds > 600 and (now - _bet.get("updated", _bet["created"])).seconds > 600:
+        if (now - first_bet_time).seconds > 300 and (now - _bet.get("updated", _bet["created"])).seconds > 300:
             message = "It's been too long since your original bet - you can't change it now."
             await interaction.response.send_message(content=message, ephemeral=True, delete_after=10)
             return

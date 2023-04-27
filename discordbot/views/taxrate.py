@@ -56,7 +56,7 @@ class TaxRateView(discord.ui.View):
             channel = interaction.guild.get_channel(channel_id)
             msg = (
                 f"{interaction.user.mention} has changed the tax rate to `{value}` "
-                "and the supporter tax rate to `{supporter_value}`! 📈"
+                f"and the supporter tax rate to `{supporter_value}`! 📈"
             )
             await channel.send(content=msg)
 

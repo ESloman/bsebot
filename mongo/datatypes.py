@@ -1,6 +1,7 @@
 
 import datetime
 from typing import TypedDict, Union
+
 try:
     from typing import NotRequired
 except ImportError:
@@ -103,6 +104,10 @@ class Bet(TypedDict):
     """Title of the bet"""
     options: list[str]
     """List of option emojis"""
+    option_vals: list[str]
+    """List of option values"""
+    users: list[int]
+    """List of user IDs"""
     created: datetime.datetime
     """The time the bet was created"""
     timeout: datetime.datetime

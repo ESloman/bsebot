@@ -10,7 +10,9 @@ from discordbot.message_actions.base import BaseMessageAction  # noqa
 
 # message actions
 from discordbot.message_actions.birthday_replies import BirthdayReplies
+from discordbot.message_actions.duplicate_links import DuplicateLinkAction
 from discordbot.message_actions.marvel_ad import MarvelComicsAdAction
+from discordbot.message_actions.remind_me import RemindMeAction
 from discordbot.message_actions.thank_you_replies import ThankYouReplies
 from discordbot.message_actions.wordle_reactions import WordleMessageAction
 
@@ -24,9 +26,11 @@ class OnMessage(BaseEvent):
         super().__init__(client, guild_ids, logger)
         self._post_message_action_classes = [
             BirthdayReplies(client),
+            DuplicateLinkAction(client),
             MarvelComicsAdAction(client),
+            RemindMeAction(client),
             ThankYouReplies(client),
-            WordleMessageAction(client)
+            WordleMessageAction(client),
         ]  # type: list[BaseMessageAction]
 
     async def message_received(

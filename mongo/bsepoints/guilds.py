@@ -421,6 +421,40 @@ class Guilds(BestSummerEverPointsDB):
         return ret
 
     #
+    # Remind me reminder stuff
+    #
+
+    def get_last_remind_me_time(self, guild_id: int) -> datetime.datetime:
+        """
+        Gets the last remind me suggestion time
+
+        Args:
+            guild_id (int): the guild ID to do this for
+
+        Returns:
+            dateteime: the time this guild last had a marvel comics ad
+        """
+        ret = self.query({"guild_id": guild_id}, projection={"last_remind_me_suggest_time": True})
+        if not ret or "last_remind_me_suggest_time" not in ret[0]:
+            return None
+        ret = ret[0]
+        return ret["last_remind_me_suggest_time"]
+
+    def set_last_remind_me_time(self, guild_id: int, timestamp: datetime.datetime) -> UpdateResult:
+        """
+        Sets the last remind me suggested time
+
+        Args:
+            guild_id (int): the guild ID to do this for
+            timestamp (datetime): the timestamp to set
+
+        Returns:
+            UpdateResult: update result
+        """
+        ret = self.update({"guild_id": guild_id}, {"$set": {"last_remind_me_suggest_time": timestamp}})
+        return ret
+
+    #
     # Valorant stuff
     #
 

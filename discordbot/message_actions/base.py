@@ -2,6 +2,8 @@
 import discord
 
 from discordbot.bsebot import BSEBot
+from mongo.bsepoints.guilds import Guilds
+from mongo.bsepoints.interactions import UserInteractions
 
 
 class BaseMessageAction():
@@ -10,6 +12,8 @@ class BaseMessageAction():
     """
     def __init__(self, client: BSEBot) -> None:
         self.client = client
+        self.user_interactions = UserInteractions()
+        self.guilds = Guilds()
 
     async def pre_condition(self, message: discord.Message, message_type: list) -> bool:
         """

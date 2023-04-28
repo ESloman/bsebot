@@ -1,7 +1,10 @@
 
+from logging import Logger
+
 import discord
 
 from discordbot.bsebot import BSEBot
+from discordbot.utilities import PlaceHolderLogger
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.interactions import UserInteractions
 
@@ -10,8 +13,9 @@ class BaseMessageAction():
     """
     Base message action class to be inherited from
     """
-    def __init__(self, client: BSEBot) -> None:
+    def __init__(self, client: BSEBot, logger: Logger = PlaceHolderLogger) -> None:
         self.client = client
+        self.logger = logger
         self.user_interactions = UserInteractions()
         self.guilds = Guilds()
 

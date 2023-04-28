@@ -1,6 +1,7 @@
 
 import random
 import re
+from logging import Logger
 
 import discord
 
@@ -12,8 +13,8 @@ class BirthdayReplies(BaseMessageAction):
     """
     Message action class for handling birthday reply messages for the bot
     """
-    def __init__(self, client: BSEBot) -> None:
-        super().__init__(client)
+    def __init__(self, client: BSEBot, logger: Logger) -> None:
+        super().__init__(client, logger)
         self._birthday_terms = [
             "happy birthday",
             "hb"

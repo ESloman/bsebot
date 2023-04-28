@@ -1,9 +1,13 @@
 
+import datetime
 import re
+from logging import Logger
 
 import discord
 from discord import PartialEmoji
+from pymongo.errors import OperationFailure
 
+from discordbot import utilities
 from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_SERVER_ID, SLOMAN_SERVER_ID, WORDLE_SCORE_REGEX
 from discordbot.message_actions.base import BaseMessageAction
@@ -13,8 +17,8 @@ class WordleMessageAction(BaseMessageAction):
     """
     Wordle message action class for adding reactions to wordle messages
     """
-    def __init__(self, client: BSEBot) -> None:
-        super().__init__(client)
+    def __init__(self, client: BSEBot, logger: Logger) -> None:
+        super().__init__(client, logger)
 
     async def pre_condition(self, message: discord.Message, message_type: list) -> bool:
         """
@@ -74,3 +78,49 @@ class WordleMessageAction(BaseMessageAction):
             _emoji = six_emoji
 
         await message.add_reaction(_emoji)
+
+        now = datetime.datetime.now()
+        today = now.replace(hour=0, minute=0, second=0)
+
+        if not utilities.is_utc(today):
+            today = utilities.add_utc_offset(today)
+
+        # get number of 6/6 wordles today
+        try:
+            wordle_results = self.user_interactions.query(
+                {
+                    "guild_id": message.guild.id,
+                    "is_bot": False,
+                    "$text": {"$search": "Wordle 6/6"},
+                    "timestamp": {"$gte": today},
+                    "message_type": "wordle"
+                }
+            )
+            wordle_results = [r for r in wordle_results if "6/6" in r["content"]]
+        except OperationFailure:
+            # text index not set correctly
+            return
+
+        if len(wordle_results) > 3:
+
+            # make sure we haven't sent this today already
+            try:
+                link_results = self.user_interactions.query(
+                    {
+                        "guild_id": message.guild.id,
+                        "is_bot": True,
+                        "$text": {"$search": "https://imgur.com/Uk73HPD"},
+                        "timestamp": {"$gte": today},
+                        "message_type": "link"
+                    }
+                )
+                link_results = [r for r in link_results if r["content"] == "https://imgur.com/Uk73HPD"]
+            except OperationFailure:
+                # text index not set correctly
+                return
+    
+            if len(link_results) > 0:
+                self.logger.info("already sent wordle tough image link")
+                return
+    
+            await message.channel.send(content="https://imgur.com/Uk73HPD", silent=True)

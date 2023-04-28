@@ -1,6 +1,7 @@
 
 import datetime
 import re
+from logging import Logger
 
 import discord
 
@@ -13,8 +14,8 @@ class MarvelComicsAdAction(BaseMessageAction):
     """
     Marvel comic add message action
     """
-    def __init__(self, client: BSEBot) -> None:
-        super().__init__(client)
+    def __init__(self, client: BSEBot, logger: Logger) -> None:
+        super().__init__(client, logger)
 
         self._comic_terms = [
             "comic",

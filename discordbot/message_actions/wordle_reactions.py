@@ -118,9 +118,9 @@ class WordleMessageAction(BaseMessageAction):
             except OperationFailure:
                 # text index not set correctly
                 return
-    
+
             if len(link_results) > 0:
                 self.logger.info("already sent wordle tough image link")
                 return
-    
+
             await message.channel.send(content="https://imgur.com/Uk73HPD", silent=True)

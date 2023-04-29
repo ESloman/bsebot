@@ -6,6 +6,7 @@ from logging import Logger
 
 from discord.ext import tasks
 
+from discordbot import utilities
 from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_SERVER_ID
 from discordbot.message_strings.valorant_rollcalls import MESSAGES
@@ -96,7 +97,15 @@ class AfterWorkVally(BaseTask):
             else:
                 _mention = "`Valorant`"
 
-            message = random.choice(MESSAGES)
+            odds = utilities.calculate_message_odds(
+                self.interactions,
+                guild.id,
+                MESSAGES,
+                "{role}",
+                [0, 1],
+            )
+
+            message = random.choices([message[0] for message in odds], [message[1] for message in odds])
             message = message.format(role=_mention)
 
             self.logger.info(f"Sending daily vally message: {message}")

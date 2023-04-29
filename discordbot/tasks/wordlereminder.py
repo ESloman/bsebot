@@ -2,9 +2,7 @@
 import asyncio
 import datetime
 import random
-
 from logging import Logger
-
 
 from discord.ext import tasks
 
@@ -91,6 +89,15 @@ class WordleReminder(BaseTask):
                 self.logger.info("Everyone has done their wordle today!")
                 continue
 
+            odds = utilities.calculate_message_odds(
+                self.interactions,
+                guild.id,
+                MESSAGES,
+                "{mention}",
+                [0, 1],
+            )
+
+            _messages_sent = ["", ]
             for reminder in reminders_needed:
                 if reminder["user_id"] == BSE_BOT_ID:
                     # skip bot reminder
@@ -107,7 +114,12 @@ class WordleReminder(BaseTask):
 
                 y_message = await channel.fetch_message(reminder["message_id"])
 
-                message = random.choice(MESSAGES)
+                # make sure that we send different messages for each needed reminder
+                message = ""
+                while message in _messages_sent:
+                    message = random.choices([message[0] for message in odds], [message[1] for message in odds])
+
+                _messages_sent.append(message)
                 message = message.format(mention=y_message.author.mention)
 
                 self.logger.info(message)

@@ -10,6 +10,10 @@ import re
 import sys
 from logging.handlers import RotatingFileHandler
 
+from pymongo.errors import OperationFailure
+
+from mongo.bsepoints.interactions import UserInteractions
+
 
 class PlaceHolderLogger():
     """
@@ -153,3 +157,68 @@ def add_utc_offset(date: datetime.datetime) -> datetime.datetime:
 def is_utc(date: datetime.datetime) -> bool:
     now_utc = datetime.datetime.now(tz=datetime.timezone.utc)
     return now_utc.hour == date.hour
+
+
+def calculate_message_odds(
+    interactions: UserInteractions,
+    guild_id: int,
+    message_list: list[str],
+    split: str,
+    main_indexes: list[int],
+) -> list[tuple[str, float]]:
+    """
+    Given a list of messages, calculates what the odds should be of each one getting picked.
+    This searches for previously used instances of those messages and then works out which ones should have
+    higher/lower odds.
+
+    Args:
+        interactions (UserInteractions): UserInteractions class for queries
+        guild_id (int): the guild ID
+        message_list (list[str]): the list of messages to get odds for
+        split (str): the marker to split the list of messages on to validate text search results
+        main_indexes (list[int]): the indexes of the messages that get extra odds
+
+    Returns:
+        list[tuple[str, float]]: list of messages tuples with the original string and the float percentage chance
+    """
+
+    # work out message odds
+    odds = []
+    totals = {}
+    # get the number of times each rollcall message has been used
+    for message in message_list:
+        parts = message.split(split)
+        main_bit = sorted(parts, key=lambda x: len(x), reverse=True)[0]
+
+        try:
+            results = interactions.query(
+                {
+                    "guild_id": guild_id,
+                    "is_bot": True,
+                    "$text": {"$search": message}
+                }
+            )
+            results = [result for result in results if main_bit in result["content"]]
+        except OperationFailure:
+            totals[message] = 0
+            continue
+
+        totals[message] = len(results)
+
+    # work out the weight that a given message should be picked
+    total_values = sum(totals.values())
+    for message in message_list:
+        _times = totals[message]
+        _chance = (1 - (_times / total_values)) * 100
+
+        # give greater weighting to standard messages
+        if message_list.index(message) in main_indexes:
+            _chance += 25
+
+        # give greater weighting to those with 0 uses so far
+        if _times == 0:
+            _chance += 25
+
+        odds.append((message, _chance))
+
+    return odds

@@ -5,8 +5,8 @@ import random
 from logging import Logger
 
 from discord.ext import tasks
-from pymongo.errors import OperationFailure
 
+from discordbot import utilities
 from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_SERVER_ID
 from discordbot.message_strings.valorant_rollcalls import MESSAGES
@@ -97,46 +97,15 @@ class AfterWorkVally(BaseTask):
             else:
                 _mention = "`Valorant`"
 
-            # work out message odds
-            odds = []
-            totals = {}
-            # get the number of times each rollcall message has been used
-            for message in MESSAGES:
-                parts = message.split("{role}")
-                main_bit = sorted(parts, key=lambda x: len(x), reverse=True)[0]
+            odds = utilities.calculate_message_odds(
+                self.interactions,
+                guild.id,
+                MESSAGES,
+                "{role}",
+                [0, 1],
+            )
 
-                try:
-                    results = self.interactions.query(
-                        {
-                            "guild_id": guild.id,
-                            "is_bot": True,
-                            "$text": {"$search": message}
-                        }
-                    )
-                    results = [result for result in results if main_bit in result["content"]]
-                except OperationFailure:
-                    totals[message] = 0
-                    continue
-
-                totals[message] = len(results)
-
-            # work out the weight that a given message should be picked
-            total_rollcalls = sum(totals.values())
-            for message in MESSAGES:
-                _times = totals[message]
-                _chance = (1 - (_times / total_rollcalls)) * 100
-
-                # give greater weighting to standard messages
-                if MESSAGES.index(message) in [0, 1]:
-                    _chance += 25
-
-                # give greater weighting to those with 0 uses so far
-                if _times == 0:
-                    _chance += 25
-
-                odds.append((message, _chance))
-
-            message = random.choices([message[0] for message in totals], [message[1] for message in totals])
+            message = random.choices([message[0] for message in odds], [message[1] for message in odds])
             message = message.format(role=_mention)
 
             self.logger.info(f"Sending daily vally message: {message}")

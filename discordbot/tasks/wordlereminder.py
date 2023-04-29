@@ -2,11 +2,10 @@
 import asyncio
 import datetime
 import random
-
 from logging import Logger
 
-
 from discord.ext import tasks
+from pymongo.errors import OperationFailure
 
 from discordbot import utilities
 from discordbot.bsebot import BSEBot
@@ -91,6 +90,45 @@ class WordleReminder(BaseTask):
                 self.logger.info("Everyone has done their wordle today!")
                 continue
 
+            # work out message odds
+            odds = []
+            totals = {}
+            # get the number of times each reminder message has been used
+            for message in MESSAGES:
+                parts = message.split("{mention}")
+                main_bit = sorted(parts, key=lambda x: len(x), reverse=True)[0]
+
+                try:
+                    results = self.interactions.query(
+                        {
+                            "guild_id": guild.id,
+                            "is_bot": True,
+                            "$text": {"$search": message}
+                        }
+                    )
+                    results = [result for result in results if main_bit in result["content"]]
+                except OperationFailure:
+                    totals[message] = 0
+                    continue
+
+                totals[message] = len(results)
+
+            # work out the weight that a given message should be picked
+            total_reminder_messages = sum(totals.values())
+            for message in MESSAGES:
+                _times = totals[message]
+                _chance = (1 - (_times / total_reminder_messages)) * 100
+
+                # give greater weighting to standard messages
+                if MESSAGES.index(message) in [0, 1]:
+                    _chance += 25
+
+                # give greater weighting to those with 0 uses so far
+                if _times == 0:
+                    _chance += 25
+
+                odds.append((message, _chance))
+
             for reminder in reminders_needed:
                 if reminder["user_id"] == BSE_BOT_ID:
                     # skip bot reminder
@@ -107,7 +145,7 @@ class WordleReminder(BaseTask):
 
                 y_message = await channel.fetch_message(reminder["message_id"])
 
-                message = random.choice(MESSAGES)
+                message = random.choices([message[0] for message in totals], [message[1] for message in totals])
                 message = message.format(mention=y_message.author.mention)
 
                 self.logger.info(message)

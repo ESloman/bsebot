@@ -206,10 +206,10 @@ def calculate_message_odds(
         totals[message] = len(results)
 
     # work out the weight that a given message should be picked
-    total_rollcalls = sum(totals.values())
+    total_values = sum(totals.values())
     for message in message_list:
         _times = totals[message]
-        _chance = (1 - (_times / total_rollcalls)) * 100
+        _chance = (1 - (_times / total_values)) * 100
 
         # give greater weighting to standard messages
         if message_list.index(message) in main_indexes:

@@ -2,6 +2,7 @@
 import datetime
 import random
 import re
+from logging import Logger
 
 import discord
 from pymongo.errors import OperationFailure
@@ -15,8 +16,8 @@ class DuplicateLinkAction(BaseMessageAction):
     """
     Duplicated Link action
     """
-    def __init__(self, client: BSEBot) -> None:
-        super().__init__(client)
+    def __init__(self, client: BSEBot, logger: Logger) -> None:
+        super().__init__(client, logger)
         # allow the precondition to store results for the run to use
         self._results_map = {
 
@@ -38,9 +39,13 @@ class DuplicateLinkAction(BaseMessageAction):
             return False
 
         # extract link from content
-        link = [_link for _link in re.split(" \n", message.content) if "https" in _link][0]
+        link = [
+            _link for _link in re.split(" \n", message.content) if "https" in _link
+        ][0]
+
         link = link.split("?")[0]
 
+        # ignore common links here
         if "guessthe.game" in link:
             return False
 
@@ -61,9 +66,8 @@ class DuplicateLinkAction(BaseMessageAction):
             # could be local dev env
             return False
 
-        if not results:
-            return False
-
+        # text searching can find false positives
+        # make sure our exact link is present
         results = [
             result for result in results if link in result["content"]
         ]

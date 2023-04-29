@@ -1,6 +1,7 @@
 
 import datetime
 import re
+from logging import Logger
 
 import discord
 
@@ -14,8 +15,8 @@ class RemindMeAction(BaseMessageAction):
     Remind Me message action
     Suggests to users to use the bot's remind me functionality
     """
-    def __init__(self, client: BSEBot) -> None:
-        super().__init__(client)
+    def __init__(self, client: BSEBot, logger: Logger) -> None:
+        super().__init__(client, logger)
 
         self._reminder_terms = [
             "remind me",

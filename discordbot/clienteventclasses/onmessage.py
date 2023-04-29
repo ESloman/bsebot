@@ -25,12 +25,12 @@ class OnMessage(BaseEvent):
     def __init__(self, client: BSEBot, guild_ids, logger):
         super().__init__(client, guild_ids, logger)
         self._post_message_action_classes = [
-            BirthdayReplies(client),
-            DuplicateLinkAction(client),
-            MarvelComicsAdAction(client),
-            RemindMeAction(client),
-            ThankYouReplies(client),
-            WordleMessageAction(client),
+            BirthdayReplies(client, logger),
+            DuplicateLinkAction(client, logger),
+            MarvelComicsAdAction(client, logger),
+            RemindMeAction(client, logger),
+            ThankYouReplies(client, logger),
+            WordleMessageAction(client, logger),
         ]  # type: list[BaseMessageAction]
 
     async def message_received(

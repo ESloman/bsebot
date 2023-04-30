@@ -1,5 +1,7 @@
 # file for daily vwordle reminders
 # when sending a wordle reminder message, it will pick one of these at random
+# message will be chosen randomly, but based on some dynamically created odds
+# use a tuple to hardcode some odds
 # the '{mention}' bit is where the user mention will be inserted
 # to add a new one, simply add a new line
 
@@ -12,4 +14,8 @@ MESSAGES = [
     "{mention} hasn't done their Wordle today. Are they stupid?",
     "Daddy wants you to complete your Wordle today {mention}",
     "{mention}\nRoses are red\nViolets are blue\nI've done my Wordle\nDon't forget to do yours too!",
+
+    # HARD-CODED ODDS EXAMPLE
+    # tuple with message string as first item, chance (roughly out of 100) as a float
+    # ("This is a super rare message {mention}", 1.0)
 ]

@@ -117,7 +117,7 @@ class WordleReminder(BaseTask):
                 # make sure that we send different messages for each needed reminder
                 message = ""
                 while message in _messages_sent:
-                    message = random.choices([message[0] for message in odds], [message[1] for message in odds])
+                    message = random.choices([message[0] for message in odds], [message[1] for message in odds])[0]
 
                 _messages_sent.append(message)
                 message = message.format(mention=y_message.author.mention)

@@ -105,7 +105,7 @@ class AfterWorkVally(BaseTask):
                 [0, 1],
             )
 
-            message = random.choices([message[0] for message in odds], [message[1] for message in odds])
+            message = random.choices([message[0] for message in odds], [message[1] for message in odds])[0]
             message = message.format(role=_mention)
 
             self.logger.info(f"Sending daily vally message: {message}")

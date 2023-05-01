@@ -144,7 +144,9 @@ class StatsGatherer:
 
         return data_class
 
-    def average_message_length(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[Stat]:
+    def average_message_length(
+        self, guild_id: int, start: datetime.datetime, end: datetime.datetime
+    ) -> Tuple[Stat, Stat]:
         """Returns the average message length between two given time periods
 
         Args:

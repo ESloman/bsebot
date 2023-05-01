@@ -16,7 +16,7 @@ class Pledge(BSEddies):
             return
 
         self._add_event_type_to_activity_history(
-            ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_PLEDGE, user_id=ctx.user.id
+            ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_PLEDGE
         )
 
         guild_id = ctx.guild.id

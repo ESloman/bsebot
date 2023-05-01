@@ -66,6 +66,7 @@ from discordbot.slashcommandeventclasses.view import View
 from discordbot.contextcommands.message_delete import ContextDeleteMessage
 
 # task imports
+from discordbot.tasks.activitychanger import ActivityChanger
 from discordbot.tasks.annualawards import AnnualBSEddiesAwards
 from discordbot.tasks.basetask import BaseTask
 from discordbot.tasks.betcloser import BetCloser
@@ -204,6 +205,7 @@ class CommandManager(object):
             self.client, guilds, self.logger, startup_tasks, self.bseddies_place, self.bseddies_close,
         )
 
+        self.activity_changer = ActivityChanger(self.client, guilds, self.logger, startup_tasks)
         self.bet_reminder_task = BetReminder(self.client, guilds, self.logger, startup_tasks)
         self.eddie_gain_message_task = EddieGainMessager(self.client, guilds, self.logger, startup_tasks)
         self.eddie_king_task = BSEddiesKingTask(self.client, guilds, self.logger, startup_tasks)

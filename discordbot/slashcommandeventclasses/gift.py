@@ -14,7 +14,8 @@ class Gift(BSEddies):
         super().__init__(client, guilds, logger)
 
     async def gift_eddies(
-        self, ctx: discord.ApplicationContext,
+        self,
+        ctx: discord.ApplicationContext | discord.Interaction,
         friend: discord.User,
         amount: int
     ) -> None:
@@ -33,26 +34,33 @@ class Gift(BSEddies):
             return
 
         self._add_event_type_to_activity_history(
-            ctx.author, ctx.guild_id, ActivityTypes.BSEDDIES_GIFT,
+            ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_GIFT,
             friend_id=friend.id, amount=amount
         )
 
-        points = self.user_points.get_user_points(ctx.author.id, ctx.guild.id)
+        if type(ctx) == discord.ApplicationContext:
+            response = ctx.respond
+        elif type(ctx) == discord.Interaction:
+            response = ctx.response.send_message
+        else:
+            response = ctx.respond
+
+        points = self.user_points.get_user_points(ctx.user.id, ctx.guild.id)
         if points < amount:
             msg = "You have insufficient points to perform that action."
-            await ctx.respond(content=msg, ephemeral=True, delete_after=10)
+            await response(content=msg, ephemeral=True, delete_after=10)
             return
 
         if not friend.dm_channel:
             await friend.create_dm()
         try:
-            msg = f"**{ctx.author.name}** just gifted you `{amount}` eddies!!"
+            msg = f"**{ctx.user.name}** just gifted you `{amount}` eddies!!"
             await friend.send(content=msg, silent=True)
         except discord.Forbidden:
             pass
 
         self.user_points.increment_points(
-            ctx.author.id,
+            ctx.user.id,
             ctx.guild.id,
             amount * -1,
             TransactionTypes.GIFT_GIVE,
@@ -63,7 +71,7 @@ class Gift(BSEddies):
             ctx.guild.id,
             amount,
             TransactionTypes.GIFT_RECEIVE,
-            friend_id=ctx.author.id
+            friend_id=ctx.user.id
         )
 
-        await ctx.respond(content=f"Eddies transferred to `{friend.name}`!", ephemeral=True, delete_after=10)
+        await response(content=f"Eddies transferred to `{friend.name}`!", ephemeral=True, delete_after=5)

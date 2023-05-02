@@ -64,6 +64,7 @@ from discordbot.slashcommandeventclasses.view import View
 
 # context commands
 from discordbot.contextcommands.message_delete import ContextDeleteMessage
+from discordbot.contextcommands.user_gift import ContextUserGift
 
 # task imports
 from discordbot.tasks.activitychanger import ActivityChanger
@@ -186,6 +187,7 @@ class CommandManager(object):
 
         # context commands
         self.message_delete = ContextDeleteMessage(client, guilds, self.logger)
+        self.user_gift = ContextUserGift(client, guilds, self.logger, self.bseddies_gift)
 
         # tasks
         self.guild_checker_task = GuildChecker(
@@ -776,3 +778,13 @@ class CommandManager(object):
                 title="Set a reminder"
             )
             await ctx.response.send_modal(modal)
+
+        @self.client.user_command(name="Gift")
+        async def gift(ctx: discord.ApplicationCommand, user: discord.Member):
+            """_summary_
+
+            Args:
+                ctx (discord.ApplicationCommand): _description_
+                user (discord.Member): _description_
+            """
+            await self.user_gift.user_gift(ctx, user)

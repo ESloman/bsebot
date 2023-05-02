@@ -154,7 +154,9 @@ class OnMessage(BaseEvent):
         message_type.append("message")
 
         if re.match(WORDLE_REGEX, message.content):
-            message_type.append("wordle")
+            if any([square for square in ["🟩", "🟨", "⬛", "⬜"]]):
+                # double check it's a wordle message by presence of emoji
+                message_type.append("wordle")
 
         if emojis := re.findall(r"<:[a-zA-Z_0-9]*:\d*>", message.content):
             for emoji in emojis:

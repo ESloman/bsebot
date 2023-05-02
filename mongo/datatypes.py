@@ -330,6 +330,9 @@ class GuildDB(TypedDict):
     valorant_rollcall: bool
     valorant_channel: int
     valorant_role: int
+    wordle_x_emoji: NotRequired[str]
+    wordle_two_emoji: NotRequired[str]
+    wordle_six_emoji: NotRequired[str]
 
 
 class Reminder(TypedDict):

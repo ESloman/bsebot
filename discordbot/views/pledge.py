@@ -24,6 +24,9 @@ class PledgeView(discord.ui.View):
     @discord.ui.button(label="Pledge", style=discord.ButtonStyle.blurple, row=2)
     async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
 
+        # defer first
+        await interaction.response.defer(ephemeral=True)
+
         try:
             value = self.pledge_select.values[0]
         except (IndexError, AttributeError):
@@ -50,33 +53,43 @@ class PledgeView(discord.ui.View):
                 role_id = None
                 supporter_type = SupporterType.NEUTRAL
 
-        if role_id:
-            role = interaction.guild.get_role(role_id)
-            await interaction.user.add_roles(role)
-        else:
-            # user selected "neutral"
-            # remove them from revo role if applicable
-            role = interaction.guild.get_role(guild_db["revolutionary_role"])
-            if role in interaction.user.roles:
-                await interaction.user.remove_roles(role)
+        print(f"{interaction.user.name} selected {value}")
+
+        try:
+            if role_id:
+                role = interaction.guild.get_role(role_id)
+                await interaction.user.add_roles(role)
+            else:
+                # user selected "neutral"
+                # remove them from revo role if applicable
+                role = interaction.guild.get_role(guild_db["revolutionary_role"])
+                if role in interaction.user.roles:
+                    await interaction.user.remove_roles(role)
+        except Exception as e:
+            print(f"Got error adding the new role: {e}")
 
         # remove supporter role
-        if value in ["revolutionary", "neutral"]:
-            supporter_role = interaction.guild.get_role(guild_db["supporter_role"])
-            if supporter_role in interaction.user.roles:
-                await interaction.user.remove_roles(supporter_role)
-        elif value == "supporter":
-            revolutionary_role = interaction.guild.get_role(guild_db["revolutionary_role"])
-            if revolutionary_role in interaction.user.roles:
-                await interaction.user.remove_roles(revolutionary_role)
+        try:
+            if value in ["revolutionary", "neutral"]:
+                supporter_role = interaction.guild.get_role(guild_db["supporter_role"])
+                if supporter_role in interaction.user.roles:
+                    await interaction.user.remove_roles(supporter_role)
+            elif value == "supporter":
+                revolutionary_role = interaction.guild.get_role(guild_db["revolutionary_role"])
+                if revolutionary_role in interaction.user.roles:
+                    await interaction.user.remove_roles(revolutionary_role)
+        except Exception as e:
+            print(f"Got error removing the old role: {e}")
 
         self.user_points.update(
             {"guild_id": interaction.guild.id, "uid": interaction.user.id},
             {"$set": {"supporter_type": supporter_type}}
         )
 
-        await interaction.response.edit_message(
-            content=f"Successfully pledged to be **{value}**.", view=None
+        await interaction.followup.edit_message(
+            message_id=interaction.message.id,
+            content=f"Successfully pledged to be **{value}**.",
+            view=None
         )
 
         if value in ["neutral", "revolutionary"]:

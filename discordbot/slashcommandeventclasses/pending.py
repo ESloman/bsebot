@@ -12,6 +12,9 @@ class Pending(BSEddies):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.activity_type = ActivityTypes.BSEDDIES_PENDING
+        self.help_string = "See all the pending bets you have eddies on"
+        self.command_name = "pending"
 
     async def pending(self, ctx: discord.ApplicationContext) -> None:
         """

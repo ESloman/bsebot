@@ -14,6 +14,9 @@ class View(BSEddies):
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
         self.dmable = True
+        self.activity_type = ActivityTypes.BSEDDIES_VIEW
+        self.help_string = "View your eddies for the server"
+        self.command_name = "view"
 
     def _construct_guild_message(self, user: User) -> str:
         """

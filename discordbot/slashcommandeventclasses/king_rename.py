@@ -14,6 +14,9 @@ class KingRename(BSEddies):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.activity_type = ActivityTypes.RENAME_KING
+        self.help_string = "Pay 500 eddies to rename one of the BSEddies roles"
+        self.command_name = "rename"
 
     async def rename(
         self,

@@ -9,7 +9,7 @@ from pymongo.errors import OperationFailure
 
 from discordbot import utilities
 from discordbot.bsebot import BSEBot
-from discordbot.constants import BSE_SERVER_ID, SLOMAN_SERVER_ID, WORDLE_SCORE_REGEX
+from discordbot.constants import WORDLE_SCORE_REGEX
 from discordbot.message_actions.base import BaseMessageAction
 
 
@@ -55,20 +55,14 @@ class WordleMessageAction(BaseMessageAction):
             # no need to process anything after this
             return
 
-        # TODO: #307 we should get the emojis from the guild configuration
-        if guild_id == BSE_SERVER_ID:
-            x_emoji = PartialEmoji.from_str("<:rey:883225332684038154>")
-            two_emoji = PartialEmoji.from_str("<a:pookpog:847380557469450281>")
-            six_emoji = PartialEmoji.from_str("<:grimace:883385299428855868>")
-        elif guild_id == SLOMAN_SERVER_ID:
-            x_emoji = PartialEmoji.from_str("<:col:810442635650138132>")
-            two_emoji = PartialEmoji.from_str("<a:8194pepeyay:1065934308981887057>")
-            six_emoji = PartialEmoji.from_str("<a:8194pepeyay:1065934308981887057>")
-        else:
-            # not sure on the guild - use a unicode emoji
-            x_emoji = "😞"
-            two_emoji = "🎉"
-            six_emoji = "😬"
+        guild_db = self.guilds.get_guild(guild_id)
+        x_emoji = guild_db.get("wordle_x_emoji")
+        two_emoji = guild_db.get("wordle_two_emoji", )
+        six_emoji = guild_db.get("wordle_six_emoji", )
+
+        x_emoji = "😞" if not x_emoji else PartialEmoji.from_str(x_emoji)
+        two_emoji = "🎉" if not two_emoji else PartialEmoji.from_str(two_emoji)
+        six_emoji = "😬" if not six_emoji else PartialEmoji.from_str(six_emoji)
 
         if guesses == "X":
             _emoji = x_emoji

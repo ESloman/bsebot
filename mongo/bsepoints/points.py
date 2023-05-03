@@ -202,19 +202,27 @@ class UserPoints(BestSummerEverPointsDB):
             comment="User created"
         )
 
-    def set_daily_eddies_toggle(self, user_id: int, guild_id: int, value: bool) -> None:
+    def set_daily_eddies_toggle(self, user_id: int, guild_id: int, value: bool, summary_enabled: bool = False) -> None:
         """
         Sets the "daily eddies" toggle for the given user.
         This toggle determines if the user will receive the daily allowance messages from the bot.
         :param user_id: the user id to use
         :param guild_id: the guild id
         :param value: bool - whether or not the messages should be sent
+        :param summary_enabled: bool - whether the daily summary should be sent to this user
         :return:
         """
         if guild_id:
-            self.update({"uid": user_id, "guild_id": guild_id}, {"$set": {"daily_eddies": value}})
+            self.update(
+                {"uid": user_id, "guild_id": guild_id},
+                {"$set": {"daily_eddies": value, "daily_summary": summary_enabled}}
+            )
         else:
-            self.update({"uid": user_id}, {"$set": {"daily_eddies": value}}, many=True)
+            self.update(
+                {"uid": user_id},
+                {"$set": {"daily_eddies": value, "daily_summary": summary_enabled}},
+                many=True
+            )
 
     def set_king_flag(self, user_id: int, guild_id: int, value: bool) -> None:
         """

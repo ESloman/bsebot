@@ -3,6 +3,8 @@ import discord
 from discord import Interaction, SelectOption
 from discord.ui import Select
 
+from mongo.datatypes import Emoji
+
 
 class WordleChannelSelect(Select):
     def __init__(self):
@@ -96,6 +98,44 @@ class WordleReminderSelect(Select):
         selected_amount = interaction.data["values"][0]
         for option in self.options:
             option.default = option.value == selected_amount
+
+        # expecting an update method on root here
+        await self.view.update(interaction)
+
+
+class WordleEmojiSelect(Select):
+    def __init__(self, server_emojis: list[Emoji], score_num: str = None, current: str = None):
+
+        options = [
+            SelectOption(
+                label=emoji["name"],
+                value=f"<:{emoji['name']}:{emoji['eid']}>",
+                emoji=discord.PartialEmoji.from_str(f"{emoji['name']}:{emoji['eid']}")
+            ) for emoji in server_emojis
+        ]
+
+        if current:
+            for opt in options:
+                if opt.value == current:
+                    opt.default = True
+
+        super().__init__(
+            placeholder=f"Select emoji for {score_num} reaction",
+            min_values=0,
+            max_values=1,
+            disabled=False,
+            options=options
+        )
+
+    async def callback(self, interaction: Interaction):
+        """
+
+        :param interaction:
+        :return:
+        """
+        selected = interaction.data["values"][0]
+        for option in self.options:
+            option.default = option.value == selected
 
         # expecting an update method on root here
         await self.view.update(interaction)

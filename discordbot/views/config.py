@@ -14,6 +14,7 @@ from discordbot.views.config_salary_message import DailyMessageView
 from discordbot.views.config_threads import ThreadConfigView
 from discordbot.views.config_valorant import ValorantConfigView
 from discordbot.views.config_wordle import WordleConfigView
+from discordbot.views.config_wordle_reactions import WordleEmojiReactionConfigView
 
 from mongo.bsedataclasses import SpoilerThreads
 from mongo.bsepoints.guilds import Guilds
@@ -136,6 +137,8 @@ class ConfigView(discord.ui.View):
                 msg, view = self._get_wordle_message_and_view(interaction)
             case "daily_salary":
                 msg, view = self._get_daily_salary_message_and_view(interaction)
+            case "wordle_reactions":
+                msg, view = self._get_wordle_reaction_message_and_view(interaction)
             case _:
                 # default case
                 msg = "unknown"
@@ -336,6 +339,26 @@ class ConfigView(discord.ui.View):
         msg = (
             "# Daily Salary Message\n\n"
             "Select whether you want to receive the _(silent)_ daily salary message or not."
+        )
+        return msg, view
+
+    def _get_wordle_reaction_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
+        """Handle wordle message/view
+
+        Args:
+            interaction (discord.Interaction): the interaction
+
+        Returns:
+            tuple[str, discord.ui.View]: the message and view
+        """
+        view = WordleEmojiReactionConfigView(interaction.guild_id)
+        msg = (
+            "**Wordle Emoji Reaction Config**\n\n"
+            "Select which server emojis the bot uses to react to different Wordle scores.\n"
+            "If None are selected, the defaults will be used.\n\n"
+            "1.) X score\n"
+            "2.) 2 score\n"
+            "6.) 6 score\n"
         )
         return msg, view
 

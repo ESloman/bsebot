@@ -67,4 +67,4 @@ class BetChange(discord.ui.View):
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=2, disabled=False, emoji="✖️")
     async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await interaction.response.edit_message(content="Cancelled", view=None, ephemeral=True)
+        await interaction.response.edit_message(content="Cancelled", view=None, ephemeral=True, delete_after=2)

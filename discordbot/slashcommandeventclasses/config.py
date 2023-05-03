@@ -21,6 +21,9 @@ class Config(BSEddies):
     ):
         super().__init__(client, guild_ids, logger)
         self.dmable = True
+        self.activity_type = ActivityTypes.CONFIG
+        self.help_string = "Configure BSEBot settings for the user/server"
+        self.command_name = "config"
 
     async def root_config(self, ctx: discord.ApplicationContext) -> None:
 

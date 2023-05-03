@@ -1,6 +1,7 @@
 
 import discord
 
+from discordbot.bot_enums import ActivityTypes
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.slashcommandeventclasses.close import CloseBet
 from discordbot.slashcommandeventclasses.place import PlaceBet
@@ -16,6 +17,9 @@ class RefreshBet(BSEddies):
         super().__init__(client, guilds, logger)
         self.bseddies_close = CloseBet(client, guilds, logger)
         self.bseddies_place = PlaceBet(client, guilds, logger)
+        self.activity_type = ActivityTypes.REFRESH
+        self.help_string = "Refresh a bet"
+        self.command_name = "refresh"
 
     async def create_refresh_view(
             self,

@@ -18,6 +18,9 @@ class PlaceBet(BSEddies):
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
         self.bseddies_close = CloseBet(client, guilds, logger)
+        self.activity_type = ActivityTypes.BSEDDIES_BET_PLACE
+        self.help_string = "Place eddies on a bet"
+        self.command_name = "place"
 
     async def create_bet_view(
             self,

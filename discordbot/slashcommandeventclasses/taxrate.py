@@ -10,6 +10,9 @@ class TaxRate(BSEddies):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.activity_type = ActivityTypes.BSEDDIES_SET_TAX_RATE
+        self.help_string = "Set the tax rate for the server"
+        self.command_name = "taxrate"
 
     async def create_tax_view(self, ctx: discord.ApplicationContext) -> None:
 

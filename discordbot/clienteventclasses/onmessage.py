@@ -10,6 +10,7 @@ from discordbot.message_actions.base import BaseMessageAction  # noqa
 
 # message actions
 from discordbot.message_actions.birthday_replies import BirthdayReplies
+from discordbot.message_actions.command_suggestion import CommandSuggest
 from discordbot.message_actions.duplicate_links import DuplicateLinkAction
 from discordbot.message_actions.marvel_ad import MarvelComicsAdAction
 from discordbot.message_actions.remind_me import RemindMeAction
@@ -26,6 +27,7 @@ class OnMessage(BaseEvent):
         super().__init__(client, guild_ids, logger)
         self._post_message_action_classes = [
             BirthdayReplies(client, logger),
+            CommandSuggest(client, logger),
             DuplicateLinkAction(client, logger),
             MarvelComicsAdAction(client, logger),
             RemindMeAction(client, logger),
@@ -154,7 +156,9 @@ class OnMessage(BaseEvent):
         message_type.append("message")
 
         if re.match(WORDLE_REGEX, message.content):
-            message_type.append("wordle")
+            if any([square for square in ["🟩", "🟨", "⬛", "⬜"]]):
+                # double check it's a wordle message by presence of emoji
+                message_type.append("wordle")
 
         if emojis := re.findall(r"<:[a-zA-Z_0-9]*:\d*>", message.content):
             for emoji in emojis:

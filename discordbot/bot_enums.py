@@ -94,6 +94,8 @@ class ActivityTypes(IntEnum):
     REV_NEUTRAL = 45
     REV_SAVE = 46
     CONFIG = 47
+    REFRESH = 48
+    WORDLE = 49
 
 
 class AwardsTypes(IntEnum):

@@ -2,6 +2,7 @@ from typing import Union
 
 import discord
 
+from discordbot.bot_enums import ActivityTypes
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from discordbot.constants import CREATOR
 
@@ -16,6 +17,11 @@ class BSEddies(BaseEvent):
         super().__init__(client, guilds, logger)
         self.dmable = False
 
+        # these need to be set
+        self.activity_type: ActivityTypes = None
+        self.help_string: str = None
+        self.command_name: str = None
+
     async def _handle_validation(self, ctx: Union[discord.ApplicationContext, discord.Interaction], **kwargs) -> bool:
         """
         Internal method for validating slash command inputs.
@@ -23,32 +29,38 @@ class BSEddies(BaseEvent):
         :param kwargs: the additional kwargs to use in validation
         :return: True or False
         """
+
+        if type(ctx) == discord.ApplicationContext:
+            response = ctx.respond
+        else:
+            response = ctx.response.send_message
+
         if not ctx.guild and not self.dmable:
             msg = "This command doesn't work in DMs (yet)."
-            await ctx.respond(content=msg)
+            await response(content=msg)
             return False
 
-        if kwargs.get("admin") and ctx.author.id != CREATOR:
+        if kwargs.get("admin") and ctx.user.id != CREATOR:
             msg = "You do not have the permissions to use this command."
-            await ctx.respond(content=msg, ephemeral=True, delete_after=10)
+            await response(content=msg, ephemeral=True, delete_after=10)
             return False
 
         if "friend" in kwargs and (
                 isinstance(kwargs["friend"], discord.User) or isinstance(kwargs["friend"], discord.Member)):
             if kwargs["friend"].bot:
                 msg = "Bots cannot be gifted eddies."
-                await ctx.respond(content=msg, ephemeral=True, delete_after=10)
+                await response(content=msg, ephemeral=True, delete_after=10)
                 return False
 
-            if kwargs["friend"].id == ctx.author.id:
+            if kwargs["friend"].id == ctx.user.id:
                 msg = "You can't gift yourself points."
-                await ctx.respond(content=msg, ephemeral=True, delete_after=10)
+                await response(content=msg, ephemeral=True, delete_after=10)
                 return False
 
         if "amount" in kwargs and isinstance(kwargs["amount"], int):
             if kwargs["amount"] < 0:
                 msg = "You can't _\"gift\"_ someone negative points."
-                await ctx.respond(content=msg, ephemeral=True, delete_after=10)
+                await response(content=msg, ephemeral=True, delete_after=10)
                 return False
 
         return True

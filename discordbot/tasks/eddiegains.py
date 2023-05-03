@@ -47,10 +47,11 @@ class EddieGainMessager(BaseTask):
             eddie_dict = self.eddie_manager.give_out_eddies(guild_id, real=True)
 
             guild = await self.bot.fetch_guild(guild_id)  # type: discord.Guild
+            guild_db = self.guilds.get_guild(guild_id)
 
-            current_king_id = self.user_points.get_current_king(guild_id)["uid"]
+            current_king_id = guild_db["king"]
 
-            msg = "Eddie gain summary:\n"
+            summary_message = "Eddie gain summary:\n"
             for user_id in eddie_dict:
 
                 value = eddie_dict[user_id][0]
@@ -63,10 +64,10 @@ class EddieGainMessager(BaseTask):
                 try:
                     user = await guild.fetch_member(int(user_id))  # type: discord.Member
                 except discord.NotFound:
-                    msg += f"\n- `{user_id}` :  **{value}** (tax: _{tax}_)"
+                    summary_message += f"\n- `{user_id}` :  **{value}** (tax: _{tax}_)"
                     continue
 
-                msg += f"\n- `{user_id}` {user.display_name} :  **{value}** (tax: _{tax}_)"
+                summary_message += f"\n- `{user.display_name}` :  **{value}** (tax: _{tax}_)"
                 text = f"Your daily salary of BSEDDIES is `{value}` (after tax).\n"
 
                 if user_id == current_king_id:
@@ -97,12 +98,20 @@ class EddieGainMessager(BaseTask):
                     except discord.Forbidden:
                         continue
 
-            user = await guild.fetch_member(CREATOR)  # type: discord.Member
-            try:
-                await user.send(content=msg, silent=True)
-            except discord.Forbidden:
-                # can't send DM messages to this user
-                self.logger.info(f"{user.display_name} - {msg}")
+            # make sure admin list is unique
+            for user_id in set(guild_db.get("admins", []) + [CREATOR, guild_db["owner_id"]]):
+                user_db = self.user_points.find_user(user_id, guild_id)
+
+                if not user_db.get("daily_summary"):
+                    # not configured to send summary messages
+                    continue
+
+                user = await guild.fetch_member(user_id)  # type: discord.Member
+                try:
+                    await user.send(content=summary_message, silent=True)
+                except discord.Forbidden:
+                    # can't send DM messages to this user
+                    self.logger.info(f"{user.display_name} - {summary_message}")
 
     @eddie_distributer.before_loop
     async def before_eddie_distributer(self):

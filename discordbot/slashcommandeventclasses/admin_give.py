@@ -12,6 +12,9 @@ class AdminGive(BSEddies):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.activity_type = ActivityTypes.BSEDDIES_ADMIN_GIVE
+        self.help_string = "Allows an admin to give a user eddies"
+        self.command_name = "admin_give"
 
     async def admin_give(self, ctx: discord.ApplicationContext, user: discord.User, amount: int) -> None:
         """
@@ -25,7 +28,7 @@ class AdminGive(BSEddies):
             return
 
         self._add_event_type_to_activity_history(
-            ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_ADMIN_GIVE, user_id=user.id, amount=amount
+            ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_ADMIN_GIVE, targeted_id=user.id, amount=amount
         )
 
         self.user_points.increment_points(

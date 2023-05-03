@@ -13,6 +13,9 @@ class Leaderboard(BSEddies):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.activity_type = ActivityTypes.BSEDDIES_LEADERBOARD
+        self.command_name = "leaderboard"
+        self.help_string = "See the BSEddies leaderboard"
 
     async def leaderboard(self, ctx: discord.ApplicationContext) -> None:
         """
@@ -23,7 +26,7 @@ class Leaderboard(BSEddies):
         if not await self._handle_validation(ctx):
             return
 
-        self._add_event_type_to_activity_history(ctx.author, ctx.guild_id, ActivityTypes.BSEDDIES_LEADERBOARD)
+        self._add_event_type_to_activity_history(ctx.author, ctx.guild_id, self.activity_type)
 
         await ctx.channel.trigger_typing()
 

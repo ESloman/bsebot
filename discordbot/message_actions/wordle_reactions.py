@@ -9,7 +9,7 @@ from pymongo.errors import OperationFailure
 
 from discordbot import utilities
 from discordbot.bsebot import BSEBot
-from discordbot.constants import BSE_SERVER_ID, SLOMAN_SERVER_ID, WORDLE_SCORE_REGEX
+from discordbot.constants import WORDLE_SCORE_REGEX
 from discordbot.message_actions.base import BaseMessageAction
 
 
@@ -56,15 +56,6 @@ class WordleMessageAction(BaseMessageAction):
             return
 
         guild_db = self.guilds.get_guild(guild_id)
-        if guild_id == BSE_SERVER_ID:
-            x_emoji = PartialEmoji.from_str("<:rey:883225332684038154>")
-            two_emoji = PartialEmoji.from_str("<a:pookpog:847380557469450281>")
-            six_emoji = PartialEmoji.from_str("<:grimace:883385299428855868>")
-        elif guild_id == SLOMAN_SERVER_ID:
-            x_emoji = PartialEmoji.from_str("<:col:810442635650138132>")
-            two_emoji = PartialEmoji.from_str("<a:8194pepeyay:1065934308981887057>")
-            six_emoji = PartialEmoji.from_str("<a:8194pepeyay:1065934308981887057>")
-
         x_emoji = guild_db.get("wordle_x_emoji")
         two_emoji = guild_db.get("wordle_two_emoji", )
         six_emoji = guild_db.get("wordle_six_emoji", )

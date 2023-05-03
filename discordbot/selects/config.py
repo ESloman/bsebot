@@ -6,6 +6,7 @@ from discord.ui import Select
 class ConfigSelect(Select):
     _values = [
         ("Admins", "admins"),
+        ("BSEddies", "bseddies"),
         ("Daily Salary", "salary"),
         ("Daily Salary Message", "daily_salary"),
         ("Revolution Event", "revolution"),

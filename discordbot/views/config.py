@@ -8,6 +8,7 @@ from discordbot.constants import CREATOR
 from discordbot.selects.config import ConfigSelect
 from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.config_admin import AdminConfigView
+from discordbot.views.config_bseddies import BSEddiesConfigView
 from discordbot.views.config_revolution import RevolutionConfigView
 from discordbot.views.config_salary import SalaryConfigView
 from discordbot.views.config_salary_message import DailyMessageView
@@ -125,6 +126,8 @@ class ConfigView(discord.ui.View):
         match value:
             case "admins":
                 msg, view = self._get_admins_message_and_view(interaction)
+            case "bseddies":
+                msg, view = self._get_bseddies_message_and_view(interaction)
             case "revolution":
                 msg, view = self._get_revolution_message_and_view(interaction)
             case "salary":
@@ -148,6 +151,10 @@ class ConfigView(discord.ui.View):
             await interaction.followup.send(msg, ephemeral=True, view=view)
         except AttributeError:
             await interaction.followup.send(msg, ephemeral=True)
+
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, emoji="✖️", row=2)
+    async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
+        await interaction.response.edit_message(content="Cancelled", view=None)
 
     def _get_thread_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
         """
@@ -355,7 +362,7 @@ class ConfigView(discord.ui.View):
         return msg, view
 
     def _get_wordle_reaction_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
-        """Handle wordle message/view
+        """Handle wordle reaction message/view
 
         Args:
             interaction (discord.Interaction): the interaction
@@ -374,6 +381,38 @@ class ConfigView(discord.ui.View):
         )
         return msg, view
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, emoji="✖️", row=2)
-    async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
-        await interaction.response.edit_message(content="Cancelled", view=None)
+    def _get_bseddies_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
+        """Handle bseddies message/view
+
+        Args:
+            interaction (discord.Interaction): the interaction
+
+        Returns:
+            tuple[str, discord.ui.View]: the message and view
+        """
+        guild_db = self.guilds.get_guild(interaction.guild_id)
+        _chan = guild_db.get("channel")
+        king_role = guild_db.get("role")
+        supporter_role = guild_db.get("supporter_role")
+        revolutionary_role = guild_db.get("revolutionary_role")
+        chan_mention = f"<#{_chan}>" if _chan else "_None_"
+        king_mention = f"<@&{king_role}>" if king_role else "_None_"
+        supp_mention = f"<@&{supporter_role}>" if supporter_role else "_None_"
+        rev_mention = f"<@&{revolutionary_role}>" if revolutionary_role else "_None_"
+
+        view = BSEddiesConfigView()
+        msg = (
+            "**BSEddies Config**\n\n"
+            "The bot needs, at a minimum, a 'BSEddies channel' to post most messages to and a 'KING' role that "
+            "the user with the most eddies will receive. Ideally, this role is moved high up in the role "
+            "hierarchy so that it's visible to everyone. The 'BSEBot' role will need to higher than it so that "
+            "it can reassign as necessary. It is also recommended to set a 'Supporter' and 'Revolutionary' role "
+            "to denote these 'factions'.\n\n"
+            "Select the following options:\n"
+            f"1.) The BSEddies channel (current: {chan_mention})\n"
+            f"2.) The KING role (current: {king_mention})\n"
+            f"3.) The Supporter role (current: {supp_mention})\n"
+            f"4.) The Revolutionary role (current: {rev_mention})\n\n"
+            "Leaving any of these blank will keep the current options."
+        )
+        return msg, view

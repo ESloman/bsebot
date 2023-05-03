@@ -15,6 +15,9 @@ class Predict(BSEddies):
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
         self.manager = BSEddiesManager(client, guilds, logger, [])
+        self.activity_type = ActivityTypes.BSEDDIES_PREDICT
+        self.help_string = "Predict your daily salary gain for today"
+        self.command_name = "predict"
 
     async def predict(self, ctx: discord.ApplicationContext) -> None:
         """

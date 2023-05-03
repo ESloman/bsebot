@@ -2,6 +2,7 @@ from typing import Union
 
 import discord
 
+from discordbot.bot_enums import ActivityTypes
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from discordbot.constants import CREATOR
 
@@ -15,6 +16,11 @@ class BSEddies(BaseEvent):
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
         self.dmable = False
+
+        # these need to be set
+        self.activity_type: ActivityTypes = None
+        self.help_string: str = None
+        self.command_name: str = None
 
     async def _handle_validation(self, ctx: Union[discord.ApplicationContext, discord.Interaction], **kwargs) -> bool:
         """

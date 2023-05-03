@@ -9,6 +9,9 @@ class Pledge(BSEddies):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.activity_type = ActivityTypes.BSEDDIES_PLEDGE
+        self.help_string = "Pledge your support to a faction"
+        self.command_name = "pledge"
 
     async def create_pledge_view(self, ctx: discord.ApplicationContext) -> None:
 

@@ -12,6 +12,9 @@ class Gift(BSEddies):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.activity_type = ActivityTypes.BSEDDIES_GIFT
+        self.help_string = "Gift some eddies to a friend"
+        self.command_name = "gift"
 
     async def gift_eddies(
         self,

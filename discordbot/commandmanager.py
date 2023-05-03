@@ -45,6 +45,7 @@ from discordbot.slashcommandeventclasses.active import Active
 from discordbot.slashcommandeventclasses.admin_give import AdminGive
 from discordbot.slashcommandeventclasses.autogenerate import AutoGenerate
 from discordbot.slashcommandeventclasses.bless import Bless
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.slashcommandeventclasses.close import CloseBet
 from discordbot.slashcommandeventclasses.config import Config
 from discordbot.slashcommandeventclasses.gift import Gift
@@ -183,7 +184,15 @@ class CommandManager(object):
         self.bseddies_king_rename = KingRename(client, guilds, self.logger)
         self.bseddies_pledge = Pledge(client, guilds, self.logger)
         self.bseddies_bless = Bless(client, guilds, self.logger)
-        self.bseddies_help = Help(client, guilds, self.logger)
+
+        # dynamically gets all the defined application commands
+        # from the class attributes
+        all_commands = [
+            attr[1] for attr in inspect.getmembers(self, lambda x: not inspect.isroutine(x))
+            if isinstance(attr[1], BSEddies)
+        ]
+
+        self.bseddies_help = Help(client, guilds, self.logger, all_commands)
 
         # context commands
         self.message_delete = ContextDeleteMessage(client, guilds, self.logger)

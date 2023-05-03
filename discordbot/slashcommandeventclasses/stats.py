@@ -18,6 +18,9 @@ class Stats(BSEddies):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.activity_type = ActivityTypes.STATS
+        self.help_string = "View some stats"
+        self.command_name = "stats"
 
     async def create_stats_view(self, ctx: discord.ApplicationContext) -> None:
         if not await self._handle_validation(ctx):

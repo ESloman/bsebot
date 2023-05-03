@@ -10,6 +10,9 @@ class Bless(BSEddies):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.activity_type = ActivityTypes.BSEDDIES_ACTIVE
+        self.help_string = "Allows the KING to bless supporters/everyone"
+        self.command_name = "bless"
 
     async def create_bless_view(self, ctx: discord.ApplicationContext) -> None:
 

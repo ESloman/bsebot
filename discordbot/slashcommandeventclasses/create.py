@@ -18,6 +18,9 @@ class CreateBet(BSEddies):
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
         self.multiple_options_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "0️⃣"]
+        self.activity_type = ActivityTypes.BSEDDIES_BET_CREATE
+        self.help_string = "Creates a bet"
+        self.command_name = "create"
 
     async def handle_bet_creation(
             self,

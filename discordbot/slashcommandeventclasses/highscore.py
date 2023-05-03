@@ -13,6 +13,9 @@ class HighScore(BSEddies):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.activity_type = ActivityTypes.BSEDDIES_HIGHSCORES
+        self.help_string = "See everyone's highest eddie count"
+        self.command_name = "highscore"
 
     async def highscore(self, ctx: discord.ApplicationContext) -> None:
         """

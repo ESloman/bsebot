@@ -157,7 +157,7 @@ class ConfigView(discord.ui.View):
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, emoji="✖️", row=2)
     async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
-        await interaction.response.edit_message(content="Cancelled", view=None)
+        await interaction.response.edit_message(content="Cancelled", view=None, delete_after=2)
 
     def _get_thread_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
         """

@@ -62,4 +62,4 @@ class TaxRateView(discord.ui.View):
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.gray, emoji="✖️", row=2)
     async def close_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await interaction.response.edit_message(content="Cancelled", view=None)
+        await interaction.response.edit_message(content="Cancelled", view=None, delete_after=2)

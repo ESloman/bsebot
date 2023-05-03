@@ -284,4 +284,4 @@ class AutoGenerateView(discord.ui.View):
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=4, disabled=False, custom_id="cancel_btn",
                        emoji="✖️")
     async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await interaction.response.edit_message(content="Cancelled", view=None)
+        await interaction.response.edit_message(content="Cancelled", view=None, delete_after=2)

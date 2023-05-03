@@ -8,6 +8,7 @@ from discordbot.constants import CREATOR
 from discordbot.selects.config import ConfigSelect
 from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.config_admin import AdminConfigView
+from discordbot.views.config_autogenerate import AutoGenerateConfigView
 from discordbot.views.config_bseddies import BSEddiesConfigView
 from discordbot.views.config_revolution import RevolutionConfigView
 from discordbot.views.config_salary import SalaryConfigView
@@ -126,6 +127,8 @@ class ConfigView(discord.ui.View):
         match value:
             case "admins":
                 msg, view = self._get_admins_message_and_view(interaction)
+            case "autogenerate":
+                msg, view = self._get_autogenerate_message_and_view(interaction)
             case "bseddies":
                 msg, view = self._get_bseddies_message_and_view(interaction)
             case "revolution":
@@ -414,5 +417,22 @@ class ConfigView(discord.ui.View):
             f"3.) The Supporter role (current: {supp_mention})\n"
             f"4.) The Revolutionary role (current: {rev_mention})\n\n"
             "Leaving any of these blank will keep the current options."
+        )
+        return msg, view
+
+    def _get_autogenerate_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
+        """Handle autogenerate message/view
+
+        Args:
+            interaction (discord.Interaction): the interaction
+
+        Returns:
+            tuple[str, discord.ui.View]: the message and view
+        """
+
+        view = AutoGenerateConfigView()
+        msg = (
+            "**Autogenerate Config**\n\n"
+            "What would you like to do?"
         )
         return msg, view

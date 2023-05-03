@@ -62,6 +62,7 @@ from discordbot.slashcommandeventclasses.stats import Stats
 from discordbot.slashcommandeventclasses.taxrate import TaxRate
 from discordbot.slashcommandeventclasses.transactions import TransactionHistory
 from discordbot.slashcommandeventclasses.view import View
+from discordbot.slashcommandeventclasses.wordle import Wordle
 
 # context commands
 from discordbot.contextcommands.message_delete import ContextDeleteMessage
@@ -184,6 +185,7 @@ class CommandManager(object):
         self.bseddies_king_rename = KingRename(client, guilds, self.logger)
         self.bseddies_pledge = Pledge(client, guilds, self.logger)
         self.bseddies_bless = Bless(client, guilds, self.logger)
+        self.bseddies_wordle = Wordle(client, guilds, self.logger)
 
         # dynamically gets all the defined application commands
         # from the class attributes
@@ -740,6 +742,15 @@ class CommandManager(object):
                 ctx (discord.ApplicationContext): _description_
             """
             await self.bseddies_stats.replay(ctx, 2022)
+
+        @self.client.command(description="See some Wordle stats")
+        async def wordle(ctx: discord.ApplicationContext):
+            """_summary_
+
+            Args:
+                ctx (discord.ApplicationContext): _description_
+            """
+            await self.bseddies_wordle.wordle(ctx)
 
     def _register_context_commands(self) -> None:
         """Registers our context menu commands

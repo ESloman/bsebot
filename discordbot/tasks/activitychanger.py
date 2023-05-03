@@ -53,6 +53,7 @@ class ActivityChanger(BaseTask):
         "hot tub streams",
         "the shitty Last of Us show",
         "you.",
+        "as much hentai as I can get my hands on"
     ]
 
     listening_options = [
@@ -64,7 +65,7 @@ class ActivityChanger(BaseTask):
     ]
 
     playing_options = [
-        "Valorant",
+        "VALORANT",
         "Rocket League",
         "Stellaris",
         "with knives",

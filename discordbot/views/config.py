@@ -328,18 +328,30 @@ class ConfigView(discord.ui.View):
         if interaction.guild:
             user = self.user_points.find_user(interaction.user.id, interaction.guild.id)
             daily_eddies = user["daily_eddies"]
+            daily_summary = user.get("daily_summary", False)
         else:
             users = self.user_points.query({"uid": interaction.user.id})
             daily_eddies = False
+            daily_summary = False
             for user in users:
                 if user["daily_eddies"]:
                     daily_eddies = True
+                if user.get("daily_summary", False):
+                    daily_summary = True
 
-        view = DailyMessageView(daily_eddies)
+        is_admin = self._check_perms("salary_summary", interaction.user.id, interaction.guild.id)
+
+        view = DailyMessageView(daily_eddies, is_admin, daily_summary)
         msg = (
             "# Daily Salary Message\n\n"
             "Select whether you want to receive the _(silent)_ daily salary message or not."
         )
+
+        if is_admin:
+            msg += (
+                "\nThen select if you would like to receive the daily salary summary (everyone else's eddies) or not."
+            )
+
         return msg, view
 
     def _get_wordle_reaction_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:

@@ -65,6 +65,8 @@ class User(TypedDict):
     """A list of activities the user has made"""
     daily_eddies: bool
     """Whether the user receives daily eddie messages"""
+    daily_summary: bool
+    """Whether the user receives the daily eddies summary message"""
     king: bool
     """Whether the user is KING in the server"""
     last_cull_time: datetime.datetime

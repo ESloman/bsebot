@@ -84,14 +84,22 @@ class OnMessage(BaseEvent):
             referenced_message = self.client.get_message(reference.message_id)
             if not referenced_message:
                 if reference.channel_id != message.channel.id:
-                    ref_channel = await self.client.fetch_channel(reference.channel_id)
+                    try:
+                        ref_channel = await self.client.fetch_channel(reference.channel_id)
+                    except (discord.NotFound, discord.Forbidden, discord.HTTPException):
+                        # channel was deleted / inaccessible
+                        ref_channel = None
                 else:
                     ref_channel = message.channel
-                try:
-                    referenced_message = await ref_channel.fetch_message(reference.message_id)
-                except (discord.NotFound, discord.HTTPException):
-                    # reference was deleted
-                    referenced_message = None
+
+                referenced_message = None
+                if ref_channel:
+                    try:
+                        referenced_message = await ref_channel.fetch_message(reference.message_id)
+                    except (discord.NotFound, discord.HTTPException):
+                        # reference was deleted / inaccessible
+                        pass
+
             if referenced_message and referenced_message.author.id != user_id:
                 message_type.append("reply")
                 if not message_type_only:

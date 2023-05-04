@@ -35,7 +35,7 @@ class CommandSuggest(BaseMessageAction):
         if "/" not in message.content:
             return False
 
-        if matches := re.findall(r"\/[a-z0-9_]+", message.content.lower()):
+        if matches := re.findall(r"(\/[a-z0-9_]+)[\s`_*]", message.content.lower()):
             app_commands = self.client.application_commands
             command_names = [app.name for app in app_commands]
 

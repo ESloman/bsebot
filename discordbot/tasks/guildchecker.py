@@ -227,17 +227,6 @@ class GuildChecker(BaseTask):
                 except discord.NotFound:
                     continue
 
-            # add our new fields for our new bets
-            self.logger.info("Updated bet fields")
-            all_bets = self.user_bets.query({"guild_id": guild.id, "type": {"$ne": "counter"}})
-            for bet in all_bets:
-                betters = bet.get("betters", {})
-                users = [int(user) for user in betters.keys()]
-                option_vals = [
-                    bet["option_dict"][o]["val"] for o in bet["option_dict"]
-                ]
-                self.user_bets.update({"_id": bet["_id"]}, {"$set": {"users": users, "option_vals": option_vals}})
-
             self.bot.add_view(LeaderBoardView(self.embed_manager))
 
             self.logger.info(f"Finishing checking {guild.name}")

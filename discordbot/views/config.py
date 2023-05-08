@@ -78,7 +78,7 @@ class ConfigView(discord.ui.View):
             return False
 
         # is option in options that allow normal users to use it
-        if value in ["threads", "daily_salary"]:
+        if value in ["activities", "threads", "daily_salary"]:
             return True
 
         # is user the creator
@@ -127,6 +127,8 @@ class ConfigView(discord.ui.View):
         match value:
             case "admins":
                 msg, view = self._get_admins_message_and_view(interaction)
+            case "activities":
+                msg, view = self._get_activities_message_and_view(interaction)
             case "autogenerate":
                 msg, view = self._get_autogenerate_message_and_view(interaction)
             case "bseddies":

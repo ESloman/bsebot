@@ -3,7 +3,7 @@ python-dotenv==1.0.0
 pymongo==4.3.3
 xlsxwriter==3.1.0
 py-cord[speed]==2.4.1
-selenium==4.9.0
+selenium==4.9.1
 webdriver-manager==3.8.6
 pre-commit==3.3.1
 seaborn==0.12.2

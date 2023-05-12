@@ -1,5 +1,6 @@
 
 import asyncio
+import datetime
 import random
 from logging import Logger
 
@@ -12,66 +13,6 @@ from discordbot.tasks.basetask import BaseTask
 
 class ActivityChanger(BaseTask):
 
-    activities_options = [
-        (
-            {
-                "name": "conversations",
-                "state": "Listening",
-                "type": discord.ActivityType.listening,
-                "details": "Waiting for commands!"
-            },
-            0.5
-        ),
-        (
-            {
-                "state": "Listening",
-                "type": discord.ActivityType.listening,
-                "details": "Waiting for commands!"
-            },
-            0.1
-        ),
-        (
-            {
-                "state": "Watching",
-                "type": discord.ActivityType.watching,
-                "details": "Waiting for commands!"
-            },
-            0.1
-        ),
-        (
-            {
-                "state": "Playing",
-                "type": discord.ActivityType.playing,
-                "details": "Waiting for commands!"
-            },
-            0.2
-        ),
-    ]
-
-    watching_options = [
-        "the latest Jenny Nicholson video",
-        "hot tub streams",
-        "the shitty Last of Us show",
-        "you.",
-        "as much hentai as I can get my hands on"
-    ]
-
-    listening_options = [
-        "Taylor Swift",
-        "whale noises",
-        "you.",
-        "AI podcasts",
-        "terrible financial advice",
-    ]
-
-    playing_options = [
-        "VALORANT",
-        "Rocket League",
-        "Stellaris",
-        "with knives",
-        "with myself.",
-    ]
-
     def __init__(
         self,
         bot: BSEBot,
@@ -82,36 +23,69 @@ class ActivityChanger(BaseTask):
         super().__init__(bot, guild_ids, logger, startup_tasks)
 
         self.task = self.activity_changer
+
+        self.default_activity = discord.Activity(**{
+            "name": "conversations",
+            "state": "Listening",
+            "type": discord.ActivityType.listening,
+            "details": "Waiting for commands!"
+        })
+
         self.task.start()
 
-    @tasks.loop(minutes=60)
+    @tasks.loop(hours=2)
     async def activity_changer(self):
         """
         Loop that occasionally changes the activity.
         """
 
-        # pick a new activity from the list of activities
-        # these are weighted
-        # default is more likely
-        new_activity = random.choices(
-            [act[0] for act in self.activities_options], [act[1] for act in self.activities_options]
-        )[0]
+        now = datetime.datetime.now()
+        if 0 < now.hour < 6:
+            # make it really rare for activity to change 'overnight'
+            threshold = 0.9
+        else:
+            threshold = 0.7
 
-        if "name" not in new_activity:
-            # need to pick activity name randomly
-            match new_activity["state"]:
-                case "Listening":
-                    name = random.choice(self.listening_options)
-                case "Watching":
-                    name = random.choice(self.watching_options)
-                case "Playing":
-                    name = random.choice(self.playing_options)
+        _rand = random.random()
+
+        if _rand <= threshold:
+            # keep default
+            activity = self.default_activity
+        else:
+            # pick one randomly from database
+            all_activities = self.bot_activities.get_all_activities()
+
+            # crude way of weighting
+            total = len(all_activities)
+            weights = []
+
+            for activity in all_activities:
+                weight = total - activity["count"]
+                # just make sure that the weight is non-zero
+                weight += 0.1
+                weights.append(weight)
+
+            _activity = random.choices(all_activities, weights)[0]
+
+            new_activity = {"name": _activity["name"], "details": "Waiting for commands!"}
+
+            match _activity["category"]:
+                case "listening":
+                    new_activity["state"] = "Listening"
+                    new_activity["type"] = discord.ActivityType.listening
+                case "watching":
+                    new_activity["state"] = "Watching"
+                    new_activity["type"] = discord.ActivityType.watching
+                case "playing":
+                    new_activity["state"] = "Playing"
+                    new_activity["type"] = discord.ActivityType.playing
                 case _:
-                    name = "default"
+                    return
 
-            new_activity["name"] = name
+            activity = discord.Activity(**new_activity)
+            # increment count for this selected activity
+            self.bot_activities.update({"_id": _activity["_id"]}, {"$inc": {"count": 1}})
 
-        activity = discord.Activity(**new_activity)
         await self.bot.change_presence(activity=activity)
 
     @activity_changer.before_loop

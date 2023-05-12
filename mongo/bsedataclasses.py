@@ -11,6 +11,8 @@ import datetime
 import random
 from typing import Optional, Union
 
+from pymongo.results import InsertOneResult
+
 from discordbot.bot_enums import AwardsTypes, StatTypes
 from discordbot.wordle.wordlesolver import WordleSolve
 from mongo import interface
@@ -274,3 +276,62 @@ class WordleAttempts(BestSummerEverPointsDB):
         doc["timestamp"] = doc["timestamp"].strftime("%Y-%m-%d")
 
         return self.insert(doc)
+
+
+class BotActivities(BestSummerEverPointsDB):
+    """
+    Class for interacting with the 'botactivities' MongoDB collection in the 'bestsummereverpoints' DB
+    """
+    def __init__(self):
+        """
+        Constructor method that initialises the vault object
+        """
+        super().__init__()
+        self._vault = interface.get_collection(self.database, "botactivities")
+
+    def insert_activity(self, category: str, name: str, created_by: int) -> InsertOneResult:
+        """
+        Inserts a new bot activity into the database
+
+        Args:
+            category (str): the category - either: listening, watching, playing
+            name (str): the activity name
+            created_by (int): which user created it
+
+        Returns:
+            InsertOneResult: insert result
+        """
+        doc = {
+            "category": category,
+            "name": name,
+            "created_by": created_by,
+            "created": datetime.datetime.now(),
+            "count": 0,
+            "archived": False,
+        }
+
+        return self.insert(doc)
+
+    def find_activity(self, name: str, activity: str) -> dict:
+        """
+        Find an existing activity
+
+        Args:
+            name (str): name fo the activity
+            activity (str): the category
+
+        Returns:
+            dict: _description_
+        """
+        ret = self.query({"category": name, "name": activity})
+        return ret[0] if ret else None
+
+    def get_all_activities(self) -> list:
+        """
+        Returns all activities from the collection
+
+        Returns:
+            list: _description_
+        """
+        rets = self.query({"archived": False})
+        return rets

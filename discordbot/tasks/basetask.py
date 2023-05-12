@@ -22,6 +22,7 @@ from mongo.bsepoints.interactions import UserInteractions
 from mongo.bsepoints.points import UserPoints
 from mongo.bsepoints.reminders import ServerReminders
 from mongo.bsepoints.stickers import ServerStickers
+from mongo.bsedataclasses import BotActivities
 from mongo.bsedataclasses import SpoilerThreads
 from mongo.bsedataclasses import WordleAttempts
 from mongo.bseticketedevents import RevolutionEvent
@@ -50,6 +51,7 @@ class BaseTask(commands.Cog):
 
         # database classes
         self.activities = UserActivities()
+        self.bot_activities = BotActivities()
         self.user_bets = UserBets()
         self.user_points = UserPoints()
         self.server_emojis = ServerEmojis()

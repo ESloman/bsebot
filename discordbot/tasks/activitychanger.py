@@ -1,5 +1,6 @@
 
 import asyncio
+import datetime
 import random
 from logging import Logger
 
@@ -32,21 +33,39 @@ class ActivityChanger(BaseTask):
 
         self.task.start()
 
-    @tasks.loop(minutes=60)
+    @tasks.loop(hours=2)
     async def activity_changer(self):
         """
         Loop that occasionally changes the activity.
         """
 
+        now = datetime.datetime.now()
+        if 0 < now.hour < 6:
+            # make it really rare for activity to change 'overnight'
+            threshold = 0.9
+        else:
+            threshold = 0.7
+
         _rand = random.random()
 
-        if _rand < 0.7:
+        if _rand <= threshold:
             # keep default
             activity = self.default_activity
         else:
             # pick one randomly from database
             all_activities = self.bot_activities.get_all_activities()
-            _activity = random.choice(all_activities)
+
+            # crude way of weighting
+            total = len(all_activities)
+            weights = []
+
+            for activity in all_activities:
+                weight = total - activity["count"]
+                # just make sure that the weight is non-zero
+                weight += 0.1
+                weights.append(weight)
+
+            _activity = random.choices(all_activities, weights)[0]
 
             new_activity = {"name": _activity["name"], "details": "Waiting for commands!"}
 
@@ -64,7 +83,7 @@ class ActivityChanger(BaseTask):
                     return
 
             activity = discord.Activity(**new_activity)
-            # increment count for this activity
+            # increment count for this selected activity
             self.bot_activities.update({"_id": _activity["_id"]}, {"$inc": {"count": 1}})
 
         await self.bot.change_presence(activity=activity)

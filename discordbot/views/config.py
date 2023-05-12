@@ -7,6 +7,7 @@ import discord
 from discordbot.constants import CREATOR
 from discordbot.selects.config import ConfigSelect
 from discordbot.utilities import PlaceHolderLogger
+from discordbot.views.config_activities import ActivityConfigView
 from discordbot.views.config_admin import AdminConfigView
 from discordbot.views.config_autogenerate import AutoGenerateConfigView
 from discordbot.views.config_bseddies import BSEddiesConfigView
@@ -78,7 +79,7 @@ class ConfigView(discord.ui.View):
             return False
 
         # is option in options that allow normal users to use it
-        if value in ["threads", "daily_salary"]:
+        if value in ["activities", "threads", "daily_salary"]:
             return True
 
         # is user the creator
@@ -127,6 +128,8 @@ class ConfigView(discord.ui.View):
         match value:
             case "admins":
                 msg, view = self._get_admins_message_and_view(interaction)
+            case "activities":
+                msg, view = self._get_activities_message_and_view(interaction)
             case "autogenerate":
                 msg, view = self._get_autogenerate_message_and_view(interaction)
             case "bseddies":
@@ -434,5 +437,21 @@ class ConfigView(discord.ui.View):
         msg = (
             "**Autogenerate Config**\n\n"
             "What would you like to do?"
+        )
+        return msg, view
+
+    def _get_activities_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
+        """Handle activities message/view
+
+        Args:
+            interaction (discord.Interaction): the interaction
+
+        Returns:
+            tuple[str, discord.ui.View]: the message and view
+        """
+        view = ActivityConfigView()
+        msg = (
+            "**Add an Activity***\n\n"
+            "Select the type of activity you'd like."
         )
         return msg, view

@@ -451,7 +451,7 @@ class ConfigView(discord.ui.View):
         """
         view = ActivityConfigView()
         msg = (
-            "**Add an Activity***\n\n"
+            "**Add an Activity**\n\n"
             "Select the type of activity you'd like."
         )
         return msg, view

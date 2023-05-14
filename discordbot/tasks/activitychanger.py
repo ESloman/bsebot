@@ -33,7 +33,7 @@ class ActivityChanger(BaseTask):
 
         self.task.start()
 
-    @tasks.loop(hours=2)
+    @tasks.loop(hours=1)
     async def activity_changer(self):
         """
         Loop that occasionally changes the activity.
@@ -44,7 +44,7 @@ class ActivityChanger(BaseTask):
             # make it really rare for activity to change 'overnight'
             threshold = 0.9
         else:
-            threshold = 0.7
+            threshold = 0.45
 
         _rand = random.random()
 

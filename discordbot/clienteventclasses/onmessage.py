@@ -110,10 +110,12 @@ class OnMessage(BaseEvent):
         if stickers := message.stickers:
             for sticker in stickers:  # type: discord.StickerItem
                 sticker_id = sticker.id
-                if sticker_obj := self.server_stickers.get_sticker(guild_id, sticker_id):
-                    # used a custom sticker!
-                    message_type.append("custom_sticker")
 
+                # used a custom sticker!
+                message_type.append("custom_sticker")
+                if sticker_obj := self.server_stickers.get_sticker(guild_id, sticker_id):
+                    # used a server sticker
+                    message_type.append("server_sticker")
                     if user_id == sticker_obj["created_by"]:
                         continue
                     if not message_type_only:
@@ -170,11 +172,11 @@ class OnMessage(BaseEvent):
 
         if emojis := re.findall(r"<:[a-zA-Z_0-9]*:\d*>", message.content):
             for emoji in emojis:
+                message_type.append("custom_emoji")
                 emoji_id = emoji.strip("<").strip(">").split(":")[-1]
                 if emoji_obj := self.server_emojis.get_emoji(guild_id, int(emoji_id)):
                     # used a custom emoji!
-                    message_type.append("custom_emoji")
-
+                    message_type.append("server_emoji")
                     if user_id == emoji_obj["created_by"]:
                         continue
                     if not message_type_only:

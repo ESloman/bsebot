@@ -146,9 +146,10 @@ class CreateBet(BSEddies):
         )
 
         embed = self.embed_manager.get_bet_embed(ctx.guild, bet["bet_id"], bet)
-
-        member = ctx.guild.get_member(ctx.user.id)
-        content = f"Bet created by {member.mention}"
+        content = (
+            f"# {bet['title']}\n"
+            f"_Created by <@{bet['user']}>_"
+        )
 
         bet_view = BetView(bet, bseddies_place, bseddies_close)
 

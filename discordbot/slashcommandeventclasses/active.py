@@ -51,7 +51,7 @@ class Active(BSEddies):
 
             add_text = "OPEN FOR NEW BETS" if bet.get("active") else "CLOSED - AWAITING RESULT"
 
-            pt = f"**{bets.index(bet) + 1})** [{bet['bet_id']} - `{add_text}`] _{bet['title']}_\n{link}\n\n"
+            pt = f"- **{bets.index(bet) + 1})** [{bet['bet_id']} - `{add_text}`] _[{bet['title']}](<{link}>)_\n"
             message += pt
 
             if (len(message) + 400) > 2000 and bet != bets[-1]:

@@ -155,4 +155,10 @@ class BetManager(object):
         ret_dict["king"] = king_id
         ret_dict["total_winnings"] = total_eddies_winnings
 
+        # add winnings to the bet entry in the database for future purposes
+        self.user_bets.update(
+            {"bet_id": bet_id, "guild_id": guild_id},
+            {"$set": {"winners": ret_dict["winners"]}}
+        )
+
         return ret_dict

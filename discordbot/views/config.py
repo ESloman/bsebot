@@ -202,7 +202,7 @@ class ConfigView(discord.ui.View):
         else:
             view = ThreadConfigView(configurable_threads)
             msg = (
-                "_Thread Configuration_\n"
+                "## Thread Configuration\n"
                 "Select a thread to configure, and then select whether it should send mute reminders and "
                 "on _which_ day.\n\n"
             )
@@ -223,11 +223,11 @@ class ConfigView(discord.ui.View):
         chan_mention = f"<#{_chan}>" if _chan else "_None_"
         view = WordleConfigView(guild_db["guild_id"])
         msg = (
-            "**Wordle Config**\n\n"
+            "## Wordle Config\n\n"
             "Select the following options:\n"
-            "1.) Whether doing the daily wordle is enabled or not\n"
-            f"2.) If the above is true, which channel should the wordle be posted in? (Current: {chan_mention})\n"
-            "3.) Whether to remind users to do their daily Wordle if they forget.\n\n"
+            "-  Whether doing the daily wordle is enabled or not\n"
+            f"- If the above is true, which channel should the wordle be posted in? (Current: {chan_mention})\n"
+            "- Whether to remind users to do their daily Wordle if they forget.\n\n"
             "You can leave channel select blank to keep current values."
         )
         return msg, view
@@ -250,11 +250,11 @@ class ConfigView(discord.ui.View):
         view = ValorantConfigView(interaction.guild_id)
 
         msg = (
-            "**Valorant Config**\n\n"
+            "## Valorant Config\n\n"
             "Select the following options:\n"
-            "1.) Whether to enable the daily vally rollcall\n"
-            f"2.) If the above is true, which channel should the message be posted in? (Current: {chan_mention})\n"
-            f"3.) Which role should be tagged in the message? (Current: {role_mention}).\n\n"
+            "- Whether to enable the daily vally rollcall\n"
+            f"- If the above is true, which channel should the message be posted in? (Current: {chan_mention})\n"
+            f"- Which role should be tagged in the message? (Current: {role_mention}).\n\n"
             "You can leave channel and role select blank to keep current values."
         )
         return msg, view
@@ -273,7 +273,7 @@ class ConfigView(discord.ui.View):
         _min = guild_db.get("daily_minimum", 4)
         view = SalaryConfigView(_min)
         msg = (
-            "**Salary Config**\n\n"
+            "## Salary Config\n\n"
             "Select the daily minimum salary for users in this guild. This amount is deprecated by one each day for "
             "each user that doesn't interact with the guild. This is reset for the user upon interaction.\n\n"
         )
@@ -300,7 +300,7 @@ class ConfigView(discord.ui.View):
             _admins = ", ".join([f"<@{a}>" for a in admins])
 
         msg = (
-            "**Admins Config**\n\n"
+            "## Admins Config\n\n"
             "Select the users that should be BSEBot Admins and be able to perform administrative functions. "
             "Select _all_ users you want to be admins - including existing ones if you wish for them "
             "to remain as admins.\n\n"
@@ -323,7 +323,7 @@ class ConfigView(discord.ui.View):
         rev_enabled = guild_db.get("revolution", True)
         view = RevolutionConfigView(rev_enabled)
         msg = (
-            "**Revolution Config**\n\n"
+            "## Revolution Config\n\n"
             "Select whether the revolution event is enabled or not."
         )
         return msg, view
@@ -356,7 +356,7 @@ class ConfigView(discord.ui.View):
 
         view = DailyMessageView(daily_eddies, is_admin, daily_summary)
         msg = (
-            "# Daily Salary Message\n\n"
+            "## Daily Salary Message\n\n"
             "Select whether you want to receive the _(silent)_ daily salary message or not."
         )
 
@@ -378,12 +378,12 @@ class ConfigView(discord.ui.View):
         """
         view = WordleEmojiReactionConfigView(interaction.guild_id)
         msg = (
-            "**Wordle Emoji Reaction Config**\n\n"
+            "## Wordle Emoji Reaction Config \n\n"
             "Select which server emojis the bot uses to react to different Wordle scores.\n"
             "If None are selected, the defaults will be used.\n\n"
-            "1.) X score\n"
-            "2.) 2 score\n"
-            "6.) 6 score\n"
+            "- X score\n"
+            "- 2 score\n"
+            "- 6 score\n"
         )
         return msg, view
 
@@ -408,17 +408,17 @@ class ConfigView(discord.ui.View):
 
         view = BSEddiesConfigView()
         msg = (
-            "**BSEddies Config**\n\n"
+            "## BSEddies Config \n\n"
             "The bot needs, at a minimum, a 'BSEddies channel' to post most messages to and a 'KING' role that "
             "the user with the most eddies will receive. Ideally, this role is moved high up in the role "
             "hierarchy so that it's visible to everyone. The 'BSEBot' role will need to higher than it so that "
             "it can reassign as necessary. It is also recommended to set a 'Supporter' and 'Revolutionary' role "
             "to denote these 'factions'.\n\n"
             "Select the following options:\n"
-            f"1.) The BSEddies channel (current: {chan_mention})\n"
-            f"2.) The KING role (current: {king_mention})\n"
-            f"3.) The Supporter role (current: {supp_mention})\n"
-            f"4.) The Revolutionary role (current: {rev_mention})\n\n"
+            f"- The BSEddies channel (current: {chan_mention})\n"
+            f"- The KING role (current: {king_mention})\n"
+            f"- The Supporter role (current: {supp_mention})\n"
+            f"- The Revolutionary role (current: {rev_mention})\n\n"
             "Leaving any of these blank will keep the current options."
         )
         return msg, view
@@ -435,7 +435,7 @@ class ConfigView(discord.ui.View):
 
         view = AutoGenerateConfigView()
         msg = (
-            "**Autogenerate Config**\n\n"
+            "## Autogenerate Config\n\n"
             "What would you like to do?"
         )
         return msg, view
@@ -451,7 +451,7 @@ class ConfigView(discord.ui.View):
         """
         view = ActivityConfigView()
         msg = (
-            "**Add an Activity**\n\n"
+            "## Add an Activity\n\n"
             "Select the type of activity you'd like."
         )
         return msg, view

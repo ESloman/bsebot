@@ -54,7 +54,7 @@ class Help(BSEddies):
             sorted_types = sorted_types[:10]
 
         message = (
-            "**Help**"
+            "# Help"
             "\n\n"
             "Listed below are some of the more popular commands.\n"
         )
@@ -72,8 +72,8 @@ class Help(BSEddies):
 
         message += (
             "\n\n"
-            "For more commands you can check the wiki here: https://github.com/ESloman/bsebot/wiki/Commands\n"
-            "Repo link: https://github.com/ESloman/bsebot"
+            "For more commands you can check the wiki [here](https://github.com/ESloman/bsebot/wiki/Commands).\n"
+            "[Repo link](https://github.com/ESloman/bsebot)."
         )
 
         await ctx.respond(content=message, ephemeral=True)

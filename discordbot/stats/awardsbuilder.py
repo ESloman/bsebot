@@ -187,47 +187,47 @@ class AwardsBuilder:
         # this is a mess
         stat_parts = [
             message_start,
-            (f"**Number of messages sent** 📬: `{number_messages.value}` "
+            (f"- **Number of messages sent** 📬: `{number_messages.value}` "
              f"(in `{number_messages.channels}` channel{'s' if thread_messages.channels != 1 else ''} "
              f"from `{number_messages.users}` users){comparisons.get(number_messages.stat)}\n"),
-            (f"**Number of thread messages sent** 📟: `{thread_messages.value}` "
+            (f"- **Number of thread messages sent** 📟: `{thread_messages.value}` "
              f"(in `{thread_messages.channels}` thread{'s' if thread_messages.channels != 1 else ''} "
              f"from `{thread_messages.users}` users){comparisons.get(thread_messages.stat)}\n"),
-            (f"**Average message length** 📰: Characters (`{avg_message_chars.value}`), "
+            (f"- **Average message length** 📰: Characters (`{avg_message_chars.value}`), "
              f"Words (`{avg_message_words.value}`)\n"),
-            (f"**Chattiest channel** 🖨️: <#{busiest_channel.value}> "
+            (f"- **Chattiest channel** 🖨️: <#{busiest_channel.value}> "
              f"(`{busiest_channel.messages}` messages from `{busiest_channel.users}` users)\n"),
-            (f"**Quietest channel** 📭: <#{quietest_channel.value}> "
+            (f"- **Quietest channel** 📭: <#{quietest_channel.value}> "
              f"(`{quietest_channel.messages}` messages from `{quietest_channel.users}` users)\n"),
-            (f"**Chattiest thread** 📧: {b_thread_text} "
+            (f"- **Chattiest thread** 📧: {b_thread_text} "
              f"(`{busiest_thread.messages}` messages from `{busiest_thread.users}` users)\n"),
-            (f"**Quietest thread** 📖: {q_thread_text} "
+            (f"- **Quietest thread** 📖: {q_thread_text} "
              f"(`{quietest_thread.messages}` messages from `{quietest_thread.users}` users)\n"),
-            (f"**Most popular channel** 💌: {popular_channel_obj.mention} "
+            (f"- **Most popular channel** 💌: {popular_channel_obj.mention} "
              f"(`{most_popular_channel.users}` unique users)\n"),
-            (f"**Threads created** 🖇️: {threads_created.value} "
+            (f"- **Threads created** 🖇️: {threads_created.value} "
              f"({','.join([t.mention for t in thread_objects]) if len(thread_objects) < 5 else '_too many to list_'})"
              "\n"),
-            (f"**Chattiest day** 🗓️: {busiest_day_format} "
+            (f"- **Chattiest day** 🗓️: {busiest_day_format} "
              f"(`{busiest_day.messages}` messages in `{busiest_day.channels}` "
              f"channels from `{busiest_day.users}` users)\n"),
-            (f"**Quietest day** 📆: {quietest_day_format} "
+            (f"- **Quietest day** 📆: {quietest_day_format} "
              f"(`{quietest_day.messages}` messages in `{quietest_day.channels}` "
              f"channels from `{quietest_day.users}` users)\n"),
-            (f"**Average wordle score** 🟩: `{average_wordle.value}` "
+            (f"- **Average wordle score** 🟩: `{average_wordle.value}` "
              f"(the bot's: `{average_wordle.bot_average}`){comparisons.get(average_wordle.stat)}\n"),
-            (f"**Total time spent in VCs** 📱: `{str(datetime.timedelta(seconds=time_spent_in_vc.value))}` "
+            (f"- **Total time spent in VCs** 📱: `{str(datetime.timedelta(seconds=time_spent_in_vc.value))}` "
              f"(`in {time_spent_in_vc.channels}` channels from `{time_spent_in_vc.users}` users)"
              f"{comparisons.get(time_spent_in_vc.stat)}\n"),
-            (f"**Talkiest VC** 💬: {vc_time_obj.mention} (`{vc_most_time_spent.users}` users spent "
+            (f"- **Talkiest VC** 💬: {vc_time_obj.mention} (`{vc_most_time_spent.users}` users spent "
              f"`{str(datetime.timedelta(seconds=vc_most_time_spent.time))}` in this VC)\n"),
-            (f"**Most popular VC** 🎉: {vc_users_obj.mention} (`{vc_most_users.users}` unique users spent "
+            (f"- **Most popular VC** 🎉: {vc_users_obj.mention} (`{vc_most_users.users}` unique users spent "
              f"`{str(datetime.timedelta(seconds=vc_most_users.time))}` in this VC)\n"),
-            (f"**Bets created** 🗃️: `{num_bets.value}`{comparisons.get(num_bets.stat)}\n"),
-            (f"**Eddies gained via salary** 👩🏼‍💼: `{salary_gains.value}`{comparisons.get(salary_gains.stat)}\n"),
-            (f"**Eddies placed on bets** 🧑🏼‍💻: `{eddies_placed.value}`{comparisons.get(eddies_placed.stat)}\n"),
-            (f"**Eddies won on bets** 🧑🏼‍🏫: `{eddies_won.value}`{comparisons.get(eddies_won.stat)}\n"),
-            (f"**Most popular server emoji** 🗳️: {emoji_obj} (`{most_used_server_emoji.count}`)"),
+            (f"- **Bets created** 🗃️: `{num_bets.value}`{comparisons.get(num_bets.stat)}\n"),
+            (f"- **Eddies gained via salary** 👩🏼‍💼: `{salary_gains.value}`{comparisons.get(salary_gains.stat)}\n"),
+            (f"- **Eddies placed on bets** 🧑🏼‍💻: `{eddies_placed.value}`{comparisons.get(eddies_placed.stat)}\n"),
+            (f"- **Eddies won on bets** 🧑🏼‍🏫: `{eddies_won.value}`{comparisons.get(eddies_won.stat)}\n"),
+            (f"- **Most popular server emoji** 🗳️: {emoji_obj} (`{most_used_server_emoji.count}`)"),
         ]
 
         if self.annual:
@@ -298,89 +298,89 @@ class AwardsBuilder:
         ]
 
         if not self.annual:
-            message_start = f"{start.strftime('%B')} **BSEddies Awards** 🏆\n"
+            message_start = f"# {start.strftime('%B')} BSEddies Awards 🏆\n"
             prize = MONTHLY_AWARDS_PRIZE
         else:
             message_start = (
-                f"{start.strftime('%Y')} **BSEddies Awards** 🏆\n\n"
+                f"# {start.strftime('%Y')} BSEddies Awards 🏆\n\n"
             )
             prize = ANNUAL_AWARDS_AWARD
 
         awards_parts = [
             message_start,
-            f"Each award has a prize of **{prize}** eddies.\n\n",
+            f"### Each award has a prize of **{prize}** eddies.\n\n",
             # server owner award
-            ("The _'server owner'_ 👨‍👧‍👦 award: "
+            ("- The _'server owner'_ 👨‍👧‍👦 award: "
              f"<@!{owner_award.user_id}>\n"),
             # most messages
-            ("The _'won't shut up'_ 🤐 award: "
+            ("- The _'won't shut up'_ 🤐 award: "
              f"<@!{most_messages.user_id}> (`{most_messages.value}` messages sent)\n"),
             # the longest message
-            ("The _'can't find the enter key'_ ⌨️ award: "
+            ("- The _'can't find the enter key'_ ⌨️ award: "
              f"<@!{longest_message.user_id}> (`{longest_message.value}` longest message length)\n"),
             # most messages to a thread
-            ("The _'best threads'_ 🧵 award: "
+            ("- The _'best threads'_ 🧵 award: "
              f"<@!{threadiest_user.user_id}> (`{threadiest_user.value}` messages sent to threads)\n"),
             # the least messages sent
-            ("The _'participation'_ 🥉 award: "
+            ("- The _'participation'_ 🥉 award: "
              f"<@!{least_messages.user_id}> (`{least_messages.value}` messages sent)\n"),
             # single minded
-            ("The _'single minded'_ 🧠 award: "
+            ("- The _'single minded'_ 🧠 award: "
              f"<@!{single_minded.user_id}> (`{single_minded.value}%` of messages "
              f"sent to <#{single_minded.channel}>)\n"),
             # diverse portfolio
-            ("The _'diverse portfolio'_ 💼 award: "
+            ("- The _'diverse portfolio'_ 💼 award: "
              f"<@!{diverse_portfolio.user_id}> (`{diverse_portfolio.messages}` sent to "
              f"`{diverse_portfolio.value}` channels)\n"),
             # most replies
-            ("The _'serial replier'_ 📝 award: "
+            ("- The _'serial replier'_ 📝 award: "
              f"<@!{serial_replier.user_id}> (`{serial_replier.value}` replies)\n"),
             # most replied to
-            ("The _'conversation started'_ 📥 award: "
+            ("- The _'conversation started'_ 📥 award: "
              f"<@!{conversation_starter.user_id}> "
              f"(`{conversation_starter.value}` replies _received_)\n"),
             # twitter links
-            ("The _'twitter addict'_ 🐦 award: "
+            ("- The _'twitter addict'_ 🐦 award: "
              f"<@!{twitter_addict.user_id}> (`{twitter_addict.value}` tweets shared)\n"),
             # jerk-off-chat contribs
-            ("The _'jerk off mate'_ 🍆 award: "
+            ("- The _'jerk off mate'_ 🍆 award: "
              f"<@!{jerk_off_king.user_id}> "
              f"(`{jerk_off_king.value}` contributions to <#{JERK_OFF_CHAT}>)\n"),
             # edited messages
-            ("The _'fat fingers'_ 🖐🏼 award: "
+            ("- The _'fat fingers'_ 🖐🏼 award: "
              f"<@!{fattest_fingers.user_id}> (`{fattest_fingers.value}` edits to "
              f"`{fattest_fingers.message_count}` messages)\n"),
             # most swears
-            ("The _'dirtiest fingers'_ 🚽 award: "
+            ("- The _'dirtiest fingers'_ 🚽 award: "
              f"<@!{most_swears.user_id}> (`{most_swears.value}` swears)\n"),
             # best wordle score
-            ("The _'I have an English degree'_ 📑 award: "
+            ("- The _'I have an English degree'_ 📑 award: "
              f"<@!{best_wordle.user_id}> (`{best_wordle.value}` average wordle score)\n"),
             # most reacts
-            ("The _'big memer'_ 😎 award: "
+            ("- The _'big memer'_ 😎 award: "
              f"<@!{big_memer.user_id}> (`{big_memer.value}` reacts received)\n"),
             # most reacts given
-            ("The _'emoji is worth a thousand words'_ 😂 award: "
+            ("- The _'emoji is worth a thousand words'_ 😂 award: "
              f"<@!{react_king.user_id}> (`{react_king.value}` reacts given)\n"),
             # most time spent in VC
-            ("The _'big talker'_ 🔊 award: "
+            ("- The _'big talker'_ 🔊 award: "
              f"<@!{big_gamer.user_id}> "
              f"(`{str(datetime.timedelta(seconds=big_gamer.value))}` spent in {big_gamer.channels} channels)\n"),
             # most time streaming
-            ("The _'wannabe streamer'_ 🖥️ award: "
+            ("- The _'wannabe streamer'_ 🖥️ award: "
              f"<@!{big_streamer.user_id}> (`{str(datetime.timedelta(seconds=big_streamer.value))}` "
              f"spent streaming in {big_streamer.channels} channels)\n"),
             # most bets created
-            ("The _'bookie'_ 🤑 award: "
+            ("- The _'bookie'_ 🤑 award: "
              f"<@!{most_bets.user_id}> (`{most_bets.value}` bets created)\n"),
             # most eddies bet
-            ("The _'just one more bet'_ 💵 award: "
+            ("- The _'just one more bet'_ 💵 award: "
              f"<@!{most_eddies_placed.user_id}> (`{most_eddies_placed.value}` eddies bet)\n"),
             # most eddies won
-            ("The _'rollin' in it'_ 💰 award: "
+            ("- The _'rollin' in it'_ 💰 award: "
              f"<@!{most_eddies_won.user_id}> (`{most_eddies_won.value}` eddies won)\n"),
             # most time king
-            ("The _'king of kings'_ 👑 award: "
+            ("- The _'king of kings'_ 👑 award: "
              f"<@!{longest_king.user_id}> "
              f"(`{str(datetime.timedelta(seconds=longest_king.value))}` spent as KING)"),
         ]

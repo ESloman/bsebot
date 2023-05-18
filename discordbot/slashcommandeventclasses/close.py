@@ -145,16 +145,34 @@ class CloseBet(BSEddies):
 
         ret_dict = self.bet_manager.close_a_bet(bet_id, guild.id, emoji)
 
-        desc = f"**{bet['title']}**\n{emoji} - **{', '.join([n['val'] for n in ret_dict['outcome_name']])}** won!\n\n"
+        desc = (
+            f"# {bet['title']}\n"
+            f"Bet ID: {bet_id}\n"
+        )
+
+        outcomes = ""
+        for result in zip(ret_dict["result"], ret_dict["outcome_name"], strict=True):
+            outcomes += f"\n- {result[0]} {result[1]['val']}"
+
+        desc += f"\nWinning outcome(s):{outcomes}"
+        desc += "\n## Winners"
 
         for better in ret_dict["winners"]:
             desc += f"\n- {guild.get_member(int(better)).name} won `{ret_dict['winners'][better]}` eddies!"
+
+        if not ret_dict["winners"]:
+            desc += "\n- There were no winners 😦"
 
         desc += f"\n\nThe **KING** (<@{ret_dict['king']}>) gained _{ret_dict['king_tax']}_ eddies from tax."
 
         author = guild.get_member(ctx.user.id)
         if not author:
             author = await guild.fetch_member(ctx.user.id)
+
+        # get the message reference here so we can link it in DMs
+        # update the message to reflect that it's closed
+        channel = await self.client.fetch_channel(bet["channel_id"])
+        message = channel.get_partial_message(bet["message_id"])
 
         # message the losers to tell them the bad news
         for loser in ret_dict["losers"]:
@@ -164,7 +182,7 @@ class CloseBet(BSEddies):
             try:
                 points_bet = ret_dict["losers"][loser]
                 msg = (f"**{author.name}** just closed bet "
-                       f"`[{bet_id}] - {bet['title']}` and the result was {emoji} "
+                       f"`[{bet_id}]` - [{bet['title']}](<{message.jump_url}>) and the result was {emoji} "
                        f"(`{', '.join([n['val'] for n in ret_dict['outcome_name']])})`.\n"
                        f"As this wasn't what you voted for - you have lost. You bet **{points_bet}** eddies.")
                 await mem.send(content=msg, silent=True)
@@ -178,17 +196,13 @@ class CloseBet(BSEddies):
                 await mem.create_dm()
             try:
                 msg = (f"**{author.name}** just closed bet "
-                       f"`[{bet_id}] - {bet['title']}` and the result was {emoji} "
+                       f"`[{bet_id}]` - [{bet['title']}](<{message.jump_url}>) and the result was {emoji} "
                        f"(`{', '.join([n['val'] for n in ret_dict['outcome_name']])})`.\n"
                        f"**This means you won!!** "
                        f"You have won `{ret_dict['winners'][winner]}` BSEDDIES!!")
                 await mem.send(content=msg, silent=True)
             except discord.Forbidden:
                 pass
-
-        # update the message to reflect that it's closed
-        channel = await self.client.fetch_channel(bet["channel_id"])
-        message = channel.get_partial_message(bet["message_id"])
 
         await message.edit(content=desc, view=None, embeds=[])
         await ctx.followup.edit_message(content="Closed the bet for you!", view=None, message_id=ctx.message.id)

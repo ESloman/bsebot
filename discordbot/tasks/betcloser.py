@@ -56,13 +56,17 @@ class BetCloser(BaseTask):
                     bet["active"] = False
 
                     embed = self.embed_manager.get_bet_embed(guild_obj, bet["bet_id"], bet)
+                    content = (
+                        f"# {bet['title']}\n"
+                        f"_Created by <@{bet['user']}>_"
+                    )
                     bet_view = BetView(bet, self.place, self.close)
 
                     # disable bet button
                     bet_view.children[0].disabled = True
 
-                    await message.edit(embed=embed, view=bet_view)
-                    msg = (f"Your bet `{bet['bet_id']} - {bet['title']}` (<{message.jump_url}>) "
+                    await message.edit(content=content, embed=embed, view=bet_view)
+                    msg = (f"[Your bet](<{message.jump_url}>) `{bet['bet_id']} - {bet['title']}` "
                            f"is now closed for bets and is waiting a result from you.")
                     if not member.dm_channel:
                         await member.create_dm()

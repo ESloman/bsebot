@@ -1,6 +1,7 @@
 
 import datetime
 from typing import TypedDict, Union
+
 try:
     from typing import NotRequired
 except ImportError:
@@ -64,6 +65,8 @@ class User(TypedDict):
     """A list of activities the user has made"""
     daily_eddies: bool
     """Whether the user receives daily eddie messages"""
+    daily_summary: bool
+    """Whether the user receives the daily eddies summary message"""
     king: bool
     """Whether the user is KING in the server"""
     last_cull_time: datetime.datetime
@@ -103,6 +106,10 @@ class Bet(TypedDict):
     """Title of the bet"""
     options: list[str]
     """List of option emojis"""
+    option_vals: list[str]
+    """List of option values"""
+    users: list[int]
+    """List of user IDs"""
     created: datetime.datetime
     """The time the bet was created"""
     timeout: datetime.datetime
@@ -325,6 +332,9 @@ class GuildDB(TypedDict):
     valorant_rollcall: bool
     valorant_channel: int
     valorant_role: int
+    wordle_x_emoji: NotRequired[str]
+    wordle_two_emoji: NotRequired[str]
+    wordle_six_emoji: NotRequired[str]
 
 
 class Reminder(TypedDict):

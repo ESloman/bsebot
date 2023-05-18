@@ -12,6 +12,9 @@ class Active(BSEddies):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.activity_type = ActivityTypes.BSEDDIES_ACTIVE
+        self.help_string = "Lists all the open bets"
+        self.command_name = "active"
 
     async def active(self, ctx: discord.ApplicationContext) -> None:
         """

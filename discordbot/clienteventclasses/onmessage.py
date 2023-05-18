@@ -10,7 +10,10 @@ from discordbot.message_actions.base import BaseMessageAction  # noqa
 
 # message actions
 from discordbot.message_actions.birthday_replies import BirthdayReplies
+from discordbot.message_actions.command_suggestion import CommandSuggest
+from discordbot.message_actions.duplicate_links import DuplicateLinkAction
 from discordbot.message_actions.marvel_ad import MarvelComicsAdAction
+from discordbot.message_actions.remind_me import RemindMeAction
 from discordbot.message_actions.thank_you_replies import ThankYouReplies
 from discordbot.message_actions.wordle_reactions import WordleMessageAction
 
@@ -23,10 +26,13 @@ class OnMessage(BaseEvent):
     def __init__(self, client: BSEBot, guild_ids, logger):
         super().__init__(client, guild_ids, logger)
         self._post_message_action_classes = [
-            BirthdayReplies(client),
-            MarvelComicsAdAction(client),
-            ThankYouReplies(client),
-            WordleMessageAction(client)
+            BirthdayReplies(client, logger),
+            CommandSuggest(client, logger),
+            DuplicateLinkAction(client, logger),
+            MarvelComicsAdAction(client, logger),
+            RemindMeAction(client, logger),
+            ThankYouReplies(client, logger),
+            WordleMessageAction(client, logger),
         ]  # type: list[BaseMessageAction]
 
     async def message_received(
@@ -78,14 +84,22 @@ class OnMessage(BaseEvent):
             referenced_message = self.client.get_message(reference.message_id)
             if not referenced_message:
                 if reference.channel_id != message.channel.id:
-                    ref_channel = await self.client.fetch_channel(reference.channel_id)
+                    try:
+                        ref_channel = await self.client.fetch_channel(reference.channel_id)
+                    except (discord.NotFound, discord.Forbidden, discord.HTTPException):
+                        # channel was deleted / inaccessible
+                        ref_channel = None
                 else:
                     ref_channel = message.channel
-                try:
-                    referenced_message = await ref_channel.fetch_message(reference.message_id)
-                except (discord.NotFound, discord.HTTPException):
-                    # reference was deleted
-                    referenced_message = None
+
+                referenced_message = None
+                if ref_channel:
+                    try:
+                        referenced_message = await ref_channel.fetch_message(reference.message_id)
+                    except (discord.NotFound, discord.HTTPException):
+                        # reference was deleted / inaccessible
+                        pass
+
             if referenced_message and referenced_message.author.id != user_id:
                 message_type.append("reply")
                 if not message_type_only:
@@ -96,10 +110,12 @@ class OnMessage(BaseEvent):
         if stickers := message.stickers:
             for sticker in stickers:  # type: discord.StickerItem
                 sticker_id = sticker.id
-                if sticker_obj := self.server_stickers.get_sticker(guild_id, sticker_id):
-                    # used a custom sticker!
-                    message_type.append("custom_sticker")
 
+                # used a custom sticker!
+                message_type.append("custom_sticker")
+                if sticker_obj := self.server_stickers.get_sticker(guild_id, sticker_id):
+                    # used a server sticker
+                    message_type.append("server_sticker")
                     if user_id == sticker_obj["created_by"]:
                         continue
                     if not message_type_only:
@@ -150,15 +166,17 @@ class OnMessage(BaseEvent):
         message_type.append("message")
 
         if re.match(WORDLE_REGEX, message.content):
-            message_type.append("wordle")
+            if any([square for square in ["🟩", "🟨", "⬛", "⬜"]]):
+                # double check it's a wordle message by presence of emoji
+                message_type.append("wordle")
 
         if emojis := re.findall(r"<:[a-zA-Z_0-9]*:\d*>", message.content):
             for emoji in emojis:
+                message_type.append("custom_emoji")
                 emoji_id = emoji.strip("<").strip(">").split(":")[-1]
                 if emoji_obj := self.server_emojis.get_emoji(guild_id, int(emoji_id)):
                     # used a custom emoji!
-                    message_type.append("custom_emoji")
-
+                    message_type.append("server_emoji")
                     if user_id == emoji_obj["created_by"]:
                         continue
                     if not message_type_only:

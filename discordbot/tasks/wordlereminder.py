@@ -2,15 +2,14 @@
 import asyncio
 import datetime
 import random
-
 from logging import Logger
-
 
 from discord.ext import tasks
 
 from discordbot import utilities
 from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_BOT_ID
+from discordbot.message_strings.wordle_reminders import MESSAGES
 from discordbot.tasks.basetask import BaseTask
 
 
@@ -24,16 +23,6 @@ class WordleReminder(BaseTask):
     ):
         super().__init__(bot, guild_ids, logger, startup_tasks)
         self.task = self.wordle_reminder
-        self.messages = [
-            "Hey {mention}, don't forget to do your Wordle today!",
-            "Don't forget to do your wordle today {mention}.",
-            "{mention} hasn't done their Wordle today. Are they stupid?",
-            "Daddy wants you to complete your Wordle today {mention}",
-            "{mention}\nRoses are red\nViolets are blue\nI've done my Wordle\nDon't forget to do yours too!",
-            "Hey {mention}, you absolute knob, you haven't done your Wordle yet!",
-            "Guess what? {mention} is a fucking prick. Also, they didn't do their Wordle.",
-            "Do your Wordle or die, {mention}."
-        ]
         self.task.start()
 
     @tasks.loop(minutes=60)
@@ -100,6 +89,15 @@ class WordleReminder(BaseTask):
                 self.logger.info("Everyone has done their wordle today!")
                 continue
 
+            odds = utilities.calculate_message_odds(
+                self.interactions,
+                guild.id,
+                MESSAGES,
+                "{mention}",
+                [0, 1],
+            )
+
+            _messages_sent = ["", ]
             for reminder in reminders_needed:
                 if reminder["user_id"] == BSE_BOT_ID:
                     # skip bot reminder
@@ -116,7 +114,12 @@ class WordleReminder(BaseTask):
 
                 y_message = await channel.fetch_message(reminder["message_id"])
 
-                message = random.choice(self.messages)
+                # make sure that we send different messages for each needed reminder
+                message = ""
+                while message in _messages_sent:
+                    message = random.choices([message[0] for message in odds], [message[1] for message in odds])[0]
+
+                _messages_sent.append(message)
                 message = message.format(mention=y_message.author.mention)
 
                 self.logger.info(message)

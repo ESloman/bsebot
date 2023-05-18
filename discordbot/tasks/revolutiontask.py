@@ -60,7 +60,9 @@ class BSEddiesRevolutionTask(BaseTask):
 
             if not guild_db.get("revolution", True):
                 # revolution event has been disabled
-                self.logger.debug(f"Revolution event has been disabled for {guild.name}")
+                if now.hour == 16 and now.minute == 0:
+                    # only log once per revolution event that this guild is disabled
+                    self.logger.debug(f"Revolution event has been disabled for {guild.name}")
                 continue
 
             king_user = self.user_points.find_user(guild_db["king"], guild.id)

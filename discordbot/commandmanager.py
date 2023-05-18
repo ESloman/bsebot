@@ -45,6 +45,7 @@ from discordbot.slashcommandeventclasses.active import Active
 from discordbot.slashcommandeventclasses.admin_give import AdminGive
 from discordbot.slashcommandeventclasses.autogenerate import AutoGenerate
 from discordbot.slashcommandeventclasses.bless import Bless
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.slashcommandeventclasses.close import CloseBet
 from discordbot.slashcommandeventclasses.config import Config
 from discordbot.slashcommandeventclasses.gift import Gift
@@ -61,11 +62,14 @@ from discordbot.slashcommandeventclasses.stats import Stats
 from discordbot.slashcommandeventclasses.taxrate import TaxRate
 from discordbot.slashcommandeventclasses.transactions import TransactionHistory
 from discordbot.slashcommandeventclasses.view import View
+from discordbot.slashcommandeventclasses.wordle import Wordle
 
 # context commands
 from discordbot.contextcommands.message_delete import ContextDeleteMessage
+from discordbot.contextcommands.user_gift import ContextUserGift
 
 # task imports
+from discordbot.tasks.activitychanger import ActivityChanger
 from discordbot.tasks.annualawards import AnnualBSEddiesAwards
 from discordbot.tasks.basetask import BaseTask
 from discordbot.tasks.betcloser import BetCloser
@@ -181,10 +185,20 @@ class CommandManager(object):
         self.bseddies_king_rename = KingRename(client, guilds, self.logger)
         self.bseddies_pledge = Pledge(client, guilds, self.logger)
         self.bseddies_bless = Bless(client, guilds, self.logger)
-        self.bseddies_help = Help(client, guilds, self.logger)
+        self.bseddies_wordle = Wordle(client, guilds, self.logger)
+
+        # dynamically gets all the defined application commands
+        # from the class attributes
+        all_commands = [
+            attr[1] for attr in inspect.getmembers(self, lambda x: not inspect.isroutine(x))
+            if isinstance(attr[1], BSEddies)
+        ]
+
+        self.bseddies_help = Help(client, guilds, self.logger, all_commands)
 
         # context commands
         self.message_delete = ContextDeleteMessage(client, guilds, self.logger)
+        self.user_gift = ContextUserGift(client, guilds, self.logger, self.bseddies_gift)
 
         # tasks
         self.guild_checker_task = GuildChecker(
@@ -204,6 +218,7 @@ class CommandManager(object):
             self.client, guilds, self.logger, startup_tasks, self.bseddies_place, self.bseddies_close,
         )
 
+        self.activity_changer = ActivityChanger(self.client, guilds, self.logger, startup_tasks)
         self.bet_reminder_task = BetReminder(self.client, guilds, self.logger, startup_tasks)
         self.eddie_gain_message_task = EddieGainMessager(self.client, guilds, self.logger, startup_tasks)
         self.eddie_king_task = BSEddiesKingTask(self.client, guilds, self.logger, startup_tasks)
@@ -728,6 +743,15 @@ class CommandManager(object):
             """
             await self.bseddies_stats.replay(ctx, 2022)
 
+        @self.client.command(description="See some Wordle stats")
+        async def wordle(ctx: discord.ApplicationContext):
+            """_summary_
+
+            Args:
+                ctx (discord.ApplicationContext): _description_
+            """
+            await self.bseddies_wordle.wordle(ctx)
+
     def _register_context_commands(self) -> None:
         """Registers our context menu commands
 
@@ -774,3 +798,13 @@ class CommandManager(object):
                 title="Set a reminder"
             )
             await ctx.response.send_modal(modal)
+
+        @self.client.user_command(name="Gift")
+        async def gift(ctx: discord.ApplicationCommand, user: discord.Member):
+            """_summary_
+
+            Args:
+                ctx (discord.ApplicationCommand): _description_
+                user (discord.Member): _description_
+            """
+            await self.user_gift.user_gift(ctx, user)

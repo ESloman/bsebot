@@ -10,6 +10,9 @@ class Bless(BSEddies):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.activity_type = ActivityTypes.BSEDDIES_ACTIVE
+        self.help_string = "Allows the KING to bless supporters/everyone"
+        self.command_name = "bless"
 
     async def create_bless_view(self, ctx: discord.ApplicationContext) -> None:
 
@@ -17,7 +20,7 @@ class Bless(BSEddies):
             return
 
         self._add_event_type_to_activity_history(
-            ctx.user, ctx.guild_id, ActivityTypes.BLESS, user_id=ctx.user.id
+            ctx.user, ctx.guild_id, ActivityTypes.BLESS
         )
 
         guild_id = ctx.guild.id

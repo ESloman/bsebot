@@ -7,13 +7,17 @@ import discord
 from discordbot.constants import CREATOR
 from discordbot.selects.config import ConfigSelect
 from discordbot.utilities import PlaceHolderLogger
+from discordbot.views.config_activities import ActivityConfigView
 from discordbot.views.config_admin import AdminConfigView
+from discordbot.views.config_autogenerate import AutoGenerateConfigView
+from discordbot.views.config_bseddies import BSEddiesConfigView
 from discordbot.views.config_revolution import RevolutionConfigView
 from discordbot.views.config_salary import SalaryConfigView
 from discordbot.views.config_salary_message import DailyMessageView
 from discordbot.views.config_threads import ThreadConfigView
 from discordbot.views.config_valorant import ValorantConfigView
 from discordbot.views.config_wordle import WordleConfigView
+from discordbot.views.config_wordle_reactions import WordleEmojiReactionConfigView
 
 from mongo.bsedataclasses import SpoilerThreads
 from mongo.bsepoints.guilds import Guilds
@@ -75,7 +79,7 @@ class ConfigView(discord.ui.View):
             return False
 
         # is option in options that allow normal users to use it
-        if value in ["threads", "daily_salary"]:
+        if value in ["activities", "threads", "daily_salary"]:
             return True
 
         # is user the creator
@@ -115,13 +119,21 @@ class ConfigView(discord.ui.View):
             delete_after=2
         )
 
-        if not self._check_perms(value, interaction):
+        guild_id = interaction.guild.id if interaction.guild else None
+
+        if not self._check_perms(value, interaction.user.id, guild_id):
             self.logger.info(f"User {interaction.user} tried to configure {value} without the right perms")
             return await self._send_no_perms_message(interaction)
 
         match value:
             case "admins":
                 msg, view = self._get_admins_message_and_view(interaction)
+            case "activities":
+                msg, view = self._get_activities_message_and_view(interaction)
+            case "autogenerate":
+                msg, view = self._get_autogenerate_message_and_view(interaction)
+            case "bseddies":
+                msg, view = self._get_bseddies_message_and_view(interaction)
             case "revolution":
                 msg, view = self._get_revolution_message_and_view(interaction)
             case "salary":
@@ -134,6 +146,8 @@ class ConfigView(discord.ui.View):
                 msg, view = self._get_wordle_message_and_view(interaction)
             case "daily_salary":
                 msg, view = self._get_daily_salary_message_and_view(interaction)
+            case "wordle_reactions":
+                msg, view = self._get_wordle_reaction_message_and_view(interaction)
             case _:
                 # default case
                 msg = "unknown"
@@ -143,6 +157,10 @@ class ConfigView(discord.ui.View):
             await interaction.followup.send(msg, ephemeral=True, view=view)
         except AttributeError:
             await interaction.followup.send(msg, ephemeral=True)
+
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, emoji="✖️", row=2)
+    async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
+        await interaction.response.edit_message(content="Cancelled", view=None, delete_after=2)
 
     def _get_thread_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
         """
@@ -323,20 +341,117 @@ class ConfigView(discord.ui.View):
         if interaction.guild:
             user = self.user_points.find_user(interaction.user.id, interaction.guild.id)
             daily_eddies = user["daily_eddies"]
+            daily_summary = user.get("daily_summary", False)
         else:
             users = self.user_points.query({"uid": interaction.user.id})
             daily_eddies = False
+            daily_summary = False
             for user in users:
                 if user["daily_eddies"]:
                     daily_eddies = True
+                if user.get("daily_summary", False):
+                    daily_summary = True
 
-        view = DailyMessageView(daily_eddies)
+        is_admin = self._check_perms("salary_summary", interaction.user.id, interaction.guild.id)
+
+        view = DailyMessageView(daily_eddies, is_admin, daily_summary)
         msg = (
             "# Daily Salary Message\n\n"
             "Select whether you want to receive the _(silent)_ daily salary message or not."
         )
+
+        if is_admin:
+            msg += (
+                "\nThen select if you would like to receive the daily salary summary (everyone else's eddies) or not."
+            )
+
         return msg, view
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, emoji="✖️", row=2)
-    async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
-        await interaction.response.edit_message(content="Cancelled", view=None)
+    def _get_wordle_reaction_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
+        """Handle wordle reaction message/view
+
+        Args:
+            interaction (discord.Interaction): the interaction
+
+        Returns:
+            tuple[str, discord.ui.View]: the message and view
+        """
+        view = WordleEmojiReactionConfigView(interaction.guild_id)
+        msg = (
+            "**Wordle Emoji Reaction Config**\n\n"
+            "Select which server emojis the bot uses to react to different Wordle scores.\n"
+            "If None are selected, the defaults will be used.\n\n"
+            "1.) X score\n"
+            "2.) 2 score\n"
+            "6.) 6 score\n"
+        )
+        return msg, view
+
+    def _get_bseddies_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
+        """Handle bseddies message/view
+
+        Args:
+            interaction (discord.Interaction): the interaction
+
+        Returns:
+            tuple[str, discord.ui.View]: the message and view
+        """
+        guild_db = self.guilds.get_guild(interaction.guild_id)
+        _chan = guild_db.get("channel")
+        king_role = guild_db.get("role")
+        supporter_role = guild_db.get("supporter_role")
+        revolutionary_role = guild_db.get("revolutionary_role")
+        chan_mention = f"<#{_chan}>" if _chan else "_None_"
+        king_mention = f"<@&{king_role}>" if king_role else "_None_"
+        supp_mention = f"<@&{supporter_role}>" if supporter_role else "_None_"
+        rev_mention = f"<@&{revolutionary_role}>" if revolutionary_role else "_None_"
+
+        view = BSEddiesConfigView()
+        msg = (
+            "**BSEddies Config**\n\n"
+            "The bot needs, at a minimum, a 'BSEddies channel' to post most messages to and a 'KING' role that "
+            "the user with the most eddies will receive. Ideally, this role is moved high up in the role "
+            "hierarchy so that it's visible to everyone. The 'BSEBot' role will need to higher than it so that "
+            "it can reassign as necessary. It is also recommended to set a 'Supporter' and 'Revolutionary' role "
+            "to denote these 'factions'.\n\n"
+            "Select the following options:\n"
+            f"1.) The BSEddies channel (current: {chan_mention})\n"
+            f"2.) The KING role (current: {king_mention})\n"
+            f"3.) The Supporter role (current: {supp_mention})\n"
+            f"4.) The Revolutionary role (current: {rev_mention})\n\n"
+            "Leaving any of these blank will keep the current options."
+        )
+        return msg, view
+
+    def _get_autogenerate_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
+        """Handle autogenerate message/view
+
+        Args:
+            interaction (discord.Interaction): the interaction
+
+        Returns:
+            tuple[str, discord.ui.View]: the message and view
+        """
+
+        view = AutoGenerateConfigView()
+        msg = (
+            "**Autogenerate Config**\n\n"
+            "What would you like to do?"
+        )
+        return msg, view
+
+    def _get_activities_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
+        """Handle activities message/view
+
+        Args:
+            interaction (discord.Interaction): the interaction
+
+        Returns:
+            tuple[str, discord.ui.View]: the message and view
+        """
+        view = ActivityConfigView()
+        msg = (
+            "**Add an Activity**\n\n"
+            "Select the type of activity you'd like."
+        )
+        return msg, view

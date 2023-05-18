@@ -1,22 +1,21 @@
 
 import datetime
 import re
+from logging import Logger
 
 import discord
 
 from discordbot.bsebot import BSEBot
 from discordbot.constants import MARVEL_AD_COOLDOWN
 from discordbot.message_actions.base import BaseMessageAction
-from mongo.bsepoints.guilds import Guilds
 
 
 class MarvelComicsAdAction(BaseMessageAction):
     """
     Marvel comic add message action
     """
-    def __init__(self, client: BSEBot) -> None:
-        super().__init__(client)
-        self.guilds = Guilds()
+    def __init__(self, client: BSEBot, logger: Logger) -> None:
+        super().__init__(client, logger)
 
         self._comic_terms = [
             "comic",
@@ -49,7 +48,7 @@ class MarvelComicsAdAction(BaseMessageAction):
         return False
 
     async def run(self, message: discord.Message) -> None:
-        """Marvel add action
+        """Marvel ad action
 
         Args:
             message (discord.Message): the message to action

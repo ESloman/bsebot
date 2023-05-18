@@ -9,6 +9,9 @@ class Pledge(BSEddies):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.activity_type = ActivityTypes.BSEDDIES_PLEDGE
+        self.help_string = "Pledge your support to a faction"
+        self.command_name = "pledge"
 
     async def create_pledge_view(self, ctx: discord.ApplicationContext) -> None:
 
@@ -16,7 +19,7 @@ class Pledge(BSEddies):
             return
 
         self._add_event_type_to_activity_history(
-            ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_PLEDGE, user_id=ctx.user.id
+            ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_PLEDGE
         )
 
         guild_id = ctx.guild.id

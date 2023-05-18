@@ -22,6 +22,56 @@ class AwardsBuilder:
         self.awards = Awards()
         self.user_points = UserPoints()
 
+    def _get_previous_stat(self, stat: Stat) -> dict:
+        """
+        Searches the database for the previous stat of the same time
+
+        Args:
+            stat (Stat): the stat to get previous values for
+
+        Returns:
+            dict: the previous stat object
+        """
+        query = {
+            "guild_id": stat.guild_id,
+            "type": stat.type,
+            "stat": stat.stat
+        }
+
+        if stat.annual:
+            query["year"] = int(stat.year) - 1
+        else:
+            query["month"] = (stat.timestamp - datetime.timedelta(days=7)).strftime("%b %y")
+
+        ret = self.awards.query(query)
+        return ret
+
+    def _get_comparison_string(self, new_value: float | int, old_value: float | int) -> str:
+        """
+        Creates a basic comparison string we can use in stats text
+
+        Args:
+            new_value (float | int): the incumbent stat value
+            old_value (float | int): the previous stat value
+
+        Returns:
+            str: a formatted string
+        """
+        diff = new_value - old_value
+
+        perc = round((diff / old_value) * 100, 2)
+
+        if perc < 0:
+            # make percentage positive
+            perc *= -1
+
+        _string = f" ({'up' if diff > 0 else 'down'} `{perc}%`)"
+
+        if diff == 0:
+            _string = " (no change)"
+
+        return _string
+
     async def build_stats_and_message(self) -> Tuple[List[Stat], List[str]]:
         """
         Uses StatsGatherer to query for all the required stats
@@ -95,12 +145,11 @@ class AwardsBuilder:
 
         if not self.annual:
             message_start = (
-                f"As it's the first of the month, here's some server stats 📈 from {start.strftime('%B')}:\n\n"
+                f"{start.strftime('%B')} server stats 📈:\n\n"
             )
         else:
             message_start = (
-                f"As it's the first day of the year, here's some server stats 📈 from {start.strftime('%Y')}:\n"
-                "_(Voice stats 🎤 from Nov 22 onwards)_\n\n"
+                f"{start.strftime('%Y')} server stats 📈:\n\n"
             )
 
         if busiest_thread_obj.archived:
@@ -113,14 +162,37 @@ class AwardsBuilder:
         else:
             q_thread_text = quietest_thread_obj.mention
 
+        comparisons = {}
+        # stats we can compare
+        for stat in [
+            number_messages, thread_messages, avg_message_words, avg_message_chars,
+            num_bets, salary_gains, average_wordle, eddies_placed, eddies_won,
+            time_spent_in_vc
+        ]:
+            try:
+                previous = self._get_previous_stat(stat)
+
+                if not previous:
+                    comparisons[stat.stat] = ""
+                    continue
+
+                comparison_string = self._get_comparison_string(stat.value, previous["value"])
+            except Exception as e:
+                self.logger.debug(f"Got {e} working out {stat.short_name} comparison string")
+                comparisons[stat.stat] = ""
+                continue
+
+            comparisons[stat.stat] = comparison_string
+
+        # this is a mess
         stat_parts = [
             message_start,
             (f"- **Number of messages sent** 📬: `{number_messages.value}` "
              f"(in `{number_messages.channels}` channel{'s' if thread_messages.channels != 1 else ''} "
-             f"from `{number_messages.users}` users)\n"),
+             f"from `{number_messages.users}` users){comparisons.get(number_messages.stat)}\n"),
             (f"- **Number of thread messages sent** 📟: `{thread_messages.value}` "
              f"(in `{thread_messages.channels}` thread{'s' if thread_messages.channels != 1 else ''} "
-             f"from `{thread_messages.users}` users)\n"),
+             f"from `{thread_messages.users}` users){comparisons.get(thread_messages.stat)}\n"),
             (f"- **Average message length** 📰: Characters (`{avg_message_chars.value}`), "
              f"Words (`{avg_message_words.value}`)\n"),
             (f"- **Chattiest channel** 🖨️: <#{busiest_channel.value}> "
@@ -143,17 +215,18 @@ class AwardsBuilder:
              f"(`{quietest_day.messages}` messages in `{quietest_day.channels}` "
              f"channels from `{quietest_day.users}` users)\n"),
             (f"- **Average wordle score** 🟩: `{average_wordle.value}` "
-             f"(the bot's: `{average_wordle.bot_average}`)\n"),
+             f"(the bot's: `{average_wordle.bot_average}`){comparisons.get(average_wordle.stat)}\n"),
             (f"- **Total time spent in VCs** 📱: `{str(datetime.timedelta(seconds=time_spent_in_vc.value))}` "
-             f"(`in {time_spent_in_vc.channels}` channels from `{time_spent_in_vc.users}` users)\n"),
+             f"(`in {time_spent_in_vc.channels}` channels from `{time_spent_in_vc.users}` users)"
+             f"{comparisons.get(time_spent_in_vc.stat)}\n"),
             (f"- **Talkiest VC** 💬: {vc_time_obj.mention} (`{vc_most_time_spent.users}` users spent "
              f"`{str(datetime.timedelta(seconds=vc_most_time_spent.time))}` in this VC)\n"),
             (f"- **Most popular VC** 🎉: {vc_users_obj.mention} (`{vc_most_users.users}` unique users spent "
              f"`{str(datetime.timedelta(seconds=vc_most_users.time))}` in this VC)\n"),
-            (f"- **Bets created** 🗃️: `{num_bets.value}`\n"),
-            (f"- **Eddies gained via salary** 👩🏼‍💼: `{salary_gains.value}`\n"),
-            (f"- **Eddies placed on bets** 🧑🏼‍💻: `{eddies_placed.value}`\n"),
-            (f"- **Eddies won on bets** 🧑🏼‍🏫: `{eddies_won.value}`\n"),
+            (f"- **Bets created** 🗃️: `{num_bets.value}`{comparisons.get(num_bets.stat)}\n"),
+            (f"- **Eddies gained via salary** 👩🏼‍💼: `{salary_gains.value}`{comparisons.get(salary_gains.stat)}\n"),
+            (f"- **Eddies placed on bets** 🧑🏼‍💻: `{eddies_placed.value}`{comparisons.get(eddies_placed.stat)}\n"),
+            (f"- **Eddies won on bets** 🧑🏼‍🏫: `{eddies_won.value}`{comparisons.get(eddies_won.stat)}\n"),
             (f"- **Most popular server emoji** 🗳️: {emoji_obj} (`{most_used_server_emoji.count}`)"),
         ]
 
@@ -225,11 +298,11 @@ class AwardsBuilder:
         ]
 
         if not self.annual:
-            message_start = " # Time for the monthly **BSEddies Awards** 🏆\n"
+            message_start = f"# {start.strftime('%B')} BSEddies Awards 🏆\n"
             prize = MONTHLY_AWARDS_PRIZE
         else:
             message_start = (
-                "# Time for the _Annual_ **BSEddies Awards** 🏆\n"
+                f"# {start.strftime('%Y')} BSEddies Awards 🏆\n\n"
             )
             prize = ANNUAL_AWARDS_AWARD
 
@@ -370,9 +443,9 @@ class AwardsBuilder:
         self.logger.info(f"Stats message is {len(awards_message)} messages long")
         for message in stats_message:
             self.logger.info(f"Stats message part is {len(message)} chars long")
-            await channel.send(content=message)
+            await channel.send(content=message, silent=True)
 
         self.logger.info(f"Awards message is {len(awards_message)} messages long")
         for message in awards_message:
             self.logger.info(f"Awards message part is {len(message)} chars long")
-            await channel.send(content=message)
+            await channel.send(content=message, silent=True)

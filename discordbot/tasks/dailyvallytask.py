@@ -6,8 +6,10 @@ from logging import Logger
 
 from discord.ext import tasks
 
+from discordbot import utilities
 from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_SERVER_ID
+from discordbot.message_strings.valorant_rollcalls import MESSAGES
 from discordbot.tasks.basetask import BaseTask
 
 
@@ -23,21 +25,6 @@ class AfterWorkVally(BaseTask):
         super().__init__(bot, guild_ids, logger, startup_tasks)
         self.task = self.vally_message
         self.task.start()
-
-        self.messages = [
-            "Anyone playing after-work {role} today?",
-            "Who's about for after-work {role}?",
-            "Anyone wanna get salty playing {role}?",
-            "Who's gonna grind some `Lotus` today {role}?",
-            "Anyone want to lose some RR {role}?",
-            "Who wants to roll some fat 1s playing {role}?",
-            "Can we get an after-work 5-stack today for {role}?",
-            "My pp is soft, but my Valorant is hard. Someone play a game with me, {role}?",
-            "Jingle bells, jingle bells, jingle all the IT'S TIME TO PLAY VALORANT {role}",
-            "Valorant? Valorant? VALORANT? VALROARANT? RAVALROANT? {role}",
-            "I'm a little bot, it's time to get mad and play {role}?",
-            "# Balls. {role}"
-        ]
 
     @tasks.loop(minutes=10)
     async def vally_message(self):
@@ -110,7 +97,15 @@ class AfterWorkVally(BaseTask):
             else:
                 _mention = "`Valorant`"
 
-            message = random.choice(self.messages)
+            odds = utilities.calculate_message_odds(
+                self.interactions,
+                guild.id,
+                MESSAGES,
+                "{role}",
+                [0, 1],
+            )
+
+            message = random.choices([message[0] for message in odds], [message[1] for message in odds])[0]
             message = message.format(role=_mention)
 
             self.logger.info(f"Sending daily vally message: {message}")

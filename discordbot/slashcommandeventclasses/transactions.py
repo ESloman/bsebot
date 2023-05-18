@@ -16,6 +16,9 @@ class TransactionHistory(BSEddies):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.activity_type = ActivityTypes.BSEDDIES_TRANSACTIONS
+        self.help_string = "View your recent transactions"
+        self.command_name = "transactions"
 
     @staticmethod
     async def _handle_recent_trans(ctx: discord.ApplicationContext, transaction_history: list) -> None:

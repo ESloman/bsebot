@@ -16,6 +16,9 @@ class CloseBet(BSEddies):
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
         self.bet_manager = BetManager(logger)
+        self.activity_type = ActivityTypes.BSEDDIES_BET_CLOSE
+        self.help_string = "Resolves an existing bet"
+        self.command_name = "close"
 
     async def create_bet_view(
             self,

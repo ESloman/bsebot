@@ -10,6 +10,9 @@ class TaxRate(BSEddies):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.activity_type = ActivityTypes.BSEDDIES_SET_TAX_RATE
+        self.help_string = "Set the tax rate for the server"
+        self.command_name = "taxrate"
 
     async def create_tax_view(self, ctx: discord.ApplicationContext) -> None:
 
@@ -17,7 +20,7 @@ class TaxRate(BSEddies):
             return
 
         self._add_event_type_to_activity_history(
-            ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_SET_TAX_RATE, user_id=ctx.user.id
+            ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_SET_TAX_RATE
         )
 
         guild_id = ctx.guild.id

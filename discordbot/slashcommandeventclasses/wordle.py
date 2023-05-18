@@ -82,7 +82,7 @@ class Wordle(BSEddies):
         failed_wordles = [wordle for wordle in all_wordles if "X/6" in wordle["content"]]
         failed_perc = round((len(failed_wordles) / len(all_wordles)) * 100, 2)
 
-        msg = "**Your Wordle Stats**\n\n"
+        msg = "# Your Wordle Stats\n\n"
         msg += f"- You have attempted `{len(all_wordles)}` and posted them to this server.\n"
         msg += f"- You have failed **{len(failed_wordles)}** (`{failed_perc}%`) of them.\n"
 
@@ -101,7 +101,7 @@ class Wordle(BSEddies):
 
         msg += f"- Your *lifetime* average is `{total_avg}`.\n"
 
-        msg += "\n**Annually**\n"
+        msg += "\n## Annually\n"
         now = datetime.datetime.now()
         # calculate averages for all years and months
         all_month_avgs = {}
@@ -138,7 +138,7 @@ class Wordle(BSEddies):
                     avg_this_month = 0.0
                 all_month_avgs[month_start] = avg_this_month
 
-        msg += "\n**Monthly**\n"
+        msg += "\n## Monthly\n"
         for month in range(1, now.month):  # don't add one as we don't care about current month
             month_start = now.replace(day=1, month=month, hour=0, minute=0, second=1)
             avg_this_month = all_month_avgs[month_start]
@@ -160,15 +160,15 @@ class Wordle(BSEddies):
         )[0]
         msg += f"\n- Your **best** ever month was {top_month.strftime('%b %y')} with `{all_month_avgs[top_month]}`\n"
 
-        msg += "\n**Lifetime Score count**\n"
+        msg += "\n## Lifetime Score count\n"
 
         guesses = {x: 0 for x in range(1, 8)}
         for wordle in all_wordles:
             guesses[wordle["guesses"]] += 1
 
         for x in range(1, 7):
-            msg += f"**{x}**: `{guesses[x]}`\n"
-        msg += f"**X**: `{guesses[7]}`\n"
+            msg += f"- **{x}**: `{guesses[x]}`\n"
+        msg += f"- **X**: `{guesses[7]}`\n"
 
         msg += "\n\nBelow is a graph of your monthly average over time."
 

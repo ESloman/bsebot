@@ -39,9 +39,11 @@ class EmbedManager(object):
                     if val:
                         val += "\n"
                     better_info = guild.get_member(better["user_id"])
-                    if not better_info:
-                        _better = self.user_points.find_user(better["user_id"], guild.id)
-                    val += f"**{better_info.name if better_info else _better['name']}** (_{better['points']}_)"
+                    _better = self.user_points.find_user(better["user_id"], guild.id) if not better_info else {}
+                    val += (
+                        f"**{better_info.name if better_info else _better.get('name', better['user_id'])}** "
+                        f"(_{better['points']}_)"
+                    )
             else:
                 val = "No-one has bet on this option yet."
             embed.add_field(

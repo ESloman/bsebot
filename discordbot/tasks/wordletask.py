@@ -85,7 +85,7 @@ class WordleTask(BaseTask):
         # actually do wordle now
 
         wordle_solver = WordleSolver(self.logger)
-        await wordle_solver.get_driver()
+        await wordle_solver.setup()
 
         self.logger.debug("Solving wordle...")
         solved_wordle = await wordle_solver.solve()

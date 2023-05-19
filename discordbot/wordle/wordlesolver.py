@@ -11,7 +11,7 @@ from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import ElementNotInteractableException, StaleElementReferenceException
-from selenium.common.exceptions import ElementClickInterceptedException
+from selenium.common.exceptions import ElementClickInterceptedException, NoSuchElementException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service as FirefoxService
@@ -21,7 +21,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from discordbot.utilities import PlaceHolderLogger
 from discordbot.wordle.constants import WORDLE_GDPR_ACCEPT_ID, WORDLE_TUTORIAL_CLOSE_CLASS_NAME
 from discordbot.wordle.constants import WORDLE_BOARD_CLASS_NAME, WORDLE_ROWS_CLASS_NAME, WORDLE_URL, WORDLE_FOOTNOTE
-from discordbot.wordle.constants import WORDLE_STARTING_WORDS, WORDLE_SETTINGS_BUTTON
+from discordbot.wordle.constants import WORDLE_STARTING_WORDS, WORDLE_SETTINGS_BUTTON, WORDLE_PLAY_CLASS_NAME
 
 
 @dataclass
@@ -49,15 +49,12 @@ class WordleSolver():
         self.possible_words = []
         self.logger = logger
 
-    async def get_driver(self) -> None:
+    async def setup(self) -> None:
         """
         Gets the necessary driver using the driver manager (downloads and installs if necessary)
         Creates a WebDriver object
         Navigates to wordle web page
-        Clears GDPR and tutorial
-
-        Returns:
-            webdriver.Firefox: the instantiated driver
+        Clears GDPR, play screen and tutorial
         """
         driver = webdriver.Chrome(
             service=FirefoxService(ChromeDriverManager().install()),
@@ -72,12 +69,23 @@ class WordleSolver():
             pass
 
         try:
+            # sometimes there's a play button now
+            play_button = driver.find_element(
+                By.CSS_SELECTOR,
+                f"button[class*='{WORDLE_PLAY_CLASS_NAME}']"
+            )
+            play_button.click()
+            await asyncio.sleep(1)
+        except (ElementNotInteractableException, StaleElementReferenceException, NoSuchElementException):
+            pass
+
+        try:
             close_button = driver.find_element(
                 By.CSS_SELECTOR,
                 f"button[class*='{WORDLE_TUTORIAL_CLOSE_CLASS_NAME}']"
             )
             close_button.click()
-        except (ElementNotInteractableException, StaleElementReferenceException):
+        except (ElementNotInteractableException, StaleElementReferenceException, NoSuchElementException):
             pass
 
         self.driver = driver

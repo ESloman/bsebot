@@ -11,7 +11,7 @@ class ActivityTypeSelect(Select):
             [
                 ("Listening", "listening"),
                 ("Playing", "playing"),
-                ("Wathcing", "watching")
+                ("Watching", "watching")
             ]
         ]
 

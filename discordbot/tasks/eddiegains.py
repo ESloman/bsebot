@@ -78,7 +78,7 @@ class EddieGainMessager(BaseTask):
                 text += "\nThis is based on the following amount of interactivity yesterday:"
 
                 for key in sorted(breakdown):
-                    text += f"\n - `{HUMAN_MESSAGE_TYPES[key]}`  :  **{breakdown[key]}**"
+                    text += f"\n- `{HUMAN_MESSAGE_TYPES[key]}`  :  **{breakdown[key]}**"
 
                     if key in ["vc_joined", "vc_streaming"]:
                         text += " seconds"

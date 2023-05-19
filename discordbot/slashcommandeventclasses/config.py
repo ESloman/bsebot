@@ -34,7 +34,7 @@ class Config(BSEddies):
 
         config_view = ConfigView(self.logger, ctx.user.id, ctx.guild_id)
         msg = (
-            "**BSEBot Configuration**\n\n"
+            "## BSEBot Configuration\n\n"
             "What would you like to configure?"
         )
         await ctx.respond(content=msg, view=config_view, ephemeral=True)

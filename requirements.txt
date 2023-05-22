@@ -5,5 +5,5 @@ xlsxwriter==3.1.0
 py-cord[speed]==2.4.1
 selenium==4.9.1
 webdriver-manager==3.8.6
-pre-commit==3.3.1
+pre-commit==3.3.2
 seaborn==0.12.2

@@ -67,7 +67,7 @@ class ActivityConfigView(discord.ui.View):
 
 
 class ActivityConfirmView(discord.ui.View):
-    def __init__(self, activity_type: str, placeholder: str, name: str):
+    def __init__(self, activity_type: str, placeholder: str, name: list[str]):
         super().__init__(timeout=120)
         self.activity_type = activity_type
         self.placeholder = placeholder
@@ -88,23 +88,33 @@ class ActivityConfirmView(discord.ui.View):
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=4, disabled=False)
     async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
 
-        existing = self.bot_activities.find_activity(self.name, self.activity_type)
+        _already_existed = []
+        for activity in self.name:
+            existing = self.bot_activities.find_activity(activity, self.activity_type)
 
-        if existing:
-            # already exists
+            if existing:
+                _already_existed.append(activity)
+                continue
+
+            self.bot_activities.insert_activity(self.activity_type, activity, interaction.user.id)
+
+        if len(_already_existed) == len(self.name):
+            # all our options existed already
             await interaction.response.edit_message(
-                content="Your activity already exists - no changes were made.",
+                content="All your options already existed - nothing has changed.",
                 view=None,
-                delete_after=5
+                delete_after=3
             )
             return
 
-        self.bot_activities.insert_activity(self.activity_type, self.name, interaction.user.id)
+        content = f"Submitted your activit{'y' if len(self.name) == 1 else 'ies'} to the database."
+        if _already_existed:
+            content += f" These, (`{_already_existed}`) existed already and weren't added again."
 
         await interaction.response.edit_message(
-            content="Submitted your activity to the database.",
+            content=content,
             view=None,
-            delete_after=2
+            delete_after=4
         )
 
     @discord.ui.button(label="Edit", style=discord.ButtonStyle.gray, row=4, disabled=False)

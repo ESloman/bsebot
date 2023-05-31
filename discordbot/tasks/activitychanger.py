@@ -40,11 +40,11 @@ class ActivityChanger(BaseTask):
         """
 
         now = datetime.datetime.now()
-        if 0 < now.hour < 6:
+        if now.hour == 23 or 0 < now.hour < 8:
             # make it really rare for activity to change 'overnight'
             threshold = 0.9
         else:
-            threshold = 0.45
+            threshold = 0.65
 
         _rand = random.random()
 

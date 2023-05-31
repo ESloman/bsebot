@@ -35,7 +35,8 @@ class BetReminder(BaseTask):
             for bet in active:
                 timeout = bet["timeout"]
                 created = bet["created"]
-                if (timeout - created).total_seconds() <= 172800:
+                total_time = (timeout - created).total_seconds()
+                if total_time <= 172800:
                     continue
 
                 if now > timeout:
@@ -57,6 +58,14 @@ class BetReminder(BaseTask):
                         f"Current there's `{eddies_bet}` eddies on the line from **{num_betters}** betters."
                     )
                     await message.reply(content=msg)
+                    continue
+
+                half_time = total_time / 2
+                half_date = created + datetime.timedelta(seconds=half_time)
+
+                if now > half_date:
+                    continue
+
 
     @bet_reminder.before_loop
     async def before_bet_reminder(self):

@@ -43,6 +43,7 @@ class BetReminder(BaseTask):
                     continue
 
                 diff = timeout - now
+
                 if 82800 <= diff.total_seconds() <= 86400:
                     # ~ 24 hours to go!
                     # send reminder here
@@ -66,6 +67,21 @@ class BetReminder(BaseTask):
                 if now > half_date:
                     continue
 
+                half_diff = half_date - now
+
+                if half_diff.total_seconds() < 3600:
+                    # within the hour threshold for half way
+                    channel = await self.bot.fetch_channel(bet["channel_id"])
+                    await channel.trigger_typing()
+                    message = await channel.fetch_message(bet["message_id"])
+
+                    eddies_bet = self.user_bets.count_eddies_for_bet(bet)
+
+                    msg = (
+                        "About halfway to go on this bet - don't forget to place some eddies!"
+                    )
+                    await message.reply(content=msg, silent=True)
+                    continue
 
     @bet_reminder.before_loop
     async def before_bet_reminder(self):

@@ -5,15 +5,29 @@ import discordbot.views.config_activities
 
 
 class ActivityModal(discord.ui.Modal):
-    def __init__(self, activity_type: str, placeholder_text: str, text_value: str = None, *args, **kwargs) -> None:
+    def __init__(
+        self,
+        activity_type: str,
+        placeholder_text: str,
+        text_value: list[str] = None,
+        *args,
+        **kwargs
+    ) -> None:
         super().__init__(*args, title="Enter activity text", **kwargs)
 
         self.activity_type = activity_type
-        self.activity = discord.ui.InputText(label="Activity Text", placeholder=f"{placeholder_text}")
+        self.placeholder = placeholder_text
+
+        placeholder = self.placeholder + "\nEnter multiple entries on different lines"
+        self.activity = discord.ui.InputText(
+            label="Activity Text",
+            placeholder=f"{placeholder}",
+            style=discord.InputTextStyle.multiline
+        )
 
         if text_value:
             # set this to previously entered value
-            self.activity.value = text_value
+            self.activity.value = "\n".join(text_value)
 
         self.add_item(self.activity)
 
@@ -26,14 +40,14 @@ class ActivityModal(discord.ui.Modal):
         await interaction.response.defer(ephemeral=True)
 
         activity = self.activity.value
-        placeholder = self.activity.placeholder
+        activity = activity.split("\n")
 
-        view = discordbot.views.config_activities.ActivityConfirmView(self.activity_type, placeholder, activity)
+        view = discordbot.views.config_activities.ActivityConfirmView(self.activity_type, self.placeholder, activity)
 
-        msg = (
-            "Your activity will appear as:\n\n"
-            f"`{placeholder.strip('.')} {activity.strip()}`\n\n"
-        )
+        _act = "activity" if len(activity) == 1 else "activities"
+        msg = f"Your {_act} will appear as:\n\n"
+        for act in activity:
+            msg += f"- `{self.placeholder.strip('.')} {act.strip()}`\n"
 
         await interaction.followup.send(
             content=msg,

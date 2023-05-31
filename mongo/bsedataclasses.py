@@ -323,7 +323,7 @@ class BotActivities(BestSummerEverPointsDB):
         Returns:
             dict: _description_
         """
-        ret = self.query({"category": name, "name": activity})
+        ret = self.query({"category": activity, "name": name})
         return ret[0] if ret else None
 
     def get_all_activities(self) -> list:

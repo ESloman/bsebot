@@ -61,6 +61,10 @@ class BetReminder(BaseTask):
                     await message.reply(content=msg)
                     continue
 
+                if total_time <= 604800:
+                    # if bet timeout is less than a week - don't bother with halfway reminders
+                    continue
+
                 half_time = total_time / 2
                 half_date = created + datetime.timedelta(seconds=half_time)
 

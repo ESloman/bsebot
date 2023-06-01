@@ -3,6 +3,8 @@ import discord
 
 import discordbot.views.config_wordle
 
+from mongo.bsepoints.generic import DataStore
+
 
 class WordleReminderModal(discord.ui.Modal):
     def __init__(
@@ -47,4 +49,49 @@ class WordleReminderModal(discord.ui.Modal):
             content=msg,
             ephemeral=True,
             view=view
+        )
+
+
+class WordleStartingWords(discord.ui.Modal):
+    def __init__(
+        self,
+        current_words: list[str] = None,
+        *args,
+        **kwargs
+    ) -> None:
+        super().__init__(*args, title="Set wordle starting words", **kwargs)
+
+        self.data_store = DataStore()
+
+        placeholder = "Enter your reminder here.\nUse '{mention}' where you want the user to be mentioned."
+
+        self.activity = discord.ui.InputText(
+            label="Wordle Reminder Text",
+            placeholder=placeholder,
+            style=discord.InputTextStyle.multiline
+        )
+
+        if current_words:
+            # set this to previously entered values
+            text = "\n".join(current_words)
+            self.activity.value = text
+
+        self.add_item(self.activity)
+
+    async def callback(self, interaction: discord.Interaction):
+        """
+
+        :param interaction:
+        :return:
+        """
+        await interaction.response.defer(ephemeral=True)
+
+        text = self.activity.value
+        words = text.split("\n")
+
+        self.data_store.set_starting_words(words)
+
+        await interaction.followup.send(
+            content="Submitted.",
+            ephemeral=True,
         )

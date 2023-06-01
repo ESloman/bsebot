@@ -1,12 +1,13 @@
 import discord
 from bson import Int64
 
-import discordbot.modals.wordlereminders
+import discordbot.modals.wordle
 from discordbot.selects.wordleconfig import WordleActiveSelect, WordleChannelSelect, WordleEmojiSelect
 from discordbot.selects.wordleconfig import WordleReminderSelect, WordleRootSelect
 
 from mongo.bsedataclasses import WordleReminders
 from mongo.bsepoints.emojis import ServerEmojis
+from mongo.bsepoints.generic import DataStore
 from mongo.bsepoints.guilds import Guilds
 
 
@@ -17,6 +18,7 @@ class WordleRootConfigView(discord.ui.View):
     ):
         super().__init__(timeout=120)
         self.guilds = Guilds()
+        self.data_store = DataStore()
         self.wordle_config_select = WordleRootSelect(selectable_options)
         self.add_item(self.wordle_config_select)
 
@@ -84,10 +86,13 @@ class WordleRootConfigView(discord.ui.View):
                 )
                 await interaction.response.send_message(content=msg, view=view, ephemeral=True)
             case "wordle_reminders":
-                modal = discordbot.modals.wordlereminders.WordleReminderModal()
+                modal = discordbot.modals.wordle.WordleReminderModal()
                 await interaction.response.send_modal(modal)
             case "wordle_starting_words":
-                pass
+                words_result = self.data_store.get_starting_words()
+                words = words_result["words"]
+                modal = discordbot.modals.wordle.WordleStartingWords(words)
+                await interaction.response.send_modal(modal)
             case _:
                 return
 
@@ -314,7 +319,7 @@ class WordleReminderConfirmView(discord.ui.View):
 
     @discord.ui.button(label="Edit", style=discord.ButtonStyle.gray, row=4, disabled=False)
     async def edit_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
-        modal = discordbot.modals.wordlereminders.WordleReminderModal(self.name)
+        modal = discordbot.modals.wordle.WordleReminderModal(self.name)
         await interaction.response.send_modal(modal)
         await interaction.followup.delete_message(interaction.message.id)
 

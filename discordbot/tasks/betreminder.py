@@ -36,7 +36,9 @@ class BetReminder(BaseTask):
                 timeout = bet["timeout"]
                 created = bet["created"]
                 total_time = (timeout - created).total_seconds()
-                if total_time <= 172800:
+
+                if total_time <= 604800:
+                    # if bet timeout is less than a week - don't bother with halfway reminders
                     continue
 
                 if now > timeout:
@@ -59,10 +61,6 @@ class BetReminder(BaseTask):
                         f"Current there's `{eddies_bet}` eddies on the line from **{num_betters}** betters."
                     )
                     await message.reply(content=msg)
-                    continue
-
-                if total_time <= 604800:
-                    # if bet timeout is less than a week - don't bother with halfway reminders
                     continue
 
                 half_time = total_time / 2

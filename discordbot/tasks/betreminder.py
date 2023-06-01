@@ -35,13 +35,17 @@ class BetReminder(BaseTask):
             for bet in active:
                 timeout = bet["timeout"]
                 created = bet["created"]
-                if (timeout - created).total_seconds() <= 172800:
+                total_time = (timeout - created).total_seconds()
+
+                if total_time <= 604800:
+                    # if bet timeout is less than a week - don't bother with halfway reminders
                     continue
 
                 if now > timeout:
                     continue
 
                 diff = timeout - now
+
                 if 82800 <= diff.total_seconds() <= 86400:
                     # ~ 24 hours to go!
                     # send reminder here
@@ -57,6 +61,29 @@ class BetReminder(BaseTask):
                         f"Current there's `{eddies_bet}` eddies on the line from **{num_betters}** betters."
                     )
                     await message.reply(content=msg)
+                    continue
+
+                half_time = total_time / 2
+                half_date = created + datetime.timedelta(seconds=half_time)
+
+                if now > half_date:
+                    continue
+
+                half_diff = half_date - now
+
+                if half_diff.total_seconds() < 3600:
+                    # within the hour threshold for half way
+                    channel = await self.bot.fetch_channel(bet["channel_id"])
+                    await channel.trigger_typing()
+                    message = await channel.fetch_message(bet["message_id"])
+
+                    eddies_bet = self.user_bets.count_eddies_for_bet(bet)
+
+                    msg = (
+                        "About halfway to go on this bet - don't forget to place some eddies!"
+                    )
+                    await message.reply(content=msg, silent=True)
+                    continue
 
     @bet_reminder.before_loop
     async def before_bet_reminder(self):

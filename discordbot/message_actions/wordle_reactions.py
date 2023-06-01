@@ -79,7 +79,7 @@ class WordleMessageAction(BaseMessageAction):
         if not utilities.is_utc(today):
             today = utilities.add_utc_offset(today)
 
-        # get number of 6/6 wordles today
+        # get number of 6/6 or X/6 wordles today
         try:
             wordle_results = self.user_interactions.query(
                 {
@@ -96,7 +96,6 @@ class WordleMessageAction(BaseMessageAction):
             return
 
         if len(wordle_results) > 3:
-
             # make sure we haven't sent this today already
             try:
                 link_results = self.user_interactions.query(

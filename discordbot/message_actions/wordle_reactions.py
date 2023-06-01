@@ -90,7 +90,7 @@ class WordleMessageAction(BaseMessageAction):
                     "message_type": "wordle"
                 }
             )
-            wordle_results = [r for r in wordle_results if "6/6" in r["content"]]
+            wordle_results = [r for r in wordle_results if any([a in r["content"] for a in ["6/6", "X/6"]])]
         except OperationFailure:
             # text index not set correctly
             return

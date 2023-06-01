@@ -25,7 +25,7 @@ class BSEddiesChannelSelect(Select):
         """
         try:
             selected = interaction.data["values"][0]
-        except IndexError:
+        except (IndexError, AttributeError):
             # nothing selected
             selected = None
 
@@ -54,7 +54,7 @@ class BSEddiesRoleSelect(Select):
         """
         try:
             selected = interaction.data["values"][0]
-        except IndexError:
+        except (IndexError, AttributeError):
             # nothing selected
             selected = None
 

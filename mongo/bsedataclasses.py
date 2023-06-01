@@ -14,7 +14,7 @@ from typing import Optional, Union
 from pymongo.results import InsertOneResult
 
 from discordbot.bot_enums import AwardsTypes, StatTypes
-from discordbot.wordle.wordlesolver import WordleSolve
+from discordbot.wordle.data_type import WordleSolve
 from mongo import interface
 from mongo.datatypes import Thread
 from mongo.db_classes import BestSummerEverPointsDB

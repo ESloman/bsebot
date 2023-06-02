@@ -9,7 +9,6 @@ from discord.ext import tasks
 from discordbot import utilities
 from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_BOT_ID
-from discordbot.message_strings.wordle_reminders import MESSAGES
 from discordbot.tasks.basetask import BaseTask
 
 
@@ -89,10 +88,16 @@ class WordleReminder(BaseTask):
                 self.logger.info("Everyone has done their wordle today!")
                 continue
 
+            _messages = self.wordle_reminders.get_all_reminders()
+            _messages_list = [
+                _message["name"] if not _message.get("weight") else (_message["name"], _message["weight"])
+                for _message in _messages
+            ]
+
             odds = utilities.calculate_message_odds(
                 self.interactions,
                 guild.id,
-                MESSAGES,
+                _messages_list,
                 "{mention}",
                 [0, 1],
             )

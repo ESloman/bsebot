@@ -32,7 +32,7 @@ class ValorantConfigView(discord.ui.View):
 
         try:
             active_val = self.active_select.values[0]
-        except IndexError:
+        except (IndexError, AttributeError):
             for opt in self.active_select.options:
                 if opt.default:
                     active_val = bool(int(opt.value))
@@ -54,7 +54,7 @@ class ValorantConfigView(discord.ui.View):
 
         try:
             active_val = bool(int(self.active_select.values[0]))
-        except IndexError:
+        except (IndexError, AttributeError):
             for opt in self.active_select.options:
                 if opt.default:
                     active_val = bool(int(opt.value))

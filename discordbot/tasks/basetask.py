@@ -25,6 +25,7 @@ from mongo.bsepoints.stickers import ServerStickers
 from mongo.bsedataclasses import BotActivities
 from mongo.bsedataclasses import SpoilerThreads
 from mongo.bsedataclasses import WordleAttempts
+from mongo.bsedataclasses import WordleReminders
 from mongo.bseticketedevents import RevolutionEvent
 
 
@@ -62,6 +63,7 @@ class BaseTask(commands.Cog):
         self.server_reminders = ServerReminders()
         self.spoilers = SpoilerThreads()
         self.wordles = WordleAttempts()
+        self.wordle_reminders = WordleReminders()
 
     def _check_start_up_tasks(self) -> bool:
         """

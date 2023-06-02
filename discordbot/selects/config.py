@@ -14,8 +14,7 @@ class ConfigSelect(Select):
         ("Revolution Event", "revolution"),
         ("Spoiler Threads", "threads"),
         ("Valorant", "valorant"),
-        ("Wordle Config", "wordle"),
-        ("Wordle Emoji Reaction Config", "wordle_reactions")
+        ("Wordle Config", "wordle")
     ]
 
     def __init__(self, configurable_items: list = None):

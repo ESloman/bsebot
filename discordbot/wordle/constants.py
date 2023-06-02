@@ -7,13 +7,3 @@ WORDLE_SETTINGS_BUTTON = "settings-button"
 WORDLE_BOARD_CLASS_NAME = "Board-module_board__"
 WORDLE_ROWS_CLASS_NAME = "Row-module_row__"
 WORDLE_PLAY_CLASS_NAME = "Welcome-module_button__"
-
-WORDLE_STARTING_WORDS = [
-    "adieu",
-    "prime",
-    "sport",
-    "soare",
-    "tunic",
-    "runes",
-    "ruins"
-]

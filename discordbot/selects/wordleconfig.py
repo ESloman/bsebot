@@ -6,6 +6,45 @@ from discord.ui import Select
 from mongo.datatypes import Emoji
 
 
+class WordleRootSelect(Select):
+
+    selectable_options = [
+        "wordle_config",
+        "wordle_reactions",
+        "wordle_reminders",
+        "wordle_starting_words"
+    ]
+
+    def __init__(self, selectables: list[str] = None):
+        if not selectables:
+            selectables = self.selectable_options
+
+        options = [
+            SelectOption(label=opt.replace("_", " ").title(), value=opt)
+            for opt in selectables
+        ]
+
+        super().__init__(
+            options=options,
+            placeholder="Configure...",
+            min_values=1,
+            max_values=1
+        )
+
+    async def callback(self, interaction: Interaction):
+        """
+
+        :param interaction:
+        :return:
+        """
+        selected = interaction.data["values"][0]
+        for option in self.options:
+            option.default = option.value == selected
+
+        # expecting an update method on root here
+        await self.view.update(interaction)
+
+
 class WordleChannelSelect(Select):
     def __init__(self):
         super().__init__(

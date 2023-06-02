@@ -33,7 +33,7 @@ class RefreshBetView(discord.ui.View):
             if type(child) == BetSelect:
                 try:
                     bet_id = child.values[0]
-                except IndexError:
+                except (IndexError, AttributeError):
                     # this means that this was default
                     bet_id = child.options[0].value
                 break

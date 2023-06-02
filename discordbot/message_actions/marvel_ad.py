@@ -1,5 +1,6 @@
 
 import datetime
+import random
 import re
 from logging import Logger
 
@@ -36,15 +37,17 @@ class MarvelComicsAdAction(BaseMessageAction):
         Returns:
             bool: true or false
         """
-        if any([re.match(rf"\b{a}\b", message.content.lower()) for a in self._comic_terms]):
+        if any([re.findall(rf"\b{a}\b", message.content.lower()) for a in self._comic_terms]):
             # check last time that we sent a marvel comic ad
             now = datetime.datetime.now()
             _last_time = self.guilds.get_last_ad_time(message.guild.id)
             if _last_time:
                 if (now - _last_time).total_seconds() < MARVEL_AD_COOLDOWN:
                     return False
-            self.guilds.set_last_ad_time(message.guild.id, now)
-            return True
+            # still make it a 50/50 to trigger
+            if random.random() > 0.5:
+                self.guilds.set_last_ad_time(message.guild.id, now)
+                return True
         return False
 
     async def run(self, message: discord.Message) -> None:

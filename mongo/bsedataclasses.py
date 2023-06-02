@@ -14,7 +14,7 @@ from typing import Optional, Union
 from pymongo.results import InsertOneResult
 
 from discordbot.bot_enums import AwardsTypes, StatTypes
-from discordbot.wordle.wordlesolver import WordleSolve
+from discordbot.wordle.data_type import WordleSolve
 from mongo import interface
 from mongo.datatypes import Thread
 from mongo.db_classes import BestSummerEverPointsDB
@@ -329,6 +329,48 @@ class BotActivities(BestSummerEverPointsDB):
     def get_all_activities(self) -> list:
         """
         Returns all activities from the collection
+
+        Returns:
+            list: _description_
+        """
+        rets = self.query({"archived": False})
+        return rets
+
+
+class WordleReminders(BestSummerEverPointsDB):
+    """
+    Class for interacting with the 'wordlereminders' MongoDB collection in the 'bestsummereverpoints' DB
+    """
+    def __init__(self):
+        """
+        Constructor method that initialises the vault object
+        """
+        super().__init__()
+        self._vault = interface.get_collection(self.database, "wordlereminders")
+
+    def insert_reminder(self, name: str, created_by: int) -> InsertOneResult:
+        """
+        Inserts a new wordle reminder into the database
+
+        Args:
+            name (str): the reminder name
+            created_by (int): which user created it
+
+        Returns:
+            InsertOneResult: insert result
+        """
+        doc = {
+            "name": name,
+            "created_by": created_by,
+            "created": datetime.datetime.now(),
+            "archived": False,
+        }
+
+        return self.insert(doc)
+
+    def get_all_reminders(self) -> list:
+        """
+        Returns all reminders from the collection
 
         Returns:
             list: _description_

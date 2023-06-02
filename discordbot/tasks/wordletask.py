@@ -95,7 +95,7 @@ class WordleTask(BaseTask):
             # if we fail - try again as there's some randomness to it
             self.logger.debug(f"Failed wordle - attempting again: {attempts}")
             wordle_solver = WordleSolver(self.logger)
-            await wordle_solver.get_driver()
+            await wordle_solver.setup()
             solved_wordle = await wordle_solver.solve()
             attempts += 1
 

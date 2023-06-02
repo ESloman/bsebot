@@ -5,7 +5,6 @@ import datetime
 import os
 import random
 import re
-from dataclasses import dataclass
 
 from selenium import webdriver
 from selenium.webdriver import ActionChains
@@ -21,26 +20,16 @@ from webdriver_manager.chrome import ChromeDriverManager
 from discordbot.utilities import PlaceHolderLogger
 from discordbot.wordle.constants import WORDLE_GDPR_ACCEPT_ID, WORDLE_TUTORIAL_CLOSE_CLASS_NAME
 from discordbot.wordle.constants import WORDLE_BOARD_CLASS_NAME, WORDLE_ROWS_CLASS_NAME, WORDLE_URL, WORDLE_FOOTNOTE
-from discordbot.wordle.constants import WORDLE_STARTING_WORDS, WORDLE_SETTINGS_BUTTON, WORDLE_PLAY_CLASS_NAME
-
-
-@dataclass
-class WordleSolve:
-    solved: bool
-    guesses: list
-    starting_word: str
-    guess_count: int
-    actual_word: str
-    game_state: dict
-    timestamp: datetime.datetime
-    share_text: str
-    wordle_num: int
+from discordbot.wordle.constants import WORDLE_SETTINGS_BUTTON, WORDLE_PLAY_CLASS_NAME
+from discordbot.wordle.data_type import WordleSolve
+from mongo.bsedataclasses import WordleAttempts
+from mongo.bsepoints.generic import DataStore
 
 
 class WordleSolver():
-    def __init__(self, logger=PlaceHolderLogger) -> None:
+    def __init__(self, logger=PlaceHolderLogger, headless: bool = False) -> None:
         self.firefox_opts = Options()
-        self.firefox_opts.headless = True
+        self.firefox_opts.headless = headless
         self.firefox_opts.add_argument("--no-sandbox")
         self.words = self._get_words()
         self.words_freq = self._get_word_frequency()
@@ -48,6 +37,15 @@ class WordleSolver():
         self.action_chain = None
         self.possible_words = []
         self.logger = logger
+        self.wordles = WordleAttempts()
+        self.data_store = DataStore()
+
+        words_result = self.data_store.get_starting_words()
+        if not words_result:
+            self.logger.debug("No words found in database - setting to defaults")
+            self._starting_words = ["adieu", "soare"]
+        else:
+            self._starting_words = words_result["words"]
 
     async def setup(self) -> None:
         """
@@ -128,16 +126,40 @@ class WordleSolver():
         }
         return norm_words_f
 
-    @staticmethod
-    def _pick_starting_word() -> str:
+    def _pick_starting_word(self) -> str:
         """
         Returns a random starting word
 
         Returns:
             str: the word to start the guesses with
         """
-        starting_worde = random.choice(WORDLE_STARTING_WORDS)
-        return starting_worde
+        _default_weight = 2
+
+        # try calculate weights from success rate
+        _attempts = {}
+        for word in self._starting_words:
+            results = self.wordles.query({"starting_word": word})
+
+            if not results:
+                _attempts[word] = _default_weight
+                continue
+
+            results = sorted(results, key=lambda x: x["timestamp"])
+            _last_timestamp = None
+            _scores = []
+            for res in results:
+                # gotta do this as we don't have guild ID here to limit
+                if res["timestamp"] == _last_timestamp:
+                    continue
+                _last_timestamp = res["timestamp"]
+                _scores.append(res["guess_count"])
+            _attempts[word] = 6 - (sum(_scores) / len(_scores))
+
+        _sorted_words = sorted(_attempts, key=lambda x: _attempts[x], reverse=True)
+
+        starting_word = random.choices(_sorted_words, weights=[_attempts[w] for w in _sorted_words])
+        self.logger.debug(f"Selected: {starting_word=} from {_attempts=}")
+        return starting_word
 
     def _pick_word_from_list(self) -> str:
         """Picks a word at random from the word list

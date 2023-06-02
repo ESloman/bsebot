@@ -111,7 +111,10 @@ class Wordle(BSEddies):
             year_end = year_start.replace(year=year_start.year + 1)
             wordles_this_year = [wordle for wordle in all_wordles if year_start < wordle["timestamp"] < year_end]
             scores_this_year = [wordle["guesses"] for wordle in wordles_this_year if wordle["guesses"] != 7]
-            avg_this_year = round(sum(scores_this_year) / len(scores_this_year), 2)
+            try:
+                avg_this_year = round(sum(scores_this_year) / len(scores_this_year), 2)
+            except ZeroDivisionError:
+                avg_this_year = 0.0
             msg += f"- Your *{year_start.year}* average is `{avg_this_year}`.\n"
 
             # calculate stats for each month in this year
@@ -149,7 +152,10 @@ class Wordle(BSEddies):
         month_end = month_start + datetime.timedelta(days=31)  # month end is any day beyond today
         wordles_this_month = [wordle for wordle in all_wordles if month_start < wordle["timestamp"] < month_end]
         scores_this_month = [wordle["guesses"] for wordle in wordles_this_month if wordle["guesses"] != 7]
-        avg_this_month = round(sum(scores_this_month) / len(scores_this_month), 2)
+        try:
+            avg_this_month = round(sum(scores_this_month) / len(scores_this_month), 2)
+        except ZeroDivisionError:
+            avg_this_month = 0.0
 
         msg += f"- Your average this month so far is `{avg_this_month}`.\n"
 

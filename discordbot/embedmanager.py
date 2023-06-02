@@ -27,7 +27,6 @@ class EmbedManager(object):
         """
 
         embed = discord.Embed(
-            description=f"Bet ID: {bet_id}",
             colour=discord.Colour.random()
         )
 

@@ -6,6 +6,7 @@ import discord
 
 from discordbot.constants import CREATOR
 from discordbot.selects.config import ConfigSelect
+from discordbot.selects.wordleconfig import WordleRootSelect
 from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.config_activities import ActivityConfigView
 from discordbot.views.config_admin import AdminConfigView
@@ -16,8 +17,7 @@ from discordbot.views.config_salary import SalaryConfigView
 from discordbot.views.config_salary_message import DailyMessageView
 from discordbot.views.config_threads import ThreadConfigView
 from discordbot.views.config_valorant import ValorantConfigView
-from discordbot.views.config_wordle import WordleConfigView
-from discordbot.views.config_wordle_reactions import WordleEmojiReactionConfigView
+from discordbot.views.config_wordle import WordleRootConfigView
 
 from mongo.bsedataclasses import SpoilerThreads
 from mongo.bsepoints.guilds import Guilds
@@ -79,12 +79,16 @@ class ConfigView(discord.ui.View):
             return False
 
         # is option in options that allow normal users to use it
-        if value in ["activities", "threads", "daily_salary"]:
+        if value in ["activities", "threads", "daily_salary", "wordle_reminders"]:
             return True
 
         # is user the creator
         if user_id == CREATOR:
             return True
+
+        # creator only configuration options
+        if value in ["wordle_starting_words", ] and user_id != CREATOR:
+            return False
 
         # now we check server perms
         if not guild_db:
@@ -113,11 +117,13 @@ class ConfigView(discord.ui.View):
     @discord.ui.button(label="Select", style=discord.ButtonStyle.green, row=2)
     async def place_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
         value = self.config_select._selected_values[0]
-        await interaction.response.edit_message(
-            content="Loading your config option now...",
-            view=None,
-            delete_after=2
-        )
+
+        if value not in ["wordle_reminders", ]:
+            await interaction.response.edit_message(
+                content="Loading your config option now...",
+                view=None,
+                delete_after=2
+            )
 
         guild_id = interaction.guild.id if interaction.guild else None
 
@@ -146,8 +152,6 @@ class ConfigView(discord.ui.View):
                 msg, view = self._get_wordle_message_and_view(interaction)
             case "daily_salary":
                 msg, view = self._get_daily_salary_message_and_view(interaction)
-            case "wordle_reactions":
-                msg, view = self._get_wordle_reaction_message_and_view(interaction)
             case _:
                 # default case
                 msg = "unknown"
@@ -207,29 +211,6 @@ class ConfigView(discord.ui.View):
                 "on _which_ day.\n\n"
             )
 
-        return msg, view
-
-    def _get_wordle_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
-        """Handle wordle message/view
-
-        Args:
-            interaction (discord.Interaction): the interaction
-
-        Returns:
-            tuple[str, discord.ui.View]: the message and view
-        """
-        guild_db = self.guilds.get_guild(interaction.guild_id)
-        _chan = guild_db.get("wordle_channel")
-        chan_mention = f"<#{_chan}>" if _chan else "_None_"
-        view = WordleConfigView(guild_db["guild_id"])
-        msg = (
-            "## Wordle Config\n\n"
-            "Select the following options:\n"
-            "-  Whether doing the daily wordle is enabled or not\n"
-            f"- If the above is true, which channel should the wordle be posted in? (Current: {chan_mention})\n"
-            "- Whether to remind users to do their daily Wordle if they forget.\n\n"
-            "You can leave channel select blank to keep current values."
-        )
         return msg, view
 
     def _get_valorant_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
@@ -367,26 +348,6 @@ class ConfigView(discord.ui.View):
 
         return msg, view
 
-    def _get_wordle_reaction_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
-        """Handle wordle reaction message/view
-
-        Args:
-            interaction (discord.Interaction): the interaction
-
-        Returns:
-            tuple[str, discord.ui.View]: the message and view
-        """
-        view = WordleEmojiReactionConfigView(interaction.guild_id)
-        msg = (
-            "## Wordle Emoji Reaction Config \n\n"
-            "Select which server emojis the bot uses to react to different Wordle scores.\n"
-            "If None are selected, the defaults will be used.\n\n"
-            "- X score\n"
-            "- 2 score\n"
-            "- 6 score\n"
-        )
-        return msg, view
-
     def _get_bseddies_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
         """Handle bseddies message/view
 
@@ -453,5 +414,26 @@ class ConfigView(discord.ui.View):
         msg = (
             "## Add an Activity\n\n"
             "Select the type of activity you'd like."
+        )
+        return msg, view
+
+    def _get_wordle_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
+        """Handle wordle message/view
+
+        Args:
+            interaction (discord.Interaction): the interaction
+
+        Returns:
+            tuple[str, discord.ui.View]: the message and view
+        """
+        _opts = []
+        for opt in WordleRootSelect.selectable_options:
+            if self._check_perms(opt, interaction.user.id, interaction.guild_id):
+                _opts.append(opt)
+
+        view = WordleRootConfigView(_opts)
+        msg = (
+            "## Wordle Config\n\n"
+            "Slect what you would like to configure."
         )
         return msg, view

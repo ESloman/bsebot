@@ -60,6 +60,13 @@ class BetReminder(BaseTask):
                         "Only roughly twenty four hours to get in on this bet!\n"
                         f"Current there's `{eddies_bet}` eddies on the line from **{num_betters}** betters."
                     )
+
+                    try:
+                        _place_command = [a for a in self.bot.application_commands if a.name == "place"][0]
+                        msg += f"\n\nUse {_place_command.mention} to place some eddies."
+                    except (IndexError, AttributeError):
+                        pass
+
                     await message.reply(content=msg)
                     continue
 
@@ -82,6 +89,13 @@ class BetReminder(BaseTask):
                     msg = (
                         "About halfway to go on this bet - don't forget to place some eddies!"
                     )
+
+                    try:
+                        _place_command = [a for a in self.bot.application_commands if a.name == "place"][0]
+                        msg += f"\n\nUse {_place_command.mention} to place some eddies."
+                    except (IndexError, AttributeError):
+                        pass
+
                     await message.reply(content=msg, silent=True)
                     continue
 

@@ -184,6 +184,7 @@ class BSEddiesManager(BaseTask):
             start: datetime.datetime,
             end: datetime.datetime,
             guild_id: int,
+            wordle_word: str = None,
             real: bool = False
     ) -> tuple[int, dict]:
         """
@@ -199,6 +200,7 @@ class BSEddiesManager(BaseTask):
             start (datetime.datetime): start time to calc eddies for
             end (datetime.datetime): end time to calc eddies for
             guild_id (int): the guild ID the user exists in
+            wordle_word (str, optional): the wordle word for the day
             real (bool, optional): Whether to actually do operations. Defaults to False.
 
         Returns:
@@ -270,13 +272,16 @@ class BSEddiesManager(BaseTask):
                         for _ in matching_reactions:
                             message_types.append("react_train")
 
-        # add reaction_received events
         for message in user_results:
+            # add reaction_received events
             if replies := message.get("replies"):
                 for reply in replies:
                     if reply["user_id"] == user:
                         continue
                     message_types.append("reply_received")
+            # add used wordle words
+            if wordle_word and wordle_word in message.get("content", ""):
+                message_types.append("wordle_word_used")
 
         count = Counter(message_types)
         eddies_gained = self._calc_eddies(count, minimum)
@@ -358,6 +363,15 @@ class BSEddiesManager(BaseTask):
         eddie_gain_dict = {}
         wordle_messages = []
 
+        try:
+            wordle_doc = self.wordles.query(
+                {"timestamp": start.strftime("%Y-%m-%d"), "guild_id": guild_id}
+            )[0]
+            wordle_word = wordle_doc["actual_word"]
+        except (IndexError, KeyError):
+            wordle_doc = None
+            wordle_word = None
+
         for user in user_ids:
             self.logger.info(f"processing {user}")
 
@@ -377,6 +391,7 @@ class BSEddiesManager(BaseTask):
                 start,
                 end,
                 guild_id,
+                wordle_word,
                 real
             )
 

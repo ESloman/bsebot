@@ -6,15 +6,20 @@ from discord.ui import Select
 
 
 class StatsModeSelect(Select):
-    _modes = ["Month", "Year"]
+    _modes = [
+        ("Quick", "Your quick stats"),
+        ("Server", "Server quick stats"),
+        ("Graphs", "Generate some graphs")
+    ]  # type: tuple[str, str]
 
     def __init__(self):
 
         options = [
             SelectOption(
-                label=opt,
-                value=opt,
-                default=True if opt == "Year" else False
+                label=opt[0],
+                value=opt[0].lower(),
+                default=True if opt == "Year" else False,
+                description=opt[1]
             ) for opt in self._modes
         ]
 
@@ -36,7 +41,7 @@ class StatsModeSelect(Select):
         for option in self.options:
             option.default = option.value == selected_amount
 
-        await interaction.response.edit_message(view=self.view)
+        await self.view.update(interaction)
 
 
 class StatsYearSelect(Select):
@@ -69,4 +74,4 @@ class StatsYearSelect(Select):
         for option in self.options:
             option.default = option.value == selected_amount
 
-        await interaction.response.edit_message(view=self.view)
+        await self.view.update()

@@ -27,14 +27,22 @@ class TaxRate(BSEddies):
         guild_db = self.guilds.get_guild(guild_id)
         king_id = guild_db["king"]
 
+        value, supporter_value = self.guilds.get_tax_rate(guild_id)
+
+        message = (
+            "Tax rate is currently:\n"
+            f"- `{value * 100}%`\n"
+            f"- `{supporter_value * 100}%` for supporters"
+        )
+
         if ctx.user.id != king_id:
-            message = "You are not the King - you cannot set the tax rate."
             await ctx.respond(content=message, ephemeral=True, delete_after=10)
             return
 
-        value, supporter_value = self.guilds.get_tax_rate(guild_id)
         view = TaxRateView(value, supporter_value)
 
-        msg = f"Please select a tax rate for the peasants and a tax rate for your <@&{guild_db['supporter_role']}>."
-
-        await ctx.respond(content=msg, view=view, ephemeral=True)
+        message += (
+            f"\n\nPlease select a general tax rate and a tax rate for your <@&{guild_db['supporter_role']}>. "
+            "Leave it as is to not change anything at all."
+        )
+        await ctx.respond(content=message, view=view, ephemeral=True)

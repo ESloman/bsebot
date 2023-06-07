@@ -30,5 +30,6 @@ class StatsData:
     total_swears: int
     top_channels: tuple[int, int]
     top_swears: tuple[int, int]
+    top_users: tuple[int, int]
     replies_count: int
     replied_count: int

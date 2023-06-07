@@ -32,6 +32,7 @@ class Stats(BSEddies):
         _lengths = []
         _words = []
         _channels_dict = {}
+        _users_dict = {}
         _swears_dict = {k: 0 for k in _swears}
 
         # these two should only be different when NOT in server mode
@@ -44,6 +45,12 @@ class Stats(BSEddies):
                 _channels_dict[_channel_id] = 0
             _channels_dict[_channel_id] += 1
 
+            if "message" in message["message_type"]:
+                uid = message["user_id"]
+                if uid not in _users_dict:
+                    _users_dict[uid] = 0
+                _users_dict[uid] += 1
+
             # replies
             if "reply" in message["message_type"]:
                 _replied_count += 1
@@ -52,6 +59,9 @@ class Stats(BSEddies):
             if content := message["content"]:
                 _lengths.append(len(content))
                 _words.append(len(content.split(" ")))
+
+                if "wordle" in message["message_type"]:
+                    pass
 
                 # count swears
                 for swear in _swears:
@@ -66,6 +76,12 @@ class Stats(BSEddies):
         top_swears = sorted(_swears_dict, key=lambda x: _swears_dict[x], reverse=True)
         top_three_swears = [(_swear, _swears_dict[_swear]) for _swear in top_swears[:3] if _swears_dict[_swear]]
 
+        top_users = sorted(_users_dict, key=lambda x: _users_dict[x], reverse=True)
+        top_five_users = [
+            (_user, _users_dict[_user])
+            for _user in top_users[:5 if len(top_users) > 5 else -1]
+        ]
+
         _dict["top_five"] = top_five_channels
         _dict["average_length"] = round((sum(_lengths) / len(_lengths)), 2)
         _dict["average_word_count"] = round((sum(_words) / len(_words)), 2)
@@ -73,6 +89,7 @@ class Stats(BSEddies):
         _dict["top_swears"] = top_three_swears
         _dict["replies_count"] = _replies_count
         _dict["replied_count"] = _replied_count
+        _dict["top_users"] = top_five_users
 
         return _dict
 
@@ -151,9 +168,17 @@ class Stats(BSEddies):
             f"- **Total**: {total.total_messages} ({monthly.total_messages})\n"
             f"- **Average Length**: {total.average_length} ({monthly.average_length})\n"
             f"- **Average Word Count**: {total.average_words} ({monthly.average_words})\n"
-            "- **All time top channels**:"
+            "- **All time top users**:"
         )
 
+        for user in total.top_users:
+            message += f"\n - <@{user[0]}>: {user[1]}"
+
+        message += "\n- **This month's top users**:"
+        for user in monthly.top_users:
+            message += f"\n - <@{user[0]}>: {user[1]}"
+
+        message += "\n- **All time top channels**:"
         for channel in total.top_channels:
             message += f"\n - <#{channel[0]}>: {channel[1]}"
 
@@ -224,7 +249,8 @@ class Stats(BSEddies):
             total_swears=counts["total_swears"],
             top_swears=counts["top_swears"],
             replied_count=counts["replied_count"],
-            replies_count=counts["replies_count"]
+            replies_count=counts["replies_count"],
+            top_users=counts["top_users"]
         )
 
         monthly_stats = StatsData(
@@ -235,7 +261,8 @@ class Stats(BSEddies):
             total_swears=monthly_counts["total_swears"],
             top_swears=monthly_counts["top_swears"],
             replied_count=monthly_counts["replied_count"],
-            replies_count=monthly_counts["replies_count"]
+            replies_count=monthly_counts["replies_count"],
+            top_users=monthly_counts["top_users"]
         )
 
         return total_stats, monthly_stats

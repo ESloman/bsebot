@@ -7,6 +7,7 @@ from discordbot.bsebot import BSEBot
 from discordbot.utilities import PlaceHolderLogger
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.interactions import UserInteractions
+from mongo.bseticketedevents import RevolutionEvent
 
 
 class BaseMessageAction():
@@ -18,6 +19,7 @@ class BaseMessageAction():
         self.logger = logger
         self.user_interactions = UserInteractions()
         self.guilds = Guilds()
+        self.revolutions = RevolutionEvent()
 
     async def pre_condition(self, message: discord.Message, message_type: list) -> bool:
         """

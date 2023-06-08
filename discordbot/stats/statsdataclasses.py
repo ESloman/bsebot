@@ -33,3 +33,5 @@ class StatsData:
     top_users: tuple[int, int]
     replies_count: int
     replied_count: int
+    wordles: int
+    average_wordle_score: float

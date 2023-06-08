@@ -9,7 +9,7 @@ class StatsModeSelect(Select):
     _modes = [
         ("Quick", "Your quick stats"),
         ("Server", "Server quick stats"),
-        ("Graphs", "Generate some graphs")
+        # ("Graphs", "Generate some graphs")
     ]  # type: tuple[str, str]
 
     def __init__(self):

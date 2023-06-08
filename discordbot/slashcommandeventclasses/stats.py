@@ -1,10 +1,12 @@
 
 import datetime
+import re
 
 import discord
 
 import discordbot.views.stats
 from discordbot.bot_enums import ActivityTypes
+from discordbot.constants import WORDLE_SCORE_REGEX
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.stats.statsdatacache import StatsDataCache
 from discordbot.stats.statsdataclasses import StatsData
@@ -39,6 +41,8 @@ class Stats(BSEddies):
         _replies_count = 0  # how many times this user received a reply
         _replied_count = 0  # how many times this user replied to someone
 
+        _wordle_scores = []
+
         for message in messages:
             _channel_id = message["channel_id"]
             if _channel_id not in _channels_dict:
@@ -61,7 +65,13 @@ class Stats(BSEddies):
                 _words.append(len(content.split(" ")))
 
                 if "wordle" in message["message_type"]:
-                    pass
+                    result = re.search(WORDLE_SCORE_REGEX, content).group()
+                    guesses = result.split("/")[0]
+
+                    if guesses == "X":
+                        guesses = "10"
+                    guesses = int(guesses)
+                    _wordle_scores.append(guesses)
 
                 # count swears
                 for swear in _swears:
@@ -90,6 +100,12 @@ class Stats(BSEddies):
         _dict["replies_count"] = _replies_count
         _dict["replied_count"] = _replied_count
         _dict["top_users"] = top_five_users
+        _dict["wordles"] = len(_wordle_scores)
+
+        try:
+            _dict["average_wordle_score"] = round((sum(_wordle_scores) / len(_wordle_scores)), 2)
+        except ZeroDivisionError:
+            _dict["average_wordle_score"] = 0.0
 
         return _dict
 
@@ -155,11 +171,27 @@ class Stats(BSEddies):
             for swear in monthly.top_swears:
                 message += f"\n - `{swear[0]}`: {swear[1]}"
 
+        # wordle stuff
+        app_command = [app_com for app_com in self.client.application_commands if app_com.name == "wordle"][0]
+
+        message += (
+            "\n\n"
+            "## Wordle\n"
+            f"- **Completed wordles count**: {total.wordles} ({monthly.wordles})\n"
+            f"- **Average wordle score**: {total.average_wordle_score} ({monthly.average_wordle_score})\n"
+            "\n"
+            f"For more Wordle stats - use {app_command.mention}."
+        )
+
+        self.logger.info(f"Stats message length: {len(message)}")
+
         await interaction.followup.send(content=message, ephemeral=True)
 
     async def stats_server(self, interaction: discord.Interaction) -> None:
         await interaction.response.defer(ephemeral=True)
         total, monthly = self._stats(interaction, True)
+
+        # messages
 
         message = (
             f"# {interaction.guild.name}'s Quick Stats\n"
@@ -200,6 +232,20 @@ class Stats(BSEddies):
             message += "\n- **This month's top swears**:"
             for swear in monthly.top_swears:
                 message += f"\n - `{swear[0]}`: {swear[1]}"
+
+        # wordle stuff
+        app_command = [app_com for app_com in self.client.application_commands if app_com.name == "wordle"][0]
+
+        message += (
+            "\n\n"
+            "## Wordle\n"
+            f"- **Completed wordles count**: {total.wordles} ({monthly.wordles})\n"
+            f"- **Average wordle score**: {total.average_wordle_score} ({monthly.average_wordle_score})\n"
+            "\n"
+            f"For more Wordle stats - use {app_command.mention}."
+        )
+
+        self.logger.info(f"Stats message length: {len(message)}")
 
         await interaction.followup.send(content=message, ephemeral=True)
 
@@ -250,7 +296,9 @@ class Stats(BSEddies):
             top_swears=counts["top_swears"],
             replied_count=counts["replied_count"],
             replies_count=counts["replies_count"],
-            top_users=counts["top_users"]
+            top_users=counts["top_users"],
+            wordles=counts["wordles"],
+            average_wordle_score=counts["average_wordle_score"]
         )
 
         monthly_stats = StatsData(
@@ -262,7 +310,9 @@ class Stats(BSEddies):
             top_swears=monthly_counts["top_swears"],
             replied_count=monthly_counts["replied_count"],
             replies_count=monthly_counts["replies_count"],
-            top_users=monthly_counts["top_users"]
+            top_users=monthly_counts["top_users"],
+            wordles=monthly_counts["wordles"],
+            average_wordle_score=monthly_counts["average_wordle_score"]
         )
 
         return total_stats, monthly_stats

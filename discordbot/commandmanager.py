@@ -734,14 +734,15 @@ class CommandManager(object):
             )
             await ctx.response.send_modal(modal)
 
-        @self.client.command(description="See your 2022 replay")
-        async def wrapped22(ctx: discord.ApplicationContext):
-            """_summary_
+        @self.client.command(description="See some stats")
+        async def stats(ctx: discord.ApplicationContext):
+            """
+            Stats Slash command
 
             Args:
-                ctx (discord.ApplicationContext): _description_
+                ctx (discord.ApplicationContext): context
             """
-            await self.bseddies_stats.replay(ctx, 2022)
+            await self.bseddies_stats.create_stats_view(ctx)
 
         @self.client.command(description="See some Wordle stats")
         async def wordle(ctx: discord.ApplicationContext):

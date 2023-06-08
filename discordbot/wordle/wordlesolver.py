@@ -27,7 +27,7 @@ from mongo.bsepoints.generic import DataStore
 
 
 class WordleSolver():
-    def __init__(self, logger=PlaceHolderLogger, headless: bool = False) -> None:
+    def __init__(self, logger=PlaceHolderLogger, headless: bool = True) -> None:
         self.firefox_opts = Options()
         self.firefox_opts.headless = headless
         self.firefox_opts.add_argument("--no-sandbox")

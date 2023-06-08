@@ -1,14 +1,17 @@
 
 import datetime
+import re
 
 import discord
 
+import discordbot.views.stats
 from discordbot.bot_enums import ActivityTypes
-from discordbot.constants import BSE_SERVER_ID, JERK_OFF_CHAT
+from discordbot.constants import WORDLE_SCORE_REGEX
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
-from discordbot.stats.statsclasses import StatsGatherer
 from discordbot.stats.statsdatacache import StatsDataCache
-from discordbot.views.wrapped import WrappedView
+from discordbot.stats.statsdataclasses import StatsData
+
+from mongo.datatypes import Message
 
 
 class Stats(BSEddies):
@@ -22,6 +25,90 @@ class Stats(BSEddies):
         self.help_string = "View some stats"
         self.command_name = "stats"
 
+    def _do_message_counts(self, messages: list[Message]) -> dict:
+
+        _swears = ["fuck", "shit", "cunt", "piss", "cock", "bollock", "dick", "twat"]
+
+        _dict = {}
+
+        _lengths = []
+        _words = []
+        _channels_dict = {}
+        _users_dict = {}
+        _swears_dict = {k: 0 for k in _swears}
+
+        # these two should only be different when NOT in server mode
+        _replies_count = 0  # how many times this user received a reply
+        _replied_count = 0  # how many times this user replied to someone
+
+        _wordle_scores = []
+
+        for message in messages:
+            _channel_id = message["channel_id"]
+            if _channel_id not in _channels_dict:
+                _channels_dict[_channel_id] = 0
+            _channels_dict[_channel_id] += 1
+
+            if "message" in message["message_type"]:
+                uid = message["user_id"]
+                if uid not in _users_dict:
+                    _users_dict[uid] = 0
+                _users_dict[uid] += 1
+
+            # replies
+            if "reply" in message["message_type"]:
+                _replied_count += 1
+            _replies_count += len(message.get("replies", []))
+
+            if content := message["content"]:
+                _lengths.append(len(content))
+                _words.append(len(content.split(" ")))
+
+                if "wordle" in message["message_type"]:
+                    result = re.search(WORDLE_SCORE_REGEX, content).group()
+                    guesses = result.split("/")[0]
+
+                    if guesses == "X":
+                        guesses = "10"
+                    guesses = int(guesses)
+                    _wordle_scores.append(guesses)
+
+                # count swears
+                for swear in _swears:
+                    _swears_dict[swear] += content.count(swear)
+
+        top_channels = sorted(_channels_dict, key=lambda x: _channels_dict[x], reverse=True)
+        top_five_channels = [
+            (_chan, _channels_dict[_chan])
+            for _chan in top_channels[:5 if len(top_channels) > 5 else -1]
+        ]
+
+        top_swears = sorted(_swears_dict, key=lambda x: _swears_dict[x], reverse=True)
+        top_three_swears = [(_swear, _swears_dict[_swear]) for _swear in top_swears[:3] if _swears_dict[_swear]]
+
+        top_users = sorted(_users_dict, key=lambda x: _users_dict[x], reverse=True)
+        top_five_users = [
+            (_user, _users_dict[_user])
+            for _user in top_users[:5 if len(top_users) > 5 else -1]
+        ]
+
+        _dict["top_five"] = top_five_channels
+        _dict["average_length"] = round((sum(_lengths) / len(_lengths)), 2)
+        _dict["average_word_count"] = round((sum(_words) / len(_words)), 2)
+        _dict["total_swears"] = sum(_swears_dict.values())
+        _dict["top_swears"] = top_three_swears
+        _dict["replies_count"] = _replies_count
+        _dict["replied_count"] = _replied_count
+        _dict["top_users"] = top_five_users
+        _dict["wordles"] = len(_wordle_scores)
+
+        try:
+            _dict["average_wordle_score"] = round((sum(_wordle_scores) / len(_wordle_scores)), 2)
+        except ZeroDivisionError:
+            _dict["average_wordle_score"] = 0.0
+
+        return _dict
+
     async def create_stats_view(self, ctx: discord.ApplicationContext) -> None:
         if not await self._handle_validation(ctx):
             return
@@ -30,159 +117,202 @@ class Stats(BSEddies):
 
         self._add_event_type_to_activity_history(ctx.author, ctx.guild_id, ActivityTypes.STATS)
 
-    async def replay(self, ctx: discord.ApplicationContext, year: int) -> None:
-        """Generates a replay message and stats and sends that to the given user
+        _view = discordbot.views.stats.StatsView(self)
+        _msg = (
+            "# Stats\n"
+            "Select stats generation method."
+        )
+
+        await ctx.followup.send(content=_msg, view=_view, ephemeral=True)
+
+    async def stats_quick(self, interaction: discord.Interaction) -> None:
+        """_summary_
 
         Args:
-            ctx (discord.ApplicationContext): the application command context
-            year (int): the year to generate the replay for
+            interaction (discord.Interaction): _description_
         """
-        if not await self._handle_validation(ctx):
-            return
 
-        await ctx.defer(ephemeral=True)
+        await interaction.response.defer(ephemeral=True)
 
-        self._add_event_type_to_activity_history(ctx.author, ctx.guild_id, ActivityTypes.REPLAY22)
+        # general summary of messages
 
-        now = datetime.datetime.now()
-        start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=1, year=year, month=1)
-        end = start.replace(month=1, year=year + 1)
-
-        uid = ctx.author.id
-        replay_message = await self.stats(uid, start, end, ctx.guild)
-        replay_message = (
-            f"<@!{uid}>'s **BSEWrapped _2022_**:\n\n"
-            f"{replay_message}"
-        )
-
-        wrapped_view = WrappedView()
-        await ctx.followup.send(content=replay_message, view=wrapped_view, ephemeral=True)
-
-    async def stats(
-        self,
-        user_id: int,
-        start: datetime.datetime,
-        end: datetime.datetime,
-        guild: discord.Guild
-    ) -> None:
-        """
-        Command for handling gathering stats for various Stats commands (/stats and /replayXXXX)
-
-        :param user_id: the user ID to get stats for
-        :param start: the start date for stats
-        :param end: the end date for stats
-        :param guild: the guild object
-        :return:
-        """
-        stats_gatherer = StatsGatherer(self.logger, True)
-        cache = StatsDataCache(uid=user_id)
-
-        # set the gatherer's cache to one that limits to UID
-        stats_gatherer.cache = cache
-
-        args = (BSE_SERVER_ID, start, end)
-
-        most_messages = stats_gatherer.most_messages_sent(*args)
-        longest_message = stats_gatherer.longest_message(*args)
-        best_wordle = stats_gatherer.lowest_average_wordle_score(*args)
-        most_bets = stats_gatherer.most_bets_created(*args)
-        most_eddies_placed = stats_gatherer.most_eddies_bet(*args)
-        most_eddies_won = stats_gatherer.most_eddies_won(*args)
-        time_king = stats_gatherer.most_time_king(*args)
-        twitter_addict = stats_gatherer.twitter_addict(*args)
-        jerk_off_king = stats_gatherer.jerk_off_contributor(*args)
-        big_memer = stats_gatherer.big_memer(*args)
-        react_king = stats_gatherer.react_king(*args)
-        big_gamer = stats_gatherer.big_gamer(*args)
-        big_streamer = stats_gatherer.big_streamer(*args)
-        serial_replier, conversation_starter = stats_gatherer.most_replies(*args)
-        fattest_fingers = stats_gatherer.most_edited_messages(*args)
-        most_swears = stats_gatherer.most_swears(*args)
-        diverse_portfolio = stats_gatherer.most_messages_to_most_channels(*args)
-        busiest_day = stats_gatherer.busiest_day(*args)
-        most_used_emoji = stats_gatherer.most_popular_server_emoji(*args, user_id)
-
-        _chan = sorted(
-            diverse_portfolio.users[user_id]["channels"],
-            key=lambda x: diverse_portfolio.users[user_id]["channels"][x], reverse=True
-        )[0]
-        _least_fav_chan = sorted(
-            diverse_portfolio.users[user_id]["channels"],
-            key=lambda x: diverse_portfolio.users[user_id]["channels"][x], reverse=True
-        )[-1]
-        _perc = (diverse_portfolio.users[user_id]["channels"][_chan] / most_messages.value) * 100
-        _lf_perc = (diverse_portfolio.users[user_id]["channels"][_least_fav_chan] / most_messages.value) * 100
-
-        _vc_time = int(big_gamer.users.get(user_id, {"count": 0})["count"])
-        _king_time = int(time_king.kings.get(user_id, 0))
-        _streaming_time = int(big_streamer.users.get(user_id, {"count": 0})["count"])
-        _dv_num = diverse_portfolio.users.get(user_id, {"channels": {_chan: 0}})["channels"][_chan]
-        _lv_num = diverse_portfolio.users.get(user_id, {"channels": {_least_fav_chan: 0}})["channels"][_least_fav_chan]
-
-        try:
-            lft = await self.client.fetch_channel(_least_fav_chan)
-            if lft.archived:
-                _least_fav_text = f"`#{lft.name} (archived)`"
-            else:
-                _least_fav_text = f"<#{_least_fav_chan}>"
-        except Exception:
-            _least_fav_text = f"<#{_least_fav_chan}>"
-
-        busiest_day_format = busiest_day.value.strftime("%a %d %b")
-
-        try:
-            emoji_obj = await guild.fetch_emoji(most_used_emoji.emoji_id)
-        except Exception:
-            emoji_obj = most_used_emoji.emoji_id
+        total, monthly = self._stats(interaction, False)
 
         message = (
-            f"Messages sent: `{most_messages.value}` "
-            f"(in _{len(most_messages.message_users[user_id]['channels'])}_ channels and "
-            f"_{len(most_messages.message_users[user_id]['threads'])}_ threads)\n"
-
-            f"Number of channels and threads participated in: `{diverse_portfolio.value}`\n"
-
-            f"Favourite channel: <#{_chan}> (**{f'{round(_perc, 2)}%'}** of messages (`{_dv_num}`) sent)\n"
-
-            f"Least favourite channel: {_least_fav_text} "
-            f"(**{f'{round(_lf_perc, 2)}%'}** of messages (`{_lv_num}`) sent)\n"
-
-            f"Your longest message: `{longest_message.value}`\n"
-
-            f"Busiest day: `{busiest_day_format}` "
-            f"(**{busiest_day.messages}** messages in _{busiest_day.channels}_ channels)\n"
-
-            f"Your wordle average: `{best_wordle.value}`\n"
-
-            f"Number of twitter links shared: `{twitter_addict.value}`\n"
-
-            f"Number of contributions to <#{JERK_OFF_CHAT}>: `{jerk_off_king.value}`\n"
-
-            f"Reactions received: `{big_memer.reactees.get(user_id, 0)}`\n"
-
-            f"Reactions given: `{react_king.reaction_users.get(user_id, 0)}`\n"
-
-            f"Replies received: `{conversation_starter.repliees.get(user_id, 0)}`\n"
-
-            f"Replies given: `{serial_replier.repliers.get(user_id, 0)}`\n"
-
-            f"Number of edits: `{fattest_fingers.value}`\n"
-
-            f"Number of swears: `{most_swears.value}`\n"
-
-            f"Your favourite server emoji: {emoji_obj} (`{most_used_emoji.count}`)\n"
-
-            f"Time spent in VCs: `{str(datetime.timedelta(seconds=_vc_time))}`\n"
-
-            f"Time spent streaming: `{str(datetime.timedelta(seconds=_streaming_time))}`\n"
-
-            f"Time spent king: `{str(datetime.timedelta(seconds=_king_time))}`\n"
-
-            f"Bets created: `{most_bets.bookies.get(user_id, 0)}`\n"
-
-            f"Eddies placed on bets: `{most_eddies_placed.betters.get(user_id, 0)}`\n"
-
-            f"Eddies won: `{most_eddies_won.bet_winners.get(user_id, 0)}`"
+            f"# {interaction.user.display_name}'s Quick Stats\n"
+            "Quick all time stats - numbers in parentheses (where applicable) are this month's for comparison.\n\n"
+            "## Messages\n"
+            f"- **Total**: {total.total_messages} ({monthly.total_messages})\n"
+            f"- **Average Length**: {total.average_length} ({monthly.average_length})\n"
+            f"- **Average Word Count**: {total.average_words} ({monthly.average_words})\n"
+            "- **All time top channels**:"
         )
 
-        return message
+        for channel in total.top_channels:
+            message += f"\n - <#{channel[0]}>: {channel[1]}"
+
+        message += "\n- **This month's top channels**:"
+        for channel in monthly.top_channels:
+            message += f"\n - <#{channel[0]}>: {channel[1]}"
+
+        message += (
+            "\n"
+            f"- **Messages you _replied_ to**: {total.replied_count} ({monthly.replied_count})\n"
+            f"- **Replies _received_**: {total.replies_count} ({monthly.replies_count})\n"
+            f"- **Total Swears**: {total.total_swears} ({monthly.total_swears})\n"
+            "- **Top swears**:"
+        )
+
+        if total.total_swears:
+            for swear in total.top_swears:
+                message += f"\n - `{swear[0]}`: {swear[1]}"
+
+            message += "\n- **This month's top swears**:"
+            for swear in monthly.top_swears:
+                message += f"\n - `{swear[0]}`: {swear[1]}"
+
+        # wordle stuff
+        app_command = [app_com for app_com in self.client.application_commands if app_com.name == "wordle"][0]
+
+        message += (
+            "\n\n"
+            "## Wordle\n"
+            f"- **Completed wordles count**: {total.wordles} ({monthly.wordles})\n"
+            f"- **Average wordle score**: {total.average_wordle_score} ({monthly.average_wordle_score})\n"
+            "\n"
+            f"For more Wordle stats - use {app_command.mention}."
+        )
+
+        self.logger.info(f"Stats message length: {len(message)}")
+
+        await interaction.followup.send(content=message, ephemeral=True)
+
+    async def stats_server(self, interaction: discord.Interaction) -> None:
+        await interaction.response.defer(ephemeral=True)
+        total, monthly = self._stats(interaction, True)
+
+        # messages
+
+        message = (
+            f"# {interaction.guild.name}'s Quick Stats\n"
+            "Quick all time stats - numbers in parentheses (where applicable) are this month's for comparison.\n\n"
+            "## Messages\n"
+            f"- **Total**: {total.total_messages} ({monthly.total_messages})\n"
+            f"- **Average Length**: {total.average_length} ({monthly.average_length})\n"
+            f"- **Average Word Count**: {total.average_words} ({monthly.average_words})\n"
+            "- **All time top users**:"
+        )
+
+        for user in total.top_users:
+            message += f"\n - <@{user[0]}>: {user[1]}"
+
+        message += "\n- **This month's top users**:"
+        for user in monthly.top_users:
+            message += f"\n - <@{user[0]}>: {user[1]}"
+
+        message += "\n- **All time top channels**:"
+        for channel in total.top_channels:
+            message += f"\n - <#{channel[0]}>: {channel[1]}"
+
+        message += "\n- **This month's top channels**:"
+        for channel in monthly.top_channels:
+            message += f"\n - <#{channel[0]}>: {channel[1]}"
+
+        message += (
+            "\n"
+            f"- **Total Replies**: {total.replies_count} ({monthly.replies_count})\n"
+            f"- **Total Swears**: {total.total_swears} ({monthly.total_swears})\n"
+            "- **Top swears**:"
+        )
+
+        if total.total_swears:
+            for swear in total.top_swears:
+                message += f"\n - `{swear[0]}`: {swear[1]}"
+
+            message += "\n- **This month's top swears**:"
+            for swear in monthly.top_swears:
+                message += f"\n - `{swear[0]}`: {swear[1]}"
+
+        # wordle stuff
+        app_command = [app_com for app_com in self.client.application_commands if app_com.name == "wordle"][0]
+
+        message += (
+            "\n\n"
+            "## Wordle\n"
+            f"- **Completed wordles count**: {total.wordles} ({monthly.wordles})\n"
+            f"- **Average wordle score**: {total.average_wordle_score} ({monthly.average_wordle_score})\n"
+            "\n"
+            f"For more Wordle stats - use {app_command.mention}."
+        )
+
+        self.logger.info(f"Stats message length: {len(message)}")
+
+        await interaction.followup.send(content=message, ephemeral=True)
+
+    def _stats(self, interaction: discord.Interaction, server: bool = False) -> tuple[StatsData, StatsData]:
+        """
+        Generates a generic 'StatsData' class with stats on either a user, or a server
+
+        Args:
+            interaction (discord.Interaction): the discord interaction
+            server (bool, optional): True is server wide, False if user specific. Defaults to False.
+
+        Returns:
+            tuple[StatsData, StatsData]: a tuple of Stats Data, all time stats and this month's stats
+        """
+
+        now = datetime.datetime.now()
+        start = now.replace(year=2012, month=1, day=1, hour=1, second=1, microsecond=1)
+        end = start.replace(year=now.year+1)
+
+        month_start = now.replace(day=1, hour=0, minute=0, second=0)
+        try:
+            month_end = month_start.replace(month=now.month + 1)
+        except ValueError:
+            month_end = month_start.replace(month=1, year=now.year + 1)
+
+        _guild_id = interaction.guild_id
+
+        _cache = StatsDataCache(uid=interaction.user.id if not server else None)
+
+        # messages
+        messages = _cache.get_messages(_guild_id, start, end)
+        monthly_messages = [m for m in messages if month_start <= m["timestamp"] <= month_end]
+
+        total_messages = len(messages)
+        monthly_total_messages = len(monthly_messages)
+
+        # start the count
+        counts = self._do_message_counts(messages)
+        monthly_counts = self._do_message_counts(monthly_messages)
+
+        # create dataclasses
+        total_stats = StatsData(
+            total_messages=total_messages,
+            top_channels=counts["top_five"],
+            average_length=counts["average_length"],
+            average_words=counts["average_word_count"],
+            total_swears=counts["total_swears"],
+            top_swears=counts["top_swears"],
+            replied_count=counts["replied_count"],
+            replies_count=counts["replies_count"],
+            top_users=counts["top_users"],
+            wordles=counts["wordles"],
+            average_wordle_score=counts["average_wordle_score"]
+        )
+
+        monthly_stats = StatsData(
+            total_messages=monthly_total_messages,
+            top_channels=monthly_counts["top_five"],
+            average_length=monthly_counts["average_length"],
+            average_words=monthly_counts["average_word_count"],
+            total_swears=monthly_counts["total_swears"],
+            top_swears=monthly_counts["top_swears"],
+            replied_count=monthly_counts["replied_count"],
+            replies_count=monthly_counts["replies_count"],
+            top_users=monthly_counts["top_users"],
+            wordles=monthly_counts["wordles"],
+            average_wordle_score=monthly_counts["average_wordle_score"]
+        )
+
+        return total_stats, monthly_stats

@@ -321,6 +321,9 @@ class GuildDB(TypedDict):
     king: int
     king_since: datetime.datetime
     king_history: list[dict]
+    last_revolution_time: datetime.datetime
+    last_ad_time: datetime.datetime
+    last_rigged_time: datetime.datetime
     hash: str
     update_messages: bool
     revolution: bool

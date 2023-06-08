@@ -14,6 +14,7 @@ from discordbot.message_actions.command_suggestion import CommandSuggest
 from discordbot.message_actions.duplicate_links import DuplicateLinkAction
 from discordbot.message_actions.marvel_ad import MarvelComicsAdAction
 from discordbot.message_actions.remind_me import RemindMeAction
+from discordbot.message_actions.rigged import RiggedAction
 from discordbot.message_actions.thank_you_replies import ThankYouReplies
 from discordbot.message_actions.wordle_reactions import WordleMessageAction
 
@@ -31,6 +32,7 @@ class OnMessage(BaseEvent):
             DuplicateLinkAction(client, logger),
             MarvelComicsAdAction(client, logger),
             RemindMeAction(client, logger),
+            RiggedAction(client, logger),
             ThankYouReplies(client, logger),
             WordleMessageAction(client, logger),
         ]  # type: list[BaseMessageAction]
@@ -216,6 +218,13 @@ class OnMessage(BaseEvent):
         return message_type
 
     async def post_message_actions(self, message: discord.Message, message_type: list):
+        """
+        Checks message actions preconditions and executes the action if precondition is true
+
+        Args:
+            message (discord.Message): the message to trigger on
+            message_type (list): calculated message type
+        """
         for cls in self._post_message_action_classes:
             if await cls.pre_condition(message, message_type):
                 await cls.run(message)

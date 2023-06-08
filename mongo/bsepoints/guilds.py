@@ -511,3 +511,24 @@ class Guilds(BestSummerEverPointsDB):
             {"$set": {"wordle": active, "wordle_channel": channel, "wordle_reminders": reminders}}
         )
         return ret
+
+    #
+    # Revolution stuff
+    #
+
+    def set_last_rigged_time(
+        self,
+        guild_id: int
+    ) -> UpdateResult:
+        """
+        Sets last rigged message time
+
+        Args:
+            guild_id (int): the guild to set this for
+
+        Returns:
+            UpdateResult: update result
+        """
+        now = datetime.datetime.now()
+        ret = self.update({"guild_id": guild_id}, {"$set": {"last_rigged_time": now}})
+        return ret

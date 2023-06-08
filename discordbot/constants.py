@@ -149,3 +149,5 @@ WORDLE_SCORE_REGEX = r"[\dX]/\d"
 MARVEL_AD_COOLDOWN = 3600
 # cool down in seconds for remind me reminders
 REMIND_ME_COOLDOWN = 3600
+# cool down in seconds for rigged messages
+RIGGED_COOLDOWN = 300

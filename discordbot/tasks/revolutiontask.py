@@ -297,6 +297,8 @@ class BSEddiesRevolutionTask(BaseTask):
         await _message.reply(content=message)
         await channel.send(content=gif)
         self.revolutions.close_event(event["event_id"], guild_id, success, points_to_lose)
+        # set last revolution time in the database
+        self.guilds.update({"guild_id": guild_id}, {"$set": {"last_revolution_time": datetime.datetime.now()}})
 
     @revolution.before_loop
     async def before_revolution(self):

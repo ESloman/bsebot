@@ -56,9 +56,9 @@ class WordleMessageAction(BaseMessageAction):
             return
 
         guild_db = self.guilds.get_guild(guild_id)
-        x_emoji = guild_db.get("wordle_x_emoji")
-        two_emoji = guild_db.get("wordle_two_emoji", )
-        six_emoji = guild_db.get("wordle_six_emoji", )
+        x_emoji = guild_db.wordle_x_emoji
+        two_emoji = guild_db.wordle_two_emoji
+        six_emoji = guild_db.wordle_six_emoji
 
         x_emoji = "😞" if not x_emoji else PartialEmoji.from_str(x_emoji)
         two_emoji = "🎉" if not two_emoji else PartialEmoji.from_str(two_emoji)

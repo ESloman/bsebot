@@ -28,7 +28,7 @@ class OnMemberJoin(BaseEvent):
         )
 
         if user := self.user_points.find_user(user_id, member.guild.id):
-            self.user_points.update({"_id": user["_id"]}, {"$set": {"inactive": False}})
+            self.user_points.update({"_id": user._id}, {"$set": {"inactive": False}})
             self.logger.info(f"Activating BSEddies account for existing user - {user_id} - {member.display_name}")
             return
 

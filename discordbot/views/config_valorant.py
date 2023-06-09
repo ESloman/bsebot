@@ -14,7 +14,7 @@ class ValorantConfigView(discord.ui.View):
         self.guilds = Guilds()
 
         guild_db = self.guilds.get_guild(guild_id)
-        active = "1" if guild_db.get("valorant_rollcall") else "0"
+        active = "1" if guild_db.valorant_rollcall else "0"
 
         self.active_select = ValorantActiveSelect(active)
         self.channel_select = ValorantChannelSelect()
@@ -60,7 +60,7 @@ class ValorantConfigView(discord.ui.View):
                     active_val = bool(int(opt.value))
                     break
 
-        channel = guild_db.get("valorant_channel")
+        channel = guild_db.valorant_channel
         try:
             channel = self.channel_select.values[0]
         except (AttributeError, IndexError):
@@ -72,7 +72,7 @@ class ValorantConfigView(discord.ui.View):
         if channel and type(channel) not in [int, Int64]:
             channel = channel.id
 
-        role = guild_db.get("valorant_role")
+        role = guild_db.valorant_role
         try:
             role = self.role_select.values[0]
         except (AttributeError, IndexError):

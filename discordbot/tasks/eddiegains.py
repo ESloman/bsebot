@@ -49,7 +49,7 @@ class EddieGainMessager(BaseTask):
             guild = await self.bot.fetch_guild(guild_id)  # type: discord.Guild
             guild_db = self.guilds.get_guild(guild_id)
 
-            current_king_id = guild_db.king
+            current_king_id = guild_db["king"]
 
             summary_message = "Eddie gain summary:\n"
             for user_id in eddie_dict:
@@ -91,7 +91,7 @@ class EddieGainMessager(BaseTask):
 
                 user_dict = self.user_points.find_user(int(user_id), guild.id)
 
-                if user_dict.daily_eddies:
+                if user_dict.get("daily_eddies"):
                     self.logger.info(f"Sending message to {user.display_name} for {value}")
                     try:
                         await user.send(content=text, silent=True)
@@ -99,10 +99,10 @@ class EddieGainMessager(BaseTask):
                         continue
 
             # make sure admin list is unique
-            for user_id in set(guild_db.admins + [CREATOR, guild_db.owner_id]):
+            for user_id in set(guild_db.get("admins", []) + [CREATOR, guild_db["owner_id"]]):
                 user_db = self.user_points.find_user(user_id, guild_id)
 
-                if not user_db.daily_summary:
+                if not user_db.get("daily_summary"):
                     # not configured to send summary messages
                     continue
 
@@ -206,10 +206,7 @@ class BSEddiesManager(BaseTask):
         Returns:
             (int, dict): eddies earnt, breakdown dict
         """
-        minimum = user_dict.daily_minimum
-
-        if minimum is None:
-            minimum = self.server_min
+        minimum = user_dict.get("daily_minimum", self.server_min)
 
         if not user_results and not user_reactions and not user_reacted:
             if minimum == 0:
@@ -359,9 +356,9 @@ class BSEddiesManager(BaseTask):
         )
 
         users = self.user_points.get_all_users_for_guild(guild_id)
-        users = [u for u in users if not u.inactive]
-        user_ids = [u.uid for u in users]
-        user_dict = {u.uid: u for u in users}
+        users = [u for u in users if not u.get("inactive")]
+        user_ids = [u["uid"] for u in users]
+        user_dict = {u["uid"]: u for u in users}
 
         eddie_gain_dict = {}
         wordle_messages = []
@@ -472,7 +469,7 @@ class BSEddiesManager(BaseTask):
                 continue
 
             user_db = self.user_points.find_user(_user, guild_id)
-            tr = supporter_tax_rate if user_db.supporter_type == SupporterType.SUPPORTER else tax_rate
+            tr = supporter_tax_rate if user_db.get("supporter_type", 0) == SupporterType.SUPPORTER else tax_rate
 
             if _user != current_king_id:
                 # apply tax

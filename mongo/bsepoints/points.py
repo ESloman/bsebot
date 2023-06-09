@@ -46,7 +46,7 @@ class UserPoints(BestSummerEverPointsDB):
             list[User]: the user objects for each guild the user belongs to
         """
         ret = self.query({"uid": user_id})
-        return [User(**_user) for _user in ret]
+        return ret
 
     def find_user(self, user_id: int, guild_id: int, projection: Optional[dict] = None) -> Union[User, None]:
         """
@@ -59,7 +59,7 @@ class UserPoints(BestSummerEverPointsDB):
         """
         ret = self.query({"uid": user_id, "guild_id": guild_id}, projection=projection)
         if ret:
-            return User(**ret[0])
+            return ret[0]
         return None
 
     def get_user_points(self, user_id: int, guild_id: int) -> int:
@@ -92,11 +92,21 @@ class UserPoints(BestSummerEverPointsDB):
         :return: list of user dictionaries
         """
 
+        if projection is None:
+            projection = {
+                "points": True,
+                "uid": True,
+                "daily_minimum": True,
+                "high_score": True,
+                "inactive": True,
+                "supporter_type": True
+            }
+
         ret = self.query(
             {"guild_id": guild_id},
             projection=projection
         )
-        return [User(**_user) for _user in ret]
+        return ret
 
     def set_daily_minimum(self, user_id, guild_id, points) -> UpdateResult:
         """
@@ -233,7 +243,7 @@ class UserPoints(BestSummerEverPointsDB):
         """
         ret = self.query({"guild_id": guild_id, "king": True})
         if ret:
-            return User(**ret[0])
+            return ret[0]
 
     @staticmethod
     def get_king_info(king_user: dict) -> dict:

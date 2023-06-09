@@ -129,7 +129,9 @@ class SpoilerThreads(BestSummerEverPointsDB):
         Returns:
             list: list of Threads
         """
-        return self.query({"guild_id": guild_id})
+        ret = self.query({"guild_id": guild_id})
+        ret = [Thread(**thread) for thread in ret]
+        return ret
 
     def insert_spoiler_thread(
             self,
@@ -168,7 +170,7 @@ class SpoilerThreads(BestSummerEverPointsDB):
 
         ret = self.query({"guild_id": guild_id, "thread_id": thread_id})
         if ret:
-            return ret[0]
+            return Thread(**ret[0])
         return None
 
 

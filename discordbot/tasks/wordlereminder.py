@@ -50,7 +50,7 @@ class WordleReminder(BaseTask):
 
             guild_db = self.guilds.get_guild(guild.id)
 
-            if not guild_db.get("wordle_reminders"):
+            if not guild_db.wordle_reminders:
                 # guild isn't configured for wordle reminders
                 return
 

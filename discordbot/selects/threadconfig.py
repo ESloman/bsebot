@@ -9,11 +9,11 @@ class ThreadConfigSelect(Select):
     def __init__(self, threads: list[Thread]):
         options = []
         for thread in threads:
-            label = thread["name"]
+            label = thread.name
             if len(label) > 99:
                 label = label[:99]
 
-            value = str(thread["thread_id"])
+            value = str(thread.thread_id)
             opt = SelectOption(label=label, value=value)
             options.append(opt)
 

@@ -25,7 +25,7 @@ class Bless(BSEddies):
 
         guild_id = ctx.guild.id
         guild_db = self.guilds.get_guild(guild_id)
-        king_id = guild_db["king"]
+        king_id = guild_db.king
 
         if ctx.user.id != king_id:
             message = "You are not the King - you cannot bless."

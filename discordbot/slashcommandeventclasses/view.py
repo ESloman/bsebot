@@ -28,15 +28,15 @@ class View(BSEddies):
         Returns:
             str: the constructed message
         """
-        guild_db = self.guilds.get_guild(user["guild_id"])
+        guild_db = self.guilds.get_guild(user.guild_id)
         if not guild_db:
             return "Guild didn't exist in guilds collection - probbaly just a debug error"
-        pending = self.user_bets.get_user_pending_points(user["uid"], user["guild_id"])
+        pending = self.user_bets.get_user_pending_points(user.uid, user.guild_id)
         msg = (
-            f"**{guild_db['name']}**\n"
-            f"You have **{user['points']}** :money_with_wings:`BSEDDIES`:money_with_wings:!"
+            f"**{guild_db.name}**\n"
+            f"You have **{user.points}** :money_with_wings:`BSEDDIES`:money_with_wings:!"
             f"\nAdditionally, you have `{pending}` points on 'pending bets'.\n\n"
-            f"The _absolute highest_ amount of eddies you've ever had was `{user.get('high_score', 0)}`!."
+            f"The _absolute highest_ amount of eddies you've ever had was `{user.high_score}`!."
         )
         return msg
 

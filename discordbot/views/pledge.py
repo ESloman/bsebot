@@ -44,10 +44,10 @@ class PledgeView(discord.ui.View):
         match value:  # noqa
             case "supporter":
                 self.guilds.add_pledger(interaction.guild.id, interaction.user.id)
-                role_id = guild_db["supporter_role"]
+                role_id = guild_db.supporter_role
                 supporter_type = SupporterType.SUPPORTER
             case "revolutionary":
-                role_id = guild_db["revolutionary_role"]
+                role_id = guild_db.revolutionary_role
                 supporter_type = SupporterType.REVOLUTIONARY
             case _:
                 role_id = None
@@ -62,7 +62,7 @@ class PledgeView(discord.ui.View):
             else:
                 # user selected "neutral"
                 # remove them from revo role if applicable
-                role = interaction.guild.get_role(guild_db["revolutionary_role"])
+                role = interaction.guild.get_role(guild_db.revolutionary_role)
                 if role in interaction.user.roles:
                     await interaction.user.remove_roles(role)
         except Exception as e:
@@ -71,11 +71,11 @@ class PledgeView(discord.ui.View):
         # remove supporter role
         try:
             if value in ["revolutionary", "neutral"]:
-                supporter_role = interaction.guild.get_role(guild_db["supporter_role"])
+                supporter_role = interaction.guild.get_role(guild_db.supporter_role)
                 if supporter_role in interaction.user.roles:
                     await interaction.user.remove_roles(supporter_role)
             elif value == "supporter":
-                revolutionary_role = interaction.guild.get_role(guild_db["revolutionary_role"])
+                revolutionary_role = interaction.guild.get_role(guild_db.revolutionary_role)
                 if revolutionary_role in interaction.user.roles:
                     await interaction.user.remove_roles(revolutionary_role)
         except Exception as e:
@@ -95,13 +95,13 @@ class PledgeView(discord.ui.View):
         if value in ["neutral", "revolutionary"]:
             return
 
-        if not guild_db.get("channel"):
+        if not guild_db.channel:
             return
 
-        channel = interaction.guild.get_channel(guild_db["channel"])
+        channel = interaction.guild.get_channel(guild_db.channel)
         msg = (
             f"{interaction.user.mention} has pledged to support the KING "
-            f"and become a <@&{guild_db['supporter_role']}>"
+            f"and become a <@&{guild_db.supporter_role}>"
         )
         await channel.send(content=msg, silent=True)
 

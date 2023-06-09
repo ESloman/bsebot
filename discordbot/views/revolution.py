@@ -101,7 +101,7 @@ class RevolutionView(discord.ui.View):
         guild_id = interaction.guild.id
 
         guild_db = self.guilds.get_guild(guild_id)
-        king_id = guild_db["king"]
+        king_id = guild_db.king
 
         # check that the King isn't using buttons they shouldn't
         if (user_id == king_id) and button.label != "Save THYSELF":
@@ -211,10 +211,9 @@ class RevolutionView(discord.ui.View):
 
             # work out how many eddies to subtract
             our_user = self.user_points.find_user(
-                user_id, guild_id,
-                {"points": True, "king": True}
+                user_id, guild_id
             )
-            eddies = our_user["points"]
+            eddies = our_user.points
             amount_to_subtract = math.floor(eddies * 0.1)
             self.user_points.increment_points(
                 user_id,
@@ -254,7 +253,7 @@ class RevolutionView(discord.ui.View):
         # build new message and update it with updated event
         king_user = await self.client.fetch_user(king_id)  # type: discord.User
         guild = await self.client.fetch_guild(guild_id)
-        role = guild.get_role(guild_db["role"])
+        role = guild.get_role(guild_db.role)
         edited_message = self.embeds.get_revolution_message(king_user, role, event, guild)
         self.toggle_stuff(False)
 

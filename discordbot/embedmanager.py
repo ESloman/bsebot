@@ -40,7 +40,7 @@ class EmbedManager(object):
                     better_info = guild.get_member(better["user_id"])
                     _better = self.user_points.find_user(better["user_id"], guild.id) if not better_info else {}
                     val += (
-                        f"**{better_info.name if better_info else _better.get('name', better['user_id'])}** "
+                        f"**{better_info.name if better_info else (_better.name or better['user_id'])}** "
                         f"(_{better['points']}_)"
                     )
             else:
@@ -71,18 +71,18 @@ class EmbedManager(object):
         """
         users = self.user_points.get_all_users_for_guild(guild.id)
 
-        users = sorted(users, key=lambda x: x["points"], reverse=True)
+        users = sorted(users, key=lambda x: x.points, reverse=True)
 
         if number is None:
             number = len(users)
         else:
             number = number if number < len(users) else len(users)
 
-        users = [user for user in users if not user.get("inactive")]
+        users = [user for user in users if not user.inactive]
 
         if len(users) > 10:
             # only filter out users with ten points if the server has lots of users
-            users = [user for user in users if user["points"] != 10]
+            users = [user for user in users if user.points != 10]
 
         message = (
             "# BSEddies Leaderboard\n"
@@ -90,10 +90,10 @@ class EmbedManager(object):
 
         for user in users[:number]:
             try:
-                name = guild.get_member(user["uid"]).name
+                name = user.name or guild.get_member(user.uid).name
             except AttributeError:
                 continue
-            message += f"\n- **{users.index(user) + 1})**  {name}  :  {user['points']}"
+            message += f"\n- **{users.index(user) + 1})**  {name}  :  {user.points}"
 
         message += (
             f"\n\nLast refreshed at `{datetime.datetime.now().strftime('%d %b %y %H:%M')}` by _{username}_."
@@ -110,18 +110,18 @@ class EmbedManager(object):
         """
         users = self.user_points.get_all_users_for_guild(guild.id)
 
-        users = sorted(users, key=lambda x: x.get("high_score", 0), reverse=True)
+        users = sorted(users, key=lambda x: x.high_score, reverse=True)
 
         if number is None:
             number = len(users)
         else:
             number = number if number < len(users) else len(users)
 
-        users = [user for user in users if not user.get("inactive")]
+        users = [user for user in users if not user.inactive]
 
         if len(users) > 10:
             # only filter out users with ten points if the server has lots of users
-            users = [user for user in users if user["points"] != 10]
+            users = [user for user in users if user.points != 10]
 
         message = (
             "# BSEddies High Scores\n"
@@ -129,10 +129,10 @@ class EmbedManager(object):
 
         for user in users[:number]:
             try:
-                name = guild.get_member(user["uid"]).name
+                name = user.name or guild.get_member(user.uid).name
             except AttributeError:
                 continue
-            message += f"\n- **{users.index(user) + 1})**  {name}  :  {user.get('high_score', 0)}"
+            message += f"\n- **{users.index(user) + 1})**  {name}  :  {user.high_score}"
 
         message += (
             f"\n\nLast refreshed at `{datetime.datetime.now().strftime('%d %b %y %H:%M')}` by _{username}_."

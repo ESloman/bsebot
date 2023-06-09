@@ -107,7 +107,7 @@ class RevolutionEvent(TicketedEvent):
 
         # add guild "pledges" to supporters by default and lock them in
         guild_db = self.guilds.get_guild(guild_id)
-        pledges = guild_db.get("pledged", [])
+        pledges = guild_db.pledged
         event_doc["supporters"].extend(pledges)
         event_doc["users"].extend(pledges)
         event_doc["chance"] += (-15 * len(pledges))

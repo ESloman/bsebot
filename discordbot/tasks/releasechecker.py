@@ -71,11 +71,11 @@ class ReleaseChecker(BaseTask):
         async for guild in self.bot.fetch_guilds():
             guild_db = self.guilds.get_guild(guild.id)
 
-            if not guild_db.release_notes:
+            if not guild_db.get("release_notes"):
                 # release notes isn't set to True - skipping
                 continue
 
-            last_release_ver = guild_db.release_ver
+            last_release_ver = guild_db.get("release_ver")
             if not last_release_ver:
                 self.guilds.set_latest_release(guild.id, release_name)
                 last_release_ver = release_name
@@ -84,7 +84,7 @@ class ReleaseChecker(BaseTask):
                 # same as last release name
                 continue
 
-            channel = await self.bot.fetch_channel(guild_db.channel)
+            channel = await self.bot.fetch_channel(guild_db["channel"])
             for _body in bodies:
                 await channel.send(content=_body, silent=True, suppress=True)
 

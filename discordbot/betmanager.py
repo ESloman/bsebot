@@ -110,7 +110,7 @@ class BetManager(object):
                 pass
 
             user_db = self.user_points.find_user(int(better), guild_id)
-            tr = supporter_tax if user_db.supporter_type == SupporterType.SUPPORTER else tax_value
+            tr = supporter_tax if user_db.get("supporter_type", 0) == SupporterType.SUPPORTER else tax_value
 
             total_eddies_won += points_won
             actual_amount_won = points_won - points_bet  # the actual winnings without original bet

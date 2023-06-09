@@ -95,11 +95,11 @@ class ConfigView(discord.ui.View):
             guild_db = self.guilds.get_guild(guild_id)
 
         # is user the server owner
-        if user_id == guild_db.owner_id:
+        if user_id == guild_db["owner_id"]:
             return True
 
         # is user in server admins
-        if user_id in guild_db.admins:
+        if user_id in guild_db.get("admins", []):
             return True
 
         return False
@@ -180,13 +180,13 @@ class ConfigView(discord.ui.View):
         threads = self.spoiler_threads.get_all_threads(interaction.guild_id)
 
         guild_db = self.guilds.get_guild(interaction.guild_id)
-        admins = guild_db.admins
+        admins = guild_db.get("admins", [])
 
         now = datetime.datetime.now()
 
         configurable_threads = []
         for thread in threads:
-            if not thread.active and (now - thread.created).days >= 30:
+            if not thread.get("active") and (now - thread["created"]).days >= 30:
                 # only exclude non-active ones if they're super old
                 continue
             if interaction.user.id == CREATOR:
@@ -195,7 +195,7 @@ class ConfigView(discord.ui.View):
             elif interaction.user.id in admins:
                 configurable_threads.append(thread)
                 continue
-            elif interaction.user.id == thread.owner:
+            elif interaction.user.id == thread.get("owner", thread.get("creator", CREATOR)):
                 configurable_threads.append(thread)
                 continue
 
@@ -224,8 +224,8 @@ class ConfigView(discord.ui.View):
             tuple[str, discord.ui.View]: the message and view
         """
         guild_db = self.guilds.get_guild(interaction.guild_id)
-        _chan = guild_db.valorant_channel
-        _role = guild_db.valorant_role
+        _chan = guild_db.get("valorant_channel")
+        _role = guild_db.get("valorant_role")
         chan_mention = f"<#{_chan}>" if _chan else "_None_"
         role_mention = f"<@&{_role}>" if _role else "_None_"
         view = ValorantConfigView(interaction.guild_id)
@@ -251,7 +251,7 @@ class ConfigView(discord.ui.View):
             tuple[str, discord.ui.View]: the message and view
         """
         guild_db = self.guilds.get_guild(interaction.guild_id)
-        _min = guild_db.daily_minimum or 4
+        _min = guild_db.get("daily_minimum", 4)
         view = SalaryConfigView(_min)
         msg = (
             "## Salary Config\n\n"
@@ -271,7 +271,7 @@ class ConfigView(discord.ui.View):
             tuple[str, discord.ui.View]: the message and view
         """
         guild_db = self.guilds.get_guild(interaction.guild_id)
-        admins = guild_db.admins
+        admins = guild_db.get("admins", [])
 
         view = AdminConfigView()
 
@@ -301,7 +301,7 @@ class ConfigView(discord.ui.View):
             tuple[str, discord.ui.View]: the message and view
         """
         guild_db = self.guilds.get_guild(interaction.guild_id)
-        rev_enabled = guild_db.revolution if guild_db.revolution is not None else True
+        rev_enabled = guild_db.get("revolution", True)
         view = RevolutionConfigView(rev_enabled)
         msg = (
             "## Revolution Config\n\n"
@@ -321,16 +321,16 @@ class ConfigView(discord.ui.View):
         """
         if interaction.guild:
             user = self.user_points.find_user(interaction.user.id, interaction.guild.id)
-            daily_eddies = user.daily_eddies
-            daily_summary = user.daily_summary
+            daily_eddies = user["daily_eddies"]
+            daily_summary = user.get("daily_summary", False)
         else:
-            users = self.user_points.find_user_guildless(interaction.user.id)
+            users = self.user_points.query({"uid": interaction.user.id})
             daily_eddies = False
             daily_summary = False
             for user in users:
-                if user.daily_eddies:
+                if user["daily_eddies"]:
                     daily_eddies = True
-                if user.daily_summary:
+                if user.get("daily_summary", False):
                     daily_summary = True
 
         is_admin = self._check_perms("salary_summary", interaction.user.id, interaction.guild.id)
@@ -358,10 +358,10 @@ class ConfigView(discord.ui.View):
             tuple[str, discord.ui.View]: the message and view
         """
         guild_db = self.guilds.get_guild(interaction.guild_id)
-        _chan = guild_db.channel
-        king_role = guild_db.role
-        supporter_role = guild_db.supporter_role
-        revolutionary_role = guild_db.revolutionary_role
+        _chan = guild_db.get("channel")
+        king_role = guild_db.get("role")
+        supporter_role = guild_db.get("supporter_role")
+        revolutionary_role = guild_db.get("revolutionary_role")
         chan_mention = f"<#{_chan}>" if _chan else "_None_"
         king_mention = f"<@&{king_role}>" if king_role else "_None_"
         supp_mention = f"<@&{supporter_role}>" if supporter_role else "_None_"

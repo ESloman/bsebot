@@ -26,7 +26,6 @@ class ServerReminders(BestSummerEverPointsDB):
         :return:
         """
         ret = self.query({"active": True, "guild_id": guild_id})
-        ret = [Reminder(**reminder) for reminder in ret]
         return ret
 
     def close_reminder(self, object_id: ObjectId) -> UpdateResult:

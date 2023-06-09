@@ -58,27 +58,27 @@ class BSEddiesRevolutionTask(BaseTask):
         for guild in self.bot.guilds:
             guild_db = self.guilds.get_guild(guild.id)
 
-            if guild_db.revolution is False:
+            if not guild_db.get("revolution", True):
                 # revolution event has been disabled
                 if now.hour == 16 and now.minute == 0:
                     # only log once per revolution event that this guild is disabled
                     self.logger.debug(f"Revolution event has been disabled for {guild.name}")
                 continue
 
-            king_user = self.user_points.find_user(guild_db.king, guild.id)
+            king_user = self.user_points.find_user(guild_db["king"], guild.id)
 
-            user_points = king_user.points
+            user_points = king_user["points"]
 
             # if we don't have an actual revolution event and it IS 4PM then we trigger a new event
             if not self.rev_started.get(guild.id) and now.hour == 16 and now.minute == 0:
                 # only trigger if King was King for more than twenty four hours
-                king_since = guild_db.king_since or datetime.datetime.now() - datetime.timedelta(days=1)
+                king_since = guild_db.get("king_since", datetime.datetime.now() - datetime.timedelta(days=1))
                 if (now - king_since).total_seconds() < 86400:
                     # user hasn't been king for more than twenty four hours
-                    channel = await self.bot.fetch_channel(guild_db.channel)
+                    channel = await self.bot.fetch_channel(guild_db["channel"])
                     await channel.send(
                         content=(
-                            f"<@{guild_db.king}> has been <@&{guild_db.role}> for less than **24** hours. "
+                            f"<@{guild_db['king']}> has been <@&{guild_db['role']}> for less than **24** hours. "
                             "There will be no revolution today."
                         ),
                         silent=True
@@ -89,9 +89,9 @@ class BSEddiesRevolutionTask(BaseTask):
                     guild.id,
                     datetime.datetime.now(),
                     datetime.datetime.now() + datetime.timedelta(hours=3, minutes=30),
-                    king_user.uid,
+                    king_user["uid"],
                     user_points,
-                    guild_db.channel
+                    guild_db["channel"]
                 )
             else:
                 try:
@@ -150,8 +150,8 @@ class BSEddiesRevolutionTask(BaseTask):
 
         king = await self.bot.fetch_user(king_id)
         guild_obj = await self.bot.fetch_guild(guild_id)
-        role = guild_obj.get_role(guild_db.role)
-        channel = await self.bot.fetch_channel(guild_db.channel)
+        role = guild_obj.get_role(guild_db["role"])
+        channel = await self.bot.fetch_channel(guild_db["channel"])
         await channel.trigger_typing()
 
         revolution_view = RevolutionView(self.bot, event, self.logger)
@@ -211,8 +211,8 @@ class BSEddiesRevolutionTask(BaseTask):
             message = "Sadly, our revolution has failed. THE KING LIVES :crown: Better luck next week!"
             gif = await self.giphy_api.random_gif("disappointed")
         else:
-            king_dict = self.user_points.find_user(king_id, guild_id)
-            points_to_lose = math.floor(event.get("locked_in_eddies", king_dict.points) / 2)
+            king_dict = self.user_points.find_user(king_id, guild_id, projection={"points": True})
+            points_to_lose = math.floor(event.get("locked_in_eddies", king_dict["points"]) / 2)
 
             total_points_to_distribute = points_to_lose
             for supporter in supporters:
@@ -260,8 +260,8 @@ class BSEddiesRevolutionTask(BaseTask):
 
         # do roles
 
-        supporter_role = guild.get_role(guild_db.supporter_role)
-        revo_role = guild.get_role(guild_db.revolutionary_role)
+        supporter_role = guild.get_role(guild_db["supporter_role"])
+        revo_role = guild.get_role(guild_db["revolutionary_role"])
 
         # clear anyone that has the role already
         for member in supporter_role.members:

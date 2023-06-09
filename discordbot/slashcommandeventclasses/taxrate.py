@@ -25,7 +25,7 @@ class TaxRate(BSEddies):
 
         guild_id = ctx.guild.id
         guild_db = self.guilds.get_guild(guild_id)
-        king_id = guild_db.king
+        king_id = guild_db["king"]
 
         value, supporter_value = self.guilds.get_tax_rate(guild_id)
 
@@ -42,7 +42,7 @@ class TaxRate(BSEddies):
         view = TaxRateView(value, supporter_value)
 
         message += (
-            f"\n\nPlease select a general tax rate and a tax rate for your <@&{guild_db.supporter_role}>. "
+            f"\n\nPlease select a general tax rate and a tax rate for your <@&{guild_db['supporter_role']}>. "
             "Leave it as is to not change anything at all."
         )
         await ctx.respond(content=message, view=view, ephemeral=True)

@@ -110,12 +110,12 @@ class WordleTask(BaseTask):
         for guild in self.bot.guilds:
 
             guild_db = self.guilds.get_guild(guild.id)
-            if not guild_db.wordle:
+            if not guild_db.get("wordle"):
                 self.logger.info(f"{guild.name} has wordle turned off")
                 continue
 
-            channel_id = guild_db.wordle_channel
-            if not channel_id:
+            channel_id = guild_db.get("wordle_channel")
+            if not channel_id or not guild_db.get("wordle"):
                 self.logger.info(f"{guild.name} hasn't got a wordle channel configured - skipping")
                 continue
 

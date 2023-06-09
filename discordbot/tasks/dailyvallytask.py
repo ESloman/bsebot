@@ -51,11 +51,11 @@ class AfterWorkVally(BaseTask):
 
             guild_db = self.guilds.get_guild(guild.id)
 
-            if not guild_db.valorant_rollcall:
+            if not guild_db.get("valorant_rollcall"):
                 self.logger.info("Valorant rollcall is disabled")
                 continue
 
-            valorant_channel = guild_db.valorant_channel
+            valorant_channel = guild_db.get("valorant_channel")
             if not valorant_channel:
                 self.logger.info("Valorant channel isn't configured")
                 continue
@@ -91,7 +91,7 @@ class AfterWorkVally(BaseTask):
             channel = await self.bot.fetch_channel(valorant_channel)
             await channel.trigger_typing()
 
-            if role_id := guild_db.valorant_role:
+            if role_id := guild_db.get("valorant_role"):
                 role = guild.get_role(role_id)
                 _mention = role.mention
             else:

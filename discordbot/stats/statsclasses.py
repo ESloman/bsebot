@@ -914,7 +914,7 @@ class StatsGatherer:
         created_threads = []
         all_threads = self.cache.threads.get_all_threads(guild_id)
         for thread in all_threads:
-            if thread.created < start or end < thread.created:
+            if thread["created"] < start or end < thread["created"]:
                 # thread creation falls outside our time perioud
                 continue
             created_threads.append(thread)
@@ -930,7 +930,7 @@ class StatsGatherer:
             annual=self.annual
         )
 
-        data_class.threads = [thread.thread_id for thread in created_threads]
+        data_class.threads = [thread["thread_id"] for thread in created_threads]
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class

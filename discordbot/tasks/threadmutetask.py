@@ -41,20 +41,20 @@ class ThreadSpoilerTask(BaseTask):
 
         self.logger.info("Checking spoiler threads for mute messages")
         all_threads = self.spoilers.get_all_threads(BSE_SERVER_ID)
-        all_threads = [a for a in all_threads if a.active]
+        all_threads = [a for a in all_threads if a["active"]]
 
         for thread_info in all_threads:
-            self.logger.info(f"Checking {thread_info.name} for spoiler message")
+            self.logger.info(f"Checking {thread_info['name']} for spoiler message")
 
-            day = thread_info.day
+            day = thread_info["day"]
             if now.weekday() != day:
                 self.logger.info(
-                    f"Not the right day for {thread_info.name}: our day: {now.weekday()}, required: {day}"
+                    f"Not the right day for {thread_info['name']}: our day: {now.weekday()}, required: {day}"
                 )
                 # not the right day for this spoiler thread
                 continue
 
-            thread = await self.bot.fetch_channel(thread_info.thread_id)
+            thread = await self.bot.fetch_channel(thread_info["thread_id"])
             await thread.trigger_typing()
 
             message = random.choice(MESSAGES)

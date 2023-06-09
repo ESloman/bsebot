@@ -30,15 +30,15 @@ class RiggedAction(BaseMessageAction):
         """
 
         guild_db = self.guilds.get_guild(message.guild.id)
-        if message.channel.id != guild_db.channel:
+        if message.channel.id != guild_db.get("channel"):
             return False
 
         if any(re.findall("\brigged\b", message.content.lower())):
             # find last revolution time
-            if last_time := guild_db.last_revolution_time:
+            if last_time := guild_db.get("last_revolution_time"):
                 if 0 < (message.created_at - last_time).total_seconds() <= 900:
                     # been less than fifteen minutes since last revolution
-                    last_rigged_time = guild_db.last_rigged_time
+                    last_rigged_time = guild_db.get("last_rigged_time")
                     if not last_rigged_time:
                         return True
                     elif (message.created_at - last_rigged_time).total_seconds() >= RIGGED_COOLDOWN:

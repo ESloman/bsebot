@@ -15,7 +15,7 @@ class ThreadConfigView(discord.ui.View):
 
         self.spoiler_threads = SpoilerThreads()
 
-        threads = [t for t in threads if t["active"]]
+        threads = [t for t in threads if t.active]
         self.threads = threads
         self.thread_select = ThreadConfigSelect(threads)
         self.add_item(self.thread_select)
@@ -29,14 +29,14 @@ class ThreadConfigView(discord.ui.View):
     async def update(self):
         # updates all the selects with new values
         print(self.thread_select._selected_values)
-        selected_thread = [t for t in self.threads if str(t["thread_id"]) == self.thread_select._selected_values[0]][0]
+        selected_thread = [t for t in self.threads if str(t.thread_id) == self.thread_select._selected_values[0]][0]
 
         for opt in self.day_select.options:
             opt.default = False
 
-        if selected_thread["day"]:
+        if selected_thread.day:
             for opt in self.day_select.options:
-                if int(opt.value) == selected_thread["day"]:
+                if int(opt.value) == selected_thread.day:
                     opt.default = True
                     break
 
@@ -45,7 +45,7 @@ class ThreadConfigView(discord.ui.View):
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=4)
     async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
-        selected_thread = [t for t in self.threads if str(t["thread_id"]) == self.thread_select._selected_values[0]][0]
+        selected_thread = [t for t in self.threads if str(t.thread_id) == self.thread_select._selected_values[0]][0]
 
         try:
             day = int(self.day_select._selected_values[0])
@@ -68,7 +68,7 @@ class ThreadConfigView(discord.ui.View):
             active = True
 
         self.spoiler_threads.update(
-            {"_id": selected_thread["_id"]},
+            {"_id": selected_thread._id},
             {"$set": {"active": active, "day": day}}
         )
 

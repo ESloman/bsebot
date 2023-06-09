@@ -35,11 +35,11 @@ class BaseContextCommand(BaseEvent):
         guild_db = self.guilds.get_guild(ctx.guild_id)
 
         # is user the server owner
-        if ctx.user.id == guild_db["owner_id"]:
+        if ctx.user.id == guild_db.owner_id:
             return True
 
         # is user in server admins
-        if ctx.user.id in guild_db.get("admins", []):
+        if ctx.user.id in guild_db.admins:
             return True
 
         return False

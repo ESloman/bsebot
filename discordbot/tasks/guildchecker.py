@@ -69,12 +69,12 @@ class GuildChecker(BaseTask):
                 self.guilds.update_tax_history(guild.id, 0.1, 0.0, self.bot.user.id)
 
             self.logger.info("Checking guild salary minimum")
-            if db_guild.get("daily_minimum") is None:
+            if db_guild.daily_minimum is None:
                 self.guilds.set_daily_minimum(guild.id, 4)
 
-            if db_guild.get("name") != guild.name:
+            if db_guild.name != guild.name:
                 self.logger.info(f"Updating db name for {guild.name}")
-                self.guilds.update({"_id": db_guild["_id"]}, {"$set": {"name": guild.name}})
+                self.guilds.update({"_id": db_guild._id}, {"$set": {"name": guild.name}})
 
             self.logger.info("Checking guilds for new members")
             members = await guild.fetch_members().flatten()
@@ -96,21 +96,21 @@ class GuildChecker(BaseTask):
                         f"Creating new user entry for {member.id} - {member.name} for {guild.id} - {guild.name}"
                     )
                     continue
-                elif name != user.get("name"):
+                elif name != user.name:
                     self.logger.info(f"Updating db name for {name}")
-                    self.user_points.update({"_id": user["_id"]}, {"$set": {"name": name}})
+                    self.user_points.update({"_id": user._id}, {"$set": {"name": name}})
 
             self.logger.info("Checking for users that have left")
             member_ids = [member.id for member in members]
             if member_ids:
                 # actually managed to get members
                 _users = self.user_points.get_all_users_for_guild(guild.id)
-                _users = [u for u in _users if not u.get("inactive")]
+                _users = [u for u in _users if not u.inactive]
                 for user in _users:
-                    if user["uid"] not in member_ids:
-                        self.user_points.update({"_id": user["_id"]}, {"$set": {"inactive": True}})
+                    if user.uid not in member_ids:
+                        self.user_points.update({"_id": user._id}, {"$set": {"inactive": True}})
                         self.activities.add_activity(
-                            user["_id"],
+                            user._id,
                             guild.id,
                             ActivityTypes.SERVER_LEAVE
                         )
@@ -176,6 +176,20 @@ class GuildChecker(BaseTask):
                             thread.created_at,
                             thread.owner_id
                         )
+
+            # sync threads in db with actual threads
+            threads = self.spoilers.get_all_threads(guild.id)
+            for thread_info in threads:
+                if not thread_info.created or not thread_info.owner:
+                    try:
+                        thread = await guild.fetch_channel(thread_info.thread_id)
+                    except discord.Forbidden:
+                        continue
+
+                    self.spoilers.update(
+                        {"_id": thread_info._id},
+                        {"$set": {"created_at": thread.created_at, "owner": thread.owner.id}}
+                    )
 
             if self.finished:
                 self.logger.info(f"Finished checking {guild.name}")

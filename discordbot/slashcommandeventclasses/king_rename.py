@@ -40,7 +40,7 @@ class KingRename(BSEddies):
         self._add_event_type_to_activity_history(ctx.author, ctx.guild_id, ActivityTypes.RENAME_KING)
 
         ret = self.user_points.find_user(ctx.author.id, ctx.guild.id, projection={"points": True})
-        points = ret["points"]
+        points = ret.points
 
         db_guild = self.guilds.get_guild(ctx.guild.id)
 
@@ -50,13 +50,13 @@ class KingRename(BSEddies):
 
         match role:  # noqa
             case "king":
-                role_id = db_guild["role"]
+                role_id = db_guild.role
                 spend = 500
             case "supporter":
-                role_id = db_guild["supporter_role"]
+                role_id = db_guild.supporter_role
                 spend = 250
             case "revolutionary":
-                role_id = db_guild["revolutionary_role"]
+                role_id = db_guild.revolutionary_role
                 spend = 250
 
         if points < spend:
@@ -69,7 +69,7 @@ class KingRename(BSEddies):
             return
 
         key = f"rename_{role}"
-        last_king_rename = db_guild.get(key)
+        last_king_rename = db_guild.__getattribute__(key)
         now = datetime.datetime.now()
         if last_king_rename:
             time_elapsed = now - last_king_rename
@@ -106,13 +106,13 @@ class KingRename(BSEddies):
 
         self.guilds.update({"guild_id": ctx.guild.id}, {"$set": {key: now}})
 
-        channel_id = db_guild.get("channel")
+        channel_id = db_guild.channel
         if channel_id:
             channel = await self.client.fetch_channel(channel_id)
             await channel.trigger_typing()
 
             # get king user
-            king_id = db_guild["king"]
+            king_id = db_guild.king
             if role == "king":
                 _insert = f"<@{king_id}>"
             else:

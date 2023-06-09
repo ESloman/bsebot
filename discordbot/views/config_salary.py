@@ -37,8 +37,8 @@ class SalaryConfigView(discord.ui.View):
         # update users on current min to new min
         users = self.user_points.get_all_users_for_guild(interaction.guild_id)
         for user in users:
-            if user.get("daily_minimum") == old_min:
-                self.user_points.set_daily_minimum(user["uid"], interaction.guild_id, amount)
+            if user.daily_minimum == old_min:
+                self.user_points.set_daily_minimum(user.uid, interaction.guild_id, amount)
 
         # update server min
         self.guilds.set_daily_minimum(interaction.guild_id, amount)

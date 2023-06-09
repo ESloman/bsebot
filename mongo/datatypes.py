@@ -1,9 +1,10 @@
 
 import datetime
+from dataclasses import dataclass, field
 from typing import TypedDict, Union
 
 try:
-    from typing import NotRequired
+    from typing import Optional, NotRequired
 except ImportError:
     from typing import Optional
     NotRequired = Optional
@@ -11,6 +12,7 @@ except ImportError:
 from bson import ObjectId
 
 from discordbot.bot_enums import ActivityTypes, TransactionTypes, SupporterType
+from discordbot.constants import CREATOR
 
 
 class Transaction(TypedDict):
@@ -42,7 +44,8 @@ class Activity(TypedDict):
     """Comment"""
 
 
-class User(TypedDict):
+@dataclass
+class User:
     """A User dict
     """
     _id: ObjectId
@@ -55,29 +58,33 @@ class User(TypedDict):
     """The nickname for the guild or the user name"""
     points: int
     """The amount of eddies the user has in the server"""
-    pending_points: int
-    """The number of eddies the user has on pending bets"""
-    inactive: bool
-    """Whether the user has left the server or not"""
-    transaction_history: list[Transaction]
-    """A list of the transactions the user has made"""
-    activity_history: list[Activity]
-    """A list of activities the user has made"""
-    daily_eddies: bool
-    """Whether the user receives daily eddie messages"""
-    daily_summary: bool
-    """Whether the user receives the daily eddies summary message"""
     king: bool
     """Whether the user is KING in the server"""
-    last_cull_time: datetime.datetime
-    """*DEPRECATED*"""
-    high_score: int
+
+    # optionals / defaults
+    daily_eddies: bool = False
+    """Whether the user receives daily eddie messages"""
+    daily_summary: bool = False
+    """Whether the user receives the daily eddies summary message"""
+    pending_points: int = field(default=0)
+    """The number of eddies the user has on pending bets"""
+    high_score: int = field(default=0)
     """The user's highest ever amount of eddies"""
-    cull_warning: bool
-    """*DEPRECATED*"""
-    daily_minimum: int
+    daily_minimum: Optional[int] = None
     """The minimum amount of eddies the user is going to get each day"""
-    supporter_type: SupporterType
+    supporter_type: SupporterType = SupporterType.NEUTRAL
+    transaction_history: Optional[list[Transaction]] = field(default_factory=list)
+    """A list of the transactions the user has made"""
+    activity_history: Optional[list[Activity]] = field(default_factory=list)
+    """A list of activities the user has made"""
+    inactive: bool = False
+    """Whether the user has left the server or not"""
+
+    # DEPRECATED
+    last_cull_time: Optional[datetime.datetime] = None
+    """*DEPRECATED*"""
+    cull_warning: Optional[bool] = None
+    """*DEPRECATED*"""
 
 
 class Better(TypedDict):
@@ -282,7 +289,8 @@ class RevolutionEventType(TypedDict):
     """Whether the 15 minute warning was triggered"""
 
 
-class Thread(TypedDict):
+@dataclass
+class Thread:
     _id: ObjectId
     """The internal DB ID"""
     guild_id: int
@@ -291,56 +299,62 @@ class Thread(TypedDict):
     """The discord thread ID of the thread"""
     name: str
     """Name of the thread"""
-    created: datetime.datetime
-    """When the thread was created"""
-    owner: int
-    """The discord user ID of the user who created the thread"""
     day: int
     """Only for SPOILER threads - the day a new ep comes out"""
     active: bool
     """Only for SPOILER threads - if we should still be posting spoiler warnings"""
+    created: Optional[datetime.datetime] = None
+    """When the thread was created"""
+    owner: Optional[int] = field(default=CREATOR)
+    """The discord user ID of the user who created the thread"""
 
 
-class GuildDB(TypedDict):
+@dataclass
+class GuildDB:
     _id: ObjectId
-    admins: list[int]
     guild_id: int
     created: datetime.datetime
-    rename_king: datetime.datetime
     owner_id: int
     channel: int
-    wordle: bool
-    wordle_channel: int
     wordle_reminders: bool
     category: int
     role: int
     daily_minimum: int
     name: str
     tax_rate: float
-    tax_rate_history: list[dict]
-    king: int
-    king_since: datetime.datetime
-    king_history: list[dict]
-    last_revolution_time: datetime.datetime
-    last_ad_time: datetime.datetime
-    last_rigged_time: datetime.datetime
-    hash: str
-    update_messages: bool
-    revolution: bool
-    supporter_role: int
-    revolutionary_role: int
-    pledged: list[int]
-    release_ver: str
-    release_notes: bool
-    valorant_rollcall: bool
-    valorant_channel: int
-    valorant_role: int
-    wordle_x_emoji: NotRequired[str]
-    wordle_two_emoji: NotRequired[str]
-    wordle_six_emoji: NotRequired[str]
+    supporter_tax_rate: float
+
+    # optional vars
+    admins: list[int] = field(default_factory=list)
+    wordle: Optional[bool] = None
+    wordle_channel: Optional[int] = None
+    rename_king: Optional[datetime.datetime] = None
+    tax_rate_history: list[dict] = field(default_factory=list)
+    king: Optional[int] = None
+    king_since: Optional[datetime.datetime] = None
+    king_history: list[dict] = field(default_factory=list)
+    hash: Optional[str] = None
+    update_messages: Optional[bool] = None
+    revolution: Optional[bool] = None
+    supporter_role: Optional[int] = None
+    revolutionary_role: Optional[int] = None
+    pledged: list[int] = field(default_factory=list)
+    release_ver: Optional[str] = None
+    release_notes: Optional[bool] = None
+    valorant_rollcall: Optional[bool] = None
+    valorant_channel: Optional[int] = None
+    valorant_role: Optional[int] = None
+    wordle_x_emoji: Optional[str] = None
+    wordle_two_emoji: Optional[str] = None
+    wordle_six_emoji: Optional[str] = None
+    last_remind_me_suggest_time: Optional[datetime.datetime] = None
+    last_ad_time: Optional[datetime.datetime] = None
+    last_revolution_time: Optional[datetime.datetime] = None
+    last_rigged_time: Optional[datetime.datetime] = None
 
 
-class Reminder(TypedDict):
+@dataclass
+class Reminder:
     _id: ObjectId
     guild_id: int
     created: datetime.datetime

@@ -5,7 +5,7 @@ from pymongo.results import InsertOneResult, UpdateResult
 
 from discordbot.bot_enums import ActivityTypes
 from mongo import interface
-from mongo.datatypes import GuildDB
+from mongo.datatypes import GuildDB, User
 from mongo.db_classes import BestSummerEverPointsDB
 from mongo.bsepoints.points import UserPoints
 
@@ -32,7 +32,7 @@ class Guilds(BestSummerEverPointsDB):
 
         ret = self.query({"guild_id": guild_id}, projection={"tax_rate_history": False, "king_history": False})
         if ret:
-            return ret[0]
+            return GuildDB(**ret[0])
         return None
 
     def insert_guild(
@@ -81,7 +81,7 @@ class Guilds(BestSummerEverPointsDB):
     # King stuff
     #
 
-    def get_king(self, guild_id: int, whole_class: bool = False) -> int | dict:
+    def get_king(self, guild_id: int, whole_class: bool = False) -> int | dict | User:
         """Gets the King ID for the specified guild
 
         Args:

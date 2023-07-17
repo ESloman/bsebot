@@ -1,5 +1,5 @@
 # requirements for needed for actions / testing / etc
-ruff==0.0.275
+ruff==0.0.278
 flake8==6.0.0
 pytest==7.4.0
 pymongo==4.4.1

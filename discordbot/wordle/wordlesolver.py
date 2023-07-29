@@ -29,7 +29,8 @@ from mongo.bsepoints.generic import DataStore
 class WordleSolver():
     def __init__(self, logger=PlaceHolderLogger, headless: bool = True) -> None:
         self.firefox_opts = Options()
-        self.firefox_opts.headless = headless
+        if headless:
+            self.firefox_opts.add_argument("--headless")
         self.firefox_opts.add_argument("--no-sandbox")
         self.words = self._get_words()
         self.words_freq = self._get_word_frequency()
@@ -60,10 +61,18 @@ class WordleSolver():
         )
         driver.get(WORDLE_URL)
         await asyncio.sleep(2)
+
+        try:
+            # updated terms button
+            continue_button = driver.find_element(By.CLASS_NAME, "purr-blocker-card__button")
+            continue_button.click()
+        except (ElementNotInteractableException, StaleElementReferenceException, NoSuchElementException):
+            pass
+
         try:
             accept_button = driver.find_element(By.ID, WORDLE_GDPR_ACCEPT_ID)
             accept_button.click()
-        except (ElementNotInteractableException, StaleElementReferenceException):
+        except (ElementNotInteractableException, StaleElementReferenceException, NoSuchElementException):
             pass
 
         try:

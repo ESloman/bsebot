@@ -393,10 +393,3 @@ class WordleSolver():
         )
 
         return data_class
-
-
-if __name__ == "__main__":
-    solver = WordleSolver(headless=False)
-    import asyncio
-    asyncio.run(solver.setup())
-    asyncio.run(solver.solve())

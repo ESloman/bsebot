@@ -141,7 +141,8 @@ class Wordle(BSEddies):
             {
                 "message_type": "wordle",
                 "guild_id": ctx.guild.id
-            }
+            },
+            limit=100000
         )
 
         all_wordles = [wordle for wordle in _all_wordles if wordle["user_id"] == user_id]

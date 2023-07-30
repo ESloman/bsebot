@@ -15,7 +15,6 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service as FirefoxService
 from selenium.webdriver.remote.webelement import WebElement
-from webdriver_manager.chrome import ChromeDriverManager
 
 from discordbot.utilities import PlaceHolderLogger
 from discordbot.wordle.constants import WORDLE_GDPR_ACCEPT_ID, WORDLE_TUTORIAL_CLOSE_CLASS_NAME
@@ -56,7 +55,7 @@ class WordleSolver():
         Clears GDPR, play screen and tutorial
         """
         driver = webdriver.Chrome(
-            service=FirefoxService(ChromeDriverManager().install()),
+            service=FirefoxService("/opt/chromedriver/chromedriver-linux64/chromedriver"),
             options=self.firefox_opts
         )
         driver.get(WORDLE_URL)

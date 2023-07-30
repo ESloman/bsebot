@@ -15,10 +15,12 @@ RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key
     && apt-get autoremove  \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && wget -q https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/115.0.5790.110/linux64/chrome-linux64.zip \
+    && FULL_VERSION=`google-chrome --version` \
+    && CHROME_VERSION=${FULL_VERSION:14} \
+    && wget -q https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${CHROME_VERSION}/linux64/chromedriver-linux64.zip \
     && mkdir -vp /opt/chromedriver \
-    && unzip chrome-linux64.zip -d /opt/chromedriver \
-    && rm -rf chrome-linux64.zip
+    && unzip chromedriver-linux64.zip -d /opt/chromedriver \
+    && rm -rf chromedriver-linux64.zip
 
 RUN mkdir -vp /home/app
 

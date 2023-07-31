@@ -43,7 +43,8 @@ class DuplicateLinkAction(BaseMessageAction):
             _link for _link in re.split(" \n", message.content) if "https" in _link
         ][0]
 
-        link = link.split("?")[0]
+        if "youtube" not in link:
+            link = link.split("?")[0]
 
         # ignore common links here
         if "guessthe.game" in link:

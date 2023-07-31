@@ -35,7 +35,7 @@ class WordleSolver():
         self.words_freq = self._get_word_frequency()
         self.driver = None
         self.action_chain = None
-        self.possible_words = []
+        self.possible_words = copy.deepcopy(self.words)
         self.logger = logger
         self.wordles = WordleAttempts()
         self.data_store = DataStore()
@@ -112,7 +112,7 @@ class WordleSolver():
         return sorted(words)
 
     @staticmethod
-    def _get_word_frequency() -> list[str]:
+    def _get_word_frequency() -> dict[str, float]:
         """
         Returns a list of possible words
 
@@ -145,27 +145,33 @@ class WordleSolver():
 
         # try calculate weights from success rate
         _attempts = {}
-        for word in self._starting_words:
-            results = self.wordles.query({"starting_word": word})
 
-            if not results:
-                _attempts[word] = _default_weight
-                continue
+        _flag = random.random()
+        if _flag < 0.25:
+            # pick a new starting word to refine our starting word list
+            starting_word = self._pick_word_from_list()
+        else:
+            for word in self._starting_words:
+                results = self.wordles.query({"starting_word": word})
 
-            results = sorted(results, key=lambda x: x["timestamp"])
-            _last_timestamp = None
-            _scores = []
-            for res in results:
-                # gotta do this as we don't have guild ID here to limit
-                if res["timestamp"] == _last_timestamp:
+                if not results:
+                    _attempts[word] = _default_weight
                     continue
-                _last_timestamp = res["timestamp"]
-                _scores.append(res["guess_count"])
-            _attempts[word] = 6 - (sum(_scores) / len(_scores))
 
-        _sorted_words = sorted(_attempts, key=lambda x: _attempts[x], reverse=True)
+                results = sorted(results, key=lambda x: x["timestamp"])
+                _last_timestamp = None
+                _scores = []
+                for res in results:
+                    # gotta do this as we don't have guild ID here to limit
+                    if res["timestamp"] == _last_timestamp:
+                        continue
+                    _last_timestamp = res["timestamp"]
+                    _scores.append(res["guess_count"])
+                _attempts[word] = 6 - (sum(_scores) / len(_scores))
 
-        starting_word = random.choices(_sorted_words, weights=[_attempts[w] for w in _sorted_words])
+            _sorted_words = sorted(_attempts, key=lambda x: _attempts[x], reverse=True)
+            starting_word = random.choices(_sorted_words, weights=[_attempts[w] for w in _sorted_words])
+
         self.logger.debug(f"Selected: {starting_word=} from {_attempts=}")
         return starting_word
 
@@ -303,12 +309,15 @@ class WordleSolver():
             )
             container.click()
 
+        _starting_word = None
+
         while not solved:
             self.logger.info(f"Guess number: {row + 1}")
 
             # iterate until we solve the wordle
             if row == 0:
                 word = self._pick_starting_word()
+                _starting_word = word
             else:
                 word = self._pick_word_from_list()
 
@@ -378,6 +387,10 @@ class WordleSolver():
 
         self.logger.info(f"Got share text to be: {share_text}")
         self._terminate()
+
+        if solved and guesses <= 3 and _starting_word not in self._starting_words:
+            self.logger.info(f"Added {_starting_word=} to the list of starting words")
+            self.data_store.add_starting_word(_starting_word)
 
         data_class = WordleSolve(
             solved,

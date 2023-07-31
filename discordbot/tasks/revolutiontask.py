@@ -273,6 +273,21 @@ class BSEddiesRevolutionTask(BaseTask):
             if member.id not in revolutionaries:
                 await member.remove_roles(revo_role)
 
+        # reset role names
+        if success:
+            # only when a KING was dethroned though
+            if supporter_role.name != "Supporters":
+                await supporter_role.edit(name="Supporters")
+            if revo_role.name != "Revolutionaries":
+                await revo_role.edit(name="Revolutionaries")
+
+        # make everyone neutral
+        self.user_points.update(
+            {"guild_id": guild_id, "active": True},
+            {"$set": {"supporter_type": SupporterType.NEUTRAL}},
+            many=True
+        )
+
         # supporters get Supporter role
         supporter_type = SupporterType.SUPPORTER
         for supporter in supporters:
@@ -281,17 +296,24 @@ class BSEddiesRevolutionTask(BaseTask):
                 supporter_guild = await guild.fetch_member(supporter)
             if supporter_role not in supporter_guild.roles:
                 await supporter_guild.add_roles(supporter_role)
-            self.user_points.update({"uid": supporter}, {"$set": {"supporter_type": supporter_type}})
+            self.user_points.update(
+                {"uid": supporter, "guild_id": guild_id},
+                {"$set": {"supporter_type": supporter_type}}
+            )
 
         # revolutonaries get revolutionary role
-        supporter_type = SupporterType.REVOLUTIONARY
-        for revolutionary in revolutionaries:
-            revolutionary_guild = guild.get_member(revolutionary)
-            if not revolutionary_guild:
-                revolutionary_guild = await guild.fetch_member(revolutionary)
-            if revo_role not in revolutionary_guild.roles:
-                await revolutionary_guild.add_roles(revo_role)
-            self.user_points.update({"uid": revolutionary}, {"$set": {"supporter_type": supporter_type}})
+        if not success:
+            supporter_type = SupporterType.REVOLUTIONARY
+            for revolutionary in revolutionaries:
+                revolutionary_guild = guild.get_member(revolutionary)
+                if not revolutionary_guild:
+                    revolutionary_guild = await guild.fetch_member(revolutionary)
+                if revo_role not in revolutionary_guild.roles:
+                    await revolutionary_guild.add_roles(revo_role)
+                self.user_points.update(
+                    {"uid": revolutionary, "guild_id": guild_id},
+                    {"$set": {"supporter_type": supporter_type}}
+                )
 
         await _message.edit(content=_message.content, view=None)
         await _message.reply(content=message)

@@ -29,7 +29,7 @@ class ActivityConfigView(discord.ui.View):
         selected = self.activity_select.values
 
         for child in self.children:
-            if type(child) == discord.ui.Button and child.label == "Next":
+            if type(child) is discord.ui.Button and child.label == "Next":
                 child.disabled = not bool(selected)
                 break
 

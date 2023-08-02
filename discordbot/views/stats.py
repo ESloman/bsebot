@@ -28,7 +28,7 @@ class StatsView(discord.ui.View):
                     break
 
         for child in self.children:
-            if type(child) == discord.ui.Button and child.label == "Submit":
+            if type(child) is discord.ui.Button and child.label == "Submit":
                 child.disabled = not bool(value)
                 break
 

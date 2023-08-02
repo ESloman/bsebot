@@ -190,7 +190,7 @@ class Awards(BestSummerEverPointsDB):
         **kwargs
     ) -> list:
 
-        if type(value) == datetime.date:
+        if type(value) is datetime.date:
             # convert date into something MongoDB wants to parse
             value = value.strftime("%Y-%m-%d")
 

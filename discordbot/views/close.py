@@ -30,13 +30,13 @@ class CloseABetView(discord.ui.View):
 
         data = {}
         for child in self.children:
-            if type(child) == BetSelect:
+            if type(child) is BetSelect:
                 try:
                     data["bet_id"] = child.values[0]
                 except (IndexError, AttributeError):
                     # this means that this was default
                     data["bet_id"] = child.options[0].value
-            elif type(child) == BetOutcomesSelect:
+            elif type(child) is BetOutcomesSelect:
                 data["emoji"] = child.values
 
         # call the callback that actually places the bet

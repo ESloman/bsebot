@@ -406,14 +406,14 @@ class CommandManager(object):
                 return
 
             if message.author.id != self.client.user.id and \
-                    type(message.channel) == discord.channel.DMChannel and \
+                    type(message.channel) is discord.channel.DMChannel and \
                     message.type != discord.MessageType.application_command:
                 # this means we've received a Direct message!
                 # we'll have to handle this differently
                 self.logger.debug(f"{message} - {message.content}")
                 await self.direct_message.dm_received(message)
                 return
-            elif type(message.channel) == discord.channel.DMChannel and \
+            elif type(message.channel) is discord.channel.DMChannel and \
                     message.author.id == self.client.user.id:
                 # message in DM channel from ourselves
                 return

@@ -41,9 +41,9 @@ class Gift(BSEddies):
             friend_id=friend.id, amount=amount
         )
 
-        if type(ctx) == discord.ApplicationContext:
+        if type(ctx) is discord.ApplicationContext:
             response = ctx.respond
-        elif type(ctx) == discord.Interaction:
+        elif type(ctx) is discord.Interaction:
             response = ctx.response.send_message
         else:
             response = ctx.respond

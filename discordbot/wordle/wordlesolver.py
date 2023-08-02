@@ -150,6 +150,8 @@ class WordleSolver():
         if _flag < 0.25:
             # pick a new starting word to refine our starting word list
             starting_word = self._pick_word_from_list()
+            if type(starting_word) is list:
+                starting_word = starting_word[0]
         else:
             for word in self._starting_words:
                 results = self.wordles.query({"starting_word": word})

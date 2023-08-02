@@ -188,11 +188,11 @@ def calculate_message_odds(
     # get the number of times each rollcall message has been used
     for message in message_list:
 
-        if type(message) == tuple:
+        if type(message) is tuple:
             # if message type is tuple
             # assume odds are already set for it
 
-            if len(message) != 2 or type(message[0]) != str or type(message[1]) not in [int, float]:
+            if len(message) != 2 or type(message[0]) is not str or type(message[1]) not in [int, float]:
                 # tuple isn't correctly formatted - skip this one
                 continue
 

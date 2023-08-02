@@ -321,7 +321,7 @@ class WordleSolver():
             else:
                 word = self._pick_word_from_list()
 
-            if type(word) == list:
+            if type(word) is list:
                 word = word[0]
 
             guesses.append(word)
@@ -388,7 +388,7 @@ class WordleSolver():
         self.logger.info(f"Got share text to be: {share_text}")
         self._terminate()
 
-        if solved and guesses <= 3 and _starting_word not in self._starting_words:
+        if solved and guess_num <= 3 and _starting_word not in self._starting_words:
             self.logger.info(f"Added {_starting_word=} to the list of starting words")
             self.data_store.add_starting_word(_starting_word)
 

@@ -41,7 +41,7 @@ class BetOutcomesSelect(Select):
             option.default = option.value in selected_outcomes
 
         for child in self.view.children:
-            if type(child) == self.enable:
+            if type(child) is self.enable:
                 child.disabled = False
                 break
 

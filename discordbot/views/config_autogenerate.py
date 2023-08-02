@@ -47,7 +47,7 @@ class AutoGenerateConfigView(discord.ui.View):
                 pass
 
             for child in self.children:
-                if type(child) == discord.ui.Button and child.label == "Submit":
+                if type(child) is discord.ui.Button and child.label == "Submit":
                     child.disabled = False
                     break
 
@@ -57,7 +57,7 @@ class AutoGenerateConfigView(discord.ui.View):
                 self.add_item(self.category_select)
 
             for child in self.children:
-                if type(child) == discord.ui.Button and child.label == "Submit":
+                if type(child) is discord.ui.Button and child.label == "Submit":
                     child.disabled = not bool(cat_val)
                     break
 

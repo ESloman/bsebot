@@ -30,7 +30,7 @@ class BSEddies(BaseEvent):
         :return: True or False
         """
 
-        if type(ctx) == discord.ApplicationContext:
+        if type(ctx) is discord.ApplicationContext:
             response = ctx.respond
         else:
             response = ctx.response.send_message

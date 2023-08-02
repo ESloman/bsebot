@@ -20,7 +20,7 @@ class AdminConfigView(discord.ui.View):
         selected = self.admins_select.values
 
         for child in self.children:
-            if type(child) == discord.ui.Button and child.label == "Submit":
+            if type(child) is discord.ui.Button and child.label == "Submit":
                 child.disabled = not bool(selected)
                 break
 

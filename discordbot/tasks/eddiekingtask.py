@@ -117,6 +117,12 @@ class BSEddiesKingTask(BaseTask):
                 )
                 current_king = None
 
+                # rename role names
+                if supporter_role.name != "Supporters":
+                    await supporter_role.edit(name="Supporters")
+                if revo_role.name != "Revolutionaries":
+                    await revo_role.edit(name="Revolutionaries")
+
             # make a new KING
             if current_king is None:
                 self.logger.info(f"Adding a new king: {new.display_name}")

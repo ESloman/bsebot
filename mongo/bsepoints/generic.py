@@ -25,3 +25,16 @@ class DataStore(BestSummerEverPointsDB):
     def set_starting_words(self, words: list[str]) -> UpdateResult:
         ret = self.update({"type": "wordle_starting_words"}, {"$set": {"words": words}})
         return ret
+
+    def add_starting_word(self, word: str) -> UpdateResult:
+        """
+        Adds a new starting word to the datastore
+
+        Args:
+            word (str): the word to add
+
+        Returns:
+            UpdateResult: the update result
+        """
+        ret = self.update({"type": "wordle_starting_words"}, {"$push": {"words": word}})
+        return ret

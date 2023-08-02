@@ -66,7 +66,7 @@ class GiftAmount(Select):
             option.default = option.value == selected_amount
 
         for child in self.view.children:
-            if type(child) == Button and child.label == "Submit":
+            if type(child) is Button and child.label == "Submit":
                 child.disabled = False
                 break
 

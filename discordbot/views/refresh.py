@@ -30,7 +30,7 @@ class RefreshBetView(discord.ui.View):
     async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
 
         for child in self.children:
-            if type(child) == BetSelect:
+            if type(child) is BetSelect:
                 try:
                     bet_id = child.values[0]
                 except (IndexError, AttributeError):

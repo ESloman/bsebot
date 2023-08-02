@@ -41,10 +41,6 @@ class ValorantConfigView(discord.ui.View):
         self.channel_select.disabled = not active_val
         self.role_select.disabled = not active_val
 
-        for child in self.children:
-            if type(child) == discord.ui.Button and child.label == "Submit":
-                break
-
         await interaction.response.edit_message(content=interaction.message.content, view=self)
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=4)

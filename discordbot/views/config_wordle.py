@@ -44,7 +44,7 @@ class WordleRootConfigView(discord.ui.View):
 
         if wordle_config_val:
             for child in self.children:
-                if type(child) == discord.ui.Button and child.label == "Submit":
+                if type(child) is discord.ui.Button and child.label == "Submit":
                     child.disabled = not wordle_config_val
                     break
         await interaction.response.edit_message(content=interaction.message.content, view=self)

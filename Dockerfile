@@ -11,13 +11,14 @@ SHELL ["/bin/bash", "-c"]
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
     && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
     && apt-get update \
-    && apt-get install -yq jq tzdata nano unzip google-chrome-stable\
+    && apt-get install -yq jq tzdata nano unzip \
     && ln -fs /usr/share/zoneinfo/Europe/London /etc/localtime \
     && dpkg-reconfigure -f noninteractive tzdata \
+    && CHROME_VERSION=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r .channels.Stable.version) \
+    && apt-get install google-chrome-stable=${CHROME_VERSION} \
     && apt-get autoremove  \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && CHROME_VERSION=$(curl https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json | jq -r .channels.Stable.version) \
     && wget -q https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/${CHROME_VERSION}/linux64/chromedriver-linux64.zip \
     && mkdir -vp /opt/chromedriver \
     && unzip chromedriver-linux64.zip -d /opt/chromedriver \

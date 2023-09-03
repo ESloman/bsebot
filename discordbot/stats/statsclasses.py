@@ -1717,7 +1717,12 @@ class StatsGatherer:
                 bet_users[u] = 0
             bet_users[u] += 1
 
-        busiest = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
+        try:
+            busiest = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
+        except IndexError:
+            # no bets were created this month
+            busiest = BSE_BOT_ID
+            bet_users[BSE_BOT_ID] = 0
 
         data_class = Stat(
             type="award",
@@ -1762,8 +1767,8 @@ class StatsGatherer:
         try:
             most_placed = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
         except IndexError:
-            most_placed = 0
-            bet_users[0] = None
+            most_placed = BSE_BOT_ID
+            bet_users[BSE_BOT_ID] = 0
 
         data_class = Stat(
             type="award",

@@ -150,7 +150,7 @@ class WordleSolver():
         if _flag < 0.25:
             # pick a new starting word to refine our starting word list
             starting_word = self._pick_word_from_list()
-            if type(starting_word) is list:
+            if isinstance(starting_word, list):
                 starting_word = starting_word[0]
         else:
             for word in self._starting_words:
@@ -323,7 +323,7 @@ class WordleSolver():
             else:
                 word = self._pick_word_from_list()
 
-            if type(word) is list:
+            if isinstance(word, list):
                 word = word[0]
 
             guesses.append(word)

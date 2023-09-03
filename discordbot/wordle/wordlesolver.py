@@ -172,7 +172,7 @@ class WordleSolver():
                 _attempts[word] = 6 - (sum(_scores) / len(_scores))
 
             _sorted_words = sorted(_attempts, key=lambda x: _attempts[x], reverse=True)
-            starting_word = random.choices(_sorted_words, weights=[_attempts[w] for w in _sorted_words])
+            starting_word = random.choices(_sorted_words, weights=[_attempts[w] for w in _sorted_words])[0]
 
         self.logger.debug(f"Selected: {starting_word=} from {_attempts=}")
         return starting_word

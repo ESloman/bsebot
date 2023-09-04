@@ -57,10 +57,9 @@ class MonthlyBSEddiesAwards(BaseTask):
         if not debug:
             await self.bot.change_presence(activity=activity)
 
-        # put a "BSEBot is typing..." message
-        channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
-
         if not debug:
+            # put a "BSEBot is typing..." message
+            channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
             await channel.trigger_typing()
 
         awards_builder = AwardsBuilder(self.bot, BSE_SERVER_ID, self.logger, False, debug)

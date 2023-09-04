@@ -330,7 +330,7 @@ class StatsGatherer:
         guild_id: int,
         start: datetime.datetime,
         end: datetime.datetime,
-        channel_ids: list[int]
+        channel_ids: list[int] | None = None
     ) -> Stat:
         """Returns the channel with the least messages for a given time period
 
@@ -350,7 +350,7 @@ class StatsGatherer:
         for message in messages:
             channel_id = message["channel_id"]
             user_id = message["user_id"]
-            if not channel_id or channel_id not in channel_ids:
+            if not channel_id or (channel_ids and channel_id not in channel_ids):
                 continue
             if channel_id not in channels:
                 channels[channel_id] = {"count": 0, "users": []}

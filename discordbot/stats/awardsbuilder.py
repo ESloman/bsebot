@@ -96,9 +96,12 @@ class AwardsBuilder:
         guild = await self.bot.fetch_guild(self.guild_id)
 
         # get a list of channel IDs here to use
-        _channels = await guild.fetch_channels()
-        _channels = [c for c in _channels if c.type in [discord.ChannelType.text, discord.ChannelType.private]]
-        _channel_ids = [c.id for c in _channels]
+        if self.debug:
+            _channel_ids = []
+        else:
+            _channels = await guild.fetch_channels()
+            _channels = [c for c in _channels if c.type in [discord.ChannelType.text, discord.ChannelType.private]]
+            _channel_ids = [c.id for c in _channels]
 
         number_messages = self.stats.number_of_messages(*args)
         avg_message_chars, avg_message_words = self.stats.average_message_length(*args)
@@ -450,13 +453,16 @@ class AwardsBuilder:
                     award_name=award.short_name
                 )
 
-        channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
+        if self.debug:
+            channel = await self.bot.fetch_channel(291508460519161856)
+        else:
+            channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
 
         self.logger.info(f"Stats message is {len(awards_message)} messages long")
         for message in stats_message:
             self.logger.info(f"Stats message part is {len(message)} chars long")
 
-            if self.debug:
+            if not self.debug:
                 await channel.send(content=message, silent=True)
                 continue
             self.logger.debug(message)
@@ -464,7 +470,7 @@ class AwardsBuilder:
         self.logger.info(f"Awards message is {len(awards_message)} messages long")
         for message in awards_message:
             self.logger.info(f"Awards message part is {len(message)} chars long")
-            if self.debug:
+            if not self.debug:
                 await channel.send(content=message, silent=True)
                 continue
             self.logger.debug(message)

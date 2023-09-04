@@ -1260,7 +1260,8 @@ class StatsGatherer:
 
         tweet_users = {}
         for message in messages:
-            if "twitter" in message["content"] and "link" in message["message_type"]:
+            if "twitter" in message["content"] or "https://x.com/" in message["content"] \
+                    and "link" in message["message_type"]:
                 user_id = message["user_id"]
                 if user_id not in tweet_users:
                     tweet_users[user_id] = 0
@@ -1717,7 +1718,12 @@ class StatsGatherer:
                 bet_users[u] = 0
             bet_users[u] += 1
 
-        busiest = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
+        try:
+            busiest = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
+        except IndexError:
+            # no bets were created this month
+            busiest = BSE_BOT_ID
+            bet_users[BSE_BOT_ID] = 0
 
         data_class = Stat(
             type="award",
@@ -1762,8 +1768,8 @@ class StatsGatherer:
         try:
             most_placed = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
         except IndexError:
-            most_placed = 0
-            bet_users[0] = None
+            most_placed = BSE_BOT_ID
+            bet_users[BSE_BOT_ID] = 0
 
         data_class = Stat(
             type="award",

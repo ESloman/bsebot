@@ -576,8 +576,8 @@ class StatsGatherer:
             guesses = int(guesses)
             bot_wordle_count.append(guesses)
 
-        average_wordle = round((sum(wordle_count) / len(wordle_count)), 2)
-        average_bot_wordle = round((sum(bot_wordle_count) / len(bot_wordle_count)), 2)
+        average_wordle = round((sum(wordle_count) / len(wordle_count)), 4)
+        average_bot_wordle = round((sum(bot_wordle_count) / len(bot_wordle_count)), 4)
 
         data_class = Stat(
             "stat",
@@ -1217,15 +1217,15 @@ class StatsGatherer:
         wordle_avgs = {}
         for uid in wordle_count:
             all_guesses = wordle_count[uid]
-            avg = round((sum(all_guesses) / len(all_guesses)), 2)
+            avg = sum(all_guesses) / len(all_guesses)
             wordle_avgs[uid] = avg
 
         try:
             best_avg = sorted(wordle_avgs, key=lambda x: wordle_avgs[x])[0]
         except IndexError:
             # no data - possible if they've never done a wordle
-            best_avg = 0
-            wordle_avgs[0] = None
+            best_avg = BSE_BOT_ID
+            wordle_avgs[BSE_BOT_ID] = 0
 
         data_class = Stat(
             type="award",
@@ -1814,8 +1814,8 @@ class StatsGatherer:
         try:
             most_placed = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
         except IndexError:
-            most_placed = 0
-            bet_users[0] = None
+            most_placed = BSE_BOT_ID
+            bet_users[BSE_BOT_ID] = 0
 
         data_class = Stat(
             type="award",

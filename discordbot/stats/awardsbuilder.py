@@ -6,17 +6,19 @@ import discord
 from discordbot.bsebot import BSEBot
 from discordbot.bot_enums import TransactionTypes
 from discordbot.constants import ANNUAL_AWARDS_AWARD, BSEDDIES_REVOLUTION_CHANNEL, JERK_OFF_CHAT, MONTHLY_AWARDS_PRIZE
+from discordbot.constants import BSE_BOT_ID
 from discordbot.stats.statsclasses import Stat, StatsGatherer
 from mongo.bsedataclasses import Awards
 from mongo.bsepoints.points import UserPoints
 
 
 class AwardsBuilder:
-    def __init__(self, bot: BSEBot, guild_id: int, logger, annual=False):
+    def __init__(self, bot: BSEBot, guild_id: int, logger, annual=False, debug_mode: bool = False):
         self.bot = bot
         self.guild_id = guild_id
         self.logger = logger
         self.annual = annual
+        self.debug = debug_mode
 
         self.stats = StatsGatherer(logger, annual)
         self.awards = Awards()
@@ -177,8 +179,8 @@ class AwardsBuilder:
                     continue
 
                 comparison_string = self._get_comparison_string(stat.value, previous["value"])
-            except Exception as e:
-                self.logger.debug(f"Got {e} working out {stat.short_name} comparison string")
+            except Exception:
+                self.logger.exception(f"Got an error working out {stat.short_name} comparison string")
                 comparisons[stat.stat] = ""
                 continue
 
@@ -355,7 +357,7 @@ class AwardsBuilder:
              f"<@!{most_swears.user_id}> (`{most_swears.value}` swears)\n"),
             # best wordle score
             ("- The _'I have an English degree'_ 📑 award: "
-             f"<@!{best_wordle.user_id}> (`{best_wordle.value}` average wordle score)\n"),
+             f"<@!{best_wordle.user_id}> (`{round(best_wordle.value, 4)}` average wordle score)\n"),
             # most reacts
             ("- The _'big memer'_ 😎 award: "
              f"<@!{big_memer.user_id}> (`{big_memer.value}` reacts received)\n"),
@@ -415,8 +417,12 @@ class AwardsBuilder:
 
         for stat in stats:
             # comment out this for debug
-            self.awards.document_stat(**{k: v for k, v in stat.__dict__.items() if v is not None})
             self.logger.info(f"{ {k: v for k, v in stat.__dict__.items() if v is not None} }")
+
+            if self.debug:
+                continue
+
+            self.awards.document_stat(**{k: v for k, v in stat.__dict__.items() if v is not None})
 
         if not self.annual:
             transaction_type = TransactionTypes.MONTHLY_AWARDS_PRIZE
@@ -424,28 +430,41 @@ class AwardsBuilder:
             transaction_type = TransactionTypes.ANNUAL_AWARDS_PRIZE
 
         for award in awards:
-            # comment out this for debug
-            self.user_points.increment_points(
-                award.user_id,
-                award.guild_id,
-                award.eddies,
-                transaction_type,
-                award_name=award.short_name
-            )
-            self.awards.document_award(**{k: v for k, v in award.__dict__.items() if v is not None})
+            # run this in dry run mode before committing anything
+            self.logger.info(f"{ {k: v for k, v in award.__dict__.items() if v is not None} }")
+            self.awards.document_award(**{k: v for k, v in award.__dict__.items() if v is not None}, dry_run=True)
+
+        for award in awards:
             self.logger.info(f"{ {k: v for k, v in award.__dict__.items() if v is not None} }")
 
-        channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
+            if self.debug:
+                continue
 
-        # uncomment for debug
-        # channel = await self.bot.fetch_channel(291508460519161856)
+            self.awards.document_award(**{k: v for k, v in award.__dict__.items() if v is not None})
+            if award.user_id != BSE_BOT_ID:
+                self.user_points.increment_points(
+                    award.user_id,
+                    award.guild_id,
+                    award.eddies,
+                    transaction_type,
+                    award_name=award.short_name
+                )
+
+        channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
 
         self.logger.info(f"Stats message is {len(awards_message)} messages long")
         for message in stats_message:
             self.logger.info(f"Stats message part is {len(message)} chars long")
-            await channel.send(content=message, silent=True)
+
+            if self.debug:
+                await channel.send(content=message, silent=True)
+                continue
+            self.logger.debug(message)
 
         self.logger.info(f"Awards message is {len(awards_message)} messages long")
         for message in awards_message:
             self.logger.info(f"Awards message part is {len(message)} chars long")
-            await channel.send(content=message, silent=True)
+            if self.debug:
+                await channel.send(content=message, silent=True)
+                continue
+            self.logger.debug(message)

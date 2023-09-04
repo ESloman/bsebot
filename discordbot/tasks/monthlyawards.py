@@ -33,7 +33,10 @@ class MonthlyBSEddiesAwards(BaseTask):
         """
         now = datetime.datetime.now()
 
-        if not now.day == 1 or not now.hour == 11:
+        # whether to run in debug mode or not
+        debug = False
+
+        if now.day != 1 and now.hour != 11 and not debug:
             # we only want to trigger on the first of each month
             # and also trigger at 11am
             return
@@ -50,13 +53,17 @@ class MonthlyBSEddiesAwards(BaseTask):
             type=discord.ActivityType.playing,
             details="Working out monthly BSEddies awards"
         )
-        await self.bot.change_presence(activity=activity)
+
+        if not debug:
+            await self.bot.change_presence(activity=activity)
 
         # put a "BSEBot is typing..." message
         channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
-        await channel.trigger_typing()
 
-        awards_builder = AwardsBuilder(self.bot, BSE_SERVER_ID, self.logger, False)
+        if not debug:
+            await channel.trigger_typing()
+
+        awards_builder = AwardsBuilder(self.bot, BSE_SERVER_ID, self.logger, False, debug)
 
         self.logger.debug("Calculating stats")
         stats, message = await awards_builder.build_stats_and_message()
@@ -75,7 +82,9 @@ class MonthlyBSEddiesAwards(BaseTask):
             type=discord.ActivityType.listening,
             details="Waiting for commands!"
         )
-        await self.bot.change_presence(activity=listening_activity)
+
+        if not debug:
+            await self.bot.change_presence(activity=listening_activity)
 
         self.logger.info("Sent messages! Until next month!")
 

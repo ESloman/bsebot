@@ -15,7 +15,7 @@ class Stat:
     annual: bool
     month: Optional[str] = None
     year: Optional[str] = None
-    user_id: Optional[int] = None
+    user_id: int | list[int] | None = None
     award: Optional[AwardsTypes] = None
     stat: Optional[StatTypes] = None
     eddies: Optional[int] = None

@@ -150,6 +150,8 @@ class WordleSolver():
         if _flag < 0.25:
             # pick a new starting word to refine our starting word list
             starting_word = self._pick_word_from_list()
+            if isinstance(starting_word, list):
+                starting_word = starting_word[0]
         else:
             for word in self._starting_words:
                 results = self.wordles.query({"starting_word": word})
@@ -170,7 +172,7 @@ class WordleSolver():
                 _attempts[word] = 6 - (sum(_scores) / len(_scores))
 
             _sorted_words = sorted(_attempts, key=lambda x: _attempts[x], reverse=True)
-            starting_word = random.choices(_sorted_words, weights=[_attempts[w] for w in _sorted_words])
+            starting_word = random.choices(_sorted_words, weights=[_attempts[w] for w in _sorted_words])[0]
 
         self.logger.debug(f"Selected: {starting_word=} from {_attempts=}")
         return starting_word
@@ -321,7 +323,7 @@ class WordleSolver():
             else:
                 word = self._pick_word_from_list()
 
-            if type(word) is list:
+            if isinstance(word, list):
                 word = word[0]
 
             guesses.append(word)

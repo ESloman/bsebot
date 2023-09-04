@@ -192,7 +192,7 @@ def calculate_message_odds(
             # if message type is tuple
             # assume odds are already set for it
 
-            if len(message) != 2 or type(message[0]) is not str or type(message[1]) not in [int, float]:
+            if len(message) != 2 or not isinstance(message[0], str) or not isinstance(message[1], (int, float)):
                 # tuple isn't correctly formatted - skip this one
                 continue
 

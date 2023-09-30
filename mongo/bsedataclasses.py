@@ -187,6 +187,7 @@ class Awards(BestSummerEverPointsDB):
         annual: bool,
         month: Optional[str] = None,
         year: Optional[str] = None,
+        dry_run: bool = False,
         **kwargs
     ) -> list:
 
@@ -210,7 +211,8 @@ class Awards(BestSummerEverPointsDB):
             if key not in doc:
                 doc[key] = kwargs[key]
 
-        return self.insert(doc)
+        if not dry_run:
+            return self.insert(doc)
 
     def document_award(
         self,
@@ -223,6 +225,7 @@ class Awards(BestSummerEverPointsDB):
         annual: bool,
         month: Optional[str] = None,
         year: Optional[str] = None,
+        dry_run: bool = False,
         **kwargs
     ) -> list:
         """Insert an award into the DB
@@ -252,7 +255,8 @@ class Awards(BestSummerEverPointsDB):
             if key not in doc:
                 doc[key] = kwargs[key]
 
-        return self.insert(doc)
+        if not dry_run:
+            return self.insert(doc)
 
 
 class WordleAttempts(BestSummerEverPointsDB):

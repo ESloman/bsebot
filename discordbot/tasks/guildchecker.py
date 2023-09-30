@@ -228,7 +228,7 @@ class GuildChecker(BaseTask):
                 )
                 try:
                     await message.edit(content=content, view=view, embed=embed)
-                except discord.NotFound:
+                except (discord.NotFound, discord.Forbidden):
                     continue
 
             self.bot.add_view(LeaderBoardView(self.embed_manager))

@@ -330,7 +330,7 @@ class StatsGatherer:
         guild_id: int,
         start: datetime.datetime,
         end: datetime.datetime,
-        channel_ids: list[int]
+        channel_ids: list[int] | None = None
     ) -> Stat:
         """Returns the channel with the least messages for a given time period
 
@@ -350,7 +350,7 @@ class StatsGatherer:
         for message in messages:
             channel_id = message["channel_id"]
             user_id = message["user_id"]
-            if not channel_id or channel_id not in channel_ids:
+            if not channel_id or (channel_ids and channel_id not in channel_ids):
                 continue
             if channel_id not in channels:
                 channels[channel_id] = {"count": 0, "users": []}
@@ -576,8 +576,8 @@ class StatsGatherer:
             guesses = int(guesses)
             bot_wordle_count.append(guesses)
 
-        average_wordle = round((sum(wordle_count) / len(wordle_count)), 2)
-        average_bot_wordle = round((sum(bot_wordle_count) / len(bot_wordle_count)), 2)
+        average_wordle = round((sum(wordle_count) / len(wordle_count)), 4)
+        average_bot_wordle = round((sum(bot_wordle_count) / len(bot_wordle_count)), 4)
 
         data_class = Stat(
             "stat",
@@ -1217,15 +1217,15 @@ class StatsGatherer:
         wordle_avgs = {}
         for uid in wordle_count:
             all_guesses = wordle_count[uid]
-            avg = round((sum(all_guesses) / len(all_guesses)), 2)
+            avg = sum(all_guesses) / len(all_guesses)
             wordle_avgs[uid] = avg
 
         try:
             best_avg = sorted(wordle_avgs, key=lambda x: wordle_avgs[x])[0]
         except IndexError:
             # no data - possible if they've never done a wordle
-            best_avg = 0
-            wordle_avgs[0] = None
+            best_avg = BSE_BOT_ID
+            wordle_avgs[BSE_BOT_ID] = 0
 
         data_class = Stat(
             type="award",
@@ -1237,6 +1237,87 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="lowest_avg_wordle",
+            annual=self.annual
+        )
+
+        data_class.wordle_avgs = {str(k): v for k, v in wordle_avgs.items()}
+        data_class = self.add_annual_changes(start, data_class)
+
+        return data_class
+
+    def highest_average_wordle_score(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+        """Calculates which user has the worst average wordle score
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: the wordle stat
+        """
+        messages = self.cache.get_messages(guild_id, start, end)
+        wordle_messages = [m for m in messages if "wordle" in m["message_type"]]
+
+        # number of days in the time period
+        days = (end - start).days
+        threshold = round(days / 2)
+
+        wordle_count = {}
+        for wordle in wordle_messages:
+            uid = wordle["user_id"]
+            if uid == BSE_BOT_ID:
+                continue
+            if uid not in wordle_count:
+                wordle_count[uid] = []
+
+            result = re.search(r"[\dX]/\d", wordle["content"]).group()
+            guesses = result.split("/")[0]
+
+            if guesses == "X":
+                guesses = "7"
+            guesses = int(guesses)
+
+            wordle_count[uid].append(guesses)
+
+        if len(wordle_count) > 1:
+            wordle_count_old = deepcopy(wordle_count)
+            for uid in wordle_count_old:
+                if len(wordle_count_old[uid]) < threshold:
+                    # user hasn't done enough wordles in this time period to be
+                    # counted
+                    self.logger.info(
+                        f"Removing {uid} from wordle pool as they've only done {len(wordle_count[uid])} wordles."
+                    )
+                    wordle_count.pop(uid)
+        else:
+            self.logger.info(
+                f"Length of wordle count ({len(wordle_count)}) is less than one - skipping threshold"
+            )
+
+        wordle_avgs = {}
+        for uid in wordle_count:
+            all_guesses = wordle_count[uid]
+            avg = sum(all_guesses) / len(all_guesses)
+            wordle_avgs[uid] = avg
+
+        try:
+            worst_avg = sorted(wordle_avgs, key=lambda x: wordle_avgs[x])[0]
+        except IndexError:
+            # no data - possible if they've never done a wordle
+            worst_avg = BSE_BOT_ID
+            wordle_avgs[BSE_BOT_ID] = 0
+
+        data_class = Stat(
+            type="award",
+            guild_id=guild_id,
+            user_id=worst_avg,
+            award=AwardsTypes.WORST_AVG_WORDLE,
+            month=start.strftime("%b %y"),
+            value=wordle_avgs[worst_avg],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="highest_avg_wordle",
             annual=self.annual
         )
 
@@ -1814,8 +1895,8 @@ class StatsGatherer:
         try:
             most_placed = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
         except IndexError:
-            most_placed = 0
-            bet_users[0] = None
+            most_placed = BSE_BOT_ID
+            bet_users[BSE_BOT_ID] = 0
 
         data_class = Stat(
             type="award",

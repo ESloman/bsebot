@@ -1325,7 +1325,7 @@ class StatsGatherer:
         data_class = self.add_annual_changes(start, data_class)
 
         return data_class
-    
+
     def twitter_addict(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
         """Calculates who's posted the most twitter links
 

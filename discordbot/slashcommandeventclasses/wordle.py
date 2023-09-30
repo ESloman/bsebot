@@ -214,7 +214,10 @@ class Wordle(BSEddies):
 
         # create figure
         dates_data = [(key.strftime("%b %y"), all_month_avgs[key], total_avg) for key in all_month_avgs]
-        bot_dates_data = [(key.strftime("%b %y"), bot_month_avgs[key], total_avg) for key in bot_month_avgs]
+        bot_dates_data = [
+            (key.strftime("%b %y"), bot_month_avgs[key], total_avg)
+            for key in bot_month_avgs if bot_month_avgs[key] > 0
+        ]
         server_dates_data = [(key.strftime("%b %y"), server_month_avgs[key], total_avg) for key in server_month_avgs]
 
         seaborn.set_theme()

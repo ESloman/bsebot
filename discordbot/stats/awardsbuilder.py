@@ -276,6 +276,7 @@ class AwardsBuilder:
         least_messages = self.stats.least_messages_sent(*args)
         longest_message = self.stats.longest_message(*args)
         best_wordle = self.stats.lowest_average_wordle_score(*args)
+        worst_wordle = self.stats.highest_average_wordle_score(*args)
         most_bets = self.stats.most_bets_created(*args)
         most_eddies_placed = self.stats.most_eddies_bet(*args)
         most_eddies_won = self.stats.most_eddies_won(*args)
@@ -299,7 +300,7 @@ class AwardsBuilder:
             most_eddies_placed, most_eddies_won, longest_king, twitter_addict, jerk_off_king,
             big_memer, react_king, big_gamer, big_streamer, threadiest_user,
             serial_replier, conversation_starter, owner_award, fattest_fingers,
-            most_swears, single_minded, diverse_portfolio
+            most_swears, single_minded, diverse_portfolio, worst_wordle
         ]
 
         if not self.annual:
@@ -361,6 +362,9 @@ class AwardsBuilder:
             # best wordle score
             ("- The _'I have an English degree'_ 📑 award: "
              f"<@!{best_wordle.user_id}> (`{round(best_wordle.value, 4)}` average wordle score)\n"),
+            # worst wordle score
+            ("- The _'Is this bitch ESL?'_ :flag_eu: award: "
+             f"<@!{worst_wordle.user_id}> (`{round(worst_wordle.value, 4)}` average wordle score)\n"),
             # most reacts
             ("- The _'big memer'_ 😎 award: "
              f"<@!{big_memer.user_id}> (`{big_memer.value}` reacts received)\n"),

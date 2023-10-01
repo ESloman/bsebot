@@ -1302,7 +1302,7 @@ class StatsGatherer:
             wordle_avgs[uid] = avg
 
         try:
-            worst_avg = sorted(wordle_avgs, key=lambda x: wordle_avgs[x])[0]
+            worst_avg = sorted(wordle_avgs, key=lambda x: wordle_avgs[x], reverse=True)[0]
         except IndexError:
             # no data - possible if they've never done a wordle
             worst_avg = BSE_BOT_ID

@@ -462,7 +462,7 @@ class AwardsBuilder:
         else:
             channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
 
-        self.logger.info(f"Stats message is {len(awards_message)} messages long")
+        self.logger.info(f"Stats message is {len(stats_message)} messages long")
         for message in stats_message:
             self.logger.info(f"Stats message part is {len(message)} chars long")
 

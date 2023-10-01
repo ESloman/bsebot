@@ -125,6 +125,7 @@ class AwardsTypes(IntEnum):
     POTTY_MOUTH = 21
     SINGLE_MINDED = 22
     DIVERSE_PORTFOLIO = 23
+    WORST_AVG_WORDLE = 24
 
 
 class StatTypes(IntEnum):

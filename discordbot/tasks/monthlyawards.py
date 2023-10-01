@@ -36,7 +36,7 @@ class MonthlyBSEddiesAwards(BaseTask):
         # whether to run in debug mode or not
         debug = False
 
-        if now.day != 1 and now.hour != 11 and not debug:
+        if (not now.day == 1 or not now.hour == 11) and not debug:
             # we only want to trigger on the first of each month
             # and also trigger at 11am
             return
@@ -45,7 +45,10 @@ class MonthlyBSEddiesAwards(BaseTask):
             # does not support other servers yet
             return
 
-        self.logger.info(f"It's the first of the month and about ~11ish - time to trigger the awards! {now=}")
+        if not debug:
+            self.logger.info(f"It's the first of the month and about ~11ish - time to trigger the awards! {now=}")
+        else:
+            self.logger.info("Debug is true (%s) - testing stats/awards", debug)
 
         # set some kind of activity here
         activity = discord.Activity(

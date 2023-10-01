@@ -213,12 +213,21 @@ class Wordle(BSEddies):
         msg += "\n\nBelow is a graph of your monthly average over time."
 
         # create figure
-        dates_data = [(key.strftime("%b %y"), all_month_avgs[key], total_avg) for key in all_month_avgs]
+        dates_data = [
+            (key.strftime("%b %y"), all_month_avgs[key], total_avg)
+            for key in all_month_avgs
+            if key > (now - datetime.timedelta(month=13))
+        ]
         bot_dates_data = [
             (key.strftime("%b %y"), bot_month_avgs[key], total_avg)
-            for key in bot_month_avgs if bot_month_avgs[key] > 0
+            for key in bot_month_avgs
+            if bot_month_avgs[key] > 0 and key > (now - datetime.timedelta(month=13))
         ]
-        server_dates_data = [(key.strftime("%b %y"), server_month_avgs[key], total_avg) for key in server_month_avgs]
+        server_dates_data = [
+            (key.strftime("%b %y"), server_month_avgs[key], total_avg)
+            for key in server_month_avgs
+            if key > (now - datetime.timedelta(month=13))
+        ]
 
         seaborn.set_theme()
         plot = seaborn.lineplot()

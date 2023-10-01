@@ -2063,8 +2063,12 @@ class StatsGatherer:
         try:
             big_streamer = sorted(user_dict, key=lambda x: user_dict[x]["count"], reverse=True)[0]
         except IndexError:
-            big_streamer = 0
-            user_dict[0] = {"count": 0, "channels": {}}
+            big_streamer = BSE_BOT_ID
+            user_dict[BSE_BOT_ID] = {"count": 0, "channels": {}}
+
+        if user_dict[big_streamer]["count"] == 0 and big_streamer != BSE_BOT_ID:
+            # make the bot win if no-one streamed
+            big_streamer = BSE_BOT_ID
 
         data_class = Stat(
             type="award",

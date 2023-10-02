@@ -5,4 +5,4 @@ xlsxwriter==3.1.5
 py-cord[speed]==2.4.1
 selenium==4.13.0
 pre-commit==3.4.0
-seaborn==0.12.2
+seaborn==0.13.0

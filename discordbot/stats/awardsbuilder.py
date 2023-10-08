@@ -411,7 +411,8 @@ class AwardsBuilder:
         stats: List[Stat],
         stats_message: str,
         awards: List[Stat],
-        awards_message: str
+        awards_message: str,
+        send_messages: bool = True
     ) -> None:
         """Given the stats and awards - actually log those, distribute eddies and send the message
 
@@ -420,6 +421,7 @@ class AwardsBuilder:
             stats_message (_type_): _description_
             awards (_type_): _description_
             awards_message (_type_): _description_
+            send_messages (bool): whether to actually send messages
         """
 
         for stat in stats:
@@ -462,7 +464,7 @@ class AwardsBuilder:
         else:
             channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
 
-        self.logger.info(f"Stats message is {len(awards_message)} messages long")
+        self.logger.info(f"Stats message is {len(stats_message)} messages long")
         for message in stats_message:
             self.logger.info(f"Stats message part is {len(message)} chars long")
 
@@ -474,7 +476,7 @@ class AwardsBuilder:
         self.logger.info(f"Awards message is {len(awards_message)} messages long")
         for message in awards_message:
             self.logger.info(f"Awards message part is {len(message)} chars long")
-            if not self.debug:
+            if not self.debug and send_messages:
                 await channel.send(content=message, silent=True)
                 continue
             self.logger.debug(message)

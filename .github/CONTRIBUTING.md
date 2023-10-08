@@ -14,10 +14,9 @@ There's a form of documenation and an overview in the `docs/` directory but it i
 - To see the BSEBot in action: [join the BSE server.](https://discord.gg/dGMPswqf49)
 
 ## Code formatting
-I try to adhere to `PEP8` standards as much as possible but with a line length of **120**. Every commit will trigger a `flake8` GitHub action that will parse the code and fail that commit if it finds any flaws. 
+I try to adhere to `PEP8` standards as much as possible but with a line length of **120**. Every commit will trigger a `ruff` GitHub action that will parse the code and fail that commit if it finds any flaws. 
 
-You can run `flake8` in the root directory `bsebot`. The configuration file already exists so it should pick that up.
-Additionally, we have a `ruff` pre-commit hook setup. You can install `pre-commit` and that should also lint your code before commit; it'll also attempt to fix any issues it's found. `ruff` is a relatively new linter so it doesn't have all the rules that `flake8` has so it's available in conjunction with `flake8`.
+You can run `ruff` in the root directory `bsebot`. The configuration file already exists so it should pick that up. Additionally, we have a `ruff` pre-commit hook setup. You can install `pre-commit` and that should also lint your code before commit; it'll also attempt to fix any issues it's found.
 
 
 ### Starting requirements

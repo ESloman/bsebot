@@ -1,48 +1,37 @@
-import datetime
 
-import discord
-from discord.ext import tasks, commands
+import asyncio
+import datetime
+from logging import Logger
+
+from discord.ext import tasks
 
 from apis.github import GitHubAPI
-from mongo.bsepoints.guilds import Guilds
+from discordbot.bsebot import BSEBot
+from discordbot.tasks.basetask import BaseTask
 
 
-class ReleaseChecker(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger, startup_tasks, github_api: GitHubAPI):
-        self.bot = bot
-        self.logger = logger
-        self.startup_tasks = startup_tasks
-        self.github = github_api
-        self.guilds = Guilds()
+class ReleaseChecker(BaseTask):
+    def __init__(
+        self,
+        bot: BSEBot,
+        guild_ids: list[int],
+        logger: Logger,
+        startup_tasks: list[BaseTask],
+        github_api: GitHubAPI
+    ):
+
+        super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.task = self.release_checker
         self.last_release_name = None
+        self.github = github_api
 
-        self.release_checker.start()
-
-    def _check_start_up_tasks(self) -> bool:
-        """
-        Checks start up tasks
-        """
-        for task in self.startup_tasks:
-            if not task.finished:
-                return False
-        return True
-
-    def cog_unload(self):
-        """
-        Method for cancelling the loop.
-        :return:
-        """
-        self.release_checker.cancel()
+        self.task.start()
 
     @tasks.loop(minutes=60)
     async def release_checker(self):
         """
         Task to check github releases and post release notes when we get a new one
-        :return:
         """
-        if not self._check_start_up_tasks():
-            self.logger.info("Startup tasks not complete - skipping loop")
-            return
 
         now = datetime.datetime.now()
 
@@ -95,7 +84,7 @@ class ReleaseChecker(commands.Cog):
                 # same as last release name
                 continue
 
-            channel = await guild.fetch_channel(guild_db["channel"])
+            channel = await self.bot.fetch_channel(guild_db["channel"])
             for _body in bodies:
                 await channel.send(content=_body, silent=True, suppress=True)
 
@@ -104,7 +93,8 @@ class ReleaseChecker(commands.Cog):
     @release_checker.before_loop
     async def before_release_checker(self):
         """
-        Make sure that websocket is open before we starting querying via it.
-        :return:
+        Make sure that websocket is open before we start querying via it.
         """
         await self.bot.wait_until_ready()
+        while not self._check_start_up_tasks():
+            await asyncio.sleep(5)

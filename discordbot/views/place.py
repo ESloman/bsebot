@@ -30,22 +30,28 @@ class PlaceABetView(discord.ui.View):
     async def on_timeout(self):
         for child in self.children:
             child.disabled = True
-        await self.message.edit(content="This `place` command timed out - please _place_ another one", view=None)
+
+        try:
+            await self.message.edit(content="This `place` command timed out - please _place_ another one", view=None)
+        except discord.NotFound:
+            # not found is when the message has already been deleted
+            # don't need to edit in that case
+            pass
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=3, disabled=True, emoji="💰")
-    async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def submit_button_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
 
         data = {}
         for child in self.children:
-            if type(child) == BetSelect:
+            if type(child) is BetSelect:
                 try:
                     data["bet_id"] = child.values[0]
-                except IndexError:
+                except (IndexError, AttributeError):
                     # this means that this was default
                     data["bet_id"] = child.options[0].value
-            elif type(child) == BetOutcomesSelect:
+            elif type(child) is BetOutcomesSelect:
                 data["emoji"] = child.values[0]
-            elif type(child) == BetSelectAmount:
+            elif type(child) is BetSelectAmount:
                 data["amount"] = int(child.values[0])
 
         # call the callback that actually places the bet
@@ -58,4 +64,4 @@ class PlaceABetView(discord.ui.View):
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=3, disabled=False, emoji="✖️")
     async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await interaction.response.edit_message(content="Cancelled", view=None)
+        await interaction.response.edit_message(content="Cancelled", view=None, delete_after=2)

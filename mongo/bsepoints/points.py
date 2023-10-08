@@ -3,7 +3,9 @@ from typing import Union, Optional
 
 from pymongo.results import UpdateResult
 
+from discordbot.bot_enums import TransactionTypes
 from mongo import interface
+from mongo.bsepoints.transactions import UserTransactions
 from mongo.datatypes import User
 from mongo.db_classes import BestSummerEverPointsDB
 
@@ -18,6 +20,7 @@ class UserPoints(BestSummerEverPointsDB):
         """
         super().__init__()
         self._vault = interface.get_collection(self.database, "userpoints")
+        self._trans = UserTransactions()
 
     def __check_highest_eddie_count(self, user_id: int, guild_id: int):
         """
@@ -32,7 +35,20 @@ class UserPoints(BestSummerEverPointsDB):
         if ret["points"] > ret.get("high_score", 0):
             self.update({"_id": ret["_id"]}, {"$set": {"high_score": ret["points"]}})
 
-    def find_user(self, user_id: int, guild_id: int, projection=None) -> Union[User, None]:
+    def find_user_guildless(self, user_id: int) -> list[User]:
+        """
+        Returns all matching user objects for the given ID
+
+        Args:
+            user_id (int): the user ID to search for
+
+        Returns:
+            list[User]: the user objects for each guild the user belongs to
+        """
+        ret = self.query({"uid": user_id})
+        return ret
+
+    def find_user(self, user_id: int, guild_id: int, projection: Optional[dict] = None) -> Union[User, None]:
         """
         Looks up a user in the collection.
 
@@ -92,30 +108,6 @@ class UserPoints(BestSummerEverPointsDB):
         )
         return ret
 
-    def set_points(self, user_id: int, guild_id: int, points: int) -> UpdateResult:
-        """
-        Sets a user's points to a given value.
-
-        :param user_id: int - The ID of the user to look for
-        :param guild_id: int - The guild ID that the user belongs in
-        :param points: int - points to set the user to
-        :return: UpdateResults object
-        """
-        ret = self.update({"uid": user_id, "guild_id": guild_id}, {"$set": {"points": points}})
-        self.__check_highest_eddie_count(user_id, guild_id)
-        return ret
-
-    def set_pending_points(self, user_id: int, guild_id: int, points: int) -> UpdateResult:
-        """
-        Sets a user's pending points to a given value.
-
-        :param user_id: int - The ID of the user to look for
-        :param guild_id: int - The guild ID that the user belongs in
-        :param points: int - points to set the user's pending value to
-        :return: UpdateResults object
-        """
-        return self.update({"uid": user_id, "guild_id": guild_id}, {"$set": {"pending_points": points}})
-
     def set_daily_minimum(self, user_id, guild_id, points) -> UpdateResult:
         """
         Sets the user's daily minimum points to a given value.
@@ -127,18 +119,14 @@ class UserPoints(BestSummerEverPointsDB):
         """
         return self.update({"uid": user_id, "guild_id": guild_id}, {"$set": {"daily_minimum": points}})
 
-    def increment_pending_points(self, user_id: int, guild_id: int, amount: int) -> UpdateResult:
-        """
-        Increases the 'pending' points of specified user
-
-        :param user_id: int - The ID of the user to look for
-        :param guild_id: int - The guild ID that the user belongs in
-        :param amount: int - amount to increase pending points by
-        :return: UpdateResults object
-        """
-        return self.update({"uid": user_id, "guild_id": guild_id}, {"$inc": {"pending_points": amount}})
-
-    def increment_points(self, user_id: int, guild_id: int, amount: int) -> UpdateResult:
+    def increment_points(
+        self,
+        user_id: int,
+        guild_id: int,
+        amount: int,
+        transaction_type: TransactionTypes,
+        **kwargs,
+    ) -> UpdateResult:
         """
         Increases a user's points by a set amount.
 
@@ -150,6 +138,14 @@ class UserPoints(BestSummerEverPointsDB):
         ret = self.update({"uid": user_id, "guild_id": guild_id}, {"$inc": {"points": amount}})
         if amount > 0:
             self.__check_highest_eddie_count(user_id, guild_id)
+        # add transaction here
+        self._trans.add_transaction(
+            user_id,
+            guild_id,
+            transaction_type,
+            amount,
+            **kwargs
+        )
         return ret
 
     def increment_daily_minimum(self, user_id: int, guild_id: int, amount: int) -> UpdateResult:
@@ -163,28 +159,6 @@ class UserPoints(BestSummerEverPointsDB):
         """
         return self.update({"uid": user_id, "guild_id": guild_id}, {"$inc": {"daily_minimum": amount}})
 
-    def decrement_pending_points(self, user_id: int, guild_id: int, amount: int) -> UpdateResult:
-        """
-        Decreases a user's pending points by a set amount.
-
-        :param user_id: int - The ID of the user to look for
-        :param guild_id: int - The guild ID that the user belongs in
-        :param amount: int - amount to decrease pending points by
-        :return: UpdateResults object
-        """
-        return self.increment_pending_points(user_id, guild_id, amount * -1)
-
-    def decrement_points(self, user_id: int, guild_id: int, amount: int) -> UpdateResult:
-        """
-        Decreases a user's points by a set amount.
-
-        :param user_id: int - The ID of the user to look for
-        :param guild_id: int - The guild ID that the user belongs in
-        :param amount: int - amount to decrease points by
-        :return: UpdateResults object
-        """
-        return self.increment_points(user_id, guild_id, amount * -1)
-
     def decrement_daily_minimum(self, user_id: int, guild_id: int, amount: int) -> UpdateResult:
         """
         Decreases a user's daily minimum points by set amount
@@ -196,18 +170,20 @@ class UserPoints(BestSummerEverPointsDB):
         """
         return self.increment_daily_minimum(user_id, guild_id, amount * -1)
 
-    def create_user(self, user_id: int, guild_id: int, dailies: bool = False) -> None:
+    def create_user(self, user_id: int, guild_id: int, name: str, dailies: bool = False) -> None:
         """
         Create basic user points document.
 
         :param dailies:
         :param user_id: int - The ID of the user to look for
+        :param name: str - username
         :param guild_id: int - The guild ID that the user belongs in
         :return: None
         """
         user_doc = {
             "uid": user_id,
             "guild_id": guild_id,
+            "name": name,
             "points": 10,
             "pending_points": 0,
             "inactive": False,
@@ -218,17 +194,35 @@ class UserPoints(BestSummerEverPointsDB):
             "high_score": 10
         }
         self.insert(user_doc)
+        self._trans.add_transaction(
+            user_id,
+            guild_id,
+            TransactionTypes.USER_CREATE,
+            10,
+            comment="User created"
+        )
 
-    def set_daily_eddies_toggle(self, user_id: int, guild_id: int, value: bool) -> None:
+    def set_daily_eddies_toggle(self, user_id: int, guild_id: int, value: bool, summary_enabled: bool = False) -> None:
         """
         Sets the "daily eddies" toggle for the given user.
         This toggle determines if the user will receive the daily allowance messages from the bot.
         :param user_id: the user id to use
         :param guild_id: the guild id
         :param value: bool - whether or not the messages should be sent
+        :param summary_enabled: bool - whether the daily summary should be sent to this user
         :return:
         """
-        self.update({"uid": user_id, "guild_id": guild_id}, {"$set": {"daily_eddies": value}})
+        if guild_id:
+            self.update(
+                {"uid": user_id, "guild_id": guild_id},
+                {"$set": {"daily_eddies": value, "daily_summary": summary_enabled}}
+            )
+        else:
+            self.update(
+                {"uid": user_id},
+                {"$set": {"daily_eddies": value, "daily_summary": summary_enabled}},
+                many=True
+            )
 
     def set_king_flag(self, user_id: int, guild_id: int, value: bool) -> None:
         """
@@ -250,45 +244,6 @@ class UserPoints(BestSummerEverPointsDB):
         ret = self.query({"guild_id": guild_id, "king": True})
         if ret:
             return ret[0]
-
-    def append_to_transaction_history(self, user_id: int, guild_id: int, activity: dict) -> UpdateResult:
-        """
-        Add an item to a user's transaction history
-
-        Activity must be in the format:
-        {
-            'type': TRANSACTION_TYPE
-            'amount': AMOUNT OF EDDIES GAINED/LOST (this should be positive for gain / negative for loss)
-            'bet_id': OPTIONAL. Bet ID of bet user gained/lost eddies on
-            'user_id': OPTIONAL. User ID user gave/received eddies to/from
-            'timestamp': DATETIME OBJECT FOR TIMESTAMP
-            'comment': OPTIONAL. Comment as to what happened
-        }
-
-        :param user_id: int - The ID of the user to look for
-        :param guild_id: int - The guild ID that the user belongs in
-        :param activity: the activity dict to add to the transaction history
-        :return: None
-        """
-        return self.update({"uid": user_id, "guild_id": guild_id}, {"$push": {"transaction_history": activity}})
-
-    def append_to_activity_history(self, user_id: int, guild_id: int, activity: dict) -> None:
-        """
-        Add an item to a user's activity history
-
-        Activity must be in the format:
-        {
-            'type': ACTIVITY_TYPE,
-            'timestamp': DATETIME OBJECT FOR TIMESTAMP
-            'comment': OPTIONAL. Comment as to what happened
-        }
-
-        :param user_id:
-        :param guild_id:
-        :param activity:
-        :return:
-        """
-        self.update({"uid": user_id, "guild_id": guild_id}, {"$push": {"activity_history": activity}})
 
     @staticmethod
     def get_king_info(king_user: dict) -> dict:

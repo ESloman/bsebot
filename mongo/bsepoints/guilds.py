@@ -48,7 +48,11 @@ class Guilds(BestSummerEverPointsDB):
             "owner_id": owner_id,
             "created": created,
             "tax_rate": 0.1,
-            "update_messages": False
+            "update_messages": False,
+            "release_notes": False,
+            "wordle": False,
+            "valorant_rollcall": False,
+            "wordle_reminders": False
         }
 
         return self.insert(doc)
@@ -67,7 +71,7 @@ class Guilds(BestSummerEverPointsDB):
         Returns:
             int: the channel ID
         """
-        ret = self.query({"guild_id": guild_id}, {"channel": True})
+        ret = self.query({"guild_id": guild_id}, projection={"channel": True})
         if not ret or "channel" not in ret[0]:
             return None
         ret = ret[0]
@@ -162,6 +166,20 @@ class Guilds(BestSummerEverPointsDB):
         """
 
         return self.update({"guild_id": guild_id}, {"$set": {"pledged": []}})
+
+    def set_revolution_toggle(self, guild_id: int, enabled: bool) -> UpdateResult:
+        """
+        Set the bool the enables/disables the revolution event
+
+        Args:
+            guild_id (int): the guild ID
+            enabled (bool): whether the revolution event is enabled/disabled
+
+        Returns:
+            UpdateResult: return result
+        """
+
+        return self.update({"guild_id": guild_id}, {"$set": {"revolution": enabled}})
 
     #
     # Hash stuff
@@ -265,6 +283,46 @@ class Guilds(BestSummerEverPointsDB):
         return self.update({"guild_id": guild_id}, {"$set": {"release_ver": release_ver}})
 
     #
+    # Salary stuff
+    #
+
+    def get_daily_minimum(
+        self,
+        guild_id: int
+    ) -> int:
+        """
+        Gets daily minimum for the given guild
+
+        Args:
+            guild_id (int): guild ID to get min for
+
+        Returns:
+            int: the minimum
+        """
+        ret = self.query({"guild_id": guild_id})
+        if ret:
+            return ret[0].get("daily_minimum")
+        return None
+
+    def set_daily_minimum(
+        self,
+        guild_id: int,
+        amount: int
+    ) -> UpdateResult:
+        """
+        Updates daily minimum salary for given guild ID with given amount
+
+        Args:
+            guild_id (int): guild ID to update
+            amount (int): amount to set daily minimum to
+
+        Returns:
+            UpdateResult: update result
+        """
+        ret = self.update({"guild_id": guild_id}, {"$set": {"daily_minimum": amount}})
+        return ret
+
+    #
     #  Tax stuff
     #
 
@@ -327,3 +385,150 @@ class Guilds(BestSummerEverPointsDB):
             return 0.1, 0.0
         ret = ret[0]
         return ret["tax_rate"], ret["supporter_tax_rate"]
+
+    #
+    # Ad stuff
+    #
+
+    def get_last_ad_time(self, guild_id: int) -> datetime.datetime:
+        """
+        Gets the last ad time
+
+        Args:
+            guild_id (int): the guild ID to do this for
+
+        Returns:
+            dateteime: the time this guild last had a marvel comics ad
+        """
+        ret = self.query({"guild_id": guild_id}, projection={"last_ad_time": True})
+        if not ret or "last_ad_time" not in ret[0]:
+            return None
+        ret = ret[0]
+        return ret["last_ad_time"]
+
+    def set_last_ad_time(self, guild_id: int, timestamp: datetime.datetime) -> UpdateResult:
+        """
+        Sets the last ad time
+
+        Args:
+            guild_id (int): the guild ID to do this for
+            timestamp (datetime): the timestamp to set
+
+        Returns:
+            UpdateResult: update result
+        """
+        ret = self.update({"guild_id": guild_id}, {"$set": {"last_ad_time": timestamp}})
+        return ret
+
+    #
+    # Remind me reminder stuff
+    #
+
+    def get_last_remind_me_time(self, guild_id: int) -> datetime.datetime:
+        """
+        Gets the last remind me suggestion time
+
+        Args:
+            guild_id (int): the guild ID to do this for
+
+        Returns:
+            dateteime: the time this guild last had a marvel comics ad
+        """
+        ret = self.query({"guild_id": guild_id}, projection={"last_remind_me_suggest_time": True})
+        if not ret or "last_remind_me_suggest_time" not in ret[0]:
+            return None
+        ret = ret[0]
+        return ret["last_remind_me_suggest_time"]
+
+    def set_last_remind_me_time(self, guild_id: int, timestamp: datetime.datetime) -> UpdateResult:
+        """
+        Sets the last remind me suggested time
+
+        Args:
+            guild_id (int): the guild ID to do this for
+            timestamp (datetime): the timestamp to set
+
+        Returns:
+            UpdateResult: update result
+        """
+        ret = self.update({"guild_id": guild_id}, {"$set": {"last_remind_me_suggest_time": timestamp}})
+        return ret
+
+    #
+    # Valorant stuff
+    #
+
+    def set_valorant_config(
+        self,
+        guild_id: int,
+        active: bool,
+        channel: int = None,
+        role: int = None
+    ) -> UpdateResult:
+        """
+        Sets valorant config options
+
+        Args:
+            guild_id (int): guild ID to set for
+            active (bool): whether valorant roll call is turned on/off for guild
+            channel (int, optional): channel ID of channel to post in. Defaults to None.
+            role (int, optional): role ID of role to mention
+
+        Returns:
+            UpdateResult: update result
+        """
+        ret = self.update(
+            {"guild_id": guild_id},
+            {"$set": {"valorant_rollcall": active, "valorant_channel": channel, "valorant_role": role}}
+        )
+        return ret
+
+    #
+    # Wordle stuff
+    #
+
+    def set_wordle_config(
+        self,
+        guild_id: int,
+        active: bool,
+        channel: int = None,
+        reminders: bool = False
+    ) -> UpdateResult:
+        """
+        Sets wordle config options
+
+        Args:
+            guild_id (int): guild ID to set for
+            active (bool): whether wordle is turned on/off for guild
+            channel (int, optional): channel ID of channel to post in. Defaults to None.
+            reminders (bool, optional): whether reminders are on/off for guild. Defaults to False.
+
+        Returns:
+            UpdateResult: update result
+        """
+        ret = self.update(
+            {"guild_id": guild_id},
+            {"$set": {"wordle": active, "wordle_channel": channel, "wordle_reminders": reminders}}
+        )
+        return ret
+
+    #
+    # Revolution stuff
+    #
+
+    def set_last_rigged_time(
+        self,
+        guild_id: int
+    ) -> UpdateResult:
+        """
+        Sets last rigged message time
+
+        Args:
+            guild_id (int): the guild to set this for
+
+        Returns:
+            UpdateResult: update result
+        """
+        now = datetime.datetime.now()
+        ret = self.update({"guild_id": guild_id}, {"$set": {"last_rigged_time": now}})
+        return ret

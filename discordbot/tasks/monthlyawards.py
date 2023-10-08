@@ -1,53 +1,54 @@
+
+import asyncio
 import datetime
+from logging import Logger
 
 import discord
-from discord.ext import tasks, commands
+from discord.ext import tasks
 
+from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_SERVER_ID, BSEDDIES_REVOLUTION_CHANNEL
 from discordbot.stats.awardsbuilder import AwardsBuilder
+from discordbot.tasks.basetask import BaseTask
 
 
-class MonthlyBSEddiesAwards(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger, startup_tasks):
-        self.bot = bot
-        self.logger = logger
-        self.startup_tasks = startup_tasks
-        self.guilds = guilds
-        self.bseddies_awards.start()
+class MonthlyBSEddiesAwards(BaseTask):
+    def __init__(
+        self,
+        bot: BSEBot,
+        guild_ids: list[int],
+        logger: Logger,
+        startup_tasks: list[BaseTask]
+    ):
 
-    def cog_unload(self):
-        """
-        Method for cancelling the loop.
-        :return:
-        """
-        self.bseddies_awards.cancel()
-
-    def _check_start_up_tasks(self) -> bool:
-        """
-        Checks start up tasks
-        """
-        for task in self.startup_tasks:
-            if not task.finished:
-                return False
-        return True
+        super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.task = self.bseddies_awards
+        self.task.start()
 
     @tasks.loop(minutes=60)
     async def bseddies_awards(self):
-        if not self._check_start_up_tasks():
-            self.logger.info("Startup tasks not complete - skipping loop")
-            return
+        """
+        Loop that triggers our monthly awards. This will trigger on the 1st of a month.
+        Calculates guild stats/awards.
+        """
         now = datetime.datetime.now()
 
-        if not now.day == 1 or not now.hour == 11:
+        # whether to run in debug mode or not
+        debug = False
+
+        if (not now.day == 1 or not now.hour == 11) and not debug:
             # we only want to trigger on the first of each month
             # and also trigger at 11am
             return
 
-        if BSE_SERVER_ID not in self.guilds:
+        if BSE_SERVER_ID not in self.guild_ids:
             # does not support other servers yet
             return
 
-        self.logger.info(f"It's the first of the month and about ~11ish - time to trigger the awards! {now=}")
+        if not debug:
+            self.logger.info(f"It's the first of the month and about ~11ish - time to trigger the awards! {now=}")
+        else:
+            self.logger.info("Debug is true (%s) - testing stats/awards", debug)
 
         # set some kind of activity here
         activity = discord.Activity(
@@ -55,23 +56,33 @@ class MonthlyBSEddiesAwards(commands.Cog):
             type=discord.ActivityType.playing,
             details="Working out monthly BSEddies awards"
         )
-        await self.bot.change_presence(activity=activity)
 
-        # put a "BSEBot is typing..." message
-        channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
-        await channel.trigger_typing()
+        if not debug:
+            await self.bot.change_presence(activity=activity)
 
-        awards_builder = AwardsBuilder(self.bot, BSE_SERVER_ID, self.logger, False)
+        if not debug:
+            # put a "BSEBot is typing..." message
+            channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
+            await channel.trigger_typing()
+
+        awards_builder = AwardsBuilder(self.bot, BSE_SERVER_ID, self.logger, False, debug)
 
         self.logger.debug("Calculating stats")
         stats, message = await awards_builder.build_stats_and_message()
         self.logger.debug("Calculating awards")
         awards, bseddies_awards = await awards_builder.build_awards_and_message()
 
+        send_messages = True
+        if now.month == 1:
+            # don't send awards in Jan
+            # will be superseded by the annual stuff
+            send_messages = False
+
         self.logger.debug("Logging to DB and sending messages")
         await awards_builder.send_stats_and_awards(
             stats, message,
-            awards, bseddies_awards
+            awards, bseddies_awards,
+            send_messages
         )
 
         # set activity back
@@ -80,14 +91,17 @@ class MonthlyBSEddiesAwards(commands.Cog):
             type=discord.ActivityType.listening,
             details="Waiting for commands!"
         )
-        await self.bot.change_presence(activity=listening_activity)
+
+        if not debug:
+            await self.bot.change_presence(activity=listening_activity)
 
         self.logger.info("Sent messages! Until next month!")
 
     @bseddies_awards.before_loop
     async def before_thread_mute(self):
         """
-        Make sure that websocket is open before we starting querying via it.
-        :return:
+        Make sure that websocket is open before we start querying via it.
         """
         await self.bot.wait_until_ready()
+        while not self._check_start_up_tasks():
+            await asyncio.sleep(5)

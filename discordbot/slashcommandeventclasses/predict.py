@@ -4,17 +4,20 @@ import discord
 from discordbot.bot_enums import ActivityTypes
 from discordbot.constants import CREATOR, HUMAN_MESSAGE_TYPES
 from discordbot.tasks.eddiegains import BSEddiesManager
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
-class BSEddiesPredict(BSEddies):
+class Predict(BSEddies):
     """
     Class for handling `/bseddies predict` command
     """
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
-        self.manager = BSEddiesManager(client, logger)
+        self.manager = BSEddiesManager(client, guilds, logger, [])
+        self.activity_type = ActivityTypes.BSEDDIES_PREDICT
+        self.help_string = "Predict your daily salary gain for today"
+        self.command_name = "predict"
 
     async def predict(self, ctx: discord.ApplicationContext) -> None:
         """

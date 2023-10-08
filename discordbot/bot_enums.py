@@ -37,6 +37,9 @@ class TransactionTypes(IntEnum):
     MONTHLY_AWARDS_PRIZE = 25
     ANNUAL_AWARDS_PRIZE = 26
     KING_RENAME = 27
+    REVOLUTION_SAVE = 29
+    BLESS_GIVE = 30
+    BLESS_RECEIVE = 31
     OVERRIDE = 99
 
 
@@ -86,6 +89,13 @@ class ActivityTypes(IntEnum):
     BLESS_ACTUAL = 40
     HELP = 41
     SUGGEST = 42
+    REV_OVERTHROW = 43
+    REV_SUPPORT = 44
+    REV_NEUTRAL = 45
+    REV_SAVE = 46
+    CONFIG = 47
+    REFRESH = 48
+    WORDLE = 49
 
 
 class AwardsTypes(IntEnum):
@@ -115,6 +125,7 @@ class AwardsTypes(IntEnum):
     POTTY_MOUTH = 21
     SINGLE_MINDED = 22
     DIVERSE_PORTFOLIO = 23
+    WORST_AVG_WORDLE = 24
 
 
 class StatTypes(IntEnum):

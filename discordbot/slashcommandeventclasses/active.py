@@ -2,16 +2,19 @@
 import discord
 
 from discordbot.bot_enums import ActivityTypes
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
-class BSEddiesActive(BSEddies):
+class Active(BSEddies):
     """
     Class for handling `/active` commands
     """
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.activity_type = ActivityTypes.BSEDDIES_ACTIVE
+        self.help_string = "Lists all the open bets"
+        self.command_name = "active"
 
     async def active(self, ctx: discord.ApplicationContext) -> None:
         """
@@ -37,7 +40,7 @@ class BSEddiesActive(BSEddies):
         message = "Here are all the active bets:\n"
 
         for bet in bets:
-            if 'channel_id' not in bet or 'message_id' not in bet:
+            if "channel_id" not in bet or "message_id" not in bet:
                 continue
 
             if bet.get("private"):
@@ -48,7 +51,7 @@ class BSEddiesActive(BSEddies):
 
             add_text = "OPEN FOR NEW BETS" if bet.get("active") else "CLOSED - AWAITING RESULT"
 
-            pt = f"**{bets.index(bet) + 1})** [{bet['bet_id']} - `{add_text}`] _{bet['title']}_\n{link}\n\n"
+            pt = f"- **{bets.index(bet) + 1})** [{bet['bet_id']} - `{add_text}`] _[{bet['title']}](<{link}>)_\n"
             message += pt
 
             if (len(message) + 400) > 2000 and bet != bets[-1]:

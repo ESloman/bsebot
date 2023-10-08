@@ -1,21 +1,24 @@
-import datetime
 
 import discord
 
 from discordbot.bot_enums import TransactionTypes, ActivityTypes
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
-class BSEddiesGift(BSEddies):
+class Gift(BSEddies):
     """
     Class for handling `/bseddies gift` command
     """
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.activity_type = ActivityTypes.BSEDDIES_GIFT
+        self.help_string = "Gift some eddies to a friend"
+        self.command_name = "gift"
 
     async def gift_eddies(
-        self, ctx: discord.ApplicationContext,
+        self,
+        ctx: discord.ApplicationContext | discord.Interaction,
         friend: discord.User,
         amount: int
     ) -> None:
@@ -34,48 +37,44 @@ class BSEddiesGift(BSEddies):
             return
 
         self._add_event_type_to_activity_history(
-            ctx.author, ctx.guild_id, ActivityTypes.BSEDDIES_GIFT,
+            ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_GIFT,
             friend_id=friend.id, amount=amount
         )
 
-        points = self.user_points.get_user_points(ctx.author.id, ctx.guild.id)
+        if type(ctx) is discord.ApplicationContext:
+            response = ctx.respond
+        elif type(ctx) is discord.Interaction:
+            response = ctx.response.send_message
+        else:
+            response = ctx.respond
+
+        points = self.user_points.get_user_points(ctx.user.id, ctx.guild.id)
         if points < amount:
             msg = "You have insufficient points to perform that action."
-            await ctx.respond(content=msg, ephemeral=True)
+            await response(content=msg, ephemeral=True, delete_after=10)
             return
 
         if not friend.dm_channel:
             await friend.create_dm()
         try:
-            msg = f"**{ctx.author.name}** just gifted you `{amount}` eddies!!"
-            await friend.send(content=msg)
-        except discord.errors.Forbidden:
+            msg = f"**{ctx.user.name}** just gifted you `{amount}` eddies!!"
+            await friend.send(content=msg, silent=True)
+        except discord.Forbidden:
             pass
 
-        self.user_points.decrement_points(ctx.author.id, ctx.guild.id, amount)
-        self.user_points.increment_points(friend.id, ctx.guild.id, amount)
-
-        # add to transaction history
-        self.user_points.append_to_transaction_history(
-            ctx.author.id,
+        self.user_points.increment_points(
+            ctx.user.id,
             ctx.guild.id,
-            {
-                "type": TransactionTypes.GIFT_GIVE,
-                "amount": amount * -1,
-                "timestamp": datetime.datetime.now(),
-                "user_id": friend.id,
-            }
+            amount * -1,
+            TransactionTypes.GIFT_GIVE,
+            friend_id=friend.id
         )
-
-        self.user_points.append_to_transaction_history(
+        self.user_points.increment_points(
             friend.id,
             ctx.guild.id,
-            {
-                "type": TransactionTypes.GIFT_RECEIVE,
-                "amount": amount,
-                "timestamp": datetime.datetime.now(),
-                "user_id": ctx.author.id,
-            }
+            amount,
+            TransactionTypes.GIFT_RECEIVE,
+            friend_id=ctx.user.id
         )
 
-        await ctx.respond(content=f"Eddies transferred to `{friend.name}`!", ephemeral=True)
+        await response(content=f"Eddies transferred to `{friend.name}`!", ephemeral=True, delete_after=5)

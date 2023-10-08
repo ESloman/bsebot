@@ -1,15 +1,18 @@
 
 import discord
 
-import discordbot.views as views
 from discordbot.bot_enums import ActivityTypes
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
+from discordbot.views.bless import BlessView
 
 
-class BSEddiesBless(BSEddies):
+class Bless(BSEddies):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.activity_type = ActivityTypes.BSEDDIES_ACTIVE
+        self.help_string = "Allows the KING to bless supporters/everyone"
+        self.command_name = "bless"
 
     async def create_bless_view(self, ctx: discord.ApplicationContext) -> None:
 
@@ -17,7 +20,7 @@ class BSEddiesBless(BSEddies):
             return
 
         self._add_event_type_to_activity_history(
-            ctx.user, ctx.guild_id, ActivityTypes.BLESS, user_id=ctx.user.id
+            ctx.user, ctx.guild_id, ActivityTypes.BLESS
         )
 
         guild_id = ctx.guild.id
@@ -26,10 +29,10 @@ class BSEddiesBless(BSEddies):
 
         if ctx.user.id != king_id:
             message = "You are not the King - you cannot bless."
-            await ctx.respond(content=message, ephemeral=True)
+            await ctx.respond(content=message, ephemeral=True, delete_after=10)
             return
 
-        view = views.BlessView()
+        view = BlessView()
 
         msg = (
             "Please select _who_ to bless and how much by. "

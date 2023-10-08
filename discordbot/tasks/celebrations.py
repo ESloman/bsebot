@@ -1,34 +1,27 @@
+
+import asyncio
 import datetime
+from logging import Logger
 
-import discord
-from discord.ext import tasks, commands
+from discord.ext import tasks
 
+from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_SERVER_ID, BSEDDIES_REVOLUTION_CHANNEL
+from discordbot.tasks.basetask import BaseTask
 
 
-class Celebrations(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger, startup_tasks):
-        self.bot = bot
-        self.logger = logger
-        self.guilds = guilds
-        self.startup_tasks = startup_tasks
-        self.celebrations.start()
+class Celebrations(BaseTask):
+    def __init__(
+        self,
+        bot: BSEBot,
+        guild_ids: list[int],
+        logger: Logger,
+        startup_tasks: list[BaseTask]
+    ):
 
-    def cog_unload(self):
-        """
-        Method for cancelling the loop.
-        :return:
-        """
-        self.celebrations.cancel()
-
-    def _check_start_up_tasks(self) -> bool:
-        """
-        Checks start up tasks
-        """
-        for task in self.startup_tasks:
-            if not task.finished:
-                return False
-        return True
+        super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.task = self.celebrations
+        self.task.start()
 
     @tasks.loop(minutes=15)
     async def celebrations(self):
@@ -36,12 +29,10 @@ class Celebrations(commands.Cog):
         Send celebration message
         :return:
         """
-        if not self._check_start_up_tasks():
-            self.logger.info("Startup tasks not complete - skipping loop")
-            return
+
         now = datetime.datetime.now()
 
-        if BSE_SERVER_ID not in self.guilds:
+        if BSE_SERVER_ID not in self.guild_ids:
             return
 
         if now.month == 12 and now.day == 25:
@@ -97,7 +88,8 @@ class Celebrations(commands.Cog):
     @celebrations.before_loop
     async def before_celebrations(self):
         """
-        Make sure that websocket is open before we starting querying via it.
-        :return:
+        Make sure that websocket is open before we start querying via it.
         """
         await self.bot.wait_until_ready()
+        while not self._check_start_up_tasks():
+            await asyncio.sleep(5)

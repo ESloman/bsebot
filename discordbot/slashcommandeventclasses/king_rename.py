@@ -4,16 +4,19 @@ import datetime
 import discord
 
 from discordbot.bot_enums import ActivityTypes, TransactionTypes
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
-class BSEddiesKingRename(BSEddies):
+class KingRename(BSEddies):
     """
     Class for handling `/renameking` commands
     """
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.activity_type = ActivityTypes.RENAME_KING
+        self.help_string = "Pay 500 eddies to rename one of the BSEddies roles"
+        self.command_name = "rename"
 
     async def rename(
         self,
@@ -77,11 +80,11 @@ class BSEddiesKingRename(BSEddies):
                     f"The {role.upper()} role was renamed within the last hour can't be changed again - "
                     f"need to wait another `{mins}` minutes."
                 )
-                await ctx.followup.send(content=message, ephemeral=True)
+                await ctx.followup.send(content=message, ephemeral=True, delete_after=20)
                 return
 
         if not role_id:
-            await ctx.followup.send("Guild role not set correctly.", ephemeral=True)
+            await ctx.followup.send("Guild role not set correctly.", ephemeral=True, delete_after=20)
             return
         role_obj = ctx.guild.get_role(role_id)
 
@@ -89,28 +92,23 @@ class BSEddiesKingRename(BSEddies):
             await role_obj.edit(name=name)
         except discord.Forbidden:
             message = "Don't have the required permissions to do this."
-            await ctx.followup.send(message, ephemeral=True)
+            await ctx.followup.send(message, ephemeral=True, delete_after=30)
             return
 
-        self.user_points.decrement_points(ctx.author.id, ctx.guild.id, spend)
-
-        self.user_points.append_to_transaction_history(
+        self.user_points.increment_points(
             ctx.author.id,
             ctx.guild.id,
-            {
-                "type": TransactionTypes.KING_RENAME,
-                "amount": spend * -1,
-                "timestamp": datetime.datetime.now(),
-                "role_id": role_id,
-                "guild_id": ctx.guild.id
-            }
+            spend * -1,
+            TransactionTypes.KING_RENAME,
+            comment=f"Change {role_id} to {name}",
+            role_id=role_id
         )
 
         self.guilds.update({"guild_id": ctx.guild.id}, {"$set": {key: now}})
 
         channel_id = db_guild.get("channel")
         if channel_id:
-            channel = await ctx.guild.fetch_channel(channel_id)
+            channel = await self.client.fetch_channel(channel_id)
             await channel.trigger_typing()
 
             # get king user
@@ -124,4 +122,4 @@ class BSEddiesKingRename(BSEddies):
             await channel.send(content=ann)
 
         message = f"Changed the role name to `{name}` for you."
-        await ctx.followup.send(content=message, ephemeral=True, silent=True)
+        await ctx.followup.send(content=message, ephemeral=True, delete_after=20)

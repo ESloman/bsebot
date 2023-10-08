@@ -1,59 +1,38 @@
+
+import asyncio
 import datetime
 import random
+from logging import Logger
 
-import discord
-from discord.ext import tasks, commands
+from discord.ext import tasks
 
-from discordbot.constants import VALORANT_CHAT, VALORANT_ROLE, BSE_SERVER_ID, BSE_BOT_ID
-from mongo.bsepoints.interactions import UserInteractions
+from discordbot import utilities
+from discordbot.bsebot import BSEBot
+from discordbot.constants import BSE_SERVER_ID
+from discordbot.message_strings.valorant_rollcalls import MESSAGES
+from discordbot.tasks.basetask import BaseTask
 
 
-class AfterWorkVally(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger, startup_tasks):
-        self.bot = bot
-        self.logger = logger
-        self.guilds = guilds
-        self.startup_tasks = startup_tasks
-        self.user_interactions = UserInteractions()
-        self.vally_message.start()
+class AfterWorkVally(BaseTask):
+    def __init__(
+        self,
+        bot: BSEBot,
+        guild_ids: list[int],
+        logger: Logger,
+        startup_tasks: list[BaseTask]
+    ):
 
-        self.messages = [
-            "Anyone playing after-work {role} today?",
-            "Who's about for after-work {role}?",
-            "Anyone wanna get salty playing {role}?",
-            "Who's gonna grind some `Breeze` today {role}?",
-            "Anyone want to lose some RR {role}?",
-            "Who wants to roll some fat 1s playing {role}?",
-            "Can we get an after-work 5-stack today for {role}?"
-        ]
-
-    def _check_start_up_tasks(self) -> bool:
-        """
-        Checks start up tasks
-        """
-        for task in self.startup_tasks:
-            if not task.finished:
-                return False
-        return True
-
-    def cog_unload(self):
-        """
-        Method for cancelling the loop.
-        :return:
-        """
-        self.vally_message.cancel()
+        super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.task = self.vally_message
+        self.task.start()
 
     @tasks.loop(minutes=10)
     async def vally_message(self):
         """
-        Loop that makes sure the King is assigned correctly
-        :return:
+        Loop that sends the daily vally rollcall
         """
-        if not self._check_start_up_tasks():
-            self.logger.info("Startup tasks not complete - skipping loop")
-            return
 
-        if BSE_SERVER_ID not in self.guilds:
+        if BSE_SERVER_ID not in self.guild_ids:
             return
 
         now = datetime.datetime.now()
@@ -64,48 +43,79 @@ class AfterWorkVally(commands.Cog):
         if now.hour != 15 or not (45 <= now.minute <= 54):
             return
 
-        self.logger.info("Checking for channel interactivity")
+        for guild in self.bot.guilds:
+            # set this up for theoretically working with other guilds
+            # but only work for BSE Server for now
+            if guild.id != BSE_SERVER_ID:
+                continue
 
-        latest_bot_message = list(self.user_interactions.vault.find(
-            {"user_id": BSE_BOT_ID, "channel_id": VALORANT_CHAT, "message_type": "role_mention"},
-            sort=[("timestamp", -1)],
-            limit=1
-        ))[0]
+            guild_db = self.guilds.get_guild(guild.id)
 
-        latest_time = latest_bot_message["timestamp"]
+            if not guild_db.get("valorant_rollcall"):
+                self.logger.info("Valorant rollcall is disabled")
+                continue
 
-        messages = self.user_interactions.query(
-            {
-                "timestamp": {"$gt": latest_time},
-                "channel_id": VALORANT_CHAT
-            }
-        )
+            valorant_channel = guild_db.get("valorant_channel")
+            if not valorant_channel:
+                self.logger.info("Valorant channel isn't configured")
+                continue
 
-        if not messages:
-            self.logger.info(
-                f"Not been any messages in #valorant-chat since {latest_time} - skipping the daily vally message"
+            self.logger.info("Checking for channel interactivity")
+
+            latest_bot_message = list(self.interactions.vault.find(
+                {"user_id": self.bot.user.id, "channel_id": valorant_channel, "message_type": "role_mention"},
+                sort=[("timestamp", -1)],
+                limit=1
+            ))[0]
+
+            latest_time = latest_bot_message["timestamp"]
+
+            messages = self.interactions.query(
+                {
+                    "timestamp": {"$gt": latest_time},
+                    "channel_id": valorant_channel,
+                    "is_bot": False,
+                }
             )
-            return
 
-        self.logger.debug(f"{len(messages)} since our last vally rollcall")
+            if not messages:
+                self.logger.info(
+                    f"Not been any messages in the channel since {latest_time} - skipping the daily vally message"
+                )
+                continue
 
-        self.logger.info("Time to send vally message!")
+            self.logger.debug(f"{len(messages)} since our last vally rollcall")
+            self.logger.info("Time to send vally message!")
 
-        guild = await self.bot.fetch_guild(BSE_SERVER_ID)  # type: discord.Guild
-        channel = await guild.fetch_channel(VALORANT_CHAT)
-        await channel.trigger_typing()
-        role = guild.get_role(VALORANT_ROLE)
+            guild = await self.bot.fetch_guild(guild.id)
+            channel = await self.bot.fetch_channel(valorant_channel)
+            await channel.trigger_typing()
 
-        message = random.choice(self.messages)  # type: str
-        message = message.format(role=role.mention)
+            if role_id := guild_db.get("valorant_role"):
+                role = guild.get_role(role_id)
+                _mention = role.mention
+            else:
+                _mention = "`Valorant`"
 
-        self.logger.info(f"Sending daily vally message: {message}")
-        await channel.send(content=message)
+            odds = utilities.calculate_message_odds(
+                self.interactions,
+                guild.id,
+                MESSAGES,
+                "{role}",
+                [0, 1],
+            )
+
+            message = random.choices([message[0] for message in odds], [message[1] for message in odds])[0]
+            message = message.format(role=_mention)
+
+            self.logger.info(f"Sending daily vally message: {message}")
+            await channel.send(content=message)
 
     @vally_message.before_loop
     async def before_vally_message(self):
         """
-        Make sure that websocket is open before we starting querying via it.
-        :return:
+        Make sure that websocket is open before we start querying via it.
         """
         await self.bot.wait_until_ready()
+        while not self._check_start_up_tasks():
+            await asyncio.sleep(5)

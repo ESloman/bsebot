@@ -1,64 +1,55 @@
+
+import asyncio
 import datetime
+from logging import Logger
 
-import discord
-from discord.ext import tasks, commands
+from discord.ext import tasks
 
-from mongo.bsepoints.bets import UserBets
+from discordbot.bsebot import BSEBot
+from discordbot.tasks.basetask import BaseTask
 
 
-class BetReminder(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger, startup_tasks):
-        self.bot = bot
-        self.guilds = guilds
-        self.user_bets = UserBets()
-        self.logger = logger
-        self.startup_tasks = startup_tasks
-        self.bet_reminder.start()
+class BetReminder(BaseTask):
+    def __init__(
+        self,
+        bot: BSEBot,
+        guild_ids: list[int],
+        logger: Logger,
+        startup_tasks: list[BaseTask]
+    ):
 
-    def cog_unload(self):
-        """
-        Method for cancelling the loop.
-        :return:
-        """
-        self.bet_reminder.cancel()
-
-    def _check_start_up_tasks(self) -> bool:
-        """
-        Checks start up tasks
-        """
-        for task in self.startup_tasks:
-            if not task.finished:
-                return False
-        return True
+        super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.task = self.bet_reminder
+        self.task.start()
 
     @tasks.loop(minutes=60)
     async def bet_reminder(self):
         """
         Loop that takes all our active bets and sends a reminder message
-        :return:
         """
-        if not self._check_start_up_tasks():
-            self.logger.info("Startup tasks not complete - skipping loop")
-            return
 
         now = datetime.datetime.now()
-        for guild in self.guilds:
-            guild_obj = self.bot.get_guild(guild)  # type: discord.Guild
-            active = self.user_bets.get_all_active_bets(guild)
+        for guild in self.bot.guilds:
+            await self.bot.fetch_guild(guild.id)  # type: discord.Guild
+            active = self.user_bets.get_all_active_bets(guild.id)
             for bet in active:
                 timeout = bet["timeout"]
                 created = bet["created"]
-                if (timeout - created).total_seconds() <= 172800:
+                total_time = (timeout - created).total_seconds()
+
+                if total_time <= 604800:
+                    # if bet timeout is less than a week - don't bother with halfway reminders
                     continue
 
                 if now > timeout:
                     continue
 
                 diff = timeout - now
+
                 if 82800 <= diff.total_seconds() <= 86400:
                     # ~ 24 hours to go!
                     # send reminder here
-                    channel = await guild_obj.fetch_channel(bet["channel_id"])
+                    channel = await self.bot.fetch_channel(bet["channel_id"])
                     await channel.trigger_typing()
                     message = await channel.fetch_message(bet["message_id"])
 
@@ -69,12 +60,50 @@ class BetReminder(commands.Cog):
                         "Only roughly twenty four hours to get in on this bet!\n"
                         f"Current there's `{eddies_bet}` eddies on the line from **{num_betters}** betters."
                     )
+
+                    try:
+                        _place_command = [a for a in self.bot.application_commands if a.name == "place"][0]
+                        msg += f"\n\nUse {_place_command.mention} to place some eddies."
+                    except (IndexError, AttributeError):
+                        pass
+
                     await message.reply(content=msg)
+                    continue
+
+                half_time = total_time / 2
+                half_date = created + datetime.timedelta(seconds=half_time)
+
+                if now > half_date:
+                    continue
+
+                half_diff = half_date - now
+
+                if half_diff.total_seconds() < 3600:
+                    # within the hour threshold for half way
+                    channel = await self.bot.fetch_channel(bet["channel_id"])
+                    await channel.trigger_typing()
+                    message = await channel.fetch_message(bet["message_id"])
+
+                    eddies_bet = self.user_bets.count_eddies_for_bet(bet)
+
+                    msg = (
+                        "About halfway to go on this bet - don't forget to place some eddies!"
+                    )
+
+                    try:
+                        _place_command = [a for a in self.bot.application_commands if a.name == "place"][0]
+                        msg += f"\n\nUse {_place_command.mention} to place some eddies."
+                    except (IndexError, AttributeError):
+                        pass
+
+                    await message.reply(content=msg, silent=True)
+                    continue
 
     @bet_reminder.before_loop
     async def before_bet_reminder(self):
         """
-        Make sure that websocket is open before we starting querying via it.
-        :return:
+        Make sure that websocket is open before we start querying via it.
         """
         await self.bot.wait_until_ready()
+        while not self._check_start_up_tasks():
+            await asyncio.sleep(5)

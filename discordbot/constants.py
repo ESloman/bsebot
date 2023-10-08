@@ -8,12 +8,6 @@ SLOMAN_SERVER_ID = 291508460519161856
 BSE_SERVER_ID = 181098823228063764
 BSE_BOT_ID = 809505325505576971
 
-# bots that aren't ours
-BOT_IDS = [
-    439103207210352650,  # patch bot
-    272937604339466240  # craig bot
-]
-
 # the types of 'message' or 'interaction'
 # mostly used for calculating user salaries
 MESSAGE_TYPES = [
@@ -37,7 +31,9 @@ MESSAGE_TYPES = [
     "emoji_used",
     "emoji_created",
     "vc_joined",
-    "vc_streaming"
+    "vc_streaming",
+    "voice_message",
+    "wordle_word_used",
 ]
 
 # a mapping of the above message types to a more human readable/understandable version
@@ -59,14 +55,18 @@ HUMAN_MESSAGE_TYPES = {
     "thread_create": "Thread Create",
     "react_train": "Reaction train",
     "custom_emoji_reaction": "Emoji",
-    "custom_emoji": "Used a server emoji",
+    "custom_emoji": "Used a custom emoji",
+    "server_emoji": "Used a server emoji",
     "emoji_used": "Your server emoji used",
     "emoji_created": "Emoji created",
-    "custom_sticker": "Used a server sticker",
+    "custom_sticker": "Used a sticker",
+    "server_sticker": "Used a server sticker",
     "sticker_used": "Your server sticker used",
     "sticker_created": "Sticker created",
     "vc_joined": "Spent time in VC",
     "vc_streaming": "Spent time streaming",
+    "voice_message": "Voice Message",
+    "wordle_word_used": "Used daily Wordle word"
 }
 
 # a mapping of the above message types; and how many eddies they are worth for each individual occurence
@@ -87,13 +87,17 @@ MESSAGE_VALUES = {
     "react_train": 1,
     "custom_emoji_reaction": 2,
     "custom_emoji": 1,
+    "server_emoji": 2,
     "emoji_used": 2,
     "emoji_created": 5,
     "custom_sticker": 1,
     "sticker_used": 2,
     "sticker_created": 5,
+    "server_sticker": 2,
     "vc_joined": 0.0015,
-    "vc_streaming": 0.0025
+    "vc_streaming": 0.0025,
+    "voice_message": 4,
+    "wordle_word_used": 2
 }
 
 # the number of eddies a user received for each wordle score
@@ -121,14 +125,8 @@ BET_OUTCOME_COUNT_MODIFIER = {
 # the user that created the bot (aka ESloman)
 CREATOR = 189458414764687360
 
-# BSE boys role
-THE_BOYS_ROLE = 724888354004533258
-# BSE valorant role
-VALORANT_ROLE = 724885799119880272
-
 # BSE specific channel IDs
 BSEDDIES_REVOLUTION_CHANNEL = 817061592335122433
-VALORANT_CHAT = 724550853620662302
 GENERAL_CHAT = 181098823228063764
 JERK_OFF_CHAT = 470696533873000449
 
@@ -146,3 +144,10 @@ ANNUAL_AWARDS_AWARD = 500
 WORDLE_REGEX = r"Wordle \d?\d\d\d [\dX]/\d\n\n"
 # regex for getting wordle score
 WORDLE_SCORE_REGEX = r"[\dX]/\d"
+
+# cool down in seconds for marvel ad messages
+MARVEL_AD_COOLDOWN = 3600
+# cool down in seconds for remind me reminders
+REMIND_ME_COOLDOWN = 3600
+# cool down in seconds for rigged messages
+RIGGED_COOLDOWN = 300

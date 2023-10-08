@@ -1,7 +1,7 @@
 [tool.ruff]
 
-select = ["E", "F"]
-fixable = ["A", "B", "C", "D", "E", "F"]
+select = ["E", "F", "Q", "B"]
+fixable = ["A", "B", "C", "D", "E", "F", "Q"]
 
 exclude = [
     ".git",

@@ -2,16 +2,19 @@
 import discord
 
 from discordbot.bot_enums import ActivityTypes
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
-class BSEddiesPending(BSEddies):
+class Pending(BSEddies):
     """
     Class for handling `/bseddies pending` commands
     """
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.activity_type = ActivityTypes.BSEDDIES_PENDING
+        self.help_string = "See all the pending bets you have eddies on"
+        self.command_name = "pending"
 
     async def pending(self, ctx: discord.ApplicationContext) -> None:
         """
@@ -34,16 +37,16 @@ class BSEddiesPending(BSEddies):
         message = "Here are all your pending bets:\n"
 
         for bet in bets:
-            if 'channel_id' not in bet or 'message_id' not in bet:
+            if "channel_id" not in bet or "message_id" not in bet:
                 continue
 
             link = f"https://discordapp.com/channels/{ctx.guild.id}/{bet['channel_id']}/{bet['message_id']}"
 
             add_text = "OPEN FOR NEW BETS" if bet.get("active") else "CLOSED - AWAITING RESULT"
 
-            pt = (f"**{bets.index(bet) + 1})** [{bet['bet_id']} - `{add_text}`] _{bet['title']}_"
+            pt = (f"- **{bets.index(bet) + 1})** [{bet['bet_id']} - `{add_text}`] _[{bet['title']}](<{link}>)_"
                   f"\nOutcome: {bet['betters'][str(ctx.author.id)]['emoji']}\n"
-                  f"Points: **{bet['betters'][str(ctx.author.id)]['points']}**\n{link}\n\n")
+                  f"Points: **{bet['betters'][str(ctx.author.id)]['points']}**\n\n")
             message += pt
 
             if (len(message) + 400) > 2000 and bet != bets[-1]:

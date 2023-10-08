@@ -1,22 +1,26 @@
 
-import datetime
 from typing import Union
 
 import discord
 
-import discordbot.views as views
-import discordbot.slashcommandeventclasses as slashcommands
-from discordbot.bot_enums import TransactionTypes, ActivityTypes
+import discordbot.views.bet
+from discordbot.bot_enums import ActivityTypes
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
+from discordbot.slashcommandeventclasses.close import CloseBet
+from discordbot.views.place import PlaceABetView
 
 
-class BSEddiesPlaceBet(slashcommands.BSEddies):
+class PlaceBet(BSEddies):
     """
     Class for handling `/bseddies bet place` commands
     """
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
-        self.bseddies_close = slashcommands.BSEddiesCloseBet(client, guilds, logger)
+        self.bseddies_close = CloseBet(client, guilds, logger)
+        self.activity_type = ActivityTypes.BSEDDIES_BET_PLACE
+        self.help_string = "Place eddies on a bet"
+        self.command_name = "place"
 
     async def create_bet_view(
             self,
@@ -41,7 +45,7 @@ class BSEddiesPlaceBet(slashcommands.BSEddies):
             ctx.user.id, ctx.guild_id
         )
 
-        place_bet_view = views.PlaceABetView(bet_ids, points, submit_callback=self.place_bet)
+        place_bet_view = PlaceABetView(bet_ids, points, submit_callback=self.place_bet)
         try:
             await ctx.respond(content="**Placing a bet**", view=place_bet_view, ephemeral=True)
         except AttributeError:
@@ -82,37 +86,37 @@ class BSEddiesPlaceBet(slashcommands.BSEddies):
 
         if not bet:
             msg = "This bet doesn't exist."
-            await response.edit_message(content=msg, view=None)
+            await response.edit_message(content=msg, view=None, delete_after=10)
             return
 
-        view = views.BetView(bet, self, self.bseddies_close)
+        view = discordbot.views.bet.BetView(bet, self, self.bseddies_close)
 
         if not bet["active"]:
             msg = f"Your reaction on **Bet {bet_id}** failed as the bet is closed for new bets."
-            await response.edit_message(content=msg, view=view)
+            await response.edit_message(content=msg, view=None, delete_after=10)
             return
 
         emoji = emoji.strip()
 
         if emoji not in bet["option_dict"]:
             msg = f"Your reaction on **Bet {bet_id}** failed as that reaction isn't a valid outcome."
-            await response.edit_message(content=msg, view=view)
+            await response.edit_message(content=msg, view=None, delete_after=10)
             return
 
         if amount <= 0:
             msg = "Cannot bet negative eddies or 0 eddies."
-            await response.edit_message(content=msg, view=view)
+            await response.edit_message(content=msg, view=None, delete_after=10)
             return
 
         success = self.user_bets.add_better_to_bet(bet_id, guild.id, ctx.user.id, emoji, amount)
 
         if not success["success"]:
             msg = f"Your bet on **Bet {bet_id}** failed cos __{success['reason']}__?"
-            await response.edit_message(content=msg, view=view)
+            await response.edit_message(content=msg, view=None, delete_after=10)
             return False
 
         bet = self.user_bets.get_bet_from_id(guild.id, bet_id)
-        channel = guild.get_channel(bet["channel_id"])
+        channel = await self.client.fetch_channel(bet["channel_id"])
 
         if not channel:
             # channel is thread
@@ -120,16 +124,9 @@ class BSEddiesPlaceBet(slashcommands.BSEddies):
 
         message = channel.get_partial_message(bet["message_id"])
         embed = self.embed_manager.get_bet_embed(guild, bet_id, bet)
-        self.user_points.append_to_transaction_history(
-            ctx.user.id,
-            guild.id,
-            {
-                "type": TransactionTypes.BET_PLACE,
-                "amount": amount * -1,
-                "timestamp": datetime.datetime.now(),
-                "bet_id": bet_id,
-                "comment": "Bet placed through slash command",
-            }
+        content = (
+            f"# {bet['title']}\n"
+            f"_Created by <@{bet['user']}>_"
         )
-        await message.edit(embed=embed, view=view)
-        await response.edit_message(content="Placed the bet for you!", view=None)
+        await message.edit(content=content, embed=embed, view=view)
+        await response.edit_message(content="Placed the bet for you!", view=None, delete_after=10)

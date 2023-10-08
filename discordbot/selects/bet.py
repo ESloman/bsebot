@@ -16,14 +16,18 @@ class BetSelect(Select):
 
         options = []
         for bet in bets:
-            label = f"{bet['bet_id']} - {bet['title']}"
+            title = bet["title"]
+            if len(bet["title"]) > 100:
+                title = title[:99]
+            label = f"{bet['bet_id']} - {title}"
             if len(label) > 100:
                 label = label[:99]
+
             options.append(
                 SelectOption(
                     label=label,
                     value=f"{bet['bet_id']}",
-                    description=bet['title']
+                    description=title
                 )
             )
 
@@ -51,7 +55,7 @@ class BetSelect(Select):
         bet_obj = self.user_bets.get_bet_from_id(interaction.guild_id, selected_bet)
         outcomes = bet_obj["option_dict"]
 
-        outcome_select = [item for item in self.view.children if type(item) == BetOutcomesSelect]
+        outcome_select = [item for item in self.view.children if type(item) is BetOutcomesSelect]
 
         if outcome_select:
             outcome_select = outcome_select[0]
@@ -66,14 +70,14 @@ class BetSelect(Select):
             # disable the other ui elements when this changes
             for child in self.view.children:
 
-                if type(child) == BetSelectAmount:
+                if type(child) is BetSelectAmount:
                     child.disabled = True
 
-                if type(child) == Button and child.label == "Submit":
+                if type(child) is Button and child.label == "Submit":
                     child.disabled = True
         else:
             for child in self.view.children:
-                if type(child) == Button and child.label == "Submit":
+                if type(child) is Button and child.label == "Submit":
                     child.disabled = False
 
         await interaction.response.edit_message(view=self.view)

@@ -5,70 +5,84 @@ import datetime
 import os
 import random
 import re
-from dataclasses import dataclass
 
 from selenium import webdriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import ElementNotInteractableException, StaleElementReferenceException
-from selenium.common.exceptions import ElementClickInterceptedException
+from selenium.common.exceptions import ElementClickInterceptedException, NoSuchElementException
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service as FirefoxService
 from selenium.webdriver.remote.webelement import WebElement
-from webdriver_manager.chrome import ChromeDriverManager
 
 from discordbot.utilities import PlaceHolderLogger
 from discordbot.wordle.constants import WORDLE_GDPR_ACCEPT_ID, WORDLE_TUTORIAL_CLOSE_CLASS_NAME
 from discordbot.wordle.constants import WORDLE_BOARD_CLASS_NAME, WORDLE_ROWS_CLASS_NAME, WORDLE_URL, WORDLE_FOOTNOTE
-from discordbot.wordle.constants import WORDLE_STARTING_WORDS, WORDLE_SETTINGS_BUTTON
-
-
-@dataclass
-class WordleSolve:
-    solved: bool
-    guesses: list
-    starting_word: str
-    guess_count: int
-    actual_word: str
-    game_state: dict
-    timestamp: datetime.datetime
-    share_text: str
-    wordle_num: int
+from discordbot.wordle.constants import WORDLE_SETTINGS_BUTTON, WORDLE_PLAY_CLASS_NAME
+from discordbot.wordle.data_type import WordleSolve
+from mongo.bsedataclasses import WordleAttempts
+from mongo.bsepoints.generic import DataStore
 
 
 class WordleSolver():
-    def __init__(self, logger=PlaceHolderLogger) -> None:
+    def __init__(self, logger=PlaceHolderLogger, headless: bool = True) -> None:
         self.firefox_opts = Options()
-        self.firefox_opts.headless = True
+        if headless:
+            self.firefox_opts.add_argument("--headless")
         self.firefox_opts.add_argument("--no-sandbox")
         self.words = self._get_words()
         self.words_freq = self._get_word_frequency()
         self.driver = None
         self.action_chain = None
-        self.possible_words = []
+        self.possible_words = copy.deepcopy(self.words)
         self.logger = logger
+        self.wordles = WordleAttempts()
+        self.data_store = DataStore()
 
-    async def get_driver(self) -> None:
+        words_result = self.data_store.get_starting_words()
+        if not words_result:
+            self.logger.debug("No words found in database - setting to defaults")
+            self._starting_words = ["adieu", "soare"]
+        else:
+            self._starting_words = words_result["words"]
+
+    async def setup(self) -> None:
         """
         Gets the necessary driver using the driver manager (downloads and installs if necessary)
         Creates a WebDriver object
         Navigates to wordle web page
-        Clears GDPR and tutorial
-
-        Returns:
-            webdriver.Firefox: the instantiated driver
+        Clears GDPR, play screen and tutorial
         """
         driver = webdriver.Chrome(
-            service=FirefoxService(ChromeDriverManager().install()),
+            service=FirefoxService("/opt/chromedriver/chromedriver-linux64/chromedriver"),
             options=self.firefox_opts
         )
         driver.get(WORDLE_URL)
         await asyncio.sleep(2)
+
+        try:
+            # updated terms button
+            continue_button = driver.find_element(By.CLASS_NAME, "purr-blocker-card__button")
+            continue_button.click()
+        except (ElementNotInteractableException, StaleElementReferenceException, NoSuchElementException):
+            pass
+
         try:
             accept_button = driver.find_element(By.ID, WORDLE_GDPR_ACCEPT_ID)
             accept_button.click()
-        except (ElementNotInteractableException, StaleElementReferenceException):
+        except (ElementNotInteractableException, StaleElementReferenceException, NoSuchElementException):
+            pass
+
+        try:
+            # sometimes there's a play button now
+            play_button = driver.find_element(
+                By.CSS_SELECTOR,
+                f"button[class*='{WORDLE_PLAY_CLASS_NAME}']"
+            )
+            play_button.click()
+            await asyncio.sleep(1)
+        except (ElementNotInteractableException, StaleElementReferenceException, NoSuchElementException):
             pass
 
         try:
@@ -77,7 +91,7 @@ class WordleSolver():
                 f"button[class*='{WORDLE_TUTORIAL_CLOSE_CLASS_NAME}']"
             )
             close_button.click()
-        except (ElementNotInteractableException, StaleElementReferenceException):
+        except (ElementNotInteractableException, StaleElementReferenceException, NoSuchElementException):
             pass
 
         self.driver = driver
@@ -98,7 +112,7 @@ class WordleSolver():
         return sorted(words)
 
     @staticmethod
-    def _get_word_frequency() -> list[str]:
+    def _get_word_frequency() -> dict[str, float]:
         """
         Returns a list of possible words
 
@@ -120,16 +134,48 @@ class WordleSolver():
         }
         return norm_words_f
 
-    @staticmethod
-    def _pick_starting_word() -> str:
+    def _pick_starting_word(self) -> str:
         """
         Returns a random starting word
 
         Returns:
             str: the word to start the guesses with
         """
-        starting_worde = random.choice(WORDLE_STARTING_WORDS)
-        return starting_worde
+        _default_weight = 2
+
+        # try calculate weights from success rate
+        _attempts = {}
+
+        _flag = random.random()
+        if _flag < 0.25:
+            # pick a new starting word to refine our starting word list
+            starting_word = self._pick_word_from_list()
+            if isinstance(starting_word, list):
+                starting_word = starting_word[0]
+        else:
+            for word in self._starting_words:
+                results = self.wordles.query({"starting_word": word})
+
+                if not results:
+                    _attempts[word] = _default_weight
+                    continue
+
+                results = sorted(results, key=lambda x: x["timestamp"])
+                _last_timestamp = None
+                _scores = []
+                for res in results:
+                    # gotta do this as we don't have guild ID here to limit
+                    if res["timestamp"] == _last_timestamp:
+                        continue
+                    _last_timestamp = res["timestamp"]
+                    _scores.append(res["guess_count"])
+                _attempts[word] = 6 - (sum(_scores) / len(_scores))
+
+            _sorted_words = sorted(_attempts, key=lambda x: _attempts[x], reverse=True)
+            starting_word = random.choices(_sorted_words, weights=[_attempts[w] for w in _sorted_words])[0]
+
+        self.logger.debug(f"Selected: {starting_word=} from {_attempts=}")
+        return starting_word
 
     def _pick_word_from_list(self) -> str:
         """Picks a word at random from the word list
@@ -265,16 +311,19 @@ class WordleSolver():
             )
             container.click()
 
+        _starting_word = None
+
         while not solved:
             self.logger.info(f"Guess number: {row + 1}")
 
             # iterate until we solve the wordle
             if row == 0:
                 word = self._pick_starting_word()
+                _starting_word = word
             else:
                 word = self._pick_word_from_list()
 
-            if type(word) == list:
+            if isinstance(word, list):
                 word = word[0]
 
             guesses.append(word)
@@ -340,6 +389,10 @@ class WordleSolver():
 
         self.logger.info(f"Got share text to be: {share_text}")
         self._terminate()
+
+        if solved and guess_num <= 3 and _starting_word not in self._starting_words:
+            self.logger.info(f"Added {_starting_word=} to the list of starting words")
+            self.data_store.add_starting_word(_starting_word)
 
         data_class = WordleSolve(
             solved,

@@ -17,26 +17,9 @@ class UserInteractions(BestSummerEverPointsDB):
         super().__init__()
         self._vault = interface.get_collection(self.database, "userinteractions")
 
-    def _paginated_query(self, query_dict: dict) -> list[Message]:
-        """Performs a paginated query with the specified query dict
-
-        Args:
-            query_dict (dict): a dict of query operators
-
-        Returns:
-            list[Message]: a list of messages for the given query
-        """
-        _lim = 10000
-        messages = []
-        len_messages_ret = _lim
-        skip = 0
-        while len_messages_ret == _lim:
-            # keep looping
-            _messages = self.query(query_dict, limit=_lim, skip=skip)
-            skip += _lim
-            len_messages_ret = len(_messages)
-            messages.extend(_messages)
-        return messages
+    def paginated_query(self, query_dict: dict, limit=1000, skip=0) -> list[Message]:
+        """Overriding to define return type"""
+        return super().paginated_query(query_dict, limit, skip)
 
     def get_all_messages_for_server(self, guild_id: int) -> list[Message]:
         """Gets all messages for a given server
@@ -47,7 +30,7 @@ class UserInteractions(BestSummerEverPointsDB):
         Returns:
             list[Message]: list of messages
         """
-        messages = self._paginated_query({"guild_id": guild_id})
+        messages = self.paginated_query({"guild_id": guild_id})
         return messages
 
     def get_all_messages_for_channel(self, guild_id: int, channel_id: int) -> list[Message]:
@@ -60,7 +43,7 @@ class UserInteractions(BestSummerEverPointsDB):
         Returns:
             list[Message]: list of messages
         """
-        messages = self._paginated_query({"guild_id": guild_id, "channel_id": channel_id})
+        messages = self.paginated_query({"guild_id": guild_id, "channel_id": channel_id})
         return messages
 
     def add_entry(
@@ -75,6 +58,7 @@ class UserInteractions(BestSummerEverPointsDB):
             additional_keys: Optional[dict] = None,
             is_thread: Optional[bool] = False,
             is_vc: Optional[bool] = False,
+            is_bot: Optional[bool] = False,
     ) -> None:
         """
         Adds an entry into our interactions DB with the corresponding message.
@@ -88,6 +72,7 @@ class UserInteractions(BestSummerEverPointsDB):
         :param additional_keys:
         :param is_thread: whether the entry happened in a thread or not
         :param is_vc: whether the entry happened in a vc or not
+        :param is_bot: whether the message came from a bot or not
         :return: None
         """
 
@@ -100,7 +85,8 @@ class UserInteractions(BestSummerEverPointsDB):
             "content": message_content,
             "timestamp": timestamp,
             "is_thread": is_thread,
-            "is_vc": is_vc
+            "is_vc": is_vc,
+            "is_bot": is_bot
         }
 
         if additional_keys:
@@ -116,6 +102,7 @@ class UserInteractions(BestSummerEverPointsDB):
             user_id: int,
             timestamp: datetime.datetime,
             content: str,
+            is_bot: bool = False
     ):
         """
 
@@ -125,6 +112,7 @@ class UserInteractions(BestSummerEverPointsDB):
         :param message_id:
         :param timestamp:
         :param content:
+        :param is_bot:
         :return:
         """
         entry = {
@@ -132,6 +120,7 @@ class UserInteractions(BestSummerEverPointsDB):
             "content": content,
             "timestamp": timestamp,
             "message_id": message_id,
+            "is_bot": is_bot
         }
 
         self.update(

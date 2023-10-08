@@ -1,16 +1,16 @@
 
 import datetime
-import re
 from typing import Union
 
 import discord
 
-import discordbot.views as views
+from discordbot import utilities
 from discordbot.bot_enums import ActivityTypes
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
+from discordbot.views.bet import BetView
 
 
-class BSEddiesCreateBet(BSEddies):
+class CreateBet(BSEddies):
     """
     Class for handling `/bseddies bet create` command
     """
@@ -18,6 +18,9 @@ class BSEddiesCreateBet(BSEddies):
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
         self.multiple_options_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "0️⃣"]
+        self.activity_type = ActivityTypes.BSEDDIES_BET_CREATE
+        self.help_string = "Creates a bet"
+        self.command_name = "create"
 
     async def handle_bet_creation(
             self,
@@ -114,25 +117,22 @@ class BSEddiesCreateBet(BSEddies):
             timeout = datetime.datetime.now() + datetime.timedelta(minutes=10)
         else:
             timeout_str = timeout_str.strip()
-            match = re.match(r"\d{1,5}([smhd])", timeout_str)
-            if not match:
+            try:
+                _seconds = utilities.convert_time_str(timeout_str)
+            except (IndexError, AttributeError, Exception) as e:
+                # leaving Exception in for now until we're sure that all exception types have been caught
+                if type(e) not in (IndexError, AttributeError):
+                    self.logger.debug(f"Got an error with a timestring: {e}")
+                _seconds = None
+
+            if not _seconds:
                 msg = ("Your timeout string was incorrectly formatted. Needs to be 1 - 5 digits "
                        "and then either a s, m, h, or d "
                        "to signify seconds, minutes, hours, or days respectively.")
                 await ctx.followup.send(content=msg, ephemeral=True)
                 return
-            g = match.group()
-            if "s" in g:
-                dt_key = {"seconds": int(g.replace("s", ""))}
-            elif "m" in g:
-                dt_key = {"minutes": int(g.replace("m", ""))}
-            elif "h" in g:
-                dt_key = {"hours": int(g.replace("h", ""))}
-            elif "d" in g:
-                dt_key = {"days": int(g.replace("d", ""))}
-            else:
-                dt_key = {}
-            timeout = datetime.datetime.now() + datetime.timedelta(**dt_key)
+
+            timeout = datetime.datetime.now() + datetime.timedelta(seconds=_seconds)
 
         await ctx.channel.trigger_typing()
 
@@ -146,11 +146,12 @@ class BSEddiesCreateBet(BSEddies):
         )
 
         embed = self.embed_manager.get_bet_embed(ctx.guild, bet["bet_id"], bet)
+        content = (
+            f"# {bet['title']}\n"
+            f"_Created by <@{bet['user']}>_"
+        )
 
-        member = ctx.guild.get_member(ctx.user.id)
-        content = f"Bet created by {member.mention}"
-
-        bet_view = views.BetView(bet, bseddies_place, bseddies_close)
+        bet_view = BetView(bet, bseddies_place, bseddies_close)
 
         message = await ctx.channel.send(content=content, embed=embed, view=bet_view)
 
@@ -159,4 +160,4 @@ class BSEddiesCreateBet(BSEddies):
             {"$set": {"message_id": message.id, "channel_id": message.channel.id}}
         )
 
-        await ctx.followup.send(content="Created bet for you.", ephemeral=True)
+        await ctx.followup.send(content="Created bet for you.", ephemeral=True, delete_after=5)

@@ -1,14 +1,17 @@
 import discord
 
-import discordbot.views as views
 from discordbot.bot_enums import ActivityTypes
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
+from discordbot.views.pledge import PledgeView
 
 
-class BSEddiesPledge(BSEddies):
+class Pledge(BSEddies):
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.activity_type = ActivityTypes.BSEDDIES_PLEDGE
+        self.help_string = "Pledge your support to a faction"
+        self.command_name = "pledge"
 
     async def create_pledge_view(self, ctx: discord.ApplicationContext) -> None:
 
@@ -16,7 +19,7 @@ class BSEddiesPledge(BSEddies):
             return
 
         self._add_event_type_to_activity_history(
-            ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_PLEDGE, user_id=ctx.user.id
+            ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_PLEDGE
         )
 
         guild_id = ctx.guild.id
@@ -25,19 +28,19 @@ class BSEddiesPledge(BSEddies):
 
         if ctx.user.id == king_id:
             message = "You are not the King - you cannot pledge."
-            await ctx.respond(content=message, ephemeral=True)
+            await ctx.respond(content=message, ephemeral=True, delete_after=10)
             return
 
         if ctx.user.id in guild_db.get("pledged", []):
             # can't pledge again when they've already pledged support
             message = "You're already locked in to support the King this week."
-            await ctx.respond(content=message, ephemeral=True)
+            await ctx.respond(content=message, ephemeral=True, delete_after=10)
             return
 
         user_db = self.user_points.find_user(ctx.user.id, guild_id)
         current = user_db.get("supporter_type", 0)
 
-        view = views.PledgeView(current)
+        view = PledgeView(current)
 
         msg = (
             "Pledge to be a supporter or a revolutionary. "

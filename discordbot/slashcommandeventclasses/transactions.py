@@ -6,16 +6,19 @@ import discord
 import xlsxwriter
 
 from discordbot.bot_enums import TransactionTypes, ActivityTypes
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
-class BSEddiesTransactionHistory(BSEddies):
+class TransactionHistory(BSEddies):
     """
     Class for handling `/bseddies transactions` command
     """
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.activity_type = ActivityTypes.BSEDDIES_TRANSACTIONS
+        self.help_string = "View your recent transactions"
+        self.command_name = "transactions"
 
     @staticmethod
     async def _handle_recent_trans(ctx: discord.ApplicationContext, transaction_history: list) -> None:
@@ -83,15 +86,15 @@ class BSEddiesTransactionHistory(BSEddies):
         for item in transaction_history:
             worksheet.write_row(
                 row, 0,
-                [row, TransactionTypes(item['type']).name, item['timestamp'].strftime('%d %b %y %H:%M:%S'),
+                [row, TransactionTypes(item["type"]).name, item["timestamp"].strftime("%d %b %y %H:%M:%S"),
                  item["amount"], item["points"], item.get("bet_id", "N/A"), item.get("loan_id", "N/A"),
                  item.get("user_id", "N/A"), item.get("comment", "No comment")]
             )
             row += 1
 
         center_format = workbook.add_format()
-        center_format.set_align('center')
-        center_format.set_align('vcenter')
+        center_format.set_align("center")
+        center_format.set_align("vcenter")
 
         worksheet.set_column("A:A", cell_format=center_format)
         worksheet.set_column("B:B", width=18)
@@ -101,7 +104,11 @@ class BSEddiesTransactionHistory(BSEddies):
         workbook.close()
 
         try:
-            await ctx.author.send(content="Here's your full transaction history:", file=discord.File(full_name, f_name))
+            await ctx.author.send(
+                content="Here's your full transaction history:",
+                file=discord.File(full_name, f_name),
+                silent=True
+            )
         except discord.Forbidden:
             # user doesn't allow DMs
             pass

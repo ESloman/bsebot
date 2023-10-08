@@ -17,8 +17,7 @@ class EmbedManager(object):
         self.user_points = UserPoints()
         self.logger = logger
 
-    @staticmethod
-    def get_bet_embed(guild: discord.Guild, bet_id, bet: dict):
+    def get_bet_embed(self, guild: discord.Guild, bet_id, bet: dict) -> discord.Embed:
         """
         Gets the bet embed and returns that
         :param guild:
@@ -26,20 +25,24 @@ class EmbedManager(object):
         :param bet:
         :return:
         """
+
         embed = discord.Embed(
-            description=f"**{bet['title']}**\n\nBet ID: {bet_id}",
-            color=discord.Color.blue(),
+            colour=discord.Colour.random()
         )
 
         for option in bet["option_dict"]:
-            betters = [bet['betters'][b] for b in bet['betters'] if bet['betters'][b]["emoji"] == option]
+            betters = [bet["betters"][b] for b in bet["betters"] if bet["betters"][b]["emoji"] == option]
             if betters:
                 val = ""
                 for better in sorted(betters, key=lambda b: b["points"], reverse=True):
                     if val:
                         val += "\n"
                     better_info = guild.get_member(better["user_id"])
-                    val += f"- {better_info.name if better_info else better['user_id']} - {better['points']}"
+                    _better = self.user_points.find_user(better["user_id"], guild.id) if not better_info else {}
+                    val += (
+                        f"**{better_info.name if better_info else _better.get('name', better['user_id'])}** "
+                        f"(_{better['points']}_)"
+                    )
             else:
                 val = "No-one has bet on this option yet."
             embed.add_field(
@@ -48,14 +51,13 @@ class EmbedManager(object):
                 inline=False
             )
 
+        footer = None
         if not bet["active"]:
             footer = "This bet is closed for new bets. Awaiting results from the bet creator."
         elif timeout := bet.get("timeout"):
-            footer = f"This bet will stop taking bets on {timeout.strftime('%d %b %y %H:%M:%S')} "
-        else:
-            footer = None
+            footer = f"This bet will stop taking bets on {timeout.strftime('%d %b %y %H:%M:%S')}."
 
-        if footer is not None:
+        if footer:
             embed.set_footer(text=footer)
 
         return embed
@@ -76,10 +78,14 @@ class EmbedManager(object):
         else:
             number = number if number < len(users) else len(users)
 
-        users = [user for user in users if user["points"] != 10 and not user.get("inactive")]
+        users = [user for user in users if not user.get("inactive")]
+
+        if len(users) > 10:
+            # only filter out users with ten points if the server has lots of users
+            users = [user for user in users if user["points"] != 10]
 
         message = (
-            "**BSEddies Leaderboard**\n"
+            "# BSEddies Leaderboard\n"
         )
 
         for user in users[:number]:
@@ -87,10 +93,10 @@ class EmbedManager(object):
                 name = guild.get_member(user["uid"]).name
             except AttributeError:
                 continue
-            message += f"\n**{users.index(user) + 1})**  {name}  :  {user['points']}"
+            message += f"\n- **{users.index(user) + 1})**  {name}  :  {user['points']}"
 
         message += (
-            f"\n\nLast refreshed at `{datetime.datetime.now().strftime('%d %b %y %H:%M:%S')}` by _{username}_."
+            f"\n\nLast refreshed at `{datetime.datetime.now().strftime('%d %b %y %H:%M')}` by _{username}_."
         )
 
         return message
@@ -111,10 +117,14 @@ class EmbedManager(object):
         else:
             number = number if number < len(users) else len(users)
 
-        users = [user for user in users if user["points"] != 10 and not user.get("inactive")]
+        users = [user for user in users if not user.get("inactive")]
+
+        if len(users) > 10:
+            # only filter out users with ten points if the server has lots of users
+            users = [user for user in users if user["points"] != 10]
 
         message = (
-            "**BSEddies High Scores**\n"
+            "# BSEddies High Scores\n"
         )
 
         for user in users[:number]:
@@ -122,10 +132,10 @@ class EmbedManager(object):
                 name = guild.get_member(user["uid"]).name
             except AttributeError:
                 continue
-            message += f"\n**{users.index(user) + 1})**  {name}  :  {user.get('high_score', 0)}"
+            message += f"\n- **{users.index(user) + 1})**  {name}  :  {user.get('high_score', 0)}"
 
         message += (
-            f"\n\nLast refreshed at `{datetime.datetime.now().strftime('%d %b %y %H:%M:%S')}` by _{username}_."
+            f"\n\nLast refreshed at `{datetime.datetime.now().strftime('%d %b %y %H:%M')}` by _{username}_."
         )
 
         return message
@@ -141,21 +151,23 @@ class EmbedManager(object):
         :return:
         """
         revos = []
-        for rev in event.get('revolutionaries', []):
+        for rev in event.get("revolutionaries", []):
             if rev_info := guild.get_member(rev):
                 revos.append(rev_info.name)
             else:
-                revos.append(rev)
+                revos.append(str(rev))
 
         supps = []
-        for sup in event.get('supporters', []):
+        for sup in event.get("supporters", []):
             if sup_info := guild.get_member(sup):
                 supps.append(sup_info.name)
             else:
-                supps.append(sup)
+                supps.append(str(sup))
+
+        chance = max(min(event["chance"], 95), 5)
 
         message = (
-            f"**REVOLUTION IS UPON US**\n\n"
+            f"# REVOLUTION IS UPON US \n\n"
             f"@everyone - Yet again, we must try to overthrow our {role.mention}. {king_user.mention} has ruled "
             "tyranically for far too long and we are now offered a chance to take their BSEddies and knock him down "
             "a peg or two.\n\n"
@@ -166,12 +178,10 @@ class EmbedManager(object):
             "alongside their King.\n"
             "The KING may spend 10% of their eddies using the _Save Thyself_ "
             "button to reduce revolution chance by 15%.\n"
-            f"**Event ID**: `{event['event_id']}`\n"
-            f"**Success rate**: `{max(min(event['chance'], 100), 0)}%`\n"
+            f"**Success rate**: `{chance}%`\n"
             f"**Revolutionaries**: `{', '.join(revos) if revos else None}`\n"
             f"**Supporters**: `{', '.join(supps) if supps else None}`\n"
-            f"**Locked in KING eddies**: `{event.get('locked_in_eddies')}`\n"
-            f"**Event time**: `{event['expired'].strftime('%d %b %y %H:%M:%S')}`"
+            f"**Locked in KING eddies**: `{event.get('locked_in_eddies')}`"
         )
 
         return message

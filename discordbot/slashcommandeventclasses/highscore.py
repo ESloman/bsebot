@@ -1,18 +1,21 @@
 
 import discord
 
-import discordbot.views as views
 from discordbot.bot_enums import ActivityTypes
-from discordbot.slashcommandeventclasses import BSEddies
+from discordbot.slashcommandeventclasses.bseddies import BSEddies
+from discordbot.views.highscore import HighScoreBoardView
 
 
-class BSEddiesHighScore(BSEddies):
+class HighScore(BSEddies):
     """
     Class for handling `/bseddies highscore` commands
     """
 
     def __init__(self, client, guilds, logger):
         super().__init__(client, guilds, logger)
+        self.activity_type = ActivityTypes.BSEDDIES_HIGHSCORES
+        self.help_string = "See everyone's highest eddie count"
+        self.command_name = "highscore"
 
     async def highscore(self, ctx: discord.ApplicationContext) -> None:
         """
@@ -27,6 +30,6 @@ class BSEddiesHighScore(BSEddies):
 
         await ctx.channel.trigger_typing()
 
-        highscore_view = views.HighScoreBoardView(self.embed_manager)
+        highscore_view = HighScoreBoardView(self.embed_manager)
         msg = self.embed_manager.get_highscore_embed(ctx.guild, 5, ctx.author.display_name)
         await ctx.respond(content=msg, view=highscore_view)

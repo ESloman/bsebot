@@ -1,12 +1,22 @@
-import random
 import re
 from typing import Optional
 
 import discord
-from discord import PartialEmoji
 
+from discordbot.bsebot import BSEBot
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
-from discordbot.constants import BSE_SERVER_ID, SLOMAN_SERVER_ID, WORDLE_SCORE_REGEX, WORDLE_REGEX
+from discordbot.constants import WORDLE_REGEX
+from discordbot.message_actions.base import BaseMessageAction  # noqa
+
+# message actions
+from discordbot.message_actions.birthday_replies import BirthdayReplies
+from discordbot.message_actions.command_suggestion import CommandSuggest
+from discordbot.message_actions.duplicate_links import DuplicateLinkAction
+from discordbot.message_actions.marvel_ad import MarvelComicsAdAction
+from discordbot.message_actions.remind_me import RemindMeAction
+from discordbot.message_actions.rigged import RiggedAction
+from discordbot.message_actions.thank_you_replies import ThankYouReplies
+from discordbot.message_actions.wordle_reactions import WordleMessageAction
 
 
 class OnMessage(BaseEvent):
@@ -14,158 +24,32 @@ class OnMessage(BaseEvent):
     Class for handling on_message events from Discord
     """
 
-    def __init__(self, client, guild_ids, logger):
+    def __init__(self, client: BSEBot, guild_ids, logger):
         super().__init__(client, guild_ids, logger)
+        self._post_message_action_classes = [
+            BirthdayReplies(client, logger),
+            CommandSuggest(client, logger),
+            DuplicateLinkAction(client, logger),
+            MarvelComicsAdAction(client, logger),
+            RemindMeAction(client, logger),
+            RiggedAction(client, logger),
+            ThankYouReplies(client, logger),
+            WordleMessageAction(client, logger),
+        ]  # type: list[BaseMessageAction]
 
-    async def _wordle_react(self, message: discord.Message) -> None:
-        content = message.content
-        result = re.search(WORDLE_SCORE_REGEX, content).group()
-        guesses = result.split("/")[0]
-
-        # change this to switch?
-        if message.guild.id == BSE_SERVER_ID:
-            x_emoji = PartialEmoji.from_str("<:grimace:883385299428855868>")
-            two_emoji = PartialEmoji.from_str("<a:pookpog:847380557469450281>")
-            six_emoji = PartialEmoji.from_str("<:grimace:883385299428855868>")
-        elif message.guild.id == SLOMAN_SERVER_ID:
-            x_emoji = PartialEmoji.from_str("<:col:810442635650138132>")
-            two_emoji = PartialEmoji.from_str("<a:8194pepeyay:1065934308981887057>")
-            six_emoji = PartialEmoji.from_str("<a:8194pepeyay:1065934308981887057>")
-        else:
-            # not sure on the guild - use a unicode emoji
-            x_emoji = "😞"
-            two_emoji = "🎉"
-            six_emoji = "😬"
-
-        if "🟨" not in content:
-            # only greens
-            await message.add_reaction("🟩")
-        elif content.count("🟨") > content.count("🟩"):
-            await message.add_reaction("🟨")
-
-        if guesses == "X":
-            # user failed - react with appropriate reaction
-            await message.add_reaction(x_emoji)
-        elif guesses == "2":
-            # user did very well - react accordingly
-            await message.add_reaction(two_emoji)
-        elif guesses == "6":
-            await message.add_reaction(six_emoji)
-
-    async def _handle_bot_thank_you(self, message: discord.Message) -> None:
-        """Sends a basic reply message if a message meets the requirements
-
-        Args:
-            message (discord.Message): the discord message object
-        """
-        _thank_you_terms = [
-            "thank you", "thanks", "ty", "cutie", "i love you",
-        ]
-        _bot_thanks = [
-            "thank you bot", "thank you bsebot",
-            "thanks bot", "thanks bsebot",
-            "ty bot", "ty bsebot"
-        ]
-
-        _possible_replies = [
-            "You are most welcome.",
-            "Your praise means everything to me.",
-            "I exist to serve.",
-            "Thank you ❤️",
-            "🥰",
-            "❤️",
-            "😍",
-            "You're welcome!",
-            "Anytime cute stuff.",
-            "No worries!",
-            "I am happy to assist.",
-            "I am happy that you're happy!",
-            "https://media.giphy.com/media/tXTqLBYNf0N7W/giphy.gif",
-            "https://media.giphy.com/media/l41lY4I8lZXH0vIe4/giphy.gif",
-            "https://media.giphy.com/media/1qfb3aFqldWklPQwS3/giphy.gif",
-            "https://media.giphy.com/media/e5nATuISYAZ4Q/giphy.gif",
-            "https://media.giphy.com/media/xT0Cyhi8GCSU91PvtC/giphy.gif",
-        ]
-
-        send_message = False
-        if message.mentions:
-            mentions = [m.id for m in message.mentions if m.id == self.client.user.id]
-            if mentions:
-                if any([re.match(rf"\b{a}\b", message.content.lower()) for a in _thank_you_terms]):
-                    # yes! send message
-                    send_message = True
-        elif any([re.match(rf"\b{a}\b", message.content.lower()) for a in _bot_thanks]):
-            send_message = True
-        elif message.reference:
-            _reply = message.reference.cached_message
-            if not _reply:
-                channel = await self.client.fetch_channel(message.reference.channel_id)
-                _reply = await channel.fetch_message(message.reference.message_id)
-            if _reply.author.id == self.client.user.id:
-                # we sent this message!
-                if any([re.match(rf"\b{a}\b", message.content.lower()) for a in _thank_you_terms]):
-                    # yes! send message
-                    send_message = True
-        if not send_message:
-            return
-
-        await message.channel.trigger_typing()
-        await message.reply(content=random.choice(_possible_replies))
-
-    async def _handle_bot_birthday_thank_you(self, message: discord.Message) -> None:
-        """Sends a basic reply message if a message meets the requirements
-
-        Args:
-            message (discord.Message): the discord message object
-        """
-        _bot_thanks = [
-            "happy birthday bot", "happy birthday bsebot",
-            "hb bot", "hb bsebot",
-        ]
-
-        _birthday = [
-            "happy birthday", "hb"
-        ]
-
-        _possible_replies = [
-            "Thank you ❤️",
-            "🥰",
-            "❤️",
-            "😍"
-        ]
-
-        send_message = False
-        if message.mentions:
-            mentions = [m.id for m in message.mentions if m.id == self.client.user.id]
-            if mentions:
-                if any([re.match(rf"\b{a}\b", message.content.lower()) for a in _bot_thanks + _birthday]):
-                    # yes! send message
-                    send_message = True
-        elif any([re.match(rf"\b{a}\b", message.content.lower()) for a in _bot_thanks]):
-            send_message = True
-        elif message.reference:
-            _reply = message.reference.cached_message
-            if not _reply:
-                channel = await self.client.fetch_channel(message.reference.channel_id)
-                _reply = await channel.fetch_message(message.reference.message_id)
-            if _reply.author.id == self.client.user.id:
-                # we sent this message!
-                if any([re.match(rf"\b{a}\b", message.content.lower()) for a in _bot_thanks + _birthday]):
-                    # yes! send message
-                    send_message = True
-        if not send_message:
-            return
-
-        await message.channel.trigger_typing()
-        await message.reply(content=random.choice(_possible_replies))
-
-    async def message_received(self, message: discord.Message, message_type_only=False) -> Optional[list]:
+    async def message_received(
+        self,
+        message: discord.Message,
+        message_type_only: bool = False,
+        trigger_actions: bool = True
+    ) -> Optional[list]:
         """
         Main method for handling when we receive a message.
         Mostly just extracts data and puts it into the DB.
         We also work out what "type" of message it is.
         :param message:
         :param message_type_only:
+        :param trigger_actions:
         :return:
         """
 
@@ -182,6 +66,7 @@ class OnMessage(BaseEvent):
 
         message_type = []
 
+        is_bot = message.author.bot
         is_thread = False
         is_vc = False
         if message.channel.type in [
@@ -201,28 +86,38 @@ class OnMessage(BaseEvent):
             referenced_message = self.client.get_message(reference.message_id)
             if not referenced_message:
                 if reference.channel_id != message.channel.id:
-                    ref_channel = await self.client.fetch_channel(reference.channel_id)
+                    try:
+                        ref_channel = await self.client.fetch_channel(reference.channel_id)
+                    except (discord.NotFound, discord.Forbidden, discord.HTTPException):
+                        # channel was deleted / inaccessible
+                        ref_channel = None
                 else:
                     ref_channel = message.channel
-                try:
-                    referenced_message = await ref_channel.fetch_message(reference.message_id)
-                except (discord.NotFound, discord.errors.HTTPException):
-                    # reference was deleted
-                    referenced_message = None
+
+                referenced_message = None
+                if ref_channel:
+                    try:
+                        referenced_message = await ref_channel.fetch_message(reference.message_id)
+                    except (discord.NotFound, discord.HTTPException):
+                        # reference was deleted / inaccessible
+                        pass
+
             if referenced_message and referenced_message.author.id != user_id:
                 message_type.append("reply")
                 if not message_type_only:
                     self.interactions.add_reply_to_message(
-                        reference.message_id, message.id, guild_id, user_id, message.created_at, message_content
+                        reference.message_id, message.id, guild_id, user_id, message.created_at, message_content, is_bot
                     )
 
         if stickers := message.stickers:
             for sticker in stickers:  # type: discord.StickerItem
                 sticker_id = sticker.id
-                if sticker_obj := self.server_stickers.get_sticker(guild_id, sticker_id):
-                    # used a custom emoji!
-                    message_type.append("custom_sticker")
 
+                # used a custom sticker!
+                message_type.append("custom_sticker")
+                if sticker_obj := self.server_stickers.get_sticker(guild_id, sticker_id):
+                    # used a server sticker
+                    message_type.append("server_sticker")
                     if user_id == sticker_obj["created_by"]:
                         continue
                     if not message_type_only:
@@ -240,7 +135,13 @@ class OnMessage(BaseEvent):
                         )
 
         if message.attachments:
-            message_type.append("attachment")
+            for attachment in message.attachments:
+                message_type.append("attachment")
+
+                # this is only a temporary fix until https://github.com/Pycord-Development/pycord/pull/2016 is merged
+                # and pycord officially supports voice messages
+                if attachment.filename == "voice-message.ogg":
+                    message_type.append("voice_message")
 
         if role_mentions := message.role_mentions:
             for _ in role_mentions:
@@ -267,15 +168,17 @@ class OnMessage(BaseEvent):
         message_type.append("message")
 
         if re.match(WORDLE_REGEX, message.content):
-            message_type.append("wordle")
+            if any([square for square in ["🟩", "🟨", "⬛", "⬜"]]):
+                # double check it's a wordle message by presence of emoji
+                message_type.append("wordle")
 
         if emojis := re.findall(r"<:[a-zA-Z_0-9]*:\d*>", message.content):
             for emoji in emojis:
+                message_type.append("custom_emoji")
                 emoji_id = emoji.strip("<").strip(">").split(":")[-1]
                 if emoji_obj := self.server_emojis.get_emoji(guild_id, int(emoji_id)):
                     # used a custom emoji!
-                    message_type.append("custom_emoji")
-
+                    message_type.append("server_emoji")
                     if user_id == emoji_obj["created_by"]:
                         continue
                     if not message_type_only:
@@ -304,28 +207,24 @@ class OnMessage(BaseEvent):
             message_content,
             message.created_at,
             is_thread=is_thread,
-            is_vc=is_vc
+            is_vc=is_vc,
+            is_bot=is_bot
         )
 
-        # handle message reacts
-        if "wordle" in message_type:
-            # we're wordle - have a look and see if we should reply
-            await self._wordle_react(message)
-
-        # handle messages replies
-        try:
-            if message.mentions or "thank" in message.content.lower() or "ty" in message.content.lower():
-                if not message.author.id == self.client.user.id:
-                    await self._handle_bot_thank_you(message)
-        except Exception as e:
-            self.logger.debug(f"Something went wrong processing a possible bot reply: {e}")
-
-        try:
-            if message.mentions or "happy birthday" in message.content.lower() or "hb" in message.content.lower():
-                if message.created_at.month == 5 and message.created_at.day == 14:
-                    if not message.author.id == self.client.user.id:
-                        await self._handle_bot_thank_you(message)
-        except Exception as e:
-            self.logger.debug(f"Something went wrong processing a possible bot reply: {e}")
+        if trigger_actions:
+            # see if we need to act on this messages
+            await self.post_message_actions(message, message_type)
 
         return message_type
+
+    async def post_message_actions(self, message: discord.Message, message_type: list):
+        """
+        Checks message actions preconditions and executes the action if precondition is true
+
+        Args:
+            message (discord.Message): the message to trigger on
+            message_type (list): calculated message type
+        """
+        for cls in self._post_message_action_classes:
+            if await cls.pre_condition(message, message_type):
+                await cls.run(message)

@@ -1,6 +1,7 @@
 
 import datetime
 from typing import TypedDict, Union
+
 try:
     from typing import NotRequired
 except ImportError:
@@ -16,6 +17,8 @@ class Transaction(TypedDict):
     """
     A dict representing a transaction
     """
+    uid: int
+    guild_id: int
     type: TransactionTypes
     """The type of transaction enum"""
     amount: int
@@ -29,6 +32,8 @@ class Transaction(TypedDict):
 
 
 class Activity(TypedDict):
+    uid: int
+    guild_id: int
     type: ActivityTypes
     """The activity type enum"""
     timestamp: datetime.datetime
@@ -46,6 +51,8 @@ class User(TypedDict):
     """The discord user ID"""
     guild_id: int
     """The discord server ID the user belongs to"""
+    name: str
+    """The nickname for the guild or the user name"""
     points: int
     """The amount of eddies the user has in the server"""
     pending_points: int
@@ -58,6 +65,8 @@ class User(TypedDict):
     """A list of activities the user has made"""
     daily_eddies: bool
     """Whether the user receives daily eddie messages"""
+    daily_summary: bool
+    """Whether the user receives the daily eddies summary message"""
     king: bool
     """Whether the user is KING in the server"""
     last_cull_time: datetime.datetime
@@ -97,6 +106,10 @@ class Bet(TypedDict):
     """Title of the bet"""
     options: list[str]
     """List of option emojis"""
+    option_vals: list[str]
+    """List of option values"""
+    users: list[int]
+    """List of user IDs"""
     created: datetime.datetime
     """The time the bet was created"""
     timeout: datetime.datetime
@@ -237,6 +250,8 @@ class RevolutionEventType(TypedDict):
     """list of those supporting the event"""
     revolutionaries: list[int]
     """list of those revolutioning the event"""
+    neutrals: list[int]
+    """list of those impartial to the event"""
     locked: list[int]
     """Users who can't change their decision"""
     users: list[int]
@@ -288,23 +303,50 @@ class Thread(TypedDict):
 
 class GuildDB(TypedDict):
     _id: ObjectId
+    admins: list[int]
     guild_id: int
     created: datetime.datetime
     rename_king: datetime.datetime
     owner_id: int
     channel: int
+    wordle: bool
     wordle_channel: int
+    wordle_reminders: bool
     category: int
     role: int
+    daily_minimum: int
+    name: str
     tax_rate: float
     tax_rate_history: list[dict]
     king: int
     king_since: datetime.datetime
     king_history: list[dict]
+    last_revolution_time: datetime.datetime
+    last_ad_time: datetime.datetime
+    last_rigged_time: datetime.datetime
     hash: str
     update_messages: bool
+    revolution: bool
     supporter_role: int
     revolutionary_role: int
     pledged: list[int]
     release_ver: str
     release_notes: bool
+    valorant_rollcall: bool
+    valorant_channel: int
+    valorant_role: int
+    wordle_x_emoji: NotRequired[str]
+    wordle_two_emoji: NotRequired[str]
+    wordle_six_emoji: NotRequired[str]
+
+
+class Reminder(TypedDict):
+    _id: ObjectId
+    guild_id: int
+    created: datetime.datetime
+    user_id: int
+    timeout: datetime.datetime
+    active: bool
+    reason: str
+    channel_id: int
+    message_id: int

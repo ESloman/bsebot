@@ -1,117 +1,140 @@
+
+import asyncio
 import datetime
+import random
+from logging import Logger
 
-import discord
-from discord.ext import tasks, commands
+from discord.ext import tasks
 
-from discordbot.constants import BSE_BOT_ID, BSE_SERVER_ID, GENERAL_CHAT
-from mongo.bsepoints.interactions import UserInteractions
+from discordbot import utilities
+from discordbot.bsebot import BSEBot
+from discordbot.constants import BSE_BOT_ID
+from discordbot.tasks.basetask import BaseTask
 
 
-class WordleReminder(commands.Cog):
-    def __init__(self, bot: discord.Client, guilds, logger, startup_tasks):
-        self.bot = bot
-        self.logger = logger
-        self.guilds = guilds
-        self.startup_tasks = startup_tasks
-        self.user_interactions = UserInteractions()
-        self.wordle_reminder.start()
-
-    def _check_start_up_tasks(self) -> bool:
-        """
-        Checks start up tasks
-        """
-        for task in self.startup_tasks:
-            if not task.finished:
-                return False
-        return True
-
-    def cog_unload(self):
-        """
-        Method for cancelling the loop.
-        :return:
-        """
-        self.wordle_reminder.cancel()
+class WordleReminder(BaseTask):
+    def __init__(
+        self,
+        bot: BSEBot,
+        guild_ids: list[int],
+        logger: Logger,
+        startup_tasks: list[BaseTask]
+    ):
+        super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.task = self.wordle_reminder
+        self.task.start()
 
     @tasks.loop(minutes=60)
     async def wordle_reminder(self):
         """
-        Loop that makes sure the King is assigned correctly
-        :return:
+        Loop that reminds users to do their wordle.
+        Only reminds users that did their wordle the day before,
+        and haven't done it by ~7pm GMT/BST.
         """
-        if not self._check_start_up_tasks():
-            self.logger.info("Startup tasks not complete - skipping loop")
-            return
+
         now = datetime.datetime.now()
 
         if now.hour != 19:
-            return
-
-        if BSE_SERVER_ID not in self.guilds:
             return
 
         start = now - datetime.timedelta(days=1)
         start = start.replace(hour=0, minute=0, second=0, microsecond=1)
         end = start.replace(hour=23, minute=59, second=59)
 
-        wordles_yesterday = self.user_interactions.query(
-            {
-                "message_type": "wordle",
-                "timestamp": {"$gte": start, "$lte": end}
-            }
-        )
+        if not utilities.is_utc(now):
+            # need to add UTC offset
+            start = utilities.add_utc_offset(start)
+            end = utilities.add_utc_offset(end)
 
-        _start = start + datetime.timedelta(days=1)
-        _end = end + datetime.timedelta(days=1)
+        for guild in self.bot.guilds:
 
-        wordles_today = self.user_interactions.query(
-            {
-                "message_type": "wordle",
-                "timestamp": {"$gte": _start, "$lte": _end}
-            }
-        )
+            guild_db = self.guilds.get_guild(guild.id)
 
-        today_ids = [m["user_id"] for m in wordles_today]
+            if not guild_db.get("wordle_reminders"):
+                # guild isn't configured for wordle reminders
+                return
 
-        reminders_needed = []
-        for message in wordles_yesterday:
-            user_id = message["user_id"]
-            if user_id in today_ids:
-                # self.logger.info(f"{user_id} has already sent a wordle message today")
-                continue
-            else:
-                # user hasn't done a wordle
-                reminders_needed.append(message)
-
-        if not reminders_needed:
-            self.logger.info("Everyone has done their wordle today!")
-            return
-
-        channel = await self.bot.fetch_channel(GENERAL_CHAT)
-        for reminder in reminders_needed:
-            await channel.trigger_typing()
-            if reminder["user_id"] == BSE_BOT_ID:
-                # skip bot reminder
-                continue
-            channel_id = reminder["channel_id"]
-
-            if channel_id != channel.id:
-                self.logger.info(
-                    f"{channel_id} for wordle message ({reminder['message_id']}) didn't match {GENERAL_CHAT}"
-                )
-                continue
-            y_message = await channel.fetch_message(reminder["message_id"])
-
-            msg = (
-                f"Hey {y_message.author.mention}, don't forget to do your Wordle today!"
+            wordles_yesterday = self.interactions.query(
+                {
+                    "guild_id": guild.id,
+                    "message_type": "wordle",
+                    "timestamp": {"$gte": start, "$lte": end}
+                }
             )
 
-            self.logger.info(msg)
-            await y_message.reply(content=msg)
+            _start = start + datetime.timedelta(days=1)
+            _end = end + datetime.timedelta(days=1)
+            wordles_today = self.interactions.query(
+                {
+                    "guild_id": guild.id,
+                    "message_type": "wordle",
+                    "timestamp": {"$gte": _start, "$lte": _end}
+                }
+            )
+
+            today_ids = [m["user_id"] for m in wordles_today]
+
+            reminders_needed = []
+            for message in wordles_yesterday:
+                user_id = message["user_id"]
+                if user_id in today_ids:
+                    # self.logger.info(f"{user_id} has already sent a wordle message today")
+                    continue
+                else:
+                    # user hasn't done a wordle
+                    reminders_needed.append(message)
+
+            if not reminders_needed:
+                self.logger.info("Everyone has done their wordle today!")
+                continue
+
+            _messages = self.wordle_reminders.get_all_reminders()
+            _messages_list = [
+                _message["name"] if not _message.get("weight") else (_message["name"], _message["weight"])
+                for _message in _messages
+            ]
+
+            odds = utilities.calculate_message_odds(
+                self.interactions,
+                guild.id,
+                _messages_list,
+                "{mention}",
+                [0, 1],
+            )
+
+            _messages_sent = ["", ]
+            for reminder in reminders_needed:
+                if reminder["user_id"] == BSE_BOT_ID:
+                    # skip bot reminder
+                    continue
+                channel = await self.bot.fetch_channel(reminder["channel_id"])
+                await channel.trigger_typing()
+                channel_id = reminder["channel_id"]
+
+                if channel_id != channel.id:
+                    self.logger.info(
+                        f"{channel_id} for wordle message ({reminder['message_id']}) didn't match {channel.id}"
+                    )
+                    continue
+
+                y_message = await channel.fetch_message(reminder["message_id"])
+
+                # make sure that we send different messages for each needed reminder
+                message = ""
+                while message in _messages_sent:
+                    message = random.choices([message[0] for message in odds], [message[1] for message in odds])[0]
+
+                _messages_sent.append(message)
+                message = message.format(mention=y_message.author.mention)
+
+                self.logger.info(message)
+                await y_message.reply(content=message)
 
     @wordle_reminder.before_loop
     async def before_wordle_reminder(self):
         """
-        Make sure that websocket is open before we starting querying via it.
-        :return:
+        Make sure that websocket is open before we start querying via it.
         """
         await self.bot.wait_until_ready()
+        while not self._check_start_up_tasks():
+            await asyncio.sleep(5)

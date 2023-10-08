@@ -15,8 +15,23 @@ class Stat:
     annual: bool
     month: Optional[str] = None
     year: Optional[str] = None
-    user_id: Optional[int] = None
+    user_id: int | list[int] | None = None
     award: Optional[AwardsTypes] = None
     stat: Optional[StatTypes] = None
     eddies: Optional[int] = None
     kwargs: Optional[dict] = None
+
+
+@dataclass
+class StatsData:
+    total_messages: int
+    average_length: float
+    average_words: float
+    total_swears: int
+    top_channels: tuple[int, int]
+    top_swears: tuple[int, int]
+    top_users: tuple[int, int]
+    replies_count: int
+    replied_count: int
+    wordles: int
+    average_wordle_score: float

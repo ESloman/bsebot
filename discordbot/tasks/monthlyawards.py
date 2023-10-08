@@ -72,10 +72,17 @@ class MonthlyBSEddiesAwards(BaseTask):
         self.logger.debug("Calculating awards")
         awards, bseddies_awards = await awards_builder.build_awards_and_message()
 
+        send_messages = True
+        if now.month == 1:
+            # don't send awards in Jan
+            # will be superseded by the annual stuff
+            send_messages = False
+
         self.logger.debug("Logging to DB and sending messages")
         await awards_builder.send_stats_and_awards(
             stats, message,
-            awards, bseddies_awards
+            awards, bseddies_awards,
+            send_messages
         )
 
         # set activity back

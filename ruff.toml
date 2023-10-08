@@ -1,0 +1,34 @@
+
+select = ["ALL"]
+ignore = [
+    "S311",
+]
+fixable = ["ALL"]
+
+exclude = [
+    ".git",
+    ".github",
+    ".vscode",
+    "datafiles",
+    "__pycache__",
+    "tests",
+    "docs",
+]
+
+line-length = 120
+dummy-variable-rgx = "^_$"
+
+target-version = "py311"
+
+[mccabe]
+# Unlike Flake8, default to a complexity level of 10.
+max-complexity = 10
+
+[per-file-ignores]
+"*/*__init__.py" = ["F401"]
+
+[pydocstyle]
+convention = "google"
+
+[pylint]
+max-args = 6

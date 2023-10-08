@@ -1,6 +1,6 @@
 # BSEBot Overview
 
-The aim of this file is to provide a high-level overview of BSEbot's purpose, functionality and how it does all the former. There will be separate documents that provide more in-depth technical information.
+The aim of this file is to provide a high-level overview of BSEbot's purpose, functionality and how it does all the former. There will be separate documents that provide more in-depth technical information. There's a [shorter overview](structure_overview.md) available here.
 
 ## BSEBot Purpose
 
@@ -13,7 +13,7 @@ The bot does have other functionality - but this is secondary to the primary pur
 
 ## Technical Overview
 
-The bot is written in Python (`3.9+`) and is deployed via Docker Image to an EC2 AWS instance running in EU West (London). The bot's database is a MongoDB server instance running in a Docker container on the same EC2 instance.
+The bot is written in Python (`3.10+`) and is deployed via Docker Image to an EC2 AWS instance running in EU West (London). The bot's database is a MongoDB server instance running in a Docker container on the same EC2 instance.
 
 The code relies on the Python library `py-cord` for all of it's interactions with Discord. This framework was chosen due it's ongoing support and it being relatively up to date with the official Discord API.
 
@@ -29,7 +29,7 @@ Slash commands allow a user to give the bot a command without actually sending t
 
 ### Pycord tasks
 
-The bot runs an `asyncio` loop that listens for Discord events and then calls the appropriate bit of code to handle that event. It is therefore not possible for us to natively have some code that says
+The bot runs an `asyncio` event loop that listens for Discord events and then calls the appropriate bit of code to handle that event. It is therefore not possible for us to natively have some code that says
 
 ````python
 if time.now() == time_we_want_to_trigger_something:
@@ -61,7 +61,7 @@ A note on logs. In `main.py`, we create a Python `logging` logger object. This l
 
 The BSEBot works and interacts with Discord by listening for events. Everything that happens in Discord (like a message being sent, someone reacting to something, creating a channel, using a slash command, etc) is an event. We can add 'event listeners' to handle particular events - the `pycord` framework will then invoke our code when it receives an event of that type. The code uses coroutines and an asynchronous framework that allows it to process multiple things (like events) simultaneously.
 
-Similarly, within the code (and using the `pycord` framework), we can register the Slash Commands (and other Application Commands - but on to that later) and then when one of our commands is invoked by a user - the framework will invoke the code that we designated as it's callback.
+Similarly, within the code (and using the `pycord` framework), we can register the Slash Commands (and other Application Commands - but more on to that later) and then when one of our commands is invoked by a user - the framework will invoke the code that we designated as it's callback.
 
 The [pycord reference on discord events can be found here](https://guide.pycord.dev/interactions/application-commands/slash-commands/). This lists all the supported events in the framework. The events listed are vast and there's lots of 
 different things that we can use to trigger code.

@@ -1,3 +1,4 @@
+"""Wordle message action class."""
 
 import datetime
 import re
@@ -14,18 +15,23 @@ from discordbot.message_actions.base import BaseMessageAction
 
 
 class WordleMessageAction(BaseMessageAction):
-    """
-    Wordle message action class for adding reactions to wordle messages
-    """
-    def __init__(self, client: BSEBot, logger: Logger) -> None:
-        super().__init__(client, logger)
+    """Wordle message action class for adding reactions to wordle messages."""
 
-    async def pre_condition(self, message: discord.Message, message_type: list) -> bool:
-        """
-        Wordle precondition. Checks that we're a wordle message using the precalc message_type
+    def __init__(self, client: BSEBot, logger: Logger) -> None:
+        """Initialisation method.
 
         Args:
-            message (discord.Message): message to check
+            client (BSEBot): our BSEBot client
+            logger (Logger): our logger
+        """
+        super().__init__(client, logger)
+
+    @staticmethod
+    async def pre_condition(_: discord.Message, message_type: list) -> bool:
+        """Wordle precondition. Checks that we're a wordle message using the precalc message_type.
+
+        Args:
+            _ (discord.Message): message to check
             message_type (list): the precalculated message_type of the message
 
         Returns:
@@ -33,32 +39,46 @@ class WordleMessageAction(BaseMessageAction):
         """
         return "wordle" in message_type
 
-    async def run(self, message: discord.Message) -> None:
-        """Wordle react/reply action
-        Adds a reaction or reply
+    @staticmethod
+    async def _handle_adding_squares(message: discord.Message) -> None:
+        """Counts and adds wordle square reactions.
 
         Args:
-            message (discord.Message): the message to action
+            message (discord.Message): the mesage
         """
-        guild_id = message.guild.id
         content = message.content
-        result = re.search(WORDLE_SCORE_REGEX, content).group()
-        guesses = result.split("/")[0]
-
         if "🟨" not in content:
             # only greens
             await message.add_reaction("🟩")
         elif content.count("🟨") > content.count("🟩"):
             await message.add_reaction("🟨")
 
-        if guesses not in ["X", "2", "6"]:
+    async def run(self, message: discord.Message) -> None:
+        """Wordle react/reply action.
+
+        Adds a reaction or reply.
+
+        Args:
+            message (discord.Message): the message to action
+        """
+        guild_id = message.guild.id
+        result = re.search(WORDLE_SCORE_REGEX, message.content).group()
+        guesses = result.split("/")[0]
+
+        await self._handle_adding_squares(message)
+
+        if guesses not in {"X", "2", "6"}:
             # no need to process anything after this
             return
 
         guild_db = self.guilds.get_guild(guild_id)
         x_emoji = guild_db.get("wordle_x_emoji")
-        two_emoji = guild_db.get("wordle_two_emoji", )
-        six_emoji = guild_db.get("wordle_six_emoji", )
+        two_emoji = guild_db.get(
+            "wordle_two_emoji",
+        )
+        six_emoji = guild_db.get(
+            "wordle_six_emoji",
+        )
 
         x_emoji = "😞" if not x_emoji else PartialEmoji.from_str(x_emoji)
         two_emoji = "🎉" if not two_emoji else PartialEmoji.from_str(two_emoji)
@@ -87,15 +107,15 @@ class WordleMessageAction(BaseMessageAction):
                     "is_bot": False,
                     "$text": {"$search": "Wordle 6/6"},
                     "timestamp": {"$gte": today},
-                    "message_type": "wordle"
-                }
+                    "message_type": "wordle",
+                },
             )
-            wordle_results = [r for r in wordle_results if any([a in r["content"] for a in ["6/6", "X/6"]])]
+            wordle_results = [r for r in wordle_results if any(a in r["content"] for a in ["6/6", "X/6"])]
         except OperationFailure:
             # text index not set correctly
             return
 
-        if len(wordle_results) > 3:
+        if len(wordle_results) >= 3:  # noqa: PLR2004
             # make sure we haven't sent this today already
             try:
                 link_results = self.user_interactions.query(
@@ -104,8 +124,8 @@ class WordleMessageAction(BaseMessageAction):
                         "is_bot": True,
                         "$text": {"$search": "https://imgur.com/Uk73HPD"},
                         "timestamp": {"$gte": today},
-                        "message_type": "link"
-                    }
+                        "message_type": "link",
+                    },
                 )
                 link_results = [r for r in link_results if r["content"] == "https://imgur.com/Uk73HPD"]
             except OperationFailure:

@@ -27,7 +27,7 @@ class PlaceHolderLogger:
         Args:
             msg (str): the message to print
         """
-        print(msg)  # noqa: T201
+        print(msg)
 
     @staticmethod
     def debug(msg: str) -> None:
@@ -36,7 +36,7 @@ class PlaceHolderLogger:
         Args:
             msg (str): the message to print
         """
-        print(msg)  # noqa: T201
+        print(msg)
 
     @staticmethod
     def warning(msg: str) -> None:
@@ -45,7 +45,7 @@ class PlaceHolderLogger:
         Args:
             msg (str): the message to print
         """
-        print(msg)  # noqa: T201
+        print(msg)
 
 
 class _ColourFormatter(logging.Formatter):
@@ -240,7 +240,7 @@ def calculate_message_odds(
             continue
 
         parts = message.split(split)
-        main_bit = sorted(parts, key=lambda x: len(x), reverse=True)[0]
+        main_bit = sorted(parts, key=len, reverse=True)[0]
 
         try:
             results = interactions.query({"guild_id": guild_id, "is_bot": True, "$text": {"$search": message}})

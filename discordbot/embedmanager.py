@@ -1,34 +1,46 @@
-
-"""
-Embed manager will generated embeds/text for the given situtation based on information given to it
-"""
+"""Contains our EmbedManager class."""
 
 import datetime
-from typing import Optional, Union
+from logging import Logger
 
 import discord
 
+from discordbot.constants import MIN_USERS_FILTER, USER_POINTS_FILTER
 from discordbot.utilities import PlaceHolderLogger
 from mongo.bsepoints.points import UserPoints
 
 
-class EmbedManager(object):
-    def __init__(self, logger=PlaceHolderLogger):
+class EmbedManager:
+    """EmbedManager class.
+
+    Generatetes messages from templates for various scenarios based on inputs.
+    Centralises where we generate repeated bits of text like bet messages, revolution text, etc.
+    """
+
+    def __init__(self: "EmbedManager", logger: Logger = PlaceHolderLogger) -> None:
+        """Initialisation method.
+
+        Args:
+            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
+        """
         self.user_points = UserPoints()
         self.logger = logger
 
-    def get_bet_embed(self, guild: discord.Guild, bet_id, bet: dict) -> discord.Embed:
-        """
-        Gets the bet embed and returns that
-        :param guild:
-        :param bet_id:
-        :param bet:
-        :return:
-        """
+    def get_bet_embed(
+        self: "EmbedManager",
+        guild: discord.Guild,
+        bet: dict,
+    ) -> discord.Embed:
+        """Generates a bet embed from the given bet.
 
-        embed = discord.Embed(
-            colour=discord.Colour.random()
-        )
+        Args:
+            guild (discord.Guild): the guild Object the bet resides in
+            bet (dict): the bet dict
+
+        Returns:
+            discord.Embed: a formatted embed to send
+        """
+        embed = discord.Embed(colour=discord.Colour.random())
 
         for option in bet["option_dict"]:
             betters = [bet["betters"][b] for b in bet["betters"] if bet["betters"][b]["emoji"] == option]
@@ -45,11 +57,7 @@ class EmbedManager(object):
                     )
             else:
                 val = "No-one has bet on this option yet."
-            embed.add_field(
-                name=f"{option} - {bet['option_dict'][option]['val']}",
-                value=val,
-                inline=False
-            )
+            embed.add_field(name=f"{option} - {bet['option_dict'][option]['val']}", value=val, inline=False)
 
         footer = None
         if not bet["active"]:
@@ -62,31 +70,35 @@ class EmbedManager(object):
 
         return embed
 
-    def get_leaderboard_embed(self, guild: discord.Guild, number: Union[int, None], username: Optional[str]):
-        """
-        Return a str that will be the leaderboard table
-        :param guild:
-        :param number:
-        :return:
+    def get_leaderboard_embed(
+        self: "EmbedManager",
+        guild: discord.Guild,
+        number: int | None,
+        username: str | None,
+    ) -> str:
+        """Generates the leaderboard text.
+
+        Args:
+            guild (discord.Guild): the guild to create the leaderboard for
+            number (int | None): how many users to display
+            username (str | None): the person who triggered the command
+
+        Returns:
+            str: the formatted text
         """
         users = self.user_points.get_all_users_for_guild(guild.id)
 
         users = sorted(users, key=lambda x: x["points"], reverse=True)
 
-        if number is None:
-            number = len(users)
-        else:
-            number = number if number < len(users) else len(users)
+        number = len(users) if number is None else number if number < len(users) else len(users)
 
         users = [user for user in users if not user.get("inactive")]
 
-        if len(users) > 10:
+        if len(users) > MIN_USERS_FILTER:
             # only filter out users with ten points if the server has lots of users
-            users = [user for user in users if user["points"] != 10]
+            users = [user for user in users if user["points"] != USER_POINTS_FILTER]
 
-        message = (
-            "# BSEddies Leaderboard\n"
-        )
+        message = "# BSEddies Leaderboard\n"
 
         for user in users[:number]:
             try:
@@ -96,36 +108,41 @@ class EmbedManager(object):
             message += f"\n- **{users.index(user) + 1})**  {name}  :  {user['points']}"
 
         message += (
-            f"\n\nLast refreshed at `{datetime.datetime.now().strftime('%d %b %y %H:%M')}` by _{username}_."
+            f"\n\nLast refreshed at `{datetime.datetime.now(tz=datetime.UTC).strftime('%d %b %y %H:%M')}` "
+            f"by _{username}_."
         )
 
         return message
 
-    def get_highscore_embed(self, guild: discord.Guild, number: Union[int, None], username: Optional[str]):
-        """
-        Return a str that will be the leaderboard table
-        :param guild:
-        :param number:
-        :return:
+    def get_highscore_embed(
+        self: "EmbedManager",
+        guild: discord.Guild,
+        number: int | None,
+        username: str | None,
+    ) -> str:
+        """Genrates the highscore text.
+
+        Args:
+            guild (discord.Guild): the guild to create the highscores for
+            number (int | None): how many users to display
+            username (str | None): the user who triggered the command
+
+        Returns:
+            str: the formatted text
         """
         users = self.user_points.get_all_users_for_guild(guild.id)
 
         users = sorted(users, key=lambda x: x.get("high_score", 0), reverse=True)
 
-        if number is None:
-            number = len(users)
-        else:
-            number = number if number < len(users) else len(users)
+        number = len(users) if number is None else number if number < len(users) else len(users)
 
         users = [user for user in users if not user.get("inactive")]
 
-        if len(users) > 10:
+        if len(users) > MIN_USERS_FILTER:
             # only filter out users with ten points if the server has lots of users
-            users = [user for user in users if user["points"] != 10]
+            users = [user for user in users if user["points"] != USER_POINTS_FILTER]
 
-        message = (
-            "# BSEddies High Scores\n"
-        )
+        message = "# BSEddies High Scores\n"
 
         for user in users[:number]:
             try:
@@ -135,20 +152,24 @@ class EmbedManager(object):
             message += f"\n- **{users.index(user) + 1})**  {name}  :  {user.get('high_score', 0)}"
 
         message += (
-            f"\n\nLast refreshed at `{datetime.datetime.now().strftime('%d %b %y %H:%M')}` by _{username}_."
+            f"\n\nLast refreshed at `{datetime.datetime.now(tz=datetime.UTC).strftime('%d %b %y %H:%M')}` "
+            f"by _{username}_."
         )
 
         return message
 
     @staticmethod
-    def get_revolution_message(king_user: discord.User, role: discord.Role, event: dict, guild: discord.Guild):
-        """
-        Method for creating a 'Revolution' message
+    def get_revolution_message(king_user: discord.User, role: discord.Role, event: dict, guild: discord.Guild) -> str:
+        """Generates a revolution message.
 
-        :param king_user:
-        :param role:
-        :param event:
-        :return:
+        Args:
+            king_user (discord.User): the user who is currently king
+            role (discord.Role): the KING role
+            event (dict): the revolution event
+            guild (discord.Guild): the guild the event is happening within
+
+        Returns:
+            str: the formatted text
         """
         revos = []
         for rev in event.get("revolutionaries", []):
@@ -166,7 +187,7 @@ class EmbedManager(object):
 
         chance = max(min(event["chance"], 95), 5)
 
-        message = (
+        return (
             f"# REVOLUTION IS UPON US \n\n"
             f"@everyone - Yet again, we must try to overthrow our {role.mention}. {king_user.mention} has ruled "
             "tyranically for far too long and we are now offered a chance to take their BSEddies and knock him down "
@@ -183,5 +204,3 @@ class EmbedManager(object):
             f"**Supporters**: `{', '.join(supps) if supps else None}`\n"
             f"**Locked in KING eddies**: `{event.get('locked_in_eddies')}`"
         )
-
-        return message

@@ -22,7 +22,6 @@ class OnEmojiCreate(BaseEvent):
             client (BSEBot): the connected BSEBot client
             guild_ids (list): list of supported guild IDs
             logger (logging.Logger): the logger
-            logger (logging.Logger): _description_
         """
         super().__init__(client, guild_ids, logger)
 

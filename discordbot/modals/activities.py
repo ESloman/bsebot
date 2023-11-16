@@ -1,3 +1,4 @@
+"""Activity modal class."""
 
 import discord
 
@@ -5,14 +6,23 @@ import discordbot.views.config_activities
 
 
 class ActivityModal(discord.ui.Modal):
+    """Modal for adding activities."""
+
     def __init__(
         self,
         activity_type: str,
         placeholder_text: str,
-        text_value: list[str] = None,
-        *args,
-        **kwargs
+        text_value: list[str] | None = None,
+        *args: tuple[any],
+        **kwargs: dict[any],
     ) -> None:
+        """Initialiastion method.
+
+        Args:
+            activity_type (str): the activity type
+            placeholder_text (str): the placeholder text to enter
+            text_value (list[str] | None, optional): previously entered text. Defaults to None.
+        """
         super().__init__(*args, title="Enter activity text", **kwargs)
 
         self.activity_type = activity_type
@@ -22,7 +32,7 @@ class ActivityModal(discord.ui.Modal):
         self.activity = discord.ui.InputText(
             label="Activity Text",
             placeholder=f"{placeholder}",
-            style=discord.InputTextStyle.multiline
+            style=discord.InputTextStyle.multiline,
         )
 
         if text_value:
@@ -31,11 +41,11 @@ class ActivityModal(discord.ui.Modal):
 
         self.add_item(self.activity)
 
-    async def callback(self, interaction: discord.Interaction):
-        """
+    async def callback(self, interaction: discord.Interaction) -> None:
+        """Callback for 'Submit' button.
 
-        :param interaction:
-        :return:
+        Args:
+            interaction (discord.Interaction): the interaction
         """
         await interaction.response.defer(ephemeral=True)
 
@@ -49,8 +59,4 @@ class ActivityModal(discord.ui.Modal):
         for act in activity:
             msg += f"- `{self.placeholder.strip('.')} {act.strip()}`\n"
 
-        await interaction.followup.send(
-            content=msg,
-            ephemeral=True,
-            view=view
-        )
+        await interaction.followup.send(content=msg, ephemeral=True, view=view)

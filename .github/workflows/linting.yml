@@ -21,6 +21,4 @@ jobs:
       - name: Lint with ruff
         run: |
           ruff check .
-      - name: Lint with flake8
-        run: |
-          flake8 .
+          ruff format .

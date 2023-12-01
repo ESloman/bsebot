@@ -260,7 +260,11 @@ class StatsGatherer:
             if user_id not in threads[thread_id]["users"]:
                 threads[thread_id]["users"].append(user_id)
 
-        busiest = sorted(threads, key=lambda x: threads[x]["count"], reverse=True)[0]
+        try:
+            busiest = sorted(threads, key=lambda x: threads[x]["count"], reverse=True)[0]
+        except IndexError:
+            busiest = 0
+            threads[0] = {"count": 0, "users": []}
 
         data_class = Stat(
             "stat",
@@ -403,7 +407,11 @@ class StatsGatherer:
             if user_id not in threads[thread_id]["users"]:
                 threads[thread_id]["users"].append(user_id)
 
-        quietest = sorted(threads, key=lambda x: threads[x]["count"], reverse=False)[0]
+        try:
+            quietest = sorted(threads, key=lambda x: threads[x]["count"], reverse=False)[0]
+        except IndexError:
+            quietest = 0
+            threads[0] = {"count": 0, "users": []}
 
         data_class = Stat(
             "stat",

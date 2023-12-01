@@ -124,8 +124,6 @@ class AwardsBuilder:
         quietest_day = self.stats.quietest_day(*args)
         emojis_created = self.stats.emojis_created(*args)
 
-        busiest_thread_obj = await self.bot.fetch_channel(busiest_thread.value)
-        quietest_thread_obj = await self.bot.fetch_channel(quietest_thread.value)
         busiest_day_format = busiest_day.value.strftime("%a %d %b")
         quietest_day_format = quietest_day.value.strftime("%a %d %b")
         popular_channel_obj = await self.bot.fetch_channel(most_popular_channel.value)
@@ -157,15 +155,23 @@ class AwardsBuilder:
                 f"{start.strftime('%Y')} server stats 📈:\n\n"
             )
 
-        if busiest_thread_obj.archived:
-            b_thread_text = f"`#{busiest_thread_obj.name} (archived)`"
+        if busiest_thread.value:
+            busiest_thread_obj = await self.bot.fetch_channel(busiest_thread.value)
+            if busiest_thread_obj.archived:
+                b_thread_text = f"`#{busiest_thread_obj.name} (archived)`"
+            else:
+                b_thread_text = busiest_thread_obj.mention
         else:
-            b_thread_text = busiest_thread_obj.mention
+            b_thread_text = "none"
 
-        if quietest_thread_obj.archived:
-            q_thread_text = f"`#{quietest_thread_obj.name} (archived)`"
+        if quietest_thread.value:
+            quietest_thread_obj = await self.bot.fetch_channel(quietest_thread.value)
+            if quietest_thread_obj.archived:
+                q_thread_text = f"`#{quietest_thread_obj.name} (archived)`"
+            else:
+                q_thread_text = quietest_thread_obj.mention
         else:
-            q_thread_text = quietest_thread_obj.mention
+            q_thread_text = "none"
 
         comparisons = {}
         # stats we can compare

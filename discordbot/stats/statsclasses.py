@@ -2077,6 +2077,7 @@ class StatsGatherer:
         if user_dict[big_streamer]["count"] == 0 and big_streamer != BSE_BOT_ID:
             # make the bot win if no-one streamed
             big_streamer = BSE_BOT_ID
+            user_dict[BSE_BOT_ID] = {"count": 0, "channels": {}}
 
         data_class = Stat(
             type="award",

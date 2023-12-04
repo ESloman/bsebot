@@ -1,4 +1,3 @@
-
 """Contants.
 
 This file contains a variety of different variables whose values aren't going to change. We use these in various places
@@ -146,3 +145,6 @@ MARVEL_AD_COOLDOWN = 3600
 REMIND_ME_COOLDOWN = 3600
 # cool down in seconds for rigged messages
 RIGGED_COOLDOWN = 300
+
+# max bet title display length
+BET_TITLE_DISPLAY_LENTH = 100

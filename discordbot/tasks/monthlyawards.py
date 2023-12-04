@@ -36,7 +36,7 @@ class MonthlyBSEddiesAwards(BaseTask):
         # whether to run in debug mode or not
         debug = False
 
-        if (not now.day == 1 or not now.hour == 13) and not debug:
+        if (not now.day == 1 or not now.hour == 11) and not debug:
             # we only want to trigger on the first of each month
             # and also trigger at 11am
             return

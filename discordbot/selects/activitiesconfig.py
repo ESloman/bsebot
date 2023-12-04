@@ -1,18 +1,17 @@
+"""Activity selects."""
 
 from discord import Interaction, SelectOption
 from discord.ui import Select
 
 
 class ActivityTypeSelect(Select):
-    def __init__(self):
+    """Class for Activity Type select."""
 
+    def __init__(self) -> None:
+        """Initialisation."""
         options = [
-            SelectOption(label=option[0], value=option[1]) for option in
-            [
-                ("Listening", "listening"),
-                ("Playing", "playing"),
-                ("Watching", "watching")
-            ]
+            SelectOption(label=option[0], value=option[1])
+            for option in [("Listening", "listening"), ("Playing", "playing"), ("Watching", "watching")]
         ]
 
         super().__init__(
@@ -20,14 +19,14 @@ class ActivityTypeSelect(Select):
             placeholder="Select the activity type",
             min_values=1,
             max_values=1,
-            options=options
+            options=options,
         )
 
-    async def callback(self, interaction: Interaction):
-        """
+    async def callback(self, interaction: Interaction) -> None:
+        """Callback method.
 
-        :param interaction:
-        :return:
+        Args:
+            interaction (Interaction): the interaction to callback to
         """
         selected_amount = interaction.data["values"][0]
         for option in self.options:

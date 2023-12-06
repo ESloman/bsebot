@@ -1,28 +1,42 @@
+"""Stats classes."""
 
 import datetime
 import re
 from copy import deepcopy
-from typing import Tuple
+from logging import Logger
 
 import discord
 
 from discordbot.bot_enums import ActivityTypes, AwardsTypes, StatTypes, TransactionTypes
-from discordbot.constants import ANNUAL_AWARDS_AWARD, BSE_BOT_ID, JERK_OFF_CHAT, MONTHLY_AWARDS_PRIZE
-from discordbot.constants import WORDLE_SCORE_REGEX
+from discordbot.constants import (
+    ANNUAL_AWARDS_AWARD,
+    BSE_BOT_ID,
+    JERK_OFF_CHAT,
+    MONTHLY_AWARDS_PRIZE,
+    WORDLE_SCORE_REGEX,
+)
 from discordbot.stats.statsdatacache import StatsDataCache
 from discordbot.stats.statsdataclasses import Stat
 from discordbot.utilities import PlaceHolderLogger
 
 
-class StatsGatherer:
-    def __init__(self, logger=PlaceHolderLogger, annual: bool = False) -> None:
+class StatsGatherer:  # noqa: PLR0904
+    """Class for stats gatherer."""
+
+    def __init__(self, logger: Logger = PlaceHolderLogger, annual: bool = False) -> None:
+        """Initialisation method.
+
+        Args:
+            logger (Logger, optional): logger to use. Defaults to PlaceHolderLogger.
+            annual (bool, optional): whether to gather annual or monthly stats. Defaults to False.
+        """
         self.annual = annual
         self.logger = logger
         self.cache = StatsDataCache(self.annual)
 
     @staticmethod
-    def get_monthly_datetime_objects() -> Tuple[datetime.datetime, datetime.datetime]:
-        """Returns two datetime objects that sandwich the previous month
+    def get_monthly_datetime_objects() -> tuple[datetime.datetime, datetime.datetime]:
+        """Returns two datetime objects that sandwich the previous month.
 
         Returns:
             Tuple[datetime.datetime, datetime.datetime]:
@@ -39,8 +53,8 @@ class StatsGatherer:
         return start, end
 
     @staticmethod
-    def get_annual_datetime_objects() -> Tuple[datetime.datetime, datetime.datetime]:
-        """Returns two datetime objects that sandwich the previous year
+    def get_annual_datetime_objects() -> tuple[datetime.datetime, datetime.datetime]:
+        """Returns two datetime objects that sandwich the previous year.
 
         Returns:
             Tuple[datetime.datetime, datetime.datetime]:
@@ -55,7 +69,7 @@ class StatsGatherer:
         return start, end
 
     def add_annual_changes(self, start: datetime.datetime, data_class: Stat) -> Stat:
-        """Adds changes for annual mode
+        """Adds changes for annual mode.
 
         Args:
             start (datetime.datetime): start end time
@@ -73,7 +87,7 @@ class StatsGatherer:
 
     # generic server stats
     def number_of_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Returns the number of messages between two given time periods
+        """Returns the number of messages between two given time periods.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -85,8 +99,8 @@ class StatsGatherer:
         """
         messages = self.cache.get_messages(guild_id, start, end)
 
-        channel_ids = set([m["channel_id"] for m in messages])
-        user_ids = set([m["user_id"] for m in messages])
+        channel_ids = {m["channel_id"] for m in messages}
+        user_ids = {m["user_id"] for m in messages}
 
         data_class = Stat(
             "stat",
@@ -96,17 +110,15 @@ class StatsGatherer:
             value=len(messages),
             timestamp=datetime.datetime.now(),
             short_name="number_of_messages",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.channels = len(channel_ids)
         data_class.users = len(user_ids)
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def number_of_threaded_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Returns the number of messages sent in threads
+        """Returns the number of messages sent in threads.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -118,8 +130,8 @@ class StatsGatherer:
         """
         messages = self.cache.get_threaded_messages(guild_id, start, end)
 
-        channel_ids = set([m["channel_id"] for m in messages])
-        user_ids = set([m["user_id"] for m in messages])
+        channel_ids = {m["channel_id"] for m in messages}
+        user_ids = {m["user_id"] for m in messages}
 
         data_class = Stat(
             "stat",
@@ -129,19 +141,20 @@ class StatsGatherer:
             value=len(messages),
             timestamp=datetime.datetime.now(),
             short_name="number_of_thread_messages",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.channels = len(channel_ids)
         data_class.users = len(user_ids)
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def average_message_length(
-        self, guild_id: int, start: datetime.datetime, end: datetime.datetime
-    ) -> Tuple[Stat, Stat]:
-        """Returns the average message length between two given time periods
+        self,
+        guild_id: int,
+        start: datetime.datetime,
+        end: datetime.datetime,
+    ) -> tuple[Stat, Stat]:
+        """Returns the average message length between two given time periods.
 
         Args:
             guild_id (int): the guild ID
@@ -151,7 +164,6 @@ class StatsGatherer:
         Returns:
             Tuple[Stat, Stat]: returns a tuple of average message characters and average words per message stats
         """
-
         messages = self.cache.get_messages(guild_id, start, end)
         lengths = []
         words = []
@@ -170,7 +182,7 @@ class StatsGatherer:
             value=average_message_len,
             timestamp=datetime.datetime.now(),
             short_name="average_message_length_chars",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class_b = Stat(
@@ -181,7 +193,7 @@ class StatsGatherer:
             value=average_word_number,
             timestamp=datetime.datetime.now(),
             short_name="average_message_length_words",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class_a = self.add_annual_changes(start, data_class_a)
@@ -190,7 +202,7 @@ class StatsGatherer:
         return data_class_a, data_class_b
 
     def busiest_channel(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Returns the channel with the most messages for a given time period
+        """Returns the channel with the most messages for a given time period.
 
         Args:
             guild_id (int): the guild ID
@@ -225,18 +237,16 @@ class StatsGatherer:
             value=busiest,
             timestamp=datetime.datetime.now(),
             short_name="busiest_channel",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.messages = channels[busiest]["count"]
         data_class.users = len(channels[busiest]["users"])
         data_class.channels = {str(k): v for k, v in channels.items()}
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def busiest_thread(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates the thread with most messages for the given time period
+        """Calculates the thread with most messages for the given time period.
 
         Args:
             guild_id (int): the guild ID
@@ -270,17 +280,15 @@ class StatsGatherer:
             value=busiest,
             timestamp=datetime.datetime.now(),
             short_name="busiest_thread",
-            annual=self.annual
+            annual=self.annual,
         )
         data_class.messages = threads[busiest]["count"]
         data_class.users = len(threads[busiest]["users"])
         data_class.threads = {str(k): v for k, v in threads.items()}
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def busiest_day(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Returns the day with the most messages sent for the given time period
+        """Returns the day with the most messages sent for the given time period.
 
         Args:
             guild_id (int): the guild ID
@@ -315,24 +323,22 @@ class StatsGatherer:
             value=busiest,
             timestamp=datetime.datetime.now(),
             short_name="busiest_day",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.messages = days[busiest]["count"]
         data_class.channels = len(days[busiest]["channels"])
         data_class.users = len(days[busiest]["users"])
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def quietest_channel(
         self,
         guild_id: int,
         start: datetime.datetime,
         end: datetime.datetime,
-        channel_ids: list[int] | None = None
+        channel_ids: list[int] | None = None,
     ) -> Stat:
-        """Returns the channel with the least messages for a given time period
+        """Returns the channel with the least messages for a given time period.
 
         Args:
             guild_id (int): the guild ID
@@ -368,18 +374,16 @@ class StatsGatherer:
             value=quietest,
             timestamp=datetime.datetime.now(),
             short_name="quietest_channel",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.messages = channels[quietest]["count"]
         data_class.users = len(channels[quietest]["users"])
         data_class.channels = {str(k): v for k, v in channels.items()}
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def quietest_thread(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates the quietest thread
+        """Calculates the quietest thread.
 
         Args:
             guild_id (int): the guild ID
@@ -413,17 +417,15 @@ class StatsGatherer:
             value=quietest,
             timestamp=datetime.datetime.now(),
             short_name="quietest_thread",
-            annual=self.annual
+            annual=self.annual,
         )
         data_class.messages = threads[quietest]["count"]
         data_class.users = len(threads[quietest]["users"])
         data_class.threads = {str(k): v for k, v in threads.items()}
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def quietest_day(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Returns the day with the least messages sent for the given time period
+        """Returns the day with the least messages sent for the given time period.
 
         Args:
             guild_id (int): the guild ID
@@ -458,18 +460,16 @@ class StatsGatherer:
             value=quietest,
             timestamp=datetime.datetime.now(),
             short_name="quietest_day",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.messages = days[quietest]["count"]
         data_class.channels = len(days[quietest]["channels"])
         data_class.users = len(days[quietest]["users"])
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def number_of_bets(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Returns the number of bets between two given time periods
+        """Returns the number of bets between two given time periods.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -489,15 +489,13 @@ class StatsGatherer:
             value=len(bets),
             timestamp=datetime.datetime.now(),
             short_name="number_of_bets",
-            annual=self.annual
+            annual=self.annual,
         )
 
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def salary_gains(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Returns the total amount of eddies gained through salaries this month
+        """Returns the total amount of eddies gained through salaries this month.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -522,15 +520,13 @@ class StatsGatherer:
             value=salary_total,
             timestamp=datetime.datetime.now(),
             short_name="salary_total",
-            annual=self.annual
+            annual=self.annual,
         )
 
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def average_wordle_victory(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates the server's average wordle score
+        """Calculates the server's average wordle score.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -557,12 +553,7 @@ class StatsGatherer:
             wordle_count.append(guesses)
 
         bot_wordles = self.cache.user_interactions.paginated_query(
-            {
-                "guild_id": guild_id,
-                "timestamp": {"$gt": start, "$lt": end},
-                "message_type": "wordle",
-                "is_bot": True
-            }
+            {"guild_id": guild_id, "timestamp": {"$gt": start, "$lt": end}, "message_type": "wordle", "is_bot": True},
         )
         bot_wordle_count = []
         for wordle in bot_wordles:
@@ -587,16 +578,14 @@ class StatsGatherer:
             value=average_wordle,
             timestamp=datetime.datetime.now(),
             short_name="average_wordle_victory",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.bot_average = average_bot_wordle
-        data_class = self.add_annual_changes(start, data_class)
+        return self.add_annual_changes(start, data_class)
 
-        return data_class
-
-    def bet_eddies_stats(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[Stat, Stat]:
-        """Calculates the total eddies placed on bets, and the total eddies won on bets
+    def bet_eddies_stats(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> tuple[Stat, Stat]:
+        """Calculates the total eddies placed on bets, and the total eddies won on bets.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -625,7 +614,7 @@ class StatsGatherer:
             value=eddies_placed,
             timestamp=datetime.datetime.now(),
             short_name="number_of_eddies_placed",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class_b = Stat(
@@ -636,7 +625,7 @@ class StatsGatherer:
             value=eddies_won,
             timestamp=datetime.datetime.now(),
             short_name="number_of_eddies_won",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class_a = self.add_annual_changes(start, data_class_a)
@@ -645,7 +634,7 @@ class StatsGatherer:
         return data_class_a, data_class_b
 
     def most_unique_channel_contributers(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates the channel with the most unique contributors
+        """Calculates the channel with the most unique contributors.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -676,17 +665,15 @@ class StatsGatherer:
             value=most_popular_channel,
             timestamp=datetime.datetime.now(),
             short_name="most_popular_channel",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.users = len(channels[most_popular_channel])
 
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def total_time_spent_in_vc(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates the total amount of time spent by everyone in all VCs
+        """Calculates the total amount of time spent by everyone in all VCs.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -719,18 +706,16 @@ class StatsGatherer:
             value=int(vc_time),
             timestamp=datetime.datetime.now(),
             short_name="total_time_spent_in_vc",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.users = len(users)
         data_class.channels = len(channels)
 
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def vc_with_most_time_spent(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates which VC had the most time spent in it
+        """Calculates which VC had the most time spent in it.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -764,19 +749,17 @@ class StatsGatherer:
             value=vc_most_time,
             timestamp=datetime.datetime.now(),
             short_name="vc_most_time",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.users = len(channels[vc_most_time]["users"])
         data_class.channels = {str(k): v for k, v in channels.items()}
         data_class.time = int(channels[vc_most_time]["count"])
 
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def vc_with_most_users(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates which VC had the most unique users in it
+        """Calculates which VC had the most unique users in it.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -810,24 +793,22 @@ class StatsGatherer:
             value=vc_most_users,
             timestamp=datetime.datetime.now(),
             short_name="vc_most_time",
-            annual=self.annual
+            annual=self.annual,
         )
         data_class.time = int(channels[vc_most_users]["count"])
         data_class.channels = {str(k): v for k, v in channels.items()}
         data_class.users = len(channels[vc_most_users]["users"])
 
-        data_class = self.add_annual_changes(start, data_class)
+        return self.add_annual_changes(start, data_class)
 
-        return data_class
-
-    def most_popular_server_emoji(
+    def most_popular_server_emoji(  # noqa: C901, PLR0912
         self,
         guild_id: int,
         start: datetime.datetime,
         end: datetime.datetime,
-        uid: int = None
+        uid: int | None = None,
     ) -> Stat:
-        """Calculates the most popular server emoji for the given time frame
+        """Calculates the most popular server emoji for the given time frame.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -838,7 +819,6 @@ class StatsGatherer:
         Returns:
             Stat: the ServerEmoji data class
         """
-
         reaction_messages = self.cache.get_reactions(guild_id, start, end)
         messages = self.cache.get_messages(guild_id, start, end)
 
@@ -875,7 +855,7 @@ class StatsGatherer:
         try:
             most_used_emoji = sorted(emoji_count, key=lambda x: emoji_count[x], reverse=True)[0]
 
-            emoji_id = [emoji["eid"] for emoji in all_emojis if emoji["name"] == most_used_emoji][0]
+            emoji_id = next(emoji["eid"] for emoji in all_emojis if emoji["name"] == most_used_emoji)
         except IndexError:
             most_used_emoji = 0
             emoji_id = None
@@ -889,19 +869,17 @@ class StatsGatherer:
             value=most_used_emoji,
             timestamp=datetime.datetime.now(),
             short_name="most_used_server_emoji",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.emojis = emoji_count
         data_class.count = emoji_count[most_used_emoji]
         data_class.emoji_id = emoji_id
 
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def threads_created(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates number of threads created in the given time period
+        """Calculates number of threads created in the given time period.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -927,17 +905,14 @@ class StatsGatherer:
             value=len(created_threads),
             timestamp=datetime.datetime.now(),
             short_name="threads_created",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.threads = [thread["thread_id"] for thread in created_threads]
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def emojis_created(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """
-        Gets all emojis created during the given time frame
+        """Gets all emojis created during the given time frame.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -958,18 +933,16 @@ class StatsGatherer:
             value=len(created),
             timestamp=datetime.datetime.now(),
             short_name="emojis_created",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.emoji_ids = [e["eid"] for e in created]
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     # stats that can be won
     # messages
     def server_owner(self, guild: discord.Guild, start: datetime.datetime) -> Stat:
-        """Generates the server owner award
+        """Generates the server owner award.
 
         Args:
             guild (discord.Guild): the guild object
@@ -989,14 +962,13 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="guild_owner_award",
-            annual=self.annual
+            annual=self.annual,
         )
 
-        data_class = self.add_annual_changes(start, data_class)
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def most_messages_sent(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates the person who has sent the most messages in the server
+        """Calculates the person who has sent the most messages in the server.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -1019,9 +991,8 @@ class StatsGatherer:
             if message.get("is_thread"):
                 if message["channel_id"] not in message_users[uid]["threads"]:
                     message_users[uid]["threads"].append(message["channel_id"])
-            else:
-                if message["channel_id"] not in message_users[uid]["channels"]:
-                    message_users[uid]["channels"].append(message["channel_id"])
+            elif message["channel_id"] not in message_users[uid]["channels"]:
+                message_users[uid]["channels"].append(message["channel_id"])
 
         chattiest = sorted(message_users, key=lambda x: message_users[x]["count"], reverse=True)[0]
 
@@ -1035,16 +1006,14 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="most_messages_sent",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.message_users = {str(k): v for k, v in message_users.items()}
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def least_messages_sent(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates the person who has sent the least messages in the server
+        """Calculates the person who has sent the least messages in the server.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -1076,16 +1045,14 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="least_messages_sent",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.message_users = {str(k): v for k, v in message_users.items()}
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def most_thread_messages_sent(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates the person who has sent the most threaded messages in the server
+        """Calculates the person who has sent the most threaded messages in the server.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -1117,16 +1084,14 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="most_thread_messages_sent",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.message_users = {str(k): v for k, v in message_users.items()}
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def longest_message(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Returns the longest message from two given time periods
+        """Returns the longest message from two given time periods.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -1158,15 +1123,13 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="longest_message",
-            annual=self.annual
+            annual=self.annual,
         )
 
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def lowest_average_wordle_score(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates which user has the best average wordle score
+        """Calculates which user has the best average wordle score.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -1206,14 +1169,12 @@ class StatsGatherer:
                 if len(wordle_count_old[uid]) < threshold:
                     # user hasn't done enough wordles in this time period to be
                     # counted
-                    self.logger.info(
-                        f"Removing {uid} from wordle pool as they've only done {len(wordle_count[uid])} wordles."
+                    self.logger.debug(
+                        "Removing %s from wordle pool as they've only done %s wordles.", uid, len(wordle_count[uid])
                     )
                     wordle_count.pop(uid)
         else:
-            self.logger.info(
-                f"Length of wordle count ({len(wordle_count)}) is less than one - skipping threshold"
-            )
+            self.logger.debug("Length of wordle count (%s) is less than one - skipping threshold", len(wordle_count))
         wordle_avgs = {}
         for uid in wordle_count:
             all_guesses = wordle_count[uid]
@@ -1237,16 +1198,14 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="lowest_avg_wordle",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.wordle_avgs = {str(k): v for k, v in wordle_avgs.items()}
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def highest_average_wordle_score(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates which user has the worst average wordle score
+        """Calculates which user has the worst average wordle score.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -1286,14 +1245,12 @@ class StatsGatherer:
                 if len(wordle_count_old[uid]) < threshold:
                     # user hasn't done enough wordles in this time period to be
                     # counted
-                    self.logger.info(
-                        f"Removing {uid} from wordle pool as they've only done {len(wordle_count[uid])} wordles."
+                    self.logger.debug(
+                        "Removing %s from wordle pool as they've only done %s wordles.", uid, len(wordle_count[uid])
                     )
                     wordle_count.pop(uid)
         else:
-            self.logger.info(
-                f"Length of wordle count ({len(wordle_count)}) is less than one - skipping threshold"
-            )
+            self.logger.debug("Length of wordle count (%s) is less than one - skipping threshold", len(wordle_count))
 
         wordle_avgs = {}
         for uid in wordle_count:
@@ -1318,16 +1275,14 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="highest_avg_wordle",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.wordle_avgs = {str(k): v for k, v in wordle_avgs.items()}
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def twitter_addict(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates who's posted the most twitter links
+        """Calculates who's posted the most twitter links.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -1341,8 +1296,11 @@ class StatsGatherer:
 
         tweet_users = {}
         for message in messages:
-            if "twitter" in message["content"] or "https://x.com/" in message["content"] \
-                    and "link" in message["message_type"]:
+            if (
+                "twitter" in message["content"]
+                or "https://x.com/" in message["content"]
+                and "link" in message["message_type"]
+            ):
                 user_id = message["user_id"]
                 if user_id not in tweet_users:
                     tweet_users[user_id] = 0
@@ -1365,16 +1323,14 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="twitter_addict",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.twitter_addict = {str(k): v for k, v in tweet_users.items()}
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def jerk_off_contributor(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates who's posted this most contributions in #jerk-off-chat
+        """Calculates who's posted this most contributions in #jerk-off-chat.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -1389,7 +1345,7 @@ class StatsGatherer:
 
         jerk_off_users = {}
         for message in jerk_off_messages:
-            if any([a for a in ["link", "attachment"] if a in message["message_type"]]):
+            if any(a for a in ["link", "attachment"] if a in message["message_type"]):
                 user_id = message["user_id"]
                 if user_id not in jerk_off_users:
                     jerk_off_users[user_id] = 0
@@ -1412,16 +1368,14 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="masturbator",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.masturbators = {str(k): v for k, v in jerk_off_users.items()}
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def big_memer(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates which user had the most reactions for this time period
+        """Calculates which user had the most reactions for this time period.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -1453,21 +1407,19 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="big_memer",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.reactees = {str(k): v for k, v in reaction_users.items()}
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def react_king(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """
-        Calculates who's given the most reactions
+        """Calculates who's given the most reactions.
+
         Args:
             guild_id (int): the guild ID to query for
             start (datetime.datetime): beginning of time period
-            end (datetime.datetime): end of time period
+            end (datetime.datetime): end of time period.
 
         Returns:
             Stat: the react king award
@@ -1496,26 +1448,23 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="react_king",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.reaction_users = {str(k): v for k, v in reaction_users.items()}
-        data_class = self.add_annual_changes(start, data_class)
+        return self.add_annual_changes(start, data_class)
 
-        return data_class
+    def most_replies(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> tuple[Stat, Stat]:
+        """Calculates who's been replied to most and who's given the most replies.
 
-    def most_replies(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Tuple[Stat, Stat]:
-        """
-        Calculates who's been replied to most and who's given the most replies
         Args:
             guild_id (int): the guild ID to query for
             start (datetime.datetime): beginning of time period
-            end (datetime.datetime): end of time period
+            end (datetime.datetime): end of time period.
 
         Returns:
             Tuple[Stat, Stat]: the two reply Stat objects
         """
-
         messages_with_replies = self.cache.get_replies(guild_id, start, end)
         replies = {}  # replies someone has done
         replied_to = {}  # replies _received_
@@ -1546,7 +1495,7 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="serial_replier",
-            annual=self.annual
+            annual=self.annual,
         )
 
         replier_data_class.repliers = {str(k): v for k, v in replies.items()}
@@ -1562,7 +1511,7 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="conversation_starter",
-            annual=self.annual
+            annual=self.annual,
         )
 
         conversation_data_class.repliees = {str(k): v for k, v in replied_to.items()}
@@ -1571,7 +1520,7 @@ class StatsGatherer:
         return replier_data_class, conversation_data_class
 
     def most_edited_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates the user who's edited the most messages this period
+        """Calculates the user who's edited the most messages this period.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -1581,7 +1530,6 @@ class StatsGatherer:
         Returns:
             Stat: the stat object
         """
-
         edited_messages = self.cache.get_edited_messages(guild_id, start, end)
         message_users = {}
         for message in edited_messages:
@@ -1609,18 +1557,16 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="most_messages_edited",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.message_users = {str(k): v for k, v in message_users.items()}
         data_class.message_count = message_users[fattest_fingers]["messages"]
 
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def most_swears(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates who swore the most during the given time period
+        """Calculates who swore the most during the given time period.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -1630,7 +1576,6 @@ class StatsGatherer:
         Returns:
             Stat: the most swears stat
         """
-
         swears = ["fuck", "shit", "cunt", "piss", "cock", "bollock", "dick", "twat"]
         all_messages = self.cache.get_messages(guild_id, start, end)
 
@@ -1664,20 +1609,18 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="most_swears",
-            annual=self.annual
+            annual=self.annual,
         )
         data_class.swears = {str(k): v for k, v in swear_dict.items()}
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def most_messages_to_a_single_channel(
         self,
         guild_id: int,
         start: datetime.datetime,
-        end: datetime.datetime
+        end: datetime.datetime,
     ) -> Stat:
-        """Calculates the user who sent most of their messages to one channel
+        """Calculates the user who sent most of their messages to one channel.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -1725,16 +1668,14 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="single_minded",
-            annual=self.annual
+            annual=self.annual,
         )
         data_class.users = {str(k): v for k, v in users.items()}
         data_class.channel = users[top]["channel"]
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def most_messages_to_most_channels(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates the user who sent most of their messages to the most diverse channels
+        """Calculates the user who sent most of their messages to the most diverse channels.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -1771,17 +1712,15 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="diverse_portfolio",
-            annual=self.annual
+            annual=self.annual,
         )
         data_class.users = {str(k): v for k, v in users.items()}
         data_class.messages = users[top]["messages"]
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     # bets
     def most_bets_created(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Get the user who made the most bets
+        """Get the user who made the most bets.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -1816,16 +1755,14 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="most_bets_created",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.bookies = {str(k): v for k, v in bet_users.items()}
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def most_eddies_bet(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates who placed the most eddies on bets
+        """Calculates who placed the most eddies on bets.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -1862,16 +1799,14 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="most_eddies_placed",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.betters = {str(k): v for k, v in bet_users.items()}
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def most_eddies_won(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates who won the most eddies on bets
+        """Calculates who won the most eddies on bets.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -1908,16 +1843,14 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="most_eddies_won",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.bet_winners = {str(k): v for k, v in bet_users.items()}
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def most_time_king(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """Calculates who's been King longest this month
+        """Calculates who's been King longest this month.
 
         Args:
             guild_id (int): the guild ID to query for
@@ -1927,11 +1860,10 @@ class StatsGatherer:
         Returns:
             Stat: longest King stat
         """
-
         activity_history = self.cache.get_activities(guild_id, start, end)
         king_events = sorted(
-            [a for a in activity_history if a["type"] in [ActivityTypes.KING_GAIN, ActivityTypes.KING_LOSS]],
-            key=lambda x: x["timestamp"]
+            [a for a in activity_history if a["type"] in {ActivityTypes.KING_GAIN, ActivityTypes.KING_LOSS}],
+            key=lambda x: x["timestamp"],
         )
 
         kings = {}
@@ -1976,22 +1908,20 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="longest_king",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.kings = {str(k): v for k, v in kings.items()}
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     # vc
     def big_gamer(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """
-        Calculates who spent the most time in VC
+        """Calculates who spent the most time in VC.
+
         Args:
             guild_id (int): the guild ID to query for
             start (datetime.datetime): beginning of time period
-            end (datetime.datetime): end of time period
+            end (datetime.datetime): end of time period.
 
         Returns:
             Stat: the VC stat
@@ -2026,22 +1956,20 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="big_gamer",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.users = {str(k): v for k, v in user_dict.items()}
         data_class.channels = len(user_dict[big_gamer]["channels"])
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)
 
     def big_streamer(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
-        """
-        Calculates who spent the most time streaming
+        """Calculates who spent the most time streaming.
+
         Args:
             guild_id (int): the guild ID to query for
             start (datetime.datetime): beginning of time period
-            end (datetime.datetime): end of time period
+            end (datetime.datetime): end of time period.
 
         Returns:
             Stat: the award
@@ -2080,11 +2008,9 @@ class StatsGatherer:
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="big_streamer",
-            annual=self.annual
+            annual=self.annual,
         )
 
         data_class.users = {str(k): v for k, v in user_dict.items()}
         data_class.channels = len(user_dict[big_streamer]["channels"])
-        data_class = self.add_annual_changes(start, data_class)
-
-        return data_class
+        return self.add_annual_changes(start, data_class)

@@ -1,3 +1,4 @@
+"""Monthly BSEddies awards task."""
 
 import asyncio
 import datetime
@@ -13,30 +14,33 @@ from discordbot.tasks.basetask import BaseTask
 
 
 class MonthlyBSEddiesAwards(BaseTask):
-    def __init__(
-        self,
-        bot: BSEBot,
-        guild_ids: list[int],
-        logger: Logger,
-        startup_tasks: list[BaseTask]
-    ):
+    """Class for monthly bseddies awards."""
 
+    def __init__(self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask]) -> None:
+        """Initialisation method.
+
+        Args:
+            bot (BSEBot): the BSEBot client
+            guild_ids (list[int]): the list of guild IDs
+            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
+            startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
+        """
         super().__init__(bot, guild_ids, logger, startup_tasks)
         self.task = self.bseddies_awards
         self.task.start()
 
     @tasks.loop(minutes=60)
-    async def bseddies_awards(self):
-        """
-        Loop that triggers our monthly awards. This will trigger on the 1st of a month.
-        Calculates guild stats/awards.
+    async def bseddies_awards(self) -> None:
+        """Loop that triggers our monthly awards.
+
+        This will trigger on the 1st of a month. Calculates guild stats/awards.
         """
         now = datetime.datetime.now()
 
         # whether to run in debug mode or not
         debug = False
 
-        if (not now.day == 1 or not now.hour == 11) and not debug:
+        if (now.day != 1 or now.hour != 11) and not debug:  # noqa: PLR2004
             # we only want to trigger on the first of each month
             # and also trigger at 11am
             return
@@ -46,7 +50,7 @@ class MonthlyBSEddiesAwards(BaseTask):
             return
 
         if not debug:
-            self.logger.info(f"It's the first of the month and about ~11ish - time to trigger the awards! {now=}")
+            self.logger.info("It's the first of the month and about ~11ish - time to trigger the awards! %s", now)
         else:
             self.logger.info("Debug is true (%s) - testing stats/awards", debug)
 
@@ -54,7 +58,7 @@ class MonthlyBSEddiesAwards(BaseTask):
         activity = discord.Activity(
             name="with some monthly stats and awards ",
             type=discord.ActivityType.playing,
-            details="Working out monthly BSEddies awards"
+            details="Working out monthly BSEddies awards",
         )
 
         if not debug:
@@ -79,17 +83,13 @@ class MonthlyBSEddiesAwards(BaseTask):
             send_messages = False
 
         self.logger.debug("Logging to DB and sending messages")
-        await awards_builder.send_stats_and_awards(
-            stats, message,
-            awards, bseddies_awards,
-            send_messages
-        )
+        await awards_builder.send_stats_and_awards(stats, message, awards, bseddies_awards, send_messages)
 
         # set activity back
         listening_activity = discord.Activity(
             name="conversations",
             type=discord.ActivityType.listening,
-            details="Waiting for commands!"
+            details="Waiting for commands!",
         )
 
         if not debug:
@@ -98,10 +98,8 @@ class MonthlyBSEddiesAwards(BaseTask):
         self.logger.info("Sent messages! Until next month!")
 
     @bseddies_awards.before_loop
-    async def before_thread_mute(self):
-        """
-        Make sure that websocket is open before we start querying via it.
-        """
+    async def before_thread_mute(self) -> None:
+        """Make sure that websocket is open before we start querying via it."""
         await self.bot.wait_until_ready()
         while not self._check_start_up_tasks():
             await asyncio.sleep(5)

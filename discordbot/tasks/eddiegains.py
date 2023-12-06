@@ -1,3 +1,4 @@
+"""Tasks for eddie gains."""
 
 import asyncio
 import datetime
@@ -10,23 +11,37 @@ import discord
 from discord.ext import tasks
 
 from discordbot import utilities
+from discordbot.bot_enums import SupporterType, TransactionTypes
 from discordbot.bsebot import BSEBot
-from discordbot.bot_enums import TransactionTypes, SupporterType
-from discordbot.constants import CREATOR, MESSAGE_TYPES, MESSAGE_VALUES, WORDLE_VALUES, HUMAN_MESSAGE_TYPES
-from discordbot.constants import GENERAL_CHAT, WORDLE_SCORE_REGEX
+from discordbot.constants import (
+    CREATOR,
+    GENERAL_CHAT,
+    HUMAN_MESSAGE_TYPES,
+    MESSAGE_TYPES,
+    MESSAGE_VALUES,
+    WORDLE_SCORE_REGEX,
+    WORDLE_VALUES,
+)
 from discordbot.tasks.basetask import BaseTask
 from mongo.datatypes import User
 
 
 class EddieGainMessager(BaseTask):
-    def __init__(
-        self,
-        bot: BSEBot,
-        guild_ids: list[int],
-        logger: Logger,
-        startup_tasks: list[BaseTask]
-    ):
+    """Class for eddie gains task."""
 
+    def __init__(self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask]) -> None:
+        """Initialisation method.
+
+        Args:
+            bot (BSEBot): the BSEBot client
+            guild_ids (list[int]): the list of guild IDs
+            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
+            startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
+            on_ready (OnReadyEvent): on ready event
+            github_api (GitHubAPI): the authenticated Github api class
+            place (PlaceBet): the place bet class
+            close (CloseBet): the close bet class
+        """
         super().__init__(bot, guild_ids, logger, startup_tasks)
         self.task = self.eddie_distributer
 
@@ -34,13 +49,11 @@ class EddieGainMessager(BaseTask):
         self.task.start()
 
     @tasks.loop(minutes=1)
-    async def eddie_distributer(self):
-        """
-        Task that distributes daily eddies.
-        """
+    async def eddie_distributer(self) -> None:  # noqa: PLR0912, C901
+        """Task that distributes daily eddies."""
         now = datetime.datetime.now()
 
-        if now.hour != 7 or now.minute != 30:
+        if now.hour != 7 or now.minute != 30:  # noqa: PLR2004
             return
 
         for guild_id in self.guild_ids:
@@ -53,7 +66,6 @@ class EddieGainMessager(BaseTask):
 
             summary_message = "Eddie gain summary:\n"
             for user_id in eddie_dict:
-
                 value = eddie_dict[user_id][0]
                 breakdown = eddie_dict[user_id][1]
                 tax = eddie_dict[user_id][2]
@@ -80,26 +92,24 @@ class EddieGainMessager(BaseTask):
                 for key in sorted(breakdown):
                     text += f"\n- `{HUMAN_MESSAGE_TYPES[key]}`  :  **{breakdown[key]}**"
 
-                    if key in ["vc_joined", "vc_streaming"]:
+                    if key in {"vc_joined", "vc_streaming"}:
                         text += " seconds"
 
-                self.logger.info(f"{user.display_name} is gaining `{value} eddies`")
+                self.logger.info("%s is gaining `%s eddies`", user.display_name, value)
 
-                text += (
-                    "\n\nWant to turn these notifications off? Use `/config` to disable."
-                )
+                text += "\n\nWant to turn these notifications off? Use `/config` to disable."
 
                 user_dict = self.user_points.find_user(int(user_id), guild.id)
 
                 if user_dict.get("daily_eddies"):
-                    self.logger.info(f"Sending message to {user.display_name} for {value}")
+                    self.logger.info("Sending message to %s for %s", user.display_name, value)
                     try:
                         await user.send(content=text, silent=True)
                     except discord.Forbidden:
                         continue
 
             # make sure admin list is unique
-            for user_id in set(guild_db.get("admins", []) + [CREATOR, guild_db["owner_id"]]):
+            for user_id in {*guild_db.get("admins", []), CREATOR, guild_db["owner_id"]}:
                 user_db = self.user_points.find_user(user_id, guild_id)
 
                 if not user_db.get("daily_summary"):
@@ -111,38 +121,45 @@ class EddieGainMessager(BaseTask):
                     await user.send(content=summary_message, silent=True)
                 except discord.Forbidden:
                     # can't send DM messages to this user
-                    self.logger.info(f"{user.display_name} - {summary_message}")
+                    self.logger.info("%s - %s", user.display_name, summary_message)
 
     @eddie_distributer.before_loop
-    async def before_eddie_distributer(self):
-        """
-        We want to make sure the websocket is connected before we start sending requests via it
-        """
+    async def before_eddie_distributer(self) -> None:
+        """We want to make sure the websocket is connected before we start sending requests via it."""
         await self.bot.wait_until_ready()
         while not self._check_start_up_tasks():
             await asyncio.sleep(5)
 
 
 class BSEddiesManager(BaseTask):
-    """
-    Class that _actually_ calculates eddies
-    """
-    def __init__(
-        self,
-        bot: BSEBot,
-        guild_ids: list[int],
-        logger: Logger,
-        startup_tasks: list[BaseTask]
-    ):
+    """Class that _actually_ calculates eddies."""
 
+    def __init__(self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask]) -> None:
+        """Initialisation method.
+
+        Args:
+            bot (BSEBot): the BSEBot client
+            guild_ids (list[int]): the list of guild IDs
+            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
+            startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
+            on_ready (OnReadyEvent): on ready event
+            github_api (GitHubAPI): the authenticated Github api class
+            place (PlaceBet): the place bet class
+            close (CloseBet): the close bet class
+        """
         super().__init__(bot, guild_ids, logger, startup_tasks)
         # default minimum
         self.server_min = 4
 
     @staticmethod
-    def get_datetime_objects(days=1) -> tuple[datetime.datetime, datetime.datetime]:
-        """
-        Get's the datetime START and END of yesterday
+    def get_datetime_objects(days: int = 1) -> tuple[datetime.datetime, datetime.datetime]:
+        """Get's the datetime START and END of yesterday.
+
+        Args:
+            days (int): the number of days to go back. Defaults to 1.
+
+        Returns:
+            tuple[datetime.datetime, datetime.datetime]: start, end of day
         """
         now = datetime.datetime.now()
         yesterday = now - datetime.timedelta(days=days)
@@ -157,38 +174,42 @@ class BSEddiesManager(BaseTask):
         return start, end
 
     def _calc_eddies(self, counter: Counter, start: int = 4) -> int:
-        """
-        Quick function to loop over the message types and work out an amount of BSEddies the user will gain
-        :param counter:
-        :return:
+        """Loop over the message types and work out an amount of BSEddies the user will gain.
+
+        Args:
+            counter (Counter): the counter to use
+            start (int): minimum eddies to start at
+
+        Returns:
+            int: the amount of eddies the user is going to gain
         """
         points = start
         for message_type in MESSAGE_TYPES:
             if val := counter.get(message_type):
                 message_worth = MESSAGE_VALUES.get(message_type, 0)
                 if not message_worth:
-                    self.logger.debug(f"'{message_type}' doesn't have a value associated with it - skipping")
+                    self.logger.debug("'%s' doesn't have a value associated with it - skipping", message_type)
                     continue
                 t_points = val * message_worth
                 points += t_points
-                self.logger.info(f"{t_points} for {message_type}")
+                self.logger.info("%s for %s", t_points, message_type)
         return points
 
-    def calc_individual(
-            self,
-            user: int,
-            user_dict: User,
-            user_results: list,
-            user_reacted: list,
-            user_reactions: list,
-            start: datetime.datetime,
-            end: datetime.datetime,
-            guild_id: int,
-            wordle_word: str = None,
-            real: bool = False
+    def calc_individual(  # noqa: C901, PLR0913, PLR0912, PLR0915
+        self,
+        user: int,
+        user_dict: User,
+        user_results: list,
+        user_reacted: list,
+        user_reactions: list,
+        start: datetime.datetime,
+        end: datetime.datetime,
+        guild_id: int,
+        wordle_word: str | None = None,
+        real: bool = False,
     ) -> tuple[int, dict]:
-        """
-        Method that calculates the daily salary for a given individual.
+        """Method that calculates the daily salary for a given individual.
+
         Needs all the data given to it.
 
         Args:
@@ -222,11 +243,10 @@ class BSEddiesManager(BaseTask):
                 self.user_points.decrement_daily_minimum(user, guild_id, 1)
             if minimum == 0:
                 return 0, {}
-        else:
-            if minimum != self.server_min:
-                minimum = self.server_min
-                if real:
-                    self.user_points.set_daily_minimum(user, guild_id, minimum)
+        elif minimum != self.server_min:
+            minimum = self.server_min
+            if real:
+                self.user_points.set_daily_minimum(user, guild_id, minimum)
 
         message_types = []
         for r in user_results:
@@ -255,13 +275,11 @@ class BSEddiesManager(BaseTask):
                 react for react in reactions if react["user_id"] == user and (start < react["timestamp"] < end)
             ]
             for reaction in our_user_reactions:
-
                 if _ := self.server_emojis.get_emoji_from_name(guild_id, reaction["content"]):
                     message_types.append("custom_emoji_reaction")
 
                 matching_reactions = [
-                    react for react in reactions
-                    if react["content"] == reaction["content"] and react["user_id"] != user
+                    react for react in reactions if react["content"] == reaction["content"] and react["user_id"] != user
                 ]
 
                 if matching_reactions:
@@ -269,8 +287,7 @@ class BSEddiesManager(BaseTask):
                     _matching = sorted(matching_reactions, key=lambda x: x["timestamp"])
                     if _matching[0]["timestamp"] > reaction["timestamp"]:
                         # we reacted first!
-                        for _ in matching_reactions:
-                            message_types.append("react_train")
+                        message_types.extend("react_train" for _ in matching_reactions)
 
         for message in user_results:
             # add reaction_received events
@@ -304,7 +321,7 @@ class BSEddiesManager(BaseTask):
 
         if stream_total_time:
             # add a minimum of 2 for each streaming event
-            stream_eddies += (len(vc_streaming_events) * 2)
+            stream_eddies += len(vc_streaming_events) * 2
 
         eddies_gained += stream_eddies
 
@@ -320,10 +337,10 @@ class BSEddiesManager(BaseTask):
 
         return eddies_gained, count
 
-    def give_out_eddies(self, guild_id: int, real: bool = False, days: int = 1) -> dict:
-        """
-        Works out all the predicted salary gain for a given server's members and,
-        if applicable, distribute them.
+    def give_out_eddies(self, guild_id: int, real: bool = False, days: int = 1) -> dict:  # noqa: PLR0915, PLR0912, C901
+        """Works out all the predicted salary gain for a given server's members.
+
+        Only distributes them if specified.
 
         Args:
             guild_id (int): The guild ID to process
@@ -341,19 +358,9 @@ class BSEddiesManager(BaseTask):
         self.server_min = server_min
 
         # query gets all messages yesterday
-        results = self.interactions.query(
-            {
-                "guild_id": guild_id,
-                "timestamp": {"$gt": start, "$lt": end}
-            }
-        )
+        results = self.interactions.query({"guild_id": guild_id, "timestamp": {"$gt": start, "$lt": end}})
 
-        reactions = self.interactions.query(
-            {
-                "guild_id": guild_id,
-                "reactions.timestamp": {"$gt": start, "$lt": end}
-             }
-        )
+        reactions = self.interactions.query({"guild_id": guild_id, "reactions.timestamp": {"$gt": start, "$lt": end}})
 
         users = self.user_points.get_all_users_for_guild(guild_id)
         users = [u for u in users if not u.get("inactive")]
@@ -364,22 +371,19 @@ class BSEddiesManager(BaseTask):
         wordle_messages = []
 
         try:
-            wordle_doc = self.wordles.query(
-                {"timestamp": start.strftime("%Y-%m-%d"), "guild_id": guild_id}
-            )[0]
+            wordle_doc = self.wordles.query({"timestamp": start.strftime("%Y-%m-%d"), "guild_id": guild_id})[0]
             wordle_word = wordle_doc["actual_word"]
         except (IndexError, KeyError):
             wordle_doc = None
             wordle_word = None
 
         for user in user_ids:
-            self.logger.info(f"processing {user}")
+            self.logger.info("processing %s", user)
 
             user_results = [r for r in results if r["user_id"] == user]
             user_reacted_messages = [r for r in reactions if r["user_id"] == user]
             user_reactions = [
-                r for r in reactions
-                if any([react for react in r["reactions"] if react["user_id"] == user])
+                r for r in reactions if any(react for react in r["reactions"] if react["user_id"] == user)
             ]
 
             eddies_gained, breakdown = self.calc_individual(
@@ -392,11 +396,11 @@ class BSEddiesManager(BaseTask):
                 end,
                 guild_id,
                 wordle_word,
-                real
+                real,
             )
 
             try:
-                wordle_message = [w for w in user_results if "wordle" in w["message_type"]][0]
+                wordle_message = next(w for w in user_results if "wordle" in w["message_type"])
                 result = re.search(WORDLE_SCORE_REGEX, wordle_message["content"]).group()
                 guesses = result.split("/")[0]
 
@@ -430,8 +434,8 @@ class BSEddiesManager(BaseTask):
                 "timestamp": {"$gt": start, "$lt": end},
                 "user_id": self.bot.user.id,
                 "channel_id": GENERAL_CHAT,
-                "message_type": "wordle"
-            }
+                "message_type": "wordle",
+            },
         )
 
         bot_guesses = 100  # arbitrarily high number
@@ -439,10 +443,7 @@ class BSEddiesManager(BaseTask):
             bot_message = results[0]
             bot_result = re.search(r"[\dX]/\d", bot_message["content"]).group()
             bot_guesses = bot_result.split("/")[0]
-            if bot_guesses != "X":
-                bot_guesses = int(bot_guesses)
-            else:
-                bot_guesses = 100
+            bot_guesses = int(bot_guesses) if bot_guesses != "X" else 100
 
         # do wordle here
         if wordle_messages:
@@ -462,7 +463,7 @@ class BSEddiesManager(BaseTask):
         tax_gains = 0
 
         tax_rate, supporter_tax_rate = self.guilds.get_tax_rate(guild_id)
-        self.logger.info(f"Tax rate is: {tax_rate=}, {supporter_tax_rate=}")
+        self.logger.info("Tax rate is: %s, %s", tax_rate, supporter_tax_rate)
 
         for _user in eddie_gain_dict:
             if _user == "guild":
@@ -479,14 +480,14 @@ class BSEddiesManager(BaseTask):
                 tax_gains += taxed
 
             if real:
-                self.logger.info(f"Incrementing {_user} by {eddie_gain_dict[_user][0]}")
+                self.logger.info("Incrementing %s by %s", _user, eddie_gain_dict[_user][0])
                 self.user_points.increment_points(
                     _user,
                     guild_id,
                     eddie_gain_dict[_user][0],
-                    TransactionTypes.DAILY_SALARY
+                    TransactionTypes.DAILY_SALARY,
                 )
-            self.logger.info(f"{_user} gained {eddie_gain_dict[_user][0]}")
+            self.logger.info("%s gained %s", _user, eddie_gain_dict[_user][0])
 
         eddie_gain_dict[current_king_id].append(tax_gains)
         eddie_gain_dict[current_king_id][0] += tax_gains
@@ -496,7 +497,7 @@ class BSEddiesManager(BaseTask):
                 current_king_id,
                 guild_id,
                 eddie_gain_dict[current_king_id][0],
-                TransactionTypes.TAX_GAINS
+                TransactionTypes.TAX_GAINS,
             )
 
         return eddie_gain_dict

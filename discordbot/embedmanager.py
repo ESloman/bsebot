@@ -90,7 +90,7 @@ class EmbedManager:
 
         users = sorted(users, key=lambda x: x["points"], reverse=True)
 
-        number = len(users) if number is None else number if number < len(users) else len(users)
+        number = len(users) if number is None else min(len(users), number)
 
         users = [user for user in users if not user.get("inactive")]
 
@@ -134,7 +134,7 @@ class EmbedManager:
 
         users = sorted(users, key=lambda x: x.get("high_score", 0), reverse=True)
 
-        number = len(users) if number is None else number if number < len(users) else len(users)
+        number = len(users) if number is None else min(len(users), number)
 
         users = [user for user in users if not user.get("inactive")]
 

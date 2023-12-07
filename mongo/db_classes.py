@@ -1,5 +1,4 @@
-"""
-This file is for DB classes.
+"""This file is for DB classes.
 
 A DB class represents a MongoDB Database object.
 A DB class derives from a 'BaseClass' which will represent a MongoClient object.
@@ -16,60 +15,54 @@ from mongo.baseclass import BaseClass
 
 
 class BestSummerEverPointsDB(BaseClass):
-    """
-    Class to represent the BestSummerEverPoints DB
-    """
-    def __init__(self):
-        """
-        Constructor method that initialises the DB object.
-        """
+    """Class to represent the BestSummerEverPoints DB."""
+
+    def __init__(self) -> None:
+        """Constructor method that initialises the DB object."""
         super().__init__()
         self.bse_db = interface.get_database(self.cli, "bestsummereverpoints")
 
     @property
     def database(self) -> Database:
-        """
-        Basic database property.
-        :return:
+        """Basic database property.
+
+        Returns:
+            Database: the database
         """
         return self.bse_db
 
 
 class BestSummerEverGameServersDB(BaseClass):
-    """
-    Class to represent the BestSummerEverGameServers DB
-    """
-    def __init__(self):
-        """
-        Constructor method that initialises the DB object.
-        """
+    """Class to represent the BestSummerEverGameServers DB."""
+
+    def __init__(self) -> None:
+        """Constructor method that initialises the DB object."""
         super().__init__()
         self.bse_servers_db = interface.get_database(self.cli, "bestsummerevergameservers")
 
     @property
     def database(self) -> Database:
-        """
-        Basic database property.
-        :return:
+        """Basic database property.
+
+        Returns:
+            Database: the database
         """
         return self.bse_servers_db
 
 
 class BestSummerEverWordleDB(BaseClass):
-    """
-    Class to represent the BestSummereverWordle DB
-    """
-    def __init__(self):
-        """
-        Constructor method that initialises the DB object.
-        """
+    """Class to represent the BestSummereverWordle DB."""
+
+    def __init__(self) -> None:
+        """Constructor method that initialises the DB object."""
         super().__init__()
         self.bse_servers_db = interface.get_database(self.cli, "bestsummereverwordle")
 
     @property
     def database(self) -> Database:
-        """
-        Basic database property.
-        :return:
+        """Basic database property.
+
+        Returns:
+            Database: the database
         """
         return self.bse_servers_db

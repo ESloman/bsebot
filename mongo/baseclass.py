@@ -1,101 +1,124 @@
-from typing import Union
+"""Mongo baseclass."""
 
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.cursor import Cursor
-from pymongo.results import InsertOneResult, InsertManyResult, UpdateResult
+from pymongo.results import InsertManyResult, InsertOneResult, UpdateResult
 
 from mongo import interface
 
 
-class BaseClass(object):
-    """
-    Base MongoDB DB Class. Provides basic method and properties that all other DB Classes will need.
+class BaseClass:
+    """Base MongoDB DB Class.
+
+    Provides basic method and properties that all other DB Classes will need.
     If not username or password is provided - authenticate without username and password.
     """
-    def __init__(
-        self,
-        ip: str = "127.0.0.1",
-        username: str = None,
-        password: str = None
-    ):
-        """
-        Constructor method.
-        :param ip: ip of instance to connect to
-        :param username: username to login to instance with
-        :param password: password to login to instance with
+
+    def __init__(self, ip: str = "127.0.0.1", username: str | None = None, password: str | None = None) -> None:
+        """Initialisation method.
+
+        Args:
+            ip (str, optional): ip to connect to. Defaults to "127.0.0.1".
+            username (str | None, optional): username. Defaults to None.
+            password (str | None, optional): password. Defaults to None.
         """
         self.cli = interface.get_client(ip, username, password)
         self._vault = None
 
     @property
     def mongo_client(self) -> MongoClient:
-        """
-        Pymongo Client Object
-        :return: MongoClient object
+        """Mongo client property.
+
+        Returns:
+            MongoClient: the client
         """
         return self.cli
 
     @property
     def vault(self) -> Collection:
-        """
-        vault property
-        :return: Collection object
+        """Vault property.
+
+        Returns:
+            Collection: the collection/vault
         """
         return self._vault
 
-    def insert(self, document: Union[dict, list]) -> InsertOneResult | InsertManyResult:
-        """
-        Inserts the given object into this class' Collection object.
-        :param document: document(s) to insert as dict or list of dicts
-        :return: list of inserted IDs
+    def insert(self, document: dict | list) -> InsertOneResult | InsertManyResult:
+        """Inserts the given object into this class' Collection object.
+
+        Args:
+            document (dict | list): the document or list of documents to insert
+
+        Raises:
+            NoVaultError: _description_
+            IncorrectDocument: _description_
+            IncorrectDocument: _description_
+
+        Returns:
+            InsertOneResult | InsertManyResult: _description_
         """
         if self.vault is None:
-            raise NoVaultError("No vault instantiated.")
-        if not isinstance(document, (list, dict)):
-            raise IncorrectDocument("Given document isn't a dictionary or a list.")
-        elif isinstance(document, list) and not all([isinstance(k, dict) for k in document]):
-            raise IncorrectDocument("Not all documents in the list are dictionaries.")
-        rets = interface.insert(self._vault, document)
-        return rets
+            msg = "No vault instantiated."
+            raise NoVaultError(msg)
+        if not isinstance(document, list | dict):
+            msg = "Given document isn't a dictionary or a list."
+            raise IncorrectDocumentError(msg)
+
+        if isinstance(document, list) and not all(isinstance(k, dict) for k in document):
+            msg = "Not all documents in the list are dictionaries."
+            raise IncorrectDocumentError(msg)
+        return interface.insert(self._vault, document)
 
     def update(self, parameters: dict, updated_vals: dict, many: bool = False) -> UpdateResult:
-        """
-        Updates all documents based on the given parameters with the provided values.
-        :param parameters:
-        :param updated_vals:
-        :param many:
-        :return: UpdateResult object
+        """Updates all documents based on the given parameters with the provided values.
+
+        Args:
+            parameters (dict): _description_
+            updated_vals (dict): _description_
+            many (bool, optional): _description_. Defaults to False.
+
+        Raises:
+            NoVaultError: _description_
+
+        Returns:
+            UpdateResult: _description_
         """
         if self.vault is None:
-            raise NoVaultError("No vault instantiated.")
-        rets = interface.update(self.vault, parameters, updated_vals, many)
-        return rets
+            msg = "No vault instantiated."
+            raise NoVaultError(msg)
+        return interface.update(self.vault, parameters, updated_vals, many)
 
     def delete(self, parameters: dict, many: bool = True) -> int:
-        """
-        Deletes documents based on the given parameters. If many=False, only deletes one else it deletes all matches.
-        :param many: whether to delete all matching documents or just one
-        :param parameters: Parameters to match and delete on. Must be a dictionary.
-        :return: number of deleted
+        """Deletes documents based on the given parameters. If many=False, only deletes one else it deletes all matches.
+
+        Args:
+            parameters (dict): _description_
+            many (bool, optional): _description_. Defaults to True.
+
+        Raises:
+            NoVaultError: _description_
+
+        Returns:
+            int: _description_
         """
         if self.vault is None:
-            raise NoVaultError("No vault instantiated.")
-        rets = interface.delete(self.vault, parameters, many)
-        return rets
+            msg = "No vault instantiated."
+            raise NoVaultError(msg)
+        return interface.delete(self.vault, parameters, many)
 
-    def query(
-            self,
-            parameters: dict,
-            limit: int = 1000,
-            projection: dict = None,
-            as_gen: bool = False,
-            skip: int = None,
-            use_paginated: bool = False,
-            sort: list[tuple] = None
-    ) -> Union[list, Cursor]:
-        """
-        Searches a collection for documents based on given parameters.
+    def query(  # noqa: PLR0913
+        self,
+        parameters: dict,
+        limit: int = 1000,
+        projection: dict | None = None,
+        as_gen: bool = False,
+        skip: int | None = None,
+        use_paginated: bool = False,
+        sort: list[tuple] | None = None,
+    ) -> list | Cursor:
+        """Searches a collection for documents based on given parameters.
+
         Parameters should be dictionaries : {key : search}. Where key is an existing key in the collection and
         search is either a value or an expression.
         Expressions can either be {operator: value} or {"$regex": regex_expression}.
@@ -106,24 +129,32 @@ class BaseClass(object):
             parameters = {"test_name": {"$gt": "tst_S"}}
             parameters = {"test_name": {"$regex": "tst_g.*"}}
         Projection examples:
-            projection = {"_id": False}
+            projection = {"_id": False}.
+
         Args:
-            parameters : dictionary as above
-            limit : max number of results to return
-            projection : dict of keys to return for each result
-            as_gen : True returns generator (mongoDB cursor obj) and false returns list of results
-            skip: number of items to skip at the start of the result set
-            use_paginated: whether to use a paginated query by default to get all things
-        Returns a generator (cursor obj) if as_gen else returns a list of results
+            parameters (dict): _description_
+            limit (int, optional): _description_. Defaults to 1000.
+            projection (dict | None, optional): _description_. Defaults to None.
+            as_gen (bool, optional): _description_. Defaults to False.
+            skip (int | None, optional): _description_. Defaults to None.
+            use_paginated (bool, optional): _description_. Defaults to False.
+            sort (list[tuple] | None, optional): _description_. Defaults to None.
+
+        Raises:
+            NoVaultError: _description_
+
+        Returns:
+            list | Cursor: _description_
         """
         if self.vault is None:
-            raise NoVaultError("No vault instantiated.")
+            msg = "No vault instantiated."
+            raise NoVaultError(msg)
         if not projection or as_gen or not use_paginated:
             return interface.query(self.vault, parameters, limit, projection, as_gen, skip=skip, sort=sort)
         return self.paginated_query(parameters, limit, skip)
 
-    def paginated_query(self, query_dict: dict, limit=1000, skip=0) -> list[dict]:
-        """Performs a paginated query with the specified query dict
+    def paginated_query(self, query_dict: dict, limit: int = 1000, skip: int = 0) -> list[dict]:
+        """Performs a paginated query with the specified query dict.
 
         Args:
             query_dict (dict): a dict of query operators
@@ -137,59 +168,77 @@ class BaseClass(object):
         len_ret = limit
         while len_ret == limit:
             # keep looping
-            ret = interface.query(
-                self.vault,
-                query_dict,
-                lim=limit,
-                projection=None,
-                as_gen=False,
-                skip=skip
-            )
+            ret = interface.query(self.vault, query_dict, lim=limit, projection=None, as_gen=False, skip=skip)
             skip += limit
             len_ret = len(ret)
             docs.extend(ret)
         return docs
 
-    def get_collection_names(self) -> Union[None, list]:
-        """
-        Gets collection names of database
-        :return:
+    def get_collection_names(self) -> None | list:
+        """Gets collection names of database.
+
+        Raises:
+            NoVaultError: _description_
+
+        Returns:
+            None | list: _description_
         """
         if not hasattr(self, "database"):
-            raise NoVaultError("No vault instantiated.")
+            msg = "No vault instantiated."
+            raise NoVaultError(msg)
         return interface.get_collection_names(self.database)
 
-    def create_index(self, field: str) -> Union[bool, str, list]:
-        """
-        Creates an index on the current collection
-        :param field: str of field name to index of
-        :return:
+    def create_index(self, field: str) -> bool | (str | list):
+        """Creates an index on the current collection.
+
+        Args:
+            self (_type_): _description_
+
+        Raises:
+            NoVaultError: _description_
+
+        Returns:
+            _type_: _description_
         """
         if self.vault is None:
-            raise NoVaultError("No vault instantiated.")
+            msg = "No vault instantiated."
+            raise NoVaultError(msg)
         return interface.create_index(self.vault, field)
 
     def get_indexes(self) -> list:
-        """
-        Gets a list of indexes on the current collection
-        :return:
+        """Gets a list of indexes on the current collection.
+
+        Raises:
+            NoVaultError: _description_
+
+        Returns:
+            list: _description_
         """
         if self.vault is None:
-            raise NoVaultError("No vault instantiated.")
+            msg = "No vault instantiated."
+            raise NoVaultError(msg)
         return interface.get_indexes(self.vault)
 
 
 class NoVaultError(Exception):
-    """
-    Custom exception for when we haven't instantiated a vault properly
-    """
-    def __init__(self, message):
-        super(NoVaultError, self).__init__(message)
+    """Custom exception for when we haven't instantiated a vault properly."""
 
+    def __init__(self, message: str) -> None:
+        """Initialisation method.
 
-class IncorrectDocument(Exception):
-    """
-        Custom exception for when we haven't got a document formatted correctly
+        Args:
+            message (str): _description_
         """
-    def __init__(self, message):
-        super(IncorrectDocument, self).__init__(message)
+        super().__init__(message)
+
+
+class IncorrectDocumentError(Exception):
+    """Custom exception for when we haven't got a document formatted correctly."""
+
+    def __init__(self, message: str) -> None:
+        """Initialisation method.
+
+        Args:
+            message (str): _description_
+        """
+        super().__init__(message)

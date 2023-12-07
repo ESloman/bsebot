@@ -1,4 +1,1 @@
-
-"""
-directory contains useful classes for interacting with DB(s)
-"""
+"""Directory contains useful classes for interacting with DB(s)."""

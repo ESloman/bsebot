@@ -70,7 +70,7 @@ class BetCloser(BaseTask):
                     message = await channel.fetch_message(bet["message_id"])  # type: discord.Message
                     bet["active"] = False
 
-                    embed = self.embed_manager.get_bet_embed(guild_obj, bet["bet_id"], bet)
+                    embed = self.embed_manager.get_bet_embed(guild_obj, bet)
                     content = f"# {bet['title']}\n_Created by <@{bet['user']}>_"
                     bet_view = BetView(bet, self.place, self.close)
 

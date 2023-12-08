@@ -117,7 +117,7 @@ class AddBetOption(discord.ui.Modal):
 
         channel = await interaction.guild.fetch_channel(self.bet["channel_id"])
         message = await channel.fetch_message(self.bet["message_id"])
-        embed = self.embed_manager.get_bet_embed(interaction.guild, self.bet["bet_id"], self.bet)
+        embed = self.embed_manager.get_bet_embed(interaction.guild, self.bet)
         view = discordbot.views.bet.BetView(self.bet, self.place, self.close)
         await message.edit(embed=embed, view=view)
         await interaction.followup.send(content="Sorted.", ephemeral=True)

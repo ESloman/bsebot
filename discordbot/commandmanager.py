@@ -253,7 +253,7 @@ class CommandManager:
 
         # call the methods that register the events we're listening for
         self._register_client_events()
-        self._register_slash_commands(guilds)
+        self._register_slash_commands()
         self._register_context_commands()
 
     # noinspection PyProtectedMember

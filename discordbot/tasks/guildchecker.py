@@ -224,7 +224,7 @@ class GuildChecker(BaseTask):
 
                 message = channel.get_partial_message(message_id)
 
-                embed = self.embed_manager.get_bet_embed(guild, bet["bet_id"], bet)
+                embed = self.embed_manager.get_bet_embed(guild, bet)
                 view = BetView(bet, self.place, self.close)
                 content = f"# {bet['title']}\n_Created by <@{bet['user']}>_"
                 try:

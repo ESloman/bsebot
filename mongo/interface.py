@@ -25,7 +25,7 @@ class CachedMongoClient:
     _instance = None
     _client = None
 
-    def __new__(cls: "CachedMongoClient") -> "CachedMongoClient":
+    def __new__(cls: "CachedMongoClient", _: str) -> "CachedMongoClient":
         """Instantantiation method.
 
         Returns:

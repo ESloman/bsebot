@@ -56,7 +56,7 @@ class BetChange(discord.ui.View):
         bet = self.user_bets.get_bet_from_id(interaction.guild_id, self.bet["bet_id"])
         channel = await interaction.guild.fetch_channel(bet["channel_id"])
         message = await channel.fetch_message(bet["message_id"])
-        embed = self.embed_manager.get_bet_embed(interaction.guild, bet["bet_id"], bet)
+        embed = self.embed_manager.get_bet_embed(interaction.guild, bet)
         view = discordbot.views.bet.BetView(bet, self.place, self.close)
         await message.edit(embed=embed, view=view)
         await interaction.followup.edit_message(

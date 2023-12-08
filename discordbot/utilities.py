@@ -108,7 +108,7 @@ def create_logger(level: int | None = None) -> logging.Logger:
         level = logging.DEBUG
 
     path: Path = Path(Path.home(), "bsebotlogs")
-    Path.mkdir(parents=True, exist_ok=True)
+    path.mkdir(parents=True, exist_ok=True)
 
     _logger = logging.getLogger("bsebot")
     _logger.setLevel(level)

@@ -266,9 +266,9 @@ class WordleSolver:
         settings_button.click()
         await asyncio.sleep(1)
         footnote = self.driver.find_element(By.CSS_SELECTOR, f"div[class*='{WORDLE_FOOTNOTE}']")
-        div_children = footnote.find_elements(By.TAG_NAME, "div")
-        number_div = div_children[1]
-        wordle_number = number_div.text.strip().strip("#")
+        p_children = footnote.find_elements(By.TAG_NAME, "p")
+        number_p = p_children[1]
+        wordle_number = number_p.text.strip().strip("#")
         self.action_chain.send_keys(Keys.ESCAPE).perform()
         await asyncio.sleep(1)
         return wordle_number
@@ -404,3 +404,9 @@ class WordleSolver:
             share_text,
             int(wordle_number),
         )
+
+
+if __name__ == "__main__":
+    solver = WordleSolver(headless=False)
+    asyncio.run(solver.setup())
+    asyncio.run(solver.solve())

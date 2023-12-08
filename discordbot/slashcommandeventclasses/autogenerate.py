@@ -44,7 +44,7 @@ class AutoGenerate(BSEddies):
         view = AutoGenerateView(self)
         await ctx.followup.send(view=view, ephemeral=True)
 
-    async def autogenerate_wrapper(  # noqa: C901, PLR0912, PLR0913
+    async def autogenerate_wrapper(  # noqa: C901, PLR0912, PLR0913, PLR0917
         self,
         ctx: discord.ApplicationContext,
         _type: str,

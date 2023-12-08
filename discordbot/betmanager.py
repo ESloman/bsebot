@@ -26,7 +26,6 @@ class BetManager:
         guilds (Guilds): guilds collection class
     """
 
-
     def __init__(self: "BetManager", logger: Logger) -> None:
         """Initialisation method.
 
@@ -114,7 +113,10 @@ class BetManager:
         )
 
         multiplier, coefficient = self.calculate_bet_modifiers(
-            total_eddies_bet, winning_outcome_eddies, len(ret["options"]), len(ret_dict["losers"]),
+            total_eddies_bet,
+            winning_outcome_eddies,
+            len(ret["options"]),
+            len(ret_dict["losers"]),
         )
 
         self.logger.info("Bet %s winnings has multiplier %s and coefficient %s", bet_id, multiplier, coefficient)
@@ -158,24 +160,40 @@ class BetManager:
 
             self.logger.info(
                 "%s bet %s eddies and won %s (%s) - getting taxed %s so %s",
-                better, points_bet, actual_amount_won, points_won, tax_amount, eddies_won_minux_tax,
+                better,
+                points_bet,
+                actual_amount_won,
+                points_won,
+                tax_amount,
+                eddies_won_minux_tax,
             )
 
             ret_dict["winners"][better] = eddies_won_minux_tax
             self.logger.info("%s won - incrementing eddies by %s", better, eddies_won_minux_tax)
             self.user_points.increment_points(
-                int(better), guild_id, eddies_won_minux_tax, TransactionTypes.BET_WIN, bet_id=bet_id,
+                int(better),
+                guild_id,
+                eddies_won_minux_tax,
+                TransactionTypes.BET_WIN,
+                bet_id=bet_id,
             )
 
         # give taxed eddies to the King
         self.logger.info(
             "Bet ID: %s, eddies won: %s, eddies won (with original bets): %s, eddies taxed: %s",
-            bet_id, total_eddies_winnings, total_eddies_won, total_eddies_taxed,
+            bet_id,
+            total_eddies_winnings,
+            total_eddies_won,
+            total_eddies_taxed,
         )
 
         king_id = self.guilds.get_king(guild_id)
         self.user_points.increment_points(
-            king_id, guild_id, total_eddies_taxed, TransactionTypes.BET_TAX, bet_id=bet_id,
+            king_id,
+            guild_id,
+            total_eddies_taxed,
+            TransactionTypes.BET_TAX,
+            bet_id=bet_id,
         )
 
         ret_dict["king_tax"] = total_eddies_taxed

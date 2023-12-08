@@ -203,7 +203,7 @@ def update(
     return update_func(filter=parameters, update=updated_vals, upsert=upsert)
 
 
-def query(  # noqa: PLR0913
+def query(  # noqa: PLR0913, PLR0917
     collection: Collection,
     parameters: dict,
     lim: int = 10000,

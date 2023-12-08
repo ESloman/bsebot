@@ -195,7 +195,7 @@ class BSEddiesManager(BaseTask):
                 self.logger.info("%s for %s", t_points, message_type)
         return points
 
-    def calc_individual(  # noqa: C901, PLR0913, PLR0912, PLR0915
+    def calc_individual(  # noqa: C901, PLR0913, PLR0912, PLR0915, PLR0917
         self,
         user: int,
         user_dict: User,

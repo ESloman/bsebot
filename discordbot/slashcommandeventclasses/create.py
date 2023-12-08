@@ -30,7 +30,7 @@ class CreateBet(BSEddies):
         self.help_string = "Creates a bet"
         self.command_name = "create"
 
-    async def handle_bet_creation(  # noqa: C901, PLR0913, PLR0912
+    async def handle_bet_creation(  # noqa: C901, PLR0913, PLR0912, PLR0917
         self,
         ctx: discord.ApplicationContext | discord.Interaction,
         bet_title: str,

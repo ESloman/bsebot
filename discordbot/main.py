@@ -1,4 +1,3 @@
-
 """This file is our "main" file and the entrypoint for our Discord bot.
 
 It creates the necessary BSEBot class using our discord token and also an instance of our
@@ -15,6 +14,7 @@ import discord
 
 try:
     import dotenv
+
     DOTENV = True
 except ImportError:
     DOTENV = False

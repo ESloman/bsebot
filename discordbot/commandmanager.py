@@ -352,7 +352,11 @@ class CommandManager:
                 user (discord.User): the user that triggered the reaction
             """
             await self.on_reaction_add.handle_reaction_event(
-                reaction.message, reaction.message.guild, reaction.message.channel, reaction.emoji, user,
+                reaction.message,
+                reaction.message.guild,
+                reaction.message.channel,
+                reaction.emoji,
+                user,
             )
 
         @self.client.event
@@ -447,7 +451,9 @@ class CommandManager:
 
         @self.client.event
         async def on_guild_emojis_update(
-            guild: discord.Guild, before: discord.Sequence[discord.Emoji], after: discord.Sequence[discord.Emoji],
+            guild: discord.Guild,
+            before: discord.Sequence[discord.Emoji],
+            after: discord.Sequence[discord.Emoji],
         ) -> None:
             """For updating our internal list of emojis.
 
@@ -460,7 +466,9 @@ class CommandManager:
 
         @self.client.event
         async def on_guild_stickers_update(
-            guild: discord.Guild, before: discord.Sequence[discord.Sticker], after: discord.Sequence[discord.Sticker],
+            guild: discord.Guild,
+            before: discord.Sequence[discord.Sticker],
+            after: discord.Sequence[discord.Sticker],
         ) -> None:
             """For updating our internal list of emojis.
 
@@ -473,7 +481,9 @@ class CommandManager:
 
         @self.client.event
         async def on_voice_state_update(
-            member: discord.Member, before: discord.VoiceState, after: discord.VoiceState,
+            member: discord.Member,
+            before: discord.VoiceState,
+            after: discord.VoiceState,
         ) -> None:
             """Logging time in VC.
 
@@ -552,7 +562,9 @@ class CommandManager:
 
         @self.client.command(description="Gift some of your eddies to a friend")
         async def gift(
-            ctx: discord.ApplicationContext, friend: discord.Option(discord.User), amount: discord.Option(int),
+            ctx: discord.ApplicationContext,
+            friend: discord.Option(discord.User),
+            amount: discord.Option(int),
         ) -> None:
             """A slash command that allows users to gift eddies to their friends.
 

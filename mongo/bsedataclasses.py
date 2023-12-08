@@ -108,7 +108,7 @@ class SpoilerThreads(BestSummerEverPointsDB):
         """
         return self.query({"guild_id": guild_id})
 
-    def insert_spoiler_thread(  # noqa: PLR0913
+    def insert_spoiler_thread(  # noqa: PLR0913, PLR0917
         self,
         guild_id: int,
         thread_id: int,
@@ -157,7 +157,7 @@ class Awards(BestSummerEverPointsDB):
         super().__init__()
         self._vault = interface.get_collection(self.database, "awards")
 
-    def document_stat(  # noqa: PLR0913
+    def document_stat(  # noqa: PLR0913, PLR0917
         self,
         guild_id: int,
         stat: StatTypes,
@@ -210,7 +210,7 @@ class Awards(BestSummerEverPointsDB):
             return self.insert(doc)
         return None
 
-    def document_award(  # noqa: PLR0913
+    def document_award(  # noqa: PLR0913, PLR0917
         self,
         guild_id: int,
         user_id: int,

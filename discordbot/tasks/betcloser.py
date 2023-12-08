@@ -19,7 +19,7 @@ from discordbot.views.bet import BetView
 class BetCloser(BaseTask):
     """Class for bet closer."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913, PLR0917
         self,
         bot: BSEBot,
         guild_ids: list[int],

@@ -107,7 +107,7 @@ class BaseClass:
             raise NoVaultError(msg)
         return interface.delete(self.vault, parameters, many)
 
-    def query(  # noqa: PLR0913
+    def query(  # noqa: PLR0913, PLR0917
         self,
         parameters: dict,
         limit: int = 1000,

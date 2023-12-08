@@ -22,7 +22,7 @@ from discordbot.views.revolution import RevolutionView
 class GuildChecker(BaseTask):
     """Class for guild checker task."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913, PLR0917
         self,
         bot: BSEBot,
         guild_ids: list[int],

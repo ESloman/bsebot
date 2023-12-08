@@ -1,35 +1,43 @@
+"""Close slash command."""
 
+import logging
 
 import discord
 
 from discordbot.betmanager import BetManager
-from discordbot.bot_enums import TransactionTypes, ActivityTypes
+from discordbot.bot_enums import ActivityTypes, TransactionTypes
+from discordbot.bsebot import BSEBot
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.views.close import CloseABetView
 
 
 class CloseBet(BSEddies):
-    """
-    Class for handling `/bseddies bet close` commands
-    """
+    """Class for handling `/bseddies bet close` commands."""
 
-    def __init__(self, client, guilds, logger):
-        super().__init__(client, guilds, logger)
+    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+        """Initialisation method.
+
+        Args:
+            client (BSEBot): the connected BSEBot client
+            guild_ids (list): list of supported guild IDs
+            logger (logging.Logger): the logger
+        """
+        super().__init__(client, guild_ids, logger)
         self.bet_manager = BetManager(logger)
         self.activity_type = ActivityTypes.BSEDDIES_BET_CLOSE
         self.help_string = "Resolves an existing bet"
         self.command_name = "close"
 
-    async def create_bet_view(
-            self,
-            ctx: discord.ApplicationContext,
-            bet_ids: list = None
-    ) -> None:
+    async def create_bet_view(self, ctx: discord.ApplicationContext, bet_ids: list | None = None) -> None:
+        """Creates the view.
 
+        Args:
+            ctx (discord.ApplicationContext): the context
+        """
         if not bet_ids:
             bet_ids = self.user_bets.query(
                 {"closed": None, "guild_id": ctx.guild_id, "user": ctx.user.id},
-                projection={"bet_id": True, "title": True, "created": True, "option_dict": True}
+                projection={"bet_id": True, "title": True, "created": True, "option_dict": True},
             )
 
         if len(bet_ids) == 0:
@@ -39,7 +47,7 @@ class CloseBet(BSEddies):
                 await ctx.response.send_message(content="You have no bets to close.", ephemeral=True, delete_after=10)
             return
 
-        if len(bet_ids) > 25:
+        if len(bet_ids) > 25:  # noqa: PLR2004
             bet_ids = sorted(bet_ids, key=lambda x: x["created"], reverse=True)
             bet_ids = bet_ids[:24]
 
@@ -49,14 +57,8 @@ class CloseBet(BSEddies):
         except AttributeError:
             await ctx.response.send_message(content="**Closing a bet**", view=close_bet_view, ephemeral=True)
 
-    async def close_bet(
-            self,
-            ctx: discord.Interaction,
-            bet_id: str,
-            emoji: list[str]
-    ) -> None:
-        """
-        This is the method for handling when we close a bet.
+    async def close_bet(self, ctx: discord.Interaction, bet_id: str, emoji: list[str]) -> None:  # noqa: C901, PLR0912, PLR0915
+        """This is the method for handling when we close a bet.
 
         We validate that the user initiating the command is the user who created the bet and that
         the bet is still open in the first place. We also make sure that the result the user
@@ -65,20 +67,23 @@ class CloseBet(BSEddies):
         If that's all okay - we close the bet and dish out the BSEddies to the winners.
         We also inform the winners/losers what the result was and how many BSEddies they won (if any).
 
-        :param ctx: slash command context
-        :param bet_id: str - the BET ID
-        :param emoji: str - the winning outcome emoji
+        Args:
+            ctx (discord.Interaction): slash command context
+            bet_id (str): the BET ID
+            emoji (str): the winning outcome emoji
         :return: None
         """
-
         if not await self._handle_validation(ctx):
             return
 
         await ctx.response.defer()
 
         self._add_event_type_to_activity_history(
-            ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_BET_CLOSE,
-            bet_id=bet_id, emoji=emoji
+            ctx.user,
+            ctx.guild_id,
+            ActivityTypes.BSEDDIES_BET_CLOSE,
+            bet_id=bet_id,
+            emoji=emoji,
         )
 
         guild = ctx.guild  # type: discord.Guild
@@ -101,54 +106,54 @@ class CloseBet(BSEddies):
             return
 
         for _emoji in emoji:
-            _emoji = _emoji.strip()
-            if _emoji not in bet["option_dict"]:
-                msg = f"{_emoji} isn't a valid outcome so the bet can't be closed."
+            stripped_emoji = _emoji.strip()
+            if stripped_emoji not in bet["option_dict"]:
+                msg = f"{stripped_emoji} isn't a valid outcome so the bet can't be closed."
                 await ctx.followup.edit_message(content=msg, view=None, message_id=ctx.message.id)
                 return
 
         # the logic in this if statement only applies if the user "won" their own bet and they were the only better
         # they just get refunded the eddies that put in
-        if bet_dict := bet["betters"].get(str(author.id), None):
-            if len(bet["betters"]) == 1 and bet_dict["emoji"] in emoji:
-
-                self.logger.info(f"{ctx.user.id} just won a bet ({bet_id}) where they were the only better...")
-                self.user_bets.close_a_bet(bet["_id"], emoji)
-                self.user_points.increment_points(
-                    author.id,
-                    guild.id,
-                    bet_dict["points"],
-                    TransactionTypes.BET_REFUND,
-                    comment="User won their own bet when no-one else entered.",
-                    bet_id=bet_id
+        bet_dict = bet["betters"].get(str(author.id), None)
+        if bet_dict and len(bet["betters"]) == 1 and bet_dict["emoji"] in emoji:
+            self.logger.info("%s just won a bet (%s) where they were the only better...", ctx.user.id, bet_id)
+            self.user_bets.close_a_bet(bet["_id"], emoji)
+            self.user_points.increment_points(
+                author.id,
+                guild.id,
+                bet_dict["points"],
+                TransactionTypes.BET_REFUND,
+                comment="User won their own bet when no-one else entered.",
+                bet_id=bet_id,
+            )
+            if not author.dm_channel:
+                await author.create_dm()
+            try:
+                msg = (
+                    "Looks like you were the only person to bet on your bet and you _happened_ to win it. "
+                    "As such, you have won **nothing**. However, you have been refunded the eddies that you "
+                    "originally bet."
                 )
-                if not author.dm_channel:
-                    await author.create_dm()
-                try:
-                    msg = ("Looks like you were the only person to bet on your bet and you _happened_ to win it. "
-                           "As such, you have won **nothing**. However, you have been refunded the eddies that you "
-                           "originally bet.")
-                    await author.send(content=msg, silent=True)
-                except discord.Forbidden:
-                    pass
+                await author.send(content=msg, silent=True)
+            except discord.Forbidden:
+                pass
 
-                desc = (f"**{bet['title']}**\n\nThere were no winners on this bet. {author.mention} just _happened_ "
-                        f"to win a bet they created and they were the only entry. They were refunded the amount of "
-                        f"eddies that they originally bet.")
-                # update the message to reflect that it's closed
-                channel = await self.client.fetch_channel(bet["channel_id"])
+            desc = (
+                f"**{bet['title']}**\n\nThere were no winners on this bet. {author.mention} just _happened_ "
+                f"to win a bet they created and they were the only entry. They were refunded the amount of "
+                f"eddies that they originally bet."
+            )
+            # update the message to reflect that it's closed
+            channel = await self.client.fetch_channel(bet["channel_id"])
 
-                message = channel.get_partial_message(bet["message_id"])
-                await message.edit(content=desc, view=None, embeds=[])
-                await ctx.followup.edit_message(content="Closed the bet for you!", view=None, message_id=ctx.message.id)
-                return
+            message = channel.get_partial_message(bet["message_id"])
+            await message.edit(content=desc, view=None, embeds=[])
+            await ctx.followup.edit_message(content="Closed the bet for you!", view=None, message_id=ctx.message.id)
+            return
 
         ret_dict = self.bet_manager.close_a_bet(bet_id, guild.id, emoji)
 
-        desc = (
-            f"# {bet['title']}\n"
-            f"Bet ID: {bet_id}\n"
-        )
+        desc = f"# {bet['title']}\nBet ID: {bet_id}\n"
 
         outcomes = ""
         for result in zip(ret_dict["result"], ret_dict["outcome_name"], strict=True):
@@ -181,10 +186,12 @@ class CloseBet(BSEddies):
                 await mem.create_dm()
             try:
                 points_bet = ret_dict["losers"][loser]
-                msg = (f"**{author.name}** just closed bet "
-                       f"`[{bet_id}]` - [{bet['title']}](<{message.jump_url}>) and the result was {emoji} "
-                       f"(`{', '.join([n['val'] for n in ret_dict['outcome_name']])})`.\n"
-                       f"As this wasn't what you voted for - you have lost. You bet **{points_bet}** eddies.")
+                msg = (
+                    f"**{author.name}** just closed bet "
+                    f"`[{bet_id}]` - [{bet['title']}](<{message.jump_url}>) and the result was {emoji} "
+                    f"(`{', '.join([n['val'] for n in ret_dict['outcome_name']])})`.\n"
+                    f"As this wasn't what you voted for - you have lost. You bet **{points_bet}** eddies."
+                )
                 await mem.send(content=msg, silent=True)
             except discord.Forbidden:
                 pass
@@ -195,11 +202,13 @@ class CloseBet(BSEddies):
             if not mem.dm_channel:
                 await mem.create_dm()
             try:
-                msg = (f"**{author.name}** just closed bet "
-                       f"`[{bet_id}]` - [{bet['title']}](<{message.jump_url}>) and the result was {emoji} "
-                       f"(`{', '.join([n['val'] for n in ret_dict['outcome_name']])})`.\n"
-                       f"**This means you won!!** "
-                       f"You have won `{ret_dict['winners'][winner]}` BSEDDIES!!")
+                msg = (
+                    f"**{author.name}** just closed bet "
+                    f"`[{bet_id}]` - [{bet['title']}](<{message.jump_url}>) and the result was {emoji} "
+                    f"(`{', '.join([n['val'] for n in ret_dict['outcome_name']])})`.\n"
+                    f"**This means you won!!** "
+                    f"You have won `{ret_dict['winners'][winner]}` BSEDDIES!!"
+                )
                 await mem.send(content=msg, silent=True)
             except discord.Forbidden:
                 pass
@@ -207,13 +216,8 @@ class CloseBet(BSEddies):
         await message.edit(content=desc, view=None, embeds=[])
         await ctx.followup.edit_message(content="Closed the bet for you!", view=None, message_id=ctx.message.id)
 
-    async def cancel_bet(
-            self,
-            ctx: discord.Interaction,
-            bet_id: str
-    ) -> None:
-        """
-        This is the method for handling when we close a bet.
+    async def cancel_bet(self, ctx: discord.Interaction, bet_id: str) -> None:
+        """This is the method for handling when we close a bet.
 
         We validate that the user initiating the command is the user who created the bet and that
         the bet is still open in the first place. We also make sure that the result the user
@@ -227,15 +231,16 @@ class CloseBet(BSEddies):
         :param emoji: str - the winning outcome emoji
         :return: None
         """
-
         if not await self._handle_validation(ctx):
             return
 
         await ctx.response.defer()
 
         self._add_event_type_to_activity_history(
-            ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_BET_CANCEL,
-            bet_id=bet_id
+            ctx.user,
+            ctx.guild_id,
+            ActivityTypes.BSEDDIES_BET_CANCEL,
+            bet_id=bet_id,
         )
 
         guild = ctx.guild  # type: discord.Guild
@@ -267,7 +272,7 @@ class CloseBet(BSEddies):
                     bet_dict["points"],
                     TransactionTypes.BET_REFUND,
                     comment="Bet was cancelled",
-                    bet_id=bet_id
+                    bet_id=bet_id,
                 )
 
         self.user_bets.close_a_bet(bet["_id"], "cancelled")
@@ -275,5 +280,7 @@ class CloseBet(BSEddies):
         channel = await self.client.fetch_channel(bet["channel_id"])
         message = channel.get_partial_message(bet["message_id"])
         await message.edit(
-            content="Bet has been cancelled. Any bets were refunded to the betters.", view=None, embeds=[]
+            content="Bet has been cancelled. Any bets were refunded to the betters.",
+            view=None,
+            embeds=[],
         )

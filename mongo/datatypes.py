@@ -1,22 +1,23 @@
+"""Database object types."""
 
 import datetime
-from typing import TypedDict, Union
+from typing import TypedDict
 
 try:
     from typing import NotRequired
 except ImportError:
     from typing import Optional
+
     NotRequired = Optional
 
 from bson import ObjectId
 
-from discordbot.bot_enums import ActivityTypes, TransactionTypes, SupporterType
+from discordbot.bot_enums import ActivityTypes, SupporterType, TransactionTypes
 
 
 class Transaction(TypedDict):
-    """
-    A dict representing a transaction
-    """
+    """A dict representing a transaction."""
+
     uid: int
     guild_id: int
     type: TransactionTypes
@@ -32,6 +33,8 @@ class Transaction(TypedDict):
 
 
 class Activity(TypedDict):
+    """A dict representing an activity."""
+
     uid: int
     guild_id: int
     type: ActivityTypes
@@ -43,8 +46,8 @@ class Activity(TypedDict):
 
 
 class User(TypedDict):
-    """A User dict
-    """
+    """A User dict."""
+
     _id: ObjectId
     """The internal DB ID"""
     uid: int
@@ -81,6 +84,8 @@ class User(TypedDict):
 
 
 class Better(TypedDict):
+    """A dict representing a better on a bet."""
+
     user_id: int
     emoji: str
     first_bet: datetime.datetime
@@ -89,11 +94,15 @@ class Better(TypedDict):
 
 
 class Option(TypedDict):
+    """A dict representing an option in a bet."""
+
     val: str
     """The human outcome name"""
 
 
 class Bet(TypedDict):
+    """A dict representing a bet."""
+
     _id: ObjectId
     """The internal DB ID"""
     guild_id: int
@@ -116,9 +125,9 @@ class Bet(TypedDict):
     """When the bet will stop taking bets"""
     active: bool
     """Whether the bet is accepting new bets or not"""
-    betters: dict[str: Better]
+    betters: dict[str:Better]
     """A dict of user ID keys to their bet amounts"""
-    result: Union[str, None]
+    result: str | None
     """The outcome of the bet"""
     option_dict: dict[str, Option]
     """a dict of emoji keys to the human readable names"""
@@ -133,6 +142,8 @@ class Bet(TypedDict):
 
 
 class Reaction(TypedDict):
+    """A dict representing a user reaction."""
+
     user_id: int
     """The discord user ID of the user who sent the message"""
     content: str
@@ -142,6 +153,8 @@ class Reaction(TypedDict):
 
 
 class Reply(TypedDict):
+    """A dict representing a user reply."""
+
     user_id: int
     """The discord user ID of the user who sent the reply"""
     content: str
@@ -153,6 +166,8 @@ class Reply(TypedDict):
 
 
 class Message(TypedDict):
+    """A dict representing a user message."""
+
     _id: ObjectId
     """The internal DB ID"""
     guild_id: int
@@ -184,6 +199,8 @@ class Message(TypedDict):
 
 
 class VCInteraction(Message):
+    """A dict representing a voice channel interaction."""
+
     muted: bool
     muted_time: datetime.datetime
     deafened: bool
@@ -200,6 +217,8 @@ class VCInteraction(Message):
 
 
 class Emoji(TypedDict):
+    """A dict representing an emoji."""
+
     _id: ObjectId
     """The internal DB ID"""
     guild_id: int
@@ -215,6 +234,8 @@ class Emoji(TypedDict):
 
 
 class Sticker(TypedDict):
+    """A dict representing a sticker."""
+
     _id: ObjectId
     """The internal DB ID"""
     guild_id: int
@@ -230,6 +251,8 @@ class Sticker(TypedDict):
 
 
 class RevolutionEventType(TypedDict):
+    """A dict representing a revolution event."""
+
     _id: ObjectId
     """The internal DB ID"""
     type: str
@@ -283,6 +306,8 @@ class RevolutionEventType(TypedDict):
 
 
 class Thread(TypedDict):
+    """A dict representing a thread."""
+
     _id: ObjectId
     """The internal DB ID"""
     guild_id: int
@@ -302,6 +327,8 @@ class Thread(TypedDict):
 
 
 class GuildDB(TypedDict):
+    """A dict representing a guild/server."""
+
     _id: ObjectId
     admins: list[int]
     guild_id: int
@@ -341,6 +368,8 @@ class GuildDB(TypedDict):
 
 
 class Reminder(TypedDict):
+    """A dict representing a reminder."""
+
     _id: ObjectId
     guild_id: int
     created: datetime.datetime

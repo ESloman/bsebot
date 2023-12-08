@@ -1,3 +1,4 @@
+"""Command suggest message action class."""
 
 import re
 from logging import Logger
@@ -9,25 +10,30 @@ from discordbot.message_actions.base import BaseMessageAction
 
 
 class CommandSuggest(BaseMessageAction):
+    """Command suggest message action.
+
+    Will provide easy links to command when used in free text.
     """
-    Command suggest message action
-    Will provide easy links to command when used in free text
-    """
+
     def __init__(self, client: BSEBot, logger: Logger) -> None:
+        """Initialisation method.
+
+        Args:
+            client (BSEBot): our BSEBot client
+            logger (Logger): our logger
+        """
         super().__init__(client, logger)
 
-    async def pre_condition(self, message: discord.Message, message_type: list) -> bool:
-        """
-        Checks that a message contains `/COMMAND_NAME` and that it's a valid command name
+    async def pre_condition(self, message: discord.Message, _: list) -> bool:
+        """Checks that a message contains `/COMMAND_NAME` and that it's a valid command name.
 
         Args:
             message (discord.Message): message to check
-            message_type (list): the precalculated message_type of the message
+            _ (list): the precalculated message_type of the message
 
         Returns:
             bool: true or false
         """
-
         if message.author.bot:
             # don't trigger on ourselves
             return False
@@ -49,13 +55,11 @@ class CommandSuggest(BaseMessageAction):
         return False
 
     async def run(self, message: discord.Message) -> None:
-        """
-        Replies to the user with a list of commands that they can click on
+        """Replies to the user with a list of commands that they can click on.
 
         Args:
             message (discord.Message): the message to action
         """
-
         matches = re.findall(r"\/[a-z0-9_]+", message.content.lower())
         app_commands = self.client.application_commands
         command_names = [app.name for app in app_commands]
@@ -67,13 +71,8 @@ class CommandSuggest(BaseMessageAction):
             match_name = _match.strip("/")
             if match_name in command_names:
                 app_command = app_map[match_name]
-                msg += (
-                    f"- {app_command.mention}\n"
-                )
+                msg += f"- {app_command.mention}\n"
 
-        msg += (
-            "\n"
-            f"For more information on commands, use {app_map['help'].mention}."
-        )
+        msg += "\n" f"For more information on commands, use {app_map['help'].mention}."
 
         await message.reply(content=msg, suppress=True)

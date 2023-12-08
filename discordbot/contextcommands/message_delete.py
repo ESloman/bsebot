@@ -1,3 +1,4 @@
+"""Contains our ContextDeleteMessage class."""
 
 import logging
 
@@ -8,15 +9,32 @@ from discordbot.contextcommands.base import BaseContextCommand
 
 
 class ContextDeleteMessage(BaseContextCommand):
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger):
-        super().__init__(client, guild_ids, logger)
+    """Context class for delete message."""
 
-    async def message_delete(self, ctx: discord.ApplicationContext, message: discord.Message):
+    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+        """Initialisation method.
 
+        Args:
+            client (BSEBot): the connected BSEBot client
+            guild_ids (list): list of supported guild IDs
+            logger (logging.Logger): the logger
+        """
+
+    async def message_delete(self, ctx: discord.ApplicationContext, message: discord.Message) -> None:
+        """Allows someone to delete a message with a right-click.
+
+        Args:
+            ctx (discord.ApplicationContext): application context
+            message (discord.Message): the right-clicked message
+
+        Returns:
+            None
+        """
         if not self._check_perms(ctx):
             return await self._send_no_perms_message(ctx)
 
-        self.logger.info(f"{ctx.user.name} deleted {message.id}")
+        self.logger.info("%s deleted %s", ctx.user.name, message.id)
         _reason = f"{ctx.user.id}: {ctx.user.name} requested this message be deleted"
         await message.delete(reason=_reason)
         await ctx.respond(content="Message deleted", ephemeral=True, delete_after=10)
+        return None

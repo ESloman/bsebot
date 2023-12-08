@@ -1,3 +1,4 @@
+"""Stats views."""
 
 import discord
 
@@ -5,10 +6,17 @@ from discordbot.selects.stats import StatsModeSelect
 
 
 class StatsView(discord.ui.View):
+    """Class for stats view."""
+
     def __init__(
         self,
-        stats_class  # discordbot.slashcommandeventclasses.stats.Stats - can't import due to circular imports
-    ):
+        stats_class: object,
+    ) -> None:
+        """Initialisation method.
+
+        Args:
+            stats_class (discordbot.slashcommandeventclasses.stats.Stats): the stats class
+        """
         super().__init__(timeout=None)
 
         self.stats_class = stats_class
@@ -16,8 +24,14 @@ class StatsView(discord.ui.View):
 
         self.add_item(self.stats_mode)
 
-    async def update(self, interaction: discord.Interaction):
+    async def update(self, interaction: discord.Interaction) -> None:
+        """View update method.
 
+        Can be called by child types when something changes.
+
+        Args:
+            interaction (discord.Interaction): _description_
+        """
         value = None
         try:
             value = self.stats_mode.values[0]
@@ -32,14 +46,16 @@ class StatsView(discord.ui.View):
                 child.disabled = not bool(value)
                 break
 
-        await interaction.response.edit_message(
-            content=interaction.message.content,
-            view=self
-        )
+        await interaction.response.edit_message(content=interaction.message.content, view=self)
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=3, disabled=False)
-    async def submit_button_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def submit_button_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:
+        """Button callback.
 
+        Args:
+            _ (discord.ui.Button): the button pressed
+            interaction (discord.Interaction): the callback interaction
+        """
         value = None
         try:
             value = self.stats_mode.values[0]
@@ -60,6 +76,13 @@ class StatsView(discord.ui.View):
 
         await interaction.followup.delete_message(interaction.message.id)
 
+    @staticmethod
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=3, disabled=False, emoji="✖️")
-    async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def cancel_callback(_: discord.ui.Button, interaction: discord.Interaction) -> None:
+        """Button callback.
+
+        Args:
+            _ (discord.ui.Button): the button pressed
+            interaction (discord.Interaction): the callback interaction
+        """
         await interaction.response.edit_message(content="Cancelled", view=None, delete_after=2)

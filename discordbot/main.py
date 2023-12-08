@@ -1,6 +1,5 @@
+"""This file is our "main" file and the entrypoint for our Discord bot.
 
-"""
-This file is our "main" file and the entrypoint for our Discord bot.
 It creates the necessary BSEBot class using our discord token and also an instance of our
 CommandManager class.
 
@@ -15,16 +14,19 @@ import discord
 
 try:
     import dotenv
+
     DOTENV = True
 except ImportError:
     DOTENV = False
 
-from bsebot import BSEBot
-from discordbot.commandmanager import CommandManager
-from discordbot.constants import SLOMAN_SERVER_ID, BSE_SERVER_ID
-from discordbot import utilities
-from mongo.bsepoints.bets import UserBets
+import sys
 
+from bsebot import BSEBot
+
+from discordbot import utilities
+from discordbot.commandmanager import CommandManager
+from discordbot.constants import BSE_SERVER_ID, SLOMAN_SERVER_ID
+from mongo.bsepoints.bets import UserBets
 
 if __name__ == "__main__":
     """
@@ -64,17 +66,11 @@ if __name__ == "__main__":
         GITHUB_TOKEN = _github
 
     if TOKEN is None:
-        exit(-1)
+        sys.exit(-1)
 
-    if DEBUG_MODE is None:
-        DEBUG_MODE = False
-    else:
-        DEBUG_MODE = bool(int(DEBUG_MODE))
+    DEBUG_MODE = False if DEBUG_MODE is None else bool(int(DEBUG_MODE))
 
-    if DEBUG_MODE is True:
-        IDS = [SLOMAN_SERVER_ID]  # test IDs
-    else:
-        IDS = [BSE_SERVER_ID]  # actual IDS
+    IDS = [SLOMAN_SERVER_ID] if DEBUG_MODE is True else [BSE_SERVER_ID]
 
     logger = utilities.create_logger(logging.DEBUG)
 
@@ -86,15 +82,10 @@ if __name__ == "__main__":
     listening_activity = discord.Activity(
         name="conversations",
         type=discord.ActivityType.listening,
-        details="Waiting for commands!"
+        details="Waiting for commands!",
     )
 
-    cli = BSEBot(
-        intents=intents,
-        activity=listening_activity,
-        max_messages=5000,
-        logger=logger
-    )
+    cli = BSEBot(intents=intents, activity=listening_activity, max_messages=5000, logger=logger)
 
     com = CommandManager(cli, IDS, logger, giphy_token=GIPHY_TOKEN, github_token=GITHUB_TOKEN)
 

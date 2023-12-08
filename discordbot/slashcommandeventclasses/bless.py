@@ -1,27 +1,41 @@
+"""Bless slash command."""
+
+import logging
 
 import discord
 
 from discordbot.bot_enums import ActivityTypes
+from discordbot.bsebot import BSEBot
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.views.bless import BlessView
 
 
 class Bless(BSEddies):
+    """Class for Bless command."""
 
-    def __init__(self, client, guilds, logger):
-        super().__init__(client, guilds, logger)
+    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+        """Initialisation method.
+
+        Args:
+            client (BSEBot): the connected BSEBot client
+            guild_ids (list): list of supported guild IDs
+            logger (logging.Logger): the logger
+        """
+        super().__init__(client, guild_ids, logger)
         self.activity_type = ActivityTypes.BSEDDIES_ACTIVE
         self.help_string = "Allows the KING to bless supporters/everyone"
         self.command_name = "bless"
 
     async def create_bless_view(self, ctx: discord.ApplicationContext) -> None:
+        """Creates the view.
 
+        Args:
+            ctx (discord.ApplicationContext): the context
+        """
         if not await self._handle_validation(ctx):
             return
 
-        self._add_event_type_to_activity_history(
-            ctx.user, ctx.guild_id, ActivityTypes.BLESS
-        )
+        self._add_event_type_to_activity_history(ctx.user, ctx.guild_id, ActivityTypes.BLESS)
 
         guild_id = ctx.guild.id
         guild_db = self.guilds.get_guild(guild_id)

@@ -1,6 +1,8 @@
+"""Transactions collection interface."""
+
 import datetime
 
-from pymongo.results import InsertOneResult, InsertManyResult
+from pymongo.results import InsertManyResult, InsertOneResult
 
 from discordbot.bot_enums import TransactionTypes
 from mongo import interface
@@ -9,13 +11,10 @@ from mongo.db_classes import BestSummerEverPointsDB
 
 
 class UserTransactions(BestSummerEverPointsDB):
-    """
-    Class for interacting with the 'usertransactions' MongoDB collection in the 'bestsummereverpoints' DB
-    """
-    def __init__(self):
-        """
-        Constructor method that initialises the vault object
-        """
+    """Class for interacting with the 'usertransactions' MongoDB collection in the 'bestsummereverpoints' DB."""
+
+    def __init__(self) -> None:
+        """Constructor method that initialises the vault object."""
         super().__init__()
         self._vault = interface.get_collection(self.database, "usertransactions")
 
@@ -25,14 +24,25 @@ class UserTransactions(BestSummerEverPointsDB):
         guild_id: int,
         transaction_type: TransactionTypes,
         amount: int,
-        **kwargs
+        **kwargs: dict[str, any],
     ) -> InsertOneResult | InsertManyResult:
+        """Adds a transaction.
+
+        Args:
+            user_id (int): _description_
+            guild_id (int): _description_
+            transaction_type (TransactionTypes): _description_
+            amount (int): _description_
+
+        Returns:
+            InsertOneResult | InsertManyResult: _description_
+        """
         doc = {
             "uid": user_id,
             "guild_id": guild_id,
             "type": transaction_type,
             "amount": amount,
-            "timestamp": datetime.datetime.now()
+            "timestamp": datetime.datetime.now(),
         }
 
         doc.update(kwargs)
@@ -42,9 +52,9 @@ class UserTransactions(BestSummerEverPointsDB):
         self,
         guild_id: int,
         start: datetime.datetime,
-        end: datetime.datetime
+        end: datetime.datetime,
     ) -> list[Transaction]:
-        """Get guild transactions between two timestamps
+        """Get guild transactions between two timestamps.
 
         Args:
             guild_id (int): the guild ID
@@ -54,13 +64,10 @@ class UserTransactions(BestSummerEverPointsDB):
         Returns:
             list[Transaction]: transactions between those times
         """
-        return self.query(
-            {"guild_id": guild_id, "timestamp": {"$gt": start, "$lt": end}},
-            limit=10000
-        )
+        return self.query({"guild_id": guild_id, "timestamp": {"$gt": start, "$lt": end}}, limit=10000)
 
     def get_all_guild_transactions(self, guild_id: int) -> list[Transaction]:
-        """Get all transactions for a given guild ID
+        """Get all transactions for a given guild ID.
 
         Args:
             guild_id (int): the guild ID

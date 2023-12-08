@@ -1,11 +1,13 @@
+"""Wordle data type."""
 
 import datetime
-
 from dataclasses import dataclass
 
 
 @dataclass
 class WordleSolve:
+    """Dataclass for wordle."""
+
     solved: bool
     guesses: list
     starting_word: str

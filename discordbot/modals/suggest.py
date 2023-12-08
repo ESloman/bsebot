@@ -1,3 +1,6 @@
+"""Suggest modal class."""
+
+import logging
 
 import discord
 
@@ -5,7 +8,15 @@ from apis.github import GitHubAPI
 
 
 class SuggestModal(discord.ui.Modal):
-    def __init__(self, logger, github_api: GitHubAPI, *args, **kwargs) -> None:
+    """Suggest modal class."""
+
+    def __init__(self, logger: logging.Logger, github_api: GitHubAPI, *args: tuple[any], **kwargs: dict[any]) -> None:
+        """Initialisation method.
+
+        Args:
+            logger (logging.Logger): the logger
+            github_api (GitHubAPI): initialised github API class
+        """
         super().__init__(*args, **kwargs)
 
         self.logger = logger
@@ -16,15 +27,15 @@ class SuggestModal(discord.ui.Modal):
             discord.ui.InputText(
                 label="Issue description",
                 placeholder="Please enter a description of the issue/improvement.",
-                style=discord.InputTextStyle.long
-            )
+                style=discord.InputTextStyle.long,
+            ),
         )
 
-    async def callback(self, interaction: discord.Interaction):
-        """
+    async def callback(self, interaction: discord.Interaction) -> None:
+        """The submit callback.
 
-        :param interaction:
-        :return:
+        Args:
+            interaction (discord.Interaction): the interaction
         """
         await interaction.response.defer(ephemeral=True)
 
@@ -37,24 +48,15 @@ class SuggestModal(discord.ui.Modal):
 
         issue_body = f"Created by: `{interaction.user.name}`.\n\n{issue_body}"
 
-        ret = self.github.raise_issue(
-            "ESloman",
-            "bsebot",
-            issue_title,
-            issue_body,
-            "feature"
-        )
+        ret = self.github.raise_issue("ESloman", "bsebot", issue_title, issue_body, "feature")
 
-        if ret.status_code != 201:
+        if ret.status_code != 201:  # noqa: PLR2004
             # something went wrong
             await interaction.followup.send(
                 content=f"Something went wrong raising an issue: `{ret.json()}`",
-                ephemeral=True
+                ephemeral=True,
             )
             return
 
         msg = f"Created an issue for you. [Link]({ret.json()['url'].replace('api.', '').replace('repos/', '')})."
-        await interaction.followup.send(
-            content=msg,
-            ephemeral=True
-        )
+        await interaction.followup.send(content=msg, ephemeral=True)

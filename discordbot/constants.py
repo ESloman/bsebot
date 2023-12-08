@@ -1,5 +1,5 @@
+"""Contants.
 
-"""
 This file contains a variety of different variables whose values aren't going to change. We use these in various places
 throughout the codebase so we define them here.
 """
@@ -23,8 +23,7 @@ MESSAGE_TYPES = [
     "reaction_received",
     "reply_received",
     "wordle",
-    "wordle_win"
-    "thread_create",
+    "wordle_winthread_create",
     "react_train",
     "custom_emoji_reaction",
     "custom_emoji",
@@ -66,7 +65,7 @@ HUMAN_MESSAGE_TYPES = {
     "vc_joined": "Spent time in VC",
     "vc_streaming": "Spent time streaming",
     "voice_message": "Voice Message",
-    "wordle_word_used": "Used daily Wordle word"
+    "wordle_word_used": "Used daily Wordle word",
 }
 
 # a mapping of the above message types; and how many eddies they are worth for each individual occurence
@@ -97,19 +96,11 @@ MESSAGE_VALUES = {
     "vc_joined": 0.0015,
     "vc_streaming": 0.0025,
     "voice_message": 4,
-    "wordle_word_used": 2
+    "wordle_word_used": 2,
 }
 
 # the number of eddies a user received for each wordle score
-WORDLE_VALUES = {
-    6: 1,
-    5: 2,
-    4: 3,
-    3: 4,
-    2: 10,
-    1: 1,
-    "X": 1
-}
+WORDLE_VALUES = {6: 1, 5: 2, 4: 3, 3: 4, 2: 10, 1: 1, "X": 1}
 
 # bet outcome coefficient
 BET_OUTCOME_COUNT_MODIFIER = {
@@ -122,6 +113,15 @@ BET_OUTCOME_COUNT_MODIFIER = {
     8: 0.16,
 }
 
+# amount of eddies on a bet that we will just return on winning
+SMALL_BET_AMOUNT = 10
+
+# leaderboard stuff
+# max number of users to filter by user points
+MIN_USERS_FILTER = 10
+# the eddies total to filter users out with
+USER_POINTS_FILTER = 10
+
 # the user that created the bot (aka ESloman)
 CREATOR = 189458414764687360
 
@@ -129,12 +129,6 @@ CREATOR = 189458414764687360
 BSEDDIES_REVOLUTION_CHANNEL = 817061592335122433
 GENERAL_CHAT = 181098823228063764
 JERK_OFF_CHAT = 470696533873000449
-
-# KING roles
-BSEDDIES_KING_ROLES = {
-    SLOMAN_SERVER_ID: 1066004383705337936,
-    BSE_SERVER_ID: 813738204989227008,
-}
 
 # the bseddies awards money
 MONTHLY_AWARDS_PRIZE = 100
@@ -151,3 +145,6 @@ MARVEL_AD_COOLDOWN = 3600
 REMIND_ME_COOLDOWN = 3600
 # cool down in seconds for rigged messages
 RIGGED_COOLDOWN = 300
+
+# max bet title display length
+BET_TITLE_DISPLAY_LENTH = 100

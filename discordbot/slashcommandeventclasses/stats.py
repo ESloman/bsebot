@@ -1,32 +1,39 @@
+"""Stats slash command."""
 
 import datetime
+import logging
 import re
 
 import discord
 
 import discordbot.views.stats
 from discordbot.bot_enums import ActivityTypes
+from discordbot.bsebot import BSEBot
 from discordbot.constants import WORDLE_SCORE_REGEX
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.stats.statsdatacache import StatsDataCache
 from discordbot.stats.statsdataclasses import StatsData
-
 from mongo.datatypes import Message
 
 
 class Stats(BSEddies):
-    """
-    Class for handling `/stats` commands
-    """
+    """Class for handling `/stats` commands."""
 
-    def __init__(self, client, guilds, logger):
-        super().__init__(client, guilds, logger)
+    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+        """Initialisation method.
+
+        Args:
+            client (BSEBot): the connected BSEBot client
+            guild_ids (list): list of supported guild IDs
+            logger (logging.Logger): the logger
+        """
+        super().__init__(client, guild_ids, logger)
         self.activity_type = ActivityTypes.STATS
         self.help_string = "View some stats"
         self.command_name = "stats"
 
-    def _do_message_counts(self, messages: list[Message]) -> dict:
-
+    @staticmethod
+    def _do_message_counts(messages: list[Message]) -> dict:  # noqa: C901, PLR0915
         _swears = ["fuck", "shit", "cunt", "piss", "cock", "bollock", "dick", "twat"]
 
         _dict = {}
@@ -80,17 +87,14 @@ class Stats(BSEddies):
         top_channels = sorted(_channels_dict, key=lambda x: _channels_dict[x], reverse=True)
         top_five_channels = [
             (_chan, _channels_dict[_chan])
-            for _chan in top_channels[:5 if len(top_channels) > 5 else -1]
+            for _chan in top_channels[: 5 if len(top_channels) > 5 else -1]  # noqa: PLR2004
         ]
 
         top_swears = sorted(_swears_dict, key=lambda x: _swears_dict[x], reverse=True)
         top_three_swears = [(_swear, _swears_dict[_swear]) for _swear in top_swears[:3] if _swears_dict[_swear]]
 
         top_users = sorted(_users_dict, key=lambda x: _users_dict[x], reverse=True)
-        top_five_users = [
-            (_user, _users_dict[_user])
-            for _user in top_users[:5 if len(top_users) > 5 else -1]
-        ]
+        top_five_users = [(_user, _users_dict[_user]) for _user in top_users[: 5 if len(top_users) > 5 else -1]]  # noqa: PLR2004
 
         _dict["top_five"] = top_five_channels
         _dict["average_length"] = round((sum(_lengths) / len(_lengths)), 2)
@@ -110,6 +114,11 @@ class Stats(BSEddies):
         return _dict
 
     async def create_stats_view(self, ctx: discord.ApplicationContext) -> None:
+        """Creates the view.
+
+        Args:
+            ctx (discord.ApplicationContext): the context
+        """
         if not await self._handle_validation(ctx):
             return
 
@@ -118,20 +127,16 @@ class Stats(BSEddies):
         self._add_event_type_to_activity_history(ctx.author, ctx.guild_id, ActivityTypes.STATS)
 
         _view = discordbot.views.stats.StatsView(self)
-        _msg = (
-            "# Stats\n"
-            "Select stats generation method."
-        )
+        _msg = "# Stats\nSelect stats generation method."
 
         await ctx.followup.send(content=_msg, view=_view, ephemeral=True)
 
     async def stats_quick(self, interaction: discord.Interaction) -> None:
-        """_summary_
+        """_summary_.
 
         Args:
             interaction (discord.Interaction): _description_
         """
-
         await interaction.response.defer(ephemeral=True)
 
         # general summary of messages
@@ -172,7 +177,7 @@ class Stats(BSEddies):
                 message += f"\n - `{swear[0]}`: {swear[1]}"
 
         # wordle stuff
-        app_command = [app_com for app_com in self.client.application_commands if app_com.name == "wordle"][0]
+        app_command = next(app_com for app_com in self.client.application_commands if app_com.name == "wordle")
 
         message += (
             "\n\n"
@@ -183,11 +188,16 @@ class Stats(BSEddies):
             f"For more Wordle stats - use {app_command.mention}."
         )
 
-        self.logger.info(f"Stats message length: {len(message)}")
+        self.logger.info("Stats message length: %s", len(message))
 
         await interaction.followup.send(content=message, ephemeral=True)
 
     async def stats_server(self, interaction: discord.Interaction) -> None:
+        """Calculates stats.
+
+        Args:
+            interaction (discord.Interaction): the interaction
+        """
         await interaction.response.defer(ephemeral=True)
         total, monthly = self._stats(interaction, True)
 
@@ -234,7 +244,7 @@ class Stats(BSEddies):
                 message += f"\n - `{swear[0]}`: {swear[1]}"
 
         # wordle stuff
-        app_command = [app_com for app_com in self.client.application_commands if app_com.name == "wordle"][0]
+        app_command = next(app_com for app_com in self.client.application_commands if app_com.name == "wordle")
 
         message += (
             "\n\n"
@@ -245,13 +255,12 @@ class Stats(BSEddies):
             f"For more Wordle stats - use {app_command.mention}."
         )
 
-        self.logger.info(f"Stats message length: {len(message)}")
+        self.logger.info("Stats message length: %s", len(message))
 
         await interaction.followup.send(content=message, ephemeral=True)
 
     def _stats(self, interaction: discord.Interaction, server: bool = False) -> tuple[StatsData, StatsData]:
-        """
-        Generates a generic 'StatsData' class with stats on either a user, or a server
+        """Generates a generic 'StatsData' class with stats on either a user, or a server.
 
         Args:
             interaction (discord.Interaction): the discord interaction
@@ -260,10 +269,9 @@ class Stats(BSEddies):
         Returns:
             tuple[StatsData, StatsData]: a tuple of Stats Data, all time stats and this month's stats
         """
-
         now = datetime.datetime.now()
         start = now.replace(year=2012, month=1, day=1, hour=1, second=1, microsecond=1)
-        end = start.replace(year=now.year+1)
+        end = start.replace(year=now.year + 1)
 
         month_start = now.replace(day=1, hour=0, minute=0, second=0)
         try:
@@ -298,7 +306,7 @@ class Stats(BSEddies):
             replies_count=counts["replies_count"],
             top_users=counts["top_users"],
             wordles=counts["wordles"],
-            average_wordle_score=counts["average_wordle_score"]
+            average_wordle_score=counts["average_wordle_score"],
         )
 
         monthly_stats = StatsData(
@@ -312,7 +320,7 @@ class Stats(BSEddies):
             replies_count=monthly_counts["replies_count"],
             top_users=monthly_counts["top_users"],
             wordles=monthly_counts["wordles"],
-            average_wordle_score=monthly_counts["average_wordle_score"]
+            average_wordle_score=monthly_counts["average_wordle_score"],
         )
 
         return total_stats, monthly_stats

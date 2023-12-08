@@ -1,38 +1,45 @@
+"""Predict slash command."""
+
+import logging
 
 import discord
 
 from discordbot.bot_enums import ActivityTypes
+from discordbot.bsebot import BSEBot
 from discordbot.constants import CREATOR, HUMAN_MESSAGE_TYPES
-from discordbot.tasks.eddiegains import BSEddiesManager
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
+from discordbot.tasks.eddiegains import BSEddiesManager
 
 
 class Predict(BSEddies):
-    """
-    Class for handling `/bseddies predict` command
-    """
+    """Class for handling `/bseddies predict` command."""
 
-    def __init__(self, client, guilds, logger):
-        super().__init__(client, guilds, logger)
-        self.manager = BSEddiesManager(client, guilds, logger, [])
+    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+        """Initialisation method.
+
+        Args:
+            client (BSEBot): the connected BSEBot client
+            guild_ids (list): list of supported guild IDs
+            logger (logging.Logger): the logger
+        """
+        super().__init__(client, guild_ids, logger)
+        self.manager = BSEddiesManager(client, guild_ids, logger, [])
         self.activity_type = ActivityTypes.BSEDDIES_PREDICT
         self.help_string = "Predict your daily salary gain for today"
         self.command_name = "predict"
 
     async def predict(self, ctx: discord.ApplicationContext) -> None:
-        """
-        Command to allow a user to see how many eddies they might gain today.
-        :param ctx:
-        :return:
+        """Command to allow a user to see how many eddies they might gain today.
+
+        Args:
+            ctx (discord.ApplicationContext): the context
         """
         if not await self._handle_validation(ctx):
             return
 
         await ctx.defer(ephemeral=True)
 
-        self._add_event_type_to_activity_history(
-            ctx.author, ctx.guild_id, ActivityTypes.BSEDDIES_PREDICT
-        )
+        self._add_event_type_to_activity_history(ctx.author, ctx.guild_id, ActivityTypes.BSEDDIES_PREDICT)
 
         eddies_dict = self.manager.give_out_eddies(ctx.guild_id, False, 0)
 
@@ -57,7 +64,7 @@ class Predict(BSEddies):
         for key in sorted(breakdown):
             message += f"\n - `{HUMAN_MESSAGE_TYPES[key]}`  :  **{breakdown[key]}**"
 
-            if key in ["vc_joined", "vc_streaming"]:
+            if key in {"vc_joined", "vc_streaming"}:
                 message += " seconds"
 
         if ctx.author.id != CREATOR:

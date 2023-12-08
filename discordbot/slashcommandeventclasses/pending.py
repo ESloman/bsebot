@@ -1,24 +1,32 @@
+"""Pending slash command."""
+
+import logging
 
 import discord
 
 from discordbot.bot_enums import ActivityTypes
+from discordbot.bsebot import BSEBot
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
 class Pending(BSEddies):
-    """
-    Class for handling `/bseddies pending` commands
-    """
+    """Class for handling `/bseddies pending` commands."""
 
-    def __init__(self, client, guilds, logger):
-        super().__init__(client, guilds, logger)
+    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+        """Initialisation method.
+
+        Args:
+            client (BSEBot): the connected BSEBot client
+            guild_ids (list): list of supported guild IDs
+            logger (logging.Logger): the logger
+        """
+        super().__init__(client, guild_ids, logger)
         self.activity_type = ActivityTypes.BSEDDIES_PENDING
         self.help_string = "See all the pending bets you have eddies on"
         self.command_name = "pending"
 
     async def pending(self, ctx: discord.ApplicationContext) -> None:
-        """
-        Simple method for listing all the pending bets for the user that executed this command
+        """Simple method for listing all the pending bets for the user that executed this command.
 
         A 'pending' bet is a bet that hasn't been closed or resolved the the user has invested eddies in to
 
@@ -44,12 +52,14 @@ class Pending(BSEddies):
 
             add_text = "OPEN FOR NEW BETS" if bet.get("active") else "CLOSED - AWAITING RESULT"
 
-            pt = (f"- **{bets.index(bet) + 1})** [{bet['bet_id']} - `{add_text}`] _[{bet['title']}](<{link}>)_"
-                  f"\nOutcome: {bet['betters'][str(ctx.author.id)]['emoji']}\n"
-                  f"Points: **{bet['betters'][str(ctx.author.id)]['points']}**\n\n")
+            pt = (
+                f"- **{bets.index(bet) + 1})** [{bet['bet_id']} - `{add_text}`] _[{bet['title']}](<{link}>)_"
+                f"\nOutcome: {bet['betters'][str(ctx.author.id)]['emoji']}\n"
+                f"Points: **{bet['betters'][str(ctx.author.id)]['points']}**\n\n"
+            )
             message += pt
 
-            if (len(message) + 400) > 2000 and bet != bets[-1]:
+            if (len(message) + 400) > 2000 and bet != bets[-1]:  # noqa: PLR2004
                 await ctx.respond(content=message, ephemeral=True)
                 message = ""
 

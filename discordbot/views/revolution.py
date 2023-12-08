@@ -1,22 +1,32 @@
+"""Revolution views."""
 
 import datetime
 import math
+from logging import Logger
 
 import discord
 
-from discordbot.bsebot import BSEBot
 from discordbot.bot_enums import ActivityTypes, TransactionTypes
+from discordbot.bsebot import BSEBot
 from discordbot.embedmanager import EmbedManager
-
 from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.points import UserPoints
-from mongo.datatypes import RevolutionEventType
 from mongo.bseticketedevents import RevolutionEvent
+from mongo.datatypes import RevolutionEventType
 
 
 class RevolutionView(discord.ui.View):
-    def __init__(self, client: BSEBot, event: RevolutionEventType, logger):
+    """Class for revolution view."""
+
+    def __init__(self, client: BSEBot, event: RevolutionEventType, logger: Logger) -> None:
+        """Initialisation method.
+
+        Args:
+            client (BSEBot): the BSEBot client
+            event (RevolutionEventType): the revolution event
+            logger (Logger): the logger to use
+        """
         super().__init__(timeout=None)
         self.client = client
         self.event_id = event["event_id"]
@@ -28,17 +38,18 @@ class RevolutionView(discord.ui.View):
         self.activities = UserActivities()
         self.logger = logger
 
-    def toggle_stuff(self, disable):
+    def toggle_stuff(self, disable: bool) -> None:
+        """Toggle children.
+
+        Args:
+            disable (bool): whether the children are disabled or not
+        """
         for child in self.children:
             child.disabled = disable
 
-    async def _revolution_button_logic(
-            self,
-            interaction: discord.Interaction,
-            button: discord.Button
-    ) -> None:
-        """
-        Function for abstracting the revolution button logic.
+    async def _revolution_button_logic(self, interaction: discord.Interaction, button: discord.Button) -> None:  # noqa: C901, PLR0912, PLR0915
+        """Function for abstracting the revolution button logic.
+
         The logic is slightly different for each of the buttons but there's a lot of
         shared functionality so we can reduce this complexity by putting it all in
         one place.
@@ -108,7 +119,7 @@ class RevolutionView(discord.ui.View):
             await followup.send(
                 content="You ARE the King - you can't overthrow/support yourself.",
                 ephemeral=True,
-                delete_after=10
+                delete_after=10,
             )
             self.toggle_stuff(False)
             await followup.edit_message(interaction.message.id, view=self)
@@ -119,7 +130,7 @@ class RevolutionView(discord.ui.View):
             await followup.send(
                 content="You're not the King - so you can't use this button.",
                 ephemeral=True,
-                delete_after=10
+                delete_after=10,
             )
             self.toggle_stuff(False)
             await followup.edit_message(interaction.message.id, view=self)
@@ -158,7 +169,7 @@ class RevolutionView(discord.ui.View):
                 await followup.send(
                     content="You've already acted on this - you cannot do so again",
                     ephemeral=True,
-                    delete_after=10
+                    delete_after=10,
                 )
                 self.toggle_stuff(False)
                 await followup.edit_message(interaction.message.id, view=self)
@@ -169,19 +180,19 @@ class RevolutionView(discord.ui.View):
                 await followup.send(
                     content="You've pledged your support this week - you _cannot_ change your decision.",
                     ephemeral=True,
-                    delete_after=10
+                    delete_after=10,
                 )
                 self.toggle_stuff(False)
                 await followup.edit_message(interaction.message.id, view=self)
                 return
 
-        if button.label in ["OVERTHROW", "SUPPORT THE KING"]:
+        if button.label in {"OVERTHROW", "SUPPORT THE KING"}:
             # logic for overthrow/supporting
             # different to king button logic
 
             # reverse actions of other faction
             if user_id in event[other_faction_event_key]:
-                event["chance"] -= (faction_chance * -1)
+                event["chance"] -= faction_chance * -1
                 event[other_faction_event_key].remove(user_id)
 
             # apply our actions (increasing/reducing chance)
@@ -210,17 +221,14 @@ class RevolutionView(discord.ui.View):
             # it is different to supporter/revolutionary logic
 
             # work out how many eddies to subtract
-            our_user = self.user_points.find_user(
-                user_id, guild_id,
-                {"points": True, "king": True}
-            )
+            our_user = self.user_points.find_user(user_id, guild_id, {"points": True, "king": True})
             eddies = our_user["points"]
             amount_to_subtract = math.floor(eddies * 0.1)
             self.user_points.increment_points(
                 user_id,
                 guild_id,
                 amount_to_subtract * -1,
-                TransactionTypes.REVOLUTION_SAVE
+                TransactionTypes.REVOLUTION_SAVE,
             )
 
             event["chance"] -= 15
@@ -234,22 +242,19 @@ class RevolutionView(discord.ui.View):
         # update DB with all the changes we've made
         self.revolutions.update(
             {"_id": event["_id"]},
-            {"$set": {
-                "chance": event["chance"],
-                "supporters": event["supporters"],
-                "revolutionaries": event["revolutionaries"],
-                "neutrals": event["neutrals"],
-                "users": event["users"],
-                "times_saved": event["times_saved"]
-            }}
+            {
+                "$set": {
+                    "chance": event["chance"],
+                    "supporters": event["supporters"],
+                    "revolutionaries": event["revolutionaries"],
+                    "neutrals": event["neutrals"],
+                    "users": event["users"],
+                    "times_saved": event["times_saved"],
+                },
+            },
         )
 
-        self.activities.add_activity(
-            user_id,
-            guild_id,
-            act_type,
-            event_id=event["event_id"]
-        )
+        self.activities.add_activity(user_id, guild_id, act_type, event_id=event["event_id"])
 
         # build new message and update it with updated event
         king_user = await self.client.fetch_user(king_id)  # type: discord.User
@@ -264,15 +269,10 @@ class RevolutionView(discord.ui.View):
             # only send followup for users
             await followup.send(content=msg, ephemeral=True, delete_after=10)
 
-    @discord.ui.button(
-        label="OVERTHROW",
-        style=discord.ButtonStyle.green,
-        custom_id="overthrow_button",
-        emoji="🔥"
-    )
-    async def overthrow_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
-        """
-        Callback for the Overthrow button.
+    @discord.ui.button(label="OVERTHROW", style=discord.ButtonStyle.green, custom_id="overthrow_button", emoji="🔥")
+    async def overthrow_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
+        """Callback for the Overthrow button.
+
         Defers to the button logic method for handling the logic.
 
         Args:
@@ -281,15 +281,10 @@ class RevolutionView(discord.ui.View):
         """
         await self._revolution_button_logic(interaction, button)
 
-    @discord.ui.button(
-        label="SUPPORT THE KING",
-        style=discord.ButtonStyle.red,
-        custom_id="support_button",
-        emoji="👑"
-    )
-    async def support_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
-        """
-        Callback for the SUPPORT button.
+    @discord.ui.button(label="SUPPORT THE KING", style=discord.ButtonStyle.red, custom_id="support_button", emoji="👑")
+    async def support_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
+        """Callback for the SUPPORT button.
+
         Defers to the button logic method for handling the logic.
 
         Args:
@@ -298,15 +293,10 @@ class RevolutionView(discord.ui.View):
         """
         await self._revolution_button_logic(interaction, button)
 
-    @discord.ui.button(
-        label="Impartial",
-        style=discord.ButtonStyle.blurple,
-        custom_id="impartial_button",
-        emoji="😐"
-    )
-    async def impartial_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
-        """
-        Callback for the impartial button.
+    @discord.ui.button(label="Impartial", style=discord.ButtonStyle.blurple, custom_id="impartial_button", emoji="😐")
+    async def impartial_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
+        """Callback for the impartial button.
+
         Defers to the button logic method for handling the logic.
 
         Args:
@@ -315,15 +305,10 @@ class RevolutionView(discord.ui.View):
         """
         await self._revolution_button_logic(interaction, button)
 
-    @discord.ui.button(
-        label="Save THYSELF",
-        style=discord.ButtonStyle.grey,
-        custom_id="save_button",
-        emoji="💵"
-    )
-    async def save_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
-        """
-        Callback for the Save THYSELF button.
+    @discord.ui.button(label="Save THYSELF", style=discord.ButtonStyle.grey, custom_id="save_button", emoji="💵")
+    async def save_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
+        """Callback for the Save THYSELF button.
+
         Defers to the button logic method for handling the logic.
 
         Args:

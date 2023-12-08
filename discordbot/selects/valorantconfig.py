@@ -1,3 +1,4 @@
+"""Valorant selects."""
 
 import discord
 from discord import Interaction, SelectOption
@@ -5,23 +6,24 @@ from discord.ui import Select
 
 
 class ValorantChannelSelect(Select):
-    def __init__(self):
+    """Class for valorant channel select."""
+
+    def __init__(self) -> None:
+        """Initialisation method."""
         super().__init__(
             discord.ComponentType.channel_select,
             placeholder="Select channel for Valorant rollcalls",
-            channel_types=[
-                discord.ChannelType.text, discord.ChannelType.private
-            ],
+            channel_types=[discord.ChannelType.text, discord.ChannelType.private],
             min_values=1,
             max_values=1,
-            disabled=True
+            disabled=True,
         )
 
-    async def callback(self, interaction: Interaction):
-        """
+    async def callback(self, interaction: Interaction) -> None:
+        """Callback method.
 
-        :param interaction:
-        :return:
+        Args:
+            interaction (Interaction): the interaction to callback to
         """
         selected = interaction.data["values"][0]
         for option in self.options:
@@ -32,10 +34,17 @@ class ValorantChannelSelect(Select):
 
 
 class ValorantActiveSelect(Select):
-    def __init__(self, default=None):
+    """Class for valorant active select."""
+
+    def __init__(self, default: str | None = None) -> None:
+        """Initialisation method.
+
+        Args:
+            default (int | None, optional): whether we're currently enabled or not. Defaults to None.
+        """
         options = [
             SelectOption(label="Enabled", value="1", description="Enable Valorant rollcalls"),
-            SelectOption(label="Disabled", value="0", description="Disable Valorant rollcalls")
+            SelectOption(label="Disabled", value="0", description="Disable Valorant rollcalls"),
         ]
 
         if default:
@@ -49,14 +58,14 @@ class ValorantActiveSelect(Select):
             placeholder="Whether Valorant rollcalls is enabled or not",
             min_values=1,
             max_values=1,
-            options=options
+            options=options,
         )
 
-    async def callback(self, interaction: Interaction):
-        """
+    async def callback(self, interaction: Interaction) -> None:
+        """Callback method.
 
-        :param interaction:
-        :return:
+        Args:
+            interaction (Interaction): the interaction to callback to
         """
         selected_amount = interaction.data["values"][0]
         for option in self.options:
@@ -67,20 +76,23 @@ class ValorantActiveSelect(Select):
 
 
 class ValorantRoleSelect(Select):
-    def __init__(self):
+    """Class for valorant role select."""
+
+    def __init__(self) -> None:
+        """Initialisation method."""
         super().__init__(
             discord.ComponentType.role_select,
             placeholder="Select role for Valorant rollcalls",
             min_values=1,
             max_values=1,
-            disabled=True
+            disabled=True,
         )
 
-    async def callback(self, interaction: Interaction):
-        """
+    async def callback(self, interaction: Interaction) -> None:
+        """Callback method.
 
-        :param interaction:
-        :return:
+        Args:
+            interaction (Interaction): the interaction to callback to
         """
         selected = interaction.data["values"][0]
         for option in self.options:

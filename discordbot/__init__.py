@@ -1,4 +1,1 @@
-
-"""
-discordbot/ contains all of our main bot code
-"""
+"""discordbot/ contains all of our main bot code."""

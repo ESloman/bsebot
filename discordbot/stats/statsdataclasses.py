@@ -1,29 +1,34 @@
+"""Stats data classes."""
+
 import datetime
 from dataclasses import dataclass
-from typing import Optional, Union
 
 from discordbot.bot_enums import AwardsTypes, StatTypes
 
 
 @dataclass
 class Stat:
-    type: str
+    """A stat representation."""
+
+    type: str  # noqa: A003
     guild_id: int
     short_name: str
     timestamp: datetime.datetime
-    value: Union[int, float, datetime.datetime]
+    value: int | (float | datetime.datetime)
     annual: bool
-    month: Optional[str] = None
-    year: Optional[str] = None
+    month: str | None = None
+    year: str | None = None
     user_id: int | list[int] | None = None
-    award: Optional[AwardsTypes] = None
-    stat: Optional[StatTypes] = None
-    eddies: Optional[int] = None
-    kwargs: Optional[dict] = None
+    award: AwardsTypes | None = None
+    stat: StatTypes | None = None
+    eddies: int | None = None
+    kwargs: dict | None = None
 
 
 @dataclass
 class StatsData:
+    """A stats data representation."""
+
     total_messages: int
     average_length: float
     average_words: float

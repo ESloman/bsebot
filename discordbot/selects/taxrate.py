@@ -1,44 +1,37 @@
+"""Tax rate selects."""
 
 from discord import Interaction, SelectOption
 from discord.ui import Select
 
 
 class TaxRateSelect(Select):
-    _amounts = [
-        5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90
-    ]
+    """Class for tax rate select."""
 
-    def __init__(self, current_val: float, tax_type: str):
+    _amounts = (5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90)
 
+    def __init__(self, current_val: float, tax_type: str) -> None:
+        """Initialisation method."""
         if tax_type == "supporter":
             placeholder = "Select supporter tax rate"
-            amounts = [nm for nm in range(0, 100, 5)]
+            amounts = list(range(0, 100, 5))
         else:
             placeholder = "Select peasant tax rate"
             amounts = self._amounts
 
-        options = [
-            SelectOption(label=f"{opt}%", value=f"{opt / 100}" if opt != 0 else "0.0") for opt in amounts
-        ]
+        options = [SelectOption(label=f"{opt}%", value=f"{opt / 100}" if opt != 0 else "0.0") for opt in amounts]
 
         for option in options:
             if float(option.value) == current_val:
                 option.default = True
                 break
 
-        super().__init__(
-            disabled=False,
-            placeholder=placeholder,
-            min_values=1,
-            max_values=1,
-            options=options
-        )
+        super().__init__(disabled=False, placeholder=placeholder, min_values=1, max_values=1, options=options)
 
-    async def callback(self, interaction: Interaction):
-        """
+    async def callback(self, interaction: Interaction) -> None:
+        """Callback method.
 
-        :param interaction:
-        :return:
+        Args:
+            interaction (Interaction): the interaction to callback to
         """
         selected_amount = interaction.data["values"][0]
         for option in self.options:

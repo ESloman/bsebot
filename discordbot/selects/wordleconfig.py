@@ -1,3 +1,4 @@
+"""Wordle selects."""
 
 import discord
 from discord import Interaction, SelectOption
@@ -7,35 +8,28 @@ from mongo.datatypes import Emoji
 
 
 class WordleRootSelect(Select):
+    """Class for wordle root select."""
 
-    selectable_options = [
-        "wordle_config",
-        "wordle_reactions",
-        "wordle_reminders",
-        "wordle_starting_words"
-    ]
+    selectable_options = ("wordle_config", "wordle_reactions", "wordle_reminders", "wordle_starting_words")
 
-    def __init__(self, selectables: list[str] = None):
+    def __init__(self, selectables: list[str] | None = None) -> None:
+        """Initialisation method.
+
+        Args:
+            selectables (list[str] | None, optional): selectables. Defaults to None.
+        """
         if not selectables:
             selectables = self.selectable_options
 
-        options = [
-            SelectOption(label=opt.replace("_", " ").title(), value=opt)
-            for opt in selectables
-        ]
+        options = [SelectOption(label=opt.replace("_", " ").title(), value=opt) for opt in selectables]
 
-        super().__init__(
-            options=options,
-            placeholder="Configure...",
-            min_values=1,
-            max_values=1
-        )
+        super().__init__(options=options, placeholder="Configure...", min_values=1, max_values=1)
 
-    async def callback(self, interaction: Interaction):
-        """
+    async def callback(self, interaction: Interaction) -> None:
+        """Callback method.
 
-        :param interaction:
-        :return:
+        Args:
+            interaction (Interaction): the interaction to callback to
         """
         selected = interaction.data["values"][0]
         for option in self.options:
@@ -46,23 +40,24 @@ class WordleRootSelect(Select):
 
 
 class WordleChannelSelect(Select):
-    def __init__(self):
+    """Class for wordle channel select."""
+
+    def __init__(self) -> None:
+        """Initialisation method."""
         super().__init__(
             discord.ComponentType.channel_select,
             placeholder="Select channel for daily Wordle message",
-            channel_types=[
-                discord.ChannelType.text, discord.ChannelType.private
-            ],
+            channel_types=[discord.ChannelType.text, discord.ChannelType.private],
             min_values=1,
             max_values=1,
-            disabled=True
+            disabled=True,
         )
 
-    async def callback(self, interaction: Interaction):
-        """
+    async def callback(self, interaction: Interaction) -> None:
+        """Callback method.
 
-        :param interaction:
-        :return:
+        Args:
+            interaction (Interaction): the interaction to callback to
         """
         selected = interaction.data["values"][0]
         for option in self.options:
@@ -73,10 +68,17 @@ class WordleChannelSelect(Select):
 
 
 class WordleActiveSelect(Select):
-    def __init__(self, default=None):
+    """Class for wordle active select."""
+
+    def __init__(self, default: int | None = None) -> None:
+        """Initialisation method.
+
+        Args:
+            default (int | None, optional): whether we're currently active or not. Defaults to None.
+        """
         options = [
             SelectOption(label="Enabled", value="1", description="Do the wordle"),
-            SelectOption(label="Disabled", value="0", description="Don't do the wordle")
+            SelectOption(label="Disabled", value="0", description="Don't do the wordle"),
         ]
 
         if default:
@@ -90,14 +92,14 @@ class WordleActiveSelect(Select):
             placeholder="Whether doing the wordle is enabled or not",
             min_values=1,
             max_values=1,
-            options=options
+            options=options,
         )
 
-    async def callback(self, interaction: Interaction):
-        """
+    async def callback(self, interaction: Interaction) -> None:
+        """Callback method.
 
-        :param interaction:
-        :return:
+        Args:
+            interaction (Interaction): the interaction to callback to
         """
         selected_amount = interaction.data["values"][0]
         for option in self.options:
@@ -108,10 +110,17 @@ class WordleActiveSelect(Select):
 
 
 class WordleReminderSelect(Select):
-    def __init__(self, default=None):
+    """Class for wordle reminder select."""
+
+    def __init__(self, default: int | None = None) -> None:
+        """Initialisation method.
+
+        Args:
+            default (int | None, optional): whether we're currently enabled or not. Defaults to None.
+        """
         options = [
             SelectOption(label="Enabled", value="1", description="Enable wordle reminders"),
-            SelectOption(label="Disabled", value="0", description="Disable wordle reminders")
+            SelectOption(label="Disabled", value="0", description="Disable wordle reminders"),
         ]
 
         if default:
@@ -125,14 +134,14 @@ class WordleReminderSelect(Select):
             placeholder="Whether wordle reminders are enabled or not",
             min_values=1,
             max_values=1,
-            options=options
+            options=options,
         )
 
-    async def callback(self, interaction: Interaction):
-        """
+    async def callback(self, interaction: Interaction) -> None:
+        """Callback method.
 
-        :param interaction:
-        :return:
+        Args:
+            interaction (Interaction): the interaction to callback to
         """
         selected_amount = interaction.data["values"][0]
         for option in self.options:
@@ -143,14 +152,23 @@ class WordleReminderSelect(Select):
 
 
 class WordleEmojiSelect(Select):
-    def __init__(self, server_emojis: list[Emoji], score_num: str = None, current: str = None):
+    """Class for wordle emoji select."""
 
+    def __init__(self, server_emojis: list[Emoji], score_num: str | None = None, current: str | None = None) -> None:
+        """Initialisation method.
+
+        Args:
+            server_emojis (list[Emoji]): list of current server emojis
+            score_num (str | None, optional): the score to select for. Defaults to None.
+            current (str | None, optional): the current emoji for this score. Defaults to None.
+        """
         options = [
             SelectOption(
                 label=emoji["name"],
                 value=f"<:{emoji['name']}:{emoji['eid']}>",
-                emoji=discord.PartialEmoji.from_str(f"{emoji['name']}:{emoji['eid']}")
-            ) for emoji in server_emojis
+                emoji=discord.PartialEmoji.from_str(f"{emoji['name']}:{emoji['eid']}"),
+            )
+            for emoji in server_emojis
         ]
 
         if current:
@@ -163,14 +181,14 @@ class WordleEmojiSelect(Select):
             min_values=0,
             max_values=1,
             disabled=False,
-            options=options
+            options=options,
         )
 
-    async def callback(self, interaction: Interaction):
-        """
+    async def callback(self, interaction: Interaction) -> None:
+        """Callback method.
 
-        :param interaction:
-        :return:
+        Args:
+            interaction (Interaction): the interaction to callback to
         """
         selected = interaction.data["values"][0]
         for option in self.options:

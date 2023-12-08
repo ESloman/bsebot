@@ -1,3 +1,4 @@
+"""BSEddies annual awards task."""
 
 import asyncio
 import datetime
@@ -13,27 +14,34 @@ from discordbot.tasks.basetask import BaseTask
 
 
 class AnnualBSEddiesAwards(BaseTask):
-    def __init__(
-        self,
-        bot: BSEBot,
-        guild_ids: list[int],
-        logger: Logger,
-        startup_tasks: list[BaseTask]
-    ):
+    """Class for annual bseddies awards."""
 
+    def __init__(self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask]) -> None:
+        """Initialisation method.
+
+        Args:
+            bot (BSEBot): the BSEBot client
+            guild_ids (list[int]): the list of guild IDs
+            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
+            startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
+            on_ready (OnReadyEvent): on ready event
+            github_api (GitHubAPI): the authenticated Github api class
+            place (PlaceBet): the place bet class
+            close (CloseBet): the close bet class
+        """
         super().__init__(bot, guild_ids, logger, startup_tasks)
         self.task = self.annual_bseddies_awards
         self.task.start()
 
     @tasks.loop(minutes=60)
-    async def annual_bseddies_awards(self):
-        """
-        Task that checks if we need to do the Annual BSEddies Awards.
+    async def annual_bseddies_awards(self) -> None:
+        """Task that checks if we need to do the Annual BSEddies Awards.
+
         This should only trigger on the 1st Jan. It will do annual stats and awards.
         """
         now = datetime.datetime.now()
 
-        if not now.day == 2 or not now.hour == 14 or not now.month == 1:
+        if now.day != 2 or now.hour != 14 or now.month != 1:  # noqa: PLR2004
             # we only want to trigger on the first of each YEAR
             # and also trigger at 2pm
             return
@@ -42,13 +50,13 @@ class AnnualBSEddiesAwards(BaseTask):
             # does not support other servers yet
             return
 
-        self.logger.info(f"Time for the annual BSEddies awards! {now=}")
+        self.logger.info("Time for the annual BSEddies awards! %s", now)
 
         # set some kind of activity here
         activity = discord.Activity(
             name="with some annual stats and awards ",
             type=discord.ActivityType.playing,
-            details="Working out annual BSEddies awards"
+            details="Working out annual BSEddies awards",
         )
         await self.bot.change_presence(activity=activity)
 
@@ -64,26 +72,21 @@ class AnnualBSEddiesAwards(BaseTask):
         awards, bseddies_awards = await awards_builder.build_awards_and_message()
 
         self.logger.debug("Logging to DB and sending messages")
-        await awards_builder.send_stats_and_awards(
-            stats, message,
-            awards, bseddies_awards
-        )
+        await awards_builder.send_stats_and_awards(stats, message, awards, bseddies_awards)
 
         # set activity back
         listening_activity = discord.Activity(
             name="conversations",
             type=discord.ActivityType.listening,
-            details="Waiting for commands!"
+            details="Waiting for commands!",
         )
         await self.bot.change_presence(activity=listening_activity)
 
         self.logger.info("Sent messages! Until next year!")
 
     @annual_bseddies_awards.before_loop
-    async def before_thread_mute(self):
-        """
-        Make sure that websocket is open before we start querying via it.
-        """
+    async def before_thread_mute(self) -> None:
+        """Make sure that websocket is open before we start querying via it."""
         await self.bot.wait_until_ready()
         while not self._check_start_up_tasks():
             await asyncio.sleep(5)

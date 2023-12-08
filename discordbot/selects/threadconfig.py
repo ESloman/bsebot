@@ -1,16 +1,25 @@
+"""Thread config selects."""
 
 from discord import Interaction, SelectOption
 from discord.ui import Select
 
+from discordbot.constants import BET_TITLE_DISPLAY_LENTH
 from mongo.datatypes import Thread
 
 
 class ThreadConfigSelect(Select):
-    def __init__(self, threads: list[Thread]):
+    """Class for thread config select."""
+
+    def __init__(self, threads: list[Thread]) -> None:
+        """Initialisation method.
+
+        Args:
+            threads (list[Thread]): the list of threads to configure
+        """
         options = []
         for thread in threads:
             label = thread["name"]
-            if len(label) > 99:
+            if len(label) > BET_TITLE_DISPLAY_LENTH:
                 label = label[:99]
 
             value = str(thread["thread_id"])
@@ -22,14 +31,14 @@ class ThreadConfigSelect(Select):
             placeholder="Select thread to configure...",
             min_values=1,
             max_values=1,
-            options=options
+            options=options,
         )
 
-    async def callback(self, interaction: Interaction):
-        """
+    async def callback(self, interaction: Interaction) -> None:
+        """Callback method.
 
-        :param interaction:
-        :return:
+        Args:
+            interaction (Interaction): the interaction to callback to
         """
         selected_amount = interaction.data["values"][0]
         for option in self.options:
@@ -40,10 +49,13 @@ class ThreadConfigSelect(Select):
 
 
 class ThreadActiveSelect(Select):
-    def __init__(self):
+    """Class for active select."""
+
+    def __init__(self) -> None:
+        """Initialisation method."""
         options = [
             SelectOption(label="Active", value="1", description="Send spoiler messages", default=True),
-            SelectOption(label="Inactive", value="0", description="Don't send spoiler messages")
+            SelectOption(label="Inactive", value="0", description="Don't send spoiler messages"),
         ]
 
         super().__init__(
@@ -51,14 +63,14 @@ class ThreadActiveSelect(Select):
             placeholder="Select thread activity",
             min_values=1,
             max_values=1,
-            options=options
+            options=options,
         )
 
-    async def callback(self, interaction: Interaction):
-        """
+    async def callback(self, interaction: Interaction) -> None:
+        """Callback method.
 
-        :param interaction:
-        :return:
+        Args:
+            interaction (Interaction): the interaction to callback to
         """
         selected_amount = interaction.data["values"][0]
         for option in self.options:
@@ -68,7 +80,10 @@ class ThreadActiveSelect(Select):
 
 
 class ThreadDaySelect(Select):
-    def __init__(self):
+    """Class for day select."""
+
+    def __init__(self) -> None:
+        """Initialisation method."""
         options = [
             SelectOption(label="Monday", value="0"),
             SelectOption(label="Tuesday", value="1"),
@@ -85,14 +100,14 @@ class ThreadDaySelect(Select):
             placeholder="Select a day to send mute reminders",
             min_values=1,
             max_values=1,
-            options=options
+            options=options,
         )
 
-    async def callback(self, interaction: Interaction):
-        """
+    async def callback(self, interaction: Interaction) -> None:
+        """Callback method.
 
-        :param interaction:
-        :return:
+        Args:
+            interaction (Interaction): the interaction to callback to
         """
         selected_amount = interaction.data["values"][0]
         for option in self.options:

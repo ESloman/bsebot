@@ -1,15 +1,35 @@
+"""Contains our OnDirectMessage class.
+
+Handles on_direct_message events.
+"""
+
+import logging
 
 import discord
 
+from apis.giphyapi import GiphyAPI
+from discordbot.bsebot import BSEBot
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
 
 
 class OnDirectMessage(BaseEvent):
-    """
-    Class for handling on_message events from Discord
-    """
+    """Class for handling on_message events from Discord."""
 
-    def __init__(self, client, guild_ids, logger, giphyapi):
+    def __init__(
+        self,
+        client: BSEBot,
+        guild_ids: list,
+        logger: logging.Logger,
+        giphyapi: GiphyAPI,
+    ) -> None:
+        """Initialisation method.
+
+        Args:
+            client (BSEBot): the connected BSEBot client
+            guild_ids (list): list of supported guild IDs
+            logger (logging.Logger): the logger
+            giphyapi (GiphyAPI): the giphy API class to use
+        """
         super().__init__(client, guild_ids, logger)
         self.giphyapi = giphyapi
 
@@ -17,11 +37,12 @@ class OnDirectMessage(BaseEvent):
         self.rude = ["fuck you", "fuck off", "faggot", "fuckyou"]
 
     async def dm_received(self, message: discord.Message) -> None:
-        """
-        Main method for handling when someone sends us a DM
+        """Main method for handling when someone sends us a DM.
+
         Basically, send a random gif if they say 'thank you'
-        :param message:
-        :return:
+
+        Args:
+            message (discord.Message): the message received
         """
         message_content = message.content
 

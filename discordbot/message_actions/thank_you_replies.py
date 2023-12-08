@@ -1,3 +1,4 @@
+"""Thank you message action class."""
 
 import random
 import re
@@ -10,11 +11,17 @@ from discordbot.message_actions.base import BaseMessageAction
 
 
 class ThankYouReplies(BaseMessageAction):
-    """
-    Message action class for sending thank you messages
-    """
+    """Message action class for sending thank you messages."""
+
     def __init__(self, client: BSEBot, logger: Logger) -> None:
+        """Initialisation method.
+
+        Args:
+            client (BSEBot): our BSEBot client
+            logger (Logger): our logger
+        """
         super().__init__(client, logger)
+
         self._thank_you_terms = [
             "thank you",
             "thanks",
@@ -22,10 +29,7 @@ class ThankYouReplies(BaseMessageAction):
             "cutie",
             "i love you",
         ]
-        self._bot_terms = [
-            "bsebot",
-            "bse bot"
-        ]
+        self._bot_terms = ["bsebot", "bse bot"]
         self._possible_replies = [
             "You are most welcome.",
             "Your praise means everything to me.",
@@ -48,26 +52,27 @@ class ThankYouReplies(BaseMessageAction):
             "😍",
         ]
 
-    async def pre_condition(self, message: discord.Message, message_type: list) -> bool:
-        """
+    async def pre_condition(self, message: discord.Message, _: list) -> bool:
+        """Than you precondition.
+
         Checks that any of the 'thank you' terms are in the message
         If they are, checks that we were mentioned or it's about the bot
-        Returns true if so, False if not
+        Returns true if so, False if not.
 
         Args:
             message (discord.Message): the message to action
-            message_type (list): the pre-calculated message_type
+            _ (list): the pre-calculated message_type
 
         Returns:
             bool: whether to send the message or not
         """
         mentions_ids = [m.id for m in message.mentions]
         send_message = False
-        if any([re.match(rf"\b{a}\b", message.content.lower()) for a in self._thank_you_terms]):
+        if any(re.match(rf"\b{a}\b", message.content.lower()) for a in self._thank_you_terms):
             if self.client.user.id in mentions_ids:
                 # we were mentioned!
                 send_message = True
-            elif any([re.match(rf"\b{a}\b", message.content.lower()) for a in self._bot_terms]):
+            elif any(re.match(rf"\b{a}\b", message.content.lower()) for a in self._bot_terms):
                 send_message = True
             elif message.reference:
                 _reply = message.reference.cached_message
@@ -79,15 +84,14 @@ class ThankYouReplies(BaseMessageAction):
         return send_message
 
     async def run(self, message: discord.Message) -> None:
-        """
-        Sends either a reaction or a reply (random) with a random emoji/reply text
+        """Sends either a reaction or a reply (random) with a random emoji/reply text.
 
         Args:
             message (discord.Message): the message to reply to
         """
         await message.channel.trigger_typing()
 
-        if random.random() > 0.5:
+        if random.random() > 0.5:  # noqa: PLR2004
             await message.reply(content=random.choice(self._possible_replies))
         else:
             await message.add_reaction(random.choice(self._possible_reactions))

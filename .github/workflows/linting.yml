@@ -17,10 +17,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r test-requirements.txt
+          pip install ruff
       - name: Lint with ruff
         run: |
           ruff check .
-      - name: Lint with flake8
-        run: |
-          flake8 .
+          ruff format .

@@ -1,31 +1,45 @@
+"""Views for config activities."""
+
+import contextlib
+
 import discord
 
 from discordbot.modals.activities import ActivityModal
 from discordbot.selects.activitiesconfig import ActivityTypeSelect
-
 from mongo.bsedataclasses import BotActivities
 
 
 class ActivityConfigView(discord.ui.View):
-    def __init__(self):
+    """Class for activity config view."""
+
+    def __init__(self) -> None:
+        """Initialisation method."""
         super().__init__(timeout=120)
 
         self.activity_select = ActivityTypeSelect()
         self.add_item(self.activity_select)
 
-    async def on_timeout(self):
+    async def on_timeout(self) -> None:
+        """View timeout function.
+
+        Is invoked when the message times out.
+        """
         for child in self.children:
             child.disabled = True
 
-        try:
-            await self.message.edit(content="This timed out - please _place_ another one", view=None)
-        except (discord.NotFound, AttributeError):
+        with contextlib.suppress(discord.NotFound, AttributeError):
             # not found is when the message has already been deleted
             # don't need to edit in that case
-            pass
+            await self.message.edit(content="This timed out - please _place_ another one", view=None)
 
-    async def update(self, interaction: discord.Interaction):
+    async def update(self, interaction: discord.Interaction) -> None:
+        """View update method.
 
+        Can be called by child types when something changes.
+
+        Args:
+            interaction (discord.Interaction): _description_
+        """
         selected = self.activity_select.values
 
         for child in self.children:
@@ -36,8 +50,13 @@ class ActivityConfigView(discord.ui.View):
         await interaction.response.edit_message(content=interaction.message.content, view=self)
 
     @discord.ui.button(label="Next", style=discord.ButtonStyle.green, row=4, disabled=True)
-    async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
+    async def submit_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:
+        """Button callback.
 
+        Args:
+            _ (discord.ui.Button): the button pressed
+            interaction (discord.Interaction): the callback interaction
+        """
         try:
             selected = self.activity_select.values[0]
         except (IndexError, AttributeError):
@@ -61,33 +80,56 @@ class ActivityConfigView(discord.ui.View):
         await interaction.response.send_modal(modal)
         await interaction.followup.delete_message(interaction.message.id)
 
+    @staticmethod
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, emoji="✖️", row=4)
-    async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
+    async def cancel_callback(_: discord.ui.Button, interaction: discord.Interaction) -> None:
+        """Button callback.
+
+        Args:
+            _ (discord.ui.Button): the button pressed
+            interaction (discord.Interaction): the callback interaction
+        """
         await interaction.response.edit_message(content="Cancelled", view=None, delete_after=2)
 
 
 class ActivityConfirmView(discord.ui.View):
-    def __init__(self, activity_type: str, placeholder: str, name: list[str]):
+    """Class for activity config view."""
+
+    def __init__(self, activity_type: str, placeholder: str, name: list[str]) -> None:
+        """Initialisation method.
+
+        Args:
+            activity_type (str): the activity type
+            placeholder (str): the placeholder text
+            name (list[str]): the name of the activities
+        """
         super().__init__(timeout=120)
         self.activity_type = activity_type
         self.placeholder = placeholder
         self.name = name
         self.bot_activities = BotActivities()
 
-    async def on_timeout(self):
+    async def on_timeout(self) -> None:
+        """View timeout function.
+
+        Is invoked when the message times out.
+        """
         for child in self.children:
             child.disabled = True
 
-        try:
-            await self.message.edit(content="This timed out - please _place_ another one", view=None)
-        except (discord.NotFound, AttributeError):
+        with contextlib.suppress(discord.NotFound, AttributeError):
             # not found is when the message has already been deleted
             # don't need to edit in that case
-            pass
+            await self.message.edit(content="This timed out - please _place_ another one", view=None)
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=4, disabled=False)
-    async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
+    async def submit_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:
+        """Button callback.
 
+        Args:
+            _ (discord.ui.Button): the button pressed
+            interaction (discord.Interaction): the callback interaction
+        """
         _already_existed = []
         for activity in self.name:
             existing = self.bot_activities.find_activity(activity, self.activity_type)
@@ -103,7 +145,7 @@ class ActivityConfirmView(discord.ui.View):
             await interaction.response.edit_message(
                 content="All your options already existed - nothing has changed.",
                 view=None,
-                delete_after=3
+                delete_after=3,
             )
             return
 
@@ -111,18 +153,27 @@ class ActivityConfirmView(discord.ui.View):
         if _already_existed:
             content += f" These, (`{_already_existed}`) existed already and weren't added again."
 
-        await interaction.response.edit_message(
-            content=content,
-            view=None,
-            delete_after=4
-        )
+        await interaction.response.edit_message(content=content, view=None, delete_after=4)
 
     @discord.ui.button(label="Edit", style=discord.ButtonStyle.gray, row=4, disabled=False)
-    async def edit_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
+    async def edit_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:
+        """Button callback.
+
+        Args:
+            _ (discord.ui.Button): the button pressed
+            interaction (discord.Interaction): the callback interaction
+        """
         modal = ActivityModal(self.activity_type, self.placeholder, self.name)
         await interaction.response.send_modal(modal)
         await interaction.followup.delete_message(interaction.message.id)
 
+    @staticmethod
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, emoji="✖️", row=4)
-    async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
+    async def cancel_callback(_: discord.ui.Button, interaction: discord.Interaction) -> None:
+        """Button callback.
+
+        Args:
+            _ (discord.ui.Button): the button pressed
+            interaction (discord.Interaction): the callback interaction
+        """
         await interaction.response.edit_message(content="Cancelled", view=None, delete_after=2)

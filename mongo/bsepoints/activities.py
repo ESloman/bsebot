@@ -1,6 +1,8 @@
+"""Activities collection interface."""
+
 import datetime
 
-from pymongo.results import InsertOneResult, InsertManyResult
+from pymongo.results import InsertManyResult, InsertOneResult
 
 from discordbot.bot_enums import ActivityTypes
 from mongo import interface
@@ -9,13 +11,10 @@ from mongo.db_classes import BestSummerEverPointsDB
 
 
 class UserActivities(BestSummerEverPointsDB):
-    """
-    Class for interacting with the 'useractivities' MongoDB collection in the 'bestsummereverpoints' DB
-    """
-    def __init__(self):
-        """
-        Constructor method that initialises the vault object
-        """
+    """Class for interacting with the 'useractivities' MongoDB collection in the 'bestsummereverpoints' DB."""
+
+    def __init__(self) -> None:
+        """Constructor method that initialises the vault object."""
         super().__init__()
         self._vault = interface.get_collection(self.database, "useractivities")
 
@@ -24,14 +23,19 @@ class UserActivities(BestSummerEverPointsDB):
         user_id: int,
         guild_id: int,
         activity_type: ActivityTypes,
-        **kwargs
+        **kwargs: dict[str, any],
     ) -> InsertOneResult | InsertManyResult:
-        doc = {
-            "uid": user_id,
-            "guild_id": guild_id,
-            "type": activity_type,
-            "timestamp": datetime.datetime.now()
-        }
+        """Adds an activity.
+
+        Args:
+            user_id (int): _description_
+            guild_id (int): _description_
+            activity_type (ActivityTypes): _description_
+
+        Returns:
+            InsertOneResult | InsertManyResult: _description_
+        """
+        doc = {"uid": user_id, "guild_id": guild_id, "type": activity_type, "timestamp": datetime.datetime.now()}
 
         doc.update(kwargs)
         self.insert(doc)
@@ -40,9 +44,9 @@ class UserActivities(BestSummerEverPointsDB):
         self,
         guild_id: int,
         start: datetime.datetime,
-        end: datetime.datetime
+        end: datetime.datetime,
     ) -> list[Activity]:
-        """Get guild activities between two timestamps
+        """Get guild activities between two timestamps.
 
         Args:
             guild_id (int): the guild ID
@@ -52,13 +56,10 @@ class UserActivities(BestSummerEverPointsDB):
         Returns:
             list[Activity]: activities between those times
         """
-        return self.query(
-            {"guild_id": guild_id, "timestamp": {"$gt": start, "$lt": end}},
-            limit=10000
-        )
+        return self.query({"guild_id": guild_id, "timestamp": {"$gt": start, "$lt": end}}, limit=10000)
 
     def get_all_guild_activities(self, guild_id: int) -> list[Activity]:
-        """Get all activities for the given guild ID
+        """Get all activities for the given guild ID.
 
         Args:
             guild_id (int): the guild ID

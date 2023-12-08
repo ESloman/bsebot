@@ -1,14 +1,24 @@
+"""Wrapped view."""
 
 import discord
 
 
 class WrappedView(discord.ui.View):
-    def __init__(self):
+    """Class for wrapped view."""
+
+    def __init__(self) -> None:
+        """Initialisation method."""
         super().__init__(timeout=None)
         self.shared = False
 
     @discord.ui.button(label="Share", style=discord.ButtonStyle.green)
-    async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def submit_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:
+        """Button callback.
+
+        Args:
+            _ (discord.ui.Button): the button pressed
+            interaction (discord.Interaction): the callback interaction
+        """
         if self.shared:
             return
         await interaction.channel.send(content=interaction.message.content)

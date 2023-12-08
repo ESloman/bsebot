@@ -1,3 +1,4 @@
+"""Base message action class."""
 
 from logging import Logger
 
@@ -10,11 +11,16 @@ from mongo.bsepoints.interactions import UserInteractions
 from mongo.bseticketedevents import RevolutionEvent
 
 
-class BaseMessageAction():
-    """
-    Base message action class to be inherited from
-    """
+class BaseMessageAction:
+    """Base message action class to be inherited from."""
+
     def __init__(self, client: BSEBot, logger: Logger = PlaceHolderLogger) -> None:
+        """Initialisation method.
+
+        Args:
+            client (BSEBot): the BSEBot client
+            logger (Logger, optional): the logger. Defaults to PlaceHolderLogger.
+        """
         self.client = client
         self.logger = logger
         self.user_interactions = UserInteractions()
@@ -22,9 +28,9 @@ class BaseMessageAction():
         self.revolutions = RevolutionEvent()
 
     async def pre_condition(self, message: discord.Message, message_type: list) -> bool:
-        """
-        Empty precondition function
-        Should return True if an _should_ be fun and False if not
+        """Empty precondition function.
+
+        Should return True if an _should_ be fun and False if not.
 
         Args:
             message (discord.Message): the discord Messageto check
@@ -39,9 +45,9 @@ class BaseMessageAction():
         raise NotImplementedError
 
     async def run(self, message: discord.Message) -> None:
-        """
-        Empty action function
-        The action to run if the precondition is true
+        """Empty action function.
+
+        The action to run if the precondition is true.
 
         Args:
             message (discord.Message): the message to act on

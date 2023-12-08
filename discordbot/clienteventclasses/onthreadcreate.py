@@ -1,31 +1,43 @@
+"""Contains our OnThreadCreate class.
+
+Handles on_thread_create events.
+"""
+
+import logging
 
 import discord
 
 from discordbot.bsebot import BSEBot
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from discordbot.clienteventclasses.onmessage import OnMessage
-
 from mongo.bsedataclasses import SpoilerThreads
 
 
 class OnThreadCreate(BaseEvent):
-    """
-        Class for handling on_thread_create event
-        """
+    """Class for handling on_thread_create event."""
 
-    def __init__(self, client: BSEBot, guild_ids, logger):
+    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+        """Initialisation method.
+
+        Args:
+            client (BSEBot): the connected BSEBot client
+            guild_ids (list): list of supported guild IDs
+            logger (logging.Logger): the logger
+        """
         super().__init__(client, guild_ids, logger)
         self.on_message = OnMessage(client, guild_ids, logger)
         self.threads = SpoilerThreads()
 
     async def on_thread_create(self, thread: discord.Thread) -> None:
-        """
-        Method called for on_ready event. Makes sure we have an entry for every user in each guild.
-        :return: None
-        """
+        """Method called for on_ready event.
 
+        Makes sure we have an entry for every user in each guild.
+
+        Args:
+            thread (discord.Thread): the thread
+        """
         await thread.join()
-        self.logger.info(f"Joined {thread.name}")
+        self.logger.info("Joined %s", thread.name)
 
         if not thread.starting_message:
             starting_message = await thread.fetch_message(thread.id)  # type: discord.Message
@@ -43,7 +55,7 @@ class OnThreadCreate(BaseEvent):
             message_type,
             starting_message.content,
             thread.created_at,
-            is_thread=True
+            is_thread=True,
         )
 
         if not self.threads.get_thread_by_id(thread.guild.id, thread.id):

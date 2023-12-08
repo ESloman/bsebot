@@ -1,3 +1,4 @@
+"""AddBetOption modal class."""
 
 import datetime
 from logging import Logger
@@ -14,15 +15,25 @@ from mongo.datatypes import Bet
 
 
 class AddBetOption(discord.ui.Modal):
+    """Add Bet Option modal class."""
+
     def __init__(
         self,
         bet: Bet,
         bseddies_place: PlaceBet,
         bseddies_close: CloseBet,
         logger: Logger = PlaceHolderLogger,
-        *args,
-        **kwargs
+        *args: tuple[any],
+        **kwargs: dict[any],
     ) -> None:
+        """Intialisation method.
+
+        Args:
+            bet (Bet): the bet
+            bseddies_place (PlaceBet): the place class
+            bseddies_close (CloseBet): the close class
+            logger (Logger, optional): the loggger. Defaults to PlaceHolderLogger.
+        """
         super().__init__(*args, title="Add bet outcomes", **kwargs)
 
         # option emojis
@@ -38,16 +49,16 @@ class AddBetOption(discord.ui.Modal):
         self.bet_options = discord.ui.InputText(
             label="Enter the new outcome(s) on separate lines",
             placeholder="New outcome 1...\nNew outcome 2...\nNew outcome 3...\netc, etc...",
-            style=discord.InputTextStyle.long
+            style=discord.InputTextStyle.long,
         )
 
         self.add_item(self.bet_options)
 
-    async def callback(self, interaction: discord.Interaction):
-        """
+    async def callback(self, interaction: discord.Interaction) -> None:
+        """The submit callback.
 
-        :param interaction:
-        :return:
+        Args:
+            interaction (discord.Interaction): the interaction
         """
         await interaction.response.defer(ephemeral=True)
 
@@ -60,17 +71,17 @@ class AddBetOption(discord.ui.Modal):
             await interaction.followup.send(
                 content="You need to provide at least one additional outcome",
                 ephemeral=True,
-                delete_after=10
+                delete_after=10,
             )
             return
 
         outcome_count = len(self.bet["options"])
 
-        if len(outcomes) + outcome_count > 10:
+        if len(outcomes) + outcome_count > 10:  # noqa: PLR2004
             await interaction.followup.send(
                 content="A bet cannot have more than ten outcomes",
                 ephemeral=True,
-                delete_after=10
+                delete_after=10,
             )
             return
 
@@ -99,14 +110,14 @@ class AddBetOption(discord.ui.Modal):
                     "option_dict": self.bet["option_dict"],
                     "updated": now,
                     "timeout": ending,
-                    "option_vals": self.bet["option_vals"]
-                }
-            }
+                    "option_vals": self.bet["option_vals"],
+                },
+            },
         )
 
         channel = await interaction.guild.fetch_channel(self.bet["channel_id"])
         message = await channel.fetch_message(self.bet["message_id"])
-        embed = self.embed_manager.get_bet_embed(interaction.guild, self.bet["bet_id"], self.bet)
+        embed = self.embed_manager.get_bet_embed(interaction.guild, self.bet)
         view = discordbot.views.bet.BetView(self.bet, self.place, self.close)
         await message.edit(embed=embed, view=view)
         await interaction.followup.send(content="Sorted.", ephemeral=True)

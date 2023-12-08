@@ -1,32 +1,40 @@
+"""Active slash command."""
+
+import logging
 
 import discord
 
 from discordbot.bot_enums import ActivityTypes
+from discordbot.bsebot import BSEBot
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
 class Active(BSEddies):
-    """
-    Class for handling `/active` commands
-    """
+    """Class for handling `/active` commands."""
 
-    def __init__(self, client, guilds, logger):
-        super().__init__(client, guilds, logger)
+    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+        """Initialisation method.
+
+        Args:
+            client (BSEBot): the connected BSEBot client
+            guild_ids (list): list of supported guild IDs
+            logger (logging.Logger): the logger
+        """
+        super().__init__(client, guild_ids, logger)
         self.activity_type = ActivityTypes.BSEDDIES_ACTIVE
         self.help_string = "Lists all the open bets"
         self.command_name = "active"
 
     async def active(self, ctx: discord.ApplicationContext) -> None:
-        """
-        Simple method for listing all the active bets in the system.
+        """Simple method for listing all the active bets in the system.
 
         This will actually show all bets that haven't been closed yet - not purely the active ones.
 
         We also make an effort to hide "private" bets that were created in private channels if the channel this
         command is being sent in isn't said private channel.
 
-        :param ctx: the command context
-        :return: None
+        Args:
+            ctx (discord.ApplicationContext): _description_
         """
         if not await self._handle_validation(ctx):
             return
@@ -43,9 +51,8 @@ class Active(BSEddies):
             if "channel_id" not in bet or "message_id" not in bet:
                 continue
 
-            if bet.get("private"):
-                if bet["channel_id"] != ctx.channel_id:
-                    continue
+            if bet.get("private") and bet["channel_id"] != ctx.channel_id:
+                continue
 
             link = f"https://discordapp.com/channels/{ctx.guild.id}/{bet['channel_id']}/{bet['message_id']}"
 
@@ -54,7 +61,7 @@ class Active(BSEddies):
             pt = f"- **{bets.index(bet) + 1})** [{bet['bet_id']} - `{add_text}`] _[{bet['title']}](<{link}>)_\n"
             message += pt
 
-            if (len(message) + 400) > 2000 and bet != bets[-1]:
+            if (len(message) + 400) > 2000 and bet != bets[-1]:  # noqa: PLR2004
                 await ctx.send(content=message)
                 message = ""
 

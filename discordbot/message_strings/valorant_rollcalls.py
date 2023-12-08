@@ -1,9 +1,11 @@
-# file for daily valorant message rollcalls
-# when sending a valorant rollcall message
-# message will be chosen randomly, but based on some dynamically created odds
-# use a tuple to hardcode some odds
-# the '{role}' bit is where the valorant role mention will be inserted
-# to add a new one, simply add a new line
+"""File for daily valorant message rollcall messages.
+
+when sending a valorant rollcall message
+message will be chosen randomly, but based on some dynamically created odds
+use a tuple to hardcode some odds
+the '{role}' bit is where the valorant role mention will be inserted
+to add a new one, simply add a new line
+"""
 
 MESSAGES = [
     "Anyone playing after-work {role} today?",
@@ -18,8 +20,6 @@ MESSAGES = [
     "Valorant? Valorant? VALORANT? VALROARANT? RAVALROANT? {role}",
     "I'm a little bot, it's time to get mad and play {role}?",
     "# Balls. {role}",
-
     # HARD-CODED ODDS EXAMPLE
     # tuple with message string as first item, chance (roughly out of 100) as a float
-    # ("This is a super rare message {role}", 1.0)
 ]

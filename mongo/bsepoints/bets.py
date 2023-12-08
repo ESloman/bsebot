@@ -1,6 +1,6 @@
+"""Bets collection interface."""
 
 import datetime
-from typing import Union, Optional
 
 from bson import ObjectId
 
@@ -12,12 +12,10 @@ from mongo.db_classes import BestSummerEverPointsDB
 
 
 class UserBets(BestSummerEverPointsDB):
-    """
-    Class for interacting with the 'userbets' MongoDB collection in the 'bestsummereverpoints' DB
-    """
-    def __init__(self, guilds: list = None):
-        """
-        Constructor method. We initialise the collection object and also the UserPoints instance we need
+    """Class for interacting with the 'userbets' MongoDB collection in the 'bestsummereverpoints' DB."""
+
+    def __init__(self, guilds: list | None = None) -> None:
+        """Constructor method. We initialise the collection object and also the UserPoints instance we need.
 
         If we are given a list of guilds - then we make sure we have a bet counter object for that guild ID
 
@@ -34,8 +32,7 @@ class UserBets(BestSummerEverPointsDB):
             self.__create_counter_document(guild)
 
     def __create_counter_document(self, guild_id: int) -> None:
-        """
-        Method that creates our base 'counter' document for counting bet IDs
+        """Method that creates our base 'counter' document for counting bet IDs.
 
         :param guild_id: int - guild ID to create document for
         :return: None
@@ -43,9 +40,8 @@ class UserBets(BestSummerEverPointsDB):
         if not self.query({"type": "counter", "guild_id": guild_id}):
             self.insert({"type": "counter", "guild_id": guild_id, "count": 1})
 
-    def __get_new_bet_id(self, guild_id) -> str:
-        """
-        Generate new unique ID and return it in the format we want.
+    def __get_new_bet_id(self, guild_id: int) -> str:
+        """Generate new unique ID and return it in the format we want.
 
         :param guild_id: int - guild ID to create the new unique bet ID for
         :return: str - new unique bet ID
@@ -56,7 +52,7 @@ class UserBets(BestSummerEverPointsDB):
 
     @staticmethod
     def count_eddies_for_bet(bet: Bet) -> int:
-        """Returns the number of eddies on a bet
+        """Returns the number of eddies on a bet.
 
         Args:
             bet (Bet): the Bet dict
@@ -64,24 +60,18 @@ class UserBets(BestSummerEverPointsDB):
         Returns:
             int: total eddies
         """
-        eddies_bet = sum([
-            better["points"] for better in bet["betters"].values()
-        ])
-        return eddies_bet
+        return sum([better["points"] for better in bet["betters"].values()])
 
     def get_all_active_bets(self, guild_id: int) -> list[Bet]:
-        """
-        Gets all active bets.
+        """Gets all active bets.
 
         :param guild_id: int - guild ID to get the active bets for
         :return: list of active bets
         """
-        bets = self.query({"active": True, "guild_id": guild_id})
-        return bets
+        return self.query({"active": True, "guild_id": guild_id})
 
     def get_all_inactive_pending_bets(self, guild_id: int) -> list[Bet]:
-        """
-        Gets all the bets that are not active without results
+        """Gets all the bets that are not active without results.
 
         Args:
             guild_id (int): _description_
@@ -89,23 +79,20 @@ class UserBets(BestSummerEverPointsDB):
         Returns:
             list: _description_
         """
-        bets = self.query({"active": False, "result": None, "guild_id": guild_id})
-        return bets
+        return self.query({"active": False, "result": None, "guild_id": guild_id})
 
     def get_all_pending_bets(self, guild_id: int) -> list[Bet]:
-        """
-        Gets all 'pending' bets - bets that don't have a result yet.
+        """Gets all 'pending' bets - bets that don't have a result yet.
+
         Could be active or closed.
 
         :param guild_id: int - guild ID to get the pending bets for
         :return: list of pending bets
         """
-        bets = self.query({"result": None, "guild_id": guild_id})
-        return bets
+        return self.query({"result": None, "guild_id": guild_id})
 
     def get_user_pending_points(self, user_id: int, guild_id: int) -> int:
-        """
-        Returns a users points from a given guild.
+        """Returns a users points from a given guild.
 
         We search for all the non-closed bets in the DB and get the points directly from there.
 
@@ -115,7 +102,9 @@ class UserBets(BestSummerEverPointsDB):
         """
         pending = 0
 
-        pending_bets = self.query({f"betters.{user_id}": {"$exists": True}, "guild_id": guild_id, "result": None}, )
+        pending_bets = self.query(
+            {f"betters.{user_id}": {"$exists": True}, "guild_id": guild_id, "result": None},
+        )
         for bet in pending_bets:
             our_user = bet["betters"][str(user_id)]
             pending += our_user["points"]
@@ -123,26 +112,25 @@ class UserBets(BestSummerEverPointsDB):
         return pending
 
     def get_all_pending_bets_for_user(self, user_id: int, guild_id: int) -> list[Bet]:
-        """
-        Gets all pending bets for a given user_id
+        """Gets all pending bets for a given user_id.
 
         :param user_id: int - The ID of the user to look for
         :param guild_id: int - The guild ID that the user belongs in
         :return: a list of bet dictionaries
         """
-        pending_bets = self.query({f"betters.{user_id}": {"$exists": True}, "guild_id": guild_id, "result": None})
-        return pending_bets
+        return self.query({f"betters.{user_id}": {"$exists": True}, "guild_id": guild_id, "result": None})
 
-    def create_new_bet(self,
-                       guild_id: int,
-                       user_id: int,
-                       title: str,
-                       options: list,
-                       option_dict: dict,
-                       timeout: Union[datetime.datetime, None] = None,
-                       private: bool = False) -> Bet:
-        """
-        Creates a new bet and inserts it into the DB.
+    def create_new_bet(  # noqa: PLR0913, PLR0917
+        self,
+        guild_id: int,
+        user_id: int,
+        title: str,
+        options: list,
+        option_dict: dict,
+        timeout: datetime.datetime | None = None,
+        private: bool = False,
+    ) -> Bet:
+        """Creates a new bet and inserts it into the DB.
 
         :param private:
         :param guild_id: The guild ID to create the bet in
@@ -153,7 +141,6 @@ class UserBets(BestSummerEverPointsDB):
         :param timeout: A datetime object for when the bet will be 'closed'
         :return: A bet dictionary
         """
-
         bet_id = self.__get_new_bet_id(guild_id)
         bet_doc = {
             "bet_id": bet_id,
@@ -172,36 +159,26 @@ class UserBets(BestSummerEverPointsDB):
             "private": private,
             "updated": datetime.datetime.now(),
             "users": [],
-            "option_vals": [
-                option_dict[o]["val"] for o in option_dict
-            ]
+            "option_vals": [option_dict[o]["val"] for o in option_dict],
         }
         self.insert(bet_doc)
         return bet_doc
 
-    def get_bet_from_id(self, guild_id: int, bet_id: str) -> Union[Bet, None]:
-        """
-        Gets an already created bet document from the database.
+    def get_bet_from_id(self, guild_id: int, bet_id: str) -> Bet | None:
+        """Gets an already created bet document from the database.
 
         :param guild_id: int - The guild ID the bet exists in
         :param bet_id: str - The ID of the bet to get
         :return: a dict of the bet or None if there's no matching bet ID
         """
-
         ret = self.query({"bet_id": bet_id, "guild_id": guild_id})
         if ret:
             return ret[0]
         return None
 
-    def add_better_to_bet(
-            self,
-            bet_id: int,
-            guild_id: int,
-            user_id: int,
-            emoji: str,
-            points: int) -> dict:
-        """
-        Logic for adding a 'better' to a bet.
+    def add_better_to_bet(self, bet_id: int, guild_id: int, user_id: int, emoji: str, points: int) -> dict:
+        """Logic for adding a 'better' to a bet.
+
         If the user is betting on this for the first time - we simply add the details to the DB
         If not, we check that the user has enough points, that they're betting on an option they have
         already bet on and if the bet is still active.
@@ -213,7 +190,6 @@ class UserBets(BestSummerEverPointsDB):
         :param points: int - the amount of points the user is betting
         :return: success dict
         """
-
         ret = self.query({"bet_id": bet_id, "guild_id": guild_id})[0]
         betters = ret["betters"]
 
@@ -234,17 +210,14 @@ class UserBets(BestSummerEverPointsDB):
                 "last_bet": datetime.datetime.now(),
                 "points": points,
             }
-            self.update(
-                {"_id": ret["_id"]},
-                {"$set": {f"betters.{user_id}": doc, "users": ret["users"]}}
-            )
+            self.update({"_id": ret["_id"]}, {"$set": {f"betters.{user_id}": doc, "users": ret["users"]}})
             self.user_points.increment_points(
                 user_id,
                 guild_id,
                 points * -1,
                 TransactionTypes.BET_PLACE,
                 bet_id=bet_id,
-                comment="Bet placed through slash command"
+                comment="Bet placed through slash command",
             )
             return {"success": True}
 
@@ -258,8 +231,8 @@ class UserBets(BestSummerEverPointsDB):
             {"_id": ret["_id"]},
             {
                 "$inc": {f"betters.{user_id}.points": points},
-                "$set": {"last_bet": datetime.datetime.now(), "users": ret["users"]}
-            }
+                "$set": {"last_bet": datetime.datetime.now(), "users": ret["users"]},
+            },
         )
 
         self.user_points.increment_points(
@@ -268,7 +241,7 @@ class UserBets(BestSummerEverPointsDB):
             points * -1,
             TransactionTypes.BET_PLACE,
             bet_id=bet_id,
-            comment="Bet placed through slash command"
+            comment="Bet placed through slash command",
         )
         new_points = self.user_points.get_user_points(user_id, guild_id)
 
@@ -282,27 +255,23 @@ class UserBets(BestSummerEverPointsDB):
                 points,
                 TransactionTypes.BET_REFUND,
                 bet_id=bet_id,
-                comment="Place refund"
+                comment="Place refund",
             )
             self.update(
                 {"_id": ret["_id"]},
-                {"$inc": {f"betters.{user_id}.points": -1 * points}, "$set": {"last_bet": datetime.datetime.now()}}
+                {"$inc": {f"betters.{user_id}.points": -1 * points}, "$set": {"last_bet": datetime.datetime.now()}},
             )
             return {"success": False, "reason": "not enough points"}
 
         return {"success": True}
 
-    def close_a_bet(self, _id: ObjectId, emoji: Optional[str]) -> None:
-        """
-        Close a bet from a bet ID.
+    def close_a_bet(self, _id: ObjectId, emoji: str | None) -> None:
+        """Close a bet from a bet ID.
+
         Here we also calculate who the winners are and allocate their winnings to them.
 
         :param _id: ObjectId - the bet to close
         :param emoji: str - the winning result of the bet
         :return: None
         """
-
-        self.update(
-            {"_id": _id},
-            {"$set": {"active": False, "result": emoji, "closed": datetime.datetime.now()}}
-        )
+        self.update({"_id": _id}, {"$set": {"active": False, "result": emoji, "closed": datetime.datetime.now()}})

@@ -1,15 +1,21 @@
+"""Salary config selects."""
 
 from discord import Interaction, SelectOption
 from discord.ui import Select
 
 
 class SalaryMinimumSelect(Select):
-    _amounts = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 50]
+    """Class for salary minimum select."""
 
-    def __init__(self, current_amount: int = None):
-        options = [
-            SelectOption(label=str(a), value=str(a)) for a in self._amounts
-        ]
+    _amounts = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 50)
+
+    def __init__(self, current_amount: int | None = None) -> None:
+        """Initialisation method.
+
+        Args:
+            current_amount (int | None, optional): the current minimum. Defaults to None.
+        """
+        options = [SelectOption(label=str(a), value=str(a)) for a in self._amounts]
 
         if current_amount:
             for opt in options:
@@ -22,13 +28,14 @@ class SalaryMinimumSelect(Select):
             placeholder="Select minimum salary amount",
             min_values=1,
             max_values=1,
-            options=options
+            options=options,
         )
 
-    async def callback(self, interaction: Interaction):
-        """
-        :param interaction:
-        :return:
+    async def callback(self, interaction: Interaction) -> None:
+        """Callback method.
+
+        Args:
+            interaction (Interaction): the interaction to callback to
         """
         selected_amount = interaction.data["values"][0]
         for option in self.options:
@@ -38,10 +45,17 @@ class SalaryMinimumSelect(Select):
 
 
 class DailySalaryMessageSelect(Select):
-    def __init__(self, enabled: bool = False):
+    """Class for daily salary message select."""
+
+    def __init__(self, enabled: bool = False) -> None:
+        """Initialisation method.
+
+        Args:
+            enabled (bool, optional): whether it's enabled or not. Defaults to False.
+        """
         options = [
             SelectOption(label="Enabled", value="enabled", default=enabled),
-            SelectOption(label="Disabled", value="disabled", default=not enabled)
+            SelectOption(label="Disabled", value="disabled", default=not enabled),
         ]
 
         super().__init__(
@@ -49,13 +63,14 @@ class DailySalaryMessageSelect(Select):
             placeholder="Toggle daily salary message",
             min_values=1,
             max_values=1,
-            options=options
+            options=options,
         )
 
-    async def callback(self, interaction: Interaction):
-        """
-        :param interaction:
-        :return:
+    async def callback(self, interaction: Interaction) -> None:
+        """Callback method.
+
+        Args:
+            interaction (Interaction): the interaction to callback to
         """
         selected_amount = interaction.data["values"][0]
         for option in self.options:
@@ -65,10 +80,17 @@ class DailySalaryMessageSelect(Select):
 
 
 class DailySalarySummaryMessageSelect(Select):
-    def __init__(self, enabled: bool = False):
+    """Class for daily summary message select."""
+
+    def __init__(self, enabled: bool = False) -> None:
+        """Initialisation method.
+
+        Args:
+            enabled (bool, optional): whether it's enabled or not. Defaults to False.
+        """
         options = [
             SelectOption(label="Enabled", value="enabled", default=enabled),
-            SelectOption(label="Disabled", value="disabled", default=not enabled)
+            SelectOption(label="Disabled", value="disabled", default=not enabled),
         ]
 
         super().__init__(
@@ -76,13 +98,14 @@ class DailySalarySummaryMessageSelect(Select):
             placeholder="Toggle daily summary salary message",
             min_values=1,
             max_values=1,
-            options=options
+            options=options,
         )
 
-    async def callback(self, interaction: Interaction):
-        """
-        :param interaction:
-        :return:
+    async def callback(self, interaction: Interaction) -> None:
+        """Callback method.
+
+        Args:
+            interaction (Interaction): the interaction to callback to
         """
         selected_amount = interaction.data["values"][0]
         for option in self.options:

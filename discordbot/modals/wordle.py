@@ -1,18 +1,20 @@
+"""Wordle modal classes."""
 
 import discord
 
 import discordbot.views.config_wordle
-
 from mongo.bsepoints.generic import DataStore
 
 
 class WordleReminderModal(discord.ui.Modal):
-    def __init__(
-        self,
-        text_value: list[str] = None,
-        *args,
-        **kwargs
-    ) -> None:
+    """Wordle reminder modal class."""
+
+    def __init__(self, text_value: list[str] | None = None, *args: tuple[any], **kwargs: dict[any]) -> None:
+        """Initilisation method.
+
+        Args:
+            text_value (list[str] | None, optional): the previously entered value(s). Defaults to None.
+        """
         super().__init__(*args, title="Submit wordle reminder text", **kwargs)
 
         self.placeholder = "Enter your reminder here.\nUse '{mention}' where you want the user to be mentioned."
@@ -20,7 +22,7 @@ class WordleReminderModal(discord.ui.Modal):
         self.activity = discord.ui.InputText(
             label="Wordle Reminder Text",
             placeholder=self.placeholder,
-            style=discord.InputTextStyle.multiline
+            style=discord.InputTextStyle.multiline,
         )
 
         if text_value:
@@ -29,11 +31,11 @@ class WordleReminderModal(discord.ui.Modal):
 
         self.add_item(self.activity)
 
-    async def callback(self, interaction: discord.Interaction):
-        """
+    async def callback(self, interaction: discord.Interaction) -> None:
+        """The submit callback.
 
-        :param interaction:
-        :return:
+        Args:
+            interaction (discord.Interaction): the interaction
         """
         await interaction.response.defer(ephemeral=True)
 
@@ -45,20 +47,18 @@ class WordleReminderModal(discord.ui.Modal):
 
         msg += text.format(mention=interaction.user.mention)
 
-        await interaction.followup.send(
-            content=msg,
-            ephemeral=True,
-            view=view
-        )
+        await interaction.followup.send(content=msg, ephemeral=True, view=view)
 
 
 class WordleStartingWords(discord.ui.Modal):
-    def __init__(
-        self,
-        current_words: list[str] = None,
-        *args,
-        **kwargs
-    ) -> None:
+    """Wordle starting words modal class."""
+
+    def __init__(self, current_words: list[str] | None = None, *args: tuple[any], **kwargs: tuple[any]) -> None:
+        """Initialisation method.
+
+        Args:
+            current_words (list[str] | None, optional): current starting words list. Defaults to None.
+        """
         super().__init__(*args, title="Set wordle starting words", **kwargs)
 
         self.data_store = DataStore()
@@ -68,7 +68,7 @@ class WordleStartingWords(discord.ui.Modal):
         self.activity = discord.ui.InputText(
             label="Wordle Reminder Text",
             placeholder=placeholder,
-            style=discord.InputTextStyle.multiline
+            style=discord.InputTextStyle.multiline,
         )
 
         if current_words:
@@ -78,11 +78,11 @@ class WordleStartingWords(discord.ui.Modal):
 
         self.add_item(self.activity)
 
-    async def callback(self, interaction: discord.Interaction):
-        """
+    async def callback(self, interaction: discord.Interaction) -> None:
+        """Submit button callback.
 
-        :param interaction:
-        :return:
+        Args:
+            interaction (discord.Interaction): the interaction
         """
         await interaction.response.defer(ephemeral=True)
 

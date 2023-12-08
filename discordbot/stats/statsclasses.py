@@ -270,7 +270,11 @@ class StatsGatherer:  # noqa: PLR0904
             if user_id not in threads[thread_id]["users"]:
                 threads[thread_id]["users"].append(user_id)
 
-        busiest = sorted(threads, key=lambda x: threads[x]["count"], reverse=True)[0]
+        try:
+            busiest = sorted(threads, key=lambda x: threads[x]["count"], reverse=True)[0]
+        except IndexError:
+            busiest = 0
+            threads[0] = {"count": 0, "users": []}
 
         data_class = Stat(
             "stat",
@@ -407,7 +411,11 @@ class StatsGatherer:  # noqa: PLR0904
             if user_id not in threads[thread_id]["users"]:
                 threads[thread_id]["users"].append(user_id)
 
-        quietest = sorted(threads, key=lambda x: threads[x]["count"], reverse=False)[0]
+        try:
+            quietest = sorted(threads, key=lambda x: threads[x]["count"], reverse=False)[0]
+        except IndexError:
+            quietest = 0
+            threads[0] = {"count": 0, "users": []}
 
         data_class = Stat(
             "stat",
@@ -994,7 +1002,11 @@ class StatsGatherer:  # noqa: PLR0904
             elif message["channel_id"] not in message_users[uid]["channels"]:
                 message_users[uid]["channels"].append(message["channel_id"])
 
-        chattiest = sorted(message_users, key=lambda x: message_users[x]["count"], reverse=True)[0]
+        try:
+            chattiest = sorted(message_users, key=lambda x: message_users[x]["count"], reverse=True)[0]
+        except IndexError:
+            chattiest = BSE_BOT_ID
+            message_users[BSE_BOT_ID] = {"count": 0}
 
         data_class = Stat(
             type="award",
@@ -1033,7 +1045,12 @@ class StatsGatherer:  # noqa: PLR0904
             if uid not in message_users:
                 message_users[uid] = 0
             message_users[uid] += 1
-        least_chattiest = sorted(message_users, key=lambda x: message_users[x])[0]
+
+        try:
+            least_chattiest = sorted(message_users, key=lambda x: message_users[x])[0]
+        except IndexError:
+            least_chattiest = BSE_BOT_ID
+            message_users[BSE_BOT_ID] = 0
 
         data_class = Stat(
             type="award",
@@ -1072,7 +1089,12 @@ class StatsGatherer:  # noqa: PLR0904
             if uid not in message_users:
                 message_users[uid] = 0
             message_users[uid] += 1
-        chattiest = sorted(message_users, key=lambda x: message_users[x], reverse=True)[0]
+
+        try:
+            chattiest = sorted(message_users, key=lambda x: message_users[x], reverse=True)[0]
+        except IndexError:
+            chattiest = BSE_BOT_ID
+            message_users[BSE_BOT_ID] = 0
 
         data_class = Stat(
             type="award",
@@ -1997,6 +2019,7 @@ class StatsGatherer:  # noqa: PLR0904
         if user_dict[big_streamer]["count"] == 0 and big_streamer != BSE_BOT_ID:
             # make the bot win if no-one streamed
             big_streamer = BSE_BOT_ID
+            user_dict[BSE_BOT_ID] = {"count": 0, "channels": {}}
 
         data_class = Stat(
             type="award",

@@ -3,9 +3,9 @@ name: Pytest
 on: [push, pull_request]
 
 jobs:
-  flake8-lint:
+  pytest:
     runs-on: ubuntu-latest
-    name: Lint
+    name: Pytest and coverage
     steps:
       - name: Check out source repository
         uses: actions/checkout@v4
@@ -19,7 +19,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest coverage pytest-cov
-      - name: Lint with ruff
+      - name: Pytest + Coverage
         run: |
           coverage run --source . -m pytest
           coverage report --omit=tests/*

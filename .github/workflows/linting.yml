@@ -3,7 +3,7 @@ name: Linting
 on: [push, pull_request]
 
 jobs:
-  flake8-lint:
+  ruff-lint:
     runs-on: ubuntu-latest
     name: Lint
     steps:

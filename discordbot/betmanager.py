@@ -80,6 +80,88 @@ class BetManager:
 
         return multiplier, coefficient
 
+    @staticmethod
+    def _calculate_single_bet_winnings(
+        points_bet: int, multiplier: float, coefficient: float, extra_eddies: int, num_winners: int
+    ) -> int:
+        """Calculate single bet winnings.
+
+        Returns the points won based on the inputs.
+
+        Args:
+            self (BetManager): _description_
+            points_bet (int): _description_
+            multiplier (float): _description_
+            coefficient (float): _description_
+            extra_eddies (int): _description_
+            num_winners (int): _description_
+
+        Returns:
+            int: the points won
+        """
+        points_won = math.ceil(((multiplier * points_bet) + coefficient) * points_bet)
+
+        if points_bet < SMALL_BET_AMOUNT:
+            points_won += points_bet
+
+        # add on loser points
+        with contextlib.suppress(ValueError, ZeroDivisionError, TypeError):
+            points_won += int(math.floor(extra_eddies / num_winners))
+        return points_won
+
+    def _calculate_taxed_winnings(
+        self,
+        better_id: int,
+        guild_id: int,
+        tax: tuple(int, int),
+        actual_amount_won: int,
+        points_won: int,
+    ) -> tuple[int, int]:
+        """Calculates the taxed winnings.
+
+        Args:
+            better_id (int): the better ID
+            guild_id (int): the guild ID
+            tax (tuple): the normal tax rate and supporter tax rate
+            actual_amount_won (int): the amount of eddies actually won
+            points_won (int):
+
+        Returns:
+            _type_: _description_
+        """
+        tax_value, supporter_tax = tax
+        user_db = self.user_points.find_user(int(better_id), guild_id)
+        tr = supporter_tax if user_db.get("supporter_type", 0) == SupporterType.SUPPORTER else tax_value
+        tax_amount = math.floor(actual_amount_won * tr)
+        eddies_won_minus_tax = points_won - tax_amount
+        return eddies_won_minus_tax, tax_amount
+
+    def _process_bet_winner(
+        self: "BetManager",
+        bet_id: str,
+        guild_id: int,
+        better_id: str,
+        eddies_won_minus_tax: int,
+    ) -> None:
+        """Processes a bet winner.
+
+        Adds the eddies to the winner's total.
+
+        Args:
+            bet_id (str): the bet ID
+            guild_id (int): the guild ID
+            better_id (str): the winner ID
+            eddies_won_minus_tax (int): the eddies the user actually will get
+        """
+        self.logger.debug("%s won - incrementing eddies by %s", better_id, eddies_won_minus_tax)
+        self.user_points.increment_points(
+            int(better_id),
+            guild_id,
+            eddies_won_minus_tax,
+            TransactionTypes.BET_WIN,
+            bet_id=bet_id,
+        )
+
     def close_a_bet(self: "BetManager", bet_id: str, guild_id: int, emoji: list[str]) -> dict:
         """Close a bet from a given bet ID.
 
@@ -137,49 +219,31 @@ class BetManager:
 
         # assign winning points to the users who got the answer right
         winners = [b for b in ret["betters"] if ret["betters"][b]["emoji"] in emoji]
-        for better in winners:
-            points_bet = ret["betters"][better]["points"]
-            points_won = math.ceil(((multiplier * points_bet) + coefficient) * points_bet)
+        for better_id in winners:
+            points_bet = ret["betters"][better_id]["points"]
+            points_won = self._calculate_single_bet_winnings(
+                points_bet, multiplier, coefficient, _extra_eddies, len(winners)
+            )
+            actual_amount_won = points_won - points_bet
+            eddies_won_minus_tax, tax_amount = self._calculate_taxed_winnings(
+                better_id, guild_id, (tax_value, supporter_tax), actual_amount_won, points_won
+            )
 
-            if points_bet < SMALL_BET_AMOUNT:
-                points_won += points_bet
-
-            # add on loser points
-            with contextlib.suppress(ValueError, ZeroDivisionError, TypeError):
-                points_won += int(math.floor(_extra_eddies / len(winners)))
-
-            user_db = self.user_points.find_user(int(better), guild_id)
-            tr = supporter_tax if user_db.get("supporter_type", 0) == SupporterType.SUPPORTER else tax_value
-
-            total_eddies_won += points_won
-            actual_amount_won = points_won - points_bet  # the actual winnings without original bet
-            total_eddies_winnings += actual_amount_won
-            tax_amount = math.floor(actual_amount_won * tr)
-            total_eddies_taxed += tax_amount
-            eddies_won_minux_tax = points_won - tax_amount
-
-            self.logger.info(
+            self.logger.debug(
                 "%s bet %s eddies and won %s (%s) - getting taxed %s so %s",
-                better,
+                better_id,
                 points_bet,
                 actual_amount_won,
                 points_won,
                 tax_amount,
-                eddies_won_minux_tax,
+                eddies_won_minus_tax,
             )
+            total_eddies_won += points_won
+            total_eddies_winnings += actual_amount_won
+            total_eddies_taxed += tax_amount
+            ret_dict["winners"][better_id] = eddies_won_minus_tax
 
-            ret_dict["winners"][better] = eddies_won_minux_tax
-            self.logger.info("%s won - incrementing eddies by %s", better, eddies_won_minux_tax)
-            self.user_points.increment_points(
-                int(better),
-                guild_id,
-                eddies_won_minux_tax,
-                TransactionTypes.BET_WIN,
-                bet_id=bet_id,
-            )
-
-        # give taxed eddies to the King
-        self.logger.info(
+        self.logger.debug(
             "Bet ID: %s, eddies won: %s, eddies won (with original bets): %s, eddies taxed: %s",
             bet_id,
             total_eddies_winnings,
@@ -187,6 +251,7 @@ class BetManager:
             total_eddies_taxed,
         )
 
+        # give taxed eddies to the King
         king_id = self.guilds.get_king(guild_id)
         self.user_points.increment_points(
             king_id,

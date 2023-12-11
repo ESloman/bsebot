@@ -14,7 +14,7 @@ class TestBetEmbed:
     def test_get_bet_embed() -> None:
         """Tests our get_bet_embed with some standard parameters."""
         bet = embed_mocks.get_bet()
-        guild = GuildMock()
+        guild = GuildMock(123456)
 
         embeds = EmbedManager()
         embed = embeds.get_bet_embed(guild, bet)
@@ -25,7 +25,7 @@ class TestBetEmbed:
         """Tests our get_bet_embed with no betters."""
         bet = embed_mocks.get_bet()
         bet["option_dict"] = {}
-        guild = GuildMock()
+        guild = GuildMock(123456)
 
         embeds = EmbedManager()
         embed = embeds.get_bet_embed(guild, bet)
@@ -36,7 +36,7 @@ class TestBetEmbed:
         """Tests our get_bet_embed with an inactive bet."""
         bet = embed_mocks.get_bet()
         bet["active"] = False
-        guild = GuildMock()
+        guild = GuildMock(123456)
 
         embeds = EmbedManager()
         embed = embeds.get_bet_embed(guild, bet)
@@ -47,9 +47,9 @@ class TestBetEmbed:
         """Tests our get_bet_embed with an empty id."""
         bet = embed_mocks.get_bet()
         bet["betters"]["0"] = {"user_id": 0, "emoji": "1", "points": 10}
-        guild = GuildMock()
+        guild = GuildMock(123456)
 
         embeds = EmbedManager()
-        with patch.object(embeds, "user_points", new=mongo_mocks.UserPointsMock):
+        with patch.object(embeds, "user_points", new=mongo_mocks.UserPointsMock()):
             embed = embeds.get_bet_embed(guild, bet)
         assert isinstance(embed, discord.Embed)

@@ -11,7 +11,7 @@ class TestLeaderboardEmbed:
     @staticmethod
     def test_get_leaderboard_embed() -> None:
         """Tests our get_leaderboard_embed with some standard parameters."""
-        guild = GuildMock()
+        guild = GuildMock(123456)
 
         embeds = EmbedManager()
         with patch.object(embeds, "user_points", new=mongo_mocks.UserPointsMock()):
@@ -21,7 +21,7 @@ class TestLeaderboardEmbed:
     @staticmethod
     def test_get_leaderboard_embed_with_number() -> None:
         """Tests our get_leaderboard_embed with some standard parameters."""
-        guild = GuildMock()
+        guild = GuildMock(123456)
 
         embeds = EmbedManager()
         with patch.object(embeds, "user_points", new=mongo_mocks.UserPointsMock()):

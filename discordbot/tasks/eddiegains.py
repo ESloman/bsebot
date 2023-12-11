@@ -29,7 +29,9 @@ from mongo.datatypes import User
 class EddieGainMessager(BaseTask):
     """Class for eddie gains task."""
 
-    def __init__(self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask]) -> None:
+    def __init__(
+        self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask], start: bool = True
+    ) -> None:
         """Initialisation method.
 
         Args:
@@ -37,27 +39,27 @@ class EddieGainMessager(BaseTask):
             guild_ids (list[int]): the list of guild IDs
             logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
-            on_ready (OnReadyEvent): on ready event
-            github_api (GitHubAPI): the authenticated Github api class
-            place (PlaceBet): the place bet class
-            close (CloseBet): the close bet class
+            start (bool): whether to start the task automatically or not. Defaults to True.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
         self.task = self.eddie_distributer
 
         self.eddie_manager = BSEddiesManager(self.bot, guild_ids, self.logger, startup_tasks)
-        self.task.start()
+        if start:
+            self.task.start()
 
     @tasks.loop(minutes=1)
-    async def eddie_distributer(self) -> None:  # noqa: PLR0912, C901
+    async def eddie_distributer(self) -> None | list[dict]:  # noqa: PLR0912, C901
         """Task that distributes daily eddies."""
         now = datetime.datetime.now()
 
         if now.hour != 7 or now.minute != 30:  # noqa: PLR2004
-            return
+            return None
 
+        data = []
         for guild_id in self.guild_ids:
             eddie_dict = self.eddie_manager.give_out_eddies(guild_id, real=True)
+            data.append(eddie_dict)
 
             guild = await self.bot.fetch_guild(guild_id)  # type: discord.Guild
             guild_db = self.guilds.get_guild(guild_id)
@@ -122,6 +124,7 @@ class EddieGainMessager(BaseTask):
                 except discord.Forbidden:
                     # can't send DM messages to this user
                     self.logger.info("%s - %s", user.display_name, summary_message)
+        return data
 
     @eddie_distributer.before_loop
     async def before_eddie_distributer(self) -> None:

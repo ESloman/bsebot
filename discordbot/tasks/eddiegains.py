@@ -418,7 +418,7 @@ class BSEddiesManager(BaseTask):
                 if guesses != "X":
                     wordle_messages.append((user, guesses))
 
-            except IndexError:
+            except (IndexError, StopIteration):
                 # just means we had an error with this
                 pass
 

@@ -22,6 +22,17 @@ class RoleMock:
     mention: str
 
 
+class ChannelMock:
+    def __init__(self, channel_id: int) -> None:
+        """Init."""
+        self._id = channel_id
+
+    @property
+    def id(self) -> int:  # noqa: A003
+        """ID property."""
+        return self._id
+
+
 class GuildMock:
     def __init__(self, guild_id: int) -> None:
         """Init."""

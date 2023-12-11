@@ -100,7 +100,7 @@ MESSAGE_VALUES = {
 }
 
 # the number of eddies a user received for each wordle score
-WORDLE_VALUES = {6: 1, 5: 2, 4: 3, 3: 4, 2: 10, 1: 1, "X": 1}
+WORDLE_VALUES = {6: 1, 5: 2, 4: 3, 3: 4, 2: 10, 1: 25, "X": 1}
 
 # bet outcome coefficient
 BET_OUTCOME_COUNT_MODIFIER = {

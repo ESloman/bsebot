@@ -1,6 +1,7 @@
 """Mocks for embeds."""
 
 import datetime
+import random
 
 
 def get_bet() -> dict:
@@ -13,4 +14,14 @@ def get_bet() -> dict:
         },
         "active": True,
         "timeout": datetime.datetime.now(),
+    }
+
+
+def get_event() -> dict:
+    """Returns a revolution dict for embed generating."""
+    return {
+        "chance": 60,
+        "revolutionaries": [random.randint(500, 1000) for _ in range(3)],
+        "supporters": [random.randint(500, 1000) for _ in range(3)],
+        "locked_in_eddies": 25400,
     }

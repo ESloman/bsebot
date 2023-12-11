@@ -7,6 +7,14 @@ import dataclasses
 class MemberMock:
     id: int  # noqa: A003
     name: str = "some_name"
+    mention: str = "some_mention"
+
+
+@dataclasses.dataclass
+class RoleMock:
+    id: int  # noqa: A003
+    name: str
+    mention: str
 
 
 class GuildMock:

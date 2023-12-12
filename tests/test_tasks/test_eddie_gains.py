@@ -6,7 +6,7 @@ import pytest
 
 from discordbot.tasks.eddiegains import EddieGainMessager
 from discordbot.utilities import PlaceHolderLogger
-from tests.mocks.bsebot_mock import BSEBotMock
+from tests.mocks.bsebot_mocks import BSEBotMock
 from tests.mocks.mongo_mocks import GuildsMock, UserPointsMock
 from tests.mocks.task_mocks import mock_eddie_manager_give_out_eddies
 from tests.mocks.util_mocks import datetime_now

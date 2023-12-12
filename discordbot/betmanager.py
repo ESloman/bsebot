@@ -113,7 +113,7 @@ class BetManager:
         self,
         better_id: int,
         guild_id: int,
-        tax: tuple(int, int),
+        tax: tuple[int, int],
         actual_amount_won: int,
         points_won: int,
     ) -> tuple[int, int]:
@@ -127,7 +127,7 @@ class BetManager:
             points_won (int):
 
         Returns:
-            _type_: _description_
+            tuple[int, int]: eddiws_won, tax
         """
         tax_value, supporter_tax = tax
         user_db = self.user_points.find_user(int(better_id), guild_id)
@@ -175,29 +175,29 @@ class BetManager:
         Returns:
             dict: a result_dict that has some info about the winners and losers
         """
-        ret = self.user_bets.get_bet_from_id(guild_id, bet_id)
+        bet = self.user_bets.get_bet_from_id(guild_id, bet_id)
 
-        self.user_bets.close_a_bet(ret["_id"], emoji)
+        self.user_bets.close_a_bet(bet["_id"], emoji)
 
         ret_dict = {
             "result": emoji,
-            "outcome_name": [ret["option_dict"][e] for e in emoji],
+            "outcome_name": [bet["option_dict"][e] for e in emoji],
             "timestamp": datetime.datetime.now(tz=datetime.UTC),
             "losers": {
-                b: ret["betters"][b]["points"] for b in ret["betters"] if ret["betters"][b]["emoji"] not in emoji
+                b: bet["betters"][b]["points"] for b in bet["betters"] if bet["betters"][b]["emoji"] not in emoji
             },
             "winners": {},
         }
 
-        total_eddies_bet = sum([ret["betters"][b]["points"] for b in ret["betters"]])
+        total_eddies_bet = sum([bet["betters"][b]["points"] for b in bet["betters"]])
         winning_outcome_eddies = sum(
-            [ret["betters"][b]["points"] for b in ret["betters"] if ret["betters"][b]["emoji"] in emoji],
+            [bet["betters"][b]["points"] for b in bet["betters"] if bet["betters"][b]["emoji"] in emoji],
         )
 
         multiplier, coefficient = self.calculate_bet_modifiers(
             total_eddies_bet,
             winning_outcome_eddies,
-            len(ret["options"]),
+            len(bet["options"]),
             len(ret_dict["losers"]),
         )
 
@@ -218,9 +218,9 @@ class BetManager:
         total_eddies_taxed = 0
 
         # assign winning points to the users who got the answer right
-        winners = [b for b in ret["betters"] if ret["betters"][b]["emoji"] in emoji]
+        winners = [b for b in bet["betters"] if bet["betters"][b]["emoji"] in emoji]
         for better_id in winners:
-            points_bet = ret["betters"][better_id]["points"]
+            points_bet = bet["betters"][better_id]["points"]
             points_won = self._calculate_single_bet_winnings(
                 points_bet, multiplier, coefficient, _extra_eddies, len(winners)
             )
@@ -228,6 +228,8 @@ class BetManager:
             eddies_won_minus_tax, tax_amount = self._calculate_taxed_winnings(
                 better_id, guild_id, (tax_value, supporter_tax), actual_amount_won, points_won
             )
+
+            self._process_bet_winner(bet_id, guild_id, better_id, eddies_won_minus_tax)
 
             self.logger.debug(
                 "%s bet %s eddies and won %s (%s) - getting taxed %s so %s",
@@ -238,6 +240,7 @@ class BetManager:
                 tax_amount,
                 eddies_won_minus_tax,
             )
+
             total_eddies_won += points_won
             total_eddies_winnings += actual_amount_won
             total_eddies_taxed += tax_amount

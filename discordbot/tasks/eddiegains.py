@@ -421,7 +421,7 @@ class BSEddiesManager(BaseTask):
                 if guesses != "X":
                     wordle_messages.append((user, guesses))
 
-            except IndexError:
+            except (IndexError, StopIteration):
                 # just means we had an error with this
                 pass
 
@@ -492,14 +492,18 @@ class BSEddiesManager(BaseTask):
                 )
             self.logger.info("%s gained %s", _user, eddie_gain_dict[_user][0])
 
+        if current_king_id not in eddie_gain_dict:
+            # king isn't gaining eddies lol
+            eddie_gain_dict[current_king_id] = [0, {}]
         eddie_gain_dict[current_king_id].append(tax_gains)
         eddie_gain_dict[current_king_id][0] += tax_gains
 
         if real:
+            # give king their tax earnings
             self.user_points.increment_points(
                 current_king_id,
                 guild_id,
-                eddie_gain_dict[current_king_id][0],
+                tax_gains,
                 TransactionTypes.TAX_GAINS,
             )
 

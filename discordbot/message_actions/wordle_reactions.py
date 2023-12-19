@@ -67,7 +67,7 @@ class WordleMessageAction(BaseMessageAction):
 
         await self._handle_adding_squares(message)
 
-        if guesses not in {"X", "2", "6"}:
+        if guesses not in {"X", "1", "2", "6"}:
             # no need to process anything after this
             return
 
@@ -86,7 +86,7 @@ class WordleMessageAction(BaseMessageAction):
 
         if guesses == "X":
             _emoji = x_emoji
-        elif guesses == "2":
+        elif guesses in {"1", "2"}:
             _emoji = two_emoji
         elif guesses == "6":
             _emoji = six_emoji

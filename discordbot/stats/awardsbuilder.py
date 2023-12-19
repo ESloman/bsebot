@@ -58,13 +58,20 @@ class AwardsBuilder:
         Returns:
             dict: the previous stat object
         """
-        query = {"guild_id": stat.guild_id, "type": stat.type, "stat": stat.stat}
+        query = {"guild_id": stat.guild_id, "type": stat.type}
 
         if stat.annual:
             query["year"] = int(stat.year) - 1
         else:
-            query["month"] = (stat.timestamp - datetime.timedelta(days=7)).strftime("%b %y")
+            query["month"] = (stat.timestamp - datetime.timedelta(days=37)).strftime("%b %y")
 
+        match stat.type:
+            case "award":
+                query["award"] = stat.award
+            case "stat":
+                query["stat"] = stat.stat
+
+        self.logger.debug(query)
         return self.awards.query(query)
 
     @staticmethod

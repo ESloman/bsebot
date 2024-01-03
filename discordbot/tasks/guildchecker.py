@@ -40,10 +40,6 @@ class GuildChecker(BaseTask):
             guild_ids (list[int]): the list of guild IDs
             logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
-            on_ready (OnReadyEvent): on ready event
-            github_api (GitHubAPI): the authenticated Github api class
-            place (PlaceBet): the place bet class
-            close (CloseBet): the close bet class
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
         self.task = self.guild_checker

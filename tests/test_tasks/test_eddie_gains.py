@@ -1,14 +1,16 @@
 """Tests our eddie gains task."""
 
+import datetime
+from collections import Counter
 from unittest.mock import patch
 
 import pytest
 
-from discordbot.tasks.eddiegains import EddieGainMessager
+from discordbot.tasks.eddiegains import BSEddiesManager, EddieGainMessager
 from discordbot.utilities import PlaceHolderLogger
 from tests.mocks.bsebot_mocks import BSEBotMock
 from tests.mocks.mongo_mocks import GuildsMock, UserPointsMock
-from tests.mocks.task_mocks import mock_eddie_manager_give_out_eddies
+from tests.mocks.task_mocks import mock_bseddies_manager_counters, mock_eddie_manager_give_out_eddies
 from tests.mocks.util_mocks import datetime_now
 
 
@@ -50,3 +52,37 @@ class TestEddieGainMessager:
             result = await task.eddie_distributer()
             assert isinstance(result, list)
             assert len(result) > 0
+
+
+class TestBSEddiesManager:
+    @pytest.fixture(autouse=True)
+    def _test_data(self) -> None:
+        """Fixture to get test data.
+
+        Automatically called before each test.
+        """
+        self.bsebot = BSEBotMock()
+        self.logger = PlaceHolderLogger
+
+    def test_init(self) -> None:
+        """Tests if we can initialise the task."""
+        _ = BSEddiesManager(self.bsebot, [], PlaceHolderLogger, [])
+
+    @pytest.mark.parametrize("days", [1, 2, 3, 4, 5, 10])
+    def test_get_datetime_objects(self, days: int) -> None:
+        """Tests our get_datetime_objects method."""
+        now = datetime.datetime.now()
+        manager = BSEddiesManager(self.bsebot, [], PlaceHolderLogger, [])
+        start, end = manager.get_datetime_objects(days)
+
+        for obj in (start, end):
+            assert isinstance(obj, datetime.datetime)
+            assert obj < now
+            assert obj.day == (now - datetime.timedelta(days=days)).day
+
+    @pytest.mark.parametrize(("counter", "start", "expected"), mock_bseddies_manager_counters())
+    def test_calc_eddies(self, counter: Counter, start: int, expected: float) -> None:
+        """Tests our _calc_eddies method."""
+        manager = BSEddiesManager(self.bsebot, [], PlaceHolderLogger, [])
+        eddies = manager._calc_eddies(counter, start)
+        assert eddies == expected

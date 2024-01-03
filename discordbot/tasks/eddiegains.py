@@ -176,7 +176,7 @@ class BSEddiesManager(BaseTask):
 
         return start, end
 
-    def _calc_eddies(self, counter: Counter, start: int = 4) -> int:
+    def _calc_eddies(self, counter: Counter, start: int = 4) -> float:
         """Loop over the message types and work out an amount of BSEddies the user will gain.
 
         Args:
@@ -184,7 +184,7 @@ class BSEddiesManager(BaseTask):
             start (int): minimum eddies to start at
 
         Returns:
-            int: the amount of eddies the user is going to gain
+            float: the amount of eddies the user is going to gain
         """
         points = start
         for message_type in MESSAGE_TYPES:

@@ -14,6 +14,7 @@ ignore = [
     "D417",   # undocumented-param: doesn't work with 'NAME (type): DESC' convention we use
     "EXE001", # shebang-not-executable: only works on unix systems - not great for mixed OS development
     "S311",   # suspicious-non-cryptographic-random-usage: not doing anything cryptographic with random
+    "PLR0914",# too-many-local-variables: don't care about this fore now
 ]
 
 fixable = ["ALL"]
@@ -44,6 +45,7 @@ exclude = [
     "dist",
     "node_modules",
     "venv",
+    "wvenv",
     "docs/",
     "datafiles"
 ]

@@ -74,7 +74,6 @@ class WordleTask(BaseTask):
         await self.bot.change_presence(status=discord.Status.online, activity=game)
 
         # actually do wordle now
-
         wordle_solver = WordleSolver(self.logger)
         await wordle_solver.setup()
 
@@ -92,18 +91,21 @@ class WordleTask(BaseTask):
 
         # put it into dark mode
         message = solved_wordle.share_text.replace("⬜", "⬛")
+
+        # format 'spoiler message' to output solved word and guesses
         spoiler_message = f"Solved wordle in `{solved_wordle.guess_count}`, word was: || {solved_wordle.actual_word} ||"
+        spoiler_message += f". Guesses: || {' -> '.join(solved_wordle.guesses)} ||"
 
         self.logger.info("Sending wordle message: %s", message)
         for guild in self.bot.guilds:
             guild_db = self.guilds.get_guild(guild.id)
             if not guild_db.get("wordle"):
-                self.logger.info("%s has wordle turned off", guild.name)
+                self.logger.debug("%s has wordle turned off", guild.name)
                 continue
 
             channel_id = guild_db.get("wordle_channel")
             if not channel_id or not guild_db.get("wordle"):
-                self.logger.info("%s hasn't got a wordle channel configured - skipping", guild.name)
+                self.logger.debug("%s hasn't got a wordle channel configured - skipping", guild.name)
                 continue
 
             channel = await self.bot.fetch_channel(channel_id)

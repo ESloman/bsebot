@@ -558,8 +558,11 @@ class AwardsBuilder:
             send_messages (bool): whether to actually send messages
         """
         for stat in stats:
-            # comment out this for debug
-            self.logger.info("%s", {k: v for k, v in stat.__dict__.items() if v is not None})
+            if self.awards.find_entry(stat):
+                self.logger.debug("Already have this stat, %s, in the database. Skipping...", stat)
+                continue
+
+            self.logger.debug("%s", {k: v for k, v in stat.__dict__.items() if v is not None})
 
             if self.debug:
                 continue
@@ -573,7 +576,12 @@ class AwardsBuilder:
 
         for award in awards:
             # run this in dry run mode before committing anything
-            self.logger.info("%s", {k: v for k, v in award.__dict__.items() if v is not None})
+
+            if self.awards.find_entry(award):
+                self.logger.debug("Already have this award, %s, in the database. Skipping...", award)
+                continue
+
+            self.logger.debug("%s", {k: v for k, v in award.__dict__.items() if v is not None})
             self.awards.document_award(**{k: v for k, v in award.__dict__.items() if v is not None}, dry_run=True)
 
         for award in awards:

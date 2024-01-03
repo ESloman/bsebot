@@ -12,6 +12,7 @@ import random
 from pymongo.results import InsertOneResult
 
 from discordbot.bot_enums import AwardsTypes, StatTypes
+from discordbot.stats.statsdataclasses import Stat
 from discordbot.wordle.data_type import WordleSolve
 from mongo import interface
 from mongo.datatypes import Thread
@@ -263,6 +264,39 @@ class Awards(BestSummerEverPointsDB):
         if not dry_run:
             return self.insert(doc)
         return None
+
+    def find_entry(self, award_or_stat: Stat) -> list:
+        """Finds an award or stat in the database.
+
+        Builds a query for the given award/stat and returns anything it finds.
+
+        Args:
+            award_or_stat (Stat): the award or stat to search
+
+        Returns:
+            list: the found entry(ies)
+        """
+        query = {
+            "type": award_or_stat.type,
+            "guild_id": award_or_stat.guild_id,
+            "value": award_or_stat.value,
+            "annual": award_or_stat.annual,
+            "user_id": award_or_stat.user_id,
+            "short_name": award_or_stat.short_name,
+        }
+
+        if award_or_stat.annual:
+            query["year"] = award_or_stat.year
+        else:
+            query["month"] = award_or_stat.month
+
+        match award_or_stat.type:
+            case "award":
+                query["award"] = award_or_stat.award
+            case "stat":
+                query["stat"] = award_or_stat.stat
+
+        return self.query(query)
 
 
 class WordleAttempts(BestSummerEverPointsDB):

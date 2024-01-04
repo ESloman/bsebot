@@ -338,45 +338,87 @@ class Thread:
 class GuildDB:
     """A dict representing a guild/server."""
 
+    # general server info
     _id: ObjectId
+    """The internal DB ID."""
     guild_id: int
+    """The discord server ID of the server."""
     owner_id: int
+    """The ID of the user that owns the server."""
     name: str = ""
-    tax_rate: float = 0.1
-    supporter_tax_rate: float = 0.0
-
-    # optional vars
-    wordle_reminders: bool = False
+    """The guild/server's name."""
     created: datetime.datetime | None = None
-    daily_minimum: int | None = None
-    role: int | None = None
+    """When the server was created."""
     admins: list[int] = field(default_factory=list)
-    wordle: bool | None = None
+    """List of BSEddies admins in the server."""
+
+    # bseddies stuff
+    daily_minimum: int | None = None
+    """The daily minimum number of eddies."""
+    tax_rate: float = 0.1
+    """The standard eddies tax rate."""
+    supporter_tax_rate: float = 0
+    """The eddies tax rate for supporters."""
+
+    role: int | None = None
+    """The role ID for the KING role."""
+
+    # wordle stuff
+    wordle: bool = False
+    """Whether to post the wordle in this server."""
     wordle_channel: int | None = None
+    """The channel ID of the channel to post the wordle in."""
+    wordle_reminders: bool = False
+    """Whether wordle reminders are enabled or not."""
+    wordle_x_emoji: str | None = None
+    """The emoji to use for X wordle scores."""
+    wordle_two_emoji: str | None = None
+    """The emoji to use for 2 wordle scores."""
+    wordle_six_emoji: str | None = None
+    """The emoji to use for 6 wordle scores."""
+
     rename_king: datetime.datetime | None = None
+    """When the King was last renamed."""
     tax_rate_history: list[dict] = field(default_factory=list)
+    """The tax rate history."""
     king: int | None = None
+    """The user ID of the user that is currently KING."""
     king_since: datetime.datetime | None = None
+    """Start time of the current KING's rule."""
     king_history: list[dict] = field(default_factory=list)
+    """The KING history."""
     hash: str | None = None  # noqa: A003
     channel: int | None = None
-    update_messages: bool | None = None
-    revolution: bool | None = None
+    """The ID of the BSEddies channel."""
+    update_messages: bool = False
+    """Whether to post bot update messages."""
+    revolution: bool = False
+    """Whether revolution is enabled."""
     supporter_role: int | None = None
+    """The ID of the role for supporters."""
     revolutionary_role: int | None = None
+    """The ID of the role for revolutionaries."""
     pledged: list[int] = field(default_factory=list)
+    """The list of users pledged to support the KING this cycle."""
     release_ver: str | None = None
-    release_notes: bool | None = None
-    valorant_rollcall: bool | None = None
+    """The last version of release notes published."""
+    release_notes: bool = False
+    """Whether to post release notes."""
+    valorant_rollcall: bool = False
+    """Whether to do valorant roll call messages."""
     valorant_channel: int | None = None
+    """The channel ID of the 'valorant' channel."""
     valorant_role: int | None = None
-    wordle_x_emoji: str | None = None
-    wordle_two_emoji: str | None = None
-    wordle_six_emoji: str | None = None
+    """The role ID of the 'valorant' role."""
+
     last_remind_me_suggest_time: datetime.datetime | None = None
+    """The last time we triggered a 'remind me' message."""
     last_ad_time: datetime.datetime | None = None
+    """The last time we triggered a 'marvel ad' message."""
     last_revolution_time: datetime.datetime | None = None
+    """The last time we triggered a 'revolution' message."""
     last_rigged_time: datetime.datetime | None = None
+    """The last time we triggered a 'rigged' message."""
 
 
 @dataclass

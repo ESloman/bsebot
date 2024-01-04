@@ -3,7 +3,7 @@ name: Pytest
 on: [push, pull_request]
 
 jobs:
-  pytest:
+  testing:
     runs-on: ubuntu-latest
     name: Pytest and coverage
     steps:
@@ -24,3 +24,9 @@ jobs:
           coverage run --source . -m pytest
           coverage report --omit=tests/*
           coverage html --omit=tests/*
+          coverage xml --omit=tests/*
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_API_KEY }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

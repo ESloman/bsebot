@@ -9,8 +9,7 @@ repos:
   hooks:
     - id: pytest
       name: pytest
-      entry: pytest
+      entry: coverage run --source . -m pytest
       language: system
       pass_filenames: false
       always_run: true
-  

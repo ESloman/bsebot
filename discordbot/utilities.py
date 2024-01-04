@@ -21,7 +21,7 @@ class PlaceHolderLogger:
     """
 
     @staticmethod
-    def info(msg: str) -> None:
+    def info(msg: str, *args: tuple[any], **kwargs: dict[str, any]) -> None:  # noqa: ARG004
         """logger.info mock.
 
         Args:
@@ -30,7 +30,7 @@ class PlaceHolderLogger:
         print(msg)
 
     @staticmethod
-    def debug(msg: str) -> None:
+    def debug(msg: str, *args: tuple[any], **kwargs: dict[str, any]) -> None:  # noqa: ARG004
         """logger.debug mock.
 
         Args:
@@ -39,7 +39,7 @@ class PlaceHolderLogger:
         print(msg)
 
     @staticmethod
-    def warning(msg: str) -> None:
+    def warning(msg: str, *args: tuple[any], **kwargs: dict[str, any]) -> None:  # noqa: ARG004
         """logger.warning mock.
 
         Args:

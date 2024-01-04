@@ -8,6 +8,7 @@ import discord
 from discordbot.constants import MIN_USERS_FILTER, USER_POINTS_FILTER
 from discordbot.utilities import PlaceHolderLogger
 from mongo.bsepoints.points import UserPoints
+from mongo.datatypes import Bet
 
 
 class EmbedManager:
@@ -29,13 +30,13 @@ class EmbedManager:
     def get_bet_embed(
         self: "EmbedManager",
         guild: discord.Guild,
-        bet: dict,
+        bet: Bet,
     ) -> discord.Embed:
         """Generates a bet embed from the given bet.
 
         Args:
             guild (discord.Guild): the guild Object the bet resides in
-            bet (dict): the bet dict
+            bet (Bet): the bet dict
 
         Returns:
             discord.Embed: a formatted embed to send

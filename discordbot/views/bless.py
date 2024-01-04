@@ -65,11 +65,7 @@ class BlessView(discord.ui.View):
             users = [u for u in _users if u.daily_minimum and not u.king]
         else:
             users = [
-                u
-                for u in _users
-                if u.daily_minimum
-                and not u.king
-                and u.supporter_type == SupporterType.SUPPORTER
+                u for u in _users if u.daily_minimum and not u.king and u.supporter_type == SupporterType.SUPPORTER
             ]
 
         num_users = len(users)

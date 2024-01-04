@@ -18,7 +18,7 @@ class Guilds(BestSummerEverPointsDB):  # noqa: PLR0904
         """Constructor method for the class. Initialises the collection object."""
         super().__init__()
         self._vault = interface.get_collection(self.database, "guilds")
-        self.user_points = UserPoints()
+        self.user_points: UserPoints = UserPoints()
 
     def get_guild(self, guild_id: int) -> GuildDB | None:
         """Gets an already created guild document from the database.

@@ -112,8 +112,7 @@ class PledgeView(discord.ui.View):
 
         channel = interaction.guild.get_channel(guild_db.channel)
         msg = (
-            f"{interaction.user.mention} has pledged to support the KING "
-            f"and become a <@&{guild_db.supporter_role}>"
+            f"{interaction.user.mention} has pledged to support the KING " f"and become a <@&{guild_db.supporter_role}>"
         )
         await channel.send(content=msg, silent=True)
 

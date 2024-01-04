@@ -81,7 +81,7 @@ class GuildChecker(BaseTask):
 
             if db_guild.name != guild.name:
                 self.logger.debug("Updating db name for %s", guild.name)
-                self.guilds.update({"_id": db_guild._id}, {"$set": {"name": guild.name}})
+                self.guilds.update({"_id": db_guild._id}, {"$set": {"name": guild.name}})  # noqa: SLF001
 
             self.logger.debug("Checking guilds for new members")
             members = await guild.fetch_members().flatten()
@@ -102,7 +102,7 @@ class GuildChecker(BaseTask):
 
                 if name != user.name:
                     self.logger.debug("Updating db name for %s", name)
-                    self.user_points.update({"_id": user._id}, {"$set": {"name": name}})
+                    self.user_points.update({"_id": user._id}, {"$set": {"name": name}})  # noqa: SLF001
 
             self.logger.debug("Checking for users that have left")
             member_ids = [member.id for member in members]
@@ -112,8 +112,8 @@ class GuildChecker(BaseTask):
                 _users = [u for u in _users if not u.inactive]
                 for user in _users:
                     if user["uid"] not in member_ids:
-                        self.user_points.update({"_id": user._id}, {"$set": {"inactive": True}})
-                        self.activities.add_activity(user._id, guild.id, ActivityTypes.SERVER_LEAVE)
+                        self.user_points.update({"_id": user._id}, {"$set": {"inactive": True}})  # noqa: SLF001
+                        self.activities.add_activity(user._id, guild.id, ActivityTypes.SERVER_LEAVE)  # noqa: SLF001
 
             self.logger.info("Checking guild emojis")
             # sort out emojis
@@ -187,8 +187,8 @@ class GuildChecker(BaseTask):
                         continue
 
                     self.spoilers.update(
-                        {"_id": thread_info._id},
-                        {"$set": {"created_at": thread.created_at, "owner": thread.owner.id}}
+                        {"_id": thread_info._id},  # noqa: SLF001
+                        {"$set": {"created_at": thread.created_at, "owner": thread.owner.id}},
                     )
 
             if self.finished:

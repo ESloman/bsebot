@@ -97,7 +97,7 @@ class EmbedManager:
 
         if len(users) > MIN_USERS_FILTER:
             # only filter out users with ten points if the server has lots of users
-            users = [user for user in users if user["points"] != USER_POINTS_FILTER]
+            users = [user for user in users if user.points != USER_POINTS_FILTER]
 
         message = "# BSEddies Leaderboard\n"
 
@@ -141,7 +141,7 @@ class EmbedManager:
 
         if len(users) > MIN_USERS_FILTER:
             # only filter out users with ten points if the server has lots of users
-            users = [user for user in users if user["points"] != USER_POINTS_FILTER]
+            users = [user for user in users if user.points != USER_POINTS_FILTER]
 
         message = "# BSEddies High Scores\n"
 

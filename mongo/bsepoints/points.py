@@ -95,10 +95,7 @@ class UserPoints(BestSummerEverPointsDB):
                 "supporter_type": True,
             }
 
-        ret = self.query(
-            {"guild_id": guild_id},
-            projection=projection
-        )
+        ret = self.query({"guild_id": guild_id}, projection=projection)
         return [User(**_user) for _user in ret]
 
     def set_daily_minimum(self, user_id: int, guild_id: int, points: int) -> UpdateResult:

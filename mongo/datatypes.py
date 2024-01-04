@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 from typing import TypedDict
 
 try:
-    from typing import Optional, NotRequired
+    from typing import NotRequired, Optional
 except ImportError:
     from typing import Optional
 
@@ -13,8 +13,9 @@ except ImportError:
 
 from bson import ObjectId
 
-from discordbot.bot_enums import ActivityTypes, TransactionTypes, SupporterType
+from discordbot.bot_enums import ActivityTypes, SupporterType, TransactionTypes
 from discordbot.constants import CREATOR
+
 
 class Transaction(TypedDict):
     """A dict representing a transaction."""
@@ -72,20 +73,20 @@ class User:
     """The number of eddies the user has on pending bets"""
     high_score: int = field(default=0)
     """The user's highest ever amount of eddies"""
-    daily_minimum: Optional[int] = None
+    daily_minimum: int | None = None
     """The minimum amount of eddies the user is going to get each day"""
     supporter_type: SupporterType = SupporterType.NEUTRAL
-    transaction_history: Optional[list[Transaction]] = field(default_factory=list)
+    transaction_history: list[Transaction] | None = field(default_factory=list)
     """A list of the transactions the user has made"""
-    activity_history: Optional[list[Activity]] = field(default_factory=list)
+    activity_history: list[Activity] | None = field(default_factory=list)
     """A list of activities the user has made"""
     inactive: bool = False
     """Whether the user has left the server or not"""
 
     # DEPRECATED
-    last_cull_time: Optional[datetime.datetime] = None
+    last_cull_time: datetime.datetime | None = None
     """*DEPRECATED*"""
-    cull_warning: Optional[bool] = None
+    cull_warning: bool | None = None
     """*DEPRECATED*"""
 
 
@@ -327,56 +328,55 @@ class Thread:
     """Only for SPOILER threads - the day a new ep comes out"""
     active: bool
     """Only for SPOILER threads - if we should still be posting spoiler warnings"""
-    created: Optional[datetime.datetime] = None
+    created: datetime.datetime | None = None
     """When the thread was created"""
-    owner: Optional[int] = field(default=CREATOR)
+    owner: int | None = field(default=CREATOR)
     """The discord user ID of the user who created the thread"""
 
 
-@dataclass
+@dataclass(frozen=True)
 class GuildDB:
     """A dict representing a guild/server."""
 
     _id: ObjectId
     guild_id: int
-    created: datetime.datetime
     owner_id: int
-    channel: int
-    wordle_reminders: bool
-    category: int
-    role: int
-    daily_minimum: int
-    name: str
-    tax_rate: float
-    supporter_tax_rate: float
+    name: str = ""
+    tax_rate: float = 0.1
+    supporter_tax_rate: float = 0.0
 
     # optional vars
+    wordle_reminders: bool = False
+    created: datetime.datetime | None = None
+    daily_minimum: int | None = None
+    role: int | None = None
     admins: list[int] = field(default_factory=list)
-    wordle: Optional[bool] = None
-    wordle_channel: Optional[int] = None
-    rename_king: Optional[datetime.datetime] = None
+    wordle: bool | None = None
+    wordle_channel: int | None = None
+    rename_king: datetime.datetime | None = None
     tax_rate_history: list[dict] = field(default_factory=list)
-    king: Optional[int] = None
-    king_since: Optional[datetime.datetime] = None
+    king: int | None = None
+    king_since: datetime.datetime | None = None
     king_history: list[dict] = field(default_factory=list)
-    hash: Optional[str] = None
-    update_messages: Optional[bool] = None
-    revolution: Optional[bool] = None
-    supporter_role: Optional[int] = None
-    revolutionary_role: Optional[int] = None
+    hash: str | None = None  # noqa: A003
+    channel: int | None = None
+    update_messages: bool | None = None
+    revolution: bool | None = None
+    supporter_role: int | None = None
+    revolutionary_role: int | None = None
     pledged: list[int] = field(default_factory=list)
-    release_ver: Optional[str] = None
-    release_notes: Optional[bool] = None
-    valorant_rollcall: Optional[bool] = None
-    valorant_channel: Optional[int] = None
-    valorant_role: Optional[int] = None
-    wordle_x_emoji: Optional[str] = None
-    wordle_two_emoji: Optional[str] = None
-    wordle_six_emoji: Optional[str] = None
-    last_remind_me_suggest_time: Optional[datetime.datetime] = None
-    last_ad_time: Optional[datetime.datetime] = None
-    last_revolution_time: Optional[datetime.datetime] = None
-    last_rigged_time: Optional[datetime.datetime] = None
+    release_ver: str | None = None
+    release_notes: bool | None = None
+    valorant_rollcall: bool | None = None
+    valorant_channel: int | None = None
+    valorant_role: int | None = None
+    wordle_x_emoji: str | None = None
+    wordle_two_emoji: str | None = None
+    wordle_six_emoji: str | None = None
+    last_remind_me_suggest_time: datetime.datetime | None = None
+    last_ad_time: datetime.datetime | None = None
+    last_revolution_time: datetime.datetime | None = None
+    last_rigged_time: datetime.datetime | None = None
 
 
 @dataclass

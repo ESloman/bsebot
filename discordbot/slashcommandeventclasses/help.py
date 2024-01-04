@@ -1,30 +1,40 @@
+"""Help slash command."""
 
 import datetime
+import logging
 
 import discord
 
 from discordbot.bot_enums import ActivityTypes
+from discordbot.bsebot import BSEBot
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
 class Help(BSEddies):
-    """
-    Class for handling `/help` commands
-    """
+    """Class for handling `/help` commands."""
 
-    def __init__(self, client, guilds, logger, command_list: list[BSEddies] = None):
-        super().__init__(client, guilds, logger)
+    def __init__(
+        self, client: BSEBot, guild_ids: list, logger: logging.Logger, command_list: list[BSEddies] | None = None
+    ) -> None:
+        """Initialisation method.
+
+        Args:
+            client (BSEBot): the connected BSEBot client
+            guild_ids (list): list of supported guild IDs
+            logger (logging.Logger): the logger
+            command_list (list[BSEddies] | None): the list of commands
+        """
+        super().__init__(client, guild_ids, logger)
         self.command_list = command_list
         self.activity_type = ActivityTypes.HELP
         self.help_string = "This command"
         self.command_name = "help"
 
-    async def help(self, ctx: discord.ApplicationContext) -> None:
-        """
-        Basic view method for handling help slash commands.
+    async def help(self, ctx: discord.ApplicationContext) -> None:  # noqa: A003
+        """Basic view method for handling help slash commands.
 
-        :param ctx:
-        :return:
+        Args:
+            ctx (discord.ApplicationContext): the context
         """
         if not await self._handle_validation(ctx):
             return
@@ -50,20 +60,16 @@ class Help(BSEddies):
             counts[act["type"]] += 1
 
         sorted_types = sorted(counts, key=lambda x: counts[x], reverse=True)
-        if len(sorted_types) > 10:
+        if len(sorted_types) > 10:  # noqa: PLR2004
             sorted_types = sorted_types[:10]
 
-        message = (
-            "# Help"
-            "\n\n"
-            "Listed below are some of the more popular commands.\n"
-        )
+        message = "# Help\n\nListed below are some of the more popular commands.\n"
         for act_type in sorted_types:
             # need to get the SlashCommand class
             # and the application command object
             try:
-                command = [com for com in self.command_list if com.activity_type == act_type][0]
-                app_command = [app_com for app_com in app_commands if app_com.name == command.command_name][0]
+                command = next(com for com in self.command_list if com.activity_type == act_type)
+                app_command = next(app_com for app_com in app_commands if app_com.name == command.command_name)
                 help_string = f"- {app_command.mention} - {command.help_string}"
                 message += "\n"
                 message += help_string

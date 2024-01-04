@@ -1,16 +1,19 @@
+"""Bless views."""
 
 import discord
 
 from discordbot.bot_enums import ActivityTypes, SupporterType, TransactionTypes
 from discordbot.selects.bless import BlessAmountSelect, BlessClassSelect
-
 from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.points import UserPoints
 
 
 class BlessView(discord.ui.View):
-    def __init__(self):
+    """Class for Bless view."""
+
+    def __init__(self) -> None:
+        """Initialisation method."""
         super().__init__(timeout=None)
         self.amount_select = BlessAmountSelect()
         self.class_select = BlessClassSelect()
@@ -21,39 +24,38 @@ class BlessView(discord.ui.View):
         self.activities = UserActivities()
 
     @discord.ui.button(label="Bless", style=discord.ButtonStyle.blurple, emoji="📈", row=2)
-    async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def submit_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:
+        """Button callback.
 
+        Args:
+            _ (discord.ui.Button): the button pressed
+            interaction (discord.Interaction): the callback interaction
+        """
         try:
             value = int(self.amount_select.values[0])
         except (IndexError, AttributeError):
-            value = int([o for o in self.amount_select.options if o.default][0].value)
+            value = int(next(o for o in self.amount_select.options if o.default).value)
 
-        class_value = [o for o in self.class_select.options if o.default][0].value
+        class_value = next(o for o in self.class_select.options if o.default).value
 
         self.activities.add_activity(
             interaction.user.id,
             interaction.guild.id,
             ActivityTypes.BLESS_ACTUAL,
             value=value,
-            class_value=class_value
+            class_value=class_value,
         )
 
         if not value or not class_value:
             msg = "Please select who should be blessed and how much by."
-            await interaction.response.edit_message(
-                content=msg,
-                view=None
-            )
+            await interaction.response.edit_message(content=msg, view=None)
             return
 
         user_db = self.user_points.find_user(interaction.user.id, interaction.guild.id)
         points = user_db.points
         if points < value:
             msg = "Not enough eddies to give out this many."
-            await interaction.response.edit_message(
-                content=msg,
-                view=None
-            )
+            await interaction.response.edit_message(content=msg, view=None)
             return
 
         # get the user list
@@ -63,20 +65,18 @@ class BlessView(discord.ui.View):
             users = [u for u in _users if u.daily_minimum and not u.king]
         else:
             users = [
-                u for u in _users
-                if u.daily_minimum and
-                not u.king and
-                u.supporter_type == SupporterType.SUPPORTER
+                u
+                for u in _users
+                if u.daily_minimum
+                and not u.king
+                and u.supporter_type == SupporterType.SUPPORTER
             ]
 
         num_users = len(users)
 
         if not num_users:
             msg = "There are 0 users that match the criteria. No eddies were distributed."
-            await interaction.response.edit_message(
-                content=msg,
-                view=None
-            )
+            await interaction.response.edit_message(content=msg, view=None)
             return
 
         eddies_each = round(value / num_users)
@@ -86,7 +86,7 @@ class BlessView(discord.ui.View):
                 user.uid,
                 interaction.guild.id,
                 eddies_each,
-                TransactionTypes.BLESS_RECEIVE
+                TransactionTypes.BLESS_RECEIVE,
             )
             eddies_given += eddies_each
 
@@ -94,18 +94,22 @@ class BlessView(discord.ui.View):
             interaction.user.id,
             interaction.guild.id,
             eddies_given * -1,
-            TransactionTypes.BLESS_GIVE
+            TransactionTypes.BLESS_GIVE,
         )
 
         msg = (
             f"Successfully bless `{num_users}` with `{eddies_each}` eddies each. "
             f"You were substracted `{eddies_given}` eddies."
         )
-        await interaction.response.edit_message(
-            content=msg,
-            view=None
-        )
+        await interaction.response.edit_message(content=msg, view=None)
 
+    @staticmethod
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.gray, emoji="✖️", row=2)
-    async def close_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def close_callback(_: discord.ui.Button, interaction: discord.Interaction) -> None:
+        """Button callback.
+
+        Args:
+            _ (discord.ui.Button): the button pressed
+            interaction (discord.Interaction): the callback interaction
+        """
         await interaction.response.edit_message(content="Cancelled", view=None)

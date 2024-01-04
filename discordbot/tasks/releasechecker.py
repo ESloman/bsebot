@@ -1,3 +1,4 @@
+"""Release Checker task."""
 
 import asyncio
 import datetime
@@ -11,15 +12,24 @@ from discordbot.tasks.basetask import BaseTask
 
 
 class ReleaseChecker(BaseTask):
+    """Task for our release checker."""
+
     def __init__(
         self,
         bot: BSEBot,
         guild_ids: list[int],
         logger: Logger,
         startup_tasks: list[BaseTask],
-        github_api: GitHubAPI
-    ):
+        github_api: GitHubAPI,
+    ) -> None:
+        """Initialisation method.
 
+        Args:
+            bot (BSEBot): the BSEBot client
+            guild_ids (list[int]): the list of guild IDs
+            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
+            startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
+        """
         super().__init__(bot, guild_ids, logger, startup_tasks)
         self.task = self.release_checker
         self.last_release_name = None
@@ -28,14 +38,11 @@ class ReleaseChecker(BaseTask):
         self.task.start()
 
     @tasks.loop(minutes=60)
-    async def release_checker(self):
-        """
-        Task to check github releases and post release notes when we get a new one
-        """
-
+    async def release_checker(self) -> None:  # noqa: C901
+        """Task to check github releases and post release notes when we get a new one."""
         now = datetime.datetime.now()
 
-        if now.hour != 12:
+        if now.hour != 12:  # noqa: PLR2004
             return
 
         release_ret = self.github.get_latest_release("ESloman", "bsebot")
@@ -53,7 +60,7 @@ class ReleaseChecker(BaseTask):
         for part in split_body:
             body += part
             body += "\n"
-            if len(body) > 1900:
+            if len(body) > 1900:  # noqa: PLR2004
                 bodies.append(body)
                 body = ""
 
@@ -91,10 +98,8 @@ class ReleaseChecker(BaseTask):
             self.guilds.set_latest_release(guild.id, release_name)
 
     @release_checker.before_loop
-    async def before_release_checker(self):
-        """
-        Make sure that websocket is open before we start querying via it.
-        """
+    async def before_release_checker(self) -> None:
+        """Make sure that websocket is open before we start querying via it."""
         await self.bot.wait_until_ready()
         while not self._check_start_up_tasks():
             await asyncio.sleep(5)

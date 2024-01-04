@@ -1,3 +1,4 @@
+"""Activity Changer task."""
 
 import asyncio
 import datetime
@@ -12,39 +13,36 @@ from discordbot.tasks.basetask import BaseTask
 
 
 class ActivityChanger(BaseTask):
+    """Class for activity changer."""
 
-    def __init__(
-        self,
-        bot: BSEBot,
-        guild_ids: list[int],
-        logger: Logger,
-        startup_tasks: list[BaseTask]
-    ):
+    def __init__(self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask]) -> None:
+        """Initialisation method.
+
+        Args:
+            bot (BSEBot): the BSEBot client
+            guild_ids (list[int]): the list of guild IDs
+            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
+            startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
+        """
         super().__init__(bot, guild_ids, logger, startup_tasks)
 
         self.task = self.activity_changer
 
-        self.default_activity = discord.Activity(**{
-            "name": "conversations",
-            "state": "Listening",
-            "type": discord.ActivityType.listening,
-            "details": "Waiting for commands!"
-        })
+        self.default_activity = discord.Activity(
+            name="conversations",
+            state="Listening",
+            type=discord.ActivityType.listening,
+            details="Waiting for commands!",
+        )
 
         self.task.start()
 
     @tasks.loop(hours=1)
-    async def activity_changer(self):
-        """
-        Loop that occasionally changes the activity.
-        """
-
+    async def activity_changer(self) -> None:
+        """Loop that occasionally changes the activity."""
         now = datetime.datetime.now()
-        if now.hour == 23 or 0 < now.hour < 8:
-            # make it really rare for activity to change 'overnight'
-            threshold = 0.9
-        else:
-            threshold = 0.65
+
+        threshold = 0.9 if now.hour == 23 or 0 < now.hour < 8 else 0.65  # noqa: PLR2004
 
         _rand = random.random()
 
@@ -89,10 +87,8 @@ class ActivityChanger(BaseTask):
         await self.bot.change_presence(activity=activity)
 
     @activity_changer.before_loop
-    async def before_activity_changer(self):
-        """
-        Make sure that websocket is open before we start querying via it.
-        """
+    async def before_activity_changer(self) -> None:
+        """Make sure that websocket is open before we start querying via it."""
         await self.bot.wait_until_ready()
         while not self._check_start_up_tasks():
             await asyncio.sleep(5)

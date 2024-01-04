@@ -1,3 +1,4 @@
+"""Daily valorant task."""
 
 import asyncio
 import datetime
@@ -14,33 +15,33 @@ from discordbot.tasks.basetask import BaseTask
 
 
 class AfterWorkVally(BaseTask):
-    def __init__(
-        self,
-        bot: BSEBot,
-        guild_ids: list[int],
-        logger: Logger,
-        startup_tasks: list[BaseTask]
-    ):
+    """Class for after work vally task."""
 
+    def __init__(self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask]) -> None:
+        """Initialisation method.
+
+        Args:
+            bot (BSEBot): the BSEBot client
+            guild_ids (list[int]): the list of guild IDs
+            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
+            startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
+        """
         super().__init__(bot, guild_ids, logger, startup_tasks)
         self.task = self.vally_message
         self.task.start()
 
     @tasks.loop(minutes=10)
-    async def vally_message(self):
-        """
-        Loop that sends the daily vally rollcall
-        """
-
+    async def vally_message(self) -> None:
+        """Loop that sends the daily vally rollcall."""
         if BSE_SERVER_ID not in self.guild_ids:
             return
 
         now = datetime.datetime.now()
 
-        if now.weekday() not in [0, 1, 2, 3, 4]:
+        if now.weekday() not in {0, 1, 2, 3, 4}:
             return
 
-        if now.hour != 15 or not (45 <= now.minute <= 54):
+        if now.hour != 15 or not (45 <= now.minute <= 54):  # noqa: PLR2004
             return
 
         for guild in self.bot.guilds:
@@ -62,11 +63,15 @@ class AfterWorkVally(BaseTask):
 
             self.logger.info("Checking for channel interactivity")
 
-            latest_bot_message = list(self.interactions.vault.find(
-                {"user_id": self.bot.user.id, "channel_id": valorant_channel, "message_type": "role_mention"},
-                sort=[("timestamp", -1)],
-                limit=1
-            ))[0]
+            latest_bot_message = next(
+                iter(
+                    self.interactions.vault.find(
+                        {"user_id": self.bot.user.id, "channel_id": valorant_channel, "message_type": "role_mention"},
+                        sort=[("timestamp", -1)],
+                        limit=1,
+                    )
+                )
+            )
 
             latest_time = latest_bot_message["timestamp"]
 
@@ -75,31 +80,31 @@ class AfterWorkVally(BaseTask):
                     "timestamp": {"$gt": latest_time},
                     "channel_id": valorant_channel,
                     "is_bot": False,
-                }
+                },
             )
 
             if not messages:
                 self.logger.info(
-                    f"Not been any messages in the channel since {latest_time} - skipping the daily vally message"
+                    "Not been any messages in the channel since %s - skipping the daily vally message", latest_time
                 )
                 continue
 
-            self.logger.debug(f"{len(messages)} since our last vally rollcall")
+            self.logger.debug("%s since our last vally rollcall", len(messages))
             self.logger.info("Time to send vally message!")
 
-            guild = await self.bot.fetch_guild(guild.id)
+            _guild = await self.bot.fetch_guild(guild.id)
             channel = await self.bot.fetch_channel(valorant_channel)
             await channel.trigger_typing()
 
             if role_id := guild_db.valorant_role:
-                role = guild.get_role(role_id)
+                role = _guild.get_role(role_id)
                 _mention = role.mention
             else:
                 _mention = "`Valorant`"
 
             odds = utilities.calculate_message_odds(
                 self.interactions,
-                guild.id,
+                _guild.id,
                 MESSAGES,
                 "{role}",
                 [0, 1],
@@ -108,14 +113,12 @@ class AfterWorkVally(BaseTask):
             message = random.choices([message[0] for message in odds], [message[1] for message in odds])[0]
             message = message.format(role=_mention)
 
-            self.logger.info(f"Sending daily vally message: {message}")
+            self.logger.info("Sending daily vally message: %s", message)
             await channel.send(content=message)
 
     @vally_message.before_loop
-    async def before_vally_message(self):
-        """
-        Make sure that websocket is open before we start querying via it.
-        """
+    async def before_vally_message(self) -> None:
+        """Make sure that websocket is open before we start querying via it."""
         await self.bot.wait_until_ready()
         while not self._check_start_up_tasks():
             await asyncio.sleep(5)

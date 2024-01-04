@@ -1,3 +1,4 @@
+"""Bet reminder task."""
 
 import asyncio
 import datetime
@@ -10,24 +11,25 @@ from discordbot.tasks.basetask import BaseTask
 
 
 class BetReminder(BaseTask):
-    def __init__(
-        self,
-        bot: BSEBot,
-        guild_ids: list[int],
-        logger: Logger,
-        startup_tasks: list[BaseTask]
-    ):
+    """Class for bet reminder."""
 
+    def __init__(self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask]) -> None:
+        """Initialisation method.
+
+        Args:
+            bot (BSEBot): the BSEBot client
+            guild_ids (list[int]): the list of guild IDs
+            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
+            startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
+            on_ready (OnReadyEvent): on ready event
+        """
         super().__init__(bot, guild_ids, logger, startup_tasks)
         self.task = self.bet_reminder
         self.task.start()
 
     @tasks.loop(minutes=60)
-    async def bet_reminder(self):
-        """
-        Loop that takes all our active bets and sends a reminder message
-        """
-
+    async def bet_reminder(self) -> None:
+        """Loop that takes all our active bets and sends a reminder message."""
         now = datetime.datetime.now()
         for guild in self.bot.guilds:
             await self.bot.fetch_guild(guild.id)  # type: discord.Guild
@@ -37,7 +39,7 @@ class BetReminder(BaseTask):
                 created = bet["created"]
                 total_time = (timeout - created).total_seconds()
 
-                if total_time <= 604800:
+                if total_time <= 604800:  # noqa: PLR2004
                     # if bet timeout is less than a week - don't bother with halfway reminders
                     continue
 
@@ -46,7 +48,7 @@ class BetReminder(BaseTask):
 
                 diff = timeout - now
 
-                if 82800 <= diff.total_seconds() <= 86400:
+                if 82800 <= diff.total_seconds() <= 86400:  # noqa: PLR2004
                     # ~ 24 hours to go!
                     # send reminder here
                     channel = await self.bot.fetch_channel(bet["channel_id"])
@@ -62,7 +64,7 @@ class BetReminder(BaseTask):
                     )
 
                     try:
-                        _place_command = [a for a in self.bot.application_commands if a.name == "place"][0]
+                        _place_command = next(a for a in self.bot.application_commands if a.name == "place")
                         msg += f"\n\nUse {_place_command.mention} to place some eddies."
                     except (IndexError, AttributeError):
                         pass
@@ -78,7 +80,7 @@ class BetReminder(BaseTask):
 
                 half_diff = half_date - now
 
-                if half_diff.total_seconds() < 3600:
+                if half_diff.total_seconds() < 3600:  # noqa: PLR2004
                     # within the hour threshold for half way
                     channel = await self.bot.fetch_channel(bet["channel_id"])
                     await channel.trigger_typing()
@@ -86,12 +88,10 @@ class BetReminder(BaseTask):
 
                     eddies_bet = self.user_bets.count_eddies_for_bet(bet)
 
-                    msg = (
-                        "About halfway to go on this bet - don't forget to place some eddies!"
-                    )
+                    msg = "About halfway to go on this bet - don't forget to place some eddies!"
 
                     try:
-                        _place_command = [a for a in self.bot.application_commands if a.name == "place"][0]
+                        _place_command = next(a for a in self.bot.application_commands if a.name == "place")
                         msg += f"\n\nUse {_place_command.mention} to place some eddies."
                     except (IndexError, AttributeError):
                         pass
@@ -100,10 +100,8 @@ class BetReminder(BaseTask):
                     continue
 
     @bet_reminder.before_loop
-    async def before_bet_reminder(self):
-        """
-        Make sure that websocket is open before we start querying via it.
-        """
+    async def before_bet_reminder(self) -> None:
+        """Make sure that websocket is open before we start querying via it."""
         await self.bot.wait_until_ready()
         while not self._check_start_up_tasks():
             await asyncio.sleep(5)

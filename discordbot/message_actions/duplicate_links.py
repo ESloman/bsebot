@@ -1,3 +1,4 @@
+"""Duplicate link message class."""
 
 import datetime
 import random
@@ -13,19 +14,21 @@ from discordbot.message_strings.duplicate_links import MESSAGES
 
 
 class DuplicateLinkAction(BaseMessageAction):
-    """
-    Duplicated Link action
-    """
+    """Duplicated Link action."""
+
     def __init__(self, client: BSEBot, logger: Logger) -> None:
+        """Initialisation method.
+
+        Args:
+            client (BSEBot): our BSEBot client
+            logger (Logger): our logger
+        """
         super().__init__(client, logger)
         # allow the precondition to store results for the run to use
-        self._results_map = {
-
-        }
+        self._results_map = {}
 
     async def pre_condition(self, message: discord.Message, message_type: list) -> bool:
-        """
-        Duplicated links precondition
+        """Duplicated links precondition.
 
         Args:
             message (discord.Message): message to check
@@ -34,16 +37,14 @@ class DuplicateLinkAction(BaseMessageAction):
         Returns:
             bool: true or false
         """
-
         if "link" not in message_type or message.author.bot:
             return False
 
         # extract link from content
-        link = [
-            _link for _link in re.split(" \n", message.content) if "https" in _link
-        ][0]
+        link = next(_link for _link in re.split(" \n", message.content) if "https" in _link)
 
-        link = link.split("?")[0]
+        if "youtube" not in link:
+            link = link.split("?")[0]
 
         # ignore common links here
         if "guessthe.game" in link:
@@ -58,8 +59,8 @@ class DuplicateLinkAction(BaseMessageAction):
                     "is_bot": False,  # don't care if the original poster was a bot
                     "message_id": {"$ne": message.id},  # don't trigger off of original message
                     "$text": {"$search": link},
-                    "timestamp": {"$gte": threshold}
-                }
+                    "timestamp": {"$gte": threshold},
+                },
             )
         except OperationFailure:
             # index not set correctly
@@ -68,9 +69,7 @@ class DuplicateLinkAction(BaseMessageAction):
 
         # text searching can find false positives
         # make sure our exact link is present
-        results = [
-            result for result in results if link in result["content"]
-        ]
+        results = [result for result in results if link in result["content"]]
 
         if not results:
             return False
@@ -80,12 +79,11 @@ class DuplicateLinkAction(BaseMessageAction):
         return True
 
     async def run(self, message: discord.Message) -> None:
-        """Duplicate link action
+        """Duplicate link action.
 
         Args:
             message (discord.Message): the message to action
         """
-
         original = self._results_map[message.id][0]
 
         # link to the original message

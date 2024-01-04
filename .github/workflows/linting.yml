@@ -3,24 +3,22 @@ name: Linting
 on: [push, pull_request]
 
 jobs:
-  flake8-lint:
+  ruff-lint:
     runs-on: ubuntu-latest
     name: Lint
     steps:
       - name: Check out source repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Set up Python environment
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: "3.12.1"
           cache: 'pip'
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r test-requirements.txt
+          pip install ruff
       - name: Lint with ruff
         run: |
           ruff check .
-      - name: Lint with flake8
-        run: |
-          flake8 .
+          ruff format .

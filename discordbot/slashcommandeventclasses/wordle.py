@@ -1,60 +1,69 @@
+"""Wordle slash command."""
 
+import contextlib
 import datetime
+import logging
 import re
 
 import discord
-import seaborn
+import seaborn as sns
 
 from discordbot.bot_enums import ActivityTypes
+from discordbot.bsebot import BSEBot
 from discordbot.constants import WORDLE_SCORE_REGEX
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
 class WordleStatsShareView(discord.ui.View):
-    def __init__(self, ):
+    """Wordle stats share view."""
+
+    def __init__(
+        self,
+    ) -> None:
+        """Initialisation method."""
         super().__init__(timeout=None)
 
+    @staticmethod
     @discord.ui.button(label="Share", style=discord.ButtonStyle.blurple, row=2, disabled=False)
-    async def submit_button_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+    async def submit_button_callback(_: discord.ui.Button, interaction: discord.Interaction) -> None:
+        """Button callback.
 
+        Args:
+            _ (discord.ui.Button): _description_
+            interaction (discord.Interaction): _description_
+        """
         # add username
         content = interaction.message.content.replace(
             "Your Wordle Stats",
-            f"{interaction.user.display_name}'s Wordle Stats"
+            f"{interaction.user.display_name}'s Wordle Stats",
         )
 
-        _files = [
-            await attachment.to_file() for attachment in
-            interaction.message.attachments
-        ]
+        _files = [await attachment.to_file() for attachment in interaction.message.attachments]
 
-        await interaction.channel.send(
-            content=content,
-            silent=True,
-            suppress=True,
-            files=_files
-        )
-        try:
+        await interaction.channel.send(content=content, silent=True, suppress=True, files=_files)
+        with contextlib.suppress(discord.NotFound):
             await interaction.response.edit_message(content="Shared.", view=None, delete_after=2)
-        except discord.NotFound:
-            pass
 
 
 class Wordle(BSEddies):
-    """
-    Class for handling `/wordle` commands
-    """
+    """Class for handling `/wordle` commands."""
 
-    def __init__(self, client, guilds, logger):
-        super().__init__(client, guilds, logger)
+    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+        """Initialisation method.
+
+        Args:
+            client (BSEBot): the connected BSEBot client
+            guild_ids (list): list of supported guild IDs
+            logger (logging.Logger): the logger
+        """
+        super().__init__(client, guild_ids, logger)
         self.activity_type = ActivityTypes.WORDLE
         self.help_string = "View some wordle stats"
         self.command_name = "wordle"
 
     @staticmethod
     def _add_guesses(_wordles: list[dict]) -> None:
-        """
-        Adds the 'guesses' key to a list of wordle interactions
+        """Adds the 'guesses' key to a list of wordle interactions.
 
         Args:
             _wordles (list[dict]): the list of wordle messages
@@ -63,15 +72,11 @@ class Wordle(BSEddies):
             result = re.search(WORDLE_SCORE_REGEX, wordle["content"]).group()
             guesses = result.split("/")[0]
 
-            if guesses == "X":
-                guesses = 7
-            else:
-                guesses = int(guesses)
+            guesses = 7 if guesses == "X" else int(guesses)
             wordle["guesses"] = guesses
 
     @staticmethod
     def _calculate_averages(_wordles: list[dict]) -> tuple[dict[int, float], dict[datetime.datetime, float]]:
-
         now = datetime.datetime.now()
         # calculate averages for all years and months
         monthly_avgs = {}
@@ -81,7 +86,7 @@ class Wordle(BSEddies):
             year_start = now.replace(year=year, day=1, month=1, hour=0, minute=0, second=1, microsecond=0)
             year_end = year_start.replace(year=year_start.year + 1)
             wordles_this_year = [wordle for wordle in _wordles if year_start < wordle["timestamp"] < year_end]
-            scores_this_year = [wordle["guesses"] for wordle in wordles_this_year if wordle["guesses"] != 7]
+            scores_this_year = [wordle["guesses"] for wordle in wordles_this_year if wordle["guesses"] != 7]  # noqa: PLR2004
 
             try:
                 avg_this_year = round(sum(scores_this_year) / len(scores_this_year), 2)
@@ -92,7 +97,6 @@ class Wordle(BSEddies):
 
             # calculate stats for each month in this year
             for month in range(1, 13):
-
                 month_start = year_start.replace(day=1, month=month, hour=0, minute=0, second=1)
 
                 if month_start.year == now.year and month_start.month > now.month:
@@ -106,7 +110,7 @@ class Wordle(BSEddies):
                     month_end = month_start.replace(year=month_start.year + 1, month=1)
 
                 wordles_this_month = [wordle for wordle in _wordles if month_start < wordle["timestamp"] < month_end]
-                scores_this_month = [wordle["guesses"] for wordle in wordles_this_month if wordle["guesses"] != 7]
+                scores_this_month = [wordle["guesses"] for wordle in wordles_this_month if wordle["guesses"] != 7]  # noqa: PLR2004
 
                 try:
                     avg_this_month = round(sum(scores_this_month) / len(scores_this_month), 2)
@@ -118,9 +122,8 @@ class Wordle(BSEddies):
 
         return yearly_avgs, monthly_avgs
 
-    async def wordle(self, ctx: discord.ApplicationContext) -> None:
-        """
-        Basic view method for handling wordle slash commands.
+    async def wordle(self, ctx: discord.ApplicationContext) -> None:  # noqa: PLR0915
+        """Basic view method for handling wordle slash commands.
 
         Sends an ephemeral message to the user with their total eddies and any "pending" eddies they
         have tied up in bets.
@@ -137,12 +140,7 @@ class Wordle(BSEddies):
 
         user_id = ctx.user.id
 
-        _all_wordles = self.interactions.query(
-            {
-                "message_type": "wordle",
-                "guild_id": ctx.guild.id
-            }
-        )
+        _all_wordles = self.interactions.query({"message_type": "wordle", "guild_id": ctx.guild.id}, limit=100000)
 
         all_wordles = [wordle for wordle in _all_wordles if wordle["user_id"] == user_id]
         bot_wordles = [wordle for wordle in _all_wordles if wordle["user_id"] == self.client.user.id]
@@ -158,7 +156,7 @@ class Wordle(BSEddies):
         for wordle_list in [all_wordles, bot_wordles, server_wordles]:
             self._add_guesses(wordle_list)
 
-        scores = [wordle["guesses"] for wordle in all_wordles if wordle["guesses"] != 7]
+        scores = [wordle["guesses"] for wordle in all_wordles if wordle["guesses"] != 7]  # noqa: PLR2004
         total_avg = round(sum(scores) / len(scores), 2)
 
         msg += f"- Your *lifetime* average is `{total_avg}`.\n"
@@ -184,7 +182,7 @@ class Wordle(BSEddies):
         month_start = now.replace(day=1, hour=0, minute=0, second=1)
         month_end = month_start + datetime.timedelta(days=31)  # month end is any day beyond today
         wordles_this_month = [wordle for wordle in all_wordles if month_start < wordle["timestamp"] < month_end]
-        scores_this_month = [wordle["guesses"] for wordle in wordles_this_month if wordle["guesses"] != 7]
+        scores_this_month = [wordle["guesses"] for wordle in wordles_this_month if wordle["guesses"] != 7]  # noqa: PLR2004
         try:
             avg_this_month = round(sum(scores_this_month) / len(scores_this_month), 2)
         except ZeroDivisionError:
@@ -195,7 +193,7 @@ class Wordle(BSEddies):
         top_month = sorted(
             [a for a in all_month_avgs if all_month_avgs[a]],
             key=lambda x: all_month_avgs[x],
-            reverse=False
+            reverse=False,
         )[0]
         msg += f"\n- Your **best** ever month was {top_month.strftime('%b %y')} with `{all_month_avgs[top_month]}`\n"
 
@@ -212,12 +210,24 @@ class Wordle(BSEddies):
         msg += "\n\nBelow is a graph of your monthly average over time."
 
         # create figure
-        dates_data = [(key.strftime("%b %y"), all_month_avgs[key], total_avg) for key in all_month_avgs]
-        bot_dates_data = [(key.strftime("%b %y"), bot_month_avgs[key], total_avg) for key in bot_month_avgs]
-        server_dates_data = [(key.strftime("%b %y"), server_month_avgs[key], total_avg) for key in server_month_avgs]
+        dates_data = [
+            (key.strftime("%b %y"), all_month_avgs[key], total_avg)
+            for key in all_month_avgs
+            if key > (now - datetime.timedelta(weeks=56))
+        ]
+        bot_dates_data = [
+            (key.strftime("%b %y"), bot_month_avgs[key], total_avg)
+            for key in bot_month_avgs
+            if bot_month_avgs[key] > 0 and key > (now - datetime.timedelta(weeks=56))
+        ]
+        server_dates_data = [
+            (key.strftime("%b %y"), server_month_avgs[key], total_avg)
+            for key in server_month_avgs
+            if key > (now - datetime.timedelta(weeks=56))
+        ]
 
-        seaborn.set_theme()
-        plot = seaborn.lineplot()
+        sns.set_theme()
+        plot = sns.lineplot()
 
         plot.plot(
             [d[0] for d in dates_data],
@@ -229,7 +239,7 @@ class Wordle(BSEddies):
 
         plot.plot(
             [d[0] for d in dates_data],
-            [total_avg]*len(dates_data),
+            [total_avg] * len(dates_data),
             label=f"{ctx.user.display_name}'s lifetime average",
             linestyle="--",
         )

@@ -1,40 +1,54 @@
-
-"""
-File for other small and useful classes that we may need in other parts of the code
-"""
+"""File for other small and useful classes that we may need in other parts of the code."""
 
 import datetime
 import logging
-import os
 import re
 import sys
+from logging import LogRecord
 from logging.handlers import RotatingFileHandler
+from pathlib import Path
+from typing import ClassVar
 
 from pymongo.errors import OperationFailure
 
 from mongo.bsepoints.interactions import UserInteractions
 
 
-class PlaceHolderLogger():
+class PlaceHolderLogger:
+    """Placeholder logger for when we don't have a logging object.
+
+    Replaces logging functions with just printing.
     """
-    Placeholder logger for when we don't have a logging object
-    replaces logging functions with just printing
-    """
+
     @staticmethod
-    def info(msg: str) -> None:
+    def info(msg: str, *args: tuple[any], **kwargs: dict[str, any]) -> None:  # noqa: ARG004
+        """logger.info mock.
+
+        Args:
+            msg (str): the message to print
+        """
         print(msg)
 
     @staticmethod
-    def debug(msg: str) -> None:
+    def debug(msg: str, *args: tuple[any], **kwargs: dict[str, any]) -> None:  # noqa: ARG004
+        """logger.debug mock.
+
+        Args:
+            msg (str): the message to print
+        """
         print(msg)
 
     @staticmethod
-    def warning(msg: str) -> None:
+    def warning(msg: str, *args: tuple[any], **kwargs: dict[str, any]) -> None:  # noqa: ARG004
+        """logger.warning mock.
+
+        Args:
+            msg (str): the message to print
+        """
         print(msg)
 
 
 class _ColourFormatter(logging.Formatter):
-
     # ANSI codes are a bit weird to decipher if you're unfamiliar with them, so here's a refresher
     # It starts off with a format like \x1b[XXXm where XXX is a semicolon separated list of commands
     # The important ones here relate to colour.
@@ -44,7 +58,7 @@ class _ColourFormatter(logging.Formatter):
     # 100-107 are the same as the bright ones but for the background.
     # 1 means bold, 2 means dim, 0 means reset, and 4 means underline.
 
-    LEVEL_COLOURS = [
+    LEVEL_COLOURS: ClassVar = [
         (logging.DEBUG, "\x1b[40;1m"),
         (logging.INFO, "\x1b[34;1m"),
         (logging.WARNING, "\x1b[33;1m"),
@@ -52,14 +66,22 @@ class _ColourFormatter(logging.Formatter):
         (logging.CRITICAL, "\x1b[41m"),
     ]
 
-    FORMATS = {
+    FORMATS: ClassVar = {
         level: logging.Formatter(
-            f"\x1b[30;1m[%(asctime)s]\x1b[0m {colour}[%(levelname)s] \x1b[0m\x1b[35m%(funcName)8s:\x1b[0m %(message)s"
+            f"\x1b[30;1m[%(asctime)s]\x1b[0m {colour}[%(levelname)s] \x1b[0m\x1b[35m%(funcName)8s:\x1b[0m %(message)s",
         )
         for level, colour in LEVEL_COLOURS
     }
 
-    def format(self, record):
+    def format(self: "_ColourFormatter", record: LogRecord) -> str:  # noqa: A003
+        """Formats the message appropriately with colour.
+
+        Args:
+            record (LogRecord): the record to colour
+
+        Returns:
+            str: the formatted text
+        """
         formatter = self.FORMATS.get(record.levelno)
         if formatter is None:
             formatter = self.FORMATS[logging.DEBUG]
@@ -76,17 +98,17 @@ class _ColourFormatter(logging.Formatter):
         return output
 
 
-def create_logger(level: int = None) -> logging.Logger:
-    """
-    Creates a simple logger to use throughout the bot
-    :return: Logger object
+def create_logger(level: int | None = None) -> logging.Logger:
+    """Creates a simple logger to use throughout the bot.
+
+    Returns:
+        logger.Logger: the logger
     """
     if not level:
         level = logging.DEBUG
 
-    fol = os.path.join(os.path.expanduser("~"), "bsebotlogs")
-    if not os.path.exists(fol):
-        os.makedirs(fol)
+    path: Path = Path(Path.home(), "bsebotlogs")
+    path.mkdir(parents=True, exist_ok=True)
 
     _logger = logging.getLogger("bsebot")
     _logger.setLevel(level)
@@ -100,9 +122,7 @@ def create_logger(level: int = None) -> logging.Logger:
     stream_handler.setFormatter(colour_formatter)
 
     # this makes sure we're logging to a file
-    file_handler = RotatingFileHandler(
-        os.path.join(fol, "bsebot.log"), maxBytes=10485760, backupCount=1
-    )
+    file_handler = RotatingFileHandler(Path(path, "bsebot.log"), maxBytes=10485760, backupCount=1)
     file_handler.setFormatter(formatter)
 
     _logger.addHandler(stream_handler)
@@ -112,8 +132,7 @@ def create_logger(level: int = None) -> logging.Logger:
 
 
 def convert_time_str(time_str: str) -> int:
-    """
-    Converts a given time string into the number of seconds.
+    """Converts a given time string into the number of seconds.
 
     Time strings are strings in the format:
     - 1w7d24h60m60s
@@ -143,19 +162,38 @@ def convert_time_str(time_str: str) -> int:
 
 
 def get_utc_offset() -> int:
-    d = datetime.datetime.now(datetime.timezone.utc).astimezone()
-    utc_offset = d.utcoffset() // datetime.timedelta(seconds=1)
-    return utc_offset
+    """Gets the UTC offset.
+
+    Returns:
+        int: the UTC offset in seconds
+    """
+    d = datetime.datetime.now(datetime.UTC).astimezone()
+    return d.utcoffset() // datetime.timedelta(seconds=1)
 
 
 def add_utc_offset(date: datetime.datetime) -> datetime.datetime:
+    """Adds the UTC offset.
+
+    Args:
+        date (datetime.datetime): the current date
+
+    Returns:
+        datetime.datetime: the date with offset added
+    """
     offset = get_utc_offset()
-    new_date = date - datetime.timedelta(seconds=offset)
-    return new_date
+    return date - datetime.timedelta(seconds=offset)
 
 
 def is_utc(date: datetime.datetime) -> bool:
-    now_utc = datetime.datetime.now(tz=datetime.timezone.utc)
+    """Checks a given date is UTC.
+
+    Args:
+        date (datetime.datetime): the date to check
+
+    Returns:
+        bool: whether it is or not
+    """
+    now_utc = datetime.datetime.now(tz=datetime.UTC)
     return now_utc.hour == date.hour
 
 
@@ -166,8 +204,8 @@ def calculate_message_odds(
     split: str,
     main_indexes: list[int],
 ) -> list[tuple[str, float]]:
-    """
-    Given a list of messages, calculates what the odds should be of each one getting picked.
+    """Given a list of messages, calculates what the odds should be of each one getting picked.
+
     This searches for previously used instances of those messages and then works out which ones should have
     higher/lower odds.
 
@@ -181,18 +219,20 @@ def calculate_message_odds(
     Returns:
         list[tuple[str, float]]: list of messages tuples with the original string and the float percentage chance
     """
-
     # work out message odds
     odds = []
     totals = {}
     # get the number of times each rollcall message has been used
     for message in message_list:
-
-        if type(message) == tuple:
+        if type(message) is tuple:
             # if message type is tuple
             # assume odds are already set for it
 
-            if len(message) != 2 or type(message[0]) != str or type(message[1]) not in [int, float]:
+            if (
+                len(message) != 2  # noqa: PLR2004
+                or not isinstance(message[0], str)
+                or not isinstance(message[1], int | float)
+            ):
                 # tuple isn't correctly formatted - skip this one
                 continue
 
@@ -200,16 +240,10 @@ def calculate_message_odds(
             continue
 
         parts = message.split(split)
-        main_bit = sorted(parts, key=lambda x: len(x), reverse=True)[0]
+        main_bit = sorted(parts, key=len, reverse=True)[0]
 
         try:
-            results = interactions.query(
-                {
-                    "guild_id": guild_id,
-                    "is_bot": True,
-                    "$text": {"$search": message}
-                }
-            )
+            results = interactions.query({"guild_id": guild_id, "is_bot": True, "$text": {"$search": message}})
             results = [result for result in results if main_bit in result["content"]]
         except OperationFailure:
             totals[message] = 0

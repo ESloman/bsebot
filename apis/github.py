@@ -1,29 +1,27 @@
+"""Github API class."""
 
 import requests
 
 
-class GitHubAPI(object):
+class GitHubAPI:
+    """Class for interactino with Github API."""
 
-    def __init__(self, token):
+    def __init__(self: "GitHubAPI", token: str) -> None:
+        """Initialisation method.
 
+        Args:
+            token (str): the API token
+        """
         self.token = token
         self.base_url = "https://api.github.com"
         self.headers = {
             "Authorization": f"Bearer {self.token}",
             "Accept": "application/vnd.github+json",
-            "X-GitHub-Api-Version": "2022-11-28"
+            "X-GitHub-Api-Version": "2022-11-28",
         }
 
-    def raise_issue(
-        self,
-        owner: str,
-        repo: str,
-        title: str,
-        body: str,
-        _type: str
-    ) -> requests.Response:
-        """
-        Raises an issue in the specified repo
+    def raise_issue(self: "GitHubAPI", owner: str, repo: str, title: str, body: str, _type: str) -> requests.Response:
+        """Raises an issue in the specified repo.
 
         Args:
             owner (str): the owner of the repo
@@ -35,7 +33,6 @@ class GitHubAPI(object):
         Returns:
             bool: whether the issue was created or not
         """
-
         url = f"{self.base_url}/repos/{owner}/{repo}/issues"
 
         labels = ["enhancement", "suggested"]
@@ -47,26 +44,12 @@ class GitHubAPI(object):
 
         body = f"**[RAISED VIA APPLICATION COMMAND]**\n\n{body}"
 
-        data = {
-            "title": title,
-            "body": body,
-            "labels": labels
-        }
+        data = {"title": title, "body": body, "labels": labels}
 
-        ret = requests.post(
-            url,
-            headers=self.headers,
-            json=data
-        )
+        return requests.post(url, headers=self.headers, json=data, timeout=10)
 
-        return ret
-
-    def get_releases(
-        self,
-        owner: str,
-        repo: str
-    ) -> requests.Response:
-        """Gets the releases for a given repo
+    def get_releases(self: "GitHubAPI", owner: str, repo: str) -> requests.Response:
+        """Gets the releases for a given repo.
 
         Args:
             owner (str): _description_
@@ -75,21 +58,11 @@ class GitHubAPI(object):
         Returns:
             requests.Response: _description_
         """
-
         url = f"{self.base_url}/repos/{owner}/{repo}/releases"
-        ret = requests.get(
-            url,
-            headers=self.headers
-        )
+        return requests.get(url, headers=self.headers, timeout=10)
 
-        return ret
-
-    def get_latest_release(
-        self,
-        owner: str,
-        repo: str
-    ) -> requests.Response:
-        """Gets the latest releases for a given repo
+    def get_latest_release(self: "GitHubAPI", owner: str, repo: str) -> requests.Response:
+        """Gets the latest releases for a given repo.
 
         Args:
             owner (str): _description_
@@ -98,11 +71,5 @@ class GitHubAPI(object):
         Returns:
             requests.Response: _description_
         """
-
         url = f"{self.base_url}/repos/{owner}/{repo}/releases/latest"
-        ret = requests.get(
-            url,
-            headers=self.headers
-        )
-
-        return ret
+        return requests.get(url, headers=self.headers, timeout=10)

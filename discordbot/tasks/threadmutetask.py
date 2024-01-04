@@ -1,3 +1,4 @@
+"""Thread Mute Task."""
 
 import asyncio
 import datetime
@@ -14,26 +15,32 @@ from discordbot.tasks.basetask import BaseTask
 
 
 class ThreadSpoilerTask(BaseTask):
+    """Class for Thread spoiler task."""
+
     def __init__(
         self,
         bot: BSEBot,
         guild_ids: list[int],
         logger: Logger,
         startup_tasks: list[BaseTask],
-    ):
+    ) -> None:
+        """Initialisation method.
 
+        Args:
+            bot (BSEBot): the BSEBot client
+            guild_ids (list[int]): the list of guild IDs
+            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
+            startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
+        """
         super().__init__(bot, guild_ids, logger, startup_tasks)
         self.task = self.thread_mute
         self.task.start()
 
     @tasks.loop(minutes=15)
-    async def thread_mute(self):
-        """
-        Task that sends daily "remember to mute this spoiler thread" messages.
-        """
-
+    async def thread_mute(self) -> None:
+        """Task that sends daily "remember to mute this spoiler thread" messages."""
         now = datetime.datetime.now()
-        if now.hour != 8 or not (0 <= now.minute < 15):
+        if now.hour != 8 or not (0 <= now.minute < 15):  # noqa: PLR2004
             return
 
         if BSE_SERVER_ID not in self.guild_ids:
@@ -44,12 +51,12 @@ class ThreadSpoilerTask(BaseTask):
         all_threads = [a for a in all_threads if a.active]
 
         for thread_info in all_threads:
-            self.logger.info(f"Checking {thread_info.name} for spoiler message")
+            self.logger.info("Checking %s for spoiler message", thread_info.name)
 
             day = thread_info.day
             if now.weekday() != day:
                 self.logger.info(
-                    f"Not the right day for {thread_info.name}: our day: {now.weekday()}, required: {day}"
+                    "Not the right day for %s: our day: %s, required: %s", thread_info.name, now.weekday(), day
                 )
                 # not the right day for this spoiler thread
                 continue
@@ -65,13 +72,11 @@ class ThreadSpoilerTask(BaseTask):
                 "disable mute reminders for this thread."
             )
             await thread.send(content=message, allowed_mentions=discord.AllowedMentions(everyone=True))
-            self.logger.info(f"Sent message to {thread.id}, {thread.name}: {message}")
+            self.logger.info("Sent message to %s, %s: %s", thread.id, thread.name, message)
 
     @thread_mute.before_loop
-    async def before_thread_mute(self):
-        """
-        Make sure that websocket is open before we start querying via it.
-        """
+    async def before_thread_mute(self) -> None:
+        """Make sure that websocket is open before we start querying via it."""
         await self.bot.wait_until_ready()
         while not self._check_start_up_tasks():
             await asyncio.sleep(5)

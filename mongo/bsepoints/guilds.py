@@ -1,47 +1,54 @@
+"""Guilds collection interface."""
+
 import datetime
-from typing import Union, Optional
 
 from pymongo.results import InsertOneResult, UpdateResult
 
 from discordbot.bot_enums import ActivityTypes
 from mongo import interface
+from mongo.bsepoints.points import UserPoints
 from mongo.datatypes import GuildDB, User
 from mongo.db_classes import BestSummerEverPointsDB
-from mongo.bsepoints.points import UserPoints
 
 
-class Guilds(BestSummerEverPointsDB):
-    """
-    Class for interacting with the 'guilds' MongoDB collection in the 'bestsummereverpoints' DB
-    """
-    def __init__(self):
-        """
-        Constructor method for the class. Initialises the collection object
-        """
+class Guilds(BestSummerEverPointsDB):  # noqa: PLR0904
+    """Class for interacting with the 'guilds' MongoDB collection in the 'bestsummereverpoints' DB."""
+
+    def __init__(self) -> None:
+        """Constructor method for the class. Initialises the collection object."""
         super().__init__()
         self._vault = interface.get_collection(self.database, "guilds")
         self.user_points = UserPoints()
 
-    def get_guild(self, guild_id: int) -> Union[GuildDB, None]:
-        """
-        Gets an already created guild document from the database.
+    def get_guild(self, guild_id: int) -> GuildDB | None:
+        """Gets an already created guild document from the database.
 
         :param guild_id: int - The guild ID
         :return: a dict of the guild or None if there's no matching ID
         """
-
         ret = self.query({"guild_id": guild_id}, projection={"tax_rate_history": False, "king_history": False})
         if ret:
             return GuildDB(**ret[0])
         return None
 
     def insert_guild(
-            self,
-            guild_id: int,
-            name: str,
-            owner_id: int,
-            created: datetime.datetime,
+        self,
+        guild_id: int,
+        name: str,
+        owner_id: int,
+        created: datetime.datetime,
     ) -> InsertOneResult:
+        """Inserts a guild into the database.
+
+        Args:
+            guild_id (int): _description_
+            name (str): _description_
+            owner_id (int): _description_
+            created (datetime.datetime): _description_
+
+        Returns:
+            InsertOneResult: _description_
+        """
         doc = {
             "name": name,
             "guild_id": guild_id,
@@ -52,7 +59,7 @@ class Guilds(BestSummerEverPointsDB):
             "release_notes": False,
             "wordle": False,
             "valorant_rollcall": False,
-            "wordle_reminders": False
+            "wordle_reminders": False,
         }
 
         return self.insert(doc)
@@ -62,8 +69,7 @@ class Guilds(BestSummerEverPointsDB):
     #
 
     def get_channel(self, guild_id: int) -> int:
-        """
-        Gets the bseddies channel to send messages to
+        """Gets the bseddies channel to send messages to.
 
         Args:
             guild_id (int): the guild ID to do this for
@@ -82,7 +88,7 @@ class Guilds(BestSummerEverPointsDB):
     #
 
     def get_king(self, guild_id: int, whole_class: bool = False) -> int | dict | User:
-        """Gets the King ID for the specified guild
+        """Gets the King ID for the specified guild.
 
         Args:
             guild_id (int): the guild ID
@@ -117,15 +123,13 @@ class Guilds(BestSummerEverPointsDB):
         previous_king = self.get_king(guild_id, False)
         previous_doc = {"timestamp": now, "type": ActivityTypes.KING_LOSS, "user_id": previous_king}
         doc = {"timestamp": datetime.datetime.now(), "type": ActivityTypes.KING_GAIN, "user_id": user_id}
-        ret = self.update(
+        return self.update(
             {"guild_id": guild_id},
-            {"$set": {"king": user_id, "king_since": now}, "$push": {"king_history": {"$each": [previous_doc, doc]}}}
+            {"$set": {"king": user_id, "king_since": now}, "$push": {"king_history": {"$each": [previous_doc, doc]}}},
         )
-        return ret
 
     def get_king_time(self, guild_id: int) -> datetime.datetime:
-        """
-        Returns the time that the current King has been King
+        """Returns the time that the current King has been King.
 
         Args:
             guild_id (int): the guild ID
@@ -141,8 +145,7 @@ class Guilds(BestSummerEverPointsDB):
         return ret["king"]
 
     def add_pledger(self, guild_id: int, user_id: int) -> UpdateResult:
-        """
-        Add a supporting pledger to the pledges list
+        """Add a supporting pledger to the pledges list.
 
         Args:
             guild_id (int): the guild ID
@@ -151,12 +154,10 @@ class Guilds(BestSummerEverPointsDB):
         Returns:
             UpdateResult: return result
         """
-
         return self.update({"guild_id": guild_id}, {"$push": {"pledged": user_id}})
 
     def reset_pledges(self, guild_id: int) -> UpdateResult:
-        """
-        Reset the pledges
+        """Reset the pledges.
 
         Args:
             guild_id (int): the guild ID
@@ -164,12 +165,10 @@ class Guilds(BestSummerEverPointsDB):
         Returns:
             UpdateResult: return result
         """
-
         return self.update({"guild_id": guild_id}, {"$set": {"pledged": []}})
 
     def set_revolution_toggle(self, guild_id: int, enabled: bool) -> UpdateResult:
-        """
-        Set the bool the enables/disables the revolution event
+        """Set the bool the enables/disables the revolution event.
 
         Args:
             guild_id (int): the guild ID
@@ -178,7 +177,6 @@ class Guilds(BestSummerEverPointsDB):
         Returns:
             UpdateResult: return result
         """
-
         return self.update({"guild_id": guild_id}, {"$set": {"revolution": enabled}})
 
     #
@@ -186,17 +184,14 @@ class Guilds(BestSummerEverPointsDB):
     #
 
     def get_update_message(self, guild_id: int) -> bool:
-        """
-        Gets whether or not we should send bot update messages to this guild. Default is false.
-        """
+        """Gets whether or not we should send bot update messages to this guild. Default is false."""
         ret = self.query({"guild_id": guild_id}, projection={"update_messages": True})
         if not ret or "update_messages" not in ret[0]:
             return False
         return ret["update_messages"]
 
-    def get_last_hash(self, guild_id: int) -> Optional[str]:
-        """
-        Get last update hash for the specific guild
+    def get_last_hash(self, guild_id: int) -> str | None:
+        """Get last update hash for the specific guild.
 
         Args:
             guild_id (int): guild ID to get hash for
@@ -210,22 +205,20 @@ class Guilds(BestSummerEverPointsDB):
         ret = ret[0]
         return ret["hash"]
 
-    def set_last_hash(self, guild_id: int, hash: str) -> UpdateResult:
-        """
-        Sets hash of last update message
+    def set_last_hash(self, guild_id: int, _hash: str) -> UpdateResult:
+        """Sets hash of last update message.
 
         Args:
             guild_id (int): guild ID to set hash for
-            hash (str): the hash value
+            _hash (str): the hash value
 
         Returns:
             UpdateResult: _description_
         """
-        return self.update({"guild_id": guild_id}, {"$set": {"hash": hash}})
+        return self.update({"guild_id": guild_id}, {"$set": {"hash": _hash}})
 
-    def get_update_channel(self, guild_id: int) -> Optional[int]:
-        """
-        Gets channel we should send update messages to
+    def get_update_channel(self, guild_id: int) -> int | None:
+        """Gets channel we should send update messages to.
 
         Args:
             guild_id (int): the guild ID
@@ -240,7 +233,7 @@ class Guilds(BestSummerEverPointsDB):
     #
 
     def get_release_flag(self, guild_id: int) -> bool:
-        """_summary_
+        """_summary_.
 
         Args:
             guild_id (int): _description_
@@ -255,8 +248,8 @@ class Guilds(BestSummerEverPointsDB):
         ret = ret[0]
         return ret["release_notes"]
 
-    def get_latest_release(self, guild_id: int) -> Optional[str]:
-        """_summary_
+    def get_latest_release(self, guild_id: int) -> str | None:
+        """_summary_.
 
         Args:
             guild_id (int): _description_
@@ -271,7 +264,7 @@ class Guilds(BestSummerEverPointsDB):
         return ret["release_ver"]
 
     def set_latest_release(self, guild_id: int, release_ver: str) -> UpdateResult:
-        """_summary_
+        """_summary_.
 
         Args:
             guild_id (int): _description_
@@ -286,12 +279,8 @@ class Guilds(BestSummerEverPointsDB):
     # Salary stuff
     #
 
-    def get_daily_minimum(
-        self,
-        guild_id: int
-    ) -> int:
-        """
-        Gets daily minimum for the given guild
+    def get_daily_minimum(self, guild_id: int) -> int:
+        """Gets daily minimum for the given guild.
 
         Args:
             guild_id (int): guild ID to get min for
@@ -304,13 +293,8 @@ class Guilds(BestSummerEverPointsDB):
             return ret[0].get("daily_minimum")
         return None
 
-    def set_daily_minimum(
-        self,
-        guild_id: int,
-        amount: int
-    ) -> UpdateResult:
-        """
-        Updates daily minimum salary for given guild ID with given amount
+    def set_daily_minimum(self, guild_id: int, amount: int) -> UpdateResult:
+        """Updates daily minimum salary for given guild ID with given amount.
 
         Args:
             guild_id (int): guild ID to update
@@ -319,8 +303,7 @@ class Guilds(BestSummerEverPointsDB):
         Returns:
             UpdateResult: update result
         """
-        ret = self.update({"guild_id": guild_id}, {"$set": {"daily_minimum": amount}})
-        return ret
+        return self.update({"guild_id": guild_id}, {"$set": {"daily_minimum": amount}})
 
     #
     #  Tax stuff
@@ -331,26 +314,19 @@ class Guilds(BestSummerEverPointsDB):
         guild_id: int,
         tax_rate: float,
         supporter_tax_rate: float,
-        user_id: int
+        user_id: int,
     ) -> UpdateResult:
-        """
-        Adds entry to tax history
-        """
+        """Adds entry to tax history."""
         doc = {
             "tax_rate": tax_rate,
             "supporter_tax_rate": supporter_tax_rate,
-            "user_id": user_id, "timestamp": datetime.datetime.now()
+            "user_id": user_id,
+            "timestamp": datetime.datetime.now(),
         }
         return self.update({"guild_id": guild_id}, {"$push": {"tax_rate_history": doc}})
 
-    def set_tax_rate(
-        self,
-        guild_id: int,
-        tax_rate: float,
-        supporter_tax_rate: float
-    ) -> UpdateResult:
-        """
-        Updates tax rate for given guild ID
+    def set_tax_rate(self, guild_id: int, tax_rate: float, supporter_tax_rate: float) -> UpdateResult:
+        """Updates tax rate for given guild ID.
 
         Args:
             guild_id (int): guild ID to set tax rate for
@@ -362,15 +338,11 @@ class Guilds(BestSummerEverPointsDB):
         """
         return self.update(
             {"guild_id": guild_id},
-            {"$set": {"tax_rate": tax_rate, "supporter_tax_rate": supporter_tax_rate}}
+            {"$set": {"tax_rate": tax_rate, "supporter_tax_rate": supporter_tax_rate}},
         )
 
-    def get_tax_rate(
-        self,
-        guild_id: int
-    ) -> tuple[float]:
-        """
-        Returns the tax rate for the given guild
+    def get_tax_rate(self, guild_id: int) -> tuple[float]:
+        """Returns the tax rate for the given guild.
 
         Args:
             guild_id (int): the guild ID
@@ -391,8 +363,7 @@ class Guilds(BestSummerEverPointsDB):
     #
 
     def get_last_ad_time(self, guild_id: int) -> datetime.datetime:
-        """
-        Gets the last ad time
+        """Gets the last ad time.
 
         Args:
             guild_id (int): the guild ID to do this for
@@ -407,8 +378,7 @@ class Guilds(BestSummerEverPointsDB):
         return ret["last_ad_time"]
 
     def set_last_ad_time(self, guild_id: int, timestamp: datetime.datetime) -> UpdateResult:
-        """
-        Sets the last ad time
+        """Sets the last ad time.
 
         Args:
             guild_id (int): the guild ID to do this for
@@ -417,16 +387,14 @@ class Guilds(BestSummerEverPointsDB):
         Returns:
             UpdateResult: update result
         """
-        ret = self.update({"guild_id": guild_id}, {"$set": {"last_ad_time": timestamp}})
-        return ret
+        return self.update({"guild_id": guild_id}, {"$set": {"last_ad_time": timestamp}})
 
     #
     # Remind me reminder stuff
     #
 
     def get_last_remind_me_time(self, guild_id: int) -> datetime.datetime:
-        """
-        Gets the last remind me suggestion time
+        """Gets the last remind me suggestion time.
 
         Args:
             guild_id (int): the guild ID to do this for
@@ -441,8 +409,7 @@ class Guilds(BestSummerEverPointsDB):
         return ret["last_remind_me_suggest_time"]
 
     def set_last_remind_me_time(self, guild_id: int, timestamp: datetime.datetime) -> UpdateResult:
-        """
-        Sets the last remind me suggested time
+        """Sets the last remind me suggested time.
 
         Args:
             guild_id (int): the guild ID to do this for
@@ -451,22 +418,16 @@ class Guilds(BestSummerEverPointsDB):
         Returns:
             UpdateResult: update result
         """
-        ret = self.update({"guild_id": guild_id}, {"$set": {"last_remind_me_suggest_time": timestamp}})
-        return ret
+        return self.update({"guild_id": guild_id}, {"$set": {"last_remind_me_suggest_time": timestamp}})
 
     #
     # Valorant stuff
     #
 
     def set_valorant_config(
-        self,
-        guild_id: int,
-        active: bool,
-        channel: int = None,
-        role: int = None
+        self, guild_id: int, active: bool, channel: int | None = None, role: int | None = None
     ) -> UpdateResult:
-        """
-        Sets valorant config options
+        """Sets valorant config options.
 
         Args:
             guild_id (int): guild ID to set for
@@ -477,11 +438,10 @@ class Guilds(BestSummerEverPointsDB):
         Returns:
             UpdateResult: update result
         """
-        ret = self.update(
+        return self.update(
             {"guild_id": guild_id},
-            {"$set": {"valorant_rollcall": active, "valorant_channel": channel, "valorant_role": role}}
+            {"$set": {"valorant_rollcall": active, "valorant_channel": channel, "valorant_role": role}},
         )
-        return ret
 
     #
     # Wordle stuff
@@ -491,11 +451,10 @@ class Guilds(BestSummerEverPointsDB):
         self,
         guild_id: int,
         active: bool,
-        channel: int = None,
-        reminders: bool = False
+        channel: int | None = None,
+        reminders: bool = False,
     ) -> UpdateResult:
-        """
-        Sets wordle config options
+        """Sets wordle config options.
 
         Args:
             guild_id (int): guild ID to set for
@@ -506,22 +465,17 @@ class Guilds(BestSummerEverPointsDB):
         Returns:
             UpdateResult: update result
         """
-        ret = self.update(
+        return self.update(
             {"guild_id": guild_id},
-            {"$set": {"wordle": active, "wordle_channel": channel, "wordle_reminders": reminders}}
+            {"$set": {"wordle": active, "wordle_channel": channel, "wordle_reminders": reminders}},
         )
-        return ret
 
     #
     # Revolution stuff
     #
 
-    def set_last_rigged_time(
-        self,
-        guild_id: int
-    ) -> UpdateResult:
-        """
-        Sets last rigged message time
+    def set_last_rigged_time(self, guild_id: int) -> UpdateResult:
+        """Sets last rigged message time.
 
         Args:
             guild_id (int): the guild to set this for
@@ -530,5 +484,4 @@ class Guilds(BestSummerEverPointsDB):
             UpdateResult: update result
         """
         now = datetime.datetime.now()
-        ret = self.update({"guild_id": guild_id}, {"$set": {"last_rigged_time": now}})
-        return ret
+        return self.update({"guild_id": guild_id}, {"$set": {"last_rigged_time": now}})

@@ -1,3 +1,5 @@
+"""BSEddies config views."""
+
 import discord
 from bson import Int64
 
@@ -6,9 +8,10 @@ from mongo.bsepoints.guilds import Guilds
 
 
 class BSEddiesConfigView(discord.ui.View):
-    def __init__(
-        self
-    ):
+    """Class for BSEddies config view."""
+
+    def __init__(self) -> None:
+        """Initialisation method."""
         super().__init__(timeout=120)
         self.guilds = Guilds()
 
@@ -22,12 +25,24 @@ class BSEddiesConfigView(discord.ui.View):
         self.add_item(self.supporter_select)
         self.add_item(self.revolutionary_select)
 
-    async def update(self, interaction: discord.Interaction):
+    async def update(self, interaction: discord.Interaction) -> None:
+        """View update method.
+
+        Can be called by child types when something changes.
+
+        Args:
+            interaction (discord.Interaction): _description_
+        """
         await interaction.response.edit_message(content=interaction.message.content, view=self)
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=4)
-    async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
+    async def submit_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:  # noqa: C901, PLR0912
+        """Button callback.
 
+        Args:
+            _ (discord.ui.Button): the button pressed
+            interaction (discord.Interaction): the callback interaction
+        """
         channel = None
         try:
             channel = self.channel_select.values[0]
@@ -37,7 +52,7 @@ class BSEddiesConfigView(discord.ui.View):
                     channel = opt.value
                     break
 
-        if channel and type(channel) not in [int, Int64]:
+        if channel and type(channel) not in {int, Int64}:
             channel = channel.id
 
         king_role = None
@@ -48,7 +63,7 @@ class BSEddiesConfigView(discord.ui.View):
                 if opt.default:
                     king_role = opt.value
 
-        if king_role and type(king_role) not in [int, Int64]:
+        if king_role and type(king_role) not in {int, Int64}:
             king_role = king_role.id
 
         supporter_role = None
@@ -59,7 +74,7 @@ class BSEddiesConfigView(discord.ui.View):
                 if opt.default:
                     supporter_role = opt.value
 
-        if supporter_role and type(supporter_role) not in [int, Int64]:
+        if supporter_role and type(supporter_role) not in {int, Int64}:
             supporter_role = supporter_role.id
 
         revolutionary_role = None
@@ -70,7 +85,7 @@ class BSEddiesConfigView(discord.ui.View):
                 if opt.default:
                     revolutionary_role = opt.value
 
-        if revolutionary_role and type(revolutionary_role) not in [int, Int64]:
+        if revolutionary_role and type(revolutionary_role) not in {int, Int64}:
             revolutionary_role = revolutionary_role.id
 
         update_dict = {}
@@ -87,12 +102,15 @@ class BSEddiesConfigView(discord.ui.View):
         if update_dict:
             self.guilds.update({"guild_id": interaction.guild_id}, {"$set": update_dict})
 
-        await interaction.response.edit_message(
-            content="BSEddies config updated.",
-            view=None,
-            delete_after=5
-        )
+        await interaction.response.edit_message(content="BSEddies config updated.", view=None, delete_after=5)
 
+    @staticmethod
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, emoji="✖️", row=4)
-    async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
+    async def cancel_callback(_: discord.ui.Button, interaction: discord.Interaction) -> None:
+        """Button callback.
+
+        Args:
+            _ (discord.ui.Button): the button pressed
+            interaction (discord.Interaction): the callback interaction
+        """
         await interaction.response.edit_message(content="Cancelled", view=None, delete_after=2)

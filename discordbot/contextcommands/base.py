@@ -1,20 +1,29 @@
+"""Contains our BaseContextCommand class."""
 
 import logging
 
 import discord
 
 from discordbot.bsebot import BSEBot
-from discordbot.constants import CREATOR
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
+from discordbot.constants import CREATOR
 
 
 class BaseContextCommand(BaseEvent):
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger):
+    """Base Context Command class."""
+
+    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+        """Initialisation method.
+
+        Args:
+            client (BSEBot): the connected BSEBot client
+            guild_ids (list): list of supported guild IDs
+            logger (logging.Logger): the logger
+        """
         super().__init__(client, guild_ids, logger)
 
     def _check_perms(self, ctx: discord.ApplicationContext) -> bool:
-        """
-        Checks if the user has the right perms
+        """Checks if the user has the right perms.
 
         Args:
             ctx (discord.ApplicationContext): the context
@@ -44,9 +53,9 @@ class BaseContextCommand(BaseEvent):
 
         return False
 
-    async def _send_no_perms_message(self, ctx: discord.ApplicationContext) -> None:
-        """
-        Sends a message stating they don't have perm
+    @staticmethod
+    async def _send_no_perms_message(ctx: discord.ApplicationContext) -> None:
+        """Sends a message stating they don't have perm.
 
         Args:
             ctx (discord.ApplicationContext): the context

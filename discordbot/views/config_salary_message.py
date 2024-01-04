@@ -1,3 +1,4 @@
+"""Salary messages config view."""
 
 import discord
 
@@ -6,12 +7,16 @@ from mongo.bsepoints.points import UserPoints
 
 
 class DailyMessageView(discord.ui.View):
-    def __init__(
-        self,
-        enabled: bool = False,
-        is_admin: bool = False,
-        summary_enabled: bool = False
-    ):
+    """Class for daily message config view."""
+
+    def __init__(self, enabled: bool = False, is_admin: bool = False, summary_enabled: bool = False) -> None:
+        """Initialisation method.
+
+        Args:
+            enabled (bool, optional): whether we're currently enabled. Defaults to False.
+            is_admin (bool, optional): whether the user is admin or not. Defaults to False.
+            summary_enabled (bool, optional): whether the summary is enabled or not. Defaults to False.
+        """
         super().__init__(timeout=120)
         self.user_points = UserPoints()
 
@@ -25,10 +30,15 @@ class DailyMessageView(discord.ui.View):
             self.add_item(self.summary_select)
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=4)
-    async def submit_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
+    async def submit_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:
+        """Button callback.
 
+        Args:
+            _ (discord.ui.Button): the button pressed
+            interaction (discord.Interaction): the callback interaction
+        """
         try:
-            enabled = self.enabled_select._selected_values[0]
+            enabled = self.enabled_select._selected_values[0]  # noqa: SLF001
         except (IndexError, AttributeError):
             # look for default as user didn't select one explicitly
             for opt in self.enabled_select.options:
@@ -40,7 +50,7 @@ class DailyMessageView(discord.ui.View):
 
         if self.summary_select:
             try:
-                summary_enabled = self.summary_select._selected_values[0]
+                summary_enabled = self.summary_select._selected_values[0]  # noqa: SLF001
             except (IndexError, AttributeError):
                 # look for default as user didn't select one explicitly
                 for opt in self.summary_select.options:
@@ -51,25 +61,22 @@ class DailyMessageView(discord.ui.View):
         else:
             summary_bool = False
 
-        if interaction.guild:
-            # we have a guild - great
-            guild_id = interaction.guild.id
-        else:
-            # handle where we don't have a guild
-            guild_id = 0
-
+        guild_id = interaction.guild.id if interaction.guild else 0
         self.user_points.set_daily_eddies_toggle(interaction.user.id, guild_id, enabled_bool, summary_bool)
 
         msg = f"Daily salary message `{enabled}`."
         if self.summary_select:
             msg += f" Daily summary message `{summary_enabled}`."
 
-        await interaction.response.edit_message(
-            content=msg,
-            view=None,
-            delete_after=5
-        )
+        await interaction.response.edit_message(content=msg, view=None, delete_after=5)
 
+    @staticmethod
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, emoji="✖️", row=4)
-    async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
+    async def cancel_callback(_: discord.ui.Button, interaction: discord.Interaction) -> None:
+        """Button callback.
+
+        Args:
+            _ (discord.ui.Button): the button pressed
+            interaction (discord.Interaction): the callback interaction
+        """
         await interaction.response.edit_message(content="Cancelled", view=None, delete_after=2)

@@ -1,3 +1,4 @@
+"""Bet outcome select."""
 
 from discord import Interaction, SelectOption
 from discord.ui import Select
@@ -6,16 +7,19 @@ from discordbot.selects.betamount import BetSelectAmount
 
 
 class BetOutcomesSelect(Select):
-    def __init__(self, outcomes: list, enable_type=BetSelectAmount, close: bool = False):
-        """
+    """Class for bet outcomes."""
 
-        :param outcomes:
+    def __init__(self, outcomes: list, enable_type: type = BetSelectAmount, close: bool = False) -> None:
+        """Initialisation method.
+
+        Args:
+            outcomes (list): the possible outcomes
+            enable_type (type, optional): the select type. Defaults to BetSelectAmount.
+            close (bool, optional): whether we're closing the bet or not. Defaults to False.
         """
         if not outcomes:
             outcomes = ["placeholder1", "placeholder2"]
-            options = [
-                SelectOption(label=opt) for opt in outcomes
-            ]
+            options = [SelectOption(label=opt) for opt in outcomes]
         else:
             options = outcomes
 
@@ -24,24 +28,24 @@ class BetOutcomesSelect(Select):
             placeholder="Select an outcome",
             min_values=1,
             max_values=len(options) if close else 1,
-            options=options
+            options=options,
         )
 
         # the item we need to enable when we get a value
         self.enable = enable_type
 
-    async def callback(self, interaction: Interaction):
-        """
+    async def callback(self, interaction: Interaction) -> None:
+        """Callback method.
 
-        :param interaction:
-        :return:
+        Args:
+            interaction (Interaction): the interaction to callback to
         """
         selected_outcomes = interaction.data["values"]
         for option in self.options:
             option.default = option.value in selected_outcomes
 
         for child in self.view.children:
-            if type(child) == self.enable:
+            if type(child) is self.enable:
                 child.disabled = False
                 break
 

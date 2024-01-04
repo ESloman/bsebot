@@ -1,36 +1,40 @@
+"""King rename slash command."""
 
 import datetime
+import logging
 
 import discord
 
 from discordbot.bot_enums import ActivityTypes, TransactionTypes
+from discordbot.bsebot import BSEBot
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
 class KingRename(BSEddies):
-    """
-    Class for handling `/renameking` commands
-    """
+    """Class for handling `/renameking` commands."""
 
-    def __init__(self, client, guilds, logger):
-        super().__init__(client, guilds, logger)
+    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+        """Initialisation method.
+
+        Args:
+            client (BSEBot): the connected BSEBot client
+            guild_ids (list): list of supported guild IDs
+            logger (logging.Logger): the logger
+        """
+        super().__init__(client, guild_ids, logger)
         self.activity_type = ActivityTypes.RENAME_KING
         self.help_string = "Pay 500 eddies to rename one of the BSEddies roles"
         self.command_name = "rename"
 
-    async def rename(
-        self,
-        ctx: discord.ApplicationContext,
-        name: str,
-        role: str
-    ) -> None:
-        """
-        Method for a user to rename the BSEddies KING role for small cost.
+    async def rename(self, ctx: discord.ApplicationContext, name: str, role: str) -> None:
+        """Method for a user to rename the BSEddies KING role for small cost.
+
         The role can't be changed more than once an hour.
 
-        :param ctx:
-        :param name:
-        :return:
+        Args:
+            ctx (discord.ApplicationContext): the context
+            name (str): new name
+            role (str): the role
         """
         if not await self._handle_validation(ctx):
             return
@@ -48,7 +52,7 @@ class KingRename(BSEddies):
             # no guild info in DB ??
             return
 
-        match role:  # noqa
+        match role:
             case "king":
                 role_id = db_guild.role
                 spend = 500
@@ -73,7 +77,7 @@ class KingRename(BSEddies):
         now = datetime.datetime.now()
         if last_king_rename:
             time_elapsed = now - last_king_rename
-            if time_elapsed.total_seconds() < 3600:
+            if time_elapsed.total_seconds() < 3600:  # noqa: PLR2004
                 # not been an hour yet
                 mins = round((3600 - time_elapsed.total_seconds()) / 60, 1)
                 message = (
@@ -101,7 +105,7 @@ class KingRename(BSEddies):
             spend * -1,
             TransactionTypes.KING_RENAME,
             comment=f"Change {role_id} to {name}",
-            role_id=role_id
+            role_id=role_id,
         )
 
         self.guilds.update({"guild_id": ctx.guild.id}, {"$set": {key: now}})
@@ -113,12 +117,11 @@ class KingRename(BSEddies):
 
             # get king user
             king_id = db_guild.king
-            if role == "king":
-                _insert = f"<@{king_id}>"
-            else:
-                _insert = f"{role.capitalize()}"
-            ann = (f"{ctx.author.mention} changed the `bseddies` {role.upper()} role "
-                   f"name to **{name}**. {_insert} is now {role_obj.mention}!")
+            _insert = f"<@{king_id}>" if role == "king" else f"{role.capitalize()}"
+            ann = (
+                f"{ctx.author.mention} changed the `bseddies` {role.upper()} role "
+                f"name to **{name}**. {_insert} is now {role_obj.mention}!"
+            )
             await channel.send(content=ann)
 
         message = f"Changed the role name to `{name}` for you."

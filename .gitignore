@@ -51,6 +51,7 @@ coverage.xml
 .hypothesis/
 .pytest_cache/
 .ruff_cache
+tests.xml
 
 # Translations
 *.mo
@@ -109,10 +110,12 @@ celerybeat.pid
 .idea
 env/
 venv/
+wvenv/
 ENV/
 env.bak/
 venv.bak/
 .vscode
+wvenv/
 
 # Spyder project settings
 .spyderproject

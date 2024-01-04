@@ -51,10 +51,11 @@ class BaseClass(object):
     If not username or password is provided - authenticate without username and password.
     """
     def __init__(
-            self,
-            ip: str = "127.0.0.1",
-            username: str = None,
-            password: str = None):
+        self,
+        ip: str = "127.0.0.1",
+        username: str = None,
+        password: str = None
+    ):
         """
         Constructor method.
         :param ip: ip of instance to connect to
@@ -122,12 +123,12 @@ Querying is our first _CRUD_ operation - it's the _Read_. We can query MongoDB u
 
 ````python
 def query(
-        self,
-        parameters: dict,
-        limit: int = 1000,
-        projection: dict = None,
-        as_gen: bool = False
-    ) -> Union[list, Cursor]:
+    self,
+    parameters: dict,
+    limit: int = 1000,
+    projection: dict = None,
+    as_gen: bool = False
+) -> Union[list, Cursor]:
 
     if self.vault is None:
         raise NoVaultError("No vault instantiated.")

@@ -1,54 +1,56 @@
+"""Task for setting the King."""
 
 import asyncio
+import contextlib
 import datetime
 from logging import Logger
 
 import discord
 from discord.ext import tasks
-from discordbot.bsebot import BSEBot
+
 from discordbot.bot_enums import ActivityTypes
+from discordbot.bsebot import BSEBot
 from discordbot.tasks.basetask import BaseTask
 
 
 class BSEddiesKingTask(BaseTask):
-    def __init__(
-        self,
-        bot: BSEBot,
-        guild_ids: list[int],
-        logger: Logger,
-        startup_tasks: list[BaseTask]
-    ):
+    """Class for BSEddies King task."""
 
+    def __init__(self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask]) -> None:
+        """Initialisation method.
+
+        Args:
+            bot (BSEBot): the BSEBot client
+            guild_ids (list[int]): the list of guild IDs
+            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
+            startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
+        """
         super().__init__(bot, guild_ids, logger, startup_tasks)
         self.task = self.king_checker
         self.task.start()
         self.events_cache = {}
 
     @tasks.loop(minutes=1)
-    async def king_checker(self):
-        """
-        Loop that makes sure the King is assigned correctly
-        """
-
-        for guild in self.bot.guilds:
-
-            if events := self.revolutions.get_open_events(guild.id):
+    async def king_checker(self) -> None:  # noqa: C901, PLR0912, PLR0915
+        """Loop that makes sure the King is assigned correctly."""
+        for _guild in self.bot.guilds:
+            if events := self.revolutions.get_open_events(_guild.id):
                 # ongoing revolution event - not changing the King now
-                self.events_cache[guild.id] = events[0]
+                self.events_cache[_guild.id] = events[0]
                 continue
-            elif event := self.events_cache.get(guild.id):
+
+            if event := self.events_cache.get(_guild.id):
                 # there was a recent event
                 now = datetime.datetime.now()
                 expiry_time = event["expired"]  # type: datetime.datetime
-                if (now - expiry_time).total_seconds() < 60:
+                if (now - expiry_time).total_seconds() < 60:  # noqa: PLR2004
                     # only been two minutes since the event - wait
-                    self.logger.info(f"The recent event {event} only finished {expiry_time} - waiting...")
+                    self.logger.info("The recent event %s only finished %s - waiting...", event, expiry_time)
                     continue
-                self.events_cache[guild.id] = None
+                self.events_cache[_guild.id] = None
 
-            guild_db = self.guilds.get_guild(guild.id)
-            guild = await self.bot.fetch_guild(guild.id)  # type: discord.Guild
-            # members = await guild.fetch_members()
+            guild_db = self.guilds.get_guild(_guild.id)
+            guild = await self.bot.fetch_guild(_guild.id)  # type: discord.Guild
             member_ids = [member.id for member in await guild.fetch_members().flatten()]
 
             role_id = guild_db.role
@@ -59,7 +61,7 @@ class BSEddiesKingTask(BaseTask):
 
             if not role and not role_id:
                 self.logger.warning(
-                    f"No BSEddies role defined for {guild.id}: {guild.name}. Can't check KING so skipping."
+                    "No BSEddies role defined for %s: %s. Can't check KING so skipping.", guild.id, guild.name
                 )
                 continue
 
@@ -69,7 +71,7 @@ class BSEddiesKingTask(BaseTask):
                     if member.id != current_king:
                         await member.remove_roles(
                             role,
-                            reason="User assigned themself this role and they are NOT king."
+                            reason="User assigned themself this role and they are NOT king.",
                         )
 
             users = self.user_points.get_all_users_for_guild(guild.id)
@@ -95,37 +97,40 @@ class BSEddiesKingTask(BaseTask):
                 if not current:
                     current = await guild.fetch_member(current_king)  # type: discord.Member
 
-                self.logger.info(f"Removing a king: {current.display_name}")
+                self.logger.info("Removing a king: %s", current.display_name)
 
                 await current.remove_roles(role, reason="User is not longer King!")
 
                 self.user_points.set_king_flag(current_king, guild.id, False)
 
-                message = (f"You have been **DETHRONED** - {new.display_name} is now the "
-                           f"KING of {guild.name}! :crown:")
+                message = f"You have been **DETHRONED** - {new.display_name} is now the KING of {guild.name}! :crown:"
 
-                try:
+                with contextlib.suppress(discord.Forbidden):
                     await current.send(content=message, silent=True)
-                except discord.Forbidden:
-                    pass
 
                 self.activities.add_activity(
                     current_king,
                     guild.id,
                     ActivityTypes.KING_LOSS,
-                    comment=f"Losing King to {top_user.uid}"
+                    comment=f"Losing King to {top_user.uid}",
                 )
                 current_king = None
 
+                # rename role names
+                if supporter_role.name != "Supporters":
+                    await supporter_role.edit(name="Supporters")
+                if revo_role.name != "Revolutionaries":
+                    await revo_role.edit(name="Revolutionaries")
+
             # make a new KING
             if current_king is None:
-                self.logger.info(f"Adding a new king: {new.display_name}")
+                self.logger.info("Adding a new king: %s", new.display_name)
 
                 self.activities.add_activity(
                     top_user.uid,
                     guild.id,
                     ActivityTypes.KING_GAIN,
-                    comment=f"Taking King from {prev_king_id}"
+                    comment=f"Taking King from {prev_king_id}",
                 )
 
                 await new.add_roles(role, reason="User is now KING!")
@@ -134,10 +139,8 @@ class BSEddiesKingTask(BaseTask):
                 self.guilds.set_king(guild.id, top_user.uid)
 
                 message = f"You are now the KING of {guild.name}! :crown:"
-                try:
+                with contextlib.suppress(discord.Forbidden):
                     await new.send(content=message, silent=True)
-                except discord.Forbidden:
-                    pass
 
                 # everyone who was a supporter needs to lose their role now
                 self.guilds.reset_pledges(guild.id)
@@ -156,10 +159,8 @@ class BSEddiesKingTask(BaseTask):
                 await channel.send(content=msg)
 
     @king_checker.before_loop
-    async def before_king_checker(self):
-        """
-        Make sure that websocket is open before we start querying via it.
-        """
+    async def before_king_checker(self) -> None:
+        """Make sure that websocket is open before we start querying via it."""
         await self.bot.wait_until_ready()
         while not self._check_start_up_tasks():
             await asyncio.sleep(5)

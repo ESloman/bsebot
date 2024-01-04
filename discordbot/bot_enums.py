@@ -1,15 +1,11 @@
-
-"""
-A file full of useful enums that we use throughout the codebase
-"""
+"""A file full of useful enums that we use throughout the codebase."""
 
 from enum import IntEnum
 
 
 class TransactionTypes(IntEnum):
-    """
-    TransactionTypes are the type of "transactions" that can take place when a user gains/loses eddies.
-    """
+    """TransactionTypes are the type of "transactions" that can take place when a user gains/loses eddies."""
+
     HISTORY_START = 1
     BET_PLACE = 2
     BET_WIN = 3
@@ -44,9 +40,8 @@ class TransactionTypes(IntEnum):
 
 
 class ActivityTypes(IntEnum):
-    """
-    ActivityTypes are types of activity that we are tracking (that aren't transactions)
-    """
+    """ActivityTypes are types of activity that we are tracking (that aren't transactions)."""
+
     KING_GAIN = 1
     KING_LOSS = 2
     LOAN_TAKE = 3
@@ -99,9 +94,8 @@ class ActivityTypes(IntEnum):
 
 
 class AwardsTypes(IntEnum):
-    """
-    The different BSEddies awards
-    """
+    """The different BSEddies awards."""
+
     MOST_MESSAGES = 1
     LEAST_MESSAGES = 2
     LONGEST_MESSAGE = 3
@@ -125,12 +119,12 @@ class AwardsTypes(IntEnum):
     POTTY_MOUTH = 21
     SINGLE_MINDED = 22
     DIVERSE_PORTFOLIO = 23
+    WORST_AVG_WORDLE = 24
 
 
 class StatTypes(IntEnum):
-    """
-    The different BSEddies stat types
-    """
+    """The different BSEddies stat types."""
+
     NUMBER_OF_MESSAGES = 1
     AVERAGE_MESSAGE_LENGTH_CHARS = 2
     AVERAGE_MESSAGE_LENGTH_WORDS = 3
@@ -156,8 +150,8 @@ class StatTypes(IntEnum):
 
 
 class SupporterType(IntEnum):
-    """
-    """
+    """Supporter type enum."""
+
     NEUTRAL = 0
     SUPPORTER = 1
     REVOLUTIONARY = 2

@@ -1,17 +1,26 @@
+"""Gift slash command."""
+
+import logging
 
 import discord
 
-from discordbot.bot_enums import TransactionTypes, ActivityTypes
+from discordbot.bot_enums import ActivityTypes, TransactionTypes
+from discordbot.bsebot import BSEBot
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 
 
 class Gift(BSEddies):
-    """
-    Class for handling `/bseddies gift` command
-    """
+    """Class for handling `/bseddies gift` command."""
 
-    def __init__(self, client, guilds, logger):
-        super().__init__(client, guilds, logger)
+    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+        """Initialisation method.
+
+        Args:
+            client (BSEBot): the connected BSEBot client
+            guild_ids (list): list of supported guild IDs
+            logger (logging.Logger): the logger
+        """
+        super().__init__(client, guild_ids, logger)
         self.activity_type = ActivityTypes.BSEDDIES_GIFT
         self.help_string = "Gift some eddies to a friend"
         self.command_name = "gift"
@@ -20,10 +29,9 @@ class Gift(BSEddies):
         self,
         ctx: discord.ApplicationContext | discord.Interaction,
         friend: discord.User,
-        amount: int
+        amount: int,
     ) -> None:
-        """
-        Function for handling a 'gift eddies' event.
+        """Function for handling a 'gift eddies' event.
 
         We make sure that the user initiating the command has enough BSEddies to give to a friend
         and then we simply increment their friend's BSEddies and decrement theirs.
@@ -37,13 +45,16 @@ class Gift(BSEddies):
             return
 
         self._add_event_type_to_activity_history(
-            ctx.user, ctx.guild_id, ActivityTypes.BSEDDIES_GIFT,
-            friend_id=friend.id, amount=amount
+            ctx.user,
+            ctx.guild_id,
+            ActivityTypes.BSEDDIES_GIFT,
+            friend_id=friend.id,
+            amount=amount,
         )
 
-        if type(ctx) == discord.ApplicationContext:
+        if type(ctx) is discord.ApplicationContext:
             response = ctx.respond
-        elif type(ctx) == discord.Interaction:
+        elif type(ctx) is discord.Interaction:
             response = ctx.response.send_message
         else:
             response = ctx.respond
@@ -67,14 +78,14 @@ class Gift(BSEddies):
             ctx.guild.id,
             amount * -1,
             TransactionTypes.GIFT_GIVE,
-            friend_id=friend.id
+            friend_id=friend.id,
         )
         self.user_points.increment_points(
             friend.id,
             ctx.guild.id,
             amount,
             TransactionTypes.GIFT_RECEIVE,
-            friend_id=ctx.user.id
+            friend_id=ctx.user.id,
         )
 
         await response(content=f"Eddies transferred to `{friend.name}`!", ephemeral=True, delete_after=5)

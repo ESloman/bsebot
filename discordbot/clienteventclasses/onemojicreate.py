@@ -1,5 +1,10 @@
+"""Contains our OnEmojiCreate class.
+
+Handles on_emoji_create events.
+"""
+
 import datetime
-from typing import List
+import logging
 
 import discord
 
@@ -8,11 +13,26 @@ from discordbot.clienteventclasses.baseeventclass import BaseEvent
 
 
 class OnEmojiCreate(BaseEvent):
-    def __init__(self, client: BSEBot, guild_ids, logger):
+    """Class for handling OnEmojiCreate events."""
+
+    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+        """Initialisation method.
+
+        Args:
+            client (BSEBot): the connected BSEBot client
+            guild_ids (list): list of supported guild IDs
+            logger (logging.Logger): the logger
+        """
         super().__init__(client, guild_ids, logger)
 
-    async def on_emojis_update(self, guild_id: int, before: List[discord.Emoji], after: List[discord.Emoji]) -> None:
+    async def on_emojis_update(self, guild_id: int, _: list[discord.Emoji], after: list[discord.Emoji]) -> None:
+        """Handling on emoji creation events.
 
+        Args:
+            guild_id (int): the guild ID the event is happening in
+            _ (list[discord.Emoji]): the list of emojis before
+            after (list[discord.Emoji]): the list of emojis after
+        """
         guild = await self.client.fetch_guild(guild_id)
 
         for emoji in after:
@@ -22,22 +42,18 @@ class OnEmojiCreate(BaseEvent):
 
             new_emoji_obj = await guild.fetch_emoji(emoji.id)
 
-            self.logger.info(f"New emoji, {emoji.name}, created!")
-            self.server_emojis.insert_emoji(
-                emoji.id,
-                emoji.name,
-                emoji.created_at,
-                new_emoji_obj.user.id,
-                guild_id
-            )
+            self.logger.info("New emoji, %s, created!", emoji.name)
+            self.server_emojis.insert_emoji(emoji.id, emoji.name, emoji.created_at, new_emoji_obj.user.id, guild_id)
 
             self.interactions.add_entry(
                 emoji.id,
                 guild_id,
                 new_emoji_obj.user.id,
                 guild_id,
-                ["emoji_created", ],
+                [
+                    "emoji_created",
+                ],
                 emoji.name,
                 datetime.datetime.now(),
-                additional_keys={"emoji_id": emoji.id, "created_at": emoji.created_at}
+                additional_keys={"emoji_id": emoji.id, "created_at": emoji.created_at},
             )

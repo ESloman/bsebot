@@ -1,3 +1,4 @@
+"""Config views."""
 
 import datetime
 from logging import Logger
@@ -18,7 +19,6 @@ from discordbot.views.config_salary_message import DailyMessageView
 from discordbot.views.config_threads import ThreadConfigView
 from discordbot.views.config_valorant import ValorantConfigView
 from discordbot.views.config_wordle import WordleRootConfigView
-
 from mongo.bsedataclasses import SpoilerThreads
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.points import UserPoints
@@ -26,12 +26,18 @@ from mongo.datatypes import GuildDB
 
 
 class ConfigView(discord.ui.View):
+    """Class for config view."""
+
     def __init__(
-        self,
-        logger: Logger = PlaceHolderLogger,
-        user_id: int = None,
-        guild_id: int = None
-    ):
+        self, logger: Logger = PlaceHolderLogger, user_id: int | None = None, guild_id: int | None = None
+    ) -> None:
+        """Initialisation method.
+
+        Args:
+            logger (Logger, optional): the logger. Defaults to PlaceHolderLogger.
+            user_id (int | None, optional): the user ID. Defaults to None.
+            guild_id (int | None, optional): the guild ID. Defaults to None.
+        """
         super().__init__(timeout=120)
         self.logger = logger
         self.spoiler_threads = SpoilerThreads()
@@ -44,22 +50,17 @@ class ConfigView(discord.ui.View):
         configurable_items = []
         if user_id:
             guild_db = self.guilds.get_guild(guild_id) if guild_id else None
-            for value in ConfigSelect._values:
-                if self._check_perms(value[1], user_id, guild_db=guild_db):
-                    configurable_items.append(value)
+            configurable_items.extend(
+                value
+                for value in ConfigSelect._values  # noqa: SLF001
+                if self._check_perms(value[1], user_id, guild_db=guild_db)
+            )
 
         self.config_select = ConfigSelect(configurable_items)
         self.add_item(self.config_select)
 
-    def _check_perms(
-        self,
-        value: str,
-        user_id: int,
-        guild_id: int = None,
-        guild_db: GuildDB = None
-    ) -> bool:
-        """
-        Checks if the user has the right perms to configure this item
+    def _check_perms(self, value: str, user_id: int, guild_id: int | None = None, guild_db: GuildDB = None) -> bool:  # noqa: PLR0911
+        """Checks if the user has the right perms to configure this item.
 
         Args:
             value (str): the configurable item
@@ -70,16 +71,15 @@ class ConfigView(discord.ui.View):
         Returns:
             bool: whether they do or don't
         """
-
         # check we have a guild
         if not guild_id and not guild_db:
             # no guild specified - these are the non-guild options that can be configured
-            if value in ["daily_salary", ]:
+            if value == "daily_salary":
                 return True
             return False
 
         # is option in options that allow normal users to use it
-        if value in ["activities", "threads", "daily_salary", "wordle_reminders"]:
+        if value in {"activities", "threads", "daily_salary", "wordle_reminders"}:
             return True
 
         # is user the creator
@@ -87,7 +87,7 @@ class ConfigView(discord.ui.View):
             return True
 
         # creator only configuration options
-        if value in ["wordle_starting_words", ] and user_id != CREATOR:
+        if value == "wordle_starting_words" and user_id != CREATOR:
             return False
 
         # now we check server perms
@@ -104,9 +104,9 @@ class ConfigView(discord.ui.View):
 
         return False
 
-    async def _send_no_perms_message(self, interaction: discord.Interaction) -> None:
-        """
-        Sends a message stating they don't have perm
+    @staticmethod
+    async def _send_no_perms_message(interaction: discord.Interaction) -> None:
+        """Sends a message stating they don't have perm.
 
         Args:
             interaction (discord.Interaction): the interaction
@@ -115,20 +115,26 @@ class ConfigView(discord.ui.View):
         await interaction.followup.send(msg, ephemeral=True, delete_after=10)
 
     @discord.ui.button(label="Select", style=discord.ButtonStyle.green, row=2)
-    async def place_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
-        value = self.config_select._selected_values[0]
+    async def place_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:
+        """Button callback.
 
-        if value not in ["wordle_reminders", ]:
+        Args:
+            _ (discord.ui.Button): the button pressed
+            interaction (discord.Interaction): the callback interaction
+        """
+        value = self.config_select._selected_values[0]  # noqa: SLF001
+
+        if value != "wordle_reminders":
             await interaction.response.edit_message(
                 content="Loading your config option now...",
                 view=None,
-                delete_after=2
+                delete_after=2,
             )
 
         guild_id = interaction.guild.id if interaction.guild else None
 
         if not self._check_perms(value, interaction.user.id, guild_id):
-            self.logger.info(f"User {interaction.user} tried to configure {value} without the right perms")
+            self.logger.info("User %s tried to configure %s without the right perms", interaction.user, value)
             return await self._send_no_perms_message(interaction)
 
         match value:
@@ -162,13 +168,19 @@ class ConfigView(discord.ui.View):
         except AttributeError:
             await interaction.followup.send(msg, ephemeral=True)
 
+    @staticmethod
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, emoji="✖️", row=2)
-    async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction) -> None:
+    async def cancel_callback(_: discord.ui.Button, interaction: discord.Interaction) -> None:
+        """Button callback.
+
+        Args:
+            _ (discord.ui.Button): the button pressed
+            interaction (discord.Interaction): the callback interaction
+        """
         await interaction.response.edit_message(content="Cancelled", view=None, delete_after=2)
 
     def _get_thread_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
-        """
-        Handle thread message/view
+        """Handle thread message/view.
 
         Args:
             interaction (discord.Interaction): the interaction
@@ -176,7 +188,6 @@ class ConfigView(discord.ui.View):
         Returns:
             tuple[str, discord.ui.View]: the message and view
         """
-
         threads = self.spoiler_threads.get_all_threads(interaction.guild_id)
 
         guild_db = self.guilds.get_guild(interaction.guild_id)
@@ -186,16 +197,15 @@ class ConfigView(discord.ui.View):
 
         configurable_threads = []
         for thread in threads:
-            if not thread.active and (now - thread.created).days >= 30:
+            if not thread.active and (now - thread.created).days >= 30:  # noqa: PLR2004
                 # only exclude non-active ones if they're super old
                 continue
-            if interaction.user.id == CREATOR:
-                configurable_threads.append(thread)
-                continue
-            elif interaction.user.id in admins:
-                configurable_threads.append(thread)
-                continue
-            elif interaction.user.id == thread.owner:
+
+            if (
+                interaction.user.id == CREATOR
+                or interaction.user.id in admins
+                or interaction.user.id == (thread.owner or thread.creator)
+            ):
                 configurable_threads.append(thread)
                 continue
 
@@ -214,8 +224,7 @@ class ConfigView(discord.ui.View):
         return msg, view
 
     def _get_valorant_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
-        """
-        Handle valorant message/view
+        """Handle valorant message/view.
 
         Args:
             interaction (discord.Interaction): the interaction
@@ -241,8 +250,7 @@ class ConfigView(discord.ui.View):
         return msg, view
 
     def _get_daily_minimum_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
-        """
-        Handle daily minimum message/view
+        """Handle daily minimum message/view.
 
         Args:
             interaction (discord.Interaction): the interaction
@@ -261,8 +269,7 @@ class ConfigView(discord.ui.View):
         return msg, view
 
     def _get_admins_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
-        """
-        Handle admin message/view
+        """Handle admin message/view.
 
         Args:
             interaction (discord.Interaction): the interaction
@@ -275,10 +282,7 @@ class ConfigView(discord.ui.View):
 
         view = AdminConfigView()
 
-        if not admins:
-            _admins = "_None_"
-        else:
-            _admins = ", ".join([f"<@{a}>" for a in admins])
+        _admins = "_None_" if not admins else ", ".join([f"<@{a}>" for a in admins])
 
         msg = (
             "## Admins Config\n\n"
@@ -292,7 +296,7 @@ class ConfigView(discord.ui.View):
         return msg, view
 
     def _get_revolution_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
-        """Handle revolution message/view
+        """Handle revolution message/view.
 
         Args:
             interaction (discord.Interaction): the interaction
@@ -303,15 +307,11 @@ class ConfigView(discord.ui.View):
         guild_db = self.guilds.get_guild(interaction.guild_id)
         rev_enabled = guild_db.revolution if guild_db.revolution is not None else True
         view = RevolutionConfigView(rev_enabled)
-        msg = (
-            "## Revolution Config\n\n"
-            "Select whether the revolution event is enabled or not."
-        )
+        msg = "## Revolution Config\n\nSelect whether the revolution event is enabled or not."
         return msg, view
 
     def _get_daily_salary_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
-        """
-        Handle daily salary message message/view
+        """Handle daily salary message message/view.
 
         Args:
             interaction (discord.Interaction): the interaction
@@ -349,7 +349,7 @@ class ConfigView(discord.ui.View):
         return msg, view
 
     def _get_bseddies_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
-        """Handle bseddies message/view
+        """Handle bseddies message/view.
 
         Args:
             interaction (discord.Interaction): the interaction
@@ -384,25 +384,23 @@ class ConfigView(discord.ui.View):
         )
         return msg, view
 
-    def _get_autogenerate_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
-        """Handle autogenerate message/view
+    @staticmethod
+    def _get_autogenerate_message_and_view(_: discord.Interaction) -> tuple[str, discord.ui.View]:
+        """Handle autogenerate message/view.
 
         Args:
-            interaction (discord.Interaction): the interaction
+            _ (discord.Interaction): the interaction
 
         Returns:
             tuple[str, discord.ui.View]: the message and view
         """
-
         view = AutoGenerateConfigView()
-        msg = (
-            "## Autogenerate Config\n\n"
-            "What would you like to do?"
-        )
+        msg = "## Autogenerate Config\n\nWhat would you like to do?"
         return msg, view
 
-    def _get_activities_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
-        """Handle activities message/view
+    @staticmethod
+    def _get_activities_message_and_view(_: discord.Interaction) -> tuple[str, discord.ui.View]:
+        """Handle activities message/view.
 
         Args:
             interaction (discord.Interaction): the interaction
@@ -411,14 +409,11 @@ class ConfigView(discord.ui.View):
             tuple[str, discord.ui.View]: the message and view
         """
         view = ActivityConfigView()
-        msg = (
-            "## Add an Activity\n\n"
-            "Select the type of activity you'd like."
-        )
+        msg = "## Add an Activity\n\nSelect the type of activity you'd like."
         return msg, view
 
     def _get_wordle_message_and_view(self, interaction: discord.Interaction) -> tuple[str, discord.ui.View]:
-        """Handle wordle message/view
+        """Handle wordle message/view.
 
         Args:
             interaction (discord.Interaction): the interaction
@@ -426,14 +421,12 @@ class ConfigView(discord.ui.View):
         Returns:
             tuple[str, discord.ui.View]: the message and view
         """
-        _opts = []
-        for opt in WordleRootSelect.selectable_options:
-            if self._check_perms(opt, interaction.user.id, interaction.guild_id):
-                _opts.append(opt)
+        _opts = [
+            opt
+            for opt in WordleRootSelect.selectable_options
+            if self._check_perms(opt, interaction.user.id, interaction.guild_id)
+        ]
 
         view = WordleRootConfigView(_opts)
-        msg = (
-            "## Wordle Config\n\n"
-            "Slect what you would like to configure."
-        )
+        msg = "## Wordle Config\n\nSlect what you would like to configure."
         return msg, view

@@ -1,3 +1,4 @@
+"""Contains our BirthdayReplies message action class."""
 
 import random
 import re
@@ -10,51 +11,53 @@ from discordbot.message_actions.base import BaseMessageAction
 
 
 class BirthdayReplies(BaseMessageAction):
-    """
-    Message action class for handling birthday reply messages for the bot
-    """
+    """Message action class for handling birthday reply messages for the bot."""
+
     def __init__(self, client: BSEBot, logger: Logger) -> None:
+        """Initialisation method.
+
+        Args:
+            client (BSEBot): our BSEBot client
+            logger (Logger): our logger
+        """
         super().__init__(client, logger)
-        self._birthday_terms = [
-            "happy birthday",
-            "hb"
-        ]
-        self._bot_terms = [
-            "bsebot",
-            "bse bot",
-            "bot"
-        ]
-        self._possible_replies = [
-            "Thank you ❤️"
-        ]
+
+        self.bot_birthday_month = 2
+        self.bot_birthday_day = 14
+
+        self._birthday_terms = ["happy birthday", "hb"]
+        self._bot_terms = ["bsebot", "bse bot", "bot"]
+        self._possible_replies = ["Thank you ❤️"]
         self._possible_reactions = [
             "🥰",
             "❤️",
             "😍",
         ]
 
-    async def pre_condition(self, message: discord.Message, message_type: list) -> bool:
-        """
-        Precondition that checks whether or not the message is a 'happy birthday' style
+    async def pre_condition(self, message: discord.Message, _: list) -> bool:
+        """Precondition.
+
+        Checks whether or not the message is a 'happy birthday' style
         message for our bot on it's birthday.
 
         Args:
             message (discord.Message): the message to check
-            message_type (list): pre-calculated message_type to help with condition
+            _ (list): pre-calculated message_type to help with condition
 
         Returns:
             bool: whether or not to run this action on this message
         """
-        if message.created_at.month != 2 or message.created_at.day != 14:
+        if message.created_at.month != self.bot_birthday_month or message.created_at.day != self.bot_birthday_day:
             # only trigger on bot's birthday
             return False
+
         mentions_ids = [m.id for m in message.mentions]
         send_message = False
-        if any([re.match(rf"\b{a}\b", message.content.lower()) for a in self._birthday_terms]):
+        if any(re.match(rf"\b{a}\b", message.content.lower()) for a in self._birthday_terms):
             if self.client.user.id in mentions_ids:
                 # we were mentioned!
                 send_message = True
-            elif any([re.match(rf"\b{a}\b", message.content.lower()) for a in self._bot_terms]):
+            elif any(re.match(rf"\b{a}\b", message.content.lower()) for a in self._bot_terms):
                 send_message = True
             elif message.reference:
                 _reply = message.reference.cached_message
@@ -66,15 +69,14 @@ class BirthdayReplies(BaseMessageAction):
         return send_message
 
     async def run(self, message: discord.Message) -> None:
-        """
-        Action that will either react or send a reply on the message.
+        """Action that will either react or send a reply on the message.
 
         Args:
             message (discord.Message): the message to action on
         """
         await message.channel.trigger_typing()
 
-        if random.random() > 0.5:
+        if random.random() > 0.5:  # noqa: PLR2004
             await message.reply(content=random.choice(self._possible_replies))
         else:
             await message.add_reaction(random.choice(self._possible_reactions))

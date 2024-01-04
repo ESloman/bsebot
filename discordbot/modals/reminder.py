@@ -1,5 +1,7 @@
+"""Reminder modal class."""
 
 import datetime
+import logging
 
 import discord
 
@@ -8,33 +10,36 @@ from mongo.bsepoints.reminders import ServerReminders
 
 
 class ReminderModal(discord.ui.Modal):
-    def __init__(self, logger, message_id, *args, **kwargs) -> None:
+    """Reminder modal class."""
+
+    def __init__(self, logger: logging.Logger, message_id: int, *args: tuple[any], **kwargs: dict[any]) -> None:
+        """Initialisation method.
+
+        Args:
+            logger (logging.Logger): the logger
+            message_id (int): the message ID
+        """
         super().__init__(*args, **kwargs)
 
         self.logger = logger
         self.server_reminders = ServerReminders()
         self.message_id = message_id
 
-        self.reminder_reason = discord.ui.InputText(
-            label="Reminder name/reason",
-            placeholder="Remind you about..."
-        )
+        self.reminder_reason = discord.ui.InputText(label="Reminder name/reason", placeholder="Remind you about...")
 
         self.reminder_timeout = discord.ui.InputText(
             label="Timeout: DIGITS + (s|m|h|d|w) (Optional)",
-            placeholder=(
-                "Examples: 30m, 8h, 1d12h, 12h30m10s, 1w3d2h, etc..."
-            )
+            placeholder=("Examples: 30m, 8h, 1d12h, 12h30m10s, 1w3d2h, etc..."),
         )
 
         self.add_item(self.reminder_reason)
         self.add_item(self.reminder_timeout)
 
-    async def callback(self, interaction: discord.Interaction):
-        """
+    async def callback(self, interaction: discord.Interaction) -> None:
+        """The submit callback.
 
-        :param interaction:
-        :return:
+        Args:
+            interaction (discord.Interaction): the interaction
         """
         await interaction.response.defer(ephemeral=True)
 
@@ -46,7 +51,7 @@ class ReminderModal(discord.ui.Modal):
         now = datetime.datetime.now()
         timeout_date = now + datetime.timedelta(seconds=timeout_seconds)
 
-        self.logger.info(f"{reason} - {timeout} - {timeout_seconds}")
+        self.logger.info("%s - %s - %s", reason, timeout, timeout_seconds)
 
         reminder_msg = (
             f"{interaction.user.mention} you will be reminded about **{reason}** "
@@ -54,9 +59,7 @@ class ReminderModal(discord.ui.Modal):
         )
 
         if not self.message_id:
-            reminder_message = await interaction.channel.send(
-                content=reminder_msg
-            )
+            reminder_message = await interaction.channel.send(content=reminder_msg)
         else:
             await interaction.followup.send(content=reminder_msg, ephemeral=True)
 
@@ -67,7 +70,7 @@ class ReminderModal(discord.ui.Modal):
             timeout_date,
             reason,
             interaction.channel.id,
-            self.message_id or reminder_message.id
+            self.message_id or reminder_message.id,
         )
 
         if not self.message_id:

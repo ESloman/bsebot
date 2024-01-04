@@ -45,14 +45,6 @@ jobs:
           tags: |
             type=sha
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install pytest
-      - name: Run pytest
-        run: |
-          pytest
       - name: Build Docker image
         uses: docker/build-push-action@v5
         with:

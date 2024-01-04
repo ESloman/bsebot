@@ -1,11 +1,14 @@
-from pytest import mark
+"""Tests our utility convert_time_str function."""
+
+import pytest
 
 from discordbot.utilities import convert_time_str
 
 
-class TestUtilitiesConvertTimeStr:
-    @mark.parametrize(
-        "input,expected",
+class TestConvertTimeStr:
+    @staticmethod
+    @pytest.mark.parametrize(
+        ("input_str", "expected"),
         [
             # seconds
             ("1s", 1),
@@ -29,11 +32,18 @@ class TestUtilitiesConvertTimeStr:
             ("7w", 4233600),
         ],
     )
-    def test_single_unit(self, input: str, expected: int):
-        assert convert_time_str(input) == expected
+    def test_single_unit(input_str: str, expected: int) -> None:
+        """Tests a variety of values with a single unit.
 
-    @mark.parametrize(
-        "input,expected",
+        Args:
+            input_str (str): the input string
+            expected (int): the expected value
+        """
+        assert convert_time_str(input_str) == expected
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        ("input_str", "expected"),
         [
             # two units
             ("5m10s", 310),
@@ -52,5 +62,11 @@ class TestUtilitiesConvertTimeStr:
             ("2w3d45h10m50s", 1631450),
         ],
     )
-    def test_multi_unit(self, input: str, expected: int):
-        assert convert_time_str(input) == expected
+    def test_multi_unit(input_str: str, expected: int) -> None:
+        """Tests our function with multi-unit strings.
+
+        Args:
+            input_str (str): the input string
+            expected (int): the expected value
+        """
+        assert convert_time_str(input_str) == expected

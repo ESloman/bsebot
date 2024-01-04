@@ -47,8 +47,7 @@ exclude = [
     "venv",
     "wvenv",
     "docs/",
-    "datafiles",
-    "tests",
+    "datafiles"
 ]
 
 line-length = 120

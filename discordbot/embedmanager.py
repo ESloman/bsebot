@@ -44,17 +44,17 @@ class EmbedManager:
         embed = discord.Embed(colour=discord.Colour.random())
 
         for option in bet["option_dict"]:
-            betters = [bet["betters"][b] for b in bet["betters"] if bet["betters"][b]["emoji"] == option]
+            betters = [bet["betters"][b] for b in bet["betters"] if bet["betters"][b].emoji == option]
             if betters:
                 val = ""
-                for better in sorted(betters, key=lambda b: b["points"], reverse=True):
+                for better in sorted(betters, key=lambda b: b.points, reverse=True):
                     if val:
                         val += "\n"
-                    better_info = guild.get_member(better["user_id"])
-                    _better = self.user_points.find_user(better["user_id"], guild.id) if not better_info else {}
+                    better_info = guild.get_member(better.user_id)
+                    _better = self.user_points.find_user(better.user_id, guild.id) if not better_info else {}
                     val += (
-                        f"**{better_info.name if better_info else (_better.name or better['user_id'])}** "
-                        f"(_{better['points']}_)"
+                        f"**{better_info.name if better_info else (_better.name or better.user_id)}** "
+                        f"(_{better.points}_)"
                     )
             else:
                 val = "No-one has bet on this option yet."

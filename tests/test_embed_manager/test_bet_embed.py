@@ -5,6 +5,7 @@ from unittest.mock import patch
 import discord
 
 from discordbot.embedmanager import EmbedManager
+from mongo.datatypes import Better
 from tests.mocks import embed_mocks, mongo_mocks
 from tests.mocks.discord_mocks import GuildMock
 
@@ -46,7 +47,7 @@ class TestBetEmbed:
     def test_get_bet_embed_with_empty_id() -> None:
         """Tests our get_bet_embed with an empty id."""
         bet = embed_mocks.get_bet()
-        bet["betters"]["0"] = {"user_id": 0, "emoji": "1", "points": 10}
+        bet["betters"]["0"] = Better(user_id=0, emoji="1", points=10)
         guild = GuildMock(123456)
 
         embeds = EmbedManager()

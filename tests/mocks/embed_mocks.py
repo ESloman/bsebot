@@ -3,19 +3,22 @@
 import datetime
 import random
 
+from mongo.bsepoints import bets
 from mongo.datatypes import Bet, RevolutionEventType
 
 
 def get_bet() -> Bet:
     """Returns a bet dict for embed generating."""
-    return Bet(
-        option_dict={"1": {"val": "one"}, "2": {"val": "two"}},
-        betters={
-            "123456": {"user_id": 123456, "emoji": "1", "points": 10},
-            "654321": {"user_id": 654321, "emoji": "2", "points": 20},
-        },
-        active=True,
-        timeout=datetime.datetime.now(),
+    return bets.UserBets.make_data_class(
+        Bet(
+            option_dict={"1": {"val": "one"}, "2": {"val": "two"}},
+            betters={
+                "123456": {"user_id": 123456, "emoji": "1", "points": 10},
+                "654321": {"user_id": 654321, "emoji": "2", "points": 20},
+            },
+            active=True,
+            timeout=datetime.datetime.now(),
+        )
     )
 
 

@@ -516,9 +516,9 @@ class StatsGatherer:  # noqa: PLR0904
         transactions = self.cache.get_transactions(guild_id, start, end)
         salary_total = 0
         for trans in transactions:
-            if trans["type"] != TransactionTypes.DAILY_SALARY:
+            if trans.type != TransactionTypes.DAILY_SALARY:
                 continue
-            salary_total += trans["amount"]
+            salary_total += trans.amount
 
         data_class = Stat(
             "stat",
@@ -608,11 +608,11 @@ class StatsGatherer:  # noqa: PLR0904
         eddies_placed = 0
         eddies_won = 0
         for trans in transactions:
-            trans_type = trans["type"]
+            trans_type = trans.type
             if trans_type == TransactionTypes.BET_PLACE:
-                eddies_placed -= trans["amount"]  # amount is negative in these cases
+                eddies_placed -= trans.amount  # amount is negative in these cases
             elif trans_type == TransactionTypes.BET_WIN:
-                eddies_won += trans["amount"]
+                eddies_won += trans.amount
 
         data_class_a = Stat(
             "stat",
@@ -1798,12 +1798,11 @@ class StatsGatherer:  # noqa: PLR0904
 
         bet_users = {}
         for trans in transactions:
-            if trans["type"] != TransactionTypes.BET_PLACE:
+            if trans.type != TransactionTypes.BET_PLACE:
                 continue
-            uid = trans["uid"]
-            if uid not in bet_users:
-                bet_users[uid] = 0
-            bet_users[uid] -= trans["amount"]
+            if trans.uid not in bet_users:
+                bet_users[trans.uid] = 0
+            bet_users[trans.uid] -= trans.amount
 
         try:
             most_placed = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
@@ -1842,12 +1841,11 @@ class StatsGatherer:  # noqa: PLR0904
 
         bet_users = {}
         for trans in transactions:
-            if trans["type"] != TransactionTypes.BET_WIN:
+            if trans.type != TransactionTypes.BET_WIN:
                 continue
-            uid = trans["uid"]
-            if uid not in bet_users:
-                bet_users[uid] = 0
-            bet_users[uid] += trans["amount"]
+            if trans.uid not in bet_users:
+                bet_users[trans.uid] = 0
+            bet_users[trans.uid] += trans.amount
 
         try:
             most_placed = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
@@ -1884,7 +1882,7 @@ class StatsGatherer:  # noqa: PLR0904
         """
         activity_history = self.cache.get_activities(guild_id, start, end)
         king_events = sorted(
-            [a for a in activity_history if a["type"] in {ActivityTypes.KING_GAIN, ActivityTypes.KING_LOSS}],
+            [act for act in activity_history if act.type in {ActivityTypes.KING_GAIN, ActivityTypes.KING_LOSS}],
             key=lambda x: x["timestamp"],
         )
 

@@ -17,94 +17,108 @@ from discordbot.bot_enums import ActivityTypes, SupporterType, TransactionTypes
 from discordbot.constants import CREATOR
 
 
-class Transaction(TypedDict):
+@dataclass(frozen=True)
+class Transaction:
     """A dict representing a transaction."""
 
     uid: int
+    """The ID of the user the transaction relates to."""
     guild_id: int
-    type: TransactionTypes
-    """The type of transaction enum"""
+    """The ID of the guild the transaction occured in."""
+    type: TransactionTypes  # noqa: A003
+    """The type of transaction."""
     amount: int
-    """The amount of eddies the transaction is concerned with"""
+    """The amount of eddies in the transaction."""
     timestamp: datetime.datetime
-    """The time the transaction took place"""
+    """The time the transaction took place."""
     comment: str
-    """Comment"""
-    bet_id: NotRequired[str]
-    """Bet ID of the transaction - if relevant"""
+    """The comment pertaining to a transaction."""
+    bet_id: str | None = None
+    """Bet ID of the transaction."""
 
 
-class Activity(TypedDict):
+@dataclass(frozen=True)
+class Activity:
     """A dict representing an activity."""
 
     uid: int
+    """The ID of the user the transaction relates to."""
     guild_id: int
-    type: ActivityTypes
-    """The activity type enum"""
+    """The ID of the guild the transaction occured in."""
+    type: ActivityTypes  # noqa: A003
+    """The type of transaction."""
     timestamp: datetime.datetime
-    """The time the activity took place"""
+    """The time the activity took place."""
     comment: str
-    """Comment"""
+    """The comment pertaining to the activity."""
 
 
-@dataclass
+@dataclass(frozen=True)
 class User:
-    """A User dict."""
+    """Represents a user in the database."""
 
+    # basic user information
     _id: ObjectId
-    """The internal DB ID"""
+    """The internal DB ID."""
     uid: int
-    """The discord user ID"""
+    """The discord user ID."""
     guild_id: int
-    """The discord server ID the user belongs to"""
+    """The discord server ID the user belongs to."""
     name: str
-    """The nickname for the guild or the user name"""
-    points: int
-    """The amount of eddies the user has in the server"""
-    king: bool
-    """Whether the user is KING in the server"""
+    """The nickname for the guild or the user name."""
 
-    # optionals / defaults
+    # eddies stuff
+    points: int
+    """The amount of eddies the user has in the server."""
+    king: bool
+    """Whether the user is KING in the server."""
     daily_eddies: bool = False
-    """Whether the user receives daily eddie messages"""
+    """Whether the user receives daily eddie messages."""
     daily_summary: bool = False
-    """Whether the user receives the daily eddies summary message"""
+    """Whether the user receives the daily eddies summary message."""
     pending_points: int = field(default=0)
-    """The number of eddies the user has on pending bets"""
+    """The number of eddies the user has on pending bets."""
     high_score: int = field(default=0)
-    """The user's highest ever amount of eddies"""
+    """The user's highest ever amount of eddies."""
     daily_minimum: int | None = None
-    """The minimum amount of eddies the user is going to get each day"""
+    """The minimum amount of eddies the user is going to get each day."""
     supporter_type: SupporterType = SupporterType.NEUTRAL
-    transaction_history: list[Transaction] | None = field(default_factory=list)
-    """A list of the transactions the user has made"""
-    activity_history: list[Activity] | None = field(default_factory=list)
-    """A list of activities the user has made"""
+    """The user's alignment."""
     inactive: bool = False
-    """Whether the user has left the server or not"""
+    """Whether the user has left the server or not."""
 
     # DEPRECATED
+    transaction_history: list[Transaction] | None = field(default_factory=list)
+    """*DEPRECATED*"""
+    activity_history: list[Activity] | None = field(default_factory=list)
+    """*DEPCREATED*"""
     last_cull_time: datetime.datetime | None = None
     """*DEPRECATED*"""
     cull_warning: bool | None = None
     """*DEPRECATED*"""
 
 
-class Better(TypedDict):
-    """A dict representing a better on a bet."""
+@dataclass(frozen=True)
+class Better:
+    """Represents a better on a bet."""
 
     user_id: int
+    """The ID of the user."""
     emoji: str
-    first_bet: datetime.datetime
-    last_bet: datetime.datetime
+    """The emoji the user bet with."""
     points: int
+    """The amount of eddies the user put in on this bet."""
+    first_bet: datetime.datetime | None = None
+    """The time the user put in their first bet."""
+    last_bet: datetime.datetime | None = None
+    """The time the user put in their last bet."""
 
 
 class Option(TypedDict):
     """A dict representing an option in a bet."""
 
     val: str
-    """The human outcome name"""
+    """The human outcome name."""
 
 
 class Bet(TypedDict):
@@ -132,7 +146,7 @@ class Bet(TypedDict):
     """When the bet will stop taking bets"""
     active: bool
     """Whether the bet is accepting new bets or not"""
-    betters: dict[str:Better]
+    betters: dict[str, Better]
     """A dict of user ID keys to their bet amounts"""
     result: str | None
     """The outcome of the bet"""
@@ -324,10 +338,10 @@ class Thread:
     """The discord thread ID of the thread"""
     name: str
     """Name of the thread"""
-    day: int
-    """Only for SPOILER threads - the day a new ep comes out"""
     active: bool
     """Only for SPOILER threads - if we should still be posting spoiler warnings"""
+    day: int | None = None
+    """Only for SPOILER threads - the day a new ep comes out"""
     created: datetime.datetime | None = None
     """When the thread was created"""
     owner: int | None = field(default=CREATOR)
@@ -355,13 +369,34 @@ class GuildDB:
     # bseddies stuff
     daily_minimum: int | None = None
     """The daily minimum number of eddies."""
+    channel: int | None = None
+    """The ID of the BSEddies channel."""
     tax_rate: float = 0.1
     """The standard eddies tax rate."""
     supporter_tax_rate: float = 0
     """The eddies tax rate for supporters."""
+    tax_rate_history: list[dict] = field(default_factory=list)
+    """The tax rate history."""
 
+    # KING stuff
     role: int | None = None
     """The role ID for the KING role."""
+    king: int | None = None
+    """The user ID of the user that is currently KING."""
+    king_since: datetime.datetime | None = None
+    """Start time of the current KING's rule."""
+    king_history: list[dict] = field(default_factory=list)
+    """The KING history."""
+    rename_king: datetime.datetime | None = None
+    """When the King was last renamed."""
+    revolution: bool = False
+    """Whether revolution is enabled."""
+    supporter_role: int | None = None
+    """The ID of the role for supporters."""
+    revolutionary_role: int | None = None
+    """The ID of the role for revolutionaries."""
+    pledged: list[int] = field(default_factory=list)
+    """The list of users pledged to support the KING this cycle."""
 
     # wordle stuff
     wordle: bool = False
@@ -377,33 +412,7 @@ class GuildDB:
     wordle_six_emoji: str | None = None
     """The emoji to use for 6 wordle scores."""
 
-    rename_king: datetime.datetime | None = None
-    """When the King was last renamed."""
-    tax_rate_history: list[dict] = field(default_factory=list)
-    """The tax rate history."""
-    king: int | None = None
-    """The user ID of the user that is currently KING."""
-    king_since: datetime.datetime | None = None
-    """Start time of the current KING's rule."""
-    king_history: list[dict] = field(default_factory=list)
-    """The KING history."""
-    hash: str | None = None  # noqa: A003
-    channel: int | None = None
-    """The ID of the BSEddies channel."""
-    update_messages: bool = False
-    """Whether to post bot update messages."""
-    revolution: bool = False
-    """Whether revolution is enabled."""
-    supporter_role: int | None = None
-    """The ID of the role for supporters."""
-    revolutionary_role: int | None = None
-    """The ID of the role for revolutionaries."""
-    pledged: list[int] = field(default_factory=list)
-    """The list of users pledged to support the KING this cycle."""
-    release_ver: str | None = None
-    """The last version of release notes published."""
-    release_notes: bool = False
-    """Whether to post release notes."""
+    # valorant stuff
     valorant_rollcall: bool = False
     """Whether to do valorant roll call messages."""
     valorant_channel: int | None = None
@@ -411,6 +420,7 @@ class GuildDB:
     valorant_role: int | None = None
     """The role ID of the 'valorant' role."""
 
+    # message timers
     last_remind_me_suggest_time: datetime.datetime | None = None
     """The last time we triggered a 'remind me' message."""
     last_ad_time: datetime.datetime | None = None
@@ -420,17 +430,36 @@ class GuildDB:
     last_rigged_time: datetime.datetime | None = None
     """The last time we triggered a 'rigged' message."""
 
+    # update stuff
+    hash: str | None = None  # noqa: A003
+    """The last git hash."""
+    release_ver: str | None = None
+    """The last version of release notes published."""
+    release_notes: bool = False
+    """Whether to post release notes."""
+    update_messages: bool = False
+    """Whether to post bot update messages."""
 
-@dataclass
+
+@dataclass(frozen=True)
 class Reminder:
     """A dict representing a reminder."""
 
     _id: ObjectId
+    """The internal DB ID."""
     guild_id: int
+    """The ID of the server this reminder belongs to."""
     created: datetime.datetime
+    """When the reminder was created."""
     user_id: int
+    """The ID of the user that created the reminder."""
     timeout: datetime.datetime
+    """When the reminder times out."""
     active: bool
+    """Whether the reminder is active."""
     reason: str
-    channel_id: int
-    message_id: int
+    """The reason for the reminder."""
+    channel_id: int | None = None
+    """The ID of the channel the reminder was created in."""
+    message_id: int | None = None
+    """The ID of the message the reminder was created for."""

@@ -37,7 +37,7 @@ class BetChange(discord.ui.View):
         self.add_item(self.outcome_select)
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=2)
-    async def place_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:
+    async def submit_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:
         """Button callback.
 
         Args:
@@ -47,8 +47,6 @@ class BetChange(discord.ui.View):
         await interaction.response.defer(ephemeral=True)
 
         value = self.outcome_select.values[0]
-
-        self.bet["betters"][str(interaction.user.id)]["emoji"] = value
 
         self.user_bets.update({"_id": self.bet["_id"]}, {"$set": {f"betters.{interaction.user.id}.emoji": value}})
 

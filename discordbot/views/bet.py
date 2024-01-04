@@ -104,7 +104,7 @@ class BetView(discord.ui.View):
             await interaction.response.send_message(content=message, ephemeral=True, delete_after=10)
             return
 
-        first_bet_time = _bet["betters"][str(interaction.user.id)]["first_bet"]
+        first_bet_time = _bet["betters"][str(interaction.user.id)].first_bet
         now = datetime.datetime.now()
         if (now - first_bet_time).seconds > 300 and (now - _bet.get("updated", _bet["created"])).seconds > 300:  # noqa: PLR2004
             message = "It's been too long since your original bet - you can't change it now."

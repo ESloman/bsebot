@@ -64,7 +64,10 @@ class UserTransactions(BestSummerEverPointsDB):
         Returns:
             list[Transaction]: transactions between those times
         """
-        return self.query({"guild_id": guild_id, "timestamp": {"$gt": start, "$lt": end}}, limit=10000)
+        return [
+            Transaction(**trans)
+            for trans in self.query({"guild_id": guild_id, "timestamp": {"$gt": start, "$lt": end}}, limit=10000)
+        ]
 
     def get_all_guild_transactions(self, guild_id: int) -> list[Transaction]:
         """Get all transactions for a given guild ID.
@@ -75,4 +78,4 @@ class UserTransactions(BestSummerEverPointsDB):
         Returns:
             list[Transaction]: list of transactions
         """
-        return self.query({"guild_id": guild_id}, limit=10000)
+        return [Transaction(**trans) for trans in self.query({"guild_id": guild_id}, limit=10000)]

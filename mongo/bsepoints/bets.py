@@ -7,7 +7,7 @@ from bson import ObjectId
 from discordbot.bot_enums import TransactionTypes
 from mongo import interface
 from mongo.bsepoints.points import UserPoints
-from mongo.datatypes import Bet
+from mongo.datatypes import Bet, Better
 from mongo.db_classes import BestSummerEverPointsDB
 
 
@@ -51,6 +51,13 @@ class UserBets(BestSummerEverPointsDB):
         return f"{count:04d}"
 
     @staticmethod
+    def make_data_class(bet: Bet) -> Bet:
+        """Turns a bet dict into a dataclass representation."""
+        # convert betters
+        bet["betters"] = {key: Better(**value) for key, value in bet["betters"].items()}
+        return bet
+
+    @staticmethod
     def count_eddies_for_bet(bet: Bet) -> int:
         """Returns the number of eddies on a bet.
 
@@ -60,7 +67,7 @@ class UserBets(BestSummerEverPointsDB):
         Returns:
             int: total eddies
         """
-        return sum([better["points"] for better in bet["betters"].values()])
+        return sum([better.points for better in bet["betters"].values()])
 
     def get_all_active_bets(self, guild_id: int) -> list[Bet]:
         """Gets all active bets.
@@ -68,7 +75,7 @@ class UserBets(BestSummerEverPointsDB):
         :param guild_id: int - guild ID to get the active bets for
         :return: list of active bets
         """
-        return self.query({"active": True, "guild_id": guild_id})
+        return [self.make_data_class(active) for active in self.query({"active": True, "guild_id": guild_id})]
 
     def get_all_inactive_pending_bets(self, guild_id: int) -> list[Bet]:
         """Gets all the bets that are not active without results.
@@ -79,7 +86,10 @@ class UserBets(BestSummerEverPointsDB):
         Returns:
             list: _description_
         """
-        return self.query({"active": False, "result": None, "guild_id": guild_id})
+        return [
+            self.make_data_class(inactive)
+            for inactive in self.query({"active": False, "result": None, "guild_id": guild_id})
+        ]
 
     def get_all_pending_bets(self, guild_id: int) -> list[Bet]:
         """Gets all 'pending' bets - bets that don't have a result yet.
@@ -89,7 +99,7 @@ class UserBets(BestSummerEverPointsDB):
         :param guild_id: int - guild ID to get the pending bets for
         :return: list of pending bets
         """
-        return self.query({"result": None, "guild_id": guild_id})
+        return [self.make_data_class(pending) for pending in self.query({"result": None, "guild_id": guild_id})]
 
     def get_user_pending_points(self, user_id: int, guild_id: int) -> int:
         """Returns a users points from a given guild.
@@ -114,11 +124,17 @@ class UserBets(BestSummerEverPointsDB):
     def get_all_pending_bets_for_user(self, user_id: int, guild_id: int) -> list[Bet]:
         """Gets all pending bets for a given user_id.
 
-        :param user_id: int - The ID of the user to look for
-        :param guild_id: int - The guild ID that the user belongs in
-        :return: a list of bet dictionaries
+        Args:
+            user_id (int): the ID of the user to look for
+            guild_id (int): the guild ID
+
+        Returns:
+            list[Bet]: a list of Bets
         """
-        return self.query({f"betters.{user_id}": {"$exists": True}, "guild_id": guild_id, "result": None})
+        return [
+            self.make_data_class(pending)
+            for pending in self.query({f"betters.{user_id}": {"$exists": True}, "guild_id": guild_id, "result": None})
+        ]
 
     def create_new_bet(  # noqa: PLR0913, PLR0917
         self,
@@ -162,7 +178,7 @@ class UserBets(BestSummerEverPointsDB):
             "option_vals": [option_dict[o]["val"] for o in option_dict],
         }
         self.insert(bet_doc)
-        return bet_doc
+        return self.make_data_class(bet_doc)
 
     def get_bet_from_id(self, guild_id: int, bet_id: str) -> Bet | None:
         """Gets an already created bet document from the database.
@@ -173,7 +189,7 @@ class UserBets(BestSummerEverPointsDB):
         """
         ret = self.query({"bet_id": bet_id, "guild_id": guild_id})
         if ret:
-            return ret[0]
+            return self.make_data_class(ret[0])
         return None
 
     def add_better_to_bet(self, bet_id: int, guild_id: int, user_id: int, emoji: str, points: int) -> dict:
@@ -190,7 +206,7 @@ class UserBets(BestSummerEverPointsDB):
         :param points: int - the amount of points the user is betting
         :return: success dict
         """
-        ret = self.query({"bet_id": bet_id, "guild_id": guild_id})[0]
+        ret = self.make_data_class(self.query({"bet_id": bet_id, "guild_id": guild_id})[0])
         betters = ret["betters"]
 
         # checking the user has enough points
@@ -224,7 +240,7 @@ class UserBets(BestSummerEverPointsDB):
         # here we're checking if the user has already bet on the option they have selected
         # if they haven't - then it's an error
         current_better = betters[str(user_id)]
-        if emoji != current_better["emoji"]:
+        if emoji != current_better.emoji:
             return {"success": False, "reason": "wrong option"}
 
         self.update(

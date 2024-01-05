@@ -21,7 +21,7 @@ class CloseABetView(discord.ui.View):
 
         if len(bet_ids) == 1 and "option_dict" in bet_ids[0]:
             outcomes = bet_ids[0]["option_dict"]
-            options = [discord.SelectOption(label=outcomes[key]["val"], value=key, emoji=key) for key in outcomes]
+            options = [discord.SelectOption(label=outcomes[key].val, value=key, emoji=key) for key in outcomes]
         else:
             options = []
 

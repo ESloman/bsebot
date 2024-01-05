@@ -1,5 +1,6 @@
 """AddBetOption modal class."""
 
+import copy
 import datetime
 from logging import Logger
 
@@ -11,7 +12,7 @@ from discordbot.slashcommandeventclasses.close import CloseBet
 from discordbot.slashcommandeventclasses.place import PlaceBet
 from discordbot.utilities import PlaceHolderLogger
 from mongo.bsepoints.bets import UserBets
-from mongo.datatypes import Bet
+from mongo.datatypes import Bet, Option
 
 
 class AddBetOption(discord.ui.Modal):
@@ -85,13 +86,15 @@ class AddBetOption(discord.ui.Modal):
             )
             return
 
-        self.bet["options"].extend(outcomes)
+        new_options = self.bet["options"] + outcomes
+        new_option_dict = copy.deepcopy(self.bet["option_dict"])
+        new_option_vals = copy.deepcopy(self.bet["option_vals"])
 
         for outcome in outcomes:
             _index = outcome_count + outcomes.index(outcome)
             _emoji = self.multiple_options_emojis[_index]
-            self.bet["option_dict"][_emoji] = {"val": outcome}
-            self.bet["option_vals"].append(outcome)
+            new_option_dict[_emoji] = Option(val=outcome)
+            new_option_vals.append(outcome)
 
         # extend bet's timeout
         created = self.bet["created"]
@@ -106,11 +109,11 @@ class AddBetOption(discord.ui.Modal):
             {"_id": self.bet["_id"]},
             {
                 "$set": {
-                    "options": self.bet["options"],
-                    "option_dict": self.bet["option_dict"],
+                    "options": new_options,
+                    "option_dict": new_option_dict,
                     "updated": now,
                     "timeout": ending,
-                    "option_vals": self.bet["option_vals"],
+                    "option_vals": new_option_vals,
                 },
             },
         )

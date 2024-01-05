@@ -115,13 +115,13 @@ class CloseBet(BSEddies):
         # the logic in this if statement only applies if the user "won" their own bet and they were the only better
         # they just get refunded the eddies that put in
         bet_dict = bet["betters"].get(str(author.id), None)
-        if bet_dict and len(bet["betters"]) == 1 and bet_dict["emoji"] in emoji:
+        if bet_dict and len(bet["betters"]) == 1 and bet_dict.emoji in emoji:
             self.logger.info("%s just won a bet (%s) where they were the only better...", ctx.user.id, bet_id)
             self.user_bets.close_a_bet(bet["_id"], emoji)
             self.user_points.increment_points(
                 author.id,
                 guild.id,
-                bet_dict["points"],
+                bet_dict.points,
                 TransactionTypes.BET_REFUND,
                 comment="User won their own bet when no-one else entered.",
                 bet_id=bet_id,

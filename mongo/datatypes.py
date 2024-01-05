@@ -114,7 +114,8 @@ class Better:
     """The time the user put in their last bet."""
 
 
-class Option(TypedDict):
+@dataclass(frozen=True)
+class Option:
     """A dict representing an option in a bet."""
 
     val: str

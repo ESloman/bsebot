@@ -183,15 +183,13 @@ class BetManager:
             "result": emoji,
             "outcome_name": [bet["option_dict"][e] for e in emoji],
             "timestamp": datetime.datetime.now(tz=datetime.UTC),
-            "losers": {
-                b: bet["betters"][b]["points"] for b in bet["betters"] if bet["betters"][b]["emoji"] not in emoji
-            },
+            "losers": {b: bet["betters"][b].points for b in bet["betters"] if bet["betters"][b].emoji not in emoji},
             "winners": {},
         }
 
-        total_eddies_bet = sum([bet["betters"][b]["points"] for b in bet["betters"]])
+        total_eddies_bet = sum([bet["betters"][b].points for b in bet["betters"]])
         winning_outcome_eddies = sum(
-            [bet["betters"][b]["points"] for b in bet["betters"] if bet["betters"][b]["emoji"] in emoji],
+            [bet["betters"][b].points for b in bet["betters"] if bet["betters"][b].emoji in emoji],
         )
 
         multiplier, coefficient = self.calculate_bet_modifiers(
@@ -218,9 +216,9 @@ class BetManager:
         total_eddies_taxed = 0
 
         # assign winning points to the users who got the answer right
-        winners = [b for b in bet["betters"] if bet["betters"][b]["emoji"] in emoji]
+        winners = [b for b in bet["betters"] if bet["betters"][b].emoji in emoji]
         for better_id in winners:
-            points_bet = bet["betters"][better_id]["points"]
+            points_bet = bet["betters"][better_id].points
             points_won = self._calculate_single_bet_winnings(
                 points_bet, multiplier, coefficient, _extra_eddies, len(winners)
             )

@@ -58,7 +58,7 @@ class EmbedManager:
                     )
             else:
                 val = "No-one has bet on this option yet."
-            embed.add_field(name=f"{option} - {bet['option_dict'][option]['val']}", value=val, inline=False)
+            embed.add_field(name=f"{option} - {bet['option_dict'][option].val}", value=val, inline=False)
 
         footer = None
         if not bet["active"]:

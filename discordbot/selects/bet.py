@@ -48,9 +48,7 @@ class BetSelect(Select):
 
         if outcome_select:
             outcome_select = outcome_select[0]
-            outcome_select.options = [
-                SelectOption(label=outcomes[key]["val"], value=key, emoji=key) for key in outcomes
-            ]
+            outcome_select.options = [SelectOption(label=outcomes[key].val, value=key, emoji=key) for key in outcomes]
             outcome_select.disabled = False
             # disable the other ui elements when this changes
             for child in self.view.children:

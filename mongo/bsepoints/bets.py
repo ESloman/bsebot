@@ -7,7 +7,7 @@ from bson import ObjectId
 from discordbot.bot_enums import TransactionTypes
 from mongo import interface
 from mongo.bsepoints.points import UserPoints
-from mongo.datatypes import Bet, Better
+from mongo.datatypes import Bet, Better, Option
 from mongo.db_classes import BestSummerEverPointsDB
 
 
@@ -55,6 +55,7 @@ class UserBets(BestSummerEverPointsDB):
         """Turns a bet dict into a dataclass representation."""
         # convert betters
         bet["betters"] = {key: Better(**value) for key, value in bet["betters"].items()}
+        bet["option_dict"] = {key: Option(**value) for key, value in bet["option_dict"].items()}
         return bet
 
     @staticmethod

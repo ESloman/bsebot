@@ -1,9 +1,12 @@
 """Bet Manager mocks."""
 
+from mongo.bsepoints.bets import UserBets
+from mongo.datatypes import Bet
 
-def get_bet_dict(idx: int) -> dict[str, any]:
+
+def get_bet_dict(idx: int) -> Bet:
     """Returns the bet dict at the specified index."""
-    bets: list[dict[str, any]] = [
+    bets: list[Bet] = [
         {
             "_id": "1",
             "title": "some title",
@@ -30,4 +33,4 @@ def get_bet_dict(idx: int) -> dict[str, any]:
         },
     ]
 
-    return bets[idx]
+    return UserBets.make_data_class(bets[idx])

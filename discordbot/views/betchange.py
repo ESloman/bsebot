@@ -31,7 +31,7 @@ class BetChange(discord.ui.View):
         self.close = close
 
         outcomes = bet["option_dict"]
-        options = [discord.SelectOption(label=outcomes[key]["val"], value=key, emoji=key) for key in outcomes]
+        options = [discord.SelectOption(label=outcomes[key].val, value=key, emoji=key) for key in outcomes]
 
         self.outcome_select = BetOutcomesSelect(options, discord.ui.Button)
         self.add_item(self.outcome_select)

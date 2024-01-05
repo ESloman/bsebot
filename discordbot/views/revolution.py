@@ -13,7 +13,7 @@ from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.points import UserPoints
 from mongo.bseticketedevents import RevolutionEvent
-from mongo.datatypes.datatypes import RevolutionEventDB
+from mongo.datatypes.revolution import RevolutionEventDB
 
 
 class RevolutionView(discord.ui.View):

@@ -7,7 +7,7 @@ from pymongo.results import InsertOneResult, UpdateResult
 from discordbot.bot_enums import ActivityTypes
 from mongo import interface
 from mongo.bsepoints.points import UserPoints
-from mongo.datatypes.datatypes import GuildDB
+from mongo.datatypes.guild import GuildDB
 from mongo.datatypes.user import UserDB
 from mongo.db_classes import BestSummerEverPointsDB
 

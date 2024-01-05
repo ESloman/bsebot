@@ -8,7 +8,7 @@ from bson import ObjectId
 
 from mongo.bsepoints import bets
 from mongo.datatypes.bet import BetDB
-from mongo.datatypes.datatypes import RevolutionEventDB
+from mongo.datatypes.revolution import RevolutionEventDB
 
 
 def get_bet() -> BetDB:

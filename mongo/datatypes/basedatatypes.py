@@ -1,5 +1,6 @@
 """Holds our base dataclasses."""
 
+import datetime
 from dataclasses import dataclass
 
 from bson import ObjectId
@@ -31,3 +32,19 @@ class ImplementsMessage:
     """The discord ID of the channel the message is in."""
     message_id: int
     """The discord ID of the message."""
+
+
+@dataclass(frozen=True)
+class BaseEventDB(BaseDBObject, ImplementsMessage):
+    """Represents a base event."""
+
+    type: str  # noqa: A003
+    """Event type."""
+    event_id: str
+    """The event ID."""
+    created: datetime.datetime
+    """When the event was created."""
+    expired: datetime.datetime
+    """When the event will expire and 'resolve'."""
+    open: bool  # noqa: A003
+    """whether the event is still open."""

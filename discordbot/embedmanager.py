@@ -9,7 +9,7 @@ from discordbot.constants import MIN_USERS_FILTER, USER_POINTS_FILTER
 from discordbot.utilities import PlaceHolderLogger
 from mongo.bsepoints.points import UserPoints
 from mongo.datatypes.bet import BetDB
-from mongo.datatypes.datatypes import RevolutionEventDB
+from mongo.datatypes.revolution import RevolutionEventDB
 
 
 class EmbedManager:

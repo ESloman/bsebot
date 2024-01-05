@@ -4,7 +4,7 @@ import random
 
 from bson import ObjectId
 
-from mongo.datatypes.datatypes import GuildDB
+from mongo.datatypes.guild import GuildDB
 from mongo.datatypes.user import UserDB
 
 

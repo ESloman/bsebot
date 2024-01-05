@@ -9,7 +9,7 @@ from mongo.bsepoints.emojis import ServerEmojis
 from mongo.bsepoints.interactions import UserInteractions
 from mongo.bsepoints.points import UserPoints
 from mongo.bsepoints.transactions import UserTransactions
-from mongo.datatypes import Activity, BetDB, Emoji, Message, Transaction, UserDB, VCInteraction
+from mongo.datatypes import Activity, BetDB, Emoji, MessageDB, Transaction, UserDB, VCInteractionDB
 
 
 class StatsDataCache:
@@ -38,10 +38,10 @@ class StatsDataCache:
         self.__end_cache: datetime.datetime | None = None
         self.__user_id_cache: int | None = uid
 
-        self.__message_cache: list[Message] = []
+        self.__message_cache: list[MessageDB] = []
         self.__message_cache_time: datetime.datetime | None = None
 
-        self.__vc_cache: list[VCInteraction] = []
+        self.__vc_cache: list[VCInteractionDB] = []
         self.__vc_cache_time: datetime.datetime | None = None
 
         self.__bet_cache: list[BetDB] = []
@@ -56,20 +56,20 @@ class StatsDataCache:
         self.__activity_cache: list[Activity] = []
         self.__activity_cache_time: datetime.datetime | None = None
 
-        self.__reactions_cache: list[Message] = []
+        self.__reactions_cache: list[MessageDB] = []
         self.__reactions_cache_time: datetime.datetime | None = None
 
         self.__emoji_cache: list[Emoji] = []
         self.__emoji_cache_time: datetime.datetime | None = None
 
-        self.__reply_cache: list[Message] = []
+        self.__reply_cache: list[MessageDB] = []
         self.__reply_cache_time: datetime.datetime | None = None
 
-        self.__edit_cache: list[Message] = []
+        self.__edit_cache: list[MessageDB] = []
         self.__edit_cache_time: datetime.datetime | None = None
 
     # caching functions
-    def get_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> list[Message]:
+    def get_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> list[MessageDB]:
         """Internal method to query for messages between a certain date.
 
         Will cache the messages on first parse and return the cache if cache was set less than an hour ago.
@@ -100,12 +100,12 @@ class StatsDataCache:
         )
 
         if self.__user_id_cache:
-            self.__message_cache = [m for m in self.__message_cache if m["user_id"] == self.__user_id_cache]
+            self.__message_cache = [m for m in self.__message_cache if m.user_id == self.__user_id_cache]
 
         self.__message_cache_time = now
         return self.__message_cache
 
-    def get_edited_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> list[Message]:
+    def get_edited_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> list[MessageDB]:
         """Internal method to query for edited messages between a certain date.
 
         Will cache the messages on first parse and return the cache if cache was set less than an hour ago.
@@ -137,7 +137,7 @@ class StatsDataCache:
         )
 
         if self.__user_id_cache:
-            self.__edit_cache = [m for m in self.__edit_cache if m["user_id"] == self.__user_id_cache]
+            self.__edit_cache = [m for m in self.__edit_cache if m.user_id == self.__user_id_cache]
 
         self.__edit_cache_time = now
         return self.__edit_cache
@@ -147,7 +147,7 @@ class StatsDataCache:
         guild_id: int,
         start: datetime.datetime,
         end: datetime.datetime,
-    ) -> list[VCInteraction]:
+    ) -> list[VCInteractionDB]:
         """Internal method to query for VC interactions between a certain date.
 
         Will cache the messages on first parse and return the cache if cache was set less than an hour ago.
@@ -173,7 +173,7 @@ class StatsDataCache:
         )
 
         if self.__user_id_cache:
-            self.__vc_cache = [m for m in self.__vc_cache if m["user_id"] == self.__user_id_cache]
+            self.__vc_cache = [m for m in self.__vc_cache if m.user_id == self.__user_id_cache]
 
         self.__vc_cache_time = now
         return self.__vc_cache
@@ -285,7 +285,7 @@ class StatsDataCache:
         self.__activity_cache_time = now
         return self.__activity_cache
 
-    def get_reactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> list[Message]:
+    def get_reactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> list[MessageDB]:
         """Internal method to query for messages between a certain date.
 
         Will cache the messages on first parse and return the cache if cache was set less than an hour ago.
@@ -338,7 +338,7 @@ class StatsDataCache:
         self.__emoji_cache_time = now
         return self.__emoji_cache
 
-    def get_threaded_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> list[Message]:
+    def get_threaded_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> list[MessageDB]:
         """_summary_.
 
         Args:
@@ -350,9 +350,9 @@ class StatsDataCache:
             List[Message]: list of messages
         """
         all_messages = self.get_messages(guild_id, start, end)
-        return [mes for mes in all_messages if mes.get("is_thread")]
+        return [mes for mes in all_messages if mes.is_thread]
 
-    def get_replies(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> list[Message]:
+    def get_replies(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> list[MessageDB]:
         """_summary_.
 
         Args:

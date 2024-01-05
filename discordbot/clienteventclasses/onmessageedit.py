@@ -80,10 +80,10 @@ class OnMessageEdit(BaseEvent):
         now = datetime.datetime.now()
 
         self.interactions.update(
-            {"_id": db_message["_id"]},
+            {"_id": db_message._id},  # noqa: SLF001
             {
                 "$set": {"content": after.content, "edited": now, "message_type": message_type},
-                "$push": {"content_old": db_message["content"]},
+                "$push": {"content_old": db_message.content},
                 "$inc": {"edit_count": 1},
             },
         )

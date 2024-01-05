@@ -3,7 +3,7 @@
 import datetime
 
 from mongo import interface
-from mongo.datatypes import Message
+from mongo.datatypes import MessageDB, ReactionDB, ReplyDB, VCInteractionDB
 from mongo.db_classes import BestSummerEverPointsDB
 
 
@@ -15,11 +15,25 @@ class UserInteractions(BestSummerEverPointsDB):
         super().__init__()
         self._vault = interface.get_collection(self.database, "userinteractions")
 
-    def paginated_query(self, query_dict: dict, limit: int = 1000, skip: int = 0) -> list[Message]:
-        """Overriding to define return type."""
-        return super().paginated_query(query_dict, limit, skip)
+    @staticmethod
+    def make_data_class(message: dict) -> MessageDB | VCInteractionDB:
+        """Makes a given message a dataclass.
 
-    def get_all_messages_for_server(self, guild_id: int) -> list[Message]:
+        Returns:
+            MessageDB: _description_
+        """
+        if message.get("is_vc"):
+            return VCInteractionDB(**message)
+
+        message["reactions"] = [ReactionDB(**react) for react in message.get("reactions", [])]
+        message["replies"] = [ReplyDB(**reply) for reply in message.get("replies", [])]
+        return MessageDB(**message)
+
+    def paginated_query(self, query_dict: dict, limit: int = 1000, skip: int = 0) -> list[MessageDB]:
+        """Overriding to define return type."""
+        return [self.make_data_class(message) for message in super().paginated_query(query_dict, limit, skip)]
+
+    def get_all_messages_for_server(self, guild_id: int) -> list[MessageDB]:
         """Gets all messages for a given server.
 
         Args:
@@ -30,7 +44,7 @@ class UserInteractions(BestSummerEverPointsDB):
         """
         return self.paginated_query({"guild_id": guild_id})
 
-    def get_all_messages_for_channel(self, guild_id: int, channel_id: int) -> list[Message]:
+    def get_all_messages_for_channel(self, guild_id: int, channel_id: int) -> list[MessageDB]:
         """Gets all messages for a given channel and guild.
 
         Args:
@@ -55,7 +69,7 @@ class UserInteractions(BestSummerEverPointsDB):
         is_thread: bool | None = False,
         is_vc: bool | None = False,
         is_bot: bool | None = False,
-    ) -> None:
+    ) -> MessageDB:
         """Adds an entry into our interactions DB with the corresponding message.
 
         :param message_id: int - message ID
@@ -88,6 +102,7 @@ class UserInteractions(BestSummerEverPointsDB):
             message.update(additional_keys)
 
         self.insert(message)
+        return self.make_data_class(message)
 
     def add_reply_to_message(  # noqa: PLR0913, PLR0917
         self,
@@ -188,7 +203,7 @@ class UserInteractions(BestSummerEverPointsDB):
             {"$pull": {"reactions": entry}},
         )
 
-    def get_message(self, guild_id: int, message_id: int) -> Message | None:
+    def get_message(self, guild_id: int, message_id: int) -> MessageDB | None:
         """Retrieves a message from the DB cache with the specific guild ID and message ID.
 
         Args:
@@ -200,7 +215,7 @@ class UserInteractions(BestSummerEverPointsDB):
         """
         ret = self.query({"guild_id": guild_id, "message_id": message_id})
         if ret:
-            return ret[0]
+            return self.make_data_class(ret[0])
         return None
 
     def add_voice_state_entry(  # noqa: PLR0913, PLR0917

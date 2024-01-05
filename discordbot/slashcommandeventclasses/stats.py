@@ -13,7 +13,7 @@ from discordbot.constants import WORDLE_SCORE_REGEX
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.stats.statsdatacache import StatsDataCache
 from discordbot.stats.statsdataclasses import StatsData
-from mongo.datatypes import Message
+from mongo.datatypes import MessageDB
 
 
 class Stats(BSEddies):
@@ -33,7 +33,7 @@ class Stats(BSEddies):
         self.command_name = "stats"
 
     @staticmethod
-    def _do_message_counts(messages: list[Message]) -> dict:  # noqa: C901, PLR0915
+    def _do_message_counts(messages: list[MessageDB]) -> dict:  # noqa: C901, PLR0915
         _swears = ["fuck", "shit", "cunt", "piss", "cock", "bollock", "dick", "twat"]
 
         _dict = {}
@@ -51,27 +51,27 @@ class Stats(BSEddies):
         _wordle_scores = []
 
         for message in messages:
-            _channel_id = message["channel_id"]
+            _channel_id = message.channel_id
             if _channel_id not in _channels_dict:
                 _channels_dict[_channel_id] = 0
             _channels_dict[_channel_id] += 1
 
-            if "message" in message["message_type"]:
-                uid = message["user_id"]
+            if "message" in message.message_type:
+                uid = message.user_id
                 if uid not in _users_dict:
                     _users_dict[uid] = 0
                 _users_dict[uid] += 1
 
             # replies
-            if "reply" in message["message_type"]:
+            if "reply" in message.message_type:
                 _replied_count += 1
-            _replies_count += len(message.get("replies", []))
+            _replies_count += len(message.replies)
 
-            if content := message["content"]:
+            if content := message.content:
                 _lengths.append(len(content))
                 _words.append(len(content.split(" ")))
 
-                if "wordle" in message["message_type"]:
+                if "wordle" in message.message_type:
                     result = re.search(WORDLE_SCORE_REGEX, content).group()
                     guesses = result.split("/")[0]
 

@@ -154,79 +154,106 @@ class BetDB(BaseDBObject, ImplementsMessage):
     """When the last bet was."""
 
 
-class Reaction(TypedDict):
+@dataclass(frozen=True)
+class ReactionDB:
     """A dict representing a user reaction."""
 
     user_id: int
-    """The discord user ID of the user who sent the message"""
+    """The discord ID of the user who sent the reaction."""
     content: str
-    """The reaction"""
+    """The reaction."""
     timestamp: datetime.datetime
-    """When the reaction happened"""
+    """When the reaction happened."""
+    is_bot: bool = False
+    """Whether the reply was from a bot."""
 
 
-class Reply(TypedDict):
-    """A dict representing a user reply."""
+@dataclass(frozen=True)
+class ReplyDB:
+    """Represents a user reply."""
 
     user_id: int
-    """The discord user ID of the user who sent the reply"""
+    """The discord ID of the user who sent the reply."""
     content: str
-    """The reply"""
+    """The reply content."""
     timestamp: datetime.datetime
-    """When the reply happened"""
+    """When the reply happened."""
     message_id: str
-    """The reply message ID"""
+    """The discord ID of the message."""
+    is_bot: bool = False
+    """Whether the reply was from a bot."""
 
 
-class Message(TypedDict):
+@dataclass(frozen=True)
+class MessageDB(BaseDBObject, ImplementsMessage):
     """A dict representing a user message."""
 
-    _id: ObjectId
-    """The internal DB ID"""
-    guild_id: int
-    """The discord server ID of the server the message is in"""
-    message_id: int
-    """The discord message ID of the message"""
+    # message info
     user_id: int
-    """The discord user ID of the user who sent the message"""
-    channel_id: int
-    """The discord channel ID of the channel the message is in"""
-    message_type: list[str]
-    """The message classification"""
-    content: str
-    """Message content (fi anything)"""
+    """The discord user ID of the user who sent the message."""
     timestamp: datetime.datetime
     """When the message was sent"""
-    reactions: NotRequired[list[Reaction]]
-    """List of reactions"""
-    replies: NotRequired[list[Reply]]
-    """List of replies"""
-    is_thread: NotRequired[bool]
-    """Whether the message happened in a thread or not"""
-    content_old: list[str]
-    """The list of previous message contents"""
-    edit_count: int
-    """Number of edits made to this message"""
-    edited_at: datetime.datetime
-    """When this message was last edited"""
+    content: str | None = None
+    """Message content."""
+    message_type: list[str] = field(default_factory=list)
+    """The message classification"""
+    is_thread: bool = False
+    """Whether the message happened in a thread or not."""
+    is_vc: bool = False
+    """Whether the message represents a VC interaction or not."""
+    is_bot: bool = False
+    """Whether the message was sent by a bot."""
+
+    # message reactions
+    reactions: list[ReactionDB] | None = None
+    """List of reactions."""
+    replies: list[ReplyDB] | None = None
+    """List of replies."""
+
+    # edit stuff
+    edit_count: int = 0
+    """Number of edits made to this message."""
+    edited_at: datetime.datetime | None = None
+    """When this message was last edited."""
+    content_old: list[str] = field(default_factory=list)
+    """The list of previous message contents."""
+
+    # emoji / sticker stuff
+    emoji_id: int | None = None
+    """The discord ID of the emoji for the 'emoji_created' interaction type."""
+    sticker_id: int | None = None
+    """The discord ID of the sticker for the 'sticker_created' interaction type."""
+    created_at: datetime.datetime | None = None
+    """The time the emoji / sticker was created."""
+    edited: datetime.datetime | None = None
+    """The time the emoji / sticker was edited."""
+    og_mid: int | None = None
+    """The discord ID of the message when the user users a sticker or emoji."""
 
 
-class VCInteraction(Message):
+@dataclass(frozen=True)
+class VCInteractionDB(MessageDB):
     """A dict representing a voice channel interaction."""
 
-    muted: bool
-    muted_time: datetime.datetime
-    deafened: bool
-    deafened_time: datetime.datetime
-    streaming: bool
-    streaming_time: datetime.datetime
-    time_in_vc: float
-    time_muted: float
-    time_deafened: float
-    time_streaming: float
-    active: bool
-    events: list[dict]
-    left: datetime.datetime
+    active: bool = False
+    time_in_vc: float | None = None
+    events: list[dict] = field(default_factory=list)
+    left: datetime.datetime | None = None
+
+    # muted
+    muted: bool = False
+    muted_time: datetime.datetime | None = None
+    time_muted: float = 0
+
+    # deafened
+    deafened: bool = False
+    deafened_time: datetime.datetime | None = None
+    time_deafened: float = 0
+
+    # streaming
+    streaming: bool = False
+    streaming_time: datetime.datetime | None = None
+    time_streaming: float = 0
 
 
 class Emoji(TypedDict):

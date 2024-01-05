@@ -82,7 +82,7 @@ class MessageSync(BaseTask):
         self.logger.info("Checking %s for unsynced messages", channel.name)
 
         _cached_messages = self.interactions.get_all_messages_for_channel(channel.guild.id, channel.id)
-        _cached_ids = [c["message_id"] for c in _cached_messages]
+        _cached_ids = [c.message_id for c in _cached_messages]
 
         sync = True
         while sync:

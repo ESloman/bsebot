@@ -26,7 +26,7 @@ class NamedDBObject(BaseDBObject):
 
 @dataclass(frozen=True)
 class ImplementsMessage:
-    """A class that represents our database object contains a message ID."""
+    """A class that represents our database object that contains a message ID."""
 
     channel_id: int
     """The discord ID of the channel the message is in."""

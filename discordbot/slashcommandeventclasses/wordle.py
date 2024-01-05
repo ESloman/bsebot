@@ -13,8 +13,7 @@ from discordbot.bot_enums import ActivityTypes
 from discordbot.bsebot import BSEBot
 from discordbot.constants import WORDLE_SCORE_REGEX
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
-from mongo.datatypes.datatypes import WordleMessageDB
-from mongo.datatypes.message import MessageDB
+from mongo.datatypes.message import MessageDB, WordleMessageDB
 
 
 class WordleStatsShareView(discord.ui.View):

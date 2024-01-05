@@ -6,8 +6,9 @@ import pytest
 
 from mongo.datatypes.basedatatypes import BaseEventDB
 from mongo.datatypes.bet import BetDB, BetterDB, OptionDB
+from mongo.datatypes.customs import EmojiDB, StickerDB
 from mongo.datatypes.guild import GuildDB
-from mongo.datatypes.message import MessageDB, ReactionDB, ReplyDB
+from mongo.datatypes.message import MessageDB, ReactionDB, ReplyDB, VCInteractionDB, WordleMessageDB
 from mongo.datatypes.revolution import RevolutionEventDB, RevolutionEventUnFrozenDB
 from mongo.datatypes.thread import ThreadDB
 from mongo.datatypes.user import UserDB
@@ -52,6 +53,20 @@ class TestBetDB:
         # test the frozen-ness
         with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
             bet_db.title = "100"
+
+
+class TestEmojiDB:
+    @pytest.mark.parametrize("emoji", dataclass_mocks.get_emoji_inputs())
+    def test_emojidb_init(self, emoji: dict) -> None:  # noqa: PLR6301
+        """Tests our EmojiDB dataclass."""
+        emoji_db = EmojiDB(**emoji)
+        assert isinstance(emoji_db, EmojiDB)
+        for key in emoji:
+            assert emoji[key] == emoji_db.__getattribute__(key)
+
+        # test the frozen-ness
+        with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
+            emoji_db.eid = 100
 
 
 class TestGuildDB:
@@ -105,6 +120,41 @@ class TestMessageDB:
         with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
             reaction_db.content = ""
 
+    @pytest.mark.parametrize("vc", dataclass_mocks.get_message_vc_inputs())
+    def test_vcinteractiondb_init(self, vc: dict) -> None:  # noqa: PLR6301
+        """Tests our VCInteractionDB dataclass."""
+        vc_db = VCInteractionDB(**vc)
+        assert isinstance(vc_db, MessageDB)
+        assert isinstance(vc_db, VCInteractionDB)
+        for key in vc:
+            assert vc[key] == vc_db.__getattribute__(key)
+
+        # test the frozen-ness
+        with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
+            vc_db.content = ""
+
+    @pytest.mark.parametrize("message", dataclass_mocks.get_message_wordle_inputs())
+    def test_wordlemessagedb_init(self, message: dict) -> None:  # noqa: PLR6301
+        """Tests our WordleMessageDB dataclass."""
+        message_db = MessageDB(**message)
+        assert isinstance(message_db, MessageDB)
+        for key in message:
+            assert message[key] == message_db.__getattribute__(key)
+
+        # test the frozen-ness
+        with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
+            message_db.content = ""
+
+        wordle_message = WordleMessageDB(**dataclasses.asdict(message_db), guesses=5)
+        assert isinstance(wordle_message, WordleMessageDB)
+        assert isinstance(wordle_message, MessageDB)
+        for key in message:
+            assert message[key] == wordle_message.__getattribute__(key)
+
+        # test the frozen-ness
+        with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
+            wordle_message.content = ""
+
 
 class TestRevolutionEventsDB:
     @pytest.mark.parametrize("event", dataclass_mocks.get_revolution_inputs())
@@ -152,6 +202,20 @@ class TestRevolutionEventsDB:
         assert not isinstance(unfrozen, BaseEventDB)
         assert isinstance(unfrozen, RevolutionEventUnFrozenDB)
         assert unfrozen.chance != event_db.chance
+
+
+class TestStickerDB:
+    @pytest.mark.parametrize("sticker", dataclass_mocks.get_sticker_inputs())
+    def test_emojidb_init(self, sticker: dict) -> None:  # noqa: PLR6301
+        """Tests our EmojiDB dataclass."""
+        sticker_db = StickerDB(**sticker)
+        assert isinstance(sticker_db, StickerDB)
+        for key in sticker:
+            assert sticker[key] == sticker_db.__getattribute__(key)
+
+        # test the frozen-ness
+        with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
+            sticker_db.stid = 100
 
 
 class TestThreadDB:

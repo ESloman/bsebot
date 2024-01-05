@@ -2,7 +2,7 @@
 
 import dataclasses
 import datetime
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from mongo.datatypes.basedatatypes import BaseDBObject, ImplementsMessage
 
@@ -82,3 +82,36 @@ class MessageDB(BaseDBObject, ImplementsMessage):
     """The time the emoji / sticker was edited."""
     og_mid: int | None = None
     """The discord ID of the message when the user users a sticker or emoji."""
+
+
+@dataclass(frozen=True)
+class VCInteractionDB(MessageDB):
+    """A dict representing a voice channel interaction."""
+
+    active: bool = False
+    time_in_vc: float | None = None
+    events: list[dict] = field(default_factory=list)
+    left: datetime.datetime | None = None
+
+    # muted
+    muted: bool = False
+    muted_time: datetime.datetime | None = None
+    time_muted: float = 0
+
+    # deafened
+    deafened: bool = False
+    deafened_time: datetime.datetime | None = None
+    time_deafened: float = 0
+
+    # streaming
+    streaming: bool = False
+    streaming_time: datetime.datetime | None = None
+    time_streaming: float = 0
+
+
+@dataclass(frozen=True)
+class WordleMessageDB(MessageDB):
+    """To represent a wordle message."""
+
+    guesses: int = 0
+    """The number of guesses for this wordle."""

@@ -3,7 +3,7 @@
 import datetime
 
 from mongo import interface
-from mongo.datatypes.datatypes import StickerDB
+from mongo.datatypes.customs import StickerDB
 from mongo.db_classes import BestSummerEverPointsDB
 
 

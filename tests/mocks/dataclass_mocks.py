@@ -195,6 +195,28 @@ def get_bet_inputs() -> list[dict]:
     ]
 
 
+def get_emoji_inputs() -> list[dict]:
+    """Returns a bunch if emoji inputs."""
+    return [
+        {
+            "_id": "632f68a96d1e89caebaa0f2f",
+            "eid": 776126839286530059,
+            "name": "simongook",
+            "created": "2020-11-11T16:50:58.225+0000",
+            "created_by": 189458414764687360,
+            "guild_id": 181098823228063764,
+        },
+        {
+            "_id": "64410b2909486e5ef195b0ee",
+            "eid": 1098546508464402522,
+            "name": "yiss",
+            "created": "2023-04-20T09:51:37.625+0000",
+            "created_by": 189458414764687360,
+            "guild_id": 181098823228063764,
+        },
+    ]
+
+
 def get_guild_inputs() -> list[dict]:
     """Returns a bunch of guild inputs."""
     return [
@@ -546,6 +568,66 @@ def get_message_reply_inputs() -> list[dict]:
     ]
 
 
+def get_message_vc_inputs() -> list[dict]:
+    """Returns a bunch of message VC inputs."""
+    return [
+        {
+            "_id": "6576292f27b71f0d8d77a021",
+            "guild_id": 181098823228063764,
+            "user_id": 189435778315714560,
+            "channel_id": 181098823232258048,
+            "message_id": None,
+            "timestamp": "2023-12-10T21:10:07.730+0000",
+            "muted": False,
+            "muted_time": None,
+            "deafened": True,
+            "deafened_time": "2023-12-10T21:10:07.730+0000",
+            "streaming": False,
+            "streaming_time": None,
+            "time_in_vc": 6191.876062,
+            "time_muted": 2911.544864,
+            "time_deafened": 0,
+            "time_streaming": 0,
+            "message_type": ["vc_joined"],
+            "active": False,
+            "events": [
+                {"timestamp": "2023-12-10T21:10:07.730+0000", "event": "joined"},
+                {"timestamp": "2023-12-10T21:15:48.208+0000", "event": "muted"},
+                {"timestamp": "2023-12-10T21:48:56.427+0000", "event": "unmuted"},
+                {"timestamp": "2023-12-10T21:49:06.933+0000", "event": "muted"},
+                {"timestamp": "2023-12-10T21:49:28.596+0000", "event": "unmuted"},
+                {"timestamp": "2023-12-10T21:49:31.066+0000", "event": "muted"},
+                {"timestamp": "2023-12-10T21:49:35.264+0000", "event": "unmuted"},
+                {"timestamp": "2023-12-10T21:49:37.142+0000", "event": "muted"},
+                {"timestamp": "2023-12-10T22:02:02.156+0000", "event": "unmuted"},
+                {"timestamp": "2023-12-10T22:03:29.297+0000", "event": "muted"},
+                {"timestamp": "2023-12-10T22:52:00.841+0000", "event": "unmuted"},
+                {"timestamp": "2023-12-10T22:53:19.606+0000", "event": "left"},
+            ],
+            "left": "2023-12-10T22:53:19.606+0000",
+        }
+    ]
+
+
+def get_message_wordle_inputs() -> list[dict]:
+    """Returns a bunch of message wordle inputs."""
+    return [
+        {
+            "_id": "65965ad44458e7fd0d7cbf7e",
+            "message_id": 1192365415251333180,
+            "guild_id": 181098823228063764,
+            "user_id": 189435778315714560,
+            "channel_id": 181098823228063764,
+            "message_type": ["message", "wordle"],
+            "content": "Wordle 929 5/6\n\n🟩⬛🟩⬛⬛\n🟩⬛🟩⬛🟨\n🟩⬛🟩🟩⬛\n🟩🟨🟩🟩⬛\n🟩🟩🟩🟩🟩",
+            "timestamp": "2024-01-04T07:14:28.074+0000",
+            "is_thread": False,
+            "is_vc": False,
+            "is_bot": False,
+        }
+    ]
+
+
 def get_revolution_inputs() -> list[dict]:
     """Returns a bunch of revolution event inputs."""
     return [
@@ -592,6 +674,28 @@ def get_revolution_inputs() -> list[dict]:
             "locked": [],
             "one_hour": True,
             "quarter_hour": True,
+        },
+    ]
+
+
+def get_sticker_inputs() -> list[dict]:
+    """Returns a bunch of sticker inputs."""
+    return [
+        {
+            "_id": "632f68ae6d1e89caebaa0f5f",
+            "stid": 947579388491354112,
+            "name": "not poggers",
+            "created": "2022-02-27T19:42:11.390+0000",
+            "created_by": 181098573579026433,
+            "guild_id": 181098823228063764,
+        },
+        {
+            "_id": "64668227d1ba627349bddd90",
+            "stid": 1108844754743083139,
+            "name": "Ben pooping",
+            "created": "2023-05-18T19:53:10.870+0000",
+            "created_by": 189458414764687360,
+            "guild_id": 181098823228063764,
         },
     ]
 

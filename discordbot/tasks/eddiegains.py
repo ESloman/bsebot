@@ -23,8 +23,7 @@ from discordbot.constants import (
     WORDLE_VALUES,
 )
 from discordbot.tasks.basetask import BaseTask
-from mongo.datatypes.datatypes import VCInteractionDB
-from mongo.datatypes.message import MessageDB
+from mongo.datatypes.message import MessageDB, VCInteractionDB
 from mongo.datatypes.user import UserDB
 
 

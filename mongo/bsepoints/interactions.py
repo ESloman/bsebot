@@ -3,8 +3,7 @@
 import datetime
 
 from mongo import interface
-from mongo.datatypes.datatypes import VCInteractionDB
-from mongo.datatypes.message import MessageDB, ReactionDB, ReplyDB
+from mongo.datatypes.message import MessageDB, ReactionDB, ReplyDB, VCInteractionDB
 from mongo.db_classes import BestSummerEverPointsDB
 
 
@@ -26,7 +25,9 @@ class UserInteractions(BestSummerEverPointsDB):
         if isinstance(message, MessageDB):
             return message
 
-        if message.get("is_vc"):
+        if "vc_joined" in message["message_type"]:
+            if "message_id" not in message:
+                message["message_id"] = None
             return VCInteractionDB(**message)
 
         message["reactions"] = [ReactionDB(**react) for react in message.get("reactions", [])]

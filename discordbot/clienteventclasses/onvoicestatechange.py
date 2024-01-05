@@ -48,7 +48,7 @@ class OnVoiceStateChange(BaseEvent):
         if not after.self_mute:
             vc_doc["time_muted"] = (now - vc_doc["muted_time"]).total_seconds()
             vc_doc["muted_time"] = None
-        elif after.self_mute:
+        else:
             vc_doc["muted_time"] = now
 
         vc_doc["events"].append({"timestamp": now, "event": "muted" if after.self_mute else "unmuted"})
@@ -76,7 +76,7 @@ class OnVoiceStateChange(BaseEvent):
         if not after.self_deaf:
             vc_doc["time_deafened"] = (now - vc_doc["deafened_time"]).total_seconds()
             vc_doc["deafened_time"] = None
-        elif after.self_deaf:
+        else:
             vc_doc["deafened_time"] = now
 
         vc_doc["events"].append({"timestamp": now, "event": "deafened" if after.self_deaf else "undeafened"})
@@ -104,7 +104,7 @@ class OnVoiceStateChange(BaseEvent):
         if not after.self_stream:
             vc_doc["time_streaming"] = (now - vc_doc["streaming_time"]).total_seconds()
             vc_doc["streaming_time"] = None
-        elif after.self_stream:
+        else:
             vc_doc["streaming_time"] = now
 
         vc_doc["events"].append({"timestamp": now, "event": "streaming" if after.self_stream else "unstreaming"})

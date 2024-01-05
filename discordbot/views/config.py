@@ -207,7 +207,6 @@ class ConfigView(discord.ui.View):
                 or interaction.user.id == (thread.owner or thread.creator)
             ):
                 configurable_threads.append(thread)
-                continue
 
         if not configurable_threads:
             view = None

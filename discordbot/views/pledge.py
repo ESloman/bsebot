@@ -41,7 +41,7 @@ class PledgeView(discord.ui.View):
 
         try:
             value = self.pledge_select.values[0]
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             value = next(o for o in self.pledge_select.options if o.default).value
 
         self.activities.add_activity(
@@ -111,9 +111,7 @@ class PledgeView(discord.ui.View):
             return
 
         channel = interaction.guild.get_channel(guild_db.channel)
-        msg = (
-            f"{interaction.user.mention} has pledged to support the KING " f"and become a <@&{guild_db.supporter_role}>"
-        )
+        msg = f"{interaction.user.mention} has pledged to support the KING and become a <@&{guild_db.supporter_role}>"
         await channel.send(content=msg, silent=True)
 
     @staticmethod

@@ -111,7 +111,7 @@ class GuildChecker(BaseTask):
                 _users = self.user_points.get_all_users_for_guild(guild.id)
                 _users = [u for u in _users if not u.inactive]
                 for user in _users:
-                    if user["uid"] not in member_ids:
+                    if user.uid not in member_ids:
                         self.user_points.update({"_id": user._id}, {"$set": {"inactive": True}})  # noqa: SLF001
                         self.activities.add_activity(user._id, guild.id, ActivityTypes.SERVER_LEAVE)  # noqa: SLF001
 

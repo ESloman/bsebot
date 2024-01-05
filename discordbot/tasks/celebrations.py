@@ -83,7 +83,6 @@ class Celebrations(BaseTask):
             channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
             await channel.trigger_typing()
             await channel.send(content=msg)
-            return
 
     @celebrations.before_loop
     async def before_celebrations(self) -> None:

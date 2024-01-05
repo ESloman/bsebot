@@ -136,10 +136,10 @@ class CreateBet(BSEddies):
             timeout_str = timeout_str.strip()
             try:
                 _seconds = utilities.convert_time_str(timeout_str)
-            except (IndexError, AttributeError, Exception) as e:
+            except Exception as exc:
                 # leaving Exception in for now until we're sure that all exception types have been caught
-                if type(e) not in {IndexError, AttributeError}:
-                    self.logger.debug("Got an error with a timestring: %s", e)
+                if type(exc) not in {IndexError, AttributeError}:
+                    self.logger.debug("Got an error with a timestring: %s", exc)
                 _seconds = None
 
             if not _seconds:

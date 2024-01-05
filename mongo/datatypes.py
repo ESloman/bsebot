@@ -370,6 +370,8 @@ class GuildDB:
     # bseddies stuff
     daily_minimum: int | None = None
     """The daily minimum number of eddies."""
+    category: int | None = None
+    """The ID of the category the BSEddies channel is in."""
     channel: int | None = None
     """The ID of the BSEddies channel."""
     tax_rate: float = 0.1

@@ -49,7 +49,7 @@ class GiftUserEddiesView(discord.ui.View):
         """
         try:
             value = self.gift_amount.values[0]
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             value = next(o for o in self.gift_amount.options if o.default).value
 
         await self.gift.gift_eddies(interaction, self.friend, int(value))

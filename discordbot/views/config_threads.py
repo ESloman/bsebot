@@ -63,7 +63,7 @@ class ThreadConfigView(discord.ui.View):
 
         try:
             day = int(self.day_select._selected_values[0])  # noqa: SLF001
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             # look for default as user didn't select one explicitly
             for opt in self.day_select.options:
                 if opt.default:
@@ -76,7 +76,7 @@ class ThreadConfigView(discord.ui.View):
 
         try:
             active = bool(int(self.active_select._selected_values[0]))  # noqa: SLF001
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             # user didn't select a value
             # true is default here
             active = True

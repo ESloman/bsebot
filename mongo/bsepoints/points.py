@@ -89,6 +89,9 @@ class UserPoints(BestSummerEverPointsDB):
             projection = {
                 "points": True,
                 "uid": True,
+                "guild_id": True,
+                "name": True,
+                "king": True,
                 "daily_minimum": True,
                 "high_score": True,
                 "inactive": True,
@@ -208,7 +211,7 @@ class UserPoints(BestSummerEverPointsDB):
         """
         self.update({"uid": user_id, "guild_id": guild_id}, {"$set": {"king": value}})
 
-    def get_current_king(self, guild_id: int) -> User:
+    def get_current_king(self, guild_id: int) -> User | None:
         """Gets current King.
 
         Args:

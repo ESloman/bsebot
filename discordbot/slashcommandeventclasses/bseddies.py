@@ -31,9 +31,9 @@ class BSEddies(BaseEvent):
         self.dmable = False
 
         # these need to be set
-        self.activity_type: ActivityTypes = None
-        self.help_string: str = None
-        self.command_name: str = None
+        self.activity_type: ActivityTypes | None = None
+        self.help_string: str | None = None
+        self.command_name: str | None = None
 
     async def _handle_validation(
         self, ctx: discord.ApplicationContext | discord.Interaction, **kwargs: dict[str, any]

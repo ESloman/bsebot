@@ -33,7 +33,7 @@ class BlessView(discord.ui.View):
         """
         try:
             value = int(self.amount_select.values[0])
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             value = int(next(o for o in self.amount_select.options if o.default).value)
 
         class_value = next(o for o in self.class_select.options if o.default).value

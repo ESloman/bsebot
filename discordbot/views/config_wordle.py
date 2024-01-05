@@ -58,7 +58,7 @@ class WordleRootConfigView(discord.ui.View):
         wordle_config_val = None
         try:
             wordle_config_val = self.wordle_config_select.values[0]
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             for opt in self.wordle_config_select.options:
                 if opt.default:
                     wordle_config_val = opt.value
@@ -81,7 +81,7 @@ class WordleRootConfigView(discord.ui.View):
         """
         try:
             wordle_config_val = self.wordle_config_select.values[0]
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             for opt in self.wordle_config_select.options:
                 if opt.default:
                     wordle_config_val = opt.value
@@ -190,7 +190,7 @@ class WordleConfigView(discord.ui.View):
         """
         try:
             active_val = bool(int(self.active_select.values[0]))
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             for opt in self.active_select.options:
                 if opt.default:
                     active_val = bool(int(opt.value))
@@ -209,7 +209,7 @@ class WordleConfigView(discord.ui.View):
         """
         try:
             active_val = bool(int(self.active_select.values[0]))
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             for opt in self.active_select.options:
                 if opt.default:
                     active_val = bool(int(opt.value))
@@ -218,7 +218,7 @@ class WordleConfigView(discord.ui.View):
         channel = None
         try:
             channel = self.channel_select.values[0]
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             for opt in self.channel_select.options:
                 if opt.default:
                     channel = opt.value
@@ -229,7 +229,7 @@ class WordleConfigView(discord.ui.View):
 
         try:
             reminders = bool(int(self.reminder_select.values[0]))
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             for opt in self.reminder_select.options:
                 if opt.default:
                     reminders = bool(int(opt.value))
@@ -300,7 +300,7 @@ class WordleEmojiReactionConfigView(discord.ui.View):
         x_val = None
         try:
             x_val = self.x_select.values[0]
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             for opt in self.x_select.options:
                 if opt.default:
                     x_val = opt.value
@@ -309,7 +309,7 @@ class WordleEmojiReactionConfigView(discord.ui.View):
         two_val = None
         try:
             two_val = self.two_select.values[0]
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             for opt in self.two_select.options:
                 if opt.default:
                     two_val = opt.value
@@ -318,7 +318,7 @@ class WordleEmojiReactionConfigView(discord.ui.View):
         six_val = None
         try:
             six_val = self.six_select.values[0]
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             for opt in self.six_select.options:
                 if opt.default:
                     six_val = opt.value

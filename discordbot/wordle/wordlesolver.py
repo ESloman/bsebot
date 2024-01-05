@@ -229,7 +229,7 @@ class WordleSolver:
             if re.match(pattern, word):
                 # still need to filter to match 'present' letters
                 for letter in present_letters:
-                    if not word.count(letter) >= (present_letters.count(letter) + correct_letters.count(letter)):
+                    if word.count(letter) < (present_letters.count(letter) + correct_letters.count(letter)):
                         break
                 else:
                     new_possible_words.append(word)

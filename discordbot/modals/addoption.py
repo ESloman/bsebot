@@ -2,6 +2,7 @@
 
 import copy
 import datetime
+from dataclasses import asdict
 from logging import Logger
 
 import discord
@@ -12,7 +13,7 @@ from discordbot.slashcommandeventclasses.close import CloseBet
 from discordbot.slashcommandeventclasses.place import PlaceBet
 from discordbot.utilities import PlaceHolderLogger
 from mongo.bsepoints.bets import UserBets
-from mongo.datatypes import Bet, Option
+from mongo.datatypes import Bet
 
 
 class AddBetOption(discord.ui.Modal):
@@ -87,13 +88,13 @@ class AddBetOption(discord.ui.Modal):
             return
 
         new_options = self.bet["options"] + outcomes
-        new_option_dict = copy.deepcopy(self.bet["option_dict"])
+        new_option_dict = {key: asdict(value) for key, value in self.bet["option_dict"].items()}
         new_option_vals = copy.deepcopy(self.bet["option_vals"])
 
         for outcome in outcomes:
             _index = outcome_count + outcomes.index(outcome)
             _emoji = self.multiple_options_emojis[_index]
-            new_option_dict[_emoji] = Option(val=outcome)
+            new_option_dict[_emoji] = {"val": outcome}
             new_option_vals.append(outcome)
 
         # extend bet's timeout

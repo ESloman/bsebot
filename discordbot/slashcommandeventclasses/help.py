@@ -73,7 +73,7 @@ class Help(BSEddies):
                 help_string = f"- {app_command.mention} - {command.help_string}"
                 message += "\n"
                 message += help_string
-            except (IndexError, AttributeError):
+            except (IndexError, AttributeError, TypeError):
                 continue
 
         message += (

@@ -46,7 +46,7 @@ class BSEddiesConfigView(discord.ui.View):
         channel = None
         try:
             channel = self.channel_select.values[0]
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             for opt in self.channel_select.options:
                 if opt.default:
                     channel = opt.value
@@ -58,7 +58,7 @@ class BSEddiesConfigView(discord.ui.View):
         king_role = None
         try:
             king_role = self.king_select.values[0]
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             for opt in self.king_select.options:
                 if opt.default:
                     king_role = opt.value
@@ -69,7 +69,7 @@ class BSEddiesConfigView(discord.ui.View):
         supporter_role = None
         try:
             supporter_role = self.supporter_select.values[0]
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             for opt in self.supporter_select.options:
                 if opt.default:
                     supporter_role = opt.value
@@ -80,7 +80,7 @@ class BSEddiesConfigView(discord.ui.View):
         revolutionary_role = None
         try:
             revolutionary_role = self.revolutionary_select.values[0]
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             for opt in self.revolutionary_select.options:
                 if opt.default:
                     revolutionary_role = opt.value

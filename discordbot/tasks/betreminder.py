@@ -66,7 +66,7 @@ class BetReminder(BaseTask):
                     try:
                         _place_command = next(a for a in self.bot.application_commands if a.name == "place")
                         msg += f"\n\nUse {_place_command.mention} to place some eddies."
-                    except (IndexError, AttributeError):
+                    except (IndexError, AttributeError, TypeError):
                         pass
 
                     await message.reply(content=msg)
@@ -93,11 +93,10 @@ class BetReminder(BaseTask):
                     try:
                         _place_command = next(a for a in self.bot.application_commands if a.name == "place")
                         msg += f"\n\nUse {_place_command.mention} to place some eddies."
-                    except (IndexError, AttributeError):
+                    except (IndexError, AttributeError, TypeError):
                         pass
 
                     await message.reply(content=msg, silent=True)
-                    continue
 
     @bet_reminder.before_loop
     async def before_bet_reminder(self) -> None:

@@ -3,7 +3,8 @@
 import datetime
 
 from mongo import interface
-from mongo.datatypes.datatypes import MessageDB, ReactionDB, ReplyDB, VCInteractionDB
+from mongo.datatypes.datatypes import VCInteractionDB
+from mongo.datatypes.message import MessageDB, ReactionDB, ReplyDB
 from mongo.db_classes import BestSummerEverPointsDB
 
 

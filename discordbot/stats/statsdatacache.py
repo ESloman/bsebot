@@ -10,7 +10,8 @@ from mongo.bsepoints.interactions import UserInteractions
 from mongo.bsepoints.points import UserPoints
 from mongo.bsepoints.transactions import UserTransactions
 from mongo.datatypes.bet import BetDB
-from mongo.datatypes.datatypes import ActivityDB, EmojiDB, MessageDB, TransactionDB, VCInteractionDB
+from mongo.datatypes.datatypes import ActivityDB, EmojiDB, TransactionDB, VCInteractionDB
+from mongo.datatypes.message import MessageDB
 from mongo.datatypes.user import UserDB
 
 

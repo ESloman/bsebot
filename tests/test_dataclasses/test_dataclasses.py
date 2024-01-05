@@ -7,6 +7,7 @@ import pytest
 from mongo.datatypes.basedatatypes import BaseEventDB
 from mongo.datatypes.bet import BetDB, BetterDB, OptionDB
 from mongo.datatypes.guild import GuildDB
+from mongo.datatypes.message import MessageDB, ReactionDB, ReplyDB
 from mongo.datatypes.revolution import RevolutionEventDB, RevolutionEventUnFrozenDB
 from mongo.datatypes.thread import ThreadDB
 from mongo.datatypes.user import UserDB
@@ -65,6 +66,44 @@ class TestGuildDB:
         # test the frozen-ness
         with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
             guild_db.king = 100
+
+
+class TestMessageDB:
+    @pytest.mark.parametrize("message", dataclass_mocks.get_message_inputs())
+    def test_messagedb_init(self, message: dict) -> None:  # noqa: PLR6301
+        """Tests our MessageDB dataclass."""
+        message_db = MessageDB(**message)
+        assert isinstance(message_db, MessageDB)
+        for key in message:
+            assert message[key] == message_db.__getattribute__(key)
+
+        # test the frozen-ness
+        with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
+            message_db.content = ""
+
+    @pytest.mark.parametrize("reply", dataclass_mocks.get_message_reply_inputs())
+    def test_replydb_init(self, reply: dict) -> None:  # noqa: PLR6301
+        """Tests our ReplyDB dataclass."""
+        reply_db = ReplyDB(**reply)
+        assert isinstance(reply_db, ReplyDB)
+        for key in reply:
+            assert reply[key] == reply_db.__getattribute__(key)
+
+        # test the frozen-ness
+        with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
+            reply_db.content = ""
+
+    @pytest.mark.parametrize("reaction", dataclass_mocks.get_message_reaction_inputs())
+    def test_reactiondb_init(self, reaction: dict) -> None:  # noqa: PLR6301
+        """Tests our ReactionDB dataclass."""
+        reaction_db = ReactionDB(**reaction)
+        assert isinstance(reaction_db, ReactionDB)
+        for key in reaction:
+            assert reaction[key] == reaction_db.__getattribute__(key)
+
+        # test the frozen-ness
+        with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
+            reaction_db.content = ""
 
 
 class TestRevolutionEventsDB:

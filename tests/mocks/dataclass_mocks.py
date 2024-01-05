@@ -3,6 +3,7 @@
 from bson import ObjectId
 
 from mongo.datatypes.bet import BetterDB, OptionDB
+from mongo.datatypes.message import ReactionDB, ReplyDB
 
 
 def get_bet_option_inputs() -> list[dict]:
@@ -397,6 +398,150 @@ def get_guild_inputs() -> list[dict]:
             "daily_minimum": 4,
             "revolution": False,
             "last_ad_time": "2023-04-27T09:49:27.837+0000",
+        },
+    ]
+
+
+def get_message_inputs() -> list[dict]:
+    """Returns a bunch of message inputs."""
+    return [
+        {
+            "_id": "65983f054458e7fd0d7cc010",
+            "message_id": 1192885314797183018,
+            "guild_id": 181098823228063764,
+            "user_id": 439103207210352650,
+            "channel_id": 439103098363838465,
+            "message_type": ["message"],
+            "content": "",
+            "timestamp": "2024-01-05T17:40:21.785+0000",
+            "is_thread": False,
+            "is_vc": False,
+            "is_bot": True,
+            "content_old": [""],
+            "edit_count": 1,
+            "edited": "2024-01-05T17:40:22.989+0000",
+        },
+        {
+            "_id": "626ae189c097bbba05988477",
+            "message_id": 969309195289641040,
+            "guild_id": 181098823228063764,
+            "user_id": 189458414764687360,
+            "channel_id": 181098823232258048,
+            "message_type": ["link", "message"],
+            "content": "https://steamcommunity.com/sharedfiles/filedetails/?id=2800909279",
+            "timestamp": "2022-04-28T18:48:41.051+0000",
+            "is_thread": False,
+            "is_vc": True,
+        },
+        {
+            "_id": "602be7ef06c6effbf781114e",
+            "message_id": 811261272418025472,
+            "guild_id": 181098823228063764,
+            "user_id": 189458414764687360,
+            "channel_id": 809773876078575636,
+            "message_type": ["message"],
+            "content": '"nice" is supposed to be "niche"',
+            "timestamp": "2021-02-16T15:42:39.850+0000",
+            "is_thread": False,
+        },
+        {
+            "_id": "63752185822b430452557707",
+            "message_id": 915204034934210621,
+            "guild_id": 181098823228063764,
+            "user_id": 809505325505576971,
+            "channel_id": 181098823228063764,
+            "message_type": ["message"],
+            "content": "Bet has been cancelled. Any bets were refunded to the betters.",
+            "timestamp": "2021-11-30T11:34:05.597+0000",
+            "is_thread": False,
+            "content_old": ["Bet has been cancelled. Any bets were refunded to the betters."],
+            "edit_count": 1,
+            "edited": "2022-10-25T11:44:59.157+0000",
+            "is_bot": True,
+        },
+        {
+            "_id": "632f74d2600624a047b4f252",
+            "message_id": 1023343411882889277,
+            "guild_id": 181098823228063764,
+            "user_id": 77458304837615616,
+            "channel_id": 1014906447911452732,
+            "message_type": ["message"],
+            "content": "“you _are_ Sauron??”",
+            "timestamp": "2022-09-24T21:21:22.194+0000",
+            "is_thread": True,
+        },
+        {
+            "_id": "60ec63908f2a769a37674cfa",
+            "message_id": 864170573612318740,
+            "guild_id": 181098823228063764,
+            "user_id": 220132511328501760,
+            "channel_id": 181098823228063764,
+            "message_type": ["link"],
+            "content": "https://i.redd.it/o6j2biox2la71.jpg",
+            "timestamp": "2021-07-12T15:45:20.262+0000",
+            "replies": [
+                ReplyDB(
+                    user_id=189405043018039297,
+                    content="Blessed",
+                    timestamp="2021-07-12T16:00:52.929+0000",
+                    message_id=864174485501247509,
+                )
+            ],
+            "is_thread": False,
+        },
+        {
+            "_id": "60c36716857b2f18fb46d30e",
+            "message_id": 852904363580063745,
+            "guild_id": 181098823228063764,
+            "user_id": 189405043018039297,
+            "channel_id": 181098823228063764,
+            "message_type": ["message"],
+            "content": (
+                "We're the queer power ranger. Losing ranked game after ranked game to represent the real and "
+                "definitely comparable struggles of the LGBTIA+ community"
+            ),
+            "timestamp": "2021-06-11T13:37:26.474+0000",
+            "reactions": [
+                ReactionDB(user_id=77458304837615616, content="😂", timestamp="2021-06-11T13:37:26.474+0000"),
+                ReactionDB(user_id=189458414764687360, content="😂", timestamp="2021-06-11T13:37:26.474+0000"),
+            ],
+            "is_thread": False,
+            "content_old": [
+                (
+                    "We're the queer power ranger. Losing ranked game after ranked game to represent the real and "
+                    "definitely comparable struggles of the LGBTQIA+ community"
+                )
+            ],
+            "edit_count": 1,
+            "edited": "2021-06-11T13:37:44.526+0000",
+        },
+    ]
+
+
+def get_message_reaction_inputs() -> list[dict]:
+    """Returns a bunch of message reaction inputs."""
+    return [
+        {"user_id": 77458304837615616, "content": "😂", "timestamp": "2021-06-11T13:37:26.474+0000"},
+        {"user_id": 189458414764687360, "content": "😂", "timestamp": "2021-06-11T13:37:26.474+0000"},
+        {"user_id": 189458414764687360, "content": "😏", "timestamp": "2021-06-10T15:37:25.899+0000"},
+        {"user_id": 189405043018039297, "content": "😍", "timestamp": "2021-06-10T15:37:25.899+0000"},
+    ]
+
+
+def get_message_reply_inputs() -> list[dict]:
+    """Returns a bunch of message reply inputs."""
+    return [
+        {
+            "user_id": 220132511328501760,
+            "content": "Pin it",
+            "timestamp": "2021-07-11T10:43:36.188+0000",
+            "message_id": 863732251756986368,
+        },
+        {
+            "user_id": 181098573579026433,
+            "content": "",
+            "timestamp": "2021-07-11T10:45:16.021+0000",
+            "message_id": 863732670487592970,
         },
     ]
 

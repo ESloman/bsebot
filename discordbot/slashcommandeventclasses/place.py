@@ -10,6 +10,7 @@ from discordbot.bsebot import BSEBot
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.slashcommandeventclasses.close import CloseBet
 from discordbot.views.place import PlaceABetView
+from mongo.datatypes import Bet
 
 
 class PlaceBet(BSEddies):
@@ -32,7 +33,7 @@ class PlaceBet(BSEddies):
     async def create_bet_view(
         self,
         ctx: discord.ApplicationContext | discord.Interaction,
-        bet_ids: list | None = None,
+        bets: list[Bet] | None = None,
     ) -> None:
         """Creates the view.
 
@@ -40,13 +41,10 @@ class PlaceBet(BSEddies):
             ctx (discord.ApplicationContext): the context
             bet_ids (list | None): the bet IDs
         """
-        if not bet_ids:
-            bet_ids = self.user_bets.query(
-                {"active": True, "guild_id": ctx.guild_id},
-                projection={"bet_id": True, "title": True, "option_dict": True},
-            )
+        if not bets:
+            bets = self.user_bets.get_all_active_bets(ctx.guild_id)
 
-        if len(bet_ids) == 0:
+        if len(bets) == 0:
             try:
                 await ctx.respond(content="There are no active bets to bet on right now.", ephemeral=True)
             except AttributeError:
@@ -55,7 +53,7 @@ class PlaceBet(BSEddies):
 
         points = self.user_points.get_user_points(ctx.user.id, ctx.guild_id)
 
-        place_bet_view = PlaceABetView(bet_ids, points, submit_callback=self.place_bet)
+        place_bet_view = PlaceABetView(bets, points, submit_callback=self.place_bet)
         try:
             await ctx.respond(content="**Placing a bet**", view=place_bet_view, ephemeral=True)
         except AttributeError:
@@ -107,14 +105,14 @@ class PlaceBet(BSEddies):
 
         view = discordbot.views.bet.BetView(bet, self, self.bseddies_close)
 
-        if not bet["active"]:
+        if not bet.active:
             msg = f"Your reaction on **Bet {bet_id}** failed as the bet is closed for new bets."
             await response.edit_message(content=msg, view=None, delete_after=10)
             return None
 
         emoji = emoji.strip()
 
-        if emoji not in bet["option_dict"]:
+        if emoji not in bet.option_dict:
             msg = f"Your reaction on **Bet {bet_id}** failed as that reaction isn't a valid outcome."
             await response.edit_message(content=msg, view=None, delete_after=10)
             return None
@@ -127,20 +125,20 @@ class PlaceBet(BSEddies):
         success = self.user_bets.add_better_to_bet(bet_id, guild.id, ctx.user.id, emoji, amount)
 
         if not success["success"]:
-            msg = f"Your bet on **Bet {bet_id}** failed cos __{success['reason']}__?"
+            msg = f"Your bet on **Bet {bet_id}** failed because of: __{success['reason']}__?"
             await response.edit_message(content=msg, view=None, delete_after=10)
             return False
 
         bet = self.user_bets.get_bet_from_id(guild.id, bet_id)
-        channel = await self.client.fetch_channel(bet["channel_id"])
+        channel = await self.client.fetch_channel(bet.channel_id)
 
         if not channel:
             # channel is thread
-            channel = guild.get_thread(bet["channel_id"])
+            channel = guild.get_thread(bet.channel_id)
 
-        message = channel.get_partial_message(bet["message_id"])
+        message = channel.get_partial_message(bet.message_id)
         embed = self.embed_manager.get_bet_embed(guild, bet)
-        content = f"# {bet['title']}\n_Created by <@{bet['user']}>_"
+        content = f"# {bet.title}\n_Created by <@{bet.user}>_"
         await message.edit(content=content, embed=embed, view=view)
         await response.edit_message(content="Placed the bet for you!", view=None, delete_after=10)
         return None

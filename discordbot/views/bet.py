@@ -97,7 +97,7 @@ class BetView(discord.ui.View):
             await interaction.response.send_message(content=message, ephemeral=True, delete_after=10)
             return
 
-        _bet = self.user_bets.get_bet_from_id(self.bet["guild_id"], self.bet["bet_id"])
+        _bet = self.user_bets.get_bet_from_id(self.bet.guild_id, self.bet.bet_id)
 
         if not _bet.active or _bet.closed:
             message = "Bet is closed - you can't change your bet."
@@ -122,4 +122,4 @@ class BetView(discord.ui.View):
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        await self.close.cancel_bet(interaction, self.bet["bet_id"])
+        await self.close.cancel_bet(interaction, self.bet.bet_id)

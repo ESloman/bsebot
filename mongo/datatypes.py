@@ -147,6 +147,8 @@ class Bet:
     """When the bet will stop taking bets."""
     active: bool
     """Whether the bet is accepting new bets or not."""
+    updated: datetime.datetime | None = None
+    """When the bet was last updated."""
 
     # bet options
     options: list[str] = field(default=list)
@@ -165,6 +167,8 @@ class Bet:
     """Whether the bet was made in a private channel."""
     closed: datetime.datetime | None = None
     """Date the bet was closed."""
+    last_bet: datetime.datetime | None = None
+    """When the last bet was."""
 
 
 class Reaction(TypedDict):

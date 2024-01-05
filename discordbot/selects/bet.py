@@ -7,23 +7,24 @@ from discordbot.constants import BET_TITLE_DISPLAY_LENTH
 from discordbot.selects.betamount import BetSelectAmount
 from discordbot.selects.betoutcomes import BetOutcomesSelect
 from mongo.bsepoints.bets import UserBets
+from mongo.datatypes import Bet
 
 
 class BetSelect(Select):
     """Class for Bet select."""
 
-    def __init__(self, bets: list) -> None:
+    def __init__(self, bets: list[Bet]) -> None:
         """Initialisation method."""
         options = []
         for bet in bets:
-            title = bet["title"]
-            if len(bet["title"]) > BET_TITLE_DISPLAY_LENTH:
+            title = bet.title
+            if len(bet.title) > BET_TITLE_DISPLAY_LENTH:
                 title = title[:99]
-            label = f"{bet['bet_id']} - {title}"
+            label = f"{bet.bet_id} - {title}"
             if len(label) > BET_TITLE_DISPLAY_LENTH:
                 label = label[:99]
 
-            options.append(SelectOption(label=label, value=f"{bet['bet_id']}", description=title))
+            options.append(SelectOption(label=label, value=f"{bet.bet_id}", description=title))
 
         if len(bets) == 1:
             options[0].default = True
@@ -42,7 +43,7 @@ class BetSelect(Select):
             option.default = option.value == selected_bet
 
         bet_obj = self.user_bets.get_bet_from_id(interaction.guild_id, selected_bet)
-        outcomes = bet_obj["option_dict"]
+        outcomes = bet_obj.option_dict
 
         outcome_select = [item for item in self.view.children if type(item) is BetOutcomesSelect]
 

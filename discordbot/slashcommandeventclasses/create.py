@@ -165,14 +165,14 @@ class CreateBet(BSEddies):
         )
 
         embed = self.embed_manager.get_bet_embed(ctx.guild, bet)
-        content = f"# {bet['title']}\n_Created by <@{bet['user']}>_"
+        content = f"# {bet.title}\n_Created by <@{bet.user}>_"
 
         bet_view = BetView(bet, bseddies_place, bseddies_close)
 
         message = await ctx.channel.send(content=content, embed=embed, view=bet_view)
 
         self.user_bets.update(
-            {"_id": bet["_id"]},
+            {"_id": bet._id},  # noqa: SLF001
             {"$set": {"message_id": message.id, "channel_id": message.channel.id}},
         )
 

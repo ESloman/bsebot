@@ -88,4 +88,4 @@ class OnMessageEdit(BaseEvent):
             },
         )
 
-        self.logger.info("%s was edited - updated DB", after.id)
+        self.logger.debug("%s was edited - updated DB", after.id)

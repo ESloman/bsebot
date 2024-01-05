@@ -4,23 +4,24 @@ import discord
 
 from discordbot.selects.bet import BetSelect
 from discordbot.selects.betoutcomes import BetOutcomesSelect
+from mongo.datatypes import Bet
 
 
 class CloseABetView(discord.ui.View):
     """Class for closing a bet view."""
 
-    def __init__(self, bet_ids: list, submit_callback: callable) -> None:
+    def __init__(self, bets: list[Bet], submit_callback: callable) -> None:
         """Initialisation method.
 
         Args:
-            bet_ids (list): the list of available bet IDs
+            bets (list[Bet]): the list of available bet IDs
             submit_callback (callable): the function to call when closing
         """
         super().__init__(timeout=60)
-        self.add_item(BetSelect(bet_ids))
+        self.add_item(BetSelect(bets))
 
-        if len(bet_ids) == 1 and "option_dict" in bet_ids[0]:
-            outcomes = bet_ids[0]["option_dict"]
+        if len(bets) == 1 and bets[0].option_dict:
+            outcomes = bets[0].option_dict
             options = [discord.SelectOption(label=outcomes[key].val, value=key, emoji=key) for key in outcomes]
         else:
             options = []

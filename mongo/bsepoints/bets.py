@@ -1,5 +1,6 @@
 """Bets collection interface."""
 
+import copy
 import datetime
 
 from bson import ObjectId
@@ -50,6 +51,41 @@ class UserBets(BestSummerEverPointsDB):
         self.update({"type": "counter", "guild_id": guild_id}, {"$inc": {"count": 1}})
         return f"{count:04d}"
 
+    def __add_new_better_to_bet(self, bet: Bet, user_id: int, emoji: str, points: int) -> dict[str, bool]:
+        """Adds a new better to a bet.
+
+        Args:
+            bet (Bet): the bet to addd them to
+            user_id (int): the user ID to add
+            emoji (str): the option the user is betting on
+            points (int): the amount of points the user is better
+
+        Returns:
+            dict: result dict
+        """
+        doc = {
+            "user_id": user_id,
+            "emoji": emoji,
+            "first_bet": datetime.datetime.now(),
+            "last_bet": datetime.datetime.now(),
+            "points": points,
+        }
+
+        new_users = copy.deepcopy(bet.users)
+        if user_id not in bet.users:
+            new_users.append(user_id)
+
+        self.update({"_id": bet._id}, {"$set": {f"betters.{user_id}": doc, "users": new_users}})  # noqa: SLF001
+        self.user_points.increment_points(
+            user_id,
+            bet.guild_id,
+            points * -1,
+            TransactionTypes.BET_PLACE,
+            bet_id=bet.bet_id,
+            comment="Bet placed through slash command",
+        )
+        return {"success": True}
+
     @staticmethod
     def make_data_class(bet: dict) -> Bet:
         """Turns a bet dict into a dataclass representation."""
@@ -90,6 +126,7 @@ class UserBets(BestSummerEverPointsDB):
         return [
             self.make_data_class(inactive)
             for inactive in self.query({"active": False, "result": None, "guild_id": guild_id})
+            if "type" not in inactive
         ]
 
     def get_all_pending_bets(self, guild_id: int) -> list[Bet]:
@@ -100,7 +137,11 @@ class UserBets(BestSummerEverPointsDB):
         :param guild_id: int - guild ID to get the pending bets for
         :return: list of pending bets
         """
-        return [self.make_data_class(pending) for pending in self.query({"result": None, "guild_id": guild_id})]
+        return [
+            self.make_data_class(pending)
+            for pending in self.query({"result": None, "guild_id": guild_id})
+            if "type" not in pending
+        ]
 
     def get_user_pending_points(self, user_id: int, guild_id: int) -> int:
         """Returns a users points from a given guild.
@@ -113,12 +154,15 @@ class UserBets(BestSummerEverPointsDB):
         """
         pending = 0
 
-        pending_bets = self.query(
-            {f"betters.{user_id}": {"$exists": True}, "guild_id": guild_id, "result": None},
-        )
+        pending_bets = [
+            self.make_data_class(bet)
+            for bet in self.query(
+                {f"betters.{user_id}": {"$exists": True}, "guild_id": guild_id, "result": None},
+            )
+        ]
         for bet in pending_bets:
-            our_user = bet["betters"][str(user_id)]
-            pending += our_user["points"]
+            our_user = bet.betters[str(user_id)]
+            pending += our_user.points
 
         return pending
 
@@ -135,6 +179,7 @@ class UserBets(BestSummerEverPointsDB):
         return [
             self.make_data_class(pending)
             for pending in self.query({f"betters.{user_id}": {"$exists": True}, "guild_id": guild_id, "result": None})
+            if "type" not in pending
         ]
 
     def create_new_bet(  # noqa: PLR0913, PLR0917
@@ -200,55 +245,38 @@ class UserBets(BestSummerEverPointsDB):
         If not, we check that the user has enough points, that they're betting on an option they have
         already bet on and if the bet is still active.
 
-        :param bet_id: int - The ID of the bet to get
-        :param guild_id: int - The guild ID the bet exists in
-        :param user_id: int - the user ID of the user betting
-        :param emoji: : str - the option the user is attempting to bet on
-        :param points: int - the amount of points the user is betting
-        :return: success dict
+        Args:
+            bet_id (int): ID of the bet to get
+            guild_id (int): the guild ID the bet exists in
+            user_id (int): the user ID of the user betting
+            emoji (str): the option the user is attempting to bet on
+            points (int): the amount of points the user is betting
+
+        Returns:
+            dict: the success dict
         """
-        ret = self.make_data_class(self.query({"bet_id": bet_id, "guild_id": guild_id})[0])
-        betters = ret["betters"]
+        bet = self.make_data_class(self.query({"bet_id": bet_id, "guild_id": guild_id})[0])
 
         # checking the user has enough points
         cur_points = self.user_points.get_user_points(user_id, guild_id)
         if (points > cur_points) or cur_points == 0:
             return {"success": False, "reason": "not enough points"}
 
-        if user_id not in ret.get("users", []):
-            ret["users"].append(user_id)
-
         # this section is the logic if the user hasn't bet on this bet yet
-        if str(user_id) not in betters:
-            doc = {
-                "user_id": user_id,
-                "emoji": emoji,
-                "first_bet": datetime.datetime.now(),
-                "last_bet": datetime.datetime.now(),
-                "points": points,
-            }
-            self.update({"_id": ret["_id"]}, {"$set": {f"betters.{user_id}": doc, "users": ret["users"]}})
-            self.user_points.increment_points(
-                user_id,
-                guild_id,
-                points * -1,
-                TransactionTypes.BET_PLACE,
-                bet_id=bet_id,
-                comment="Bet placed through slash command",
-            )
-            return {"success": True}
+        if str(user_id) not in bet.betters:
+            return self.__add_new_better_to_bet(bet, user_id, emoji, points)
 
         # here we're checking if the user has already bet on the option they have selected
         # if they haven't - then it's an error
-        current_better = betters[str(user_id)]
+        current_better = bet.betters[str(user_id)]
         if emoji != current_better.emoji:
             return {"success": False, "reason": "wrong option"}
 
         self.update(
-            {"_id": ret["_id"]},
+            {"_id": bet._id},  # noqa: SLF001
             {
                 "$inc": {f"betters.{user_id}.points": points},
-                "$set": {"last_bet": datetime.datetime.now(), "users": ret["users"]},
+                "$set": {"last_bet": datetime.datetime.now(), "users": bet.users},
             },
         )
 
@@ -275,7 +303,7 @@ class UserBets(BestSummerEverPointsDB):
                 comment="Place refund",
             )
             self.update(
-                {"_id": ret["_id"]},
+                {"_id": bet._id},  # noqa: SLF001
                 {"$inc": {f"betters.{user_id}.points": -1 * points}, "$set": {"last_bet": datetime.datetime.now()}},
             )
             return {"success": False, "reason": "not enough points"}

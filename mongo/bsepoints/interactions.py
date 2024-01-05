@@ -32,9 +32,21 @@ class UserInteractions(BestSummerEverPointsDB):
         message["replies"] = [ReplyDB(**reply) for reply in message.get("replies", [])]
         return MessageDB(**message)
 
-    def query(self, query_dict: dict, limit: int = 1000) -> list[MessageDB]:
+    def query(  # noqa: PLR0913, PLR0917
+        self,
+        query_dict: dict,
+        limit: int = 1000,
+        projection: dict | None = None,
+        as_gen: bool = False,
+        skip: int | None = None,
+        use_paginated: bool = False,
+        sort: list[tuple] | None = None,
+    ) -> list[MessageDB]:
         """Overriding to define return type."""
-        return [self.make_data_class(message) for message in super().query(query_dict, limit)]
+        return [
+            self.make_data_class(message)
+            for message in super().query(query_dict, limit, projection, as_gen, skip, use_paginated, sort)
+        ]
 
     def paginated_query(self, query_dict: dict, limit: int = 1000, skip: int = 0) -> list[MessageDB]:
         """Overriding to define return type."""

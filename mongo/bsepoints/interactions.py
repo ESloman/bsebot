@@ -16,18 +16,25 @@ class UserInteractions(BestSummerEverPointsDB):
         self._vault = interface.get_collection(self.database, "userinteractions")
 
     @staticmethod
-    def make_data_class(message: dict) -> MessageDB | VCInteractionDB:
+    def make_data_class(message: dict | MessageDB) -> MessageDB | VCInteractionDB:
         """Makes a given message a dataclass.
 
         Returns:
             MessageDB: _description_
         """
+        if isinstance(message, MessageDB):
+            return message
+
         if message.get("is_vc"):
             return VCInteractionDB(**message)
 
         message["reactions"] = [ReactionDB(**react) for react in message.get("reactions", [])]
         message["replies"] = [ReplyDB(**reply) for reply in message.get("replies", [])]
         return MessageDB(**message)
+
+    def query(self, query_dict: dict, limit: int = 1000) -> list[MessageDB]:
+        """Overriding to define return type."""
+        return [self.make_data_class(message) for message in super().query(query_dict, limit)]
 
     def paginated_query(self, query_dict: dict, limit: int = 1000, skip: int = 0) -> list[MessageDB]:
         """Overriding to define return type."""
@@ -40,7 +47,7 @@ class UserInteractions(BestSummerEverPointsDB):
             guild_id (int): the server Id to get messages for
 
         Returns:
-            list[Message]: list of messages
+            list[MessageDB]: list of messages
         """
         return self.paginated_query({"guild_id": guild_id})
 
@@ -52,7 +59,7 @@ class UserInteractions(BestSummerEverPointsDB):
             channel_id (int): the channel Id to get messages for
 
         Returns:
-            list[Message]: list of messages
+            list[MessageDB]: list of messages
         """
         return self.paginated_query({"guild_id": guild_id, "channel_id": channel_id})
 
@@ -66,24 +73,24 @@ class UserInteractions(BestSummerEverPointsDB):
         message_content: str,
         timestamp: datetime.datetime,
         additional_keys: dict | None = None,
-        is_thread: bool | None = False,
-        is_vc: bool | None = False,
-        is_bot: bool | None = False,
+        is_thread: bool = False,
+        is_vc: bool = False,
+        is_bot: bool = False,
     ) -> MessageDB:
         """Adds an entry into our interactions DB with the corresponding message.
 
-        :param message_id: int - message ID
-        :param guild_id: int - guild ID
-        :param user_id: int - user ID
-        :param channel_id: int - channel ID
-        :param message_type: str - message type
-        :param message_content: str - message content
-        :param timestamp: - datetime object
-        :param additional_keys:
-        :param is_thread: whether the entry happened in a thread or not
-        :param is_vc: whether the entry happened in a vc or not
-        :param is_bot: whether the message came from a bot or not
-        :return: None.
+        Args:
+            message_id (int): message ID
+            guild_id (int): guild ID
+            user_id (int): user ID
+            channel_id (int): channel ID
+            message_type (str): message type
+            message_content (str): message content
+            timestamp (datetime.datetime): timestamp of the message.
+            additional_keys: (dict | None): any additional info. Defaults to None.
+            is_thread (bool): whether the entry happened in a thread or not. Defaults to False.
+            is_vc (bool): whether the entry happened in a vc or not. Defaults to False.
+            is_bot (bool): whether the message came from a bot or not. Defaults to False.
         """
         message = {
             "message_id": message_id,
@@ -117,7 +124,6 @@ class UserInteractions(BestSummerEverPointsDB):
         """Adds a reply to a message.
 
         Args:
-            PLR0917self (_type_): _description_
             reference_message_id (int): _description_
             message_id (int): _description_
             guild_id (int): _description_
@@ -151,14 +157,14 @@ class UserInteractions(BestSummerEverPointsDB):
     ) -> None:
         """Adds a reaction entry into our interactions DB with the corresponding message.
 
-        :param message_id: int - message ID
-        :param guild_id: int - guild ID
-        :param user_id: int - user ID
-        :param channel_id: int - channel ID
-        :param message_content: str - message content
-        :param timestamp: - datetime object
-        :param author_id:
-        :return: None.
+        Args:
+            message_id (int): message ID
+            guild_id (int): guild ID
+            user_id (int): user ID
+            channel_id (int): channel ID
+            message_content (str): message content
+            timestamp (datetime.datetime): when the reaction happened
+            author_id (int): the author ID
         """
         entry = {
             "user_id": user_id,
@@ -183,14 +189,14 @@ class UserInteractions(BestSummerEverPointsDB):
     ) -> None:
         """Adds a reaction entry into our interactions DB with the corresponding message.
 
-        :param message_id: int - message ID
-        :param guild_id: int - guild ID
-        :param user_id: int - user ID
-        :param channel_id: int - channel ID
-        :param message_content: str - message content
-        :param timestamp: - datetime object
-        :param author_id:
-        :return: None.
+        Args:
+            message_id (int): message ID
+            guild_id (int): guild ID
+            user_id (int): user ID
+            channel_id (int): channel ID
+            message_content (str): message content
+            timestamp (datetime.datetime): timestamp
+            author_id (int): the author ID
         """
         entry = {
             "user_id": user_id,

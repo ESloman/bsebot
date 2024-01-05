@@ -193,7 +193,7 @@ class MessageDB(BaseDBObject, ImplementsMessage):
     """The discord user ID of the user who sent the message."""
     timestamp: datetime.datetime
     """When the message was sent"""
-    content: str | None = None
+    content: str = ""
     """Message content."""
     message_type: list[str] = field(default_factory=list)
     """The message classification"""

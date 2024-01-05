@@ -47,7 +47,7 @@ class Predict(BSEddies):
         breakdown = eddies_dict[ctx.author.id][1]
         tax = eddies_dict[ctx.author.id][2]
 
-        king_id = self.user_points.get_current_king(ctx.guild_id)["uid"]
+        king_id = self.user_points.get_current_king(ctx.guild_id).uid
 
         if king_id == ctx.author.id:
             tax_message = f"You're estimated to gain `{tax}` from tax gains."

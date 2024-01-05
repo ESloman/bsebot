@@ -23,7 +23,7 @@ from discordbot.constants import (
     WORDLE_VALUES,
 )
 from discordbot.tasks.basetask import BaseTask
-from mongo.datatypes import UserDB
+from mongo.datatypes import MessageDB, UserDB, VCInteractionDB
 
 
 class EddieGainMessager(BaseTask):
@@ -202,9 +202,9 @@ class BSEddiesManager(BaseTask):
         self,
         user: int,
         user_dict: UserDB,
-        user_results: list,
-        user_reacted: list,
-        user_reactions: list,
+        user_results: list[MessageDB | VCInteractionDB],
+        user_reacted: list[MessageDB],
+        user_reactions: list[MessageDB],
         start: datetime.datetime,
         end: datetime.datetime,
         guild_id: int,
@@ -218,9 +218,9 @@ class BSEddiesManager(BaseTask):
         Args:
             user (int): The user ID of the user
             user_dict (User): The user database object
-            user_results (list): list of user interactions
-            user_reacted (list): list of messages the user reacted to
-            user_reactions (list): list of messages the user had reactions on
+            user_results (list[MessageDB | VCInteractionDB]): list of user interactions
+            user_reacted (list[MessageDB]): list of messages the user reacted to
+            user_reactions (list[MessageDB]): list of messages the user had reactions on
             start (datetime.datetime): start time to calc eddies for
             end (datetime.datetime): end time to calc eddies for
             guild_id (int): the guild ID the user exists in
@@ -255,55 +255,55 @@ class BSEddiesManager(BaseTask):
                 self.user_points.set_daily_minimum(user, guild_id, minimum)
 
         message_types = []
-        for r in user_results:
-            if isinstance(r["message_type"], list):
+        for mess in user_results:
+            if isinstance(mess.message_type, list):
                 # handle vc later
-                if "vc_joined" in r["message_type"] or "vc_streaming" in r["message_type"]:
+                if "vc_joined" in mess.message_type or "vc_streaming" in mess.message_type:
                     continue
-                message_types.extend(r["message_type"])
+                message_types.extend(mess.message_type)
             else:
-                message_types.append(r["message_type"])
+                message_types.append(mess.message_type)
 
         # REACTION HANDLING
         for message in user_reacted:
             # messages the user sent that got reacted to
-            for reaction in message.get("reactions", []):
-                if reaction["user_id"] == user:
+            for reaction in message.reactions:
+                if reaction.user_id == user:
                     continue
-                if start < reaction["timestamp"] < end:
+                if start < reaction.timestamp < end:
                     message_types.append("reaction_received")
 
         for message in user_reactions:
             # messages the user reacted to
-            reactions = message.get("reactions", [])
+            reactions = message.reactions
 
             our_user_reactions = [
-                react for react in reactions if react["user_id"] == user and (start < react["timestamp"] < end)
+                react for react in reactions if react.user_id == user and (start < react.timestamp < end)
             ]
             for reaction in our_user_reactions:
-                if _ := self.server_emojis.get_emoji_from_name(guild_id, reaction["content"]):
+                if _ := self.server_emojis.get_emoji_from_name(guild_id, reaction.content):
                     message_types.append("custom_emoji_reaction")
 
                 matching_reactions = [
-                    react for react in reactions if react["content"] == reaction["content"] and react["user_id"] != user
+                    react for react in reactions if react.content == reaction.content and react.user_id != user
                 ]
 
                 if matching_reactions:
                     # someone else reacted with the same emoji we did
-                    _matching = sorted(matching_reactions, key=lambda x: x["timestamp"])
-                    if _matching[0]["timestamp"] > reaction["timestamp"]:
+                    _matching = sorted(matching_reactions, key=lambda x: x.timestamp)
+                    if _matching[0].timestamp > reaction.timestamp:
                         # we reacted first!
                         message_types.extend("react_train" for _ in matching_reactions)
 
         for message in user_results:
             # add reaction_received events
-            if replies := message.get("replies"):
+            if replies := message.replies:
                 for reply in replies:
-                    if reply["user_id"] == user:
+                    if reply.user_id == user:
                         continue
                     message_types.append("reply_received")
             # add used wordle words
-            if wordle_word and wordle_word in message.get("content", ""):
+            if wordle_word and wordle_word in message.content:
                 message_types.append("wordle_word_used")
 
         count = Counter(message_types)
@@ -311,8 +311,8 @@ class BSEddiesManager(BaseTask):
 
         # handle VC stuff here
         # VC events are different as we want to work out eddies on time spent in VC
-        vc_joined_events = [vc for vc in user_results if "vc_joined" in vc["message_type"]]
-        vc_total_time = sum([vc["time_in_vc"] for vc in vc_joined_events])
+        vc_joined_events = [vc for vc in user_results if "vc_joined" in vc.message_type]
+        vc_total_time = sum([vc.time_in_vc for vc in vc_joined_events])
         vc_eddies = vc_total_time * MESSAGE_VALUES["vc_joined"]
 
         if vc_total_time:
@@ -321,8 +321,8 @@ class BSEddiesManager(BaseTask):
 
         eddies_gained += vc_eddies
 
-        vc_streaming_events = [vc for vc in user_results if "vc_streaming" in vc["message_type"]]
-        stream_total_time = sum([vc["time_streaming"] for vc in vc_streaming_events])
+        vc_streaming_events = [vc for vc in user_results if "vc_streaming" in vc.message_type]
+        stream_total_time = sum([vc.time_streaming for vc in vc_streaming_events])
         stream_eddies = stream_total_time * MESSAGE_VALUES["vc_streaming"]
 
         if stream_total_time:
@@ -386,11 +386,9 @@ class BSEddiesManager(BaseTask):
         for user in user_ids:
             self.logger.info("processing %s", user)
 
-            user_results = [r for r in results if r["user_id"] == user]
-            user_reacted_messages = [r for r in reactions if r["user_id"] == user]
-            user_reactions = [
-                r for r in reactions if any(react for react in r["reactions"] if react["user_id"] == user)
-            ]
+            user_results = [r for r in results if r.user_id == user]
+            user_reacted_messages = [r for r in reactions if r.user_id == user]
+            user_reactions = [r for r in reactions if any(react for react in r.reactions if react.user_id == user)]
 
             eddies_gained, breakdown = self.calc_individual(
                 user,
@@ -406,8 +404,8 @@ class BSEddiesManager(BaseTask):
             )
 
             try:
-                wordle_message = next(w for w in user_results if "wordle" in w["message_type"])
-                result = re.search(WORDLE_SCORE_REGEX, wordle_message["content"]).group()
+                wordle_message = next(w for w in user_results if "wordle" in w.message_type)
+                result = re.search(WORDLE_SCORE_REGEX, wordle_message.content).group()
                 guesses = result.split("/")[0]
 
                 if guesses != "X":
@@ -447,7 +445,7 @@ class BSEddiesManager(BaseTask):
         bot_guesses = 100  # arbitrarily high number
         if results:
             bot_message = results[0]
-            bot_result = re.search(r"[\dX]/\d", bot_message["content"]).group()
+            bot_result = re.search(r"[\dX]/\d", bot_message.content).group()
             bot_guesses = bot_result.split("/")[0]
             bot_guesses = int(bot_guesses) if bot_guesses != "X" else 100
 
@@ -465,7 +463,7 @@ class BSEddiesManager(BaseTask):
                     gain_dict["wordle_win"] = 1
                     eddie_gain_dict[wordle_attempt[0]] = [eddie_gain_dict[wordle_attempt[0]][0] + 5, gain_dict]
 
-        current_king_id = self.user_points.get_current_king(guild_id)["uid"]
+        current_king_id = self.user_points.get_current_king(guild_id).uid
         tax_gains = 0
 
         tax_rate, supporter_tax_rate = self.guilds.get_tax_rate(guild_id)

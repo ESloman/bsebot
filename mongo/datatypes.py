@@ -15,16 +15,7 @@ from bson import ObjectId
 
 from discordbot.bot_enums import ActivityTypes, SupporterType, TransactionTypes
 from discordbot.constants import CREATOR
-
-
-@dataclass(frozen=True)
-class BaseDBObject:
-    """A class representing a base database object."""
-
-    _id: ObjectId
-    """The internal database ID."""
-    guild_id: int
-    """The discord guild/server ID."""
+from mongo.basedatatypes import BaseDBObject, ImplementsMessage, NamedDBObject
 
 
 @dataclass(frozen=True)
@@ -60,14 +51,12 @@ class Activity(BaseDBObject):
 
 
 @dataclass(frozen=True)
-class UserDB(BaseDBObject):
+class UserDB(NamedDBObject):
     """Represents a user in the database."""
 
     # basic user information
     uid: int
     """The discord user ID."""
-    name: str
-    """The nickname for the guild or the user name."""
 
     # eddies stuff
     points: int
@@ -125,7 +114,7 @@ class OptionDB:
 
 
 @dataclass(frozen=True)
-class BetDB(BaseDBObject):
+class BetDB(BaseDBObject, ImplementsMessage):
     """A dict representing a bet."""
 
     # general info
@@ -135,10 +124,6 @@ class BetDB(BaseDBObject):
     """The ID of the user who created the bet."""
     title: str
     """Title of the bet."""
-    channel_id: int
-    """The channel the bet exists in."""
-    message_id: int
-    """The message ID of the bet."""
     created: datetime.datetime
     """The time the bet was created."""
     timeout: datetime.datetime
@@ -334,13 +319,11 @@ class RevolutionEventType(TypedDict):
 
 
 @dataclass(frozen=True)
-class ThreadDB(BaseDBObject):
+class ThreadDB(NamedDBObject):
     """A dict representing a thread."""
 
     thread_id: int
     """The discord thread ID of the thread"""
-    name: str
-    """Name of the thread"""
     active: bool
     """Only for SPOILER threads - if we should still be posting spoiler warnings"""
     day: int | None = None
@@ -352,14 +335,12 @@ class ThreadDB(BaseDBObject):
 
 
 @dataclass(frozen=True)
-class GuildDB(BaseDBObject):
+class GuildDB(NamedDBObject):
     """A dict representing a guild/server."""
 
     # general server info
     owner_id: int
     """The ID of the user that owns the server."""
-    name: str = ""
-    """The guild/server's name."""
     created: datetime.datetime | None = None
     """When the server was created."""
     admins: list[int] = field(default_factory=list)
@@ -443,7 +424,7 @@ class GuildDB(BaseDBObject):
 
 
 @dataclass(frozen=True)
-class ReminderDB(BaseDBObject):
+class ReminderDB(BaseDBObject, ImplementsMessage):
     """A dict representing a reminder."""
 
     created: datetime.datetime
@@ -456,7 +437,3 @@ class ReminderDB(BaseDBObject):
     """Whether the reminder is active."""
     reason: str
     """The reason for the reminder."""
-    channel_id: int | None = None
-    """The ID of the channel the reminder was created in."""
-    message_id: int | None = None
-    """The ID of the message the reminder was created for."""

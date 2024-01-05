@@ -40,4 +40,4 @@ class UserPointsMock:
 class GuildsMock:
     def get_guild(self, guild_id: int) -> GuildDB:  # noqa: PLR6301
         """Mock for get_guild."""
-        return GuildDB(_id=ObjectId(), guild_id=guild_id, king=3, admins=[], owner_id=guild_id)
+        return GuildDB(_id=ObjectId(), guild_id=guild_id, king=3, admins=[], owner_id=guild_id, name="somename")

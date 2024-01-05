@@ -451,6 +451,42 @@ def get_revolution_inputs() -> list[dict]:
     ]
 
 
+def get_thread_inputs() -> list[dict]:
+    """Returns a bunch of thread inputs."""
+    return [
+        {
+            "_id": ObjectId("64e6f6f85cc48e1bd4269713"),
+            "guild_id": 181098823228063764,
+            "thread_id": 1144154553558765669,
+            "name": "Asoka spoilers",
+            "day": 2,
+            "active": False,
+            "created": "2023-08-24T06:21:42.932+0000",
+            "owner": 181098573579026433,
+        },
+        {
+            "_id": ObjectId("637d4a6683d1cdb6e4fbd5af"),
+            "guild_id": 181098823228063764,
+            "thread_id": 1044582450573082644,
+            "name": "It's coming home!",
+            "day": None,
+            "active": False,
+            "created": "2022-11-22T11:57:43.620+0000",
+            "creator": 181098573579026433,
+        },
+        {
+            "_id": "63353a4653898b1b69f79e9e",
+            "guild_id": 181098823228063764,
+            "thread_id": 1014906447911452732,
+            "name": "rings-of-power-SPOILERS",
+            "day": 4,
+            "active": False,
+            "created": "2022-09-01T14:36:24.917+0000",
+            "creator": 189458414764687360,
+        },
+    ]
+
+
 def get_user_inputs() -> list[dict]:
     """Returns a bunch of user inputs."""
     return [

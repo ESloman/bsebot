@@ -4,7 +4,7 @@ from discord import Interaction, SelectOption
 from discord.ui import Select
 
 from discordbot.constants import BET_TITLE_DISPLAY_LENTH
-from mongo.datatypes.datatypes import ThreadDB
+from mongo.datatypes.thread import ThreadDB
 
 
 class ThreadConfigSelect(Select):

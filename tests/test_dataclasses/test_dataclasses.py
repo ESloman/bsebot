@@ -8,6 +8,7 @@ from mongo.datatypes.basedatatypes import BaseEventDB
 from mongo.datatypes.bet import BetDB, BetterDB, OptionDB
 from mongo.datatypes.guild import GuildDB
 from mongo.datatypes.revolution import RevolutionEventDB, RevolutionEventUnFrozenDB
+from mongo.datatypes.thread import ThreadDB
 from mongo.datatypes.user import UserDB
 from tests.mocks import dataclass_mocks
 
@@ -112,6 +113,20 @@ class TestRevolutionEventsDB:
         assert not isinstance(unfrozen, BaseEventDB)
         assert isinstance(unfrozen, RevolutionEventUnFrozenDB)
         assert unfrozen.chance != event_db.chance
+
+
+class TestThreadDB:
+    @pytest.mark.parametrize("thread", dataclass_mocks.get_thread_inputs())
+    def test_userdb_init(self, thread: dict) -> None:  # noqa: PLR6301
+        """Tests our ThreadDB dataclass."""
+        thread_db = ThreadDB(**thread)
+        assert isinstance(thread_db, ThreadDB)
+        for key in thread:
+            assert thread[key] == thread_db.__getattribute__(key)
+
+        # test the frozen-ness
+        with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
+            thread_db.name = "some name"
 
 
 class TestUserDB:

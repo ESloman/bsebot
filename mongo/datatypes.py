@@ -256,6 +256,14 @@ class VCInteractionDB(MessageDB):
     time_streaming: float = 0
 
 
+@dataclass(frozen=True)
+class WordleMessageDB(MessageDB):
+    """To represent a wordle message."""
+
+    guesses: int = 0
+    """The number of guesses for this wordle."""
+
+
 class Emoji(TypedDict):
     """A dict representing an emoji."""
 

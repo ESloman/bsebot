@@ -285,7 +285,7 @@ class Stats(BSEddies):
 
         # messages
         messages = _cache.get_messages(_guild_id, start, end)
-        monthly_messages = [m for m in messages if month_start <= m["timestamp"] <= month_end]
+        monthly_messages = [m for m in messages if month_start <= m.timestamp <= month_end]
 
         total_messages = len(messages)
         monthly_total_messages = len(monthly_messages)

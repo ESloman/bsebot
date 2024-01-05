@@ -8,7 +8,7 @@ from discordbot.selects.betoutcomes import BetOutcomesSelect
 from discordbot.slashcommandeventclasses.close import CloseBet
 from discordbot.slashcommandeventclasses.place import PlaceBet
 from mongo.bsepoints.bets import UserBets
-from mongo.datatypes import BetDB
+from mongo.datatypes.bet import BetDB
 
 
 class BetChange(discord.ui.View):

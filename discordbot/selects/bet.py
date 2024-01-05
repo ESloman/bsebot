@@ -7,7 +7,7 @@ from discordbot.constants import BET_TITLE_DISPLAY_LENTH
 from discordbot.selects.betamount import BetSelectAmount
 from discordbot.selects.betoutcomes import BetOutcomesSelect
 from mongo.bsepoints.bets import UserBets
-from mongo.datatypes import BetDB
+from mongo.datatypes.bet import BetDB
 
 
 class BetSelect(Select):

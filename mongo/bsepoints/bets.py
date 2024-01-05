@@ -8,7 +8,7 @@ from bson import ObjectId
 from discordbot.bot_enums import TransactionTypes
 from mongo import interface
 from mongo.bsepoints.points import UserPoints
-from mongo.datatypes import BetDB, BetterDB, OptionDB
+from mongo.datatypes.bet import BetDB, BetterDB, OptionDB
 from mongo.db_classes import BestSummerEverPointsDB
 
 

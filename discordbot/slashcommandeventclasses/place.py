@@ -10,7 +10,7 @@ from discordbot.bsebot import BSEBot
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.slashcommandeventclasses.close import CloseBet
 from discordbot.views.place import PlaceABetView
-from mongo.datatypes import BetDB
+from mongo.datatypes.bet import BetDB
 
 
 class PlaceBet(BSEddies):

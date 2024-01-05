@@ -8,7 +8,7 @@ from discordbot.embedmanager import EmbedManager
 from discordbot.selects.bet import BetSelect
 from discordbot.views.bet import BetView
 from mongo.bsepoints.bets import UserBets
-from mongo.datatypes import BetDB
+from mongo.datatypes.bet import BetDB
 
 
 class RefreshBetView(discord.ui.View):

@@ -12,7 +12,7 @@ from pymongo.results import UpdateResult
 
 from mongo import interface
 from mongo.bsepoints.guilds import Guilds
-from mongo.datatypes import RevolutionEventDB
+from mongo.datatypes.datatypes import RevolutionEventDB
 from mongo.db_classes import BestSummerEverPointsDB
 
 

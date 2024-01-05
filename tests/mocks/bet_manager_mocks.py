@@ -3,7 +3,7 @@
 import datetime
 
 from mongo.bsepoints.bets import UserBets
-from mongo.datatypes import BetDB
+from mongo.datatypes.bet import BetDB
 
 
 def get_bet_dict(idx: int) -> BetDB:

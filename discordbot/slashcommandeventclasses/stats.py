@@ -13,7 +13,7 @@ from discordbot.constants import WORDLE_SCORE_REGEX
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.stats.statsdatacache import StatsDataCache
 from discordbot.stats.statsdataclasses import StatsData
-from mongo.datatypes import MessageDB
+from mongo.datatypes.datatypes import MessageDB
 
 
 class Stats(BSEddies):

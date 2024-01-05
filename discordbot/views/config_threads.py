@@ -4,7 +4,7 @@ import discord
 
 from discordbot.selects.threadconfig import ThreadActiveSelect, ThreadConfigSelect, ThreadDaySelect
 from mongo.bsedataclasses import SpoilerThreads
-from mongo.datatypes import ThreadDB
+from mongo.datatypes.datatypes import ThreadDB
 
 
 class ThreadConfigView(discord.ui.View):

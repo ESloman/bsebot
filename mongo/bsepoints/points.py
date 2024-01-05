@@ -7,7 +7,7 @@ from pymongo.results import UpdateResult
 from discordbot.bot_enums import TransactionTypes
 from mongo import interface
 from mongo.bsepoints.transactions import UserTransactions
-from mongo.datatypes import UserDB
+from mongo.datatypes.user import UserDB
 from mongo.db_classes import BestSummerEverPointsDB
 
 

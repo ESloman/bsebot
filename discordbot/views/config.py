@@ -22,7 +22,7 @@ from discordbot.views.config_wordle import WordleRootConfigView
 from mongo.bsedataclasses import SpoilerThreads
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.points import UserPoints
-from mongo.datatypes import GuildDB
+from mongo.datatypes.datatypes import GuildDB
 
 
 class ConfigView(discord.ui.View):

@@ -7,7 +7,7 @@ import discord
 from discordbot.selects.bet import BetSelect
 from discordbot.selects.betamount import BetSelectAmount
 from discordbot.selects.betoutcomes import BetOutcomesSelect
-from mongo.datatypes import BetDB
+from mongo.datatypes.bet import BetDB
 
 
 class PlaceABetView(discord.ui.View):

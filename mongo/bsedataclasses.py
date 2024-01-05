@@ -15,7 +15,7 @@ from discordbot.bot_enums import AwardsTypes, StatTypes
 from discordbot.stats.statsdataclasses import Stat
 from discordbot.wordle.data_type import WordleSolve
 from mongo import interface
-from mongo.datatypes import ThreadDB
+from mongo.datatypes.datatypes import ThreadDB
 from mongo.db_classes import BestSummerEverPointsDB
 
 

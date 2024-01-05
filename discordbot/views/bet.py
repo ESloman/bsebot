@@ -9,7 +9,7 @@ from discordbot.slashcommandeventclasses.close import CloseBet
 from discordbot.slashcommandeventclasses.place import PlaceBet
 from discordbot.views.betchange import BetChange
 from mongo.bsepoints.bets import UserBets
-from mongo.datatypes import BetDB
+from mongo.datatypes.bet import BetDB
 
 
 class BetView(discord.ui.View):

@@ -6,7 +6,7 @@ from pymongo.results import InsertManyResult, InsertOneResult
 
 from discordbot.bot_enums import ActivityTypes
 from mongo import interface
-from mongo.datatypes import Activity
+from mongo.datatypes.datatypes import ActivityDB
 from mongo.db_classes import BestSummerEverPointsDB
 
 
@@ -45,7 +45,7 @@ class UserActivities(BestSummerEverPointsDB):
         guild_id: int,
         start: datetime.datetime,
         end: datetime.datetime,
-    ) -> list[Activity]:
+    ) -> list[ActivityDB]:
         """Get guild activities between two timestamps.
 
         Args:
@@ -58,7 +58,7 @@ class UserActivities(BestSummerEverPointsDB):
         """
         return self.query({"guild_id": guild_id, "timestamp": {"$gt": start, "$lt": end}}, limit=10000)
 
-    def get_all_guild_activities(self, guild_id: int) -> list[Activity]:
+    def get_all_guild_activities(self, guild_id: int) -> list[ActivityDB]:
         """Get all activities for the given guild ID.
 
         Args:

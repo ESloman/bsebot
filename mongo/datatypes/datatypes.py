@@ -5,13 +5,13 @@ from dataclasses import asdict, dataclass, field
 
 from bson import ObjectId
 
-from discordbot.bot_enums import ActivityTypes, SupporterType, TransactionTypes
+from discordbot.bot_enums import ActivityTypes, TransactionTypes
 from discordbot.constants import CREATOR
-from mongo.basedatatypes import BaseDBObject, ImplementsMessage, NamedDBObject
+from mongo.datatypes.basedatatypes import BaseDBObject, ImplementsMessage, NamedDBObject
 
 
 @dataclass(frozen=True)
-class Transaction(BaseDBObject):
+class TransactionDB(BaseDBObject):
     """A dict representing a transaction."""
 
     uid: int
@@ -29,7 +29,7 @@ class Transaction(BaseDBObject):
 
 
 @dataclass(frozen=True)
-class Activity(BaseDBObject):
+class ActivityDB(BaseDBObject):
     """A dict representing an activity."""
 
     uid: int
@@ -40,110 +40,6 @@ class Activity(BaseDBObject):
     """The time the activity took place."""
     comment: str
     """The comment pertaining to the activity."""
-
-
-@dataclass(frozen=True)
-class UserDB(NamedDBObject):
-    """Represents a user in the database."""
-
-    # basic user information
-    uid: int
-    """The discord user ID."""
-
-    # eddies stuff
-    points: int
-    """The amount of eddies the user has in the server."""
-    king: bool
-    """Whether the user is KING in the server."""
-    daily_eddies: bool = False
-    """Whether the user receives daily eddie messages."""
-    daily_summary: bool = False
-    """Whether the user receives the daily eddies summary message."""
-    pending_points: int = field(default=0)
-    """The number of eddies the user has on pending bets."""
-    high_score: int = field(default=0)
-    """The user's highest ever amount of eddies."""
-    daily_minimum: int | None = None
-    """The minimum amount of eddies the user is going to get each day."""
-    supporter_type: SupporterType = SupporterType.NEUTRAL
-    """The user's alignment."""
-    inactive: bool = False
-    """Whether the user has left the server or not."""
-
-    # DEPRECATED
-    transaction_history: list[Transaction] | None = field(default_factory=list)
-    """*DEPRECATED*"""
-    activity_history: list[Activity] | None = field(default_factory=list)
-    """*DEPCREATED*"""
-    last_cull_time: datetime.datetime | None = None
-    """*DEPRECATED*"""
-    cull_warning: bool | None = None
-    """*DEPRECATED*"""
-
-
-@dataclass(frozen=True)
-class BetterDB:
-    """Represents a better on a bet."""
-
-    user_id: int
-    """The ID of the user."""
-    emoji: str
-    """The emoji the user bet with."""
-    points: int
-    """The amount of eddies the user put in on this bet."""
-    first_bet: datetime.datetime | None = None
-    """The time the user put in their first bet."""
-    last_bet: datetime.datetime | None = None
-    """The time the user put in their last bet."""
-
-
-@dataclass(frozen=True)
-class OptionDB:
-    """A dict representing an option in a bet."""
-
-    val: str
-    """The human outcome name."""
-
-
-@dataclass(frozen=True)
-class BetDB(BaseDBObject, ImplementsMessage):
-    """A dict representing a bet."""
-
-    # general info
-    bet_id: int
-    """The bet ID of the bet"""
-    user: int
-    """The ID of the user who created the bet."""
-    title: str
-    """Title of the bet."""
-    created: datetime.datetime
-    """The time the bet was created."""
-    timeout: datetime.datetime
-    """When the bet will stop taking bets."""
-    active: bool
-    """Whether the bet is accepting new bets or not."""
-    updated: datetime.datetime | None = None
-    """When the bet was last updated."""
-
-    # bet options
-    options: list[str] = field(default=list)
-    """List of option emojis."""
-    option_vals: list[str] = field(default=list)
-    """List of option values."""
-    users: list[int] = field(default=list)
-    """List of user IDs."""
-    betters: dict[str, BetterDB] = field(default=dict)
-    """A dict of user ID keys to their bet amounts."""
-    result: str | None = None
-    """The outcome of the bet."""
-    option_dict: dict[str, OptionDB] = field(default=dict)
-    """a dict of emoji keys to the human readable names."""
-    private: bool = False
-    """Whether the bet was made in a private channel."""
-    closed: datetime.datetime | None = None
-    """Date the bet was closed."""
-    last_bet: datetime.datetime | None = None
-    """When the last bet was."""
 
 
 @dataclass(frozen=True)

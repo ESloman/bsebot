@@ -6,7 +6,7 @@ from bson import ObjectId
 from pymongo.results import UpdateResult
 
 from mongo import interface
-from mongo.datatypes import ReminderDB
+from mongo.datatypes.datatypes import ReminderDB
 from mongo.db_classes import BestSummerEverPointsDB
 
 

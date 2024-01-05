@@ -23,7 +23,8 @@ from discordbot.constants import (
     WORDLE_VALUES,
 )
 from discordbot.tasks.basetask import BaseTask
-from mongo.datatypes import MessageDB, UserDB, VCInteractionDB
+from mongo.datatypes.datatypes import MessageDB, VCInteractionDB
+from mongo.datatypes.user import UserDB
 
 
 class EddieGainMessager(BaseTask):

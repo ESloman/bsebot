@@ -4,7 +4,8 @@ import random
 
 from bson import ObjectId
 
-from mongo.datatypes import GuildDB, UserDB
+from mongo.datatypes.datatypes import GuildDB
+from mongo.datatypes.user import UserDB
 
 
 class UserPointsMock:

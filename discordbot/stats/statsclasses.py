@@ -21,7 +21,7 @@ from discordbot.stats.statsdataclasses import Stat
 from discordbot.utilities import PlaceHolderLogger
 
 if TYPE_CHECKING:
-    from mongo.datatypes import ReactionDB
+    from mongo.datatypes.datatypes import ReactionDB
 
 
 class StatsGatherer:  # noqa: PLR0904

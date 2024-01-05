@@ -6,7 +6,7 @@ from pymongo.results import InsertManyResult, InsertOneResult
 
 from discordbot.bot_enums import TransactionTypes
 from mongo import interface
-from mongo.datatypes import Transaction
+from mongo.datatypes.datatypes import TransactionDB
 from mongo.db_classes import BestSummerEverPointsDB
 
 
@@ -53,7 +53,7 @@ class UserTransactions(BestSummerEverPointsDB):
         guild_id: int,
         start: datetime.datetime,
         end: datetime.datetime,
-    ) -> list[Transaction]:
+    ) -> list[TransactionDB]:
         """Get guild transactions between two timestamps.
 
         Args:
@@ -65,11 +65,11 @@ class UserTransactions(BestSummerEverPointsDB):
             list[Transaction]: transactions between those times
         """
         return [
-            Transaction(**trans)
+            TransactionDB(**trans)
             for trans in self.query({"guild_id": guild_id, "timestamp": {"$gt": start, "$lt": end}}, limit=10000)
         ]
 
-    def get_all_guild_transactions(self, guild_id: int) -> list[Transaction]:
+    def get_all_guild_transactions(self, guild_id: int) -> list[TransactionDB]:
         """Get all transactions for a given guild ID.
 
         Args:
@@ -78,4 +78,4 @@ class UserTransactions(BestSummerEverPointsDB):
         Returns:
             list[Transaction]: list of transactions
         """
-        return [Transaction(**trans) for trans in self.query({"guild_id": guild_id}, limit=10000)]
+        return [TransactionDB(**trans) for trans in self.query({"guild_id": guild_id}, limit=10000)]

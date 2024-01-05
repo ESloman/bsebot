@@ -7,7 +7,7 @@ from unittest.mock import patch
 import discord
 
 from discordbot.embedmanager import EmbedManager
-from mongo.datatypes import BetterDB
+from mongo.datatypes.bet import BetterDB
 from tests.mocks import embed_mocks, mongo_mocks
 from tests.mocks.discord_mocks import GuildMock
 

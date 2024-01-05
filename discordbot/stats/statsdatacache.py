@@ -9,7 +9,9 @@ from mongo.bsepoints.emojis import ServerEmojis
 from mongo.bsepoints.interactions import UserInteractions
 from mongo.bsepoints.points import UserPoints
 from mongo.bsepoints.transactions import UserTransactions
-from mongo.datatypes import Activity, BetDB, EmojiDB, MessageDB, Transaction, UserDB, VCInteractionDB
+from mongo.datatypes.bet import BetDB
+from mongo.datatypes.datatypes import ActivityDB, EmojiDB, MessageDB, TransactionDB, VCInteractionDB
+from mongo.datatypes.user import UserDB
 
 
 class StatsDataCache:
@@ -50,10 +52,10 @@ class StatsDataCache:
         self.__user_cache: list[UserDB] = []
         self.__user_cache_time: datetime.datetime | None = None
 
-        self.__transaction_cache: list[Transaction] = []
+        self.__transaction_cache: list[TransactionDB] = []
         self.__transaction_cache_time: datetime.datetime | None = None
 
-        self.__activity_cache: list[Activity] = []
+        self.__activity_cache: list[ActivityDB] = []
         self.__activity_cache_time: datetime.datetime | None = None
 
         self.__reactions_cache: list[MessageDB] = []
@@ -229,7 +231,7 @@ class StatsDataCache:
         self.__user_cache_time = now
         return self.__user_cache
 
-    def get_transactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> list[Transaction]:
+    def get_transactions(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> list[TransactionDB]:
         """Internal method to query for transactions between a certain date.
 
         Will cache the transactions on first parse and return the cache if cache was set less than an hour ago.
@@ -257,7 +259,7 @@ class StatsDataCache:
         self.__transaction_cache_time = now
         return self.__transaction_cache
 
-    def get_activities(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> list[Activity]:
+    def get_activities(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> list[ActivityDB]:
         """Internal method to query for activities between a certain date.
 
         Will cache the activities on first parse and return the cache if cache was set less than an hour ago.

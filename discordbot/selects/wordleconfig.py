@@ -4,7 +4,7 @@ import discord
 from discord import Interaction, SelectOption
 from discord.ui import Select
 
-from mongo.datatypes import EmojiDB
+from mongo.datatypes.datatypes import EmojiDB
 
 
 class WordleRootSelect(Select):

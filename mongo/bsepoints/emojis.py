@@ -3,7 +3,7 @@
 import datetime
 
 from mongo import interface
-from mongo.datatypes import EmojiDB
+from mongo.datatypes.datatypes import EmojiDB
 from mongo.db_classes import BestSummerEverPointsDB
 
 

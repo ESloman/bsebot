@@ -13,7 +13,7 @@ from discordbot.slashcommandeventclasses.close import CloseBet
 from discordbot.slashcommandeventclasses.place import PlaceBet
 from discordbot.utilities import PlaceHolderLogger
 from mongo.bsepoints.bets import UserBets
-from mongo.datatypes import BetDB
+from mongo.datatypes.bet import BetDB
 
 
 class AddBetOption(discord.ui.Modal):

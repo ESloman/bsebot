@@ -7,7 +7,8 @@ from dataclasses import asdict
 from bson import ObjectId
 
 from mongo.bsepoints import bets
-from mongo.datatypes import BetDB, RevolutionEventDB
+from mongo.datatypes.bet import BetDB
+from mongo.datatypes.datatypes import RevolutionEventDB
 
 
 def get_bet() -> BetDB:

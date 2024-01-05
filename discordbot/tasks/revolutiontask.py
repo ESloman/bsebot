@@ -14,7 +14,7 @@ from discordbot.bsebot import BSEBot
 from discordbot.embedmanager import EmbedManager
 from discordbot.tasks.basetask import BaseTask
 from discordbot.views.revolution import RevolutionView
-from mongo.datatypes import GuildDB, RevolutionEventDB
+from mongo.datatypes.datatypes import GuildDB, RevolutionEventDB
 
 
 class BSEddiesRevolutionTask(BaseTask):

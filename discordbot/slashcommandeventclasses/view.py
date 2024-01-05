@@ -7,7 +7,7 @@ import discord
 from discordbot.bot_enums import ActivityTypes
 from discordbot.bsebot import BSEBot
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
-from mongo.datatypes import UserDB
+from mongo.datatypes.user import UserDB
 
 
 class View(BSEddies):

@@ -9,7 +9,7 @@ from discordbot.bot_enums import ActivityTypes, TransactionTypes
 from discordbot.bsebot import BSEBot
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.views.close import CloseABetView
-from mongo.datatypes import BetDB
+from mongo.datatypes.bet import BetDB
 
 
 class CloseBet(BSEddies):

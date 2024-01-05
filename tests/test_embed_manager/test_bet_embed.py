@@ -1,5 +1,7 @@
 """Tests our bet related functions in Embed Manager."""
 
+import copy
+import dataclasses
 from unittest.mock import patch
 
 import discord
@@ -25,7 +27,7 @@ class TestBetEmbed:
     def test_get_bet_embed_empty() -> None:
         """Tests our get_bet_embed with no betters."""
         bet = embed_mocks.get_bet()
-        bet["option_dict"] = {}
+        dataclasses.replace(bet, option_dict={})
         guild = GuildMock(123456)
 
         embeds = EmbedManager()
@@ -36,7 +38,7 @@ class TestBetEmbed:
     def test_get_bet_not_active() -> None:
         """Tests our get_bet_embed with an inactive bet."""
         bet = embed_mocks.get_bet()
-        bet["active"] = False
+        bet = dataclasses.replace(bet, active=False)
         guild = GuildMock(123456)
 
         embeds = EmbedManager()
@@ -47,7 +49,9 @@ class TestBetEmbed:
     def test_get_bet_embed_with_empty_id() -> None:
         """Tests our get_bet_embed with an empty id."""
         bet = embed_mocks.get_bet()
-        bet["betters"]["0"] = Better(user_id=0, emoji="1", points=10)
+        new_betters = copy.deepcopy(bet.betters)
+        new_betters["0"] = Better(user_id=0, emoji="1", points=10)
+        bet = dataclasses.replace(bet, betters=new_betters)
         guild = GuildMock(123456)
 
         embeds = EmbedManager()

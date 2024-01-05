@@ -1755,7 +1755,7 @@ class StatsGatherer:  # noqa: PLR0904
         bets = self.cache.get_bets(guild_id, start, end)
         bet_users = {}
         for bet in bets:
-            u = bet["user"]
+            u = bet.user
             if u not in bet_users:
                 bet_users[u] = 0
             bet_users[u] += 1

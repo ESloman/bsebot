@@ -157,7 +157,7 @@ class CloseBet(BSEddies):
 
         outcomes = ""
         for result in zip(ret_dict["result"], ret_dict["outcome_name"], strict=True):
-            outcomes += f"\n- {result[0]} {result[1]['val']}"
+            outcomes += f"\n- {result[0]} {result[1].val}"
 
         desc += f"\nWinning outcome(s):{outcomes}"
         desc += "\n## Winners"
@@ -269,7 +269,7 @@ class CloseBet(BSEddies):
                 self.user_points.increment_points(
                     int(better),
                     guild.id,
-                    bet_dict["points"],
+                    bet_dict.points,
                     TransactionTypes.BET_REFUND,
                     comment="Bet was cancelled",
                     bet_id=bet_id,

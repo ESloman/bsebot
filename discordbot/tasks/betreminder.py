@@ -35,8 +35,8 @@ class BetReminder(BaseTask):
             await self.bot.fetch_guild(guild.id)  # type: discord.Guild
             active = self.user_bets.get_all_active_bets(guild.id)
             for bet in active:
-                timeout = bet["timeout"]
-                created = bet["created"]
+                timeout = bet.timeout
+                created = bet.created
                 total_time = (timeout - created).total_seconds()
 
                 if total_time <= 604800:  # noqa: PLR2004
@@ -51,11 +51,11 @@ class BetReminder(BaseTask):
                 if 82800 <= diff.total_seconds() <= 86400:  # noqa: PLR2004
                     # ~ 24 hours to go!
                     # send reminder here
-                    channel = await self.bot.fetch_channel(bet["channel_id"])
+                    channel = await self.bot.fetch_channel(bet.channel_id)
                     await channel.trigger_typing()
-                    message = await channel.fetch_message(bet["message_id"])
+                    message = await channel.fetch_message(bet.message_id)
 
-                    num_betters = len(bet["betters"].keys())
+                    num_betters = len(bet.betters.keys())
                     eddies_bet = self.user_bets.count_eddies_for_bet(bet)
 
                     msg = (
@@ -82,9 +82,9 @@ class BetReminder(BaseTask):
 
                 if half_diff.total_seconds() < 3600:  # noqa: PLR2004
                     # within the hour threshold for half way
-                    channel = await self.bot.fetch_channel(bet["channel_id"])
+                    channel = await self.bot.fetch_channel(bet.channel_id)
                     await channel.trigger_typing()
-                    message = await channel.fetch_message(bet["message_id"])
+                    message = await channel.fetch_message(bet.message_id)
 
                     eddies_bet = self.user_bets.count_eddies_for_bet(bet)
 

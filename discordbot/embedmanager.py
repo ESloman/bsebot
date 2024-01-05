@@ -43,8 +43,8 @@ class EmbedManager:
         """
         embed = discord.Embed(colour=discord.Colour.random())
 
-        for option in bet["option_dict"]:
-            betters = [bet["betters"][b] for b in bet["betters"] if bet["betters"][b].emoji == option]
+        for option in bet.option_dict:
+            betters = [bet.betters[b] for b in bet.betters if bet.betters[b].emoji == option]
             if betters:
                 val = ""
                 for better in sorted(betters, key=lambda b: b.points, reverse=True):
@@ -58,12 +58,12 @@ class EmbedManager:
                     )
             else:
                 val = "No-one has bet on this option yet."
-            embed.add_field(name=f"{option} - {bet['option_dict'][option].val}", value=val, inline=False)
+            embed.add_field(name=f"{option} - {bet.option_dict[option].val}", value=val, inline=False)
 
         footer = None
-        if not bet["active"]:
+        if not bet.active:
             footer = "This bet is closed for new bets. Awaiting results from the bet creator."
-        elif timeout := bet.get("timeout"):
+        elif timeout := bet.timeout:
             footer = f"This bet will stop taking bets on {timeout.strftime('%d %b %y %H:%M:%S')}."
 
         if footer:

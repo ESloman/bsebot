@@ -13,19 +13,19 @@ from mongo.datatypes import Bet
 class PlaceABetView(discord.ui.View):
     """Class for place bet view."""
 
-    def __init__(self, bet_ids: list[Bet], user_eddies: int, submit_callback: callable) -> None:
+    def __init__(self, bets: list[Bet], user_eddies: int, submit_callback: callable) -> None:
         """Initialisation method.
 
         Args:
-            bet_ids (list): the bet IDs
+            bets (list): the bets
             user_eddies (int): the amount of user eddies
             submit_callback (callable): the submit callback function
         """
         super().__init__(timeout=60)
-        self.add_item(BetSelect(bet_ids))
+        self.add_item(BetSelect(bets))
 
-        if len(bet_ids) == 1 and "option_dict" in bet_ids[0]:
-            outcomes = bet_ids[0]["option_dict"]
+        if len(bets) == 1 and bets[0].option_dict:
+            outcomes = bets[0].option_dict
             options = [discord.SelectOption(label=outcomes[key].val, value=key, emoji=key) for key in outcomes]
         else:
             options = []

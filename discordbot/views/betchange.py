@@ -30,7 +30,7 @@ class BetChange(discord.ui.View):
         self.place = place
         self.close = close
 
-        outcomes = bet["option_dict"]
+        outcomes = bet.option_dict
         options = [discord.SelectOption(label=outcomes[key].val, value=key, emoji=key) for key in outcomes]
 
         self.outcome_select = BetOutcomesSelect(options, discord.ui.Button)
@@ -51,9 +51,9 @@ class BetChange(discord.ui.View):
         self.user_bets.update({"_id": self.bet["_id"]}, {"$set": {f"betters.{interaction.user.id}.emoji": value}})
 
         # refresh view for users
-        bet = self.user_bets.get_bet_from_id(interaction.guild_id, self.bet["bet_id"])
-        channel = await interaction.guild.fetch_channel(bet["channel_id"])
-        message = await channel.fetch_message(bet["message_id"])
+        bet = self.user_bets.get_bet_from_id(interaction.guild_id, self.bet.bet_id)
+        channel = await interaction.guild.fetch_channel(bet.channel_id)
+        message = await channel.fetch_message(bet.message_id)
         embed = self.embed_manager.get_bet_embed(interaction.guild, bet)
         view = discordbot.views.bet.BetView(bet, self.place, self.close)
         await message.edit(embed=embed, view=view)

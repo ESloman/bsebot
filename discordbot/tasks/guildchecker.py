@@ -220,8 +220,8 @@ class GuildChecker(BaseTask):
             other_bets = self.user_bets.get_all_inactive_pending_bets(guild.id)
             bets.extend(other_bets)
             for bet in bets:
-                message_id = bet["message_id"]
-                channel_id = bet["channel_id"]
+                message_id = bet.message_id
+                channel_id = bet.channel_id
                 if not channel_id or not message_id:
                     continue
 
@@ -236,7 +236,7 @@ class GuildChecker(BaseTask):
 
                 embed = self.embed_manager.get_bet_embed(guild, bet)
                 view = BetView(bet, self.place, self.close)
-                content = f"# {bet['title']}\n_Created by <@{bet['user']}>_"
+                content = f"# {bet.title}\n_Created by <@{bet.user}>_"
                 try:
                     await message.edit(content=content, view=view, embed=embed)
                 except (discord.NotFound, discord.Forbidden):

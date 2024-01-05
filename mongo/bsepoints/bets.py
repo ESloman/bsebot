@@ -51,12 +51,12 @@ class UserBets(BestSummerEverPointsDB):
         return f"{count:04d}"
 
     @staticmethod
-    def make_data_class(bet: Bet) -> Bet:
+    def make_data_class(bet: dict) -> Bet:
         """Turns a bet dict into a dataclass representation."""
         # convert betters
         bet["betters"] = {key: Better(**value) for key, value in bet.get("betters", {}).items()}
         bet["option_dict"] = {key: Option(**value) for key, value in bet.get("option_dict", {}).items()}
-        return bet
+        return Bet(**bet)
 
     @staticmethod
     def count_eddies_for_bet(bet: Bet) -> int:
@@ -68,7 +68,7 @@ class UserBets(BestSummerEverPointsDB):
         Returns:
             int: total eddies
         """
-        return sum([better.points for better in bet["betters"].values()])
+        return sum([better.points for better in bet.betters.values()])
 
     def get_all_active_bets(self, guild_id: int) -> list[Bet]:
         """Gets all active bets.

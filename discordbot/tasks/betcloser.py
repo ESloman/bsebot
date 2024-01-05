@@ -2,6 +2,7 @@
 
 import asyncio
 import contextlib
+import dataclasses
 import datetime
 from logging import Logger
 
@@ -60,26 +61,27 @@ class BetCloser(BaseTask):
             guild_obj = await self.bot.fetch_guild(guild.id)  # type: discord.Guild
             active = self.user_bets.get_all_active_bets(guild.id)
             for bet in active:
-                if timeout := bet.get("timeout"):
+                if timeout := bet.timeout:
                     if timeout > now:
                         continue
                     # set the bet to no longer active ??
-                    self.user_bets.update({"_id": bet["_id"]}, {"$set": {"active": False}})
-                    member = guild_obj.get_member(bet["user"])
-                    channel = await self.bot.fetch_channel(bet["channel_id"])
-                    message = await channel.fetch_message(bet["message_id"])  # type: discord.Message
-                    bet["active"] = False
+                    self.user_bets.update({"_id": bet._id}, {"$set": {"active": False}})  # noqa: SLF001
+                    member = guild_obj.get_member(bet.user)
+                    channel = await self.bot.fetch_channel(bet.channel_id)
+                    message = await channel.fetch_message(bet.message_id)
+                    # create a new bet with active set to False to pass around
+                    _bet = dataclasses.replace(bet, active=False)
 
                     embed = self.embed_manager.get_bet_embed(guild_obj, bet)
-                    content = f"# {bet['title']}\n_Created by <@{bet['user']}>_"
-                    bet_view = BetView(bet, self.place, self.close)
+                    content = f"# {_bet.title}\n_Created by <@{_bet.user}>_"
+                    bet_view = BetView(_bet, self.place, self.close)
 
                     # disable bet button
                     bet_view.children[0].disabled = True
 
                     await message.edit(content=content, embed=embed, view=bet_view)
                     msg = (
-                        f"[Your bet](<{message.jump_url}>) `{bet['bet_id']} - {bet['title']}` "
+                        f"[Your bet](<{message.jump_url}>) `{_bet.bet_id} - {_bet.title}` "
                         f"is now closed for bets and is waiting a result from you."
                     )
                     if not member.dm_channel:

@@ -122,45 +122,49 @@ class Option:
     """The human outcome name."""
 
 
-class Bet(TypedDict):
+@dataclass(frozen=True)
+class Bet:
     """A dict representing a bet."""
 
+    # general info
     _id: ObjectId
     """The internal DB ID"""
     guild_id: int
-    """The discord server ID of the server the bet is in"""
+    """The ID of the server the bet is in"""
     bet_id: int
     """The bet ID of the bet"""
     user: int
-    """The discord User ID of the user who created the bet"""
+    """The ID of the user who created the bet."""
     title: str
-    """Title of the bet"""
-    options: list[str]
-    """List of option emojis"""
-    option_vals: list[str]
-    """List of option values"""
-    users: list[int]
-    """List of user IDs"""
-    created: datetime.datetime
-    """The time the bet was created"""
-    timeout: datetime.datetime
-    """When the bet will stop taking bets"""
-    active: bool
-    """Whether the bet is accepting new bets or not"""
-    betters: dict[str, Better]
-    """A dict of user ID keys to their bet amounts"""
-    result: str | None
-    """The outcome of the bet"""
-    option_dict: dict[str, Option]
-    """a dict of emoji keys to the human readable names"""
+    """Title of the bet."""
     channel_id: int
-    """The channel the bet exists in"""
+    """The channel the bet exists in."""
     message_id: int
-    """The message ID of the bet"""
-    private: bool
-    """Whether the bet was made in a private channel"""
-    closed: datetime.datetime
-    """date the bet was closed"""
+    """The message ID of the bet."""
+    created: datetime.datetime
+    """The time the bet was created."""
+    timeout: datetime.datetime
+    """When the bet will stop taking bets."""
+    active: bool
+    """Whether the bet is accepting new bets or not."""
+
+    # bet options
+    options: list[str] = field(default=list)
+    """List of option emojis."""
+    option_vals: list[str] = field(default=list)
+    """List of option values."""
+    users: list[int] = field(default=list)
+    """List of user IDs."""
+    betters: dict[str, Better] = field(default=dict)
+    """A dict of user ID keys to their bet amounts."""
+    result: str | None = None
+    """The outcome of the bet."""
+    option_dict: dict[str, Option] = field(default=dict)
+    """a dict of emoji keys to the human readable names."""
+    private: bool = False
+    """Whether the bet was made in a private channel."""
+    closed: datetime.datetime | None = None
+    """Date the bet was closed."""
 
 
 class Reaction(TypedDict):

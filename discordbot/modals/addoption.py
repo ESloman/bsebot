@@ -77,7 +77,7 @@ class AddBetOption(discord.ui.Modal):
             )
             return
 
-        outcome_count = len(self.bet["options"])
+        outcome_count = len(self.bet.options)
 
         if len(outcomes) + outcome_count > 10:  # noqa: PLR2004
             await interaction.followup.send(
@@ -87,9 +87,9 @@ class AddBetOption(discord.ui.Modal):
             )
             return
 
-        new_options = self.bet["options"] + outcomes
-        new_option_dict = {key: asdict(value) for key, value in self.bet["option_dict"].items()}
-        new_option_vals = copy.deepcopy(self.bet["option_vals"])
+        new_options = self.bet.options + outcomes
+        new_option_dict = {key: asdict(value) for key, value in self.bet.option_dict.items()}
+        new_option_vals = copy.deepcopy(self.bet.option_vals)
 
         for outcome in outcomes:
             _index = outcome_count + outcomes.index(outcome)
@@ -98,16 +98,16 @@ class AddBetOption(discord.ui.Modal):
             new_option_vals.append(outcome)
 
         # extend bet's timeout
-        created = self.bet["created"]
-        ending = self.bet["timeout"]
+        created = self.bet.created
+        ending = self.bet.timeout
 
         expired = now - created
         ending += expired
 
-        self.bet["timeout"] = ending
+        self.bet.timeout = ending
 
         self.user_bets.update(
-            {"_id": self.bet["_id"]},
+            {"_id": self.bet._id},  # noqa: SLF001
             {
                 "$set": {
                     "options": new_options,
@@ -119,8 +119,8 @@ class AddBetOption(discord.ui.Modal):
             },
         )
 
-        channel = await interaction.guild.fetch_channel(self.bet["channel_id"])
-        message = await channel.fetch_message(self.bet["message_id"])
+        channel = await interaction.guild.fetch_channel(self.bet.channel_id)
+        message = await channel.fetch_message(self.bet.message_id)
         embed = self.embed_manager.get_bet_embed(interaction.guild, self.bet)
         view = discordbot.views.bet.BetView(self.bet, self.place, self.close)
         await message.edit(embed=embed, view=view)

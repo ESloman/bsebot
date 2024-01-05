@@ -13,13 +13,15 @@ from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.points import UserPoints
 from mongo.bseticketedevents import RevolutionEvent
-from mongo.datatypes import RevolutionEventType
+from mongo.datatypes import RevolutionEventDB
 
 
 class RevolutionView(discord.ui.View):
     """Class for revolution view."""
 
-    def __init__(self, client: BSEBot, event: RevolutionEventType, logger: Logger) -> None:
+    _SAVE_THYSELF_BUTTON_TEXT = "Save THYSELF"
+
+    def __init__(self, client: BSEBot, event: RevolutionEventDB, logger: Logger) -> None:
         """Initialisation method.
 
         Args:
@@ -29,8 +31,8 @@ class RevolutionView(discord.ui.View):
         """
         super().__init__(timeout=None)
         self.client = client
-        self.event_id = event["event_id"]
-        self.locked_in = event["locked"]
+        self.event_id = event.event_id
+        self.locked_in = event.locked
         self.revolutions = RevolutionEvent()
         self.user_points = UserPoints()
         self.guilds = Guilds()
@@ -96,14 +98,14 @@ class RevolutionView(discord.ui.View):
         event = self.revolutions.get_event(interaction.guild.id, self.event_id)
 
         # check event is still valid
-        if not event["open"]:
+        if not event.open:
             await followup.send(content="Unfortunately, this event has expired", ephemeral=True, delete_after=10)
             # leave it disabled
             return
 
         now = datetime.datetime.now()
 
-        if event["expired"] < now:
+        if event.expired < now:
             await followup.send(content="Unfortunately, this event has expired", ephemeral=True, delete_after=10)
             # leave it disabled
             return
@@ -115,7 +117,7 @@ class RevolutionView(discord.ui.View):
         king_id = guild_db.king
 
         # check that the King isn't using buttons they shouldn't
-        if (user_id == king_id) and button.label != "Save THYSELF":
+        if (user_id == king_id) and button.label != self._SAVE_THYSELF_BUTTON_TEXT:
             await followup.send(
                 content="You ARE the King - you can't overthrow/support yourself.",
                 ephemeral=True,
@@ -126,7 +128,7 @@ class RevolutionView(discord.ui.View):
             return
 
         # check that users aren't using buttons they shouldn't
-        if button.label == "Save THYSELF" and (user_id != king_id):
+        if button.label == self._SAVE_THYSELF_BUTTON_TEXT and (user_id != king_id):
             await followup.send(
                 content="You're not the King - so you can't use this button.",
                 ephemeral=True,
@@ -150,7 +152,7 @@ class RevolutionView(discord.ui.View):
                 faction_chance = -15
                 act_type = ActivityTypes.REV_SUPPORT
                 msg = "Congrats - you've pledged your `support`!"
-            case "Save THYSELF":
+            case self._SAVE_THYSELF_BUTTON_TEXT:
                 act_type = ActivityTypes.REV_SAVE
                 msg = "Congrats - you've reduced the overthrow chance."
             case "Impartial":
@@ -158,14 +160,16 @@ class RevolutionView(discord.ui.View):
                 act_type = ActivityTypes.REV_NEUTRAL
                 msg = "Congrats - you're now impartial."
 
-        if button.label != "Save THYSELF":
+        event = event.unfrozen()
+
+        if button.label != self._SAVE_THYSELF_BUTTON_TEXT:
             # only do this for the non-KING buttons
 
-            if user_id not in event["users"]:
-                event["users"].append(user_id)
+            if user_id not in event.users:
+                event.users.append(user_id)
 
             # make sure user isn't doing the same thing twice
-            if user_id in event.get(faction_event_key, []):
+            if user_id in event.__getattribute__(faction_event_key, []):
                 await followup.send(
                     content="You've already acted on this - you cannot do so again",
                     ephemeral=True,
@@ -191,32 +195,32 @@ class RevolutionView(discord.ui.View):
             # different to king button logic
 
             # reverse actions of other faction
-            if user_id in event[other_faction_event_key]:
-                event["chance"] -= faction_chance * -1
-                event[other_faction_event_key].remove(user_id)
+            if user_id in event.__getattribute__(other_faction_event_key):
+                event.chance -= faction_chance * -1
+                event.__getattribute__(other_faction_event_key).remove(user_id)
 
             # apply our actions (increasing/reducing chance)
-            event[faction_event_key].append(user_id)
-            event["chance"] += faction_chance
+            event.__getattribute__(faction_event_key).append(user_id)
+            event.chance += faction_chance
 
             # remove user from neutrals if they're in it
-            if user_id in event.get("neutrals", []):
-                event["neutrals"].remove(user_id)
+            if user_id in event.neutrals:
+                event.neutrals.remove(user_id)
 
         elif button.label == "Impartial":
             # logic for user pressing the impartial button
 
-            if user_id in event["revolutionaries"]:
-                event["chance"] -= 15
-                event["revolutionaries"].remove(user_id)
-            elif user_id in event["supporters"]:
-                event["chance"] += 15
-                event["supporters"].remove(user_id)
+            if user_id in event.revolutionaries:
+                event.chance -= 15
+                event.revolutionaries.remove(user_id)
+            elif user_id in event.supporters:
+                event.chance += 15
+                event.supporters.remove(user_id)
 
-            if user_id not in event["neutrals"]:
-                event["neutrals"].append(user_id)
+            if user_id not in event.neutrals:
+                event.neutrals.append(user_id)
 
-        elif button.label == "Save THYSELF":
+        elif button.label == self._SAVE_THYSELF_BUTTON_TEXT:
             # logic for saving thyself
             # it is different to supporter/revolutionary logic
 
@@ -241,7 +245,7 @@ class RevolutionView(discord.ui.View):
 
         # update DB with all the changes we've made
         self.revolutions.update(
-            {"_id": event["_id"]},
+            {"_id": event._id},  # noqa: SLF001
             {
                 "$set": {
                     "chance": event.chance,
@@ -265,7 +269,7 @@ class RevolutionView(discord.ui.View):
 
         await followup.edit_message(interaction.message.id, view=self, content=edited_message)
 
-        if button.label != "Save THYSELF":
+        if button.label != self._SAVE_THYSELF_BUTTON_TEXT:
             # only send followup for users
             await followup.send(content=msg, ephemeral=True, delete_after=10)
 

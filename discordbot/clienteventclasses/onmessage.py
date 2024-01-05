@@ -166,26 +166,28 @@ class OnMessage(BaseEvent):
 
             # used a custom sticker!
             message_type.append("custom_sticker")
-            if sticker_obj := self.server_stickers.get_sticker(guild_id, sticker_id):
-                # used a server sticker
-                message_type.append("server_sticker")
-                if user_id == sticker_obj["created_by"]:
-                    continue
-                if not message_type_only:
-                    self.interactions.add_entry(
-                        sticker_obj["stid"],
-                        guild_id,
-                        sticker_obj["created_by"],
-                        channel_id,
-                        [
-                            "sticker_used",
-                        ],
-                        message.content,
-                        message.created_at,
-                        is_thread=is_thread,
-                        is_vc=is_vc,
-                        additional_keys={"og_mid": message.id},
-                    )
+            sticker_obj = self.server_stickers.get_sticker(guild_id, sticker_id)
+            if not sticker_obj:
+                continue
+            # used a server sticker
+            message_type.append("server_sticker")
+            if user_id == sticker_obj.created_by:
+                continue
+            if not message_type_only:
+                self.interactions.add_entry(
+                    sticker_obj.stid,
+                    guild_id,
+                    sticker_obj.created_by,
+                    channel_id,
+                    [
+                        "sticker_used",
+                    ],
+                    message.content,
+                    message.created_at,
+                    is_thread=is_thread,
+                    is_vc=is_vc,
+                    additional_keys={"og_mid": message.id},
+                )
 
     def _handle_emojis(
         self, message: discord.Message, guild_id: int, message_type: list, message_type_only: bool = False
@@ -203,7 +205,7 @@ class OnMessage(BaseEvent):
         Returns:
             None
         """
-        emojis = re.findall(r"<:[a-zA-Z_0-9]*:\d*>", message.content)
+        emojis = re.findall(r"<:\w*:\d*>", message.content)
 
         if not emojis:
             return
@@ -220,13 +222,13 @@ class OnMessage(BaseEvent):
                 continue
 
             message_type.append("server_emoji")
-            if user_id == emoji_obj["created_by"]:
+            if user_id == emoji_obj.created_by:
                 continue
             if not message_type_only:
                 self.interactions.add_entry(
-                    emoji_obj["eid"],
+                    emoji_obj.eid,
                     guild_id,
-                    emoji_obj["created_by"],
+                    emoji_obj.created_by,
                     channel_id,
                     ["emoji_used"],
                     message.content,

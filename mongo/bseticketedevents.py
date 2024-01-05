@@ -12,7 +12,7 @@ from pymongo.results import UpdateResult
 
 from mongo import interface
 from mongo.bsepoints.guilds import Guilds
-from mongo.datatypes import RevolutionEventType
+from mongo.datatypes import RevolutionEventDB
 from mongo.db_classes import BestSummerEverPointsDB
 
 
@@ -59,6 +59,18 @@ class RevolutionEvent(TicketedEvent):
         self.update({"type": "counter", "guild_id": guild_id}, {"$inc": {"count": 1}})
         return f"{count:03d}"
 
+    @staticmethod
+    def make_data_class(event: dict) -> RevolutionEventDB:
+        """Converts an event dict into a dataclass.
+
+        Args:
+            event (dict): the event dict
+
+        Returns:
+            RevolutionEventDB: the dataclass
+        """
+        return RevolutionEventDB(**event)
+
     def create_event(  # noqa: PLR0913, PLR0917
         self,
         guild_id: int,
@@ -67,7 +79,7 @@ class RevolutionEvent(TicketedEvent):
         king_id: int,
         locked_in_eddies: int,
         channel_id: int | None = None,
-    ) -> RevolutionEventType:
+    ) -> RevolutionEventDB:
         """Create event class. Puts an entry into the DB for future use.
 
         Args:
@@ -115,7 +127,7 @@ class RevolutionEvent(TicketedEvent):
         event_doc["locked"] = pledges
 
         self.insert(document=event_doc)
-        return event_doc
+        return self.make_data_class(event_doc)
 
     def increment_eddies_total(self, event_id: str, guild_id: int, points: int) -> UpdateResult:
         """Increments the amount of eddies that have been spent on an event.
@@ -156,7 +168,7 @@ class RevolutionEvent(TicketedEvent):
         """
         return self.update({"event_id": event_id, "guild_id": guild_id}, {"$push": {"ticket_buyers": user_id}})
 
-    def get_event(self, guild_id: int, event_id: str) -> RevolutionEventType:
+    def get_event(self, guild_id: int, event_id: str) -> RevolutionEventDB | None:
         """Returns the specified event for the given guild.
 
         Args:
@@ -168,10 +180,10 @@ class RevolutionEvent(TicketedEvent):
         """
         ret = self.query({"guild_id": guild_id, "event_id": event_id})
         if ret:
-            return ret[0]
+            return self.make_data_class(ret[0])
         return None
 
-    def get_open_events(self, guild_id: int) -> list[RevolutionEventType]:
+    def get_open_events(self, guild_id: int) -> list[RevolutionEventDB]:
         """Gets all open events.
 
         Args:
@@ -180,7 +192,7 @@ class RevolutionEvent(TicketedEvent):
         Returns:
             list[RevolutionEventType]: _description_
         """
-        return self.query({"guild_id": guild_id, "open": True})
+        return [self.make_data_class(event) for event in self.query({"guild_id": guild_id, "open": True})]
 
     def close_event(self, event_id: str, guild_id: int, success: bool, points: int) -> UpdateResult:
         """Closes an event and sets all the correct flags in the DB.

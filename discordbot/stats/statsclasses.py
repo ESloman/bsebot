@@ -4,6 +4,7 @@ import datetime
 import re
 from copy import deepcopy
 from logging import Logger
+from typing import TYPE_CHECKING
 
 import discord
 
@@ -18,6 +19,9 @@ from discordbot.constants import (
 from discordbot.stats.statsdatacache import StatsDataCache
 from discordbot.stats.statsdataclasses import Stat
 from discordbot.utilities import PlaceHolderLogger
+
+if TYPE_CHECKING:
+    from mongo.datatypes import ReactionDB
 
 
 class StatsGatherer:  # noqa: PLR0904
@@ -830,23 +834,23 @@ class StatsGatherer:  # noqa: PLR0904
         reaction_messages = self.cache.get_reactions(guild_id, start, end)
         messages = self.cache.get_messages(guild_id, start, end)
 
-        reactions = []
+        reactions: list[ReactionDB] = []
         for react in reaction_messages:
             if uid:
                 # filter the reactions to our uid
-                _reactions = [r for r in react["reactions"] if r["user_id"] == uid]
+                _reactions = [r for r in react.reactions if r.user_id == uid]
                 if not _reactions:
                     continue
             else:
-                _reactions = react["reactions"]
+                _reactions = react.reactions
             reactions.extend(_reactions)
 
         all_emojis = self.cache.get_emojis(guild_id, start, end)
-        all_emoji_names = [emoji["name"] for emoji in all_emojis]
+        all_emoji_names = [emoji.name for emoji in all_emojis]
 
         emoji_count = {}
         for reaction in reactions:
-            content = reaction["content"]
+            content = reaction.content
             if content not in all_emoji_names:
                 continue
             if content not in emoji_count:
@@ -855,7 +859,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         for message in messages:
             for emoji_name in all_emoji_names:
-                if emojis := re.findall(f":{emoji_name}:", message["content"]):
+                if emojis := re.findall(f":{emoji_name}:", message.content):
                     if emoji_name not in emoji_count:
                         emoji_count[emoji_name] = 0
                     emoji_count[emoji_name] += len(emojis)
@@ -863,7 +867,7 @@ class StatsGatherer:  # noqa: PLR0904
         try:
             most_used_emoji = sorted(emoji_count, key=lambda x: emoji_count[x], reverse=True)[0]
 
-            emoji_id = next(emoji["eid"] for emoji in all_emojis if emoji["name"] == most_used_emoji)
+            emoji_id = next(emoji.eid for emoji in all_emojis if emoji.name == most_used_emoji)
         except IndexError:
             most_used_emoji = 0
             emoji_id = None

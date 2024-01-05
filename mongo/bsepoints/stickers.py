@@ -3,7 +3,7 @@
 import datetime
 
 from mongo import interface
-from mongo.datatypes import Sticker
+from mongo.datatypes import StickerDB
 from mongo.db_classes import BestSummerEverPointsDB
 
 
@@ -15,7 +15,19 @@ class ServerStickers(BestSummerEverPointsDB):
         super().__init__()
         self._vault = interface.get_collection(self.database, "serverstickers")
 
-    def get_sticker(self, guild_id: int, sticker_id: int) -> Sticker | None:
+    @staticmethod
+    def make_data_class(sticker: dict) -> StickerDB:
+        """Converts into a dataclass.
+
+        Args:
+            sticker (dict): the sticker dict
+
+        Returns:
+            StickerDB: the emoji dataclass
+        """
+        return StickerDB(**sticker)
+
+    def get_sticker(self, guild_id: int, sticker_id: int) -> StickerDB | None:
         """Gets an already created sticker document from the database.
 
         :param guild_id: int - The guild ID the sticker exists in
@@ -24,10 +36,10 @@ class ServerStickers(BestSummerEverPointsDB):
         """
         ret = self.query({"stid": sticker_id, "guild_id": guild_id})
         if ret:
-            return ret[0]
+            return self.make_data_class(ret[0])
         return None
 
-    def get_sticker_from_name(self, guild_id: int, name: str) -> Sticker | None:
+    def get_sticker_from_name(self, guild_id: int, name: str) -> StickerDB | None:
         """Get sticker from name.
 
         Args:
@@ -39,7 +51,7 @@ class ServerStickers(BestSummerEverPointsDB):
         """
         ret = self.query({"name": name, "guild_id": guild_id})
         if ret:
-            return ret[0]
+            return self.make_data_class(ret[0])
         return None
 
     def insert_sticker(self, emoji_id: int, name: str, created: datetime.datetime, user_id: int, guild_id: int) -> list:

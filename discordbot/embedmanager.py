@@ -8,7 +8,7 @@ import discord
 from discordbot.constants import MIN_USERS_FILTER, USER_POINTS_FILTER
 from discordbot.utilities import PlaceHolderLogger
 from mongo.bsepoints.points import UserPoints
-from mongo.datatypes import BetDB
+from mongo.datatypes import BetDB, RevolutionEventDB
 
 
 class EmbedManager:
@@ -160,33 +160,35 @@ class EmbedManager:
         return message
 
     @staticmethod
-    def get_revolution_message(king_user: discord.User, role: discord.Role, event: dict, guild: discord.Guild) -> str:
+    def get_revolution_message(
+        king_user: discord.User, role: discord.Role, event: RevolutionEventDB, guild: discord.Guild
+    ) -> str:
         """Generates a revolution message.
 
         Args:
             king_user (discord.User): the user who is currently king
             role (discord.Role): the KING role
-            event (dict): the revolution event
+            event (RevolutionEventDB): the revolution event
             guild (discord.Guild): the guild the event is happening within
 
         Returns:
             str: the formatted text
         """
         revos = []
-        for rev in event.get("revolutionaries", []):
+        for rev in event.revolutionaries:
             if rev_info := guild.get_member(rev):
                 revos.append(rev_info.name)
             else:
                 revos.append(str(rev))
 
         supps = []
-        for sup in event.get("supporters", []):
+        for sup in event.supporters:
             if sup_info := guild.get_member(sup):
                 supps.append(sup_info.name)
             else:
                 supps.append(str(sup))
 
-        chance = max(min(event["chance"], 95), 5)
+        chance = max(min(event.chance, 95), 5)
 
         return (
             f"# REVOLUTION IS UPON US \n\n"
@@ -203,5 +205,5 @@ class EmbedManager:
             f"**Success rate**: `{chance}%`\n"
             f"**Revolutionaries**: `{', '.join(revos) if revos else None}`\n"
             f"**Supporters**: `{', '.join(supps) if supps else None}`\n"
-            f"**Locked in KING eddies**: `{event.get('locked_in_eddies')}`"
+            f"**Locked in KING eddies**: `{event.locked_in_eddies}`"
         )

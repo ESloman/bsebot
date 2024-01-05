@@ -1,15 +1,7 @@
 """Database object types."""
 
 import datetime
-from dataclasses import dataclass, field
-from typing import TypedDict
-
-try:
-    from typing import NotRequired, Optional
-except ImportError:
-    from typing import Optional
-
-    NotRequired = Optional
+from dataclasses import asdict, dataclass, field
 
 from bson import ObjectId
 
@@ -264,93 +256,154 @@ class WordleMessageDB(MessageDB):
     """The number of guesses for this wordle."""
 
 
-class Emoji(TypedDict):
+@dataclass(frozen=True)
+class EmojiDB(NamedDBObject):
     """A dict representing an emoji."""
 
-    _id: ObjectId
-    """The internal DB ID"""
-    guild_id: int
-    """The discord server ID of the server the emoji is in"""
     eid: int
-    """The discord emoji ID of the emoji"""
-    name: str
-    """Name of the emoji"""
+    """The discord ID of the emoji."""
     created_by: int
-    """The discord user ID of the user who created the emoji"""
+    """The discord ID of the user who created the emoji."""
     created: datetime.datetime
-    """When the emoji was created"""
+    """When the emoji was created."""
 
 
-class Sticker(TypedDict):
+@dataclass(frozen=True)
+class StickerDB(NamedDBObject):
     """A dict representing a sticker."""
 
-    _id: ObjectId
-    """The internal DB ID"""
-    guild_id: int
-    """The discord server ID of the server the sticker is in"""
-    sid: int
-    """The discord sticker ID of the sticker"""
-    name: str
-    """Name of the sticker"""
+    stid: int
+    """The discord ID of the sticker."""
     created_by: int
-    """The discord user ID of the user who created the sticker"""
+    """The discord ID of the user who created the sticker."""
     created: datetime.datetime
-    """When the sticker was created"""
+    """When the sticker was created."""
 
 
-class RevolutionEventType(TypedDict):
+@dataclass(frozen=True)
+class BaseEventDB(BaseDBObject, ImplementsMessage):
+    """Represents a base event."""
+
+    type: str  # noqa: A003
+    """Event type."""
+    event_id: str
+    """The event ID."""
+    created: datetime.datetime
+    """When the event was created."""
+    expired: datetime.datetime
+    """When the event will expire and 'resolve'."""
+    open: bool  # noqa: A003
+    """whether the event is still open."""
+
+
+@dataclass
+class RevolutionEventUnFrozenDB:
+    """Unfrozen variant for editing."""
+
+    _id: ObjectId
+    """The internal database ID."""
+    guild_id: int
+    """The discord guild/server ID."""
+    channel_id: int
+    """The discord ID of the channel the message is in."""
+    message_id: int
+    """The discord ID of the message."""
+    type: str  # noqa: A003
+    """Event type."""
+    event_id: str
+    """The event ID."""
+    created: datetime.datetime
+    """When the event was created."""
+    expired: datetime.datetime
+    """When the event will expire and 'resolve'."""
+    open: bool  # noqa: A003
+    """whether the event is still open."""
+    king: int
+    """The king the event affects."""
+    chance: int
+    """The chance of success."""
+    locked_in_eddies: int
+    """Number of eddies the King had when the event triggered."""
+    points_distributed: int | None = None
+    """The number of eddies given out if the event succeeds."""
+    success: bool | None = None
+    """Whether the event was a success or not."""
+    times_saved: int = 0
+    """Number of times the king tried to save themselves."""
+    one_hour: bool = False
+    """Whether the one hour warning was triggered."""
+    quarter_hour: bool = False
+    """Whether the 15 minute warning was triggered."""
+
+    # users
+    users: list[int] = field(default_factory=list)
+    """everyone who's subscribed to the event."""
+    supporters: list[int] = field(default_factory=list)
+    """list of those supporting the event."""
+    revolutionaries: list[int] = field(default_factory=list)
+    """list of those revolutioning the event."""
+    neutrals: list[int] = field(default_factory=list)
+    """list of those impartial to the event."""
+    locked: list[int] = field(default_factory=list)
+    """Users who can't change their decision."""
+
+    # deprecated
+    ticket_cost: int | None = None
+    """DEPRECATED"""
+    ticket_buyers: list[int] | None = None
+    """DEPRECATED"""
+    eddies_spent: int | None = None
+    """DEPRECATED"""
+
+
+@dataclass(frozen=True)
+class RevolutionEventDB(BaseEventDB):
     """A dict representing a revolution event."""
 
-    _id: ObjectId
-    """The internal DB ID"""
-    type: str
-    """Event type"""
-    event_id: str
-    """The event ID"""
-    created: datetime.datetime
-    """When the event was created"""
-    expired: datetime.datetime
-    """When the event will expire and 'resolve'"""
-    chance: int
-    """The chance of success"""
-    ticket_cost: int
-    """DEPRECATED"""
-    ticket_buyers: list[int]
-    """DEPRECATED"""
-    supporters: list[int]
-    """list of those supporting the event"""
-    revolutionaries: list[int]
-    """list of those revolutioning the event"""
-    neutrals: list[int]
-    """list of those impartial to the event"""
-    locked: list[int]
-    """Users who can't change their decision"""
-    users: list[int]
-    """everyone who's subscribed to the event"""
-    open: bool
-    """whether the event is still open"""
-    message_id: int
-    """The event's discord message ID"""
-    channel_id: int
-    """The discord channel ID where the event is happening"""
-    guild_id: int
-    """The discord server ID of the server the event is in"""
+    def unfrozen(self) -> RevolutionEventUnFrozenDB:
+        """Returns an unfrozen variant of the dataclass.
+
+        Returns:
+            RevolutionEventUnFrozenDB: the unfrozen dataclass
+        """
+        return RevolutionEventUnFrozenDB(asdict(self))
+
     king: int
-    """The king the event affects"""
-    points_distributed: int
-    """The number of eddies given out if the event succeeds"""
-    eddies_spent: int
-    """DEPRECATED"""
-    success: bool
-    """Whether the event was a success or not"""
+    """The king the event affects."""
+    chance: int
+    """The chance of success."""
     locked_in_eddies: int
-    """Number of eddies the King had when the event triggered"""
-    times_saved: int
-    """Number of times the king tried to save themselves"""
-    one_hour: bool
-    """Whether the one hour warning was triggered"""
-    quarter_hour: bool
-    """Whether the 15 minute warning was triggered"""
+    """Number of eddies the King had when the event triggered."""
+    points_distributed: int | None = None
+    """The number of eddies given out if the event succeeds."""
+    success: bool | None = None
+    """Whether the event was a success or not."""
+    times_saved: int = 0
+    """Number of times the king tried to save themselves."""
+    one_hour: bool = False
+    """Whether the one hour warning was triggered."""
+    quarter_hour: bool = False
+    """Whether the 15 minute warning was triggered."""
+
+    # users
+    users: list[int] = field(default_factory=list)
+    """everyone who's subscribed to the event."""
+    supporters: list[int] = field(default_factory=list)
+    """list of those supporting the event."""
+    revolutionaries: list[int] = field(default_factory=list)
+    """list of those revolutioning the event."""
+    neutrals: list[int] = field(default_factory=list)
+    """list of those impartial to the event."""
+    locked: list[int] = field(default_factory=list)
+    """Users who can't change their decision."""
+
+    # deprecated
+    ticket_cost: int | None = None
+    """DEPRECATED"""
+    ticket_buyers: list[int] | None = None
+    """DEPRECATED"""
+    eddies_spent: int | None = None
+    """DEPRECATED"""
 
 
 @dataclass(frozen=True)

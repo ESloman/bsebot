@@ -3,7 +3,7 @@
 import datetime
 
 from mongo import interface
-from mongo.datatypes import Emoji
+from mongo.datatypes import EmojiDB
 from mongo.db_classes import BestSummerEverPointsDB
 
 
@@ -15,7 +15,19 @@ class ServerEmojis(BestSummerEverPointsDB):
         super().__init__()
         self._vault = interface.get_collection(self.database, "serveremojis")
 
-    def get_all_emojis(self, guild_id: int) -> list[Emoji]:
+    @staticmethod
+    def make_data_class(emoji: dict) -> EmojiDB:
+        """Converts into a dataclass.
+
+        Args:
+            emoji (dict): the emoji dict
+
+        Returns:
+            EmojiDB: the emoji dataclass
+        """
+        return EmojiDB(**emoji)
+
+    def get_all_emojis(self, guild_id: int) -> list[EmojiDB]:
         """Gets all emoji objects from the database.
 
         Args:
@@ -24,9 +36,9 @@ class ServerEmojis(BestSummerEverPointsDB):
         Returns:
             list[dict]: a list of emoji dicts
         """
-        return self.query({"guild_id": guild_id})
+        return [self.make_data_class(emoji) for emoji in self.query({"guild_id": guild_id})]
 
-    def get_emoji(self, guild_id: int, emoji_id: int) -> Emoji | None:
+    def get_emoji(self, guild_id: int, emoji_id: int) -> EmojiDB | None:
         """Gets an already created emoji document from the database.
 
         :param guild_id: int - The guild ID the emoji exists in
@@ -35,10 +47,10 @@ class ServerEmojis(BestSummerEverPointsDB):
         """
         ret = self.query({"eid": emoji_id, "guild_id": guild_id})
         if ret:
-            return ret[0]
+            return self.make_data_class(ret[0])
         return None
 
-    def get_emoji_from_name(self, guild_id: int, name: str) -> Emoji | None:
+    def get_emoji_from_name(self, guild_id: int, name: str) -> EmojiDB | None:
         """Gets emoji from name.
 
         Args:
@@ -50,7 +62,7 @@ class ServerEmojis(BestSummerEverPointsDB):
         """
         ret = self.query({"name": name, "guild_id": guild_id})
         if ret:
-            return ret[0]
+            return self.make_data_class(ret[0])
         return None
 
     def insert_emoji(self, emoji_id: int, name: str, created: datetime.datetime, user_id: int, guild_id: int) -> list:

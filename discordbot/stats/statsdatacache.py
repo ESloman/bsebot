@@ -9,7 +9,7 @@ from mongo.bsepoints.emojis import ServerEmojis
 from mongo.bsepoints.interactions import UserInteractions
 from mongo.bsepoints.points import UserPoints
 from mongo.bsepoints.transactions import UserTransactions
-from mongo.datatypes import Activity, BetDB, Emoji, MessageDB, Transaction, UserDB, VCInteractionDB
+from mongo.datatypes import Activity, BetDB, EmojiDB, MessageDB, Transaction, UserDB, VCInteractionDB
 
 
 class StatsDataCache:
@@ -59,7 +59,7 @@ class StatsDataCache:
         self.__reactions_cache: list[MessageDB] = []
         self.__reactions_cache_time: datetime.datetime | None = None
 
-        self.__emoji_cache: list[Emoji] = []
+        self.__emoji_cache: list[EmojiDB] = []
         self.__emoji_cache_time: datetime.datetime | None = None
 
         self.__reply_cache: list[MessageDB] = []
@@ -313,7 +313,7 @@ class StatsDataCache:
         self.__reactions_cache_time = now
         return self.__reactions_cache
 
-    def get_emojis(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> list[Emoji]:
+    def get_emojis(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> list[EmojiDB]:
         """Internal method to query for server emojis.
 
         Will cache the emojis on first parse and return the cache if cache was set less than an hour ago.

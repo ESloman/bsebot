@@ -4,7 +4,7 @@ import discord
 from discord import Interaction, SelectOption
 from discord.ui import Select
 
-from mongo.datatypes import Emoji
+from mongo.datatypes import EmojiDB
 
 
 class WordleRootSelect(Select):
@@ -154,19 +154,19 @@ class WordleReminderSelect(Select):
 class WordleEmojiSelect(Select):
     """Class for wordle emoji select."""
 
-    def __init__(self, server_emojis: list[Emoji], score_num: str | None = None, current: str | None = None) -> None:
+    def __init__(self, server_emojis: list[EmojiDB], score_num: str | None = None, current: str | None = None) -> None:
         """Initialisation method.
 
         Args:
-            server_emojis (list[Emoji]): list of current server emojis
+            server_emojis (list[EmojiDB]): list of current server emojis
             score_num (str | None, optional): the score to select for. Defaults to None.
             current (str | None, optional): the current emoji for this score. Defaults to None.
         """
         options = [
             SelectOption(
-                label=emoji["name"],
-                value=f"<:{emoji['name']}:{emoji['eid']}>",
-                emoji=discord.PartialEmoji.from_str(f"{emoji['name']}:{emoji['eid']}"),
+                label=emoji.name,
+                value=f"<:{emoji.name}:{emoji.eid}>",
+                emoji=discord.PartialEmoji.from_str(f"{emoji.name}:{emoji.eid}"),
             )
             for emoji in server_emojis
         ]

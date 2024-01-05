@@ -4,14 +4,14 @@ import random
 
 from bson import ObjectId
 
-from mongo.datatypes import GuildDB, User
+from mongo.datatypes import GuildDB, UserDB
 
 
 class UserPointsMock:
-    def get_all_users_for_guild(self, guild_id: int) -> list[User]:  # noqa: PLR6301
+    def get_all_users_for_guild(self, guild_id: int) -> list[UserDB]:  # noqa: PLR6301
         """Mocks getting all users."""
         return [
-            User(
+            UserDB(
                 _id=ObjectId(),
                 king=False,
                 uid=random.randint(0, guild_id),
@@ -24,9 +24,9 @@ class UserPointsMock:
             for _ in range(20)
         ]
 
-    def find_user(self, user_id: int, guild_id: int) -> User:  # noqa: PLR6301
+    def find_user(self, user_id: int, guild_id: int) -> UserDB:  # noqa: PLR6301
         """Find user mock."""
-        return User(
+        return UserDB(
             _id=ObjectId(),
             king=False,
             uid=user_id,

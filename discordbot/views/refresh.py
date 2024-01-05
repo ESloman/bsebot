@@ -8,13 +8,13 @@ from discordbot.embedmanager import EmbedManager
 from discordbot.selects.bet import BetSelect
 from discordbot.views.bet import BetView
 from mongo.bsepoints.bets import UserBets
-from mongo.datatypes import Bet
+from mongo.datatypes import BetDB
 
 
 class RefreshBetView(discord.ui.View):
     """Class for refresh bet view."""
 
-    def __init__(self, bets: list[Bet], place: callable, close: callable) -> None:
+    def __init__(self, bets: list[BetDB], place: callable, close: callable) -> None:
         """Initialisation method.
 
         Args:

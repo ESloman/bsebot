@@ -9,7 +9,7 @@ from discordbot.bot_enums import ActivityTypes, TransactionTypes
 from discordbot.bsebot import BSEBot
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.views.close import CloseABetView
-from mongo.datatypes import Bet
+from mongo.datatypes import BetDB
 
 
 class CloseBet(BSEddies):
@@ -29,7 +29,7 @@ class CloseBet(BSEddies):
         self.help_string = "Resolves an existing bet"
         self.command_name = "close"
 
-    async def create_bet_view(self, ctx: discord.ApplicationContext, bets: list[Bet] | None = None) -> None:
+    async def create_bet_view(self, ctx: discord.ApplicationContext, bets: list[BetDB] | None = None) -> None:
         """Creates the view.
 
         Args:

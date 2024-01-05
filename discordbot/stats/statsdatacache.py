@@ -9,7 +9,7 @@ from mongo.bsepoints.emojis import ServerEmojis
 from mongo.bsepoints.interactions import UserInteractions
 from mongo.bsepoints.points import UserPoints
 from mongo.bsepoints.transactions import UserTransactions
-from mongo.datatypes import Activity, Bet, Emoji, Message, Transaction, User, VCInteraction
+from mongo.datatypes import Activity, BetDB, Emoji, Message, Transaction, UserDB, VCInteraction
 
 
 class StatsDataCache:
@@ -44,10 +44,10 @@ class StatsDataCache:
         self.__vc_cache: list[VCInteraction] = []
         self.__vc_cache_time: datetime.datetime | None = None
 
-        self.__bet_cache: list[Bet] = []
+        self.__bet_cache: list[BetDB] = []
         self.__bet_cache_time: datetime.datetime | None = None
 
-        self.__user_cache: list[User] = []
+        self.__user_cache: list[UserDB] = []
         self.__user_cache_time: datetime.datetime | None = None
 
         self.__transaction_cache: list[Transaction] = []
@@ -178,7 +178,7 @@ class StatsDataCache:
         self.__vc_cache_time = now
         return self.__vc_cache
 
-    def get_bets(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> list[Bet]:
+    def get_bets(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> list[BetDB]:
         """Internal method to query for bets between a certain date.
 
         Will cache the bets on first parse and return the cache if cache was set less than an hour ago.
@@ -206,7 +206,7 @@ class StatsDataCache:
         self.__bet_cache_time = now
         return self.__bet_cache
 
-    def get_users(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> list[User]:
+    def get_users(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> list[UserDB]:
         """Internal method to query for users.
 
         Will cache the users on first parse and return the cache if cache was set less than an hour ago.

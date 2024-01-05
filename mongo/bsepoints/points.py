@@ -7,7 +7,7 @@ from pymongo.results import UpdateResult
 from discordbot.bot_enums import TransactionTypes
 from mongo import interface
 from mongo.bsepoints.transactions import UserTransactions
-from mongo.datatypes import User
+from mongo.datatypes import UserDB
 from mongo.db_classes import BestSummerEverPointsDB
 
 
@@ -34,7 +34,7 @@ class UserPoints(BestSummerEverPointsDB):
         if ret["points"] > ret.get("high_score", 0):
             self.update({"_id": ret["_id"]}, {"$set": {"high_score": ret["points"]}})
 
-    def find_user_guildless(self, user_id: int) -> list[User]:
+    def find_user_guildless(self, user_id: int) -> list[UserDB]:
         """Returns all matching user objects for the given ID.
 
         Args:
@@ -44,9 +44,9 @@ class UserPoints(BestSummerEverPointsDB):
             list[User]: the user objects for each guild the user belongs to
         """
         ret = self.query({"uid": user_id})
-        return [User(**_user) for _user in ret]
+        return [UserDB(**_user) for _user in ret]
 
-    def find_user(self, user_id: int, guild_id: int, projection: dict | None = None) -> User | None:
+    def find_user(self, user_id: int, guild_id: int, projection: dict | None = None) -> UserDB | None:
         """Looks up a user in the collection.
 
         :param user_id: int - The ID of the user to look for
@@ -56,7 +56,7 @@ class UserPoints(BestSummerEverPointsDB):
         """
         ret = self.query({"uid": user_id, "guild_id": guild_id}, projection=projection)
         if ret:
-            return User(**ret[0])
+            return UserDB(**ret[0])
         return None
 
     def get_user_points(self, user_id: int, guild_id: int) -> int:
@@ -79,7 +79,7 @@ class UserPoints(BestSummerEverPointsDB):
         ret = self.query({"uid": user_id, "guild_id": guild_id}, projection={"daily_minimum": True})
         return ret[0]["daily_minimum"]
 
-    def get_all_users_for_guild(self, guild_id: int, projection: dict | None = None) -> list[User]:
+    def get_all_users_for_guild(self, guild_id: int, projection: dict | None = None) -> list[UserDB]:
         """Gets all the users from a given guild.
 
         :param guild_id: int - The guild ID to get users for
@@ -99,7 +99,7 @@ class UserPoints(BestSummerEverPointsDB):
             }
 
         ret = self.query({"guild_id": guild_id}, projection=projection)
-        return [User(**_user) for _user in ret]
+        return [UserDB(**_user) for _user in ret]
 
     def set_daily_minimum(self, user_id: int, guild_id: int, points: int) -> UpdateResult:
         """Sets the user's daily minimum points to a given value.
@@ -211,7 +211,7 @@ class UserPoints(BestSummerEverPointsDB):
         """
         self.update({"uid": user_id, "guild_id": guild_id}, {"$set": {"king": value}})
 
-    def get_current_king(self, guild_id: int) -> User | None:
+    def get_current_king(self, guild_id: int) -> UserDB | None:
         """Gets current King.
 
         Args:
@@ -222,7 +222,7 @@ class UserPoints(BestSummerEverPointsDB):
         """
         ret = self.query({"guild_id": guild_id, "king": True})
         if ret:
-            return User(**ret[0])
+            return UserDB(**ret[0])
         return None
 
     @staticmethod

@@ -4,13 +4,13 @@ import discord
 
 from discordbot.selects.bet import BetSelect
 from discordbot.selects.betoutcomes import BetOutcomesSelect
-from mongo.datatypes import Bet
+from mongo.datatypes import BetDB
 
 
 class CloseABetView(discord.ui.View):
     """Class for closing a bet view."""
 
-    def __init__(self, bets: list[Bet], submit_callback: callable) -> None:
+    def __init__(self, bets: list[BetDB], submit_callback: callable) -> None:
         """Initialisation method.
 
         Args:

@@ -6,7 +6,7 @@ from bson import ObjectId
 from pymongo.results import UpdateResult
 
 from mongo import interface
-from mongo.datatypes import Reminder
+from mongo.datatypes import ReminderDB
 from mongo.db_classes import BestSummerEverPointsDB
 
 
@@ -18,14 +18,14 @@ class ServerReminders(BestSummerEverPointsDB):
         super().__init__()
         self._vault = interface.get_collection(self.database, "reminders")
 
-    def get_open_reminders(self, guild_id: int) -> list[Reminder]:
+    def get_open_reminders(self, guild_id: int) -> list[ReminderDB]:
         """Get all the currently open reminders for the given guild.
 
         :param guild_id:
         :return:
         """
         ret = self.query({"active": True, "guild_id": guild_id})
-        return [Reminder(**reminder) for reminder in ret]
+        return [ReminderDB(**reminder) for reminder in ret]
 
     def close_reminder(self, object_id: ObjectId) -> UpdateResult:
         """Closes a reminder.

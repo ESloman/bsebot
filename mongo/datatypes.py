@@ -18,13 +18,21 @@ from discordbot.constants import CREATOR
 
 
 @dataclass(frozen=True)
-class Transaction:
+class BaseDBObject:
+    """A class representing a base database object."""
+
+    _id: ObjectId
+    """The internal database ID."""
+    guild_id: int
+    """The discord guild/server ID."""
+
+
+@dataclass(frozen=True)
+class Transaction(BaseDBObject):
     """A dict representing a transaction."""
 
     uid: int
     """The ID of the user the transaction relates to."""
-    guild_id: int
-    """The ID of the guild the transaction occured in."""
     type: TransactionTypes  # noqa: A003
     """The type of transaction."""
     amount: int
@@ -38,13 +46,11 @@ class Transaction:
 
 
 @dataclass(frozen=True)
-class Activity:
+class Activity(BaseDBObject):
     """A dict representing an activity."""
 
     uid: int
     """The ID of the user the transaction relates to."""
-    guild_id: int
-    """The ID of the guild the transaction occured in."""
     type: ActivityTypes  # noqa: A003
     """The type of transaction."""
     timestamp: datetime.datetime
@@ -54,16 +60,12 @@ class Activity:
 
 
 @dataclass(frozen=True)
-class User:
+class UserDB(BaseDBObject):
     """Represents a user in the database."""
 
     # basic user information
-    _id: ObjectId
-    """The internal DB ID."""
     uid: int
     """The discord user ID."""
-    guild_id: int
-    """The discord server ID the user belongs to."""
     name: str
     """The nickname for the guild or the user name."""
 
@@ -99,7 +101,7 @@ class User:
 
 
 @dataclass(frozen=True)
-class Better:
+class BetterDB:
     """Represents a better on a bet."""
 
     user_id: int
@@ -115,7 +117,7 @@ class Better:
 
 
 @dataclass(frozen=True)
-class Option:
+class OptionDB:
     """A dict representing an option in a bet."""
 
     val: str
@@ -123,14 +125,10 @@ class Option:
 
 
 @dataclass(frozen=True)
-class Bet:
+class BetDB(BaseDBObject):
     """A dict representing a bet."""
 
     # general info
-    _id: ObjectId
-    """The internal DB ID"""
-    guild_id: int
-    """The ID of the server the bet is in"""
     bet_id: int
     """The bet ID of the bet"""
     user: int
@@ -157,11 +155,11 @@ class Bet:
     """List of option values."""
     users: list[int] = field(default=list)
     """List of user IDs."""
-    betters: dict[str, Better] = field(default=dict)
+    betters: dict[str, BetterDB] = field(default=dict)
     """A dict of user ID keys to their bet amounts."""
     result: str | None = None
     """The outcome of the bet."""
-    option_dict: dict[str, Option] = field(default=dict)
+    option_dict: dict[str, OptionDB] = field(default=dict)
     """a dict of emoji keys to the human readable names."""
     private: bool = False
     """Whether the bet was made in a private channel."""
@@ -335,14 +333,10 @@ class RevolutionEventType(TypedDict):
     """Whether the 15 minute warning was triggered"""
 
 
-@dataclass
-class Thread:
+@dataclass(frozen=True)
+class ThreadDB(BaseDBObject):
     """A dict representing a thread."""
 
-    _id: ObjectId
-    """The internal DB ID"""
-    guild_id: int
-    """The discord server ID of the server the thread is in"""
     thread_id: int
     """The discord thread ID of the thread"""
     name: str
@@ -358,14 +352,10 @@ class Thread:
 
 
 @dataclass(frozen=True)
-class GuildDB:
+class GuildDB(BaseDBObject):
     """A dict representing a guild/server."""
 
     # general server info
-    _id: ObjectId
-    """The internal DB ID."""
-    guild_id: int
-    """The discord server ID of the server."""
     owner_id: int
     """The ID of the user that owns the server."""
     name: str = ""
@@ -453,13 +443,9 @@ class GuildDB:
 
 
 @dataclass(frozen=True)
-class Reminder:
+class ReminderDB(BaseDBObject):
     """A dict representing a reminder."""
 
-    _id: ObjectId
-    """The internal DB ID."""
-    guild_id: int
-    """The ID of the server this reminder belongs to."""
     created: datetime.datetime
     """When the reminder was created."""
     user_id: int

@@ -7,7 +7,7 @@ import discord
 from discordbot.bot_enums import ActivityTypes
 from discordbot.bsebot import BSEBot
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
-from mongo.datatypes import User
+from mongo.datatypes import UserDB
 
 
 class View(BSEddies):
@@ -27,7 +27,7 @@ class View(BSEddies):
         self.help_string = "View your eddies for the server"
         self.command_name = "view"
 
-    def _construct_guild_message(self, user: User) -> str:
+    def _construct_guild_message(self, user: UserDB) -> str:
         """Constructs the `View` message for a given user and guild.
 
         Args:
@@ -41,7 +41,7 @@ class View(BSEddies):
             return "Guild didn't exist in guilds collection - probbaly just a debug error"
         pending = self.user_bets.get_user_pending_points(user.uid, user.guild_id)
         return (
-            f"**{guild_db['name']}**\n"
+            f"**{guild_db.name}**\n"
             f"You have **{user.points}** :money_with_wings:`BSEDDIES`:money_with_wings:!"
             f"\nAdditionally, you have `{pending}` points on 'pending bets'.\n\n"
             f"The _absolute highest_ amount of eddies you've ever had was `{user.high_score}`!."
@@ -82,7 +82,7 @@ class View(BSEddies):
         await ctx.respond(content=msg, ephemeral=True)
         return None
 
-    async def view_guildless(self, ctx: discord.ApplicationContext, users: list[User]) -> None:
+    async def view_guildless(self, ctx: discord.ApplicationContext, users: list[UserDB]) -> None:
         """Sends multiple messages for each guild the user is in.
 
         Args:

@@ -10,7 +10,7 @@ from discordbot.bsebot import BSEBot
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.slashcommandeventclasses.close import CloseBet
 from discordbot.views.place import PlaceABetView
-from mongo.datatypes import Bet
+from mongo.datatypes import BetDB
 
 
 class PlaceBet(BSEddies):
@@ -33,7 +33,7 @@ class PlaceBet(BSEddies):
     async def create_bet_view(
         self,
         ctx: discord.ApplicationContext | discord.Interaction,
-        bets: list[Bet] | None = None,
+        bets: list[BetDB] | None = None,
     ) -> None:
         """Creates the view.
 

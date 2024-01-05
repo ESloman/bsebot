@@ -3,12 +3,12 @@
 import datetime
 
 from mongo.bsepoints.bets import UserBets
-from mongo.datatypes import Bet
+from mongo.datatypes import BetDB
 
 
-def get_bet_dict(idx: int) -> Bet:
+def get_bet_dict(idx: int) -> BetDB:
     """Returns the bet dict at the specified index."""
-    bets: list[Bet] = [
+    bets: list[BetDB] = [
         {
             "_id": "1",
             "title": "some title",

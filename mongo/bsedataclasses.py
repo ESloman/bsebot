@@ -15,7 +15,7 @@ from discordbot.bot_enums import AwardsTypes, StatTypes
 from discordbot.stats.statsdataclasses import Stat
 from discordbot.wordle.data_type import WordleSolve
 from mongo import interface
-from mongo.datatypes import Thread
+from mongo.datatypes import ThreadDB
 from mongo.db_classes import BestSummerEverPointsDB
 
 
@@ -98,7 +98,7 @@ class SpoilerThreads(BestSummerEverPointsDB):
         super().__init__()
         self._vault = interface.get_collection(self.database, "spoilerthreads")
 
-    def get_all_threads(self, guild_id: int) -> list[Thread]:
+    def get_all_threads(self, guild_id: int) -> list[ThreadDB]:
         """Gets all threads from the DB.
 
         Args:
@@ -108,7 +108,7 @@ class SpoilerThreads(BestSummerEverPointsDB):
             list: list of Threads
         """
         ret = self.query({"guild_id": guild_id})
-        return [Thread(**thread) for thread in ret]
+        return [ThreadDB(**thread) for thread in ret]
 
     def insert_spoiler_thread(  # noqa: PLR0913, PLR0917
         self,
@@ -135,7 +135,7 @@ class SpoilerThreads(BestSummerEverPointsDB):
 
         return self.insert(document)
 
-    def get_thread_by_id(self, guild_id: int, thread_id: int) -> None | Thread:
+    def get_thread_by_id(self, guild_id: int, thread_id: int) -> None | ThreadDB:
         """Gets a database thread by ID.
 
         Args:
@@ -147,7 +147,7 @@ class SpoilerThreads(BestSummerEverPointsDB):
         """
         ret = self.query({"guild_id": guild_id, "thread_id": thread_id})
         if ret:
-            return Thread(**ret[0])
+            return ThreadDB(**ret[0])
         return None
 
 

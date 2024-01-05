@@ -7,13 +7,13 @@ import discord
 from discordbot.selects.bet import BetSelect
 from discordbot.selects.betamount import BetSelectAmount
 from discordbot.selects.betoutcomes import BetOutcomesSelect
-from mongo.datatypes import Bet
+from mongo.datatypes import BetDB
 
 
 class PlaceABetView(discord.ui.View):
     """Class for place bet view."""
 
-    def __init__(self, bets: list[Bet], user_eddies: int, submit_callback: callable) -> None:
+    def __init__(self, bets: list[BetDB], user_eddies: int, submit_callback: callable) -> None:
         """Initialisation method.
 
         Args:

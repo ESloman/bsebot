@@ -4,13 +4,13 @@ from discord import Interaction, SelectOption
 from discord.ui import Select
 
 from discordbot.constants import BET_TITLE_DISPLAY_LENTH
-from mongo.datatypes import Thread
+from mongo.datatypes import ThreadDB
 
 
 class ThreadConfigSelect(Select):
     """Class for thread config select."""
 
-    def __init__(self, threads: list[Thread]) -> None:
+    def __init__(self, threads: list[ThreadDB]) -> None:
         """Initialisation method.
 
         Args:

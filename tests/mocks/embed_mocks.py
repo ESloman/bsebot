@@ -7,14 +7,14 @@ from dataclasses import asdict
 from bson import ObjectId
 
 from mongo.bsepoints import bets
-from mongo.datatypes import Bet, RevolutionEventType
+from mongo.datatypes import BetDB, RevolutionEventType
 
 
-def get_bet() -> Bet:
+def get_bet() -> BetDB:
     """Returns a bet dict for embed generating."""
     return bets.UserBets.make_data_class(
         asdict(
-            Bet(
+            BetDB(
                 _id=ObjectId(),
                 title="Some title",
                 option_dict={"1": {"val": "one"}, "2": {"val": "two"}},

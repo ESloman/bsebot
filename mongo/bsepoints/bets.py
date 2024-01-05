@@ -8,7 +8,7 @@ from bson import ObjectId
 from discordbot.bot_enums import TransactionTypes
 from mongo import interface
 from mongo.bsepoints.points import UserPoints
-from mongo.datatypes import Bet, Better, Option
+from mongo.datatypes import BetDB, BetterDB, OptionDB
 from mongo.db_classes import BestSummerEverPointsDB
 
 
@@ -51,7 +51,7 @@ class UserBets(BestSummerEverPointsDB):
         self.update({"type": "counter", "guild_id": guild_id}, {"$inc": {"count": 1}})
         return f"{count:04d}"
 
-    def __add_new_better_to_bet(self, bet: Bet, user_id: int, emoji: str, points: int) -> dict[str, bool]:
+    def __add_new_better_to_bet(self, bet: BetDB, user_id: int, emoji: str, points: int) -> dict[str, bool]:
         """Adds a new better to a bet.
 
         Args:
@@ -87,15 +87,15 @@ class UserBets(BestSummerEverPointsDB):
         return {"success": True}
 
     @staticmethod
-    def make_data_class(bet: dict) -> Bet:
+    def make_data_class(bet: dict) -> BetDB:
         """Turns a bet dict into a dataclass representation."""
         # convert betters
-        bet["betters"] = {key: Better(**value) for key, value in bet.get("betters", {}).items()}
-        bet["option_dict"] = {key: Option(**value) for key, value in bet.get("option_dict", {}).items()}
-        return Bet(**bet)
+        bet["betters"] = {key: BetterDB(**value) for key, value in bet.get("betters", {}).items()}
+        bet["option_dict"] = {key: OptionDB(**value) for key, value in bet.get("option_dict", {}).items()}
+        return BetDB(**bet)
 
     @staticmethod
-    def count_eddies_for_bet(bet: Bet) -> int:
+    def count_eddies_for_bet(bet: BetDB) -> int:
         """Returns the number of eddies on a bet.
 
         Args:
@@ -106,7 +106,7 @@ class UserBets(BestSummerEverPointsDB):
         """
         return sum([better.points for better in bet.betters.values()])
 
-    def get_all_active_bets(self, guild_id: int) -> list[Bet]:
+    def get_all_active_bets(self, guild_id: int) -> list[BetDB]:
         """Gets all active bets.
 
         :param guild_id: int - guild ID to get the active bets for
@@ -114,7 +114,7 @@ class UserBets(BestSummerEverPointsDB):
         """
         return [self.make_data_class(active) for active in self.query({"active": True, "guild_id": guild_id})]
 
-    def get_all_inactive_pending_bets(self, guild_id: int) -> list[Bet]:
+    def get_all_inactive_pending_bets(self, guild_id: int) -> list[BetDB]:
         """Gets all the bets that are not active without results.
 
         Args:
@@ -129,7 +129,7 @@ class UserBets(BestSummerEverPointsDB):
             if "type" not in inactive
         ]
 
-    def get_all_pending_bets(self, guild_id: int) -> list[Bet]:
+    def get_all_pending_bets(self, guild_id: int) -> list[BetDB]:
         """Gets all 'pending' bets - bets that don't have a result yet.
 
         Could be active or closed.
@@ -166,7 +166,7 @@ class UserBets(BestSummerEverPointsDB):
 
         return pending
 
-    def get_all_pending_bets_for_user(self, user_id: int, guild_id: int) -> list[Bet]:
+    def get_all_pending_bets_for_user(self, user_id: int, guild_id: int) -> list[BetDB]:
         """Gets all pending bets for a given user_id.
 
         Args:
@@ -191,7 +191,7 @@ class UserBets(BestSummerEverPointsDB):
         option_dict: dict,
         timeout: datetime.datetime | None = None,
         private: bool = False,
-    ) -> Bet:
+    ) -> BetDB:
         """Creates a new bet and inserts it into the DB.
 
         :param private:
@@ -226,7 +226,7 @@ class UserBets(BestSummerEverPointsDB):
         self.insert(bet_doc)
         return self.make_data_class(bet_doc)
 
-    def get_bet_from_id(self, guild_id: int, bet_id: str) -> Bet | None:
+    def get_bet_from_id(self, guild_id: int, bet_id: str) -> BetDB | None:
         """Gets an already created bet document from the database.
 
         :param guild_id: int - The guild ID the bet exists in

@@ -7,13 +7,13 @@ from discordbot.constants import BET_TITLE_DISPLAY_LENTH
 from discordbot.selects.betamount import BetSelectAmount
 from discordbot.selects.betoutcomes import BetOutcomesSelect
 from mongo.bsepoints.bets import UserBets
-from mongo.datatypes import Bet
+from mongo.datatypes import BetDB
 
 
 class BetSelect(Select):
     """Class for Bet select."""
 
-    def __init__(self, bets: list[Bet]) -> None:
+    def __init__(self, bets: list[BetDB]) -> None:
         """Initialisation method."""
         options = []
         for bet in bets:

@@ -23,7 +23,7 @@ from discordbot.constants import (
     WORDLE_VALUES,
 )
 from discordbot.tasks.basetask import BaseTask
-from mongo.datatypes import User
+from mongo.datatypes import UserDB
 
 
 class EddieGainMessager(BaseTask):
@@ -201,7 +201,7 @@ class BSEddiesManager(BaseTask):
     def calc_individual(  # noqa: C901, PLR0913, PLR0912, PLR0915, PLR0917
         self,
         user: int,
-        user_dict: User,
+        user_dict: UserDB,
         user_results: list,
         user_reacted: list,
         user_reactions: list,

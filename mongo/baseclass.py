@@ -15,6 +15,8 @@ class BaseClass:
     If not username or password is provided - authenticate without username and password.
     """
 
+    _MINIMUM_PROJECTION_DICT: dict | None = None
+
     def __init__(self, ip: str = "127.0.0.1", username: str | None = None, password: str | None = None) -> None:
         """Initialisation method.
 
@@ -43,6 +45,25 @@ class BaseClass:
             Collection: the collection/vault
         """
         return self._vault
+
+    @property
+    def minimum_projection(self) -> dict | None:
+        """Minimum projection property.
+
+        Returns:
+            dict | None: None, or the minimum projection
+        """
+        return self._MINIMUM_PROJECTION_DICT
+
+    def update_projection(self, projection: dict) -> None:
+        """Updates the given projection with the minimum values defined.
+
+        Args:
+            projection (dict): _description_
+        """
+        if not self.minimum_projection:
+            return
+        projection.update(self.minimum_projection)
 
     def insert(self, document: dict | list) -> InsertOneResult | InsertManyResult:
         """Inserts the given object into this class' Collection object.

@@ -1,6 +1,6 @@
 """Points collection interface."""
 
-import datetime
+import typing
 
 from pymongo.results import UpdateResult
 
@@ -13,6 +13,15 @@ from mongo.db_classes import BestSummerEverPointsDB
 
 class UserPoints(BestSummerEverPointsDB):
     """Class for interacting with the 'userpoints' MongoDB collection in the 'bestsummereverpoints' DB."""
+
+    _MINIMUM_PROJECTION_DICT: typing.ClassVar = {
+        "_id": True,
+        "guild_id": True,
+        "name": True,
+        "uid": True,
+        "points": True,
+        "king": True,
+    }
 
     def __init__(self) -> None:
         """Constructor method that initialises the vault object."""
@@ -27,12 +36,28 @@ class UserPoints(BestSummerEverPointsDB):
         :param guild_id:
         :return:
         """
-        ret = self.query(
-            {"uid": user_id, "guild_id": guild_id},
-            projection={"_id": True, "high_score": True, "points": True},
-        )[0]
+        try:
+            ret = self.query(
+                {"uid": user_id, "guild_id": guild_id},
+                projection={"_id": True, "high_score": True, "points": True},
+            )[0]
+        except IndexError:
+            return
+
         if ret["points"] > ret.get("high_score", 0):
             self.update({"_id": ret["_id"]}, {"$set": {"high_score": ret["points"]}})
+
+    @staticmethod
+    def make_data_class(user: dict) -> UserDB:
+        """Converts a user dict into a dataclass.
+
+        Args:
+            user (dict): the user to convert
+
+        Returns:
+            UserDB: the dataclass
+        """
+        return UserDB(**user)
 
     def find_user_guildless(self, user_id: int) -> list[UserDB]:
         """Returns all matching user objects for the given ID.
@@ -44,7 +69,7 @@ class UserPoints(BestSummerEverPointsDB):
             list[User]: the user objects for each guild the user belongs to
         """
         ret = self.query({"uid": user_id})
-        return [UserDB(**_user) for _user in ret]
+        return [self.make_data_class(_user) for _user in ret]
 
     def find_user(self, user_id: int, guild_id: int, projection: dict | None = None) -> UserDB | None:
         """Looks up a user in the collection.
@@ -54,9 +79,12 @@ class UserPoints(BestSummerEverPointsDB):
         :param projection:
         :return: either a user dict or None if the user couldn't be found
         """
+        if projection is not None:
+            self.update_projection(projection)
+
         ret = self.query({"uid": user_id, "guild_id": guild_id}, projection=projection)
         if ret:
-            return UserDB(**ret[0])
+            return self.make_data_class(ret[0])
         return None
 
     def get_user_points(self, user_id: int, guild_id: int) -> int:
@@ -98,8 +126,10 @@ class UserPoints(BestSummerEverPointsDB):
                 "supporter_type": True,
             }
 
+        self.update_projection(projection)
+
         ret = self.query({"guild_id": guild_id}, projection=projection)
-        return [UserDB(**_user) for _user in ret]
+        return [self.make_data_class(_user) for _user in ret]
 
     def set_daily_minimum(self, user_id: int, guild_id: int, points: int) -> UpdateResult:
         """Sets the user's daily minimum points to a given value.
@@ -129,7 +159,6 @@ class UserPoints(BestSummerEverPointsDB):
         ret = self.update({"uid": user_id, "guild_id": guild_id}, {"$inc": {"points": amount}})
         if amount > 0:
             self.__check_highest_eddie_count(user_id, guild_id)
-        # add transaction here
         self._trans.add_transaction(user_id, guild_id, transaction_type, amount, **kwargs)
         return ret
 
@@ -203,11 +232,10 @@ class UserPoints(BestSummerEverPointsDB):
     def set_king_flag(self, user_id: int, guild_id: int, value: bool) -> None:
         """Sets the 'daily king' toggle for the given user.
 
-        This toggle quickly tells us who's get in the DB
-        :param user_id:
-        :param guild_id:
-        :param value:
-        :return:
+        Args:
+            user_id (int): the ID of the user to set
+            guild_id (int): the ID of the guild to set
+            value (bool): whether the user is King or not
         """
         self.update({"uid": user_id, "guild_id": guild_id}, {"$set": {"king": value}})
 
@@ -215,47 +243,12 @@ class UserPoints(BestSummerEverPointsDB):
         """Gets current King.
 
         Args:
-            guild_id (int): _description_
+            guild_id (int): the guild ID to find the KING for.
 
         Returns:
-            User: _description_
+            UserDB | None: the user or None.
         """
         ret = self.query({"guild_id": guild_id, "king": True})
         if ret:
-            return UserDB(**ret[0])
+            return self.make_data_class(ret[0])
         return None
-
-    @staticmethod
-    def get_king_info(king_user: dict[str, any]) -> dict:
-        """Function for calculating king stats from a given user dictionary.
-
-        :param king_user:
-        :return:
-        """
-        act_history = king_user.get("activity_history", [])
-        kingstuff = [a for a in act_history if a["type"] in {1, 2}]
-        gain = None
-        total_time = 0
-        times_king = 0
-        all_times = []
-        current_run = 0
-        for k in kingstuff:
-            if k["type"] == 1:
-                gain = k["timestamp"]
-                times_king += 1
-                if kingstuff.index(k) != (len(kingstuff) - 1):
-                    continue
-                now = datetime.datetime.now()
-                t = (now - gain).total_seconds()
-                all_times.append(t)
-                total_time += t
-                current_run = t
-                continue
-
-            if gain is not None:
-                t = (k["timestamp"] - gain).total_seconds()
-                all_times.append(t)
-                total_time += t
-                gain = None
-
-        return {"times": times_king, "all_times": all_times, "total": total_time, "current": current_run}

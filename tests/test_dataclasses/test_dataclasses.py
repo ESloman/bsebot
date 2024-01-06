@@ -4,17 +4,60 @@ import dataclasses
 
 import pytest
 
+from mongo.datatypes.actions import ActivityDB, TransactionDB
 from mongo.datatypes.basedatatypes import BaseEventDB
 from mongo.datatypes.bet import BetDB, BetterDB, OptionDB
 from mongo.datatypes.customs import EmojiDB, StickerDB
 from mongo.datatypes.guild import GuildDB
 from mongo.datatypes.message import MessageDB, ReactionDB, ReplyDB, VCInteractionDB, WordleMessageDB
+from mongo.datatypes.reminder import ReminderDB
 from mongo.datatypes.revolution import RevolutionEventDB, RevolutionEventUnFrozenDB
 from mongo.datatypes.thread import ThreadDB
 from mongo.datatypes.user import UserDB
 from tests.mocks import dataclass_mocks
 
 FROZEN_INSTANCE_ERROR_REGEX = r"cannot assign to field '\w*'"
+
+
+class TestActionDB:
+    @pytest.mark.parametrize("act", dataclass_mocks.get_activity_inputs())
+    def test_activitydb_init(self, act: dict) -> None:  # noqa: PLR6301
+        """Tests our ActivityDB dataclass."""
+        cls_fields = {f.name for f in dataclasses.fields(ActivityDB)}
+        extras = {k: v for k, v in act.items() if k not in cls_fields}
+        activity_db = ActivityDB(**{k: v for k, v in act.items() if k in cls_fields}, extras=extras)
+        assert isinstance(activity_db, ActivityDB)
+        for key in act:
+            try:
+                assert act[key] == activity_db.__getattribute__(key)
+            except AttributeError:
+                if key in extras:
+                    assert act[key] == extras[key]
+                else:
+                    raise
+        # test the frozen-ness
+        with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
+            activity_db.type = 10
+
+    @pytest.mark.parametrize("transaction", dataclass_mocks.get_transaction_inputs())
+    def test_transactiondb_init(self, transaction: dict) -> None:  # noqa: PLR6301
+        """Tests our TransactionDB dataclass."""
+        cls_fields = {f.name for f in dataclasses.fields(TransactionDB)}
+        extras = {k: v for k, v in transaction.items() if k not in cls_fields}
+        transaction_db = TransactionDB(**{k: v for k, v in transaction.items() if k in cls_fields}, extras=extras)
+        assert isinstance(transaction_db, TransactionDB)
+        for key in transaction:
+            try:
+                assert transaction[key] == transaction_db.__getattribute__(key) or transaction[key] == extras.get(key)
+            except AttributeError:
+                if key in extras:
+                    assert transaction[key] == extras[key]
+                else:
+                    raise
+
+        # test the frozen-ness
+        with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
+            transaction_db.type = 10
 
 
 class TestBetDB:
@@ -154,6 +197,20 @@ class TestMessageDB:
         # test the frozen-ness
         with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
             wordle_message.content = ""
+
+
+class TestReminderDB:
+    @pytest.mark.parametrize("reminder", dataclass_mocks.get_reminder_inputs())
+    def test_userdb_init(self, reminder: dict) -> None:  # noqa: PLR6301
+        """Tests our ReminderDB dataclass."""
+        reminder_db = ReminderDB(**reminder)
+        assert isinstance(reminder_db, ReminderDB)
+        for key in reminder:
+            assert reminder[key] == reminder_db.__getattribute__(key)
+
+        # test the frozen-ness
+        with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
+            reminder_db.points = 100
 
 
 class TestRevolutionEventsDB:

@@ -4,8 +4,8 @@ import dataclasses
 import datetime
 
 from discordbot.bot_enums import SupporterType
+from mongo.datatypes.actions import ActivityDB, TransactionDB
 from mongo.datatypes.basedatatypes import NamedDBObject
-from mongo.datatypes.datatypes import ActivityDB, TransactionDB
 
 
 @dataclasses.dataclass(frozen=True)

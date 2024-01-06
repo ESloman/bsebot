@@ -1,12 +1,13 @@
 """Activities collection interface."""
 
+import dataclasses
 import datetime
 
 from pymongo.results import InsertManyResult, InsertOneResult
 
 from discordbot.bot_enums import ActivityTypes
 from mongo import interface
-from mongo.datatypes.datatypes import ActivityDB
+from mongo.datatypes.actions import ActivityDB
 from mongo.db_classes import BestSummerEverPointsDB
 
 
@@ -17,6 +18,20 @@ class UserActivities(BestSummerEverPointsDB):
         """Constructor method that initialises the vault object."""
         super().__init__()
         self._vault = interface.get_collection(self.database, "useractivities")
+
+    @staticmethod
+    def make_data_class(activity: dict) -> ActivityDB:
+        """Convert the dict into a dataclass.
+
+        Args:
+            activity (dict): the activity dict
+
+        Returns:
+            ActivityDB: the dataclass.
+        """
+        cls_fields = {f.name for f in dataclasses.fields(ActivityDB)}
+        extras = {k: v for k, v in activity.items() if k not in cls_fields}
+        return ActivityDB(**{k: v for k, v in activity.items() if k in cls_fields}, extras=extras)
 
     def add_activity(
         self,
@@ -56,7 +71,10 @@ class UserActivities(BestSummerEverPointsDB):
         Returns:
             list[Activity]: activities between those times
         """
-        return self.query({"guild_id": guild_id, "timestamp": {"$gt": start, "$lt": end}}, limit=10000)
+        return [
+            self.make_data_class(act)
+            for act in self.query({"guild_id": guild_id, "timestamp": {"$gt": start, "$lt": end}}, limit=10000)
+        ]
 
     def get_all_guild_activities(self, guild_id: int) -> list[ActivityDB]:
         """Get all activities for the given guild ID.
@@ -67,4 +85,4 @@ class UserActivities(BestSummerEverPointsDB):
         Returns:
             list[Activity]: the activities
         """
-        return self.query({"guild_id": guild_id}, limit=10000)
+        return [self.make_data_class(act) for act in self.query({"guild_id": guild_id}, limit=10000)]

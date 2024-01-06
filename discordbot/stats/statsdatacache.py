@@ -9,9 +9,9 @@ from mongo.bsepoints.emojis import ServerEmojis
 from mongo.bsepoints.interactions import UserInteractions
 from mongo.bsepoints.points import UserPoints
 from mongo.bsepoints.transactions import UserTransactions
+from mongo.datatypes.actions import ActivityDB, TransactionDB
 from mongo.datatypes.bet import BetDB
 from mongo.datatypes.customs import EmojiDB
-from mongo.datatypes.datatypes import ActivityDB, TransactionDB
 from mongo.datatypes.message import MessageDB, VCInteractionDB
 from mongo.datatypes.user import UserDB
 

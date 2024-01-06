@@ -1,0 +1,1 @@
+"""Tests our UserPoints class."""

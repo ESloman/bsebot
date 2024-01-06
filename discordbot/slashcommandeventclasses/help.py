@@ -49,15 +49,15 @@ class Help(BSEddies):
         threshold = now - datetime.timedelta(days=60)
         activities = self.activities.get_guild_activities_by_timestamp(ctx.guild_id, threshold, now)
 
-        activities = [act for act in activities if act.get("type") in available_commands]
+        activities = [act for act in activities if act.type in available_commands]
 
         app_commands = self.client.application_commands
 
         counts = {}
         for act in activities:
-            if act["type"] not in counts:
-                counts[act["type"]] = 0
-            counts[act["type"]] += 1
+            if act.type not in counts:
+                counts[act.type] = 0
+            counts[act.type] += 1
 
         sorted_types = sorted(counts, key=lambda x: counts[x], reverse=True)
         if len(sorted_types) > 10:  # noqa: PLR2004

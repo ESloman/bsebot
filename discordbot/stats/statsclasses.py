@@ -1887,17 +1887,17 @@ class StatsGatherer:  # noqa: PLR0904
         activity_history = self.cache.get_activities(guild_id, start, end)
         king_events = sorted(
             [act for act in activity_history if act.type in {ActivityTypes.KING_GAIN, ActivityTypes.KING_LOSS}],
-            key=lambda x: x["timestamp"],
+            key=lambda x: x.timestamp,
         )
 
         kings = {}
         previous_time = start
 
         for event in king_events:
-            if event["type"] == ActivityTypes.KING_LOSS:
-                uid = event["uid"]
+            if event.type == ActivityTypes.KING_LOSS:
+                uid = event.uid
 
-                timestamp = event["timestamp"]  # type: datetime.datetime
+                timestamp = event.timestamp  # type: datetime.datetime
                 time_king = (timestamp - previous_time).total_seconds()
 
                 if uid not in kings:
@@ -1905,16 +1905,16 @@ class StatsGatherer:  # noqa: PLR0904
                 kings[uid] += time_king
                 previous_time = None
 
-            elif event["type"] == ActivityTypes.KING_GAIN:
-                previous_time = event["timestamp"]
+            elif event.type == ActivityTypes.KING_GAIN:
+                previous_time = event.timestamp
 
-        if king_events[-1] == event and event["type"] == ActivityTypes.KING_GAIN:
+        if king_events[-1] == event and event.type == ActivityTypes.KING_GAIN:
             # last thing someone did was become KING
-            uid = event["uid"]
+            uid = event.uid
             end_time = datetime.datetime.now()
             if end_time > end:
                 end_time = end
-            timestamp = event["timestamp"]  # type: datetime.datetime
+            timestamp = event.timestamp  # type: datetime.datetime
             time_king = (end_time - timestamp).total_seconds()
             if uid not in kings:
                 kings[uid] = 0

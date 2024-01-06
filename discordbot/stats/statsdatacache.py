@@ -256,7 +256,7 @@ class StatsDataCache:
 
         _transactions = self.trans.get_guild_transactions_by_timestamp(guild_id, start, end)
         if self.__user_id_cache:
-            _transactions = [t for t in _transactions if t["uid"] == self.__user_id_cache]
+            _transactions = [t for t in _transactions if t.uid == self.__user_id_cache]
         self.__transaction_cache = _transactions
         self.__transaction_cache_time = now
         return self.__transaction_cache
@@ -284,7 +284,7 @@ class StatsDataCache:
 
         _activities = self.activities.get_guild_activities_by_timestamp(guild_id, start, end)
         if self.__user_id_cache:
-            _activities = [a for a in _activities if a["uid"] == self.__user_id_cache]
+            _activities = [a for a in _activities if a.uid == self.__user_id_cache]
         self.__activity_cache = _activities
         self.__activity_cache_time = now
         return self.__activity_cache

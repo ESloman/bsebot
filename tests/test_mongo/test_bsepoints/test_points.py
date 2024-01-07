@@ -1,5 +1,6 @@
 """Tests our UserPoints class."""
 
+import random
 from unittest import mock
 
 import pytest
@@ -26,7 +27,10 @@ class TestUserPoints:
     @pytest.mark.parametrize(
         ("user_id", "guild_id"),
         # load list of entries dynamically
-        [(entry["uid"], entry["guild_id"]) for entry in interface_mocks.query_mock("userpoints", {})],
+        [(entry["uid"], entry["guild_id"]) for entry in interface_mocks.query_mock("userpoints", {})]
+        + [
+            (123456, 654321),
+        ],
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -56,7 +60,8 @@ class TestUserPoints:
     def test_user_points_find_user(self, user_id: int, guild_id: int) -> None:  # noqa: PLR6301
         """Tests UserPoints find_user."""
         user_points = UserPoints()
-        user = user_points.find_user(user_id=user_id, guild_id=guild_id)
+        projection = {} if random.random() > 0.5 else None
+        user = user_points.find_user(user_id=user_id, guild_id=guild_id, projection=projection)
         assert isinstance(user, UserDB)
         assert user.uid == user_id
         assert user.guild_id == guild_id
@@ -122,3 +127,49 @@ class TestUserPoints:
         user_points = UserPoints()
         points = user_points.get_user_daily_minimum(user_id, guild_id)
         assert isinstance(points, int)
+
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("userpoints", {})},
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_user_points_get_users_for_guild(self, guild_id: int) -> None:  # noqa: PLR6301
+        """Tests UserPoints get_users_for_guild."""
+        user_points = UserPoints()
+        users = user_points.get_all_users_for_guild(guild_id)
+        assert isinstance(users, list)
+        assert len(users) > 0
+        for user in users:
+            assert isinstance(user, UserDB)
+            assert user.guild_id == guild_id
+
+    @pytest.mark.parametrize(
+        ("user_id", "guild_id"),
+        # load list of entries dynamically
+        [(entry["uid"], entry["guild_id"]) for entry in interface_mocks.query_mock("userpoints", {})],
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    def test_user_points_set_daily_minimum(self, user_id: int, guild_id: int) -> None:  # noqa: PLR6301
+        """Tests UserPoints set_daily_minimum."""
+        user_points = UserPoints()
+        user_points.set_daily_minimum(user_id, guild_id, random.randint(0, 10))
+
+    @pytest.mark.parametrize(
+        ("user_id", "guild_id"),
+        # load list of entries dynamically
+        [(entry["uid"], entry["guild_id"]) for entry in interface_mocks.query_mock("userpoints", {})],
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_user_points_increment_points(self, user_id: int, guild_id: int) -> None:  # noqa: PLR6301
+        """Tests UserPoints increment_points."""
+        user_points = UserPoints()
+        with mock.patch.object(user_points._trans, "add_transaction", return_value=None):
+            user_points.increment_points(user_id, guild_id, random.randint(-10, 10), 0)

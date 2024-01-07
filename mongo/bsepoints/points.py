@@ -162,26 +162,6 @@ class UserPoints(BestSummerEverPointsDB):
         self._trans.add_transaction(user_id, guild_id, transaction_type, amount, **kwargs)
         return ret
 
-    def increment_daily_minimum(self, user_id: int, guild_id: int, amount: int) -> UpdateResult:
-        """Increments the user's daily minimum points by a given value.
-
-        :param user_id: int - The ID of the user to look for
-        :param guild_id: int - The guild ID that the user belongs in
-        :param amount: int - amount to increase daily minimum by
-        :return: UpdateResults object
-        """
-        return self.update({"uid": user_id, "guild_id": guild_id}, {"$inc": {"daily_minimum": amount}})
-
-    def decrement_daily_minimum(self, user_id: int, guild_id: int, amount: int) -> UpdateResult:
-        """Decreases a user's daily minimum points by set amount.
-
-        :param user_id: int - The ID of the user to look for
-        :param guild_id: int - The guild ID that the user belongs in
-        :param amount: int - amount to decrease daily minimum
-        :return: UpdateResults object
-        """
-        return self.increment_daily_minimum(user_id, guild_id, amount * -1)
-
     def create_user(self, user_id: int, guild_id: int, name: str, dailies: bool = False) -> None:
         """Create basic user points document.
 

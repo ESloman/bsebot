@@ -247,7 +247,7 @@ class BSEddiesManager(BaseTask):
 
             minimum -= 1
             if real:
-                self.user_points.decrement_daily_minimum(user, guild_id, 1)
+                self.user_points.set_daily_minimum(user, guild_id, minimum)
             if minimum == 0:
                 return 0, {}
         elif minimum != self.server_min:

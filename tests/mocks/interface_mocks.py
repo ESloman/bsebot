@@ -52,3 +52,7 @@ def query_mock(collection_name: str, parameters: dict, *_args: tuple[any], **_kw
 
 def update_mock(*_args: tuple[any], **kwargs: dict[any]) -> None:
     """Update mock."""
+
+
+def insert_mock(*_args: tuple[any], **kwargs: dict[any]) -> None:
+    """Insert mock."""

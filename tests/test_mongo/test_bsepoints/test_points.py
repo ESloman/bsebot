@@ -173,3 +173,59 @@ class TestUserPoints:
         user_points = UserPoints()
         with mock.patch.object(user_points._trans, "add_transaction", return_value=None):
             user_points.increment_points(user_id, guild_id, random.randint(-10, 10), 0)
+
+    @pytest.mark.parametrize(
+        ("user_id", "guild_id"),
+        # load list of entries dynamically
+        [(entry["uid"], entry["guild_id"]) for entry in interface_mocks.query_mock("userpoints", {})],
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    def test_user_points_create_user(self, user_id: int, guild_id: int) -> None:  # noqa: PLR6301
+        """Tests UserPoints increment_points."""
+        user_points = UserPoints()
+        with mock.patch.object(user_points._trans, "add_transaction", return_value=None):
+            user_points.create_user(user_id, guild_id, "some name", False)
+
+    @pytest.mark.parametrize(
+        ("user_id", "guild_id"),
+        # load list of entries dynamically
+        [(entry["uid"], entry["guild_id"]) for entry in interface_mocks.query_mock("userpoints", {})],
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    def test_user_points_set_daily_eddies_toggle(self, user_id: int, guild_id: int) -> None:  # noqa: PLR6301
+        """Tests UserPoints increment_points."""
+        user_points = UserPoints()
+        user_points.set_daily_eddies_toggle(user_id, guild_id, False)
+        user_points.set_daily_eddies_toggle(user_id, 0, False)
+
+    @pytest.mark.parametrize(
+        ("user_id", "guild_id"),
+        # load list of entries dynamically
+        [(entry["uid"], entry["guild_id"]) for entry in interface_mocks.query_mock("userpoints", {})],
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    def test_user_points_set_king_flag(self, user_id: int, guild_id: int) -> None:  # noqa: PLR6301
+        """Tests UserPoints set_king_flag."""
+        user_points = UserPoints()
+        user_points.set_king_flag(user_id, guild_id, False)
+
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("userpoints", {})},
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_user_points_get_current_king(self, guild_id: int) -> None:  # noqa: PLR6301
+        """Tests UserPoints get_current_king."""
+        user_points = UserPoints()
+        user = user_points.get_current_king(guild_id)
+        assert isinstance(user, UserDB)
+        assert user.king

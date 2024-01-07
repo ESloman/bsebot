@@ -79,10 +79,10 @@ class BaseClass:
             document (dict | list): the document or list of documents to insert
 
         Raises:
-            IncorrectDocument: _description_
+            IncorrectDocument: raised when document isn't formatted correctly
 
         Returns:
-            InsertOneResult | InsertManyResult: _description_
+            InsertOneResult | InsertManyResult: update result
         """
         if not isinstance(document, list | dict):
             msg = "Given document isn't a dictionary or a list."
@@ -98,27 +98,26 @@ class BaseClass:
         """Updates all documents based on the given parameters with the provided values.
 
         Args:
-            parameters (dict): _description_
-            updated_vals (dict): _description_
-            many (bool, optional): _description_. Defaults to False.
+            parameters (dict): the parameters to match documents on
+            updated_vals (dict): the update parameters
+            many (bool, optional): whether to update many. Defaults to False.
 
         Returns:
-            UpdateResult: _description_
+            UpdateResult: the update result
         """
         return interface.update(self.vault, parameters, updated_vals, many)
 
     def delete(self, parameters: dict, many: bool = True) -> int:
-        """Deletes documents based on the given parameters. If many=False, only deletes one else it deletes all matches.
+        """Deletes documents based on the given parameters.
+
+        If many=False, only deletes one else it deletes all matches.
 
         Args:
-            parameters (dict): _description_
-            many (bool, optional): _description_. Defaults to True.
-
-        Raises:
-            NoVaultError: _description_
+            parameters (dict): the parameters to match documents on
+            many (bool, optional): whether to delete many or not. Defaults to True.
 
         Returns:
-            int: _description_
+            int: the number of documents deleted
         """
         return interface.delete(self.vault, parameters, many)
 
@@ -147,16 +146,16 @@ class BaseClass:
             projection = {"_id": False}.
 
         Args:
-            parameters (dict): _description_
-            limit (int, optional): _description_. Defaults to 1000.
-            projection (dict | None, optional): _description_. Defaults to None.
-            as_gen (bool, optional): _description_. Defaults to False.
-            skip (int | None, optional): _description_. Defaults to None.
-            use_paginated (bool, optional): _description_. Defaults to False.
-            sort (list[tuple] | None, optional): _description_. Defaults to None.
+            parameters (dict): parameters to match documents on.
+            limit (int, optional): the max number of documents to return. Defaults to 1000.
+            projection (dict | None, optional): which keys to return/not return. Defaults to None.
+            as_gen (bool, optional): whether to return a Cursor or not. Defaults to False.
+            skip (int | None, optional): how many documents to skip. Defaults to None.
+            use_paginated (bool, optional): whether to use a paginated response. Defaults to False.
+            sort (list[tuple] | None, optional): sort options for the results. Defaults to None.
 
         Returns:
-            list | Cursor: _description_
+            list | Cursor: either a list, or a Cursor of the documents
         """
         if not projection or as_gen or not use_paginated:
             return interface.query(self.vault, parameters, limit, projection, as_gen, skip=skip, sort=sort)
@@ -187,32 +186,26 @@ class BaseClass:
         """Gets collection names of database.
 
         Returns:
-            None | list: _description_
+            None | list: list of names
         """
         return interface.get_collection_names(self.database)
 
-    def create_index(self, field: str) -> bool | (str | list):
+    def create_index(self, field: str) -> bool | str:
         """Creates an index on the current collection.
 
         Args:
-            self (_type_): _description_
-
-        Raises:
-            NoVaultError: _description_
+            field (str): field to create an index on
 
         Returns:
-            _type_: _description_
+            bool | (str | list): False, or the string
         """
         return interface.create_index(self.vault, field)
 
     def get_indexes(self) -> list:
         """Gets a list of indexes on the current collection.
 
-        Raises:
-            NoVaultError: _description_
-
         Returns:
-            list: _description_
+            list: list of indexes
         """
         return interface.get_indexes(self.vault)
 
@@ -224,7 +217,7 @@ class NoVaultError(Exception):
         """Initialisation method.
 
         Args:
-            message (str): _description_
+            message (str): the message to raise
         """
         super().__init__(message)
 
@@ -236,6 +229,6 @@ class IncorrectDocumentError(Exception):
         """Initialisation method.
 
         Args:
-            message (str): _description_
+            message (str): the message to raise
         """
         super().__init__(message)

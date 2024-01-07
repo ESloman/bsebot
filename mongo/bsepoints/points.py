@@ -29,7 +29,7 @@ class UserPoints(BestSummerEverPointsDB):
         self._vault = interface.get_collection(self.database, "userpoints")
         self._trans = UserTransactions()
 
-    def __check_highest_eddie_count(self, user_id: int, guild_id: int) -> None:
+    def _check_highest_eddie_count(self, user_id: int, guild_id: int) -> None:
         """Internal function for making sure the user always has the high score set correctly.
 
         :param user_id:
@@ -158,7 +158,7 @@ class UserPoints(BestSummerEverPointsDB):
         """
         ret = self.update({"uid": user_id, "guild_id": guild_id}, {"$inc": {"points": amount}})
         if amount > 0:
-            self.__check_highest_eddie_count(user_id, guild_id)
+            self._check_highest_eddie_count(user_id, guild_id)
         self._trans.add_transaction(user_id, guild_id, transaction_type, amount, **kwargs)
         return ret
 

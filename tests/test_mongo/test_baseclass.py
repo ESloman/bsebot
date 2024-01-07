@@ -3,7 +3,7 @@
 import pytest
 from pymongo import MongoClient
 
-from mongo.baseclass import BaseClass, NoVaultError
+from mongo.baseclass import BaseClass, IncorrectDocumentError, NoVaultError
 
 
 class TestBaseClass:
@@ -44,3 +44,25 @@ class TestBaseClass:
         base_cls.update_projection(projection)
         for key, value in base_cls._MINIMUM_PROJECTION_DICT.items():
             assert projection[key] == value
+
+    def test_base_class_update_projection_empty(self) -> None:  # noqa: PLR6301
+        """Tests BaseClass with update_projection and an empty projection."""
+        base_cls = BaseClass()
+        base_cls._MINIMUM_PROJECTION_DICT = {}
+
+        projection = {"user_id": False, "points": True}
+        base_cls.update_projection(projection)
+
+    @pytest.mark.parametrize("doc", [None, "doc", 1234])
+    def test_insert_incorrect_document(self, doc: any) -> None:  # noqa: PLR6301
+        """Tests BaseClass insert method with incorrect document."""
+        base_cls = BaseClass()
+        with pytest.raises(IncorrectDocumentError, match="Given document isn't a dictionary or a list."):
+            base_cls.insert(doc)
+
+    @pytest.mark.parametrize("doc", [[None], [{}, None, {}], [123, "doc", {}, {}]])
+    def test_insert_incorrect_documents(self, doc: any) -> None:  # noqa: PLR6301
+        """Tests BaseClass insert method with incorrect documents."""
+        base_cls = BaseClass()
+        with pytest.raises(IncorrectDocumentError, match="Not all documents in the list are dictionaries."):
+            base_cls.insert(doc)

@@ -48,3 +48,7 @@ def query_mock(collection_name: str, parameters: dict, *_args: tuple[any], **_kw
                 _filtered_data.append(data)
 
     return _filtered_data
+
+
+def update_mock(*_args: tuple[any], **kwargs: dict[any]) -> None:
+    """Update mock."""

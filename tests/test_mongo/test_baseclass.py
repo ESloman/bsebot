@@ -1,0 +1,46 @@
+"""Tests our baseclass.py module."""
+
+import pytest
+from pymongo import MongoClient
+
+from mongo.baseclass import BaseClass, NoVaultError
+
+
+class TestBaseClass:
+    """Tests our BaseClass class."""
+
+    def test_base_class_init_defaults(self) -> None:  # noqa: PLR6301
+        """Tests BaseClass init with defaults."""
+        base_cls = BaseClass()
+        assert isinstance(base_cls.mongo_client, MongoClient)
+        assert base_cls.cli is BaseClass().mongo_client
+
+    def test_base_class_init(self) -> None:  # noqa: PLR6301
+        """Tests BaseClass init."""
+        base_cls = BaseClass("123.0.0.1", username="user", password="pass")
+        assert isinstance(base_cls.mongo_client, MongoClient)
+        assert base_cls.cli is BaseClass("123.0.0.1", username="user", password="pass").mongo_client
+
+    def test_base_class_vault_exc(self) -> None:  # noqa: PLR6301
+        """Tests BaseClass vault property raises an exception correctly."""
+        base_cls = BaseClass()
+        with pytest.raises(NoVaultError, match="No vault instantiated."):
+            _ = base_cls.vault
+
+    def test_base_class_vault(self) -> None:  # noqa: PLR6301
+        """Tests BaseClass vault property."""
+        base_cls = BaseClass()
+        # assign anything to vault
+        base_cls._vault = 123
+        vault = base_cls.vault
+        assert vault is not None
+
+    def test_base_class_update_projection(self) -> None:  # noqa: PLR6301
+        """Tests BaseClass with update_projection."""
+        base_cls = BaseClass()
+        base_cls._MINIMUM_PROJECTION_DICT = {"_id": True, "guild_id": True, "user_id": True}
+
+        projection = {"user_id": False, "points": True}
+        base_cls.update_projection(projection)
+        for key, value in base_cls._MINIMUM_PROJECTION_DICT.items():
+            assert projection[key] == value

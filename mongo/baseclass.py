@@ -15,6 +15,7 @@ class BaseClass:
     If not username or password is provided - authenticate without username and password.
     """
 
+    _NO_VAULT_MESSAGE = "No vault instantiated."
     _MINIMUM_PROJECTION_DICT: dict | None = None
 
     def __init__(self, ip: str = "127.0.0.1", username: str | None = None, password: str | None = None) -> None:
@@ -41,9 +42,15 @@ class BaseClass:
     def vault(self) -> Collection:
         """Vault property.
 
+        Raises:
+            NoVaultError: raised when vault isn't instantiated
+
         Returns:
             Collection: the collection/vault
         """
+        if self._vault is None:
+            msg = self._NO_VAULT_MESSAGE
+            raise NoVaultError(msg)
         return self._vault
 
     @property
@@ -72,16 +79,11 @@ class BaseClass:
             document (dict | list): the document or list of documents to insert
 
         Raises:
-            NoVaultError: _description_
-            IncorrectDocument: _description_
             IncorrectDocument: _description_
 
         Returns:
             InsertOneResult | InsertManyResult: _description_
         """
-        if self.vault is None:
-            msg = "No vault instantiated."
-            raise NoVaultError(msg)
         if not isinstance(document, list | dict):
             msg = "Given document isn't a dictionary or a list."
             raise IncorrectDocumentError(msg)
@@ -89,7 +91,8 @@ class BaseClass:
         if isinstance(document, list) and not all(isinstance(k, dict) for k in document):
             msg = "Not all documents in the list are dictionaries."
             raise IncorrectDocumentError(msg)
-        return interface.insert(self._vault, document)
+
+        return interface.insert(self.vault, document)
 
     def update(self, parameters: dict, updated_vals: dict, many: bool = False) -> UpdateResult:
         """Updates all documents based on the given parameters with the provided values.
@@ -99,15 +102,9 @@ class BaseClass:
             updated_vals (dict): _description_
             many (bool, optional): _description_. Defaults to False.
 
-        Raises:
-            NoVaultError: _description_
-
         Returns:
             UpdateResult: _description_
         """
-        if self.vault is None:
-            msg = "No vault instantiated."
-            raise NoVaultError(msg)
         return interface.update(self.vault, parameters, updated_vals, many)
 
     def delete(self, parameters: dict, many: bool = True) -> int:
@@ -123,9 +120,6 @@ class BaseClass:
         Returns:
             int: _description_
         """
-        if self.vault is None:
-            msg = "No vault instantiated."
-            raise NoVaultError(msg)
         return interface.delete(self.vault, parameters, many)
 
     def query(  # noqa: PLR0913, PLR0917
@@ -161,15 +155,9 @@ class BaseClass:
             use_paginated (bool, optional): _description_. Defaults to False.
             sort (list[tuple] | None, optional): _description_. Defaults to None.
 
-        Raises:
-            NoVaultError: _description_
-
         Returns:
             list | Cursor: _description_
         """
-        if self.vault is None:
-            msg = "No vault instantiated."
-            raise NoVaultError(msg)
         if not projection or as_gen or not use_paginated:
             return interface.query(self.vault, parameters, limit, projection, as_gen, skip=skip, sort=sort)
         return self.paginated_query(parameters, limit, skip)
@@ -198,15 +186,9 @@ class BaseClass:
     def get_collection_names(self) -> None | list:
         """Gets collection names of database.
 
-        Raises:
-            NoVaultError: _description_
-
         Returns:
             None | list: _description_
         """
-        if not hasattr(self, "database"):
-            msg = "No vault instantiated."
-            raise NoVaultError(msg)
         return interface.get_collection_names(self.database)
 
     def create_index(self, field: str) -> bool | (str | list):
@@ -221,9 +203,6 @@ class BaseClass:
         Returns:
             _type_: _description_
         """
-        if self.vault is None:
-            msg = "No vault instantiated."
-            raise NoVaultError(msg)
         return interface.create_index(self.vault, field)
 
     def get_indexes(self) -> list:
@@ -235,9 +214,6 @@ class BaseClass:
         Returns:
             list: _description_
         """
-        if self.vault is None:
-            msg = "No vault instantiated."
-            raise NoVaultError(msg)
         return interface.get_indexes(self.vault)
 
 

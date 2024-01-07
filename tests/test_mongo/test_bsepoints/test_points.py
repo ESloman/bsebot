@@ -12,7 +12,7 @@ from tests.mocks import interface_mocks
 
 
 class TestUserPoints:
-    """Tests our BaseClass class."""
+    """Tests our UserPoints class."""
 
     def test_user_points_init(self) -> None:  # noqa: PLR6301
         """Tests UserPoints init."""

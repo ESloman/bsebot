@@ -21,6 +21,11 @@ class TestBaseClass:
         assert isinstance(base_cls.mongo_client, MongoClient)
         assert base_cls.cli is BaseClass("123.0.0.1", username="user", password="pass").mongo_client
 
+    def test_base_class_bad_user_pass(self) -> None:  # noqa: PLR6301
+        """Tests BaseClass bad user and pass."""
+        base_cls = BaseClass("123.0.0.1", username="", password="")
+        assert not base_cls.mongo_client
+
     def test_base_class_vault_exc(self) -> None:  # noqa: PLR6301
         """Tests BaseClass vault property raises an exception correctly."""
         base_cls = BaseClass()

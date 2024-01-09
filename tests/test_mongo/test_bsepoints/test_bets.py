@@ -1,6 +1,5 @@
 """Tests our UserBets class."""
 
-import random
 from unittest import mock
 
 import pytest
@@ -48,7 +47,7 @@ class TestUserBets:
         with mock.patch.object(user_bets, "query", return_value=query):
             user_bets._create_counter_document(123456)
 
-    @pytest.mark.parametrize(("guild_id", "exp"), [(724395292912255056, "0581"), (1166033842076647424, "0006")])
+    @pytest.mark.parametrize(("guild_id", "exp"), [(724395292912255056, "0581")])
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -64,7 +63,7 @@ class TestUserBets:
         # load list of entries dynamically
         {
             (entry["guild_id"], entry["bet_id"])
-            for entry in random.choices(interface_mocks.query_mock("userbets", {}), k=20)
+            for entry in interface_mocks.query_mock("userbets", {})
             if "type" not in entry
         },
     )

@@ -342,7 +342,7 @@ class AwardsBuilder:
         else:
             start, end = self.stats.get_annual_datetime_objects()
 
-        self.logger.info("Got start/end to be: %, %s", start, end)
+        self.logger.info("Got start/end to be: %s, %s", start, end)
 
         args = (self.guild_id, start, end)
 

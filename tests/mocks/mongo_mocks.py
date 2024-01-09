@@ -9,7 +9,7 @@ from mongo.datatypes.user import UserDB
 
 
 class UserPointsMock:
-    def get_all_users_for_guild(self, guild_id: int) -> list[UserDB]:  # noqa: PLR6301
+    def get_all_users_for_guild(self, guild_id: int) -> list[UserDB]:
         """Mocks getting all users."""
         return [
             UserDB(
@@ -25,7 +25,7 @@ class UserPointsMock:
             for _ in range(20)
         ]
 
-    def find_user(self, user_id: int, guild_id: int) -> UserDB:  # noqa: PLR6301
+    def find_user(self, user_id: int, guild_id: int) -> UserDB:
         """Find user mock."""
         return UserDB(
             _id=ObjectId(),
@@ -39,6 +39,6 @@ class UserPointsMock:
 
 
 class GuildsMock:
-    def get_guild(self, guild_id: int) -> GuildDB:  # noqa: PLR6301
+    def get_guild(self, guild_id: int) -> GuildDB:
         """Mock for get_guild."""
         return GuildDB(_id=ObjectId(), guild_id=guild_id, king=3, admins=[], owner_id=guild_id, name="somename")

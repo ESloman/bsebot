@@ -15,7 +15,7 @@ from tests.mocks import interface_mocks
 class TestGuilds:
     """Tests our Guilds class."""
 
-    def test_guilds_init(self) -> None:  # noqa: PLR6301
+    def test_guilds_init(self) -> None:
         """Tests Guilds init."""
         guilds = Guilds()
         assert isinstance(guilds, Guilds)
@@ -30,7 +30,7 @@ class TestGuilds:
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
-    def test_guilds_get_guild(self, guild_id: int) -> None:  # noqa: PLR6301
+    def test_guilds_get_guild(self, guild_id: int) -> None:
         """Tests Guilds get_guild method."""
         guilds = Guilds()
         guild = guilds.get_guild(guild_id)
@@ -40,7 +40,7 @@ class TestGuilds:
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
-    def test_guilds_get_guild_none(self) -> None:  # noqa: PLR6301
+    def test_guilds_get_guild_none(self) -> None:
         """Tests Guilds get_guild method."""
         guilds = Guilds()
         guild = guilds.get_guild(123456)
@@ -54,7 +54,7 @@ class TestGuilds:
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
-    def test_guilds_insert_guild(self, guild_id: int) -> None:  # noqa: PLR6301
+    def test_guilds_insert_guild(self, guild_id: int) -> None:
         """Tests Guilds insert_guild method."""
         guilds = Guilds()
         guilds.insert_guild(guild_id, "name", 123456, datetime.datetime.now())
@@ -67,7 +67,7 @@ class TestGuilds:
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
-    def test_guilds_get_channel(self, guild_id: int) -> None:  # noqa: PLR6301
+    def test_guilds_get_channel(self, guild_id: int) -> None:
         """Tests Guilds get_channel method."""
         guilds = Guilds()
         channel = guilds.get_channel(guild_id)
@@ -77,7 +77,7 @@ class TestGuilds:
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
-    def test_guilds_get_channel_none(self) -> None:  # noqa: PLR6301
+    def test_guilds_get_channel_none(self) -> None:
         """Tests Guilds get_channel method return None as expected."""
         guilds = Guilds()
         channel = guilds.get_channel(123456)
@@ -91,7 +91,7 @@ class TestGuilds:
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
-    def test_guilds_get_king(self, guild_id: int) -> None:  # noqa: PLR6301
+    def test_guilds_get_king(self, guild_id: int) -> None:
         """Tests Guilds get_king method."""
         guilds = Guilds()
         king = guilds.get_king(guild_id)
@@ -106,7 +106,7 @@ class TestGuilds:
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
-    def test_guilds_get_king_whole_class(self, guild_id: int) -> None:  # noqa: PLR6301
+    def test_guilds_get_king_whole_class(self, guild_id: int) -> None:
         """Tests Guilds get_king method and return the whole class."""
         guilds = Guilds()
         king = guilds.get_king(guild_id, True)
@@ -116,7 +116,7 @@ class TestGuilds:
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
-    def test_guilds_get_king_none(self) -> None:  # noqa: PLR6301
+    def test_guilds_get_king_none(self) -> None:
         """Tests Guilds get_king method return None as expected."""
         guilds = Guilds()
         king = guilds.get_king(123456)
@@ -131,7 +131,7 @@ class TestGuilds:
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
-    def test_guilds_set_king(self, guild_id: int) -> None:  # noqa: PLR6301
+    def test_guilds_set_king(self, guild_id: int) -> None:
         """Tests Guilds set_king method."""
         guilds = Guilds()
         with mock.patch.object(guilds, "update") as update_patched:

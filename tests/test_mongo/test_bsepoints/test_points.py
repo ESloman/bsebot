@@ -14,7 +14,7 @@ from tests.mocks import interface_mocks
 class TestUserPoints:
     """Tests our UserPoints class."""
 
-    def test_user_points_init(self) -> None:  # noqa: PLR6301
+    def test_user_points_init(self) -> None:
         """Tests UserPoints init."""
         user_points = UserPoints()
         assert isinstance(user_points, UserPoints)
@@ -36,12 +36,12 @@ class TestUserPoints:
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
-    def test_user_points_check_highest_eddie_count(self, user_id: int, guild_id: int) -> None:  # noqa: PLR6301
+    def test_user_points_check_highest_eddie_count(self, user_id: int, guild_id: int) -> None:
         """Tests UserPoints _check_highest_eddie_count."""
         user_points = UserPoints()
         user_points._check_highest_eddie_count(user_id, guild_id)
 
-    def test_user_points_make_data_class(self) -> None:  # noqa: PLR6301
+    def test_user_points_make_data_class(self) -> None:
         """Tests UserPoints make_data_class."""
         user_points = UserPoints()
         data = interface_mocks.query_mock("userpoints", {})
@@ -57,7 +57,7 @@ class TestUserPoints:
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
-    def test_user_points_find_user(self, user_id: int, guild_id: int) -> None:  # noqa: PLR6301
+    def test_user_points_find_user(self, user_id: int, guild_id: int) -> None:
         """Tests UserPoints find_user."""
         user_points = UserPoints()
         projection = {} if random.random() > 0.5 else None
@@ -76,7 +76,7 @@ class TestUserPoints:
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
-    def test_user_points_find_user_none(self, user_id: int, guild_id: int) -> None:  # noqa: PLR6301
+    def test_user_points_find_user_none(self, user_id: int, guild_id: int) -> None:
         """Tests UserPoints find_user with a user that doesn't exist."""
         user_points = UserPoints()
         user = user_points.find_user(user_id=user_id, guild_id=guild_id)
@@ -91,7 +91,7 @@ class TestUserPoints:
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
-    def test_user_points_find_user_guildless(self, user_id: int) -> None:  # noqa: PLR6301
+    def test_user_points_find_user_guildless(self, user_id: int) -> None:
         """Tests UserPoints find_user_guildless."""
         user_points = UserPoints()
         results = user_points.find_user_guildless(user_id=user_id)
@@ -108,7 +108,7 @@ class TestUserPoints:
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
-    def test_user_points_get_user_points(self, user_id: int, guild_id: int) -> None:  # noqa: PLR6301
+    def test_user_points_get_user_points(self, user_id: int, guild_id: int) -> None:
         """Tests UserPoints get_user_points."""
         user_points = UserPoints()
         points = user_points.get_user_points(user_id, guild_id)
@@ -122,7 +122,7 @@ class TestUserPoints:
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
-    def test_user_points_get_user_daily_minimum(self, user_id: int, guild_id: int) -> None:  # noqa: PLR6301
+    def test_user_points_get_user_daily_minimum(self, user_id: int, guild_id: int) -> None:
         """Tests UserPoints get_user_daily_minimum."""
         user_points = UserPoints()
         points = user_points.get_user_daily_minimum(user_id, guild_id)
@@ -136,7 +136,7 @@ class TestUserPoints:
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
-    def test_user_points_get_users_for_guild(self, guild_id: int) -> None:  # noqa: PLR6301
+    def test_user_points_get_users_for_guild(self, guild_id: int) -> None:
         """Tests UserPoints get_users_for_guild."""
         user_points = UserPoints()
         users = user_points.get_all_users_for_guild(guild_id)
@@ -154,7 +154,7 @@ class TestUserPoints:
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
-    def test_user_points_set_daily_minimum(self, user_id: int, guild_id: int) -> None:  # noqa: PLR6301
+    def test_user_points_set_daily_minimum(self, user_id: int, guild_id: int) -> None:
         """Tests UserPoints set_daily_minimum."""
         user_points = UserPoints()
         user_points.set_daily_minimum(user_id, guild_id, random.randint(0, 10))
@@ -168,7 +168,7 @@ class TestUserPoints:
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
-    def test_user_points_increment_points(self, user_id: int, guild_id: int) -> None:  # noqa: PLR6301
+    def test_user_points_increment_points(self, user_id: int, guild_id: int) -> None:
         """Tests UserPoints increment_points."""
         user_points = UserPoints()
         with mock.patch.object(user_points._trans, "add_transaction", return_value=None):
@@ -182,7 +182,7 @@ class TestUserPoints:
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
-    def test_user_points_create_user(self, user_id: int, guild_id: int) -> None:  # noqa: PLR6301
+    def test_user_points_create_user(self, user_id: int, guild_id: int) -> None:
         """Tests UserPoints increment_points."""
         user_points = UserPoints()
         with mock.patch.object(user_points._trans, "add_transaction", return_value=None):
@@ -196,7 +196,7 @@ class TestUserPoints:
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
-    def test_user_points_set_daily_eddies_toggle(self, user_id: int, guild_id: int) -> None:  # noqa: PLR6301
+    def test_user_points_set_daily_eddies_toggle(self, user_id: int, guild_id: int) -> None:
         """Tests UserPoints increment_points."""
         user_points = UserPoints()
         user_points.set_daily_eddies_toggle(user_id, guild_id, False)
@@ -210,7 +210,7 @@ class TestUserPoints:
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
-    def test_user_points_set_king_flag(self, user_id: int, guild_id: int) -> None:  # noqa: PLR6301
+    def test_user_points_set_king_flag(self, user_id: int, guild_id: int) -> None:
         """Tests UserPoints set_king_flag."""
         user_points = UserPoints()
         user_points.set_king_flag(user_id, guild_id, False)
@@ -223,7 +223,7 @@ class TestUserPoints:
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
-    def test_user_points_get_current_king(self, guild_id: int) -> None:  # noqa: PLR6301
+    def test_user_points_get_current_king(self, guild_id: int) -> None:
         """Tests UserPoints get_current_king."""
         user_points = UserPoints()
         user = user_points.get_current_king(guild_id)

@@ -21,7 +21,7 @@ FROZEN_INSTANCE_ERROR_REGEX = r"cannot assign to field '\w*'"
 
 class TestActionDB:
     @pytest.mark.parametrize("act", dataclass_mocks.get_activity_inputs())
-    def test_activitydb_init(self, act: dict) -> None:  # noqa: PLR6301
+    def test_activitydb_init(self, act: dict) -> None:
         """Tests our ActivityDB dataclass."""
         cls_fields = {f.name for f in dataclasses.fields(ActivityDB)}
         extras = {k: v for k, v in act.items() if k not in cls_fields}
@@ -40,7 +40,7 @@ class TestActionDB:
             activity_db.type = 10
 
     @pytest.mark.parametrize("transaction", dataclass_mocks.get_transaction_inputs())
-    def test_transactiondb_init(self, transaction: dict) -> None:  # noqa: PLR6301
+    def test_transactiondb_init(self, transaction: dict) -> None:
         """Tests our TransactionDB dataclass."""
         cls_fields = {f.name for f in dataclasses.fields(TransactionDB)}
         extras = {k: v for k, v in transaction.items() if k not in cls_fields}
@@ -62,7 +62,7 @@ class TestActionDB:
 
 class TestBetDB:
     @pytest.mark.parametrize("option", dataclass_mocks.get_bet_option_inputs())
-    def test_optiondb_init(self, option: dict) -> None:  # noqa: PLR6301
+    def test_optiondb_init(self, option: dict) -> None:
         """Tests our OptionDB dataclass."""
         option_db = OptionDB(**option)
         assert isinstance(option_db, OptionDB)
@@ -74,7 +74,7 @@ class TestBetDB:
             option_db.val = "100"
 
     @pytest.mark.parametrize("better", dataclass_mocks.get_bet_better_inputs())
-    def test_betterdb_init(self, better: dict) -> None:  # noqa: PLR6301
+    def test_betterdb_init(self, better: dict) -> None:
         """Tests our BetterDB dataclass."""
         better_db = BetterDB(**better)
         assert isinstance(better_db, BetterDB)
@@ -86,7 +86,7 @@ class TestBetDB:
             better_db.points = 100
 
     @pytest.mark.parametrize("bet", dataclass_mocks.get_bet_inputs())
-    def test_betdb_init(self, bet: dict) -> None:  # noqa: PLR6301
+    def test_betdb_init(self, bet: dict) -> None:
         """Tests our BetDB dataclass."""
         bet_db = BetDB(**bet)
         assert isinstance(bet_db, BetDB)
@@ -100,7 +100,7 @@ class TestBetDB:
 
 class TestEmojiDB:
     @pytest.mark.parametrize("emoji", dataclass_mocks.get_emoji_inputs())
-    def test_emojidb_init(self, emoji: dict) -> None:  # noqa: PLR6301
+    def test_emojidb_init(self, emoji: dict) -> None:
         """Tests our EmojiDB dataclass."""
         emoji_db = EmojiDB(**emoji)
         assert isinstance(emoji_db, EmojiDB)
@@ -114,7 +114,7 @@ class TestEmojiDB:
 
 class TestGuildDB:
     @pytest.mark.parametrize("guild", dataclass_mocks.get_guild_inputs())
-    def test_userdb_init(self, guild: dict) -> None:  # noqa: PLR6301
+    def test_userdb_init(self, guild: dict) -> None:
         """Tests our UserDB dataclass."""
         guild_db = GuildDB(**guild)
         assert isinstance(guild_db, GuildDB)
@@ -128,7 +128,7 @@ class TestGuildDB:
 
 class TestMessageDB:
     @pytest.mark.parametrize("message", dataclass_mocks.get_message_inputs())
-    def test_messagedb_init(self, message: dict) -> None:  # noqa: PLR6301
+    def test_messagedb_init(self, message: dict) -> None:
         """Tests our MessageDB dataclass."""
         message_db = MessageDB(**message)
         assert isinstance(message_db, MessageDB)
@@ -140,7 +140,7 @@ class TestMessageDB:
             message_db.content = ""
 
     @pytest.mark.parametrize("reply", dataclass_mocks.get_message_reply_inputs())
-    def test_replydb_init(self, reply: dict) -> None:  # noqa: PLR6301
+    def test_replydb_init(self, reply: dict) -> None:
         """Tests our ReplyDB dataclass."""
         reply_db = ReplyDB(**reply)
         assert isinstance(reply_db, ReplyDB)
@@ -152,7 +152,7 @@ class TestMessageDB:
             reply_db.content = ""
 
     @pytest.mark.parametrize("reaction", dataclass_mocks.get_message_reaction_inputs())
-    def test_reactiondb_init(self, reaction: dict) -> None:  # noqa: PLR6301
+    def test_reactiondb_init(self, reaction: dict) -> None:
         """Tests our ReactionDB dataclass."""
         reaction_db = ReactionDB(**reaction)
         assert isinstance(reaction_db, ReactionDB)
@@ -164,7 +164,7 @@ class TestMessageDB:
             reaction_db.content = ""
 
     @pytest.mark.parametrize("vc", dataclass_mocks.get_message_vc_inputs())
-    def test_vcinteractiondb_init(self, vc: dict) -> None:  # noqa: PLR6301
+    def test_vcinteractiondb_init(self, vc: dict) -> None:
         """Tests our VCInteractionDB dataclass."""
         vc_db = VCInteractionDB(**vc)
         assert isinstance(vc_db, MessageDB)
@@ -177,7 +177,7 @@ class TestMessageDB:
             vc_db.content = ""
 
     @pytest.mark.parametrize("message", dataclass_mocks.get_message_wordle_inputs())
-    def test_wordlemessagedb_init(self, message: dict) -> None:  # noqa: PLR6301
+    def test_wordlemessagedb_init(self, message: dict) -> None:
         """Tests our WordleMessageDB dataclass."""
         message_db = MessageDB(**message)
         assert isinstance(message_db, MessageDB)
@@ -201,7 +201,7 @@ class TestMessageDB:
 
 class TestReminderDB:
     @pytest.mark.parametrize("reminder", dataclass_mocks.get_reminder_inputs())
-    def test_userdb_init(self, reminder: dict) -> None:  # noqa: PLR6301
+    def test_userdb_init(self, reminder: dict) -> None:
         """Tests our ReminderDB dataclass."""
         reminder_db = ReminderDB(**reminder)
         assert isinstance(reminder_db, ReminderDB)
@@ -215,7 +215,7 @@ class TestReminderDB:
 
 class TestRevolutionEventsDB:
     @pytest.mark.parametrize("event", dataclass_mocks.get_revolution_inputs())
-    def test_revolutiondb_init(self, event: dict) -> None:  # noqa: PLR6301
+    def test_revolutiondb_init(self, event: dict) -> None:
         """Tests our RevolutionEventDB dataclass."""
         event_db = RevolutionEventDB(**event)
         assert isinstance(event_db, RevolutionEventDB)
@@ -228,7 +228,7 @@ class TestRevolutionEventsDB:
             event_db.chance += 50
 
     @pytest.mark.parametrize("event", dataclass_mocks.get_revolution_inputs())
-    def test_revolutionunfrozendb(self, event: dict) -> None:  # noqa: PLR6301
+    def test_revolutionunfrozendb(self, event: dict) -> None:
         """Tests our RevolutionEventUnFrozenDB dataclass."""
         event_db = RevolutionEventUnFrozenDB(**event)
         assert isinstance(event_db, RevolutionEventUnFrozenDB)
@@ -240,7 +240,7 @@ class TestRevolutionEventsDB:
         event_db.chance += 50
 
     @pytest.mark.parametrize("event", dataclass_mocks.get_revolution_inputs())
-    def test_revolutiondb_unfrozen(self, event: dict) -> None:  # noqa: PLR6301
+    def test_revolutiondb_unfrozen(self, event: dict) -> None:
         """Tests our RevolutionEventDB dataclass and the ability to unfreeze it."""
         event_db = RevolutionEventDB(**event)
         assert isinstance(event_db, RevolutionEventDB)
@@ -263,7 +263,7 @@ class TestRevolutionEventsDB:
 
 class TestStickerDB:
     @pytest.mark.parametrize("sticker", dataclass_mocks.get_sticker_inputs())
-    def test_emojidb_init(self, sticker: dict) -> None:  # noqa: PLR6301
+    def test_emojidb_init(self, sticker: dict) -> None:
         """Tests our EmojiDB dataclass."""
         sticker_db = StickerDB(**sticker)
         assert isinstance(sticker_db, StickerDB)
@@ -277,7 +277,7 @@ class TestStickerDB:
 
 class TestThreadDB:
     @pytest.mark.parametrize("thread", dataclass_mocks.get_thread_inputs())
-    def test_userdb_init(self, thread: dict) -> None:  # noqa: PLR6301
+    def test_userdb_init(self, thread: dict) -> None:
         """Tests our ThreadDB dataclass."""
         thread_db = ThreadDB(**thread)
         assert isinstance(thread_db, ThreadDB)
@@ -291,7 +291,7 @@ class TestThreadDB:
 
 class TestUserDB:
     @pytest.mark.parametrize("user", dataclass_mocks.get_user_inputs())
-    def test_userdb_init(self, user: dict) -> None:  # noqa: PLR6301
+    def test_userdb_init(self, user: dict) -> None:
         """Tests our UserDB dataclass."""
         user_db = UserDB(**user)
         assert isinstance(user_db, UserDB)

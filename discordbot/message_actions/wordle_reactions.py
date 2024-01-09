@@ -17,6 +17,8 @@ from discordbot.message_actions.base import BaseMessageAction
 class WordleMessageAction(BaseMessageAction):
     """Wordle message action class for adding reactions to wordle messages."""
 
+    _TOUGH_ONE_DAY_LINK = "https://imgur.com/Uk73HPD"
+
     def __init__(self, client: BSEBot, logger: Logger) -> None:
         """Initialisation method.
 
@@ -53,6 +55,76 @@ class WordleMessageAction(BaseMessageAction):
         elif content.count("🟨") > content.count("🟩"):
             await message.add_reaction("🟨")
 
+    @staticmethod
+    async def _handle_symmetry(message: discord.Message) -> None:
+        """Works out if the wordle was symmetrical or not.
+
+        Args:
+            message (discord.Message): the message
+        """
+        _, squares = message.content.split("\n\n")
+        squares = squares.split("\n")
+        squares = [row.strip() for row in squares]
+        for row in squares:
+            if row[:2] != row[3:][::-1]:
+                # not symmetrical
+                return
+        await message.add_reaction("🪞")
+
+    async def _handle_tough_day_status(self, message: discord.Message) -> None:
+        """Checks to see if need to send our 'tough day' message.
+
+        Args:
+            message (discord.Message): the message
+        """
+        now = datetime.datetime.now()
+        today = now.replace(hour=0, minute=0, second=0)
+
+        if not utilities.is_utc(today):
+            today = utilities.add_utc_offset(today)
+
+        # get number of 6/6 or X/6 wordles today
+        try:
+            wordle_results = self.user_interactions.query(
+                {
+                    "guild_id": message.guild.id,
+                    "is_bot": False,
+                    "$text": {"$search": "Wordle 6/6"},
+                    "timestamp": {"$gte": today},
+                    "message_type": "wordle",
+                },
+            )
+            wordle_results = [r for r in wordle_results if any(a in r["content"] for a in ["6/6", "X/6"])]
+        except OperationFailure:
+            # text index not set correctly
+            return
+
+        if len(wordle_results) < 3:  # noqa: PLR2004
+            # exit early - not sent enough wordles to day to send the link
+            return
+
+        # make sure we haven't sent this today already
+        try:
+            link_results = self.user_interactions.query(
+                {
+                    "guild_id": message.guild.id,
+                    "is_bot": True,
+                    "$text": {"$search": self._TOUGH_ONE_DAY_LINK},
+                    "timestamp": {"$gte": today},
+                    "message_type": "link",
+                },
+            )
+            link_results = [r for r in link_results if r["content"] == self._TOUGH_ONE_DAY_LINK]
+        except OperationFailure:
+            # text index not set correctly
+            return
+
+        if len(link_results) > 0:
+            self.logger.info("already sent wordle tough image link")
+            return
+
+        await message.channel.send(content=self._TOUGH_ONE_DAY_LINK, silent=True)
+
     async def run(self, message: discord.Message) -> None:
         """Wordle react/reply action.
 
@@ -66,6 +138,7 @@ class WordleMessageAction(BaseMessageAction):
         guesses = result.split("/")[0]
 
         await self._handle_adding_squares(message)
+        await self._handle_symmetry(message)
 
         if guesses not in {"X", "1", "2", "6"}:
             # no need to process anything after this
@@ -89,47 +162,4 @@ class WordleMessageAction(BaseMessageAction):
 
         await message.add_reaction(_emoji)
 
-        now = datetime.datetime.now()
-        today = now.replace(hour=0, minute=0, second=0)
-
-        if not utilities.is_utc(today):
-            today = utilities.add_utc_offset(today)
-
-        # get number of 6/6 or X/6 wordles today
-        try:
-            wordle_results = self.user_interactions.query(
-                {
-                    "guild_id": message.guild.id,
-                    "is_bot": False,
-                    "$text": {"$search": "Wordle 6/6"},
-                    "timestamp": {"$gte": today},
-                    "message_type": "wordle",
-                },
-            )
-            wordle_results = [r for r in wordle_results if any(a in r["content"] for a in ["6/6", "X/6"])]
-        except OperationFailure:
-            # text index not set correctly
-            return
-
-        if len(wordle_results) >= 3:  # noqa: PLR2004
-            # make sure we haven't sent this today already
-            try:
-                link_results = self.user_interactions.query(
-                    {
-                        "guild_id": message.guild.id,
-                        "is_bot": True,
-                        "$text": {"$search": "https://imgur.com/Uk73HPD"},
-                        "timestamp": {"$gte": today},
-                        "message_type": "link",
-                    },
-                )
-                link_results = [r for r in link_results if r["content"] == "https://imgur.com/Uk73HPD"]
-            except OperationFailure:
-                # text index not set correctly
-                return
-
-            if len(link_results) > 0:
-                self.logger.info("already sent wordle tough image link")
-                return
-
-            await message.channel.send(content="https://imgur.com/Uk73HPD", silent=True)
+        await self._handle_tough_day_status(message)

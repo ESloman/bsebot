@@ -53,7 +53,7 @@ exclude = [
 line-length = 120
 dummy-variable-rgx = "^_$"
 
-target-version = "py311"
+target-version = "py312"
 
 [mccabe]
 # Unlike Flake8, default to a complexity level of 10.
@@ -64,7 +64,7 @@ max-complexity = 10
     "D104",  # undocumented-public-package: happy for __init__'s not to have docstrings
     "F401",  # unused-import: okay for __init__'s to have unused imports
 ]
-"test*.py" = [
+"tests/**/*.py" = [
     "ARG001",  # unused-function-argument: allowed in tests
     "ARG002",  # unused-function-method: allowed in tests
     "ANN002",  # missing-type-args: not interested in type annotating *args for tests
@@ -72,6 +72,7 @@ max-complexity = 10
     "ANN201",  # missing-return-type-undocumented-public-function: not bothered about type annotations in tests
     "D101",    # undocumented-public-class: not bothered about fully documented test classes
     "PLR2004", # magic-value-comparison: not bothered about 'magic' values in tests
+    "PLR6301", # don't care that test methods could be static - legit usecase when using pytest parameters
     "S101",    # assert: assert is expected in test classes
     "S105",    # hardcoded-password-string: we use fake passwords during tests for mocked requests
     "S106",    # hardcoded-password-func-arg: we use fake passwords during tests for mocked requests

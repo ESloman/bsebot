@@ -4,7 +4,7 @@ import random
 
 
 class UserPointsMock:
-    def get_all_users_for_guild(self, guild_id: int) -> list[dict[str, any]]:  # noqa: PLR6301
+    def get_all_users_for_guild(self, guild_id: int) -> list[dict[str, any]]:
         """Mocks getting all users."""
         return [
             {
@@ -17,7 +17,7 @@ class UserPointsMock:
             for _ in range(20)
         ]
 
-    def find_user(self, user_id: int, guild_id: int) -> dict:  # noqa: PLR6301
+    def find_user(self, user_id: int, guild_id: int) -> dict:
         """Find user mock."""
         return {
             "uid": user_id,
@@ -29,7 +29,7 @@ class UserPointsMock:
 
 
 class GuildsMock:
-    def get_guild(self, guild_id: int) -> dict:  # noqa: PLR6301
+    def get_guild(self, guild_id: int) -> dict:
         """Mock for get_guild."""
         return {
             "id": guild_id,

@@ -4,11 +4,11 @@ from tests.mocks import discord_mocks
 
 
 class BSEBotMock:
-    async def wait_until_ready(self) -> bool:  # noqa: PLR6301
+    async def wait_until_ready(self) -> bool:
         """Mocks wait until ready method."""
         return True
 
-    async def fetch_guild(self, guild_id: int):  # noqa: PLR6301
+    async def fetch_guild(self, guild_id: int):
         """Mock for fetch guild."""
         return discord_mocks.GuildMock(guild_id)
 

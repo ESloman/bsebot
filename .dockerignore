@@ -6,7 +6,6 @@ Dockerfile
 LICENSE
 *.sh
 *.ini
-*.txt
 *.yaml
 *.toml
 *.md

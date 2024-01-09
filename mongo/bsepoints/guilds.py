@@ -88,7 +88,7 @@ class Guilds(BestSummerEverPointsDB):  # noqa: PLR0904
     # King stuff
     #
 
-    def get_king(self, guild_id: int, whole_class: bool = False) -> int | dict | UserDB:
+    def get_king(self, guild_id: int, whole_class: bool = False) -> int | UserDB:
         """Gets the King ID for the specified guild.
 
         Args:
@@ -128,22 +128,6 @@ class Guilds(BestSummerEverPointsDB):  # noqa: PLR0904
             {"guild_id": guild_id},
             {"$set": {"king": user_id, "king_since": now}, "$push": {"king_history": {"$each": [previous_doc, doc]}}},
         )
-
-    def get_king_time(self, guild_id: int) -> datetime.datetime:
-        """Returns the time that the current King has been King.
-
-        Args:
-            guild_id (int): the guild ID
-
-        Returns:
-            datetime.datetime: the datetime object
-        """
-        ret = self.query({"guild_id": guild_id}, projection={"king_since": True})
-        if not ret or "king" not in ret[0]:
-            # king_since not set
-            return None
-        ret = ret[0]
-        return ret["king"]
 
     def add_pledger(self, guild_id: int, user_id: int) -> UpdateResult:
         """Add a supporting pledger to the pledges list.

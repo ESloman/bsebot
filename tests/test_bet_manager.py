@@ -17,7 +17,7 @@ class TestBetManager:
     def _test_data(self) -> None:
         """Test data."""
 
-    def test_init(self) -> None:  # noqa: PLR6301
+    def test_init(self) -> None:
         """Tests that we can initialise the class."""
         bet_manager = BetManager(PlaceHolderLogger)
         assert isinstance(bet_manager, BetManager)
@@ -33,7 +33,7 @@ class TestBetManager:
             (0, 0, 2, 0),
         ],
     )
-    def test_calculate_bet_modifiers(self, total_bet: int, winning_total: int, options_num: int, losers: int) -> None:  # noqa: PLR6301
+    def test_calculate_bet_modifiers(self, total_bet: int, winning_total: int, options_num: int, losers: int) -> None:
         """Tests our 'calculate_bet_modifiers'."""
         bet_manager = BetManager(PlaceHolderLogger)
         mult, coef = bet_manager.calculate_bet_modifiers(total_bet, winning_total, options_num, losers)
@@ -50,7 +50,7 @@ class TestBetManager:
             (500, -0.00005, 2.3, 0, 2, 1138),
         ],
     )
-    def test_calculate_single_bet_winnings(  # noqa: PLR6301, PLR0913, PLR0917
+    def test_calculate_single_bet_winnings(  # noqa: PLR0913, PLR0917
         self, points_bet: int, multiplier: float, coeff: float, extra: int, winners: int, value: int
     ) -> None:
         """Tests our '_calculate_single_bet_winnings'."""
@@ -71,7 +71,7 @@ class TestBetManager:
             (1, (0.25, 0.1), 500, 1000, (950, 50)),
         ],
     )
-    def test_calculate_taxed_winnings(  # noqa: PLR6301
+    def test_calculate_taxed_winnings(
         self, better_id: float, tax: int, actual_won: int, points_won: int, expected: tuple[int, int]
     ) -> None:
         """Tests our '_calculate_taxed_winnings'."""
@@ -82,7 +82,7 @@ class TestBetManager:
         assert isinstance(result, tuple)
         assert result == expected
 
-    def test_process_bet_winner(self) -> None:  # noqa: PLR6301
+    def test_process_bet_winner(self) -> None:
         """Tests our _process_bet_winner."""
         bet_manager = BetManager(PlaceHolderLogger)
         with patch.object(bet_manager.user_points, "increment_points", new=lambda *args, **kwargs: None):  # noqa: ARG005
@@ -95,7 +95,7 @@ class TestBetManager:
             bet_manager_mocks.get_bet_dict(1),
         ],
     )
-    def test_close_a_bet(self, test_bet: dict) -> None:  # noqa: PLR6301
+    def test_close_a_bet(self, test_bet: dict) -> None:
         """Tests our 'close_a_bet'."""
         bet_manager = BetManager(PlaceHolderLogger)
 

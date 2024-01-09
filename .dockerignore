@@ -1,15 +1,22 @@
+# individual files to ignore
 .dockerignore
 .gitignore
 .flake8
-.pre-commit-config.yaml
-.ruff_cache
 Dockerfile
 LICENSE
-README.md
-.github
-.vscode
-docs
-datafiles
 *.sh
-test-requirements.txt
-pyproject.toml
+*.ini
+*.txt
+*.yaml
+*.toml
+*.md
+*.properties
+*.xml
+
+# directories to ignore
+.github
+.ruff_cache
+.vscode
+datafiles/
+docs/
+tests/

@@ -43,3 +43,12 @@ class TestWordleReactions:
             assert patched.called == (exp is not None)
             if exp is not None:
                 patched.assert_called_once_with(exp)
+
+    @pytest.mark.parametrize("content", message_action_mocks.get_wordle_run_content())
+    async def test_run(self, content: str) -> None:
+        """Tests the handle_adding_squares function."""
+        wordle_reaction = WordleMessageAction(self.client, self.logger)
+        message = MessageMock(content)
+        with mock.patch.object(wordle_reaction, "_handle_adding_squares") as squares_patch:
+            await wordle_reaction.run(message)
+            assert squares_patch.called

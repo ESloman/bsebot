@@ -56,14 +56,20 @@ class GuildMock:
 
 
 class MessageMock:
-    def __init__(self, content: str = "") -> None:
+    def __init__(self, content: str = "", guild_id: int = 123) -> None:
         """Init."""
         self._content = content
+        self._guild = GuildMock(guild_id)
 
     @property
     def content(self) -> str:
         """Content property."""
         return self._content
+
+    @property
+    def guild(self) -> GuildMock:
+        """Guild property."""
+        return self._guild
 
     async def add_reaction(self, reaction: str) -> None:
         """Mock add_reaction."""

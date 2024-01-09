@@ -55,46 +55,12 @@ class WordleMessageAction(BaseMessageAction):
         elif content.count("🟨") > content.count("🟩"):
             await message.add_reaction("🟨")
 
-    async def run(self, message: discord.Message) -> None:
-        """Wordle react/reply action.
-
-        Adds a reaction or reply.
+    async def _handle_tough_day_status(self, message: discord.Message) -> None:
+        """Checks to see if need to send our 'tough day' message.
 
         Args:
-            message (discord.Message): the message to action
+            message (discord.Message): the message
         """
-        guild_id = message.guild.id
-        result = re.search(WORDLE_SCORE_REGEX, message.content).group()
-        guesses = result.split("/")[0]
-
-        await self._handle_adding_squares(message)
-
-        if guesses not in {"X", "1", "2", "6"}:
-            # no need to process anything after this
-            return
-
-        guild_db = self.guilds.get_guild(guild_id)
-        x_emoji = guild_db.get("wordle_x_emoji")
-        two_emoji = guild_db.get(
-            "wordle_two_emoji",
-        )
-        six_emoji = guild_db.get(
-            "wordle_six_emoji",
-        )
-
-        x_emoji = "😞" if not x_emoji else PartialEmoji.from_str(x_emoji)
-        two_emoji = "🎉" if not two_emoji else PartialEmoji.from_str(two_emoji)
-        six_emoji = "😬" if not six_emoji else PartialEmoji.from_str(six_emoji)
-
-        if guesses == "X":
-            _emoji = x_emoji
-        elif guesses in {"1", "2"}:
-            _emoji = two_emoji
-        elif guesses == "6":
-            _emoji = six_emoji
-
-        await message.add_reaction(_emoji)
-
         now = datetime.datetime.now()
         today = now.replace(hour=0, minute=0, second=0)
 
@@ -142,3 +108,45 @@ class WordleMessageAction(BaseMessageAction):
             return
 
         await message.channel.send(content=self._TOUGH_ONE_DAY_LINK, silent=True)
+
+    async def run(self, message: discord.Message) -> None:
+        """Wordle react/reply action.
+
+        Adds a reaction or reply.
+
+        Args:
+            message (discord.Message): the message to action
+        """
+        guild_id = message.guild.id
+        result = re.search(WORDLE_SCORE_REGEX, message.content).group()
+        guesses = result.split("/")[0]
+
+        await self._handle_adding_squares(message)
+
+        if guesses not in {"X", "1", "2", "6"}:
+            # no need to process anything after this
+            return
+
+        guild_db = self.guilds.get_guild(guild_id)
+        x_emoji = guild_db.get("wordle_x_emoji")
+        two_emoji = guild_db.get(
+            "wordle_two_emoji",
+        )
+        six_emoji = guild_db.get(
+            "wordle_six_emoji",
+        )
+
+        x_emoji = "😞" if not x_emoji else PartialEmoji.from_str(x_emoji)
+        two_emoji = "🎉" if not two_emoji else PartialEmoji.from_str(two_emoji)
+        six_emoji = "😬" if not six_emoji else PartialEmoji.from_str(six_emoji)
+
+        if guesses == "X":
+            _emoji = x_emoji
+        elif guesses in {"1", "2"}:
+            _emoji = two_emoji
+        elif guesses == "6":
+            _emoji = six_emoji
+
+        await message.add_reaction(_emoji)
+
+        await self._handle_tough_day_status(message)

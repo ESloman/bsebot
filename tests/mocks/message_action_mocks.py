@@ -1,5 +1,19 @@
 """Mocks for message actions."""
 
+from pymongo.errors import OperationFailure
+
+
+def query_tough_day_exc(query: dict) -> None:
+    """Mock for tough day query."""
+    raise OperationFailure("")
+
+
+def query_tough_day_exc_sec(query: dict) -> None | list[dict]:
+    """Mock for tough day query."""
+    if not query["is_bot"]:
+        return [{"content": "6/6"} for _ in range(4)]
+    raise OperationFailure("")
+
 
 def get_wordle_squares_content() -> list[tuple[str, str | None]]:
     """Returns a bunch of wordle strings to use as content for square reactions."""
@@ -56,27 +70,74 @@ def get_wordle_squares_content() -> list[tuple[str, str | None]]:
 def get_wordle_run_content() -> list[str]:
     """Returns a bunch of wordle strings to use as content for run command."""
     return [
-        """Wordle 934 3/6
+        (
+            """Wordle 934 3/6
 
     ⬛⬛⬛⬛🟨
     ⬛⬛⬛🟩🟨
     🟩🟩🟩🟩🟩""",
-        """Wordle 927 4/6
+            None,
+        ),
+        (
+            """Wordle 927 4/6
 
     ⬛⬛🟨⬛⬛
     ⬛🟨🟨🟨⬛
     ⬛🟨⬛🟨🟨
     🟩🟩🟩🟩🟩""",
-        """Wordle 927 4/6
+            None,
+        ),
+        (
+            """Wordle 927 4/6
 
     ⬛⬛🟨⬛⬛
     ⬛🟨🟨⬛⬛
     ⬛⬛⬛🟨🟨
     🟩🟩🟩🟩🟩""",
-        """Wordle 927 4/6
+            None,
+        ),
+        (
+            """Wordle 927 4/6
 
     ⬛⬛🟩⬛⬛
     ⬛🟩🟩🟩⬛
     ⬛🟩⬛🟩🟩
     🟩🟩🟩🟩🟩""",
+            None,
+        ),
+        (
+            """Wordle 927 6/6
+
+    ⬛⬛🟩⬛⬛
+    ⬛🟩🟩🟩⬛
+    ⬛🟩⬛🟩🟩
+    ⬛🟩⬛🟩🟩
+    ⬛🟩⬛🟩🟩
+    🟩🟩🟩🟩🟩""",
+            "😬",
+        ),
+        (
+            """Wordle 927 X/6
+
+    ⬛⬛🟩⬛⬛
+    ⬛🟩🟩🟩⬛
+    ⬛🟩⬛🟩🟩
+    ⬛🟩⬛🟩🟩
+    ⬛🟩⬛🟩🟩
+    🟩🟩⬛🟩🟩""",
+            "😞",
+        ),
+        (
+            """Wordle 927 2/6
+
+    ⬛⬛🟩⬛⬛
+    🟩🟩🟩🟩🟩""",
+            "🎉",
+        ),
+        (
+            """Wordle 927 1/6
+
+    🟩🟩🟩🟩🟩""",
+            "🎉",
+        ),
     ]

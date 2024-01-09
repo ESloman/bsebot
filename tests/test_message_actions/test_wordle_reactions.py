@@ -44,6 +44,15 @@ class TestWordleReactions:
             if exp is not None:
                 patched.assert_called_once_with(exp)
 
+    @pytest.mark.parametrize(("content", "exp"), message_action_mocks.get_wordle_symmetry_content())
+    async def test_handle_symmetry(self, content: str, exp: bool) -> None:
+        """Tests the handle_symmetry function."""
+        wordle_reaction = WordleMessageAction(self.client, self.logger)
+        message = MessageMock(content)
+        with mock.patch.object(message, "add_reaction") as patched:
+            await wordle_reaction._handle_symmetry(message)
+            assert patched.called is exp
+
     @pytest.mark.parametrize(
         ("return_val", "exp_called"),
         [

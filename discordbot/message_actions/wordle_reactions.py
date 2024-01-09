@@ -55,6 +55,22 @@ class WordleMessageAction(BaseMessageAction):
         elif content.count("🟨") > content.count("🟩"):
             await message.add_reaction("🟨")
 
+    @staticmethod
+    async def _handle_symmetry(message: discord.Message) -> None:
+        """Works out if the wordle was symmetrical or not.
+
+        Args:
+            message (discord.Message): the message
+        """
+        _, squares = message.content.split("\n\n")
+        squares = squares.split("\n")
+        squares = [row.strip() for row in squares]
+        for row in squares:
+            if row[:2] != row[3:][::-1]:
+                # not symmetrical
+                return
+        await message.add_reaction("🪞")
+
     async def _handle_tough_day_status(self, message: discord.Message) -> None:
         """Checks to see if need to send our 'tough day' message.
 
@@ -122,6 +138,7 @@ class WordleMessageAction(BaseMessageAction):
         guesses = result.split("/")[0]
 
         await self._handle_adding_squares(message)
+        await self._handle_symmetry(message)
 
         if guesses not in {"X", "1", "2", "6"}:
             # no need to process anything after this

@@ -1,4 +1,4 @@
-"""Tests our GuildDB class."""
+"""Tests our Guilds class."""
 
 import datetime
 from unittest import mock

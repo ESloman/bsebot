@@ -16,8 +16,8 @@ class TestServerStickers:
 
     def test_stickers_init(self) -> None:
         """Tests ServerStickers init."""
-        guilds = ServerStickers()
-        assert isinstance(guilds, ServerStickers)
+        stickers = ServerStickers()
+        assert isinstance(stickers, ServerStickers)
 
     def test_user_points_make_data_class(self) -> None:
         """Tests ServerStickers make_data_class."""

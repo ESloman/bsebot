@@ -12,6 +12,8 @@ class OptionDB:
 
     val: str
     """The human outcome name."""
+    text: str = ""
+    """**DEPRECATED.**"""
 
 
 @dataclasses.dataclass(frozen=True)
@@ -43,10 +45,10 @@ class BetDB(BaseDBObject, ImplementsMessage):
     """Title of the bet."""
     created: datetime.datetime
     """The time the bet was created."""
-    timeout: datetime.datetime
-    """When the bet will stop taking bets."""
     active: bool
     """Whether the bet is accepting new bets or not."""
+    timeout: datetime.datetime | None = None
+    """When the bet will stop taking bets."""
     updated: datetime.datetime | None = None
     """When the bet was last updated."""
 

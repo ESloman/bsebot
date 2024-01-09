@@ -30,9 +30,9 @@ class UserBets(BestSummerEverPointsDB):
         if guilds is None:
             guilds = []
         for guild in guilds:
-            self.__create_counter_document(guild)
+            self._create_counter_document(guild)
 
-    def __create_counter_document(self, guild_id: int) -> None:
+    def _create_counter_document(self, guild_id: int) -> None:
         """Method that creates our base 'counter' document for counting bet IDs.
 
         :param guild_id: int - guild ID to create document for
@@ -41,7 +41,7 @@ class UserBets(BestSummerEverPointsDB):
         if not self.query({"type": "counter", "guild_id": guild_id}):
             self.insert({"type": "counter", "guild_id": guild_id, "count": 1})
 
-    def __get_new_bet_id(self, guild_id: int) -> str:
+    def _get_new_bet_id(self, guild_id: int) -> str:
         """Generate new unique ID and return it in the format we want.
 
         :param guild_id: int - guild ID to create the new unique bet ID for
@@ -51,7 +51,7 @@ class UserBets(BestSummerEverPointsDB):
         self.update({"type": "counter", "guild_id": guild_id}, {"$inc": {"count": 1}})
         return f"{count:04d}"
 
-    def __add_new_better_to_bet(self, bet: BetDB, user_id: int, emoji: str, points: int) -> dict[str, bool]:
+    def _add_new_better_to_bet(self, bet: BetDB, user_id: int, emoji: str, points: int) -> dict[str, bool]:
         """Adds a new better to a bet.
 
         Args:
@@ -90,8 +90,14 @@ class UserBets(BestSummerEverPointsDB):
     def make_data_class(bet: dict) -> BetDB:
         """Turns a bet dict into a dataclass representation."""
         # convert betters
-        bet["betters"] = {key: BetterDB(**value) for key, value in bet.get("betters", {}).items()}
-        bet["option_dict"] = {key: OptionDB(**value) for key, value in bet.get("option_dict", {}).items()}
+        bet["betters"] = {
+            key: BetterDB(**value) for key, value in bet.get("betters", {}).items() if not isinstance(value, BetterDB)
+        }
+        bet["option_dict"] = {
+            key: OptionDB(**value)
+            for key, value in bet.get("option_dict", {}).items()
+            if not isinstance(value, OptionDB)
+        }
         return BetDB(**bet)
 
     @staticmethod
@@ -203,7 +209,7 @@ class UserBets(BestSummerEverPointsDB):
         :param timeout: A datetime object for when the bet will be 'closed'
         :return: A bet dictionary
         """
-        bet_id = self.__get_new_bet_id(guild_id)
+        bet_id = self._get_new_bet_id(guild_id)
         bet_doc = {
             "bet_id": bet_id,
             "guild_id": guild_id,
@@ -264,7 +270,7 @@ class UserBets(BestSummerEverPointsDB):
 
         # this section is the logic if the user hasn't bet on this bet yet
         if str(user_id) not in bet.betters:
-            return self.__add_new_better_to_bet(bet, user_id, emoji, points)
+            return self._add_new_better_to_bet(bet, user_id, emoji, points)
 
         # here we're checking if the user has already bet on the option they have selected
         # if they haven't - then it's an error

@@ -16,8 +16,8 @@ class TestServerEmojis:
 
     def test_emojis_init(self) -> None:
         """Tests ServerEmojis init."""
-        guilds = ServerEmojis()
-        assert isinstance(guilds, ServerEmojis)
+        emojis = ServerEmojis()
+        assert isinstance(emojis, ServerEmojis)
 
     def test_user_points_make_data_class(self) -> None:
         """Tests ServerEmojis make_data_class."""
@@ -68,3 +68,31 @@ class TestServerEmojis:
         with mock.patch.object(emojis, "insert") as updated_patch:
             emojis.insert_emoji(123456, "name", datetime.datetime.now(), 654321, 246810)
             assert updated_patch.called
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_emojis_get_emoji_none(self) -> None:
+        """Tests ServerEmojis returns None correctly when getting."""
+        emojis = ServerEmojis()
+        emoji = emojis.get_emoji(123456, 654321)
+        assert emoji is None
+
+        emoji = emojis.get_emoji_from_name(123456, "some name")
+        assert emoji is None
+
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("serveremojis", {})},
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_emojis_get_all_emojis(self, guild_id: int) -> None:
+        """Tests ServerEmojis get_all_emojis method."""
+        emojis = ServerEmojis()
+        all_emojis = emojis.get_all_emojis(guild_id)
+        for emoji in all_emojis:
+            assert isinstance(emoji, EmojiDB)
+            assert emoji.guild_id == guild_id

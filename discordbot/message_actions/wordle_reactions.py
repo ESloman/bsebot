@@ -17,6 +17,8 @@ from discordbot.message_actions.base import BaseMessageAction
 class WordleMessageAction(BaseMessageAction):
     """Wordle message action class for adding reactions to wordle messages."""
 
+    _TOUGH_ONE_DAY_LINK = "https://imgur.com/Uk73HPD"
+
     def __init__(self, client: BSEBot, logger: Logger) -> None:
         """Initialisation method.
 
@@ -115,25 +117,28 @@ class WordleMessageAction(BaseMessageAction):
             # text index not set correctly
             return
 
-        if len(wordle_results) >= 3:  # noqa: PLR2004
-            # make sure we haven't sent this today already
-            try:
-                link_results = self.user_interactions.query(
-                    {
-                        "guild_id": message.guild.id,
-                        "is_bot": True,
-                        "$text": {"$search": "https://imgur.com/Uk73HPD"},
-                        "timestamp": {"$gte": today},
-                        "message_type": "link",
-                    },
-                )
-                link_results = [r for r in link_results if r["content"] == "https://imgur.com/Uk73HPD"]
-            except OperationFailure:
-                # text index not set correctly
-                return
+        if len(wordle_results) < 3:  # noqa: PLR2004
+            # exit early - not sent enough wordles to day to send the link
+            return
 
-            if len(link_results) > 0:
-                self.logger.info("already sent wordle tough image link")
-                return
+        # make sure we haven't sent this today already
+        try:
+            link_results = self.user_interactions.query(
+                {
+                    "guild_id": message.guild.id,
+                    "is_bot": True,
+                    "$text": {"$search": self._TOUGH_ONE_DAY_LINK},
+                    "timestamp": {"$gte": today},
+                    "message_type": "link",
+                },
+            )
+            link_results = [r for r in link_results if r["content"] == self._TOUGH_ONE_DAY_LINK]
+        except OperationFailure:
+            # text index not set correctly
+            return
 
-            await message.channel.send(content="https://imgur.com/Uk73HPD", silent=True)
+        if len(link_results) > 0:
+            self.logger.info("already sent wordle tough image link")
+            return
+
+        await message.channel.send(content=self._TOUGH_ONE_DAY_LINK, silent=True)

@@ -53,3 +53,17 @@ class GuildMock:
     async def fetch_member(self, member_id: int) -> MemberMock | None:
         """Mock for fetch_member."""
         return self.get_member(member_id)
+
+
+class MessageMock:
+    def __init__(self, content: str = "") -> None:
+        """Init."""
+        self._content = content
+
+    @property
+    def content(self) -> str:
+        """Content property."""
+        return self._content
+
+    async def add_reaction(self, reaction: str) -> None:
+        """Mock add_reaction."""

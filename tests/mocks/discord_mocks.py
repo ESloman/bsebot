@@ -32,6 +32,9 @@ class ChannelMock:
         """ID property."""
         return self._id
 
+    async def send(self, *args, **kwargs) -> None:
+        """Mocks the send method."""
+
 
 class GuildMock:
     def __init__(self, guild_id: int) -> None:
@@ -53,3 +56,29 @@ class GuildMock:
     async def fetch_member(self, member_id: int) -> MemberMock | None:
         """Mock for fetch_member."""
         return self.get_member(member_id)
+
+
+class MessageMock:
+    def __init__(self, content: str = "", guild_id: int = 123) -> None:
+        """Init."""
+        self._content = content
+        self._guild = GuildMock(guild_id)
+        self._channel = ChannelMock(654321)
+
+    @property
+    def content(self) -> str:
+        """Content property."""
+        return self._content
+
+    @property
+    def guild(self) -> GuildMock:
+        """Guild property."""
+        return self._guild
+
+    @property
+    def channel(self) -> ChannelMock:
+        """Channel property."""
+        return self._channel
+
+    async def add_reaction(self, reaction: str) -> None:
+        """Mock add_reaction."""

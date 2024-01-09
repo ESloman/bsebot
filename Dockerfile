@@ -27,11 +27,6 @@ RUN mkdir -vp /home/app
 
 COPY . /home/app/
 
-RUN cd /home/app \
-    && mkdir -vp /home/gitwork \
-    && cd /home/gitwork \
-    && git clone https://${GIT_USER}:${GIT_PASS}@github.com/ESloman/bsebot.git
-
 ENV PYTHONPATH=/home/app/
 
 RUN pip install -r home/app/requirements.txt \

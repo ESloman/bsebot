@@ -52,6 +52,7 @@ coverage.xml
 .pytest_cache/
 .ruff_cache
 tests.xml
+*.xml
 
 # Translations
 *.mo

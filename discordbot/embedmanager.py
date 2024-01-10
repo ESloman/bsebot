@@ -61,15 +61,14 @@ class EmbedManager:
                 val = "No-one has bet on this option yet."
             embed.add_field(name=f"{option} - {bet.option_dict[option].val}", value=val, inline=False)
 
-        footer = None
         if not bet.active:
             footer = "This bet is closed for new bets. Awaiting results from the bet creator."
         elif timeout := bet.timeout:
             footer = f"This bet will stop taking bets on {timeout.strftime('%d %b %y %H:%M:%S')}."
+        else:
+            footer = "Unknown state."
 
-        if footer:
-            embed.set_footer(text=footer)
-
+        embed.set_footer(text=footer)
         return embed
 
     def get_leaderboard_embed(

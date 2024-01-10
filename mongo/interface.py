@@ -6,11 +6,12 @@ MongoDB methods.
 
 from urllib.parse import quote_plus
 
+from bson import ObjectId
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.cursor import Cursor
 from pymongo.database import Database
-from pymongo.results import InsertManyResult, InsertOneResult, UpdateResult
+from pymongo.results import UpdateResult
 
 CACHED_CLIENT = None  # type: MongoClient
 
@@ -145,7 +146,7 @@ def insert(
     collection: Collection,
     documents: list[dict[str, any]] | dict[str, any],
     in_order: bool = True,
-) -> InsertOneResult | InsertManyResult:
+) -> list[ObjectId]:
     """Inserts a given number of documents into a given collection.
 
     Returns a list of objectIDs of the items inserted.
@@ -156,7 +157,7 @@ def insert(
         in_order (bool): whether the documents should be entered serially
 
     Returns:
-        InsertOneResult | InsertManyResult: the update result
+        list[ObjectId]: list of inserted IDs
     """
     documents = (
         [

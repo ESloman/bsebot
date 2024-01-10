@@ -4,6 +4,8 @@ import copy
 import json
 import pathlib
 
+from bson import ObjectId
+
 _CURRENT_DIR = pathlib.Path(pathlib.Path(__file__).parents[0])
 _CACHE = {}
 
@@ -54,5 +56,6 @@ def update_mock(*_args: tuple[any], **kwargs: dict[any]) -> None:
     """Update mock."""
 
 
-def insert_mock(*_args: tuple[any], **kwargs: dict[any]) -> None:
+def insert_mock(*_args: tuple[any], **kwargs: dict[any]) -> list[ObjectId]:
     """Insert mock."""
+    return [ObjectId() for _ in range(1)]

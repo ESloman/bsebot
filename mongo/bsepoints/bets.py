@@ -229,7 +229,8 @@ class UserBets(BestSummerEverPointsDB):
             "users": [],
             "option_vals": [option_dict[o]["val"] for o in option_dict],
         }
-        self.insert(bet_doc)
+        result = self.insert(bet_doc)
+        bet_doc["_id"] = result[0]
         return self.make_data_class(bet_doc)
 
     def get_bet_from_id(self, guild_id: int, bet_id: str) -> BetDB | None:

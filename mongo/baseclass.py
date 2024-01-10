@@ -1,9 +1,10 @@
 """Mongo baseclass."""
 
+from bson import ObjectId
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.cursor import Cursor
-from pymongo.results import InsertManyResult, InsertOneResult, UpdateResult
+from pymongo.results import UpdateResult
 
 from mongo import interface
 
@@ -72,7 +73,7 @@ class BaseClass:
             return
         projection.update(self.minimum_projection)
 
-    def insert(self, document: dict | list) -> InsertOneResult | InsertManyResult:
+    def insert(self, document: dict | list) -> list[ObjectId]:
         """Inserts the given object into this class' Collection object.
 
         Args:
@@ -82,7 +83,7 @@ class BaseClass:
             IncorrectDocument: raised when document isn't formatted correctly
 
         Returns:
-            InsertOneResult | InsertManyResult: update result
+            list[ObjectId]: list of inserted IDs
         """
         if not isinstance(document, list | dict):
             msg = "Given document isn't a dictionary or a list."

@@ -3,6 +3,7 @@
 from unittest import mock
 
 import pytest
+from bson import ObjectId
 
 from mongo import interface
 from mongo.bsepoints.bets import UserBets
@@ -156,3 +157,37 @@ class TestUserBets:
         assert isinstance(user_bet, BetDB)
         assert user_bet.guild_id == guild_id
         assert user_bet.bet_id == bet_id
+
+    @pytest.mark.parametrize(
+        ("guild_id", "user_id", "options"),
+        # load list of entries dynamically
+        [
+            (entry["guild_id"], entry["user"], entry["option_dict"])
+            for entry in interface_mocks.query_mock("userbets", {})
+            if "type" not in entry
+        ],
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    def test_user_bets_create_bet(self, guild_id: int, user_id: int, options: dict) -> None:
+        """Tests UserBets create_new_bet method."""
+        user_bets = UserBets()
+        with mock.patch.object(user_bets, "_get_new_bet_id", return_value="0001"):
+            bet = user_bets.create_new_bet(guild_id, user_id, "some title", list(options.keys()), options)
+            assert bet.guild_id == guild_id
+            assert bet.bet_id == "0001"
+            assert bet.user == user_id
+
+    @pytest.mark.parametrize(
+        "bet_id",
+        # load list of entries dynamically
+        {entry["_id"] for entry in interface_mocks.query_mock("userbets", {}) if "type" not in entry},
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    def test_user_bets_close_bet(self, bet_id: ObjectId) -> None:
+        """Tests UserBets close_a_bet method."""
+        user_bets = UserBets()
+        user_bets.close_a_bet(bet_id, "")

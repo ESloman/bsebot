@@ -200,3 +200,31 @@ class TestUserBets:
         """Tests UserBets close_a_bet method."""
         user_bets = UserBets()
         user_bets.close_a_bet(bet_id, "")
+
+    @pytest.mark.parametrize(
+        "bet",
+        [
+            UserBets.make_data_class(entry)
+            for entry in interface_mocks.query_mock("userbets", {})
+            if "type" not in entry
+        ],
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    def test_user_bets_add_new_better_to_bet(self, bet: BetDB) -> None:
+        """Tests UserBets _add_new_better_to_bet method."""
+        user_bets = UserBets()
+        with mock.patch.object(user_bets.user_points, "increment_points", return_value=None) as inc_patch:
+            if bet.users:
+                user_id = bet.users[0]
+                emoji = bet.betters[str(user_id)].emoji
+                result = user_bets._add_new_better_to_bet(bet, user_id, emoji, 100)
+                assert inc_patch.called
+                assert isinstance(result, dict)
+                assert result["success"]
+
+            result = user_bets._add_new_better_to_bet(bet, 123456, "", 50)
+            assert inc_patch.called
+            assert isinstance(result, dict)
+            assert result["success"]

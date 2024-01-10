@@ -90,14 +90,21 @@ class UserBets(BestSummerEverPointsDB):
     def make_data_class(bet: dict) -> BetDB:
         """Turns a bet dict into a dataclass representation."""
         # convert betters
-        bet["betters"] = {
-            key: BetterDB(**value) for key, value in bet.get("betters", {}).items() if not isinstance(value, BetterDB)
-        }
-        bet["option_dict"] = {
-            key: OptionDB(**value)
-            for key, value in bet.get("option_dict", {}).items()
-            if not isinstance(value, OptionDB)
-        }
+        new_betters = {}
+        for key, value in bet.get("betters", {}).items():
+            if isinstance(value, BetterDB):
+                new_betters[key] = value
+                continue
+            new_betters[key] = BetterDB(**value)
+        bet["betters"] = new_betters
+
+        new_options = {}
+        for key, value in bet.get("option_dict", {}).items():
+            if isinstance(value, OptionDB):
+                new_options[key] = value
+                continue
+            new_options[key] = OptionDB(**value)
+        bet["option_dict"] = new_options
         return BetDB(**bet)
 
     @staticmethod

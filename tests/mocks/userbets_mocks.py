@@ -52,4 +52,4 @@ def user_pending_points_query(query: dict) -> list[dict]:
     """
     response = interface_mocks.query_mock("userbets", {"guild_id": query["guild_id"]})
     _user_id = next(iter(query.keys())).split(".")[-1]
-    return [bet for bet in response if _user_id in bet.get("betters", {})]
+    return [bet for bet in response if str(_user_id) in bet.get("betters", {}) and "betters" in bet]

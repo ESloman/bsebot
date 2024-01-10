@@ -1,5 +1,6 @@
 """Tests our UserBets class."""
 
+import random
 from unittest import mock
 
 import pytest
@@ -9,6 +10,18 @@ from mongo import interface
 from mongo.bsepoints.bets import UserBets
 from mongo.datatypes.bet import BetDB
 from tests.mocks import interface_mocks, userbets_mocks
+
+BET_CACHE: list[dict[str, any]] | None = None
+
+
+def _get_bet_data(number: int | None = None) -> list[dict[str, any]]:
+    """Function for getting and caching internal data."""
+    global BET_CACHE  # noqa: PLW0603
+    if BET_CACHE is None:
+        BET_CACHE = list(interface_mocks.query_mock("userbets", {}))
+    if not number:
+        return BET_CACHE
+    return random.choices(BET_CACHE, k=number)
 
 
 class TestUserBets:
@@ -31,7 +44,7 @@ class TestUserBets:
     def test_bets_make_data_class(self) -> None:
         """Tests UserBets make_data_class."""
         user_bets = UserBets()
-        data = interface_mocks.query_mock("userbets", {})
+        data = _get_bet_data()
         for entry in data:
             if "type" in entry:
                 continue
@@ -66,7 +79,7 @@ class TestUserBets:
         count = user_bets.count_eddies_for_bet(bet)
         assert count == exp
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in interface_mocks.query_mock("userbets", {})})
+    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_bet_data() if "type" not in entry})
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -80,7 +93,7 @@ class TestUserBets:
             assert bet.active
             assert bet.guild_id == guild_id
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in interface_mocks.query_mock("userbets", {})})
+    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_bet_data() if "type" not in entry})
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -95,7 +108,7 @@ class TestUserBets:
             assert bet.result is None
             assert bet.guild_id == guild_id
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in interface_mocks.query_mock("userbets", {})})
+    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_bet_data() if "type" not in entry})
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -141,11 +154,7 @@ class TestUserBets:
     @pytest.mark.parametrize(
         ("guild_id", "bet_id"),
         # load list of entries dynamically
-        {
-            (entry["guild_id"], entry["bet_id"])
-            for entry in interface_mocks.query_mock("userbets", {})
-            if "type" not in entry
-        },
+        {(entry["guild_id"], entry["bet_id"]) for entry in _get_bet_data(100) if "type" not in entry},
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -172,7 +181,7 @@ class TestUserBets:
         # load list of entries dynamically
         [
             (entry["guild_id"], entry["user"], entry["option_dict"])
-            for entry in interface_mocks.query_mock("userbets", {})
+            for entry in _get_bet_data(100)
             if "type" not in entry
         ],
     )
@@ -191,7 +200,7 @@ class TestUserBets:
     @pytest.mark.parametrize(
         "bet_id",
         # load list of entries dynamically
-        {entry["_id"] for entry in interface_mocks.query_mock("userbets", {}) if "type" not in entry},
+        {entry["_id"] for entry in _get_bet_data(50)},
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -203,11 +212,7 @@ class TestUserBets:
 
     @pytest.mark.parametrize(
         "bet",
-        [
-            UserBets.make_data_class(entry)
-            for entry in interface_mocks.query_mock("userbets", {})
-            if "type" not in entry
-        ],
+        [UserBets.make_data_class(entry) for entry in _get_bet_data(50) if "type" not in entry],
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -216,9 +221,12 @@ class TestUserBets:
         """Tests UserBets _add_new_better_to_bet method."""
         user_bets = UserBets()
         with mock.patch.object(user_bets.user_points, "increment_points", return_value=None) as inc_patch:
-            if bet.users:
+            if bet.users and bet.betters:
                 user_id = bet.users[0]
-                emoji = bet.betters[str(user_id)].emoji
+                try:
+                    emoji = bet.betters[str(user_id)].emoji
+                except KeyError:
+                    print(str(user_id))
                 result = user_bets._add_new_better_to_bet(bet, user_id, emoji, 100)
                 assert inc_patch.called
                 assert isinstance(result, dict)

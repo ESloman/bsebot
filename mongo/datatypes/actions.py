@@ -31,10 +31,10 @@ class TransactionDB(BaseDBObject):
     """The ID of the user the transaction relates to."""
     type: TransactionTypes  # noqa: A003
     """The type of transaction."""
-    amount: int
-    """The amount of eddies in the transaction."""
     timestamp: datetime.datetime
     """The time the transaction took place."""
+    amount: int | None = None
+    """The amount of eddies in the transaction."""
     comment: str = ""
     """The comment pertaining to a transaction."""
     bet_id: str | None = None

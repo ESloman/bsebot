@@ -40,6 +40,9 @@ def query_mock(collection_name: str, parameters: dict, *_args: tuple[any], **_kw
     for key, value in parameters.items():
         data_to_search = copy.deepcopy(_filtered_data)
         _filtered_data = []
+        if isinstance(value, dict):
+            # skip dicts for now
+            continue
         for data in data_to_search:
             if key not in data:
                 # key not in data - won't match

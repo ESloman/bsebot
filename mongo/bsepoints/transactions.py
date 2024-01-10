@@ -93,4 +93,4 @@ class UserTransactions(BestSummerEverPointsDB):
         Returns:
             list[Transaction]: list of transactions
         """
-        return [self.make_data_class(**trans) for trans in self.query({"guild_id": guild_id}, limit=10000)]
+        return [self.make_data_class(trans) for trans in self.query({"guild_id": guild_id}, limit=10000)]

@@ -46,7 +46,10 @@ def user_bets_count_data() -> list[tuple[BetDB, int]]:
 
 
 def user_pending_points_query(query: dict) -> list[dict]:
-    """Mocks our pending points query."""
-    response = interface_mocks.query_mock("userbets", {"guild_id": query["guild_id"], "result": None})
+    """Mocks our pending points query.
+
+    Returns any bets that match the user so we can mock the counting bit.
+    """
+    response = interface_mocks.query_mock("userbets", {"guild_id": query["guild_id"]})
     _user_id = next(iter(query.keys())).split(".")[-1]
     return [bet for bet in response if _user_id in bet.get("betters", {})]

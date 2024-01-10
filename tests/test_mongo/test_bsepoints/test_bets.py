@@ -158,6 +158,15 @@ class TestUserBets:
         assert user_bet.guild_id == guild_id
         assert user_bet.bet_id == bet_id
 
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_user_bets_get_bet_empty(self) -> None:
+        """Tests UserBets get_bet method with empty expected."""
+        user_bets = UserBets()
+        user_bet = user_bets.get_bet_from_id(123456, "0001")
+        assert user_bet is None
+
     @pytest.mark.parametrize(
         ("guild_id", "user_id", "options"),
         # load list of entries dynamically

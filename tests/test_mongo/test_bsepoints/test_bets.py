@@ -236,3 +236,78 @@ class TestUserBets:
             assert inc_patch.called
             assert isinstance(result, dict)
             assert result["success"]
+
+    @pytest.mark.parametrize(
+        "bet",
+        [UserBets.make_data_class(entry) for entry in _get_bet_data(5) if "type" not in entry],
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_user_bets_add_new_better_to_bet_no_points(self, bet: BetDB) -> None:
+        """Tests UserBets add_new_better_to_bet method."""
+        user_bets = UserBets()
+        with mock.patch.object(user_bets.user_points, "get_user_points", return_value=5):
+            user = 123456 if not bet.users else bet.users[0]
+            result = user_bets.add_better_to_bet(bet.bet_id, bet.guild_id, user, "", 50)
+            assert isinstance(result, dict)
+            assert not result["success"]
+            assert result["reason"] == "not enough points"
+
+    @pytest.mark.parametrize(
+        "bet",
+        [UserBets.make_data_class(entry) for entry in _get_bet_data(5) if "type" not in entry],
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_user_bets_add_new_better_to_bet_not_existing(self, bet: BetDB) -> None:
+        """Tests UserBets add_new_better_to_bet method."""
+        user_bets = UserBets()
+        with (
+            mock.patch.object(user_bets.user_points, "get_user_points", return_value=500),
+            mock.patch.object(user_bets, "_add_new_better_to_bet", return_value={"success": True}),
+        ):
+            user = 123456
+            result = user_bets.add_better_to_bet(bet.bet_id, bet.guild_id, user, "", 50)
+            assert isinstance(result, dict)
+            assert result["success"]
+
+    @pytest.mark.parametrize(
+        "bet",
+        [UserBets.make_data_class(entry) for entry in _get_bet_data(100) if entry.get("betters")],
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_user_bets_add_new_better_to_bet_wrong_emoji(self, bet: BetDB) -> None:
+        """Tests UserBets add_new_better_to_bet method."""
+        user_bets = UserBets()
+        with mock.patch.object(user_bets.user_points, "get_user_points", return_value=500):
+            user = next(iter(bet.betters.keys()))
+            emoji = ""
+            result = user_bets.add_better_to_bet(bet.bet_id, bet.guild_id, user, emoji, 50)
+            assert isinstance(result, dict)
+            assert not result["success"]
+            assert result["reason"] == "wrong option"
+
+    @pytest.mark.parametrize(
+        "bet",
+        [UserBets.make_data_class(entry) for entry in _get_bet_data(50) if entry.get("betters")],
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    def test_user_bets_add_new_better_to_bet_success(self, bet: BetDB) -> None:
+        """Tests UserBets add_new_better_to_bet method."""
+        user_bets = UserBets()
+        with (
+            mock.patch.object(user_bets.user_points, "get_user_points", return_value=500),
+            mock.patch.object(user_bets.user_points, "increment_points", return_value=None),
+        ):
+            user = next(iter(bet.betters.keys()))
+            emoji = bet.betters[str(user)].emoji
+            result = user_bets.add_better_to_bet(bet.bet_id, bet.guild_id, user, emoji, 50)
+            assert isinstance(result, dict)
+            assert result["success"]

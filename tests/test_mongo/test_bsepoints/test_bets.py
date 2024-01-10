@@ -7,11 +7,11 @@ import pytest
 from mongo import interface
 from mongo.bsepoints.bets import UserBets
 from mongo.datatypes.bet import BetDB
-from tests.mocks import interface_mocks
+from tests.mocks import interface_mocks, userbets_mocks
 
 
 class TestUserBets:
-    """Tests our Guilds class."""
+    """Tests our UserBets class."""
 
     def test_user_bets_init_defaults(self) -> None:
         """Tests UserBets init."""
@@ -57,6 +57,85 @@ class TestUserBets:
         user_bets = UserBets()
         count = user_bets._get_new_bet_id(guild_id)
         assert count == exp
+
+    @pytest.mark.parametrize(("bet", "exp"), userbets_mocks.user_bets_count_data())
+    def test_count_eddies_for_bet(self, bet: BetDB, exp: int) -> None:
+        """Tests UserBets count_eddies method."""
+        user_bets = UserBets()
+        count = user_bets.count_eddies_for_bet(bet)
+        assert count == exp
+
+    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in interface_mocks.query_mock("userbets", {})})
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_user_bets_get_all_active_bets(self, guild_id: int) -> None:
+        """Tests UserBets get_all_active_bets method."""
+        user_bets = UserBets()
+        bets = user_bets.get_all_active_bets(guild_id)
+        assert isinstance(bets, list)
+        for bet in bets:
+            assert isinstance(bet, BetDB)
+            assert bet.active
+            assert bet.guild_id == guild_id
+
+    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in interface_mocks.query_mock("userbets", {})})
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_user_bets_get_all_inactive_pending_bets(self, guild_id: int) -> None:
+        """Tests UserBets get_all_inactive_pending_bets method."""
+        user_bets = UserBets()
+        bets = user_bets.get_all_inactive_pending_bets(guild_id)
+        assert isinstance(bets, list)
+        for bet in bets:
+            assert isinstance(bet, BetDB)
+            assert not bet.active
+            assert bet.result is None
+            assert bet.guild_id == guild_id
+
+    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in interface_mocks.query_mock("userbets", {})})
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_user_bets_get_all_pending_bets(self, guild_id: int) -> None:
+        """Tests UserBets get_all_pending_bets method."""
+        user_bets = UserBets()
+        bets = user_bets.get_all_pending_bets(guild_id)
+        assert isinstance(bets, list)
+        for bet in bets:
+            assert isinstance(bet, BetDB)
+            assert bet.result is None
+            assert bet.guild_id == guild_id
+
+    @pytest.mark.parametrize(
+        ("guild_id", "user_id"),
+        {(entry["guild_id"], entry["uid"]) for entry in interface_mocks.query_mock("userpoints", {})},
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    def test_user_bets_get_user_pending_points(self, guild_id: int, user_id: int) -> None:
+        """Tests UserBets get_user_pending_points method."""
+        user_bets = UserBets()
+        with mock.patch.object(user_bets, "query", new=userbets_mocks.user_pending_points_query):
+            points = user_bets.get_user_pending_points(user_id, guild_id)
+        assert isinstance(points, int)
+
+    @pytest.mark.parametrize(
+        ("guild_id", "user_id"),
+        {(entry["guild_id"], entry["uid"]) for entry in interface_mocks.query_mock("userpoints", {})},
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    def test_user_bets_get_all_pending_bets_for_user(self, guild_id: int, user_id: int) -> None:
+        """Tests UserBets get_all_pending_bets_for_user method."""
+        user_bets = UserBets()
+        with mock.patch.object(user_bets, "query", new=userbets_mocks.user_pending_points_query):
+            bets = user_bets.get_all_pending_bets_for_user(user_id, guild_id)
+        assert isinstance(bets, list)
+        for bet in bets:
+            assert isinstance(bet, BetDB)
+            assert str(user_id) in bet.betters
 
     @pytest.mark.parametrize(
         ("guild_id", "bet_id"),

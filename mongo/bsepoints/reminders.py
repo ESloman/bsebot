@@ -18,6 +18,18 @@ class ServerReminders(BestSummerEverPointsDB):
         super().__init__()
         self._vault = interface.get_collection(self.database, "reminders")
 
+    @staticmethod
+    def make_data_class(reminder: dict) -> ReminderDB:
+        """Converts the reminder into a a dataclass.
+
+        Args:
+            reminder (dict): the reminder dictionary
+
+        Returns:
+            ReminderDB: the Reminder dataclass
+        """
+        return ReminderDB(**reminder)
+
     def get_open_reminders(self, guild_id: int) -> list[ReminderDB]:
         """Get all the currently open reminders for the given guild.
 
@@ -25,7 +37,7 @@ class ServerReminders(BestSummerEverPointsDB):
         :return:
         """
         ret = self.query({"active": True, "guild_id": guild_id})
-        return [ReminderDB(**reminder) for reminder in ret]
+        return [self.make_data_class(reminder) for reminder in ret]
 
     def close_reminder(self, object_id: ObjectId) -> UpdateResult:
         """Closes a reminder.

@@ -20,3 +20,5 @@ class ReminderDB(BaseDBObject, ImplementsMessage):
     """Whether the reminder is active."""
     reason: str
     """The reason for the reminder."""
+    comment: str = ""
+    """An additional comment."""

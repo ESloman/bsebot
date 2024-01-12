@@ -13,7 +13,7 @@ class ActivityDB(BaseDBObject):
 
     uid: int
     """The ID of the user the activity relates to."""
-    type: ActivityTypes  # noqa: A003
+    type: ActivityTypes
     """The type of activity."""
     timestamp: datetime.datetime
     """The time the activity took place."""
@@ -29,7 +29,7 @@ class TransactionDB(BaseDBObject):
 
     uid: int
     """The ID of the user the transaction relates to."""
-    type: TransactionTypes  # noqa: A003
+    type: TransactionTypes
     """The type of transaction."""
     timestamp: datetime.datetime
     """The time the transaction took place."""

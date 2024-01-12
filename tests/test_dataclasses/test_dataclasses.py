@@ -29,7 +29,7 @@ class TestActionDB:
         assert isinstance(activity_db, ActivityDB)
         for key in act:
             try:
-                assert act[key] == activity_db.__getattribute__(key)
+                assert act[key] == getattr(activity_db, key)
             except AttributeError:
                 if key in extras:
                     assert act[key] == extras[key]
@@ -48,7 +48,7 @@ class TestActionDB:
         assert isinstance(transaction_db, TransactionDB)
         for key in transaction:
             try:
-                assert transaction[key] == transaction_db.__getattribute__(key) or transaction[key] == extras.get(key)
+                assert transaction[key] == getattr(transaction_db, key) or transaction[key] == extras.get(key)
             except AttributeError:
                 if key in extras:
                     assert transaction[key] == extras[key]
@@ -67,7 +67,7 @@ class TestBetDB:
         option_db = OptionDB(**option)
         assert isinstance(option_db, OptionDB)
         for key in option:
-            assert option[key] == option_db.__getattribute__(key)
+            assert option[key] == getattr(option_db, key)
 
         # test the frozen-ness
         with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
@@ -79,7 +79,7 @@ class TestBetDB:
         better_db = BetterDB(**better)
         assert isinstance(better_db, BetterDB)
         for key in better:
-            assert better[key] == better_db.__getattribute__(key)
+            assert better[key] == getattr(better_db, key)
 
         # test the frozen-ness
         with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
@@ -91,7 +91,7 @@ class TestBetDB:
         bet_db = BetDB(**bet)
         assert isinstance(bet_db, BetDB)
         for key in bet:
-            assert bet[key] == bet_db.__getattribute__(key)
+            assert bet[key] == getattr(bet_db, key)
 
         # test the frozen-ness
         with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
@@ -105,7 +105,7 @@ class TestEmojiDB:
         emoji_db = EmojiDB(**emoji)
         assert isinstance(emoji_db, EmojiDB)
         for key in emoji:
-            assert emoji[key] == emoji_db.__getattribute__(key)
+            assert emoji[key] == getattr(emoji_db, key)
 
         # test the frozen-ness
         with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
@@ -119,7 +119,7 @@ class TestGuildDB:
         guild_db = GuildDB(**guild)
         assert isinstance(guild_db, GuildDB)
         for key in guild:
-            assert guild[key] == guild_db.__getattribute__(key)
+            assert guild[key] == getattr(guild_db, key)
 
         # test the frozen-ness
         with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
@@ -133,7 +133,7 @@ class TestMessageDB:
         message_db = MessageDB(**message)
         assert isinstance(message_db, MessageDB)
         for key in message:
-            assert message[key] == message_db.__getattribute__(key)
+            assert message[key] == getattr(message_db, key)
 
         # test the frozen-ness
         with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
@@ -145,7 +145,7 @@ class TestMessageDB:
         reply_db = ReplyDB(**reply)
         assert isinstance(reply_db, ReplyDB)
         for key in reply:
-            assert reply[key] == reply_db.__getattribute__(key)
+            assert reply[key] == getattr(reply_db, key)
 
         # test the frozen-ness
         with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
@@ -157,7 +157,7 @@ class TestMessageDB:
         reaction_db = ReactionDB(**reaction)
         assert isinstance(reaction_db, ReactionDB)
         for key in reaction:
-            assert reaction[key] == reaction_db.__getattribute__(key)
+            assert reaction[key] == getattr(reaction_db, key)
 
         # test the frozen-ness
         with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
@@ -170,7 +170,7 @@ class TestMessageDB:
         assert isinstance(vc_db, MessageDB)
         assert isinstance(vc_db, VCInteractionDB)
         for key in vc:
-            assert vc[key] == vc_db.__getattribute__(key)
+            assert vc[key] == getattr(vc_db, key)
 
         # test the frozen-ness
         with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
@@ -182,7 +182,7 @@ class TestMessageDB:
         message_db = MessageDB(**message)
         assert isinstance(message_db, MessageDB)
         for key in message:
-            assert message[key] == message_db.__getattribute__(key)
+            assert message[key] == getattr(message_db, key)
 
         # test the frozen-ness
         with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
@@ -192,7 +192,7 @@ class TestMessageDB:
         assert isinstance(wordle_message, WordleMessageDB)
         assert isinstance(wordle_message, MessageDB)
         for key in message:
-            assert message[key] == wordle_message.__getattribute__(key)
+            assert message[key] == getattr(wordle_message, key)
 
         # test the frozen-ness
         with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
@@ -206,7 +206,7 @@ class TestReminderDB:
         reminder_db = ReminderDB(**reminder)
         assert isinstance(reminder_db, ReminderDB)
         for key in reminder:
-            assert reminder[key] == reminder_db.__getattribute__(key)
+            assert reminder[key] == getattr(reminder_db, key)
 
         # test the frozen-ness
         with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
@@ -221,7 +221,7 @@ class TestRevolutionEventsDB:
         assert isinstance(event_db, RevolutionEventDB)
         assert isinstance(event_db, BaseEventDB)
         for key in event:
-            assert event[key] == event_db.__getattribute__(key)
+            assert event[key] == getattr(event_db, key)
 
         # test the frozen-ness
         with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
@@ -234,7 +234,7 @@ class TestRevolutionEventsDB:
         assert isinstance(event_db, RevolutionEventUnFrozenDB)
         assert not isinstance(event_db, BaseEventDB)
         for key in event:
-            assert event[key] == event_db.__getattribute__(key)
+            assert event[key] == getattr(event_db, key)
 
         # test the unfrozen-ness
         event_db.chance += 50
@@ -246,7 +246,7 @@ class TestRevolutionEventsDB:
         assert isinstance(event_db, RevolutionEventDB)
         assert isinstance(event_db, BaseEventDB)
         for key in event:
-            assert event[key] == event_db.__getattribute__(key)
+            assert event[key] == getattr(event_db, key)
 
         # test the frozen-ness
         with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
@@ -268,7 +268,7 @@ class TestStickerDB:
         sticker_db = StickerDB(**sticker)
         assert isinstance(sticker_db, StickerDB)
         for key in sticker:
-            assert sticker[key] == sticker_db.__getattribute__(key)
+            assert sticker[key] == getattr(sticker_db, key)
 
         # test the frozen-ness
         with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
@@ -282,7 +282,7 @@ class TestThreadDB:
         thread_db = ThreadDB(**thread)
         assert isinstance(thread_db, ThreadDB)
         for key in thread:
-            assert thread[key] == thread_db.__getattribute__(key)
+            assert thread[key] == getattr(thread_db, key)
 
         # test the frozen-ness
         with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
@@ -296,7 +296,7 @@ class TestUserDB:
         user_db = UserDB(**user)
         assert isinstance(user_db, UserDB)
         for key in user:
-            assert user[key] == user_db.__getattribute__(key)
+            assert user[key] == getattr(user_db, key)
 
         # test the frozen-ness
         with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):

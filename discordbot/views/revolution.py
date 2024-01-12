@@ -169,7 +169,7 @@ class RevolutionView(discord.ui.View):
                 event.users.append(user_id)
 
             # make sure user isn't doing the same thing twice
-            if user_id in event.__getattribute__(faction_event_key, []):
+            if user_id in event.getattr(faction_event_key, []):
                 await followup.send(
                     content="You've already acted on this - you cannot do so again",
                     ephemeral=True,
@@ -195,12 +195,12 @@ class RevolutionView(discord.ui.View):
             # different to king button logic
 
             # reverse actions of other faction
-            if user_id in event.__getattribute__(other_faction_event_key):
+            if user_id in event.getattr(other_faction_event_key):
                 event.chance -= faction_chance * -1
-                event.__getattribute__(other_faction_event_key).remove(user_id)
+                event.getattr(other_faction_event_key).remove(user_id)
 
             # apply our actions (increasing/reducing chance)
-            event.__getattribute__(faction_event_key).append(user_id)
+            event.getattr(faction_event_key).append(user_id)
             event.chance += faction_chance
 
             # remove user from neutrals if they're in it

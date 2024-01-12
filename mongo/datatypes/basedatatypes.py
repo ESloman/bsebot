@@ -38,7 +38,7 @@ class ImplementsMessage:
 class BaseEventDB(BaseDBObject, ImplementsMessage):
     """Represents a base event."""
 
-    type: str  # noqa: A003
+    type: str
     """Event type."""
     event_id: str
     """The event ID."""
@@ -46,5 +46,5 @@ class BaseEventDB(BaseDBObject, ImplementsMessage):
     """When the event was created."""
     expired: datetime.datetime
     """When the event will expire and 'resolve'."""
-    open: bool  # noqa: A003
+    open: bool
     """whether the event is still open."""

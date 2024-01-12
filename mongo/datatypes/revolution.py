@@ -20,7 +20,7 @@ class RevolutionEventUnFrozenDB:
     """The discord ID of the channel the message is in."""
     message_id: int
     """The discord ID of the message."""
-    type: str  # noqa: A003
+    type: str
     """Event type."""
     event_id: str
     """The event ID."""
@@ -28,7 +28,7 @@ class RevolutionEventUnFrozenDB:
     """When the event was created."""
     expired: datetime.datetime
     """When the event will expire and 'resolve'."""
-    open: bool  # noqa: A003
+    open: bool
     """whether the event is still open."""
     king: int
     """The king the event affects."""

@@ -73,7 +73,7 @@ class KingRename(BSEddies):
             return
 
         key = f"rename_{role}"
-        last_king_rename = db_guild.__getattribute__(key)
+        last_king_rename = getattr(db_guild, key)
         now = datetime.datetime.now()
         if last_king_rename:
             time_elapsed = now - last_king_rename

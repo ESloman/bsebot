@@ -89,7 +89,7 @@ class GuildDB(NamedDBObject):
     """The last time we triggered a 'rigged' message."""
 
     # update stuff
-    hash: str | None = None  # noqa: A003
+    hash: str | None = None
     """The last git hash."""
     release_ver: str | None = None
     """The last version of release notes published."""

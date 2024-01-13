@@ -33,7 +33,7 @@ class RevolutionEvent(TicketedEvent):
         super().__init__()
         self.guilds = Guilds()
 
-    def __create_counter_document(self, guild_id: int) -> None:
+    def _create_counter_document(self, guild_id: int) -> None:
         """Method that creates our base 'counter' document for counting loan IDs.
 
         :param guild_id: int - guild ID to create document for
@@ -42,7 +42,7 @@ class RevolutionEvent(TicketedEvent):
         if not self.query({"type": "counter", "guild_id": guild_id}):
             self.insert({"type": "counter", "guild_id": guild_id, "count": 1})
 
-    def __get_new_id(self, guild_id: int) -> str:
+    def _get_new_id(self, guild_id: int) -> str:
         """Generate new unique ID and return it in the format we want.
 
         Args:
@@ -51,11 +51,8 @@ class RevolutionEvent(TicketedEvent):
         Returns:
             str: new unique ID
         """
-        try:
-            count = self.query({"type": "counter", "guild_id": guild_id}, projection={"count": True})[0]["count"]
-        except IndexError:
-            self.__create_counter_document(guild_id)
-            count = self.query({"type": "counter", "guild_id": guild_id}, projection={"count": True})[0]["count"]
+        self._create_counter_document(guild_id)
+        count = self.query({"type": "counter", "guild_id": guild_id}, projection={"count": True})[0]["count"]
         self.update({"type": "counter", "guild_id": guild_id}, {"$inc": {"count": 1}})
         return f"{count:03d}"
 
@@ -93,7 +90,7 @@ class RevolutionEvent(TicketedEvent):
         Returns:
             RevolutionEventType: _description_
         """
-        event_id = self.__get_new_id(guild_id)
+        event_id = self._get_new_id(guild_id)
 
         event_doc = {
             "type": "revolution",
@@ -126,21 +123,9 @@ class RevolutionEvent(TicketedEvent):
         event_doc["chance"] += -15 * len(pledges)
         event_doc["locked"] = pledges
 
-        self.insert(document=event_doc)
+        _id = self.insert(document=event_doc)[0]
+        event_doc["_id"] = _id
         return self.make_data_class(event_doc)
-
-    def increment_eddies_total(self, event_id: str, guild_id: int, points: int) -> UpdateResult:
-        """Increments the amount of eddies that have been spent on an event.
-
-        Args:
-            event_id (str): _description_
-            guild_id (int): _description_
-            points (int): _description_
-
-        Returns:
-            _type_: _description_
-        """
-        return self.update({"event_id": event_id, "guild_id": guild_id}, {"$inc": {"eddies_spent": points}})
 
     def increment_chance(self, event_id: str, guild_id: int, chance: int) -> UpdateResult:
         """Increments the chance the event will pass.
@@ -154,19 +139,6 @@ class RevolutionEvent(TicketedEvent):
             UpdateResult: _description_
         """
         return self.update({"event_id": event_id, "guild_id": guild_id}, {"$inc": {"chance": chance}})
-
-    def add_user_to_buyers(self, event_id: str, guild_id: int, user_id: int) -> UpdateResult:
-        """Adds an individual to the list of ticket buyers.
-
-        Args:
-            event_id (str): _description_
-            guild_id (int): _description_
-            user_id (int): _description_
-
-        Returns:
-            UpdateResult: _description_
-        """
-        return self.update({"event_id": event_id, "guild_id": guild_id}, {"$push": {"ticket_buyers": user_id}})
 
     def get_event(self, guild_id: int, event_id: str) -> RevolutionEventDB | None:
         """Returns the specified event for the given guild.

@@ -29,7 +29,7 @@ class GuildDB(NamedDBObject):
     """The standard eddies tax rate."""
     supporter_tax_rate: float = 0
     """The eddies tax rate for supporters."""
-    tax_rate_history: list[dict] = dataclasses.field(default_factory=list)
+    tax_rate_history: list[dict[str, any]] = dataclasses.field(default_factory=list)
     """The tax rate history."""
 
     # KING stuff
@@ -39,7 +39,7 @@ class GuildDB(NamedDBObject):
     """The user ID of the user that is currently KING."""
     king_since: datetime.datetime | None = None
     """Start time of the current KING's rule."""
-    king_history: list[dict] = dataclasses.field(default_factory=list)
+    king_history: list[dict[str, any]] = dataclasses.field(default_factory=list)
     """The KING history."""
     rename_king: datetime.datetime | None = None
     """When the King was last renamed."""

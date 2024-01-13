@@ -40,8 +40,15 @@ class TestRevolutionEvent:
         revolutions = RevolutionEvent()
         with mock.patch.object(revolutions, "query", return_val=True):
             revolutions._create_counter_document(123456)
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    def test_revolution_events_create_counter_doc_create(self) -> None:
+        """Tests RevolutionEvent _create_counter_doc."""
+        revolutions = RevolutionEvent()
         with mock.patch.object(revolutions, "query", return_val=False):
-            revolutions._create_counter_document(654321)
+            revolutions._create_counter_document(123456)
 
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)

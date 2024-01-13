@@ -90,7 +90,7 @@ class VCInteractionDB(MessageDB):
 
     active: bool = False
     time_in_vc: float | None = None
-    events: list[dict] = field(default_factory=list)
+    events: list[dict[str, any]] = field(default_factory=list)
     left: datetime.datetime | None = None
 
     # muted

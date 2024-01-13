@@ -58,6 +58,12 @@ class TestBaseClass:
         projection = {"user_id": False, "points": True}
         base_cls._update_projection(projection)
 
+    def test_base_class_make_data_class(self) -> None:
+        """Tests BaseClass raises an exception correctly."""
+        base_cls = BaseClass()
+        with pytest.raises(NotImplementedError):
+            base_cls.make_data_class({})
+
     @pytest.mark.parametrize("doc", [None, "doc", 1234])
     def test_insert_incorrect_document(self, doc: any) -> None:
         """Tests BaseClass insert method with incorrect document."""

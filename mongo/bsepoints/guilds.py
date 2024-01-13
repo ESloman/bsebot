@@ -272,7 +272,7 @@ class Guilds(BaseClass):  # noqa: PLR0904
             dateteime: the time this guild last had a marvel comics ad
         """
         ret: list[GuildDB] = self.query({"guild_id": guild_id}, projection={"last_ad_time": True})
-        if not ret or ret[0].last_ad_time:
+        if not ret or not ret[0].last_ad_time:
             return None
         return ret[0].last_ad_time
 

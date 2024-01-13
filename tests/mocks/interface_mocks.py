@@ -1,6 +1,7 @@
 """Mocks our interface functions."""
 
 import copy
+import datetime
 import json
 import pathlib
 
@@ -20,6 +21,22 @@ def get_database_mock(_: any, name: str) -> str:
     return name
 
 
+def _datetime_convert(entry: dict[str, any]) -> None:
+    """Convert keys into datetime objects."""
+    for key in entry:
+        if entry[key] and isinstance(entry[key], list) and isinstance(entry[key][0], dict):
+            for part in entry[key]:
+                _datetime_convert(part)
+            continue
+        match key:
+            case "created" | "timestamp":
+                entry[key] = datetime.datetime.strptime(entry[key], "%Y-%m-%dT%H:%M:%S.%f%z")
+            case "rename_supporter" | "rename_revolutionary" | "king_since":
+                entry[key] = datetime.datetime.strptime(entry[key], "%Y-%m-%dT%H:%M:%S.%f%z")
+            case "last_ad_time" | "last_remind_me_suggest_time" | "last_revolution_time":
+                entry[key] = datetime.datetime.strptime(entry[key], "%Y-%m-%dT%H:%M:%S.%f%z")
+
+
 def query_mock(collection_name: str, parameters: dict, *_args: tuple[any], **_kwargs: dict[str, any]) -> list:
     """Query mock."""
     # load the data
@@ -34,6 +51,8 @@ def query_mock(collection_name: str, parameters: dict, *_args: tuple[any], **_kw
     else:
         with open(path, encoding="utf-8") as json_file:
             all_data = json.load(json_file)
+            for entry in all_data:
+                _datetime_convert(entry)
             _CACHE[path] = all_data
 
     # search all data for matching parameters

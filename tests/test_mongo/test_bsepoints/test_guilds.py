@@ -254,7 +254,9 @@ class TestGuilds:  # noqa: PLR0904
     def test_guilds_get_last_ad_time(self) -> None:
         """Tests Guilds get_last_ad_time."""
         guilds = Guilds()
-        guilds.get_last_ad_time(724395292912255056)
+        _time = guilds.get_last_ad_time(724395292912255056)
+        assert _time is not None
+        assert isinstance(_time, datetime.datetime)
 
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -279,7 +281,9 @@ class TestGuilds:  # noqa: PLR0904
     def test_guilds_get_last_remind_me_time(self) -> None:
         """Tests Guilds get_last_remind_me_time."""
         guilds = Guilds()
-        guilds.get_last_remind_me_time(724395292912255056)
+        _time = guilds.get_last_remind_me_time(724395292912255056)
+        assert _time is not None
+        assert isinstance(_time, datetime.datetime)
 
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)

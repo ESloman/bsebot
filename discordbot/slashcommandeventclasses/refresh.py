@@ -15,7 +15,7 @@ from discordbot.views.refresh import RefreshBetView
 class RefreshBet(BSEddies):
     """Class for handling `/refresh` commands."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:

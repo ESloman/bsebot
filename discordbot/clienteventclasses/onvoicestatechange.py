@@ -82,7 +82,7 @@ class OnVoiceStateChange(BaseEvent):
         vc_doc["events"].append({"timestamp": now, "event": "deafened" if after.self_deaf else "undeafened"})
 
     def _handle_stream_status(
-        self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState, vc_doc: dict
+        self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState, vc_doc: dict[str, any]
     ) -> None:
         """Handles stream status.
 

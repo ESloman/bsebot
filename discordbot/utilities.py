@@ -49,6 +49,8 @@ class PlaceHolderLogger:
 
 
 class _ColourFormatter(logging.Formatter):
+    """Colour Formatter.
+
     # ANSI codes are a bit weird to decipher if you're unfamiliar with them, so here's a refresher
     # It starts off with a format like \x1b[XXXm where XXX is a semicolon separated list of commands
     # The important ones here relate to colour.
@@ -57,6 +59,7 @@ class _ColourFormatter(logging.Formatter):
     # 90-97 are the same but "bright" foreground
     # 100-107 are the same as the bright ones but for the background.
     # 1 means bold, 2 means dim, 0 means reset, and 4 means underline.
+    """
 
     LEVEL_COLOURS: ClassVar = [
         (logging.DEBUG, "\x1b[40;1m"),

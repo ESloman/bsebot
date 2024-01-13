@@ -13,7 +13,7 @@ from mongo.datatypes.user import UserDB
 class View(BSEddies):
     """Class for handling `/view` commands."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:

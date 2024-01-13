@@ -14,7 +14,7 @@ from discordbot.tasks.eddiegains import BSEddiesManager
 class Predict(BSEddies):
     """Class for handling `/bseddies predict` command."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:

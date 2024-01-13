@@ -201,7 +201,9 @@ class WordleSolver:
             weights=[self.words_freq.get(word, 0) for word in self.possible_words],
         )
 
-    def _filter_word_list(self, game_state: dict, present_letters: list, correct_letters: list) -> None:
+    def _filter_word_list(
+        self, game_state: dict[str, any], present_letters: list[str], correct_letters: list[str]
+    ) -> None:
         """Filters the possible word list based on our current game state.
 
         Args:

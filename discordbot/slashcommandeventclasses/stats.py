@@ -19,7 +19,7 @@ from mongo.datatypes.message import MessageDB
 class Stats(BSEddies):
     """Class for handling `/stats` commands."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:
@@ -33,7 +33,7 @@ class Stats(BSEddies):
         self.command_name = "stats"
 
     @staticmethod
-    def _do_message_counts(messages: list[MessageDB]) -> dict:  # noqa: C901, PLR0915
+    def _do_message_counts(messages: list[MessageDB]) -> dict[str, any]:  # noqa: C901, PLR0915
         _swears = ["fuck", "shit", "cunt", "piss", "cock", "bollock", "dick", "twat"]
 
         _dict = {}

@@ -63,7 +63,7 @@ class BaseClass:
         """
         return self._MINIMUM_PROJECTION_DICT
 
-    def update_projection(self, projection: dict) -> None:
+    def update_projection(self, projection: dict[str, any]) -> None:
         """Updates the given projection with the minimum values defined.
 
         Args:
@@ -95,7 +95,7 @@ class BaseClass:
 
         return interface.insert(self.vault, document)
 
-    def update(self, parameters: dict, updated_vals: dict, many: bool = False) -> UpdateResult:
+    def update(self, parameters: dict[str, any], updated_vals: dict[str, any], many: bool = False) -> UpdateResult:
         """Updates all documents based on the given parameters with the provided values.
 
         Args:
@@ -108,7 +108,7 @@ class BaseClass:
         """
         return interface.update(self.vault, parameters, updated_vals, many)
 
-    def delete(self, parameters: dict, many: bool = True) -> int:
+    def delete(self, parameters: dict[str, any], many: bool = True) -> int:
         """Deletes documents based on the given parameters.
 
         If many=False, only deletes one else it deletes all matches.
@@ -124,7 +124,7 @@ class BaseClass:
 
     def query(  # noqa: PLR0913, PLR0917
         self,
-        parameters: dict,
+        parameters: dict[str, any],
         limit: int = 1000,
         projection: dict | None = None,
         as_gen: bool = False,
@@ -162,7 +162,7 @@ class BaseClass:
             return interface.query(self.vault, parameters, limit, projection, as_gen, skip=skip, sort=sort)
         return self.paginated_query(parameters, limit, skip)
 
-    def paginated_query(self, query_dict: dict, limit: int = 1000, skip: int = 0) -> list[dict]:
+    def paginated_query(self, query_dict: dict[str, any], limit: int = 1000, skip: int = 0) -> list[dict[str, any]]:
         """Performs a paginated query with the specified query dict.
 
         Args:
@@ -202,7 +202,7 @@ class BaseClass:
         """
         return interface.create_index(self.vault, field)
 
-    def get_indexes(self) -> list:
+    def get_indexes(self) -> list[str]:
         """Gets a list of indexes on the current collection.
 
         Returns:

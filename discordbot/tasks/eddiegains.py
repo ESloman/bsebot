@@ -177,7 +177,7 @@ class BSEddiesManager(BaseTask):
 
         return start, end
 
-    def _calc_eddies(self, counter: Counter, start: int = 4) -> float:
+    def _calc_eddies(self, counter: Counter[str, int], start: int = 4) -> float:
         """Loop over the message types and work out an amount of BSEddies the user will gain.
 
         Args:
@@ -211,7 +211,7 @@ class BSEddiesManager(BaseTask):
         guild_id: int,
         wordle_word: str | None = None,
         real: bool = False,
-    ) -> tuple[int, dict]:
+    ) -> tuple[int, dict[str, any]]:
         """Method that calculates the daily salary for a given individual.
 
         Needs all the data given to it.
@@ -344,7 +344,7 @@ class BSEddiesManager(BaseTask):
 
         return eddies_gained, count
 
-    def give_out_eddies(self, guild_id: int, real: bool = False, days: int = 1) -> dict:  # noqa: PLR0915, PLR0912, C901
+    def give_out_eddies(self, guild_id: int, real: bool = False, days: int = 1) -> dict[str, any]:  # noqa: PLR0915, PLR0912, C901
         """Works out all the predicted salary gain for a given server's members.
 
         Only distributes them if specified.

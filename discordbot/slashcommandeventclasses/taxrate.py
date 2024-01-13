@@ -13,7 +13,7 @@ from discordbot.views.taxrate import TaxRateView
 class TaxRate(BSEddies):
     """Class for taxrate command."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:

@@ -257,7 +257,7 @@ class CommandManager:
         self._register_context_commands()
 
     # noinspection PyProtectedMember
-    def __get_cached_messages_list(self: "CommandManager") -> list:
+    def __get_cached_messages_list(self: "CommandManager") -> list[discord.Message]:
         """Method for getting a list of cached message IDs.
 
         Returns:

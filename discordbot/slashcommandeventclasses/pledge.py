@@ -13,7 +13,7 @@ from discordbot.views.pledge import PledgeView
 class Pledge(BSEddies):
     """Class for pledge command."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:

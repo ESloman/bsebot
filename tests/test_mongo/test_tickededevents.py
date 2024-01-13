@@ -82,3 +82,55 @@ class TestRevolutionEvent:
                 1000,
                 246810,
             )
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    def test_revolutions_increment_chance(self) -> None:
+        """Tests RevolutionEvent increment_chance."""
+        revolutions = RevolutionEvent()
+        revolutions.increment_chance("012", 123456, 15)
+
+    @pytest.mark.parametrize(
+        ("guild_id", "event_id"),
+        {(entry["guild_id"], entry["event_id"]) for entry in _get_event_data() if entry.get("type") != "counter"},
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_revolutions_get_event(self, guild_id: int, event_id: str) -> None:
+        """Tests RevolutionEvent get_event."""
+        revolutions = RevolutionEvent()
+        event = revolutions.get_event(guild_id, event_id)
+        assert isinstance(event, RevolutionEventDB)
+        assert event.guild_id == guild_id
+        assert event.event_id == event_id
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_revolutions_get_event_none(self) -> None:
+        """Tests RevolutionEvent get_event with a None."""
+        revolutions = RevolutionEvent()
+        event = revolutions.get_event(123456, "001")
+        assert event is None
+
+    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_event_data()})
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_revolutions_get_open_events(self, guild_id: int) -> None:
+        """Tests RevolutionEvent get_open_events."""
+        revolutions = RevolutionEvent()
+        events = revolutions.get_open_events(guild_id)
+        assert isinstance(events, list)
+        for event in events:
+            assert isinstance(event, RevolutionEventDB)
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    def test_revolutions_close_event(self) -> None:
+        """Tests RevolutionEvent close_event."""
+        revolutions = RevolutionEvent()
+        revolutions.close_event("001", 123456, True, 25)

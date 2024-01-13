@@ -44,6 +44,8 @@ class RevolutionEventUnFrozenDB:
     """Number of times the king tried to save themselves."""
     one_hour: bool = False
     """Whether the one hour warning was triggered."""
+    half_hour: bool = False
+    """Whether the half hour warning was triggered."""
     quarter_hour: bool = False
     """Whether the 15 minute warning was triggered."""
 
@@ -65,6 +67,10 @@ class RevolutionEventUnFrozenDB:
     ticket_buyers: list[int] | None = None
     """DEPRECATED"""
     eddies_spent: int | None = None
+    """DEPRECATED"""
+    two_hours: bool = False
+    """DEPRECATED"""
+    three_hours: bool = False
     """DEPRECATED"""
 
 
@@ -94,6 +100,8 @@ class RevolutionEventDB(BaseEventDB):
     """Number of times the king tried to save themselves."""
     one_hour: bool = False
     """Whether the one hour warning was triggered."""
+    half_hour: bool = False
+    """Whether the half hour warning was triggered."""
     quarter_hour: bool = False
     """Whether the 15 minute warning was triggered."""
 
@@ -115,4 +123,8 @@ class RevolutionEventDB(BaseEventDB):
     ticket_buyers: list[int] | None = None
     """DEPRECATED"""
     eddies_spent: int | None = None
+    """DEPRECATED"""
+    two_hours: bool = False
+    """DEPRECATED"""
+    three_hours: bool = False
     """DEPRECATED"""

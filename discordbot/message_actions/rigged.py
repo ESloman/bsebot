@@ -22,7 +22,7 @@ class RiggedAction(BaseMessageAction):
         """
         super().__init__(client, logger)
 
-    async def pre_condition(self, message: discord.Message, _: list) -> bool:
+    async def pre_condition(self, message: discord.Message, _: list[str]) -> bool:
         """Rigged action message action.
 
         Works out if the message contains "rigged" and is recently after a revolution.

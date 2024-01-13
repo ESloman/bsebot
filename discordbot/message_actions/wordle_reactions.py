@@ -29,7 +29,7 @@ class WordleMessageAction(BaseMessageAction):
         super().__init__(client, logger)
 
     @staticmethod
-    async def pre_condition(_: discord.Message, message_type: list) -> bool:
+    async def pre_condition(_: discord.Message, message_type: list[str]) -> bool:
         """Wordle precondition. Checks that we're a wordle message using the precalc message_type.
 
         Args:

@@ -17,7 +17,7 @@ from discordbot.constants import BSE_BOT_ID
 class OnMessageEdit(BaseEvent):
     """Class for handling on_message_edit events from Discord."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:

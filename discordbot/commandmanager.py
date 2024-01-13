@@ -101,7 +101,7 @@ class CommandManager:
     def __init__(  # noqa: PLR0915
         self: "CommandManager",
         client: BSEBot,
-        guilds: list,
+        guilds: list[int],
         logger: logging.Logger,
         giphy_token: str | None = None,
         github_token: str | None = None,

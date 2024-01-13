@@ -13,7 +13,7 @@ from discordbot.views.bless import BlessView
 class Bless(BSEddies):
     """Class for Bless command."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:

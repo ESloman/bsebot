@@ -16,7 +16,7 @@ from mongo.datatypes.bet import BetDB
 class PlaceBet(BSEddies):
     """Class for handling `/bseddies bet place` commands."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:

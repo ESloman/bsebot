@@ -162,7 +162,7 @@ class BetManager:
             bet_id=bet_id,
         )
 
-    def close_a_bet(self: "BetManager", bet_id: str, guild_id: int, emoji: list[str]) -> dict:
+    def close_a_bet(self: "BetManager", bet_id: str, guild_id: int, emoji: list[str]) -> dict[str, any]:
         """Close a bet from a given bet ID.
 
         Here we also calculate who the winners are and allocate their winnings to them.

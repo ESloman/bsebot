@@ -14,7 +14,7 @@ class Help(BSEddies):
     """Class for handling `/help` commands."""
 
     def __init__(
-        self, client: BSEBot, guild_ids: list, logger: logging.Logger, command_list: list[BSEddies] | None = None
+        self, client: BSEBot, guild_ids: list[int], logger: logging.Logger, command_list: list[BSEddies] | None = None
     ) -> None:
         """Initialisation method.
 

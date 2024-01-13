@@ -13,7 +13,7 @@ from discordbot.views.usergift import GiftUserEddiesView
 class ContextUserGift(BaseContextCommand):
     """Context class for gifting."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger, gift: Gift) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger, gift: Gift) -> None:
         """Initialisation method.
 
         Args:

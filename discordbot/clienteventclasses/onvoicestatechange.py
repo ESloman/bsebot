@@ -15,7 +15,7 @@ from discordbot.clienteventclasses.baseeventclass import BaseEvent
 class OnVoiceStateChange(BaseEvent):
     """Class for handling on_thread_update event."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:
@@ -26,7 +26,7 @@ class OnVoiceStateChange(BaseEvent):
         super().__init__(client, guild_ids, logger)
 
     def _handle_mute_status(
-        self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState, vc_doc: dict
+        self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState, vc_doc: dict[str, any]
     ) -> None:
         """Handles mute status.
 
@@ -54,7 +54,7 @@ class OnVoiceStateChange(BaseEvent):
         vc_doc["events"].append({"timestamp": now, "event": "muted" if after.self_mute else "unmuted"})
 
     def _handle_deaf_status(
-        self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState, vc_doc: dict
+        self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState, vc_doc: dict[str, any]
     ) -> None:
         """Handles deaf status.
 

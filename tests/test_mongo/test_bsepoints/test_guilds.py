@@ -308,3 +308,11 @@ class TestGuilds:  # noqa: PLR0904
         """Tests Guilds set_wordle_config."""
         guilds = Guilds()
         guilds.set_wordle_config(123456, False)
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    def test_guilds_set_last_rigged_time(self) -> None:
+        """Tests Guilds set_last_rigged_time."""
+        guilds = Guilds()
+        guilds.set_last_rigged_time(123456)

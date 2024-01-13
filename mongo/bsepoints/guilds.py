@@ -256,7 +256,6 @@ class Guilds(BaseClass):  # noqa: PLR0904
             self.set_tax_rate(guild_id, 0.1, 0.0)
             self.update_tax_history(guild_id, 0.1, 0.0, 0)
             return 0.1, 0.0
-        ret = ret[0]
         return ret[0].tax_rate, ret[0].supporter_tax_rate
 
     #

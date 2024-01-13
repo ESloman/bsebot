@@ -138,3 +138,103 @@ class TestGuilds:
             guilds.set_king(guild_id, 123456)
             assert update_patched.called
             assert len(update_patched.call_args) == 2
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    def test_guilds_add_pledger(self) -> None:
+        """Tests Guilds add_pledger."""
+        guilds = Guilds()
+        guilds.add_pledger(123456, 654321)
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    def test_guilds_reset_pledges(self) -> None:
+        """Tests Guilds reset_pledges."""
+        guilds = Guilds()
+        guilds.reset_pledges(123456)
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    def test_guilds_set_revolution_toggle(self) -> None:
+        """Tests Guilds set_revolution_toggle."""
+        guilds = Guilds()
+        guilds.set_revolution_toggle(123456, False)
+
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_guilds_get_daily_minimum(self, guild_id: int) -> None:
+        """Tests Guilds get_daily_minimum."""
+        guilds = Guilds()
+        minimum = guilds.get_daily_minimum(guild_id)
+        assert isinstance(minimum, int)
+        assert minimum > 0
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_guilds_get_daily_minimum_none(self) -> None:
+        """Tests Guilds get_daily_minimum is None when guild isn't found."""
+        guilds = Guilds()
+        minimum = guilds.get_daily_minimum(123456)
+        assert minimum is None
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    def test_guilds_set_daily_minimum(self) -> None:
+        """Tests Guilds set_daily_minimum."""
+        guilds = Guilds()
+        guilds.set_daily_minimum(123456, 4)
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    def test_guilds_update_tax_history(self) -> None:
+        """Tests Guilds update_tax_history."""
+        guilds = Guilds()
+        guilds.update_tax_history(123456, 0.5, 0.1, 654321)
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    def test_guilds_set_tax_rate(self) -> None:
+        """Tests Guilds set_tax_rate."""
+        guilds = Guilds()
+        guilds.set_tax_rate(123456, 0.5, 0.1)
+
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_guilds_get_tax_rate(self, guild_id: int) -> None:
+        """Tests Guilds get_tax_rate."""
+        guilds = Guilds()
+        tax_rate, supporter_rate = guilds.get_tax_rate(guild_id)
+        assert isinstance(tax_rate, float | int)
+        assert isinstance(supporter_rate, float | int)
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    def test_guilds_get_tax_rate_not_set(self) -> None:
+        """Tests Guilds get_tax_rate when not set."""
+        guilds = Guilds()
+        tax_rate, supporter_rate = guilds.get_tax_rate(123456)
+        assert isinstance(tax_rate, float | int)
+        assert isinstance(supporter_rate, float | int)
+        assert tax_rate == 0.1
+        assert supporter_rate == 0

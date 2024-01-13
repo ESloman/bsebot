@@ -4,6 +4,7 @@ import datetime
 
 from bson import ObjectId
 
+from mongo.bsepoints.bets import UserBets
 from mongo.datatypes.bet import BetDB, BetterDB
 from tests.mocks import interface_mocks
 
@@ -52,4 +53,8 @@ def user_pending_points_query(query: dict) -> list[dict]:
     """
     response = interface_mocks.query_mock("userbets", {"guild_id": query["guild_id"]})
     _user_id = next(iter(query.keys())).split(".")[-1]
-    return [bet for bet in response if str(_user_id) in bet.get("betters", {}) and "betters" in bet]
+    return [
+        UserBets.make_data_class(bet)
+        for bet in response
+        if str(_user_id) in bet.get("betters", {}) and "betters" in bet
+    ]

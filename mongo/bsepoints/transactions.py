@@ -6,21 +6,19 @@ import datetime
 from pymongo.results import InsertManyResult, InsertOneResult
 
 from discordbot.bot_enums import TransactionTypes
-from mongo import interface
+from mongo.baseclass import BaseClass
 from mongo.datatypes.actions import TransactionDB
-from mongo.db_classes import BestSummerEverPointsDB
 
 
-class UserTransactions(BestSummerEverPointsDB):
+class UserTransactions(BaseClass):
     """Class for interacting with the 'usertransactions' MongoDB collection in the 'bestsummereverpoints' DB."""
 
     def __init__(self) -> None:
         """Constructor method that initialises the vault object."""
-        super().__init__()
-        self._vault = interface.get_collection(self.database, "usertransactions")
+        super().__init__(collection="usertransactions")
 
     @staticmethod
-    def make_data_class(transaction: dict) -> TransactionDB:
+    def make_data_class(transaction: dict[str, any]) -> TransactionDB:
         """Convert the dict into a dataclass.
 
         Args:
@@ -79,10 +77,7 @@ class UserTransactions(BestSummerEverPointsDB):
         Returns:
             list[Transaction]: transactions between those times
         """
-        return [
-            self.make_data_class(trans)
-            for trans in self.query({"guild_id": guild_id, "timestamp": {"$gt": start, "$lt": end}}, limit=10000)
-        ]
+        return self.query({"guild_id": guild_id, "timestamp": {"$gt": start, "$lt": end}}, limit=10000)
 
     def get_all_guild_transactions(self, guild_id: int) -> list[TransactionDB]:
         """Get all transactions for a given guild ID.
@@ -93,4 +88,4 @@ class UserTransactions(BestSummerEverPointsDB):
         Returns:
             list[Transaction]: list of transactions
         """
-        return [self.make_data_class(trans) for trans in self.query({"guild_id": guild_id}, limit=10000)]
+        return self.query({"guild_id": guild_id}, limit=10000)

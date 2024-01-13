@@ -5,13 +5,12 @@ import typing
 from pymongo.results import UpdateResult
 
 from discordbot.bot_enums import TransactionTypes
-from mongo import interface
+from mongo.baseclass import BaseClass
 from mongo.bsepoints.transactions import UserTransactions
 from mongo.datatypes.user import UserDB
-from mongo.db_classes import BestSummerEverPointsDB
 
 
-class UserPoints(BestSummerEverPointsDB):
+class UserPoints(BaseClass):
     """Class for interacting with the 'userpoints' MongoDB collection in the 'bestsummereverpoints' DB."""
 
     _MINIMUM_PROJECTION_DICT: typing.ClassVar = {
@@ -25,8 +24,7 @@ class UserPoints(BestSummerEverPointsDB):
 
     def __init__(self) -> None:
         """Constructor method that initialises the vault object."""
-        super().__init__()
-        self._vault = interface.get_collection(self.database, "userpoints")
+        super().__init__(collection="userpoints")
         self._trans = UserTransactions()
 
     def _check_highest_eddie_count(self, user_id: int, guild_id: int) -> None:
@@ -37,18 +35,18 @@ class UserPoints(BestSummerEverPointsDB):
         :return:
         """
         try:
-            ret = self.query(
+            ret: UserDB = self.query(
                 {"uid": user_id, "guild_id": guild_id},
                 projection={"_id": True, "high_score": True, "points": True},
             )[0]
         except IndexError:
             return
 
-        if ret["points"] > ret.get("high_score", 0):
-            self.update({"_id": ret["_id"]}, {"$set": {"high_score": ret["points"]}})
+        if ret.points > ret.high_score:
+            self.update({"_id": ret._id}, {"$set": {"high_score": ret.points}})  # noqa: SLF001
 
     @staticmethod
-    def make_data_class(user: dict) -> UserDB:
+    def make_data_class(user: dict[str, any]) -> UserDB:
         """Converts a user dict into a dataclass.
 
         Args:
@@ -68,8 +66,7 @@ class UserPoints(BestSummerEverPointsDB):
         Returns:
             list[User]: the user objects for each guild the user belongs to
         """
-        ret = self.query({"uid": user_id})
-        return [self.make_data_class(_user) for _user in ret]
+        return self.query({"uid": user_id})
 
     def find_user(self, user_id: int, guild_id: int, projection: dict | None = None) -> UserDB | None:
         """Looks up a user in the collection.
@@ -80,11 +77,11 @@ class UserPoints(BestSummerEverPointsDB):
         :return: either a user dict or None if the user couldn't be found
         """
         if projection is not None:
-            self.update_projection(projection)
+            self._update_projection(projection)
 
         ret = self.query({"uid": user_id, "guild_id": guild_id}, projection=projection)
         if ret:
-            return self.make_data_class(ret[0])
+            return ret[0]
         return None
 
     def get_user_points(self, user_id: int, guild_id: int) -> int:
@@ -94,8 +91,8 @@ class UserPoints(BestSummerEverPointsDB):
         :param guild_id: int - The guild ID that the user belongs in
         :return: int - number of points the user has
         """
-        ret = self.query({"uid": user_id, "guild_id": guild_id}, projection={"points": True})
-        return ret[0]["points"]
+        ret: list[UserDB] = self.query({"uid": user_id, "guild_id": guild_id}, projection={"points": True})
+        return ret[0].points
 
     def get_user_daily_minimum(self, user_id: int, guild_id: int) -> int:
         """Returns the user's daily minimum points.
@@ -104,8 +101,8 @@ class UserPoints(BestSummerEverPointsDB):
         :param guild_id: int - The guild ID that the user belongs in
         :return: int - user's 'daily minimum'
         """
-        ret = self.query({"uid": user_id, "guild_id": guild_id}, projection={"daily_minimum": True})
-        return ret[0]["daily_minimum"]
+        ret: list[UserDB] = self.query({"uid": user_id, "guild_id": guild_id}, projection={"daily_minimum": True})
+        return ret[0].daily_minimum
 
     def get_all_users_for_guild(self, guild_id: int, projection: dict | None = None) -> list[UserDB]:
         """Gets all the users from a given guild.
@@ -126,10 +123,9 @@ class UserPoints(BestSummerEverPointsDB):
                 "supporter_type": True,
             }
 
-        self.update_projection(projection)
+        self._update_projection(projection)
 
-        ret = self.query({"guild_id": guild_id}, projection=projection)
-        return [self.make_data_class(_user) for _user in ret]
+        return self.query({"guild_id": guild_id}, projection=projection)
 
     def set_daily_minimum(self, user_id: int, guild_id: int, points: int) -> UpdateResult:
         """Sets the user's daily minimum points to a given value.
@@ -228,7 +224,7 @@ class UserPoints(BestSummerEverPointsDB):
         Returns:
             UserDB | None: the user or None.
         """
-        ret = self.query({"guild_id": guild_id, "king": True})
+        ret: list[UserDB] = self.query({"guild_id": guild_id, "king": True})
         if ret:
-            return self.make_data_class(ret[0])
+            return ret[0]
         return None

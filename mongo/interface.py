@@ -82,7 +82,7 @@ def get_client(
         p = quote_plus(password)
         connection = f"mongodb://{u}:{p}@{ip}:{port}"
     else:
-        return False
+        raise NotImplementedError
     client_cls = CachedMongoClient(connection)
     return client_cls.client
 
@@ -220,7 +220,7 @@ def update(
 
 def query(  # noqa: PLR0913, PLR0917
     collection: Collection,
-    parameters: dict,
+    parameters: dict[str, any],
     lim: int = 10000,
     projection: dict | None = None,
     as_gen: bool = True,

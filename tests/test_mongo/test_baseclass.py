@@ -23,8 +23,8 @@ class TestBaseClass:
 
     def test_base_class_bad_user_pass(self) -> None:
         """Tests BaseClass bad user and pass."""
-        base_cls = BaseClass("123.0.0.1", username="", password="")
-        assert not base_cls.mongo_client
+        with pytest.raises(NotImplementedError):
+            BaseClass("123.0.0.1", username="", password="")
 
     def test_base_class_vault_exc(self) -> None:
         """Tests BaseClass vault property raises an exception correctly."""
@@ -46,7 +46,7 @@ class TestBaseClass:
         base_cls._MINIMUM_PROJECTION_DICT = {"_id": True, "guild_id": True, "user_id": True}
 
         projection = {"user_id": False, "points": True}
-        base_cls.update_projection(projection)
+        base_cls._update_projection(projection)
         for key, value in base_cls._MINIMUM_PROJECTION_DICT.items():
             assert projection[key] == value
 
@@ -56,7 +56,7 @@ class TestBaseClass:
         base_cls._MINIMUM_PROJECTION_DICT = {}
 
         projection = {"user_id": False, "points": True}
-        base_cls.update_projection(projection)
+        base_cls._update_projection(projection)
 
     @pytest.mark.parametrize("doc", [None, "doc", 1234])
     def test_insert_incorrect_document(self, doc: any) -> None:

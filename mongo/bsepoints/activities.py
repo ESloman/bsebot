@@ -7,20 +7,20 @@ from pymongo.results import InsertManyResult, InsertOneResult
 
 from discordbot.bot_enums import ActivityTypes
 from mongo import interface
+from mongo.baseclass import BaseClass
 from mongo.datatypes.actions import ActivityDB
-from mongo.db_classes import BestSummerEverPointsDB
 
 
-class UserActivities(BestSummerEverPointsDB):
+class UserActivities(BaseClass):
     """Class for interacting with the 'useractivities' MongoDB collection in the 'bestsummereverpoints' DB."""
 
     def __init__(self) -> None:
         """Constructor method that initialises the vault object."""
-        super().__init__()
+        super().__init__(collection="useractivities")
         self._vault = interface.get_collection(self.database, "useractivities")
 
     @staticmethod
-    def make_data_class(activity: dict) -> ActivityDB:
+    def make_data_class(activity: dict[str, any]) -> ActivityDB:
         """Convert the dict into a dataclass.
 
         Args:
@@ -53,7 +53,7 @@ class UserActivities(BestSummerEverPointsDB):
         doc = {"uid": user_id, "guild_id": guild_id, "type": activity_type, "timestamp": datetime.datetime.now()}
 
         doc.update(kwargs)
-        self.insert(doc)
+        return self.insert(doc)
 
     def get_guild_activities_by_timestamp(
         self,
@@ -71,10 +71,7 @@ class UserActivities(BestSummerEverPointsDB):
         Returns:
             list[Activity]: activities between those times
         """
-        return [
-            self.make_data_class(act)
-            for act in self.query({"guild_id": guild_id, "timestamp": {"$gt": start, "$lt": end}}, limit=10000)
-        ]
+        return self.query({"guild_id": guild_id, "timestamp": {"$gt": start, "$lt": end}}, limit=10000)
 
     def get_all_guild_activities(self, guild_id: int) -> list[ActivityDB]:
         """Get all activities for the given guild ID.
@@ -85,4 +82,4 @@ class UserActivities(BestSummerEverPointsDB):
         Returns:
             list[Activity]: the activities
         """
-        return [self.make_data_class(act) for act in self.query({"guild_id": guild_id}, limit=10000)]
+        return self.query({"guild_id": guild_id}, limit=10000)

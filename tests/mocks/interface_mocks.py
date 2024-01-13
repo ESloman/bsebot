@@ -23,6 +23,7 @@ def get_database_mock(_: any, name: str) -> str:
 def query_mock(collection_name: str, parameters: dict, *_args: tuple[any], **_kwargs: dict[str, any]) -> list:
     """Query mock."""
     # load the data
+    print(collection_name)
     path = pathlib.Path("mock_data", "bestsummereverpoints", f"{collection_name}.json")
     path = pathlib.Path(_CURRENT_DIR, path)
 

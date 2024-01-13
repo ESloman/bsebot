@@ -2,18 +2,18 @@
 
 import datetime
 
-from mongo import interface
+from bson import ObjectId
+
+from mongo.baseclass import BaseClass
 from mongo.datatypes.message import MessageDB, ReactionDB, ReplyDB, VCInteractionDB
-from mongo.db_classes import BestSummerEverPointsDB
 
 
-class UserInteractions(BestSummerEverPointsDB):
+class UserInteractions(BaseClass):
     """Class for interacting with the 'userinteractions' MongoDB collection in the 'bestsummereverpoints' DB."""
 
     def __init__(self) -> None:
         """Constructor method for the class. Initialises the collection object."""
-        super().__init__()
-        self._vault = interface.get_collection(self.database, "userinteractions")
+        super().__init__(collection="userinteractions")
 
     @staticmethod
     def make_data_class(message: dict | MessageDB) -> MessageDB | VCInteractionDB:
@@ -36,23 +36,21 @@ class UserInteractions(BestSummerEverPointsDB):
 
     def query(  # noqa: PLR0913, PLR0917
         self,
-        query_dict: dict,
+        query_dict: dict[str, any],
         limit: int = 1000,
         projection: dict | None = None,
         as_gen: bool = False,
         skip: int | None = None,
         use_paginated: bool = False,
         sort: list[tuple] | None = None,
+        convert: bool = True,
     ) -> list[MessageDB]:
         """Overriding to define return type."""
-        return [
-            self.make_data_class(message)
-            for message in super().query(query_dict, limit, projection, as_gen, skip, use_paginated, sort)
-        ]
+        return super().query(query_dict, limit, projection, as_gen, skip, use_paginated, sort, convert)
 
-    def paginated_query(self, query_dict: dict, limit: int = 1000, skip: int = 0) -> list[MessageDB]:
+    def paginated_query(self, query_dict: dict[str, any], limit: int = 1000, skip: int = 0) -> list[MessageDB]:
         """Overriding to define return type."""
-        return [self.make_data_class(message) for message in super().paginated_query(query_dict, limit, skip)]
+        return [super().paginated_query(query_dict, limit, skip)]
 
     def get_all_messages_for_server(self, guild_id: int) -> list[MessageDB]:
         """Gets all messages for a given server.
@@ -83,7 +81,7 @@ class UserInteractions(BestSummerEverPointsDB):
         guild_id: int,
         user_id: int,
         channel_id: int,
-        message_type: list,
+        message_type: list[str],
         message_content: str,
         timestamp: datetime.datetime,
         additional_keys: dict | None = None,
@@ -122,7 +120,8 @@ class UserInteractions(BestSummerEverPointsDB):
         if additional_keys:
             message.update(additional_keys)
 
-        self.insert(message)
+        result = self.insert(message)
+        message["_id"] = result[0]
         return self.make_data_class(message)
 
     def add_reply_to_message(  # noqa: PLR0913, PLR0917
@@ -235,7 +234,7 @@ class UserInteractions(BestSummerEverPointsDB):
         """
         ret = self.query({"guild_id": guild_id, "message_id": message_id})
         if ret:
-            return self.make_data_class(ret[0])
+            return ret[0]
         return None
 
     def add_voice_state_entry(  # noqa: PLR0913, PLR0917
@@ -247,7 +246,7 @@ class UserInteractions(BestSummerEverPointsDB):
         muted: bool,
         deafened: bool,
         streaming: bool,
-    ) -> list:
+    ) -> list[ObjectId]:
         """Adds a voice state entry.
 
         Args:
@@ -292,7 +291,7 @@ class UserInteractions(BestSummerEverPointsDB):
         user_id: int,
         channel_id: int,
         _: datetime.datetime,
-    ) -> dict | None:
+    ) -> VCInteractionDB | None:
         """Finds a voice state activity.
 
         Args:

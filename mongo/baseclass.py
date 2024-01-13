@@ -4,6 +4,7 @@ from bson import ObjectId
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.cursor import Cursor
+from pymongo.database import Database
 from pymongo.results import UpdateResult
 
 from mongo import interface
@@ -19,16 +20,35 @@ class BaseClass:
     _NO_VAULT_MESSAGE = "No vault instantiated."
     _MINIMUM_PROJECTION_DICT: dict | None = None
 
-    def __init__(self, ip: str = "127.0.0.1", username: str | None = None, password: str | None = None) -> None:
+    def __init__(
+        self,
+        ip: str = "127.0.0.1",
+        username: str | None = None,
+        password: str | None = None,
+        database: str = "bestsummereverpoints",
+        collection: str | None = None,
+    ) -> None:
         """Initialisation method.
 
         Args:
             ip (str, optional): ip to connect to. Defaults to "127.0.0.1".
             username (str | None, optional): username. Defaults to None.
             password (str | None, optional): password. Defaults to None.
+            database (str): the database to connect to. Defaults to 'bestsummereverpoints'.
+            collection (str | None): the collection to connect to. Defaults to None.
         """
         self.cli = interface.get_client(ip, username, password)
-        self._vault = None
+        self._bse_db = interface.get_database(self.mongo_client, database)
+        self._vault = interface.get_collection(self.database, collection) if collection else None
+
+    @property
+    def database(self) -> Database:
+        """Basic database property.
+
+        Returns:
+            Database: the database
+        """
+        return self._bse_db
 
     @property
     def mongo_client(self) -> MongoClient:
@@ -63,7 +83,7 @@ class BaseClass:
         """
         return self._MINIMUM_PROJECTION_DICT
 
-    def update_projection(self, projection: dict[str, any]) -> None:
+    def _update_projection(self, projection: dict[str, any]) -> None:
         """Updates the given projection with the minimum values defined.
 
         Args:
@@ -72,6 +92,23 @@ class BaseClass:
         if not self.minimum_projection:
             return
         projection.update(self.minimum_projection)
+
+    @staticmethod
+    def make_data_class(data: dict[str, any]) -> any:
+        """Method to convert query data into a dataclass.
+
+        Expected to be implemented by each collection class.
+
+        Args:
+            data (dict[str, any]): the data to convert
+
+        Raises:
+            NotImplementedError: raised when not implemented
+
+        Returns:
+            any: the dataclass type
+        """
+        raise NotImplementedError
 
     def insert(self, document: dict | list) -> list[ObjectId]:
         """Inserts the given object into this class' Collection object.
@@ -131,7 +168,8 @@ class BaseClass:
         skip: int | None = None,
         use_paginated: bool = False,
         sort: list[tuple] | None = None,
-    ) -> list | Cursor:
+        convert: bool = True,
+    ) -> list[any] | Cursor:
         """Searches a collection for documents based on given parameters.
 
         Parameters should be dictionaries : {key : search}. Where key is an existing key in the collection and
@@ -156,11 +194,19 @@ class BaseClass:
             sort (list[tuple] | None, optional): sort options for the results. Defaults to None.
 
         Returns:
-            list | Cursor: either a list, or a Cursor of the documents
+            list | Cursor: either a list of dataclasses, or a Cursor of the documents
         """
-        if not projection or as_gen or not use_paginated:
+        if as_gen:
             return interface.query(self.vault, parameters, limit, projection, as_gen, skip=skip, sort=sort)
-        return self.paginated_query(parameters, limit, skip)
+        if use_paginated and not projection:
+            return [
+                self.make_data_class(data) if convert else data
+                for data in self.paginated_query(parameters, limit, skip)
+            ]
+        return [
+            self.make_data_class(data) if convert else data
+            for data in interface.query(self.vault, parameters, limit, projection, as_gen, skip=skip, sort=sort)
+        ]
 
     def paginated_query(self, query_dict: dict[str, any], limit: int = 1000, skip: int = 0) -> list[dict[str, any]]:
         """Performs a paginated query with the specified query dict.

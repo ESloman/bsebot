@@ -188,7 +188,7 @@ class TestUserBets:
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
-    def test_user_bets_create_bet(self, guild_id: int, user_id: int, options: dict) -> None:
+    def test_user_bets_create_bet(self, guild_id: int, user_id: int, options: dict[str, any]) -> None:
         """Tests UserBets create_new_bet method."""
         user_bets = UserBets()
         with mock.patch.object(user_bets, "_get_new_bet_id", return_value="0001"):

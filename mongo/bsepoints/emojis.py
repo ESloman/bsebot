@@ -2,12 +2,14 @@
 
 import datetime
 
+from bson import ObjectId
+
 from mongo import interface
+from mongo.baseclass import BaseClass
 from mongo.datatypes.customs import EmojiDB
-from mongo.db_classes import BestSummerEverPointsDB
 
 
-class ServerEmojis(BestSummerEverPointsDB):
+class ServerEmojis(BaseClass):
     """Class for interacting with the 'serveremojis' MongoDB collection in the 'bestsummereverpoints' DB."""
 
     def __init__(self) -> None:
@@ -16,7 +18,7 @@ class ServerEmojis(BestSummerEverPointsDB):
         self._vault = interface.get_collection(self.database, "serveremojis")
 
     @staticmethod
-    def make_data_class(emoji: dict) -> EmojiDB:
+    def make_data_class(emoji: dict[str, any]) -> EmojiDB:
         """Converts into a dataclass.
 
         Args:
@@ -36,7 +38,7 @@ class ServerEmojis(BestSummerEverPointsDB):
         Returns:
             list[dict]: a list of emoji dicts
         """
-        return [self.make_data_class(emoji) for emoji in self.query({"guild_id": guild_id})]
+        return self.query({"guild_id": guild_id})
 
     def get_emoji(self, guild_id: int, emoji_id: int) -> EmojiDB | None:
         """Gets an already created emoji document from the database.
@@ -47,7 +49,7 @@ class ServerEmojis(BestSummerEverPointsDB):
         """
         ret = self.query({"eid": emoji_id, "guild_id": guild_id})
         if ret:
-            return self.make_data_class(ret[0])
+            return ret[0]
         return None
 
     def get_emoji_from_name(self, guild_id: int, name: str) -> EmojiDB | None:
@@ -62,10 +64,12 @@ class ServerEmojis(BestSummerEverPointsDB):
         """
         ret = self.query({"name": name, "guild_id": guild_id})
         if ret:
-            return self.make_data_class(ret[0])
+            return ret[0]
         return None
 
-    def insert_emoji(self, emoji_id: int, name: str, created: datetime.datetime, user_id: int, guild_id: int) -> list:
+    def insert_emoji(
+        self, emoji_id: int, name: str, created: datetime.datetime, user_id: int, guild_id: int
+    ) -> list[ObjectId]:
         """Inserts an emoji into the database.
 
         Args:

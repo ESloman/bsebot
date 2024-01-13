@@ -10,19 +10,17 @@ import datetime
 
 from pymongo.results import UpdateResult
 
-from mongo import interface
+from mongo.baseclass import BaseClass
 from mongo.bsepoints.guilds import Guilds
 from mongo.datatypes.revolution import RevolutionEventDB
-from mongo.db_classes import BestSummerEverPointsDB
 
 
-class TicketedEvent(BestSummerEverPointsDB):
+class TicketedEvent(BaseClass):
     """Class for interacting with the 'ticketevents' MongoDB collection in the 'bestsummereverpoints' DB."""
 
     def __init__(self) -> None:
         """Constructor method that initialises the vault object."""
-        super().__init__()
-        self._vault = interface.get_collection(self.database, "ticketedevents")
+        super().__init__(collection="ticketedevents")
 
 
 class RevolutionEvent(TicketedEvent):
@@ -39,7 +37,7 @@ class RevolutionEvent(TicketedEvent):
         :param guild_id: int - guild ID to create document for
         :return: None
         """
-        if not self.query({"type": "counter", "guild_id": guild_id}):
+        if not self.query({"type": "counter", "guild_id": guild_id}, convert=False):
             self.insert({"type": "counter", "guild_id": guild_id, "count": 1})
 
     def _get_new_id(self, guild_id: int) -> str:
@@ -52,12 +50,14 @@ class RevolutionEvent(TicketedEvent):
             str: new unique ID
         """
         self._create_counter_document(guild_id)
-        count = self.query({"type": "counter", "guild_id": guild_id}, projection={"count": True})[0]["count"]
+        count = self.query({"type": "counter", "guild_id": guild_id}, projection={"count": True}, convert=False)[0][
+            "count"
+        ]
         self.update({"type": "counter", "guild_id": guild_id}, {"$inc": {"count": 1}})
         return f"{count:03d}"
 
     @staticmethod
-    def make_data_class(event: dict) -> RevolutionEventDB:
+    def make_data_class(event: dict[str, any]) -> RevolutionEventDB:
         """Converts an event dict into a dataclass.
 
         Args:
@@ -150,9 +150,9 @@ class RevolutionEvent(TicketedEvent):
         Returns:
             RevolutionEventType: _description_
         """
-        ret = self.query({"guild_id": guild_id, "event_id": event_id})
+        ret: list[RevolutionEventDB] = self.query({"guild_id": guild_id, "event_id": event_id})
         if ret:
-            return self.make_data_class(ret[0])
+            return ret[0]
         return None
 
     def get_open_events(self, guild_id: int) -> list[RevolutionEventDB]:
@@ -164,7 +164,7 @@ class RevolutionEvent(TicketedEvent):
         Returns:
             list[RevolutionEventType]: _description_
         """
-        return [self.make_data_class(event) for event in self.query({"guild_id": guild_id, "open": True})]
+        return self.query({"guild_id": guild_id, "open": True})
 
     def close_event(self, event_id: str, guild_id: int, success: bool, points: int) -> UpdateResult:
         """Closes an event and sets all the correct flags in the DB.

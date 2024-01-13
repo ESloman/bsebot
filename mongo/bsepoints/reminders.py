@@ -5,21 +5,19 @@ import datetime
 from bson import ObjectId
 from pymongo.results import UpdateResult
 
-from mongo import interface
+from mongo.baseclass import BaseClass
 from mongo.datatypes.reminder import ReminderDB
-from mongo.db_classes import BestSummerEverPointsDB
 
 
-class ServerReminders(BestSummerEverPointsDB):
+class ServerReminders(BaseClass):
     """Class for interacting with the 'reminders' MongoDB collection in the 'bestsummereverpoints' DB."""
 
     def __init__(self) -> None:
         """Constructor method for the class. Initialises the collection object."""
-        super().__init__()
-        self._vault = interface.get_collection(self.database, "reminders")
+        super().__init__(collection="reminders")
 
     @staticmethod
-    def make_data_class(reminder: dict) -> ReminderDB:
+    def make_data_class(reminder: dict[str, any]) -> ReminderDB:
         """Converts the reminder into a a dataclass.
 
         Args:
@@ -33,11 +31,13 @@ class ServerReminders(BestSummerEverPointsDB):
     def get_open_reminders(self, guild_id: int) -> list[ReminderDB]:
         """Get all the currently open reminders for the given guild.
 
-        :param guild_id:
-        :return:
+        Args:
+            guild_id (int): the guild ID
+
+        Returns:
+            list[ReminderDB]: list of reminders
         """
-        ret = self.query({"active": True, "guild_id": guild_id})
-        return [self.make_data_class(reminder) for reminder in ret]
+        return self.query({"active": True, "guild_id": guild_id})
 
     def close_reminder(self, object_id: ObjectId) -> UpdateResult:
         """Closes a reminder.
@@ -59,7 +59,7 @@ class ServerReminders(BestSummerEverPointsDB):
         reason: str,
         channel_id: int,
         message_id: int,
-    ) -> list:
+    ) -> list[ObjectId]:
         """Inserts a reminder into the database.
 
         Args:

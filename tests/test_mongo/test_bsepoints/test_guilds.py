@@ -12,7 +12,7 @@ from mongo.datatypes.user import UserDB
 from tests.mocks import interface_mocks
 
 
-class TestGuilds:
+class TestGuilds:  # noqa: PLR0904
     """Tests our Guilds class."""
 
     def test_guilds_init(self) -> None:
@@ -238,3 +238,69 @@ class TestGuilds:
         assert isinstance(supporter_rate, float | int)
         assert tax_rate == 0.1
         assert supporter_rate == 0
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_guilds_get_last_ad_time_none(self) -> None:
+        """Tests Guilds get_last_ad_time."""
+        guilds = Guilds()
+        _time = guilds.get_last_ad_time(123456)
+        assert _time is None
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_guilds_get_last_ad_time(self) -> None:
+        """Tests Guilds get_last_ad_time."""
+        guilds = Guilds()
+        guilds.get_last_ad_time(724395292912255056)
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    def test_guilds_set_last_ad_time(self) -> None:
+        """Tests Guilds set_last_ad_time."""
+        guilds = Guilds()
+        guilds.set_last_ad_time(123456, datetime.datetime.now())
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_guilds_get_last_remind_me_time_none(self) -> None:
+        """Tests Guilds get_last_remind_me_time."""
+        guilds = Guilds()
+        _time = guilds.get_last_remind_me_time(123456)
+        assert _time is None
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_guilds_get_last_remind_me_time(self) -> None:
+        """Tests Guilds get_last_remind_me_time."""
+        guilds = Guilds()
+        guilds.get_last_remind_me_time(724395292912255056)
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    def test_guilds_set_last_remind_me_time(self) -> None:
+        """Tests Guilds set_last_remind_me_time."""
+        guilds = Guilds()
+        guilds.set_last_remind_me_time(123456, datetime.datetime.now())
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    def test_guilds_set_valorant_config(self) -> None:
+        """Tests Guilds set_valorant_config."""
+        guilds = Guilds()
+        guilds.set_valorant_config(123456, False)
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    def test_guilds_set_wordle_config(self) -> None:
+        """Tests Guilds set_wordle_config."""
+        guilds = Guilds()
+        guilds.set_wordle_config(123456, False)

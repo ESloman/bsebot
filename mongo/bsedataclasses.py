@@ -108,6 +108,18 @@ class SpoilerThreads(BaseClass):
         """Constructor method that initialises the vault object."""
         super().__init__(collection="spoilerthreads")
 
+    @staticmethod
+    def make_data_class(data: dict[str, any]) -> ThreadDB:
+        """Converts the data into an ThreadDB.
+
+        Args:
+            data (dict[str, any]): data to convert
+
+        Returns:
+            ThreadDB: the dataclass
+        """
+        return ThreadDB(**data)
+
     def get_all_threads(self, guild_id: int) -> list[ThreadDB]:
         """Gets all threads from the DB.
 
@@ -117,8 +129,7 @@ class SpoilerThreads(BaseClass):
         Returns:
             list: list of Threads
         """
-        ret = self.query({"guild_id": guild_id})
-        return [ThreadDB(**thread) for thread in ret]
+        return self.query({"guild_id": guild_id})
 
     def insert_spoiler_thread(  # noqa: PLR0913, PLR0917
         self,
@@ -128,7 +139,7 @@ class SpoilerThreads(BaseClass):
         created: datetime.datetime,
         owner: int,
         new_episode_day: int | None = None,
-    ) -> list[ObjectId]:
+    ) -> ThreadDB:
         """Insert a bet into the DB that we can pull out later.
 
         :return:
@@ -142,8 +153,9 @@ class SpoilerThreads(BaseClass):
             "created": created,
             "owner": owner,
         }
-
-        return self.insert(document)
+        _id = self.insert(document)[0]
+        document["_id"] = _id
+        return self.make_data_class(document)
 
     def get_thread_by_id(self, guild_id: int, thread_id: int) -> None | ThreadDB:
         """Gets a database thread by ID.
@@ -155,9 +167,9 @@ class SpoilerThreads(BaseClass):
         Returns:
             None | Thread: _description_
         """
-        ret = self.query({"guild_id": guild_id, "thread_id": thread_id})
+        ret: list[ThreadDB] = self.query({"guild_id": guild_id, "thread_id": thread_id})
         if ret:
-            return ThreadDB(**ret[0])
+            return ret[0]
         return None
 
 

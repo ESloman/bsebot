@@ -14,7 +14,7 @@ from discordbot.constants import (
     JERK_OFF_CHAT,
     MONTHLY_AWARDS_PRIZE,
 )
-from discordbot.stats.statsclasses import Stat, StatsGatherer
+from discordbot.stats.statsclasses import StatDB, StatsGatherer
 from mongo.bsedataclasses import Awards
 from mongo.bsepoints.points import UserPoints
 
@@ -49,7 +49,7 @@ class AwardsBuilder:
         self.awards = Awards()
         self.user_points = UserPoints()
 
-    def _get_previous_stat(self: "AwardsBuilder", stat: Stat) -> dict:
+    def _get_previous_stat(self: "AwardsBuilder", stat: StatDB) -> dict:
         """Searches the database for the previous stat of the same time.
 
         Args:
@@ -100,7 +100,7 @@ class AwardsBuilder:
 
         return _string
 
-    async def build_stats_and_message(self: "AwardsBuilder") -> tuple[list[Stat], list[str]]:  # noqa: PLR0912, C901, PLR0915
+    async def build_stats_and_message(self: "AwardsBuilder") -> tuple[list[StatDB], list[str]]:  # noqa: PLR0912, C901, PLR0915
         """Uses StatsGatherer to query for all the required stats.
 
         Formats an appropriate message
@@ -328,7 +328,7 @@ class AwardsBuilder:
 
         return stats, bseddies_stats
 
-    async def build_awards_and_message(self: "AwardsBuilder") -> tuple[list[Stat], list[str]]:
+    async def build_awards_and_message(self: "AwardsBuilder") -> tuple[list[StatDB], list[str]]:
         """Uses StatsGatherer to gather all the awards.
 
         Formats an awards message
@@ -542,9 +542,9 @@ class AwardsBuilder:
 
     async def send_stats_and_awards(  # noqa: C901, PLR0912
         self: "AwardsBuilder",
-        stats: list[Stat],
+        stats: list[StatDB],
         stats_message: str,
-        awards: list[Stat],
+        awards: list[StatDB],
         awards_message: str,
         send_messages: bool = True,
     ) -> None:

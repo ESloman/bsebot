@@ -37,8 +37,6 @@ class TestSpoilerThreads:
         threads = SpoilerThreads()
         data = _get_thread_data()
         for entry in data:
-            if "selectable" in entry:
-                continue
             cls = threads.make_data_class(entry)
             assert isinstance(cls, ThreadDB)
 

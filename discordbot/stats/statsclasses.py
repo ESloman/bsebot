@@ -17,7 +17,7 @@ from discordbot.constants import (
     WORDLE_SCORE_REGEX,
 )
 from discordbot.stats.statsdatacache import StatsDataCache
-from discordbot.stats.statsdataclasses import Stat
+from discordbot.stats.statsdataclasses import StatDB
 from discordbot.utilities import PlaceHolderLogger
 
 if TYPE_CHECKING:
@@ -72,7 +72,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         return start, end
 
-    def add_annual_changes(self, start: datetime.datetime, data_class: Stat) -> Stat:
+    def add_annual_changes(self, start: datetime.datetime, data_class: StatDB) -> StatDB:
         """Adds changes for annual mode.
 
         Args:
@@ -90,7 +90,7 @@ class StatsGatherer:  # noqa: PLR0904
         return data_class
 
     # generic server stats
-    def number_of_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def number_of_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Returns the number of messages between two given time periods.
 
         Args:
@@ -106,7 +106,7 @@ class StatsGatherer:  # noqa: PLR0904
         channel_ids = {m["channel_id"] for m in messages}
         user_ids = {m["user_id"] for m in messages}
 
-        data_class = Stat(
+        data_class = StatDB(
             "stat",
             guild_id,
             stat=StatTypes.NUMBER_OF_MESSAGES,
@@ -121,7 +121,7 @@ class StatsGatherer:  # noqa: PLR0904
         data_class.users = len(user_ids)
         return self.add_annual_changes(start, data_class)
 
-    def number_of_threaded_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def number_of_threaded_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Returns the number of messages sent in threads.
 
         Args:
@@ -137,7 +137,7 @@ class StatsGatherer:  # noqa: PLR0904
         channel_ids = {m["channel_id"] for m in messages}
         user_ids = {m["user_id"] for m in messages}
 
-        data_class = Stat(
+        data_class = StatDB(
             "stat",
             guild_id,
             stat=StatTypes.NUMBER_OF_THREAD_MESSAGES,
@@ -157,7 +157,7 @@ class StatsGatherer:  # noqa: PLR0904
         guild_id: int,
         start: datetime.datetime,
         end: datetime.datetime,
-    ) -> tuple[Stat, Stat]:
+    ) -> tuple[StatDB, StatDB]:
         """Returns the average message length between two given time periods.
 
         Args:
@@ -178,7 +178,7 @@ class StatsGatherer:  # noqa: PLR0904
         average_message_len = round((sum(lengths) / len(lengths)), 2)
         average_word_number = round((sum(words) / len(words)), 2)
 
-        data_class_a = Stat(
+        data_class_a = StatDB(
             "stat",
             guild_id,
             stat=StatTypes.AVERAGE_MESSAGE_LENGTH_CHARS,
@@ -189,7 +189,7 @@ class StatsGatherer:  # noqa: PLR0904
             annual=self.annual,
         )
 
-        data_class_b = Stat(
+        data_class_b = StatDB(
             "stat",
             guild_id,
             stat=StatTypes.AVERAGE_MESSAGE_LENGTH_WORDS,
@@ -205,7 +205,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         return data_class_a, data_class_b
 
-    def busiest_channel(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def busiest_channel(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Returns the channel with the most messages for a given time period.
 
         Args:
@@ -233,7 +233,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         busiest = sorted(channels, key=lambda x: channels[x]["count"], reverse=True)[0]
 
-        data_class = Stat(
+        data_class = StatDB(
             "stat",
             guild_id,
             stat=StatTypes.BUSIEST_CHANNEL,
@@ -249,7 +249,7 @@ class StatsGatherer:  # noqa: PLR0904
         data_class.channels = {str(k): v for k, v in channels.items()}
         return self.add_annual_changes(start, data_class)
 
-    def busiest_thread(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def busiest_thread(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates the thread with most messages for the given time period.
 
         Args:
@@ -280,7 +280,7 @@ class StatsGatherer:  # noqa: PLR0904
             busiest = 0
             threads[0] = {"count": 0, "users": []}
 
-        data_class = Stat(
+        data_class = StatDB(
             "stat",
             guild_id,
             stat=StatTypes.BUSIEST_THREAD,
@@ -295,7 +295,7 @@ class StatsGatherer:  # noqa: PLR0904
         data_class.threads = {str(k): v for k, v in threads.items()}
         return self.add_annual_changes(start, data_class)
 
-    def busiest_day(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def busiest_day(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Returns the day with the most messages sent for the given time period.
 
         Args:
@@ -323,7 +323,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         busiest = sorted(days, key=lambda x: days[x]["count"], reverse=True)[0]  # type: datetime.date
 
-        data_class = Stat(
+        data_class = StatDB(
             "stat",
             guild_id,
             stat=StatTypes.BUSIEST_DAY,
@@ -345,7 +345,7 @@ class StatsGatherer:  # noqa: PLR0904
         start: datetime.datetime,
         end: datetime.datetime,
         channel_ids: list[int] | None = None,
-    ) -> Stat:
+    ) -> StatDB:
         """Returns the channel with the least messages for a given time period.
 
         Args:
@@ -374,7 +374,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         quietest = sorted(channels, key=lambda x: channels[x]["count"], reverse=False)[0]
 
-        data_class = Stat(
+        data_class = StatDB(
             "stat",
             guild_id,
             stat=StatTypes.QUIETEST_CHANNEL,
@@ -390,7 +390,7 @@ class StatsGatherer:  # noqa: PLR0904
         data_class.channels = {str(k): v for k, v in channels.items()}
         return self.add_annual_changes(start, data_class)
 
-    def quietest_thread(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def quietest_thread(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates the quietest thread.
 
         Args:
@@ -421,7 +421,7 @@ class StatsGatherer:  # noqa: PLR0904
             quietest = 0
             threads[0] = {"count": 0, "users": []}
 
-        data_class = Stat(
+        data_class = StatDB(
             "stat",
             guild_id,
             stat=StatTypes.QUIETEST_THREAD,
@@ -436,7 +436,7 @@ class StatsGatherer:  # noqa: PLR0904
         data_class.threads = {str(k): v for k, v in threads.items()}
         return self.add_annual_changes(start, data_class)
 
-    def quietest_day(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def quietest_day(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Returns the day with the least messages sent for the given time period.
 
         Args:
@@ -464,7 +464,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         quietest = sorted(days, key=lambda x: days[x]["count"], reverse=False)[0]  # type: datetime.date
 
-        data_class = Stat(
+        data_class = StatDB(
             "stat",
             guild_id,
             stat=StatTypes.QUIETEST_DAY,
@@ -480,7 +480,7 @@ class StatsGatherer:  # noqa: PLR0904
         data_class.users = len(days[quietest]["users"])
         return self.add_annual_changes(start, data_class)
 
-    def number_of_bets(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def number_of_bets(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Returns the number of bets between two given time periods.
 
         Args:
@@ -493,7 +493,7 @@ class StatsGatherer:  # noqa: PLR0904
         """
         bets = self.cache.get_bets(guild_id, start, end)
 
-        data_class = Stat(
+        data_class = StatDB(
             "stat",
             guild_id,
             stat=StatTypes.NUMBER_OF_BETS,
@@ -506,7 +506,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         return self.add_annual_changes(start, data_class)
 
-    def salary_gains(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def salary_gains(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Returns the total amount of eddies gained through salaries this month.
 
         Args:
@@ -524,7 +524,7 @@ class StatsGatherer:  # noqa: PLR0904
                 continue
             salary_total += trans.amount
 
-        data_class = Stat(
+        data_class = StatDB(
             "stat",
             guild_id,
             stat=StatTypes.SALARY_GAINS,
@@ -537,7 +537,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         return self.add_annual_changes(start, data_class)
 
-    def average_wordle_victory(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def average_wordle_victory(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates the server's average wordle score.
 
         Args:
@@ -582,7 +582,7 @@ class StatsGatherer:  # noqa: PLR0904
         average_wordle = round((sum(wordle_count) / len(wordle_count)), 4)
         average_bot_wordle = round((sum(bot_wordle_count) / len(bot_wordle_count)), 4)
 
-        data_class = Stat(
+        data_class = StatDB(
             "stat",
             guild_id,
             stat=StatTypes.AVERAGE_WORDLE_VICTORY,
@@ -596,7 +596,9 @@ class StatsGatherer:  # noqa: PLR0904
         data_class.bot_average = average_bot_wordle
         return self.add_annual_changes(start, data_class)
 
-    def bet_eddies_stats(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> tuple[Stat, Stat]:
+    def bet_eddies_stats(
+        self, guild_id: int, start: datetime.datetime, end: datetime.datetime
+    ) -> tuple[StatDB, StatDB]:
         """Calculates the total eddies placed on bets, and the total eddies won on bets.
 
         Args:
@@ -618,7 +620,7 @@ class StatsGatherer:  # noqa: PLR0904
             elif trans_type == TransactionTypes.BET_WIN:
                 eddies_won += trans.amount
 
-        data_class_a = Stat(
+        data_class_a = StatDB(
             "stat",
             guild_id,
             stat=StatTypes.EDDIES_PLACED,
@@ -629,7 +631,7 @@ class StatsGatherer:  # noqa: PLR0904
             annual=self.annual,
         )
 
-        data_class_b = Stat(
+        data_class_b = StatDB(
             "stat",
             guild_id,
             stat=StatTypes.EDDIES_WIN,
@@ -645,7 +647,9 @@ class StatsGatherer:  # noqa: PLR0904
 
         return data_class_a, data_class_b
 
-    def most_unique_channel_contributers(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def most_unique_channel_contributers(
+        self, guild_id: int, start: datetime.datetime, end: datetime.datetime
+    ) -> StatDB:
         """Calculates the channel with the most unique contributors.
 
         Args:
@@ -669,7 +673,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         most_popular_channel = sorted(channels, key=lambda x: len(channels[x]), reverse=True)[0]
 
-        data_class = Stat(
+        data_class = StatDB(
             "stat",
             guild_id,
             stat=StatTypes.MOST_POPULAR_CHANNEL,
@@ -684,7 +688,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         return self.add_annual_changes(start, data_class)
 
-    def total_time_spent_in_vc(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def total_time_spent_in_vc(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates the total amount of time spent by everyone in all VCs.
 
         Args:
@@ -710,7 +714,7 @@ class StatsGatherer:  # noqa: PLR0904
             if user_id not in users:
                 users.append(user_id)
 
-        data_class = Stat(
+        data_class = StatDB(
             "stat",
             guild_id,
             stat=StatTypes.TIME_SPENT_IN_VC,
@@ -726,7 +730,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         return self.add_annual_changes(start, data_class)
 
-    def vc_with_most_time_spent(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def vc_with_most_time_spent(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates which VC had the most time spent in it.
 
         Args:
@@ -753,7 +757,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         vc_most_time = sorted(channels, key=lambda x: channels[x]["count"], reverse=True)[0]
 
-        data_class = Stat(
+        data_class = StatDB(
             "stat",
             guild_id,
             stat=StatTypes.VC_MOST_TIME,
@@ -770,7 +774,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         return self.add_annual_changes(start, data_class)
 
-    def vc_with_most_users(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def vc_with_most_users(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates which VC had the most unique users in it.
 
         Args:
@@ -797,7 +801,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         vc_most_users = sorted(channels, key=lambda x: len(channels[x]["users"]), reverse=True)[0]
 
-        data_class = Stat(
+        data_class = StatDB(
             "stat",
             guild_id,
             stat=StatTypes.VC_MOST_TIME,
@@ -819,7 +823,7 @@ class StatsGatherer:  # noqa: PLR0904
         start: datetime.datetime,
         end: datetime.datetime,
         uid: int | None = None,
-    ) -> Stat:
+    ) -> StatDB:
         """Calculates the most popular server emoji for the given time frame.
 
         Args:
@@ -873,7 +877,7 @@ class StatsGatherer:  # noqa: PLR0904
             emoji_id = None
             emoji_count[0] = None
 
-        data_class = Stat(
+        data_class = StatDB(
             type="stat",
             guild_id=guild_id,
             stat=StatTypes.MOST_POPULAR_SERVER_EMOJI,
@@ -890,7 +894,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         return self.add_annual_changes(start, data_class)
 
-    def threads_created(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def threads_created(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates number of threads created in the given time period.
 
         Args:
@@ -909,7 +913,7 @@ class StatsGatherer:  # noqa: PLR0904
                 continue
             created_threads.append(thread)
 
-        data_class = Stat(
+        data_class = StatDB(
             type="stat",
             guild_id=guild_id,
             stat=StatTypes.THREADS_CREATED,
@@ -923,7 +927,7 @@ class StatsGatherer:  # noqa: PLR0904
         data_class.threads = [thread.thread_id for thread in created_threads]
         return self.add_annual_changes(start, data_class)
 
-    def emojis_created(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def emojis_created(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Gets all emojis created during the given time frame.
 
         Args:
@@ -937,7 +941,7 @@ class StatsGatherer:  # noqa: PLR0904
         all_server_emojis = self.cache.server_emojis.get_all_emojis(guild_id)
         created = [e for e in all_server_emojis if start < e["created"] < end]
 
-        data_class = Stat(
+        data_class = StatDB(
             type="stat",
             guild_id=guild_id,
             stat=StatTypes.EMOJIS_CREATED,
@@ -953,7 +957,7 @@ class StatsGatherer:  # noqa: PLR0904
 
     # stats that can be won
     # messages
-    def server_owner(self, guild: discord.Guild, start: datetime.datetime) -> Stat:
+    def server_owner(self, guild: discord.Guild, start: datetime.datetime) -> StatDB:
         """Generates the server owner award.
 
         Args:
@@ -964,7 +968,7 @@ class StatsGatherer:  # noqa: PLR0904
         """
         owner = guild.owner_id
 
-        data_class = Stat(
+        data_class = StatDB(
             type="award",
             guild_id=guild.id,
             user_id=owner,
@@ -979,7 +983,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         return self.add_annual_changes(start, data_class)
 
-    def most_messages_sent(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def most_messages_sent(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates the person who has sent the most messages in the server.
 
         Args:
@@ -1012,7 +1016,7 @@ class StatsGatherer:  # noqa: PLR0904
             chattiest = BSE_BOT_ID
             message_users[BSE_BOT_ID] = {"count": 0}
 
-        data_class = Stat(
+        data_class = StatDB(
             type="award",
             guild_id=guild_id,
             user_id=chattiest,
@@ -1028,7 +1032,7 @@ class StatsGatherer:  # noqa: PLR0904
         data_class.message_users = {str(k): v for k, v in message_users.items()}
         return self.add_annual_changes(start, data_class)
 
-    def least_messages_sent(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def least_messages_sent(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates the person who has sent the least messages in the server.
 
         Args:
@@ -1056,7 +1060,7 @@ class StatsGatherer:  # noqa: PLR0904
             least_chattiest = BSE_BOT_ID
             message_users[BSE_BOT_ID] = 0
 
-        data_class = Stat(
+        data_class = StatDB(
             type="award",
             guild_id=guild_id,
             user_id=least_chattiest,
@@ -1072,7 +1076,7 @@ class StatsGatherer:  # noqa: PLR0904
         data_class.message_users = {str(k): v for k, v in message_users.items()}
         return self.add_annual_changes(start, data_class)
 
-    def most_thread_messages_sent(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def most_thread_messages_sent(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates the person who has sent the most threaded messages in the server.
 
         Args:
@@ -1100,7 +1104,7 @@ class StatsGatherer:  # noqa: PLR0904
             chattiest = BSE_BOT_ID
             message_users[BSE_BOT_ID] = 0
 
-        data_class = Stat(
+        data_class = StatDB(
             type="award",
             guild_id=guild_id,
             user_id=chattiest,
@@ -1116,7 +1120,7 @@ class StatsGatherer:  # noqa: PLR0904
         data_class.message_users = {str(k): v for k, v in message_users.items()}
         return self.add_annual_changes(start, data_class)
 
-    def longest_message(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def longest_message(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Returns the longest message from two given time periods.
 
         Args:
@@ -1139,7 +1143,7 @@ class StatsGatherer:  # noqa: PLR0904
                 if len(content) > len(longest_message["content"]):
                     longest_message = message
 
-        data_class = Stat(
+        data_class = StatDB(
             type="award",
             guild_id=guild_id,
             user_id=longest_message["user_id"],
@@ -1154,7 +1158,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         return self.add_annual_changes(start, data_class)
 
-    def lowest_average_wordle_score(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def lowest_average_wordle_score(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates which user has the best average wordle score.
 
         Args:
@@ -1214,7 +1218,7 @@ class StatsGatherer:  # noqa: PLR0904
             best_avg = BSE_BOT_ID
             wordle_avgs[BSE_BOT_ID] = 0
 
-        data_class = Stat(
+        data_class = StatDB(
             type="award",
             guild_id=guild_id,
             user_id=best_avg,
@@ -1230,7 +1234,7 @@ class StatsGatherer:  # noqa: PLR0904
         data_class.wordle_avgs = {str(k): v for k, v in wordle_avgs.items()}
         return self.add_annual_changes(start, data_class)
 
-    def highest_average_wordle_score(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def highest_average_wordle_score(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates which user has the worst average wordle score.
 
         Args:
@@ -1291,7 +1295,7 @@ class StatsGatherer:  # noqa: PLR0904
             worst_avg = BSE_BOT_ID
             wordle_avgs[BSE_BOT_ID] = 0
 
-        data_class = Stat(
+        data_class = StatDB(
             type="award",
             guild_id=guild_id,
             user_id=worst_avg,
@@ -1307,7 +1311,7 @@ class StatsGatherer:  # noqa: PLR0904
         data_class.wordle_avgs = {str(k): v for k, v in wordle_avgs.items()}
         return self.add_annual_changes(start, data_class)
 
-    def twitter_addict(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def twitter_addict(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates who's posted the most twitter links.
 
         Args:
@@ -1337,7 +1341,7 @@ class StatsGatherer:  # noqa: PLR0904
             twitter_addict = 0
             tweet_users[0] = None
 
-        data_class = Stat(
+        data_class = StatDB(
             type="award",
             guild_id=guild_id,
             user_id=twitter_addict,
@@ -1353,7 +1357,7 @@ class StatsGatherer:  # noqa: PLR0904
         data_class.twitter_addict = {str(k): v for k, v in tweet_users.items()}
         return self.add_annual_changes(start, data_class)
 
-    def jerk_off_contributor(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def jerk_off_contributor(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates who's posted this most contributions in #jerk-off-chat.
 
         Args:
@@ -1382,7 +1386,7 @@ class StatsGatherer:  # noqa: PLR0904
             masturbator = 0
             jerk_off_users[0] = None
 
-        data_class = Stat(
+        data_class = StatDB(
             type="award",
             guild_id=guild_id,
             user_id=masturbator,
@@ -1398,7 +1402,7 @@ class StatsGatherer:  # noqa: PLR0904
         data_class.masturbators = {str(k): v for k, v in jerk_off_users.items()}
         return self.add_annual_changes(start, data_class)
 
-    def big_memer(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def big_memer(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates which user had the most reactions for this time period.
 
         Args:
@@ -1421,7 +1425,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         big_memer = sorted(reaction_users, key=lambda x: reaction_users[x], reverse=True)[0]
 
-        data_class = Stat(
+        data_class = StatDB(
             type="award",
             guild_id=guild_id,
             user_id=big_memer,
@@ -1437,7 +1441,7 @@ class StatsGatherer:  # noqa: PLR0904
         data_class.reactees = {str(k): v for k, v in reaction_users.items()}
         return self.add_annual_changes(start, data_class)
 
-    def react_king(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def react_king(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates who's given the most reactions.
 
         Args:
@@ -1462,7 +1466,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         react_king = sorted(reaction_users, key=lambda x: reaction_users[x], reverse=True)[0]
 
-        data_class = Stat(
+        data_class = StatDB(
             type="award",
             guild_id=guild_id,
             user_id=react_king,
@@ -1478,7 +1482,7 @@ class StatsGatherer:  # noqa: PLR0904
         data_class.reaction_users = {str(k): v for k, v in reaction_users.items()}
         return self.add_annual_changes(start, data_class)
 
-    def most_replies(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> tuple[Stat, Stat]:
+    def most_replies(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> tuple[StatDB, StatDB]:
         """Calculates who's been replied to most and who's given the most replies.
 
         Args:
@@ -1509,7 +1513,7 @@ class StatsGatherer:  # noqa: PLR0904
         serial_replier = sorted(replies, key=lambda x: replies[x], reverse=True)[0]
         conversation_starter = sorted(replied_to, key=lambda x: replied_to[x], reverse=True)[0]
 
-        replier_data_class = Stat(
+        replier_data_class = StatDB(
             type="award",
             guild_id=guild_id,
             user_id=serial_replier,
@@ -1525,7 +1529,7 @@ class StatsGatherer:  # noqa: PLR0904
         replier_data_class.repliers = {str(k): v for k, v in replies.items()}
         replier_data_class = self.add_annual_changes(start, replier_data_class)
 
-        conversation_data_class = Stat(
+        conversation_data_class = StatDB(
             type="award",
             guild_id=guild_id,
             user_id=conversation_starter,
@@ -1543,7 +1547,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         return replier_data_class, conversation_data_class
 
-    def most_edited_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def most_edited_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates the user who's edited the most messages this period.
 
         Args:
@@ -1571,7 +1575,7 @@ class StatsGatherer:  # noqa: PLR0904
             fattest_fingers = 0
             message_users = {0: {"count": 0, "messages": 0}}
 
-        data_class = Stat(
+        data_class = StatDB(
             type="award",
             guild_id=guild_id,
             user_id=fattest_fingers,
@@ -1589,7 +1593,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         return self.add_annual_changes(start, data_class)
 
-    def most_swears(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def most_swears(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates who swore the most during the given time period.
 
         Args:
@@ -1623,7 +1627,7 @@ class StatsGatherer:  # noqa: PLR0904
             most_swears = 0
             swear_dict[0] = None
 
-        data_class = Stat(
+        data_class = StatDB(
             type="award",
             guild_id=guild_id,
             user_id=most_swears,
@@ -1643,7 +1647,7 @@ class StatsGatherer:  # noqa: PLR0904
         guild_id: int,
         start: datetime.datetime,
         end: datetime.datetime,
-    ) -> Stat:
+    ) -> StatDB:
         """Calculates the user who sent most of their messages to one channel.
 
         Args:
@@ -1682,7 +1686,7 @@ class StatsGatherer:  # noqa: PLR0904
         # sort the percentages
         top = sorted(users, key=lambda x: users[x]["percentage"], reverse=True)[0]
 
-        data_class = Stat(
+        data_class = StatDB(
             type="award",
             guild_id=guild_id,
             user_id=top,
@@ -1698,7 +1702,7 @@ class StatsGatherer:  # noqa: PLR0904
         data_class.channel = users[top]["channel"]
         return self.add_annual_changes(start, data_class)
 
-    def most_messages_to_most_channels(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def most_messages_to_most_channels(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates the user who sent most of their messages to the most diverse channels.
 
         Args:
@@ -1726,7 +1730,7 @@ class StatsGatherer:  # noqa: PLR0904
         # sort the channels
         top = sorted(users, key=lambda x: len(users[x]["channels"]), reverse=True)[0]
 
-        data_class = Stat(
+        data_class = StatDB(
             type="award",
             guild_id=guild_id,
             user_id=top,
@@ -1743,7 +1747,7 @@ class StatsGatherer:  # noqa: PLR0904
         return self.add_annual_changes(start, data_class)
 
     # bets
-    def most_bets_created(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def most_bets_created(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Get the user who made the most bets.
 
         Args:
@@ -1769,7 +1773,7 @@ class StatsGatherer:  # noqa: PLR0904
             busiest = BSE_BOT_ID
             bet_users[BSE_BOT_ID] = 0
 
-        data_class = Stat(
+        data_class = StatDB(
             type="award",
             guild_id=guild_id,
             user_id=busiest,
@@ -1785,7 +1789,7 @@ class StatsGatherer:  # noqa: PLR0904
         data_class.bookies = {str(k): v for k, v in bet_users.items()}
         return self.add_annual_changes(start, data_class)
 
-    def most_eddies_bet(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def most_eddies_bet(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates who placed the most eddies on bets.
 
         Args:
@@ -1812,7 +1816,7 @@ class StatsGatherer:  # noqa: PLR0904
             most_placed = BSE_BOT_ID
             bet_users[BSE_BOT_ID] = 0
 
-        data_class = Stat(
+        data_class = StatDB(
             type="award",
             guild_id=guild_id,
             user_id=most_placed,
@@ -1828,7 +1832,7 @@ class StatsGatherer:  # noqa: PLR0904
         data_class.betters = {str(k): v for k, v in bet_users.items()}
         return self.add_annual_changes(start, data_class)
 
-    def most_eddies_won(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def most_eddies_won(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates who won the most eddies on bets.
 
         Args:
@@ -1855,7 +1859,7 @@ class StatsGatherer:  # noqa: PLR0904
             most_placed = BSE_BOT_ID
             bet_users[BSE_BOT_ID] = 0
 
-        data_class = Stat(
+        data_class = StatDB(
             type="award",
             guild_id=guild_id,
             user_id=most_placed,
@@ -1871,7 +1875,7 @@ class StatsGatherer:  # noqa: PLR0904
         data_class.bet_winners = {str(k): v for k, v in bet_users.items()}
         return self.add_annual_changes(start, data_class)
 
-    def most_time_king(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def most_time_king(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates who's been King longest this month.
 
         Args:
@@ -1920,7 +1924,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         longest_king = sorted(kings, key=lambda x: kings[x], reverse=True)[0]
 
-        data_class = Stat(
+        data_class = StatDB(
             type="award",
             guild_id=guild_id,
             user_id=longest_king,
@@ -1937,7 +1941,7 @@ class StatsGatherer:  # noqa: PLR0904
         return self.add_annual_changes(start, data_class)
 
     # vc
-    def big_gamer(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def big_gamer(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates who spent the most time in VC.
 
         Args:
@@ -1968,7 +1972,7 @@ class StatsGatherer:  # noqa: PLR0904
             big_gamer = 0
             user_dict[0] = {"count": 0, "channels": {}}
 
-        data_class = Stat(
+        data_class = StatDB(
             type="award",
             guild_id=guild_id,
             user_id=big_gamer,
@@ -1985,7 +1989,7 @@ class StatsGatherer:  # noqa: PLR0904
         data_class.channels = len(user_dict[big_gamer]["channels"])
         return self.add_annual_changes(start, data_class)
 
-    def big_streamer(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> Stat:
+    def big_streamer(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates who spent the most time streaming.
 
         Args:
@@ -2021,7 +2025,7 @@ class StatsGatherer:  # noqa: PLR0904
             big_streamer = BSE_BOT_ID
             user_dict[BSE_BOT_ID] = {"count": 0, "channels": {}}
 
-        data_class = Stat(
+        data_class = StatDB(
             type="award",
             guild_id=guild_id,
             user_id=big_streamer,

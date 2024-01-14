@@ -120,3 +120,34 @@ class TestAwards:
         for item in found:
             assert isinstance(item, StatDB)
             assert item == entry
+
+    @pytest.mark.parametrize(
+        "entry", [Awards.make_data_class(entry) for entry in _get_award_data() if entry.get("month") == "Dec 23"]
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_awards_find_previous_entry(self, entry: StatDB) -> None:
+        """Tests Awards get_previous_stat with monthly items."""
+        awards = Awards()
+        found = awards.get_previous_stat(entry)
+        assert isinstance(found, list)
+        assert len(found) > 0
+        for item in found:
+            assert isinstance(item, StatDB)
+            assert item != entry
+
+    @pytest.mark.parametrize(
+        "entry", [Awards.make_data_class(entry) for entry in _get_award_data() if entry.get("year") == "2023"]
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_awards_find_previous_entry_annual(self, entry: StatDB) -> None:
+        """Tests Awards get_previous_stat with annual items."""
+        awards = Awards()
+        found = awards.get_previous_stat(entry)
+        assert isinstance(found, list)
+        for item in found:
+            assert isinstance(item, StatDB)
+            assert item != entry

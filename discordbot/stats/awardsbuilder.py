@@ -49,31 +49,6 @@ class AwardsBuilder:
         self.awards = Awards()
         self.user_points = UserPoints()
 
-    def _get_previous_stat(self: "AwardsBuilder", stat: StatDB) -> dict:
-        """Searches the database for the previous stat of the same time.
-
-        Args:
-            stat (Stat): the stat to get previous values for
-
-        Returns:
-            dict: the previous stat object
-        """
-        query = {"guild_id": stat.guild_id, "type": stat.type}
-
-        if stat.annual:
-            query["year"] = int(stat.year) - 1
-        else:
-            query["month"] = (stat.timestamp - datetime.timedelta(days=37)).strftime("%b %y")
-
-        match stat.type:
-            case "award":
-                query["award"] = stat.award
-            case "stat":
-                query["stat"] = stat.stat
-
-        self.logger.debug(query)
-        return self.awards.query(query)
-
     @staticmethod
     def _get_comparison_string(new_value: float, old_value: float) -> str:
         """Creates a basic comparison string we can use in stats text.
@@ -222,9 +197,10 @@ class AwardsBuilder:
             time_spent_in_vc,
         ]:
             try:
-                previous = self._get_previous_stat(stat)
+                previous = self.awards.get_previous_stat(stat)
 
                 if not previous:
+                    self.logger.debug("Couldn't find previous stat for %s", stat.short_name)
                     comparisons[stat.stat] = ""
                     continue
 

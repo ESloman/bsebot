@@ -1,5 +1,6 @@
 """Stats classes."""
 
+import dataclasses
 import datetime
 import re
 from copy import deepcopy
@@ -83,10 +84,12 @@ class StatsGatherer:  # noqa: PLR0904
             Stat: the modified dataclass
         """
         if self.annual:
-            data_class.month = None
-            data_class.year = start.strftime("%Y")
-            if data_class.type == "award":
-                data_class.eddies = ANNUAL_AWARDS_AWARD
+            data_class = dataclasses.replace(
+                data_class,
+                month=None,
+                year=start.strftime("%Y"),
+                eddies=ANNUAL_AWARDS_AWARD if data_class.type == "award" else MONTHLY_AWARDS_PRIZE,
+            )
         return data_class
 
     # generic server stats
@@ -103,8 +106,8 @@ class StatsGatherer:  # noqa: PLR0904
         """
         messages = self.cache.get_messages(guild_id, start, end)
 
-        channel_ids = {m["channel_id"] for m in messages}
-        user_ids = {m["user_id"] for m in messages}
+        channel_ids = {m.channel_id for m in messages}
+        user_ids = {m.user_id for m in messages}
 
         data_class = StatDB(
             "stat",
@@ -115,10 +118,9 @@ class StatsGatherer:  # noqa: PLR0904
             timestamp=datetime.datetime.now(),
             short_name="number_of_messages",
             annual=self.annual,
+            kwargs={"channels": len(channel_ids), "users": len(user_ids)},
         )
 
-        data_class.channels = len(channel_ids)
-        data_class.users = len(user_ids)
         return self.add_annual_changes(start, data_class)
 
     def number_of_threaded_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
@@ -134,8 +136,8 @@ class StatsGatherer:  # noqa: PLR0904
         """
         messages = self.cache.get_threaded_messages(guild_id, start, end)
 
-        channel_ids = {m["channel_id"] for m in messages}
-        user_ids = {m["user_id"] for m in messages}
+        channel_ids = {m.channel_id for m in messages}
+        user_ids = {m.user_id for m in messages}
 
         data_class = StatDB(
             "stat",
@@ -146,10 +148,9 @@ class StatsGatherer:  # noqa: PLR0904
             timestamp=datetime.datetime.now(),
             short_name="number_of_thread_messages",
             annual=self.annual,
+            kwargs={"channels": len(channel_ids), "users": len(user_ids)},
         )
 
-        data_class.channels = len(channel_ids)
-        data_class.users = len(user_ids)
         return self.add_annual_changes(start, data_class)
 
     def average_message_length(
@@ -172,7 +173,7 @@ class StatsGatherer:  # noqa: PLR0904
         lengths = []
         words = []
         for message in messages:
-            if content := message["content"]:
+            if content := message.content:
                 lengths.append(len(content))
                 words.append(len(content.split(" ")))
         average_message_len = round((sum(lengths) / len(lengths)), 2)
@@ -217,12 +218,12 @@ class StatsGatherer:  # noqa: PLR0904
             Stat: the busiest channel stat
         """
         messages = self.cache.get_messages(guild_id, start, end)
-        messages = [m for m in messages if not m.get("is_thread") and not m.get("is_vc")]
+        messages = [m for m in messages if not m.is_thread and not m.is_vc]
 
         channels = {}
         for message in messages:
-            channel_id = message["channel_id"]
-            user_id = message["user_id"]
+            channel_id = message.channel_id
+            user_id = message.user_id
             if not channel_id:
                 continue
             if channel_id not in channels:
@@ -242,11 +243,13 @@ class StatsGatherer:  # noqa: PLR0904
             timestamp=datetime.datetime.now(),
             short_name="busiest_channel",
             annual=self.annual,
+            kwargs={
+                "messages": channels[busiest]["count"],
+                "users": len(channels[busiest]["users"]),
+                "channels": {str(k): v for k, v in channels.items()},
+            },
         )
 
-        data_class.messages = channels[busiest]["count"]
-        data_class.users = len(channels[busiest]["users"])
-        data_class.channels = {str(k): v for k, v in channels.items()}
         return self.add_annual_changes(start, data_class)
 
     def busiest_thread(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
@@ -264,8 +267,8 @@ class StatsGatherer:  # noqa: PLR0904
 
         threads = {}
         for thread_message in threaded:
-            thread_id = thread_message["channel_id"]
-            user_id = thread_message["user_id"]
+            thread_id = thread_message.channel_id
+            user_id = thread_message.user_id
 
             if thread_id not in threads:
                 threads[thread_id] = {"count": 0, "users": []}
@@ -289,10 +292,13 @@ class StatsGatherer:  # noqa: PLR0904
             timestamp=datetime.datetime.now(),
             short_name="busiest_thread",
             annual=self.annual,
+            kwargs={
+                "messages": threads[busiest]["count"],
+                "users": len(threads[busiest]["users"]),
+                "threads": {str(k): v for k, v in threads.items()},
+            },
         )
-        data_class.messages = threads[busiest]["count"]
-        data_class.users = len(threads[busiest]["users"])
-        data_class.threads = {str(k): v for k, v in threads.items()}
+
         return self.add_annual_changes(start, data_class)
 
     def busiest_day(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
@@ -309,9 +315,9 @@ class StatsGatherer:  # noqa: PLR0904
         messages = self.cache.get_messages(guild_id, start, end)
         days = {}
         for message in messages:
-            channel_id = message["channel_id"]
-            user_id = message["user_id"]
-            day = message["timestamp"].date()
+            channel_id = message.channel_id
+            user_id = message.user_id
+            day = message.timestamp.date()
             if day not in days:
                 days[day] = {"count": 0, "channels": [], "users": []}
             days[day]["count"] += 1
@@ -332,11 +338,13 @@ class StatsGatherer:  # noqa: PLR0904
             timestamp=datetime.datetime.now(),
             short_name="busiest_day",
             annual=self.annual,
+            kwargs={
+                "messages": days[busiest]["count"],
+                "users": len(days[busiest]["users"]),
+                "channels": len(days[busiest]["channels"]),
+            },
         )
 
-        data_class.messages = days[busiest]["count"]
-        data_class.channels = len(days[busiest]["channels"])
-        data_class.users = len(days[busiest]["users"])
         return self.add_annual_changes(start, data_class)
 
     def quietest_channel(
@@ -358,12 +366,12 @@ class StatsGatherer:  # noqa: PLR0904
             Stat: the quietest channel stat
         """
         messages = self.cache.get_messages(guild_id, start, end)
-        messages = [m for m in messages if not m.get("is_thread") and not m.get("is_vc")]
+        messages = [m for m in messages if not m.is_thread and not m.is_vc]
 
         channels = {}
         for message in messages:
-            channel_id = message["channel_id"]
-            user_id = message["user_id"]
+            channel_id = message.channel_id
+            user_id = message.user_id
             if not channel_id or (channel_ids and channel_id not in channel_ids):
                 continue
             if channel_id not in channels:
@@ -383,11 +391,13 @@ class StatsGatherer:  # noqa: PLR0904
             timestamp=datetime.datetime.now(),
             short_name="quietest_channel",
             annual=self.annual,
+            kwargs={
+                "messages": channels[quietest]["count"],
+                "users": len(channels[quietest]["users"]),
+                "channels": {str(k): v for k, v in channels.items()},
+            },
         )
 
-        data_class.messages = channels[quietest]["count"]
-        data_class.users = len(channels[quietest]["users"])
-        data_class.channels = {str(k): v for k, v in channels.items()}
         return self.add_annual_changes(start, data_class)
 
     def quietest_thread(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
@@ -405,8 +415,8 @@ class StatsGatherer:  # noqa: PLR0904
 
         threads = {}
         for thread_message in threaded:
-            thread_id = thread_message["channel_id"]
-            user_id = thread_message["user_id"]
+            thread_id = thread_message.channel_id
+            user_id = thread_message.user_id
 
             if thread_id not in threads:
                 threads[thread_id] = {"count": 0, "users": []}

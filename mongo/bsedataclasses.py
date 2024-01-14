@@ -335,6 +335,30 @@ class Awards(BaseClass):
 
         return self.query(query)
 
+    def get_previous_stat(self, stat: StatDB) -> StatDB:
+        """Searches the database for the previous stat of the same time.
+
+        Args:
+            stat (StatDB): the stat to get previous values for
+
+        Returns:
+            StatDB: the previous stat object
+        """
+        query = {"guild_id": stat.guild_id, "type": stat.type}
+
+        if stat.annual:
+            query["year"] = int(stat.year) - 1
+        else:
+            query["month"] = (stat.timestamp - datetime.timedelta(days=37)).strftime("%b %y")
+
+        match stat.type:
+            case "award":
+                query["award"] = stat.award
+            case "stat":
+                query["stat"] = stat.stat
+
+        return self.query(query)
+
 
 class WordleAttempts(BaseClass):
     """Class for interacting with the 'awards' MongoDB collection in the 'bestsummereverpoints' DB."""

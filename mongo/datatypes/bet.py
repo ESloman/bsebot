@@ -3,7 +3,7 @@
 import dataclasses
 import datetime
 
-from mongo.datatypes.basedatatypes import BaseDBObject, ImplementsMessage
+from mongo.datatypes.basedatatypes import GuildedDBObject, ImplementsMessage
 
 
 @dataclasses.dataclass(frozen=True)
@@ -33,7 +33,7 @@ class BetterDB:
 
 
 @dataclasses.dataclass(frozen=True)
-class BetDB(BaseDBObject, ImplementsMessage):
+class BetDB(GuildedDBObject, ImplementsMessage):
     """A dict representing a bet."""
 
     # general info

@@ -3,11 +3,11 @@
 import datetime
 from dataclasses import dataclass
 
-from mongo.datatypes.basedatatypes import BaseDBObject, ImplementsMessage
+from mongo.datatypes.basedatatypes import GuildedDBObject, ImplementsMessage
 
 
 @dataclass(frozen=True)
-class ReminderDB(BaseDBObject, ImplementsMessage):
+class ReminderDB(GuildedDBObject, ImplementsMessage):
     """A dict representing a reminder."""
 
     created: datetime.datetime

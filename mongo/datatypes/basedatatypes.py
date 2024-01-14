@@ -12,12 +12,18 @@ class BaseDBObject:
 
     _id: ObjectId
     """The internal database ID."""
+
+
+@dataclass(frozen=True)
+class GuildedDBObject(BaseDBObject):
+    """A class representing a guilded database object."""
+
     guild_id: int
     """The discord guild/server ID."""
 
 
 @dataclass(frozen=True)
-class NamedDBObject(BaseDBObject):
+class NamedDBObject(GuildedDBObject):
     """A class that represents something in the database with a name."""
 
     name: str
@@ -35,7 +41,7 @@ class ImplementsMessage:
 
 
 @dataclass(frozen=True)
-class BaseEventDB(BaseDBObject, ImplementsMessage):
+class BaseEventDB(GuildedDBObject, ImplementsMessage):
     """Represents a base event."""
 
     type: str

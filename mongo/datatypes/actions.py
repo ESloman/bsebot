@@ -4,11 +4,11 @@ import dataclasses
 import datetime
 
 from discordbot.bot_enums import ActivityTypes, TransactionTypes
-from mongo.datatypes.basedatatypes import BaseDBObject
+from mongo.datatypes.basedatatypes import GuildedDBObject
 
 
 @dataclasses.dataclass(frozen=True)
-class ActivityDB(BaseDBObject):
+class ActivityDB(GuildedDBObject):
     """A dict representing an activity."""
 
     uid: int
@@ -24,7 +24,7 @@ class ActivityDB(BaseDBObject):
 
 
 @dataclasses.dataclass(frozen=True)
-class TransactionDB(BaseDBObject):
+class TransactionDB(GuildedDBObject):
     """A dict representing a transaction."""
 
     uid: int

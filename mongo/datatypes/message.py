@@ -4,7 +4,7 @@ import dataclasses
 import datetime
 from dataclasses import dataclass, field
 
-from mongo.datatypes.basedatatypes import BaseDBObject, ImplementsMessage
+from mongo.datatypes.basedatatypes import GuildedDBObject, ImplementsMessage
 
 
 @dataclass(frozen=True)
@@ -38,7 +38,7 @@ class ReplyDB:
 
 
 @dataclasses.dataclass(frozen=True)
-class MessageDB(BaseDBObject, ImplementsMessage):
+class MessageDB(GuildedDBObject, ImplementsMessage):
     """A dict representing a user message."""
 
     # message info

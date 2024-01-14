@@ -6,7 +6,7 @@ from mongo.datatypes.bet import BetterDB, OptionDB
 from mongo.datatypes.message import ReactionDB, ReplyDB
 
 
-def get_activity_inputs() -> list[dict]:
+def get_activity_inputs() -> list[dict[str, any]]:
     """Returns a bunch of action inputs."""
     return [
         {
@@ -51,12 +51,32 @@ def get_activity_inputs() -> list[dict]:
     ]
 
 
-def get_bet_option_inputs() -> list[dict]:
+def get_autobet_inputs() -> list[dict[str, any]]:
+    """Returns a bunch of bet option inputs."""
+    return [
+        {
+            "_id": ObjectId("603bd2f2db46fa2aa393c63a"),
+            "type": "valorant",
+            "title": "How many pistol rounds will we win?",
+            "options": ["One", "Two", "None of them :("],
+        },
+        {
+            "_id": ObjectId("603bd2f2db46fa2aa393c640"),
+            "type": "valorant",
+            "title": "Does Sloman win a 1vX clutch? (where X is greater than 1)",
+            "options": ["Yes", "No"],
+            "channel_members": [123456],
+            "voice_channel": 654321,
+        },
+    ]
+
+
+def get_bet_option_inputs() -> list[dict[str, any]]:
     """Returns a bunch of bet option inputs."""
     return [{"val": "Ben"}, {"val": "Pook"}, {"val": "Ross"}, {"val": "Sheldon"}, {"val": "Sloman"}]
 
 
-def get_bet_better_inputs() -> list[dict]:
+def get_bet_better_inputs() -> list[dict[str, any]]:
     """Returns a bunch of bet better inputs."""
     return [
         {
@@ -97,7 +117,7 @@ def get_bet_better_inputs() -> list[dict]:
     ]
 
 
-def get_bet_inputs() -> list[dict]:
+def get_bet_inputs() -> list[dict[str, any]]:
     """Returns a bunch of bet inputs."""
     return [
         {
@@ -240,7 +260,7 @@ def get_bet_inputs() -> list[dict]:
     ]
 
 
-def get_emoji_inputs() -> list[dict]:
+def get_emoji_inputs() -> list[dict[str, any]]:
     """Returns a bunch if emoji inputs."""
     return [
         {
@@ -262,7 +282,7 @@ def get_emoji_inputs() -> list[dict]:
     ]
 
 
-def get_guild_inputs() -> list[dict]:
+def get_guild_inputs() -> list[dict[str, any]]:
     """Returns a bunch of guild inputs."""
     return [
         {
@@ -469,7 +489,7 @@ def get_guild_inputs() -> list[dict]:
     ]
 
 
-def get_message_inputs() -> list[dict]:
+def get_message_inputs() -> list[dict[str, any]]:
     """Returns a bunch of message inputs."""
     return [
         {
@@ -585,7 +605,7 @@ def get_message_inputs() -> list[dict]:
     ]
 
 
-def get_message_reaction_inputs() -> list[dict]:
+def get_message_reaction_inputs() -> list[dict[str, any]]:
     """Returns a bunch of message reaction inputs."""
     return [
         {"user_id": 77458304837615616, "content": "😂", "timestamp": "2021-06-11T13:37:26.474+0000"},
@@ -595,7 +615,7 @@ def get_message_reaction_inputs() -> list[dict]:
     ]
 
 
-def get_message_reply_inputs() -> list[dict]:
+def get_message_reply_inputs() -> list[dict[str, any]]:
     """Returns a bunch of message reply inputs."""
     return [
         {
@@ -613,7 +633,7 @@ def get_message_reply_inputs() -> list[dict]:
     ]
 
 
-def get_message_vc_inputs() -> list[dict]:
+def get_message_vc_inputs() -> list[dict[str, any]]:
     """Returns a bunch of message VC inputs."""
     return [
         {
@@ -654,7 +674,7 @@ def get_message_vc_inputs() -> list[dict]:
     ]
 
 
-def get_message_wordle_inputs() -> list[dict]:
+def get_message_wordle_inputs() -> list[dict[str, any]]:
     """Returns a bunch of message wordle inputs."""
     return [
         {
@@ -673,7 +693,7 @@ def get_message_wordle_inputs() -> list[dict]:
     ]
 
 
-def get_reminder_inputs() -> list[dict]:
+def get_reminder_inputs() -> list[dict[str, any]]:
     """Returns a bunch of reminder inputs."""
     return [
         {
@@ -701,7 +721,7 @@ def get_reminder_inputs() -> list[dict]:
     ]
 
 
-def get_revolution_inputs() -> list[dict]:
+def get_revolution_inputs() -> list[dict[str, any]]:
     """Returns a bunch of revolution event inputs."""
     return [
         {
@@ -751,7 +771,7 @@ def get_revolution_inputs() -> list[dict]:
     ]
 
 
-def get_sticker_inputs() -> list[dict]:
+def get_sticker_inputs() -> list[dict[str, any]]:
     """Returns a bunch of sticker inputs."""
     return [
         {
@@ -773,7 +793,7 @@ def get_sticker_inputs() -> list[dict]:
     ]
 
 
-def get_thread_inputs() -> list[dict]:
+def get_thread_inputs() -> list[dict[str, any]]:
     """Returns a bunch of thread inputs."""
     return [
         {
@@ -809,7 +829,7 @@ def get_thread_inputs() -> list[dict]:
     ]
 
 
-def get_transaction_inputs() -> list[dict]:
+def get_transaction_inputs() -> list[dict[str, any]]:
     """Returns a bunch of transaction inputs."""
     return [
         {
@@ -833,7 +853,7 @@ def get_transaction_inputs() -> list[dict]:
     ]
 
 
-def get_user_inputs() -> list[dict]:
+def get_user_inputs() -> list[dict[str, any]]:
     """Returns a bunch of user inputs."""
     return [
         {

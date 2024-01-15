@@ -1,5 +1,6 @@
 """Mocks our interface functions."""
 
+import contextlib
 import copy
 import datetime
 import json
@@ -28,12 +29,17 @@ def _datetime_convert(entry: dict[str, any]) -> None:
             for part in entry[key]:
                 _datetime_convert(part)
             continue
-        match key:
-            case "created" | "timestamp":
-                entry[key] = datetime.datetime.strptime(entry[key], "%Y-%m-%dT%H:%M:%S.%f%z")
-            case "rename_supporter" | "rename_revolutionary" | "king_since":
-                entry[key] = datetime.datetime.strptime(entry[key], "%Y-%m-%dT%H:%M:%S.%f%z")
-            case "last_ad_time" | "last_remind_me_suggest_time" | "last_revolution_time":
+        if key in {
+            "created",
+            "timestamp",
+            "rename_supporter",
+            "rename_revolutionary",
+            "king_since",
+            "last_ad_time",
+            "last_remind_me_suggest_time",
+            "last_revolution_time",
+        }:
+            with contextlib.suppress(ValueError):
                 entry[key] = datetime.datetime.strptime(entry[key], "%Y-%m-%dT%H:%M:%S.%f%z")
 
 

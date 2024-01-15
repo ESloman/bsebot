@@ -378,9 +378,9 @@ class BSEddiesManager(BaseTask):
         wordle_messages = []
 
         try:
-            wordle_doc = self.wordles.query({"timestamp": start.strftime("%Y-%m-%d"), "guild_id": guild_id})[0]
-            wordle_word = wordle_doc["actual_word"]
-        except (IndexError, KeyError):
+            wordle_doc = self.wordles.find_wordles_at_timestamp(start, guild_id)
+            wordle_word = wordle_doc.actual_word
+        except (AttributeError, IndexError, KeyError):
             wordle_doc = None
             wordle_word = None
 

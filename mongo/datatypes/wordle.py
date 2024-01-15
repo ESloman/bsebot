@@ -1,0 +1,30 @@
+"""Our wordle datatypes."""
+
+import dataclasses
+import datetime
+
+from mongo.datatypes.basedatatypes import GuildedDBObject
+
+
+@dataclasses.dataclass(frozen=True)
+class WordleAttemptDB(GuildedDBObject):
+    """Represents a wordle attempt in the database."""
+
+    solved: bool
+    """Whether the wordle was solved or not."""
+    starting_word: str
+    """The starting word we attempted the solve with."""
+    actual_word: str
+    """The solved word."""
+    guesses: list[str]
+    """The list of guesses."""
+    guess_count: int
+    """The number of guesses."""
+    game_state: dict[int, dict[str, str | list]]
+    """The game state."""
+    timestamp: datetime.datetime
+    """When we attempted the wordle."""
+    share_text: str
+    """The wordle share text we generated."""
+    wordle_num: int
+    """The wordle number."""

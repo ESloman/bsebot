@@ -39,8 +39,8 @@ class WordleTask(BaseTask):
         """Sets `sent_wordle` var based on whether or not we have actually sent wordle today."""
         now = datetime.datetime.now()
 
-        ret = self.wordles.query({"guild_id": BSE_SERVER_ID, "timestamp": f"{now.strftime('%Y-%m-%d')}"})
-        self.sent_wordle = bool(ret)
+        ret = self.wordles.find_wordles_at_timestamp(now, BSE_SERVER_ID)
+        self.sent_wordle = ret is not None
 
     @tasks.loop(minutes=10)
     async def wordle_message(self) -> None:  # noqa: C901

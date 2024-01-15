@@ -82,7 +82,7 @@ class AwardsBuilder:
         Returns all the stats object and the message.
 
         Returns:
-            Tuple[List[Stat], List[str]]: Tuple of the list Stat objects and the stats message to send
+            Tuple[List[StatDB], List[str]]: Tuple of the list Stat objects and the stats message to send
         """
         if not self.annual:
             start, end = self.stats.get_monthly_datetime_objects()
@@ -131,9 +131,9 @@ class AwardsBuilder:
         vc_users_obj = await self.bot.fetch_channel(vc_most_users.value)
         emoji_obj = await guild.fetch_emoji(most_used_server_emoji.emoji_id)
 
-        thread_objects = [await self.bot.fetch_channel(thread_id) for thread_id in threads_created.threads]
+        thread_objects = [await self.bot.fetch_channel(thread_id) for thread_id in threads_created.kwargs["threads"]]
 
-        emoji_objects = [await guild.fetch_emoji(emoji_id) for emoji_id in emojis_created.emoji_ids]
+        emoji_objects = [await guild.fetch_emoji(emoji_id) for emoji_id in emojis_created.kwargs["emoji_ids"]]
 
         stats = [
             number_messages,
@@ -204,7 +204,7 @@ class AwardsBuilder:
                     comparisons[stat.stat] = ""
                     continue
 
-                comparison_string = self._get_comparison_string(stat.value, previous["value"])
+                comparison_string = self._get_comparison_string(stat.value, previous.value)
             except Exception:
                 self.logger.exception("Got an error working out %s comparison string", stat.short_name)
                 comparisons[stat.stat] = ""
@@ -216,14 +216,14 @@ class AwardsBuilder:
         stat_parts = [
             message_start,
             (
-                f"- **Number of messages sent** 📬: `{number_messages.value}` "
-                f"(in `{number_messages.channels}` channel{'s' if thread_messages.channels != 1 else ''} "
-                f"from `{number_messages.users}` users){comparisons.get(number_messages.stat)}\n"
+                f"- **Number of messages sent** 📬: `{number_messages.value}` (in `"
+                f"{number_messages.kwargs["channels"]}` channel{'s' if thread_messages.kwargs["channels"] != 1 else ''}"
+                f" from `{number_messages.kwargs["users"]}` users){comparisons.get(number_messages.stat)}\n"
             ),
             (
-                f"- **Number of thread messages sent** 📟: `{thread_messages.value}` "
-                f"(in `{thread_messages.channels}` thread{'s' if thread_messages.channels != 1 else ''} "
-                f"from `{thread_messages.users}` users){comparisons.get(thread_messages.stat)}\n"
+                f"- **Number of thread messages sent** 📟: `{thread_messages.value}` (in `"
+                f"{thread_messages.kwargs["channels"]}` thread{'s' if thread_messages.kwargs["channels"] != 1 else ''} "
+                f"from `{thread_messages.kwargs["users"]}` users){comparisons.get(thread_messages.stat)}\n"
             ),
             (
                 f"- **Average message length** 📰: Characters (`{avg_message_chars.value}`), "
@@ -231,23 +231,23 @@ class AwardsBuilder:
             ),
             (
                 f"- **Chattiest channel** 🖨️: <#{busiest_channel.value}> "
-                f"(`{busiest_channel.messages}` messages from `{busiest_channel.users}` users)\n"
+                f"(`{busiest_channel.kwargs["messages"]}` messages from `{busiest_channel.kwargs["users"]}` users)\n"
             ),
             (
                 f"- **Quietest channel** 📭: <#{quietest_channel.value}> "
-                f"(`{quietest_channel.messages}` messages from `{quietest_channel.users}` users)\n"
+                f"(`{quietest_channel.kwargs["messages"]}` messages from `{quietest_channel.kwargs["users"]}` users)\n"
             ),
             (
                 f"- **Chattiest thread** 📧: {b_thread_text} "
-                f"(`{busiest_thread.messages}` messages from `{busiest_thread.users}` users)\n"
+                f"(`{busiest_thread.kwargs["messages"]}` messages from `{busiest_thread.kwargs["users"]}` users)\n"
             ),
             (
                 f"- **Quietest thread** 📖: {q_thread_text} "
-                f"(`{quietest_thread.messages}` messages from `{quietest_thread.users}` users)\n"
+                f"(`{quietest_thread.kwargs["messages"]}` messages from `{quietest_thread.kwargs["users"]}` users)\n"
             ),
             (
                 f"- **Most popular channel** 💌: {popular_channel_obj.mention} "
-                f"(`{most_popular_channel.users}` unique users)\n"
+                f"(`{most_popular_channel.kwargs["users"]}` unique users)\n"
             ),
             (
                 f"- **Threads created** 🖇️: {threads_created.value} ("
@@ -256,36 +256,37 @@ class AwardsBuilder:
             ),
             (
                 f"- **Chattiest day** 🗓️: {busiest_day_format} "
-                f"(`{busiest_day.messages}` messages in `{busiest_day.channels}` "
-                f"channels from `{busiest_day.users}` users)\n"
+                f"(`{busiest_day.kwargs["messages"]}` messages in `{busiest_day.kwargs["channels"]}` "
+                f"channels from `{busiest_day.kwargs["users"]}` users)\n"
             ),
             (
                 f"- **Quietest day** 📆: {quietest_day_format} "
-                f"(`{quietest_day.messages}` messages in `{quietest_day.channels}` "
-                f"channels from `{quietest_day.users}` users)\n"
+                f"(`{quietest_day.kwargs["messages"]}` messages in `{quietest_day.kwargs["channels"]}` "
+                f"channels from `{quietest_day.kwargs["users"]}` users)\n"
             ),
             (
                 f"- **Average wordle score** 🟩: `{average_wordle.value}` "
-                f"(the bot's: `{average_wordle.bot_average}`){comparisons.get(average_wordle.stat)}\n"
+                f"(the bot's: `{average_wordle.kwargs["bot_average"]}`){comparisons.get(average_wordle.stat)}\n"
             ),
             (
                 f"- **Total time spent in VCs** 📱: `{datetime.timedelta(seconds=time_spent_in_vc.value)!s}` "
-                f"(`in {time_spent_in_vc.channels}` channels from `{time_spent_in_vc.users}` users)"
+                f"(`in {time_spent_in_vc.kwargs["channels"]}` channels from `{time_spent_in_vc.kwargs["users"]}` users)"
                 f"{comparisons.get(time_spent_in_vc.stat)}\n"
             ),
             (
                 f"- **Talkiest VC** 💬: {vc_time_obj.mention} (`{vc_most_time_spent.users}` users spent "
-                f"`{datetime.timedelta(seconds=vc_most_time_spent.time)!s}` in this VC)\n"
+                f"`{datetime.timedelta(seconds=vc_most_time_spent.kwargs["time"])!s}` in this VC)\n"
             ),
             (
-                f"- **Most popular VC** 🎉: {vc_users_obj.mention} (`{vc_most_users.users}` unique users spent "
-                f"`{datetime.timedelta(seconds=vc_most_users.time)!s}` in this VC)\n"
+                f"- **Most popular VC** 🎉: {vc_users_obj.mention} "
+                f"(`{vc_most_users.kwargs["users"]}` unique users spent "
+                f"`{datetime.timedelta(seconds=vc_most_users.kwargs["time"])!s}` in this VC)\n"
             ),
             (f"- **Bets created** 🗃️: `{num_bets.value}`{comparisons.get(num_bets.stat)}\n"),
             (f"- **Eddies gained via salary** 👩🏼‍💼: `{salary_gains.value}`{comparisons.get(salary_gains.stat)}\n"),
             (f"- **Eddies placed on bets** 🧑🏼‍💻: `{eddies_placed.value}`{comparisons.get(eddies_placed.stat)}\n"),
             (f"- **Eddies won on bets** 🧑🏼‍🏫: `{eddies_won.value}`{comparisons.get(eddies_won.stat)}\n"),
-            (f"- **Most popular server emoji** 🗳️: {emoji_obj} (`{most_used_server_emoji.count}`)"),
+            (f"- **Most popular server emoji** 🗳️: {emoji_obj} (`{most_used_server_emoji.kwargs["count"]}`)"),
         ]
 
         if self.annual:
@@ -411,12 +412,12 @@ class AwardsBuilder:
                 # single minded
                 "- The _'single minded'_ 🧠 award: "
                 f"<@!{single_minded.user_id}> (`{single_minded.value}%` of messages "
-                f"sent to <#{single_minded.channel}>)\n"
+                f"sent to <#{single_minded.kwargs["channel"]}>)\n"
             ),
             (
                 # diverse portfolio
                 "- The _'diverse portfolio'_ 💼 award: "
-                f"<@!{diverse_portfolio.user_id}> (`{diverse_portfolio.messages}` sent to "
+                f"<@!{diverse_portfolio.user_id}> (`{diverse_portfolio.kwargs["messages"]}` sent to "
                 f"`{diverse_portfolio.value}` channels)\n"
             ),
             (
@@ -445,7 +446,7 @@ class AwardsBuilder:
                 # edited messages
                 "- The _'fat fingers'_ 🖐🏼 award: "
                 f"<@!{fattest_fingers.user_id}> (`{fattest_fingers.value}` edits to "
-                f"`{fattest_fingers.message_count}` messages)\n"
+                f"`{fattest_fingers.kwargs["message_count"]}` messages)\n"
             ),
             (
                 # most swears
@@ -480,7 +481,7 @@ class AwardsBuilder:
                 # most time streaming
                 "- The _'wannabe streamer'_ 🖥️ award: "
                 f"<@!{big_streamer.user_id}> (`{datetime.timedelta(seconds=big_streamer.value)!s}` "
-                f"spent streaming in {big_streamer.channels} channels)\n"
+                f"spent streaming in {big_streamer.kwargs["channels"]} channels)\n"
             ),
             (
                 # most bets created

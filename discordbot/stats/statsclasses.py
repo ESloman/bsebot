@@ -23,6 +23,7 @@ from discordbot.utilities import PlaceHolderLogger
 
 if TYPE_CHECKING:
     from mongo.datatypes.message import ReactionDB
+    from mongo.datatypes.thread import ThreadDB
 
 
 class StatsGatherer:  # noqa: PLR0904
@@ -368,7 +369,7 @@ class StatsGatherer:  # noqa: PLR0904
         messages = self.cache.get_messages(guild_id, start, end)
         messages = [m for m in messages if not m.is_thread and not m.is_vc]
 
-        channels = {}
+        channels: dict[int, dict[str, int | list]] = {}
         for message in messages:
             channel_id = message.channel_id
             user_id = message.user_id
@@ -413,7 +414,7 @@ class StatsGatherer:  # noqa: PLR0904
         """
         threaded = self.cache.get_threaded_messages(guild_id, start, end)
 
-        threads = {}
+        threads: dict[int, dict[str, int | list]] = {}
         for thread_message in threaded:
             thread_id = thread_message.channel_id
             user_id = thread_message.user_id
@@ -440,10 +441,13 @@ class StatsGatherer:  # noqa: PLR0904
             timestamp=datetime.datetime.now(),
             short_name="quietest_thread",
             annual=self.annual,
+            kwargs={
+                "messages": threads[quietest]["count"],
+                "users": len(threads[quietest]["users"]),
+                "threads": {str(k): v for k, v in threads.items()},
+            },
         )
-        data_class.messages = threads[quietest]["count"]
-        data_class.users = len(threads[quietest]["users"])
-        data_class.threads = {str(k): v for k, v in threads.items()}
+
         return self.add_annual_changes(start, data_class)
 
     def quietest_day(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
@@ -458,11 +462,11 @@ class StatsGatherer:  # noqa: PLR0904
             Stat: the quietest day stat
         """
         messages = self.cache.get_messages(guild_id, start, end)
-        days = {}
+        days: dict[int, dict[str, int | list]] = {}
         for message in messages:
-            channel_id = message["channel_id"]
-            user_id = message["user_id"]
-            day = message["timestamp"].date()
+            channel_id = message.channel_id
+            user_id = message.user_id
+            day = message.timestamp.date()
             if day not in days:
                 days[day] = {"count": 0, "channels": [], "users": []}
             days[day]["count"] += 1
@@ -483,11 +487,13 @@ class StatsGatherer:  # noqa: PLR0904
             timestamp=datetime.datetime.now(),
             short_name="quietest_day",
             annual=self.annual,
+            kwargs={
+                "messages": days[quietest]["count"],
+                "channels": len(days[quietest]["channels"]),
+                "users": len(days[quietest]["users"]),
+            },
         )
 
-        data_class.messages = days[quietest]["count"]
-        data_class.channels = len(days[quietest]["channels"])
-        data_class.users = len(days[quietest]["users"])
         return self.add_annual_changes(start, data_class)
 
     def number_of_bets(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
@@ -559,14 +565,14 @@ class StatsGatherer:  # noqa: PLR0904
             Stat: average wordle stat
         """
         messages = self.cache.get_messages(guild_id, start, end)
-        wordle_messages = [m for m in messages if "wordle" in m["message_type"]]
+        wordle_messages = [m for m in messages if "wordle" in m.message_type]
 
         wordle_count = []
         for wordle in wordle_messages:
-            if wordle["user_id"] == BSE_BOT_ID:
+            if wordle.user_id == BSE_BOT_ID:
                 continue
 
-            result = re.search(WORDLE_SCORE_REGEX, wordle["content"]).group()
+            result = re.search(WORDLE_SCORE_REGEX, wordle.content).group()
             guesses = result.split("/")[0]
 
             if guesses == "X":
@@ -579,10 +585,10 @@ class StatsGatherer:  # noqa: PLR0904
         )
         bot_wordle_count = []
         for wordle in bot_wordles:
-            if wordle["user_id"] != BSE_BOT_ID:
+            if wordle.user_id != BSE_BOT_ID:
                 continue
 
-            result = re.search(WORDLE_SCORE_REGEX, wordle["content"]).group()
+            result = re.search(WORDLE_SCORE_REGEX, wordle.content).group()
             guesses = result.split("/")[0]
             if guesses == "X":
                 guesses = "10"
@@ -601,9 +607,9 @@ class StatsGatherer:  # noqa: PLR0904
             timestamp=datetime.datetime.now(),
             short_name="average_wordle_victory",
             annual=self.annual,
+            kwargs={"bot_average": average_bot_wordle},
         )
 
-        data_class.bot_average = average_bot_wordle
         return self.add_annual_changes(start, data_class)
 
     def bet_eddies_stats(
@@ -674,8 +680,8 @@ class StatsGatherer:  # noqa: PLR0904
 
         channels = {}
         for message in messages:
-            channel_id = message["channel_id"]
-            user_id = message["user_id"]
+            channel_id = message.channel_id
+            user_id = message.user_id
             if channel_id not in channels:
                 channels[channel_id] = []
             if user_id not in channels[channel_id]:
@@ -692,9 +698,8 @@ class StatsGatherer:  # noqa: PLR0904
             timestamp=datetime.datetime.now(),
             short_name="most_popular_channel",
             annual=self.annual,
+            kwargs={"users": len(channels[most_popular_channel])},
         )
-
-        data_class.users = len(channels[most_popular_channel])
 
         return self.add_annual_changes(start, data_class)
 
@@ -733,10 +738,8 @@ class StatsGatherer:  # noqa: PLR0904
             timestamp=datetime.datetime.now(),
             short_name="total_time_spent_in_vc",
             annual=self.annual,
+            kwargs={"users": len(users), "channels": len(channels)},
         )
-
-        data_class.users = len(users)
-        data_class.channels = len(channels)
 
         return self.add_annual_changes(start, data_class)
 
@@ -776,11 +779,12 @@ class StatsGatherer:  # noqa: PLR0904
             timestamp=datetime.datetime.now(),
             short_name="vc_most_time",
             annual=self.annual,
+            kwargs={
+                "users": len(channels[vc_most_time]["users"]),
+                "channels": {str(k): v for k, v in channels.items()},
+                "time": int(channels[vc_most_time]["count"]),
+            },
         )
-
-        data_class.users = len(channels[vc_most_time]["users"])
-        data_class.channels = {str(k): v for k, v in channels.items()}
-        data_class.time = int(channels[vc_most_time]["count"])
 
         return self.add_annual_changes(start, data_class)
 
@@ -797,7 +801,7 @@ class StatsGatherer:  # noqa: PLR0904
         """
         vc_interactions = self.cache.get_vc_interactions(guild_id, start, end)
 
-        channels = {}
+        channels: dict[int, dict[str, int | list]] = {}
 
         for interaction in vc_interactions:
             time_spent = interaction["time_in_vc"]
@@ -820,10 +824,12 @@ class StatsGatherer:  # noqa: PLR0904
             timestamp=datetime.datetime.now(),
             short_name="vc_most_time",
             annual=self.annual,
+            kwargs={
+                "users": len(channels[vc_most_users]["users"]),
+                "channels": {str(k): v for k, v in channels.items()},
+                "time": int(channels[vc_most_users]["count"]),
+            },
         )
-        data_class.time = int(channels[vc_most_users]["count"])
-        data_class.channels = {str(k): v for k, v in channels.items()}
-        data_class.users = len(channels[vc_most_users]["users"])
 
         return self.add_annual_changes(start, data_class)
 
@@ -862,7 +868,7 @@ class StatsGatherer:  # noqa: PLR0904
         all_emojis = self.cache.get_emojis(guild_id, start, end)
         all_emoji_names = [emoji.name for emoji in all_emojis]
 
-        emoji_count = {}
+        emoji_count: dict[str, int] = {}
         for reaction in reactions:
             content = reaction.content
             if content not in all_emoji_names:
@@ -896,11 +902,8 @@ class StatsGatherer:  # noqa: PLR0904
             timestamp=datetime.datetime.now(),
             short_name="most_used_server_emoji",
             annual=self.annual,
+            kwargs={"emojis": emoji_count, "count": emoji_count[most_used_emoji], "emoji_id": emoji_id},
         )
-
-        data_class.emojis = emoji_count
-        data_class.count = emoji_count[most_used_emoji]
-        data_class.emoji_id = emoji_id
 
         return self.add_annual_changes(start, data_class)
 
@@ -915,7 +918,7 @@ class StatsGatherer:  # noqa: PLR0904
         Returns:
             Stat: the Stat data class
         """
-        created_threads = []
+        created_threads: list[ThreadDB] = []
         all_threads = self.cache.threads.get_all_threads(guild_id)
         for thread in all_threads:
             if thread.created < start or end < thread.created:
@@ -932,9 +935,9 @@ class StatsGatherer:  # noqa: PLR0904
             timestamp=datetime.datetime.now(),
             short_name="threads_created",
             annual=self.annual,
+            kwargs={"threads": [thread.thread_id for thread in created_threads]},
         )
 
-        data_class.threads = [thread.thread_id for thread in created_threads]
         return self.add_annual_changes(start, data_class)
 
     def emojis_created(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
@@ -960,9 +963,9 @@ class StatsGatherer:  # noqa: PLR0904
             timestamp=datetime.datetime.now(),
             short_name="emojis_created",
             annual=self.annual,
+            kwargs={"emoji_ids": [e.eid for e in created]},
         )
 
-        data_class.emoji_ids = [e["eid"] for e in created]
         return self.add_annual_changes(start, data_class)
 
     # stats that can be won
@@ -1006,19 +1009,19 @@ class StatsGatherer:  # noqa: PLR0904
         """
         messages = self.cache.get_messages(guild_id, start, end)
 
-        message_users = {}
+        message_users: dict[int, dict[str, int | list]] = {}
         for message in messages:
-            uid = message["user_id"]
+            uid = message.user_id
             if uid == BSE_BOT_ID:
                 continue
             if uid not in message_users:
                 message_users[uid] = {"count": 0, "channels": [], "threads": []}
             message_users[uid]["count"] += 1
-            if message.get("is_thread"):
-                if message["channel_id"] not in message_users[uid]["threads"]:
-                    message_users[uid]["threads"].append(message["channel_id"])
-            elif message["channel_id"] not in message_users[uid]["channels"]:
-                message_users[uid]["channels"].append(message["channel_id"])
+            if message.is_thread:
+                if message.channel_id not in message_users[uid]["threads"]:
+                    message_users[uid]["threads"].append(message.channel_id)
+            elif message.channel_id not in message_users[uid]["channels"]:
+                message_users[uid]["channels"].append(message.channel_id)
 
         try:
             chattiest = sorted(message_users, key=lambda x: message_users[x]["count"], reverse=True)[0]
@@ -1037,9 +1040,9 @@ class StatsGatherer:  # noqa: PLR0904
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="most_messages_sent",
             annual=self.annual,
+            kwargs={"message_users": {str(k): v for k, v in message_users.items()}},
         )
 
-        data_class.message_users = {str(k): v for k, v in message_users.items()}
         return self.add_annual_changes(start, data_class)
 
     def least_messages_sent(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
@@ -1055,9 +1058,9 @@ class StatsGatherer:  # noqa: PLR0904
         """
         messages = self.cache.get_messages(guild_id, start, end)
 
-        message_users = {}
+        message_users: dict[int, dict[str, int | list]] = {}
         for message in messages:
-            uid = message["user_id"]
+            uid = message.user_id
             if uid == BSE_BOT_ID:
                 continue
             if uid not in message_users:
@@ -1081,9 +1084,9 @@ class StatsGatherer:  # noqa: PLR0904
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="least_messages_sent",
             annual=self.annual,
+            kwargs={"message_users": {str(k): v for k, v in message_users.items()}},
         )
 
-        data_class.message_users = {str(k): v for k, v in message_users.items()}
         return self.add_annual_changes(start, data_class)
 
     def most_thread_messages_sent(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
@@ -1099,9 +1102,9 @@ class StatsGatherer:  # noqa: PLR0904
         """
         messages = self.cache.get_threaded_messages(guild_id, start, end)
 
-        message_users = {}
+        message_users: dict[int, int] = {}
         for message in messages:
-            uid = message["user_id"]
+            uid = message.user_id
             if uid == BSE_BOT_ID:
                 continue
             if uid not in message_users:
@@ -1125,9 +1128,9 @@ class StatsGatherer:  # noqa: PLR0904
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="most_thread_messages_sent",
             annual=self.annual,
+            kwargs={"message_users": {str(k): v for k, v in message_users.items()}},
         )
 
-        data_class.message_users = {str(k): v for k, v in message_users.items()}
         return self.add_annual_changes(start, data_class)
 
     def longest_message(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
@@ -1144,22 +1147,22 @@ class StatsGatherer:  # noqa: PLR0904
         messages = self.cache.get_messages(guild_id, start, end)
         longest_message = None
         for message in messages:
-            if message["user_id"] == BSE_BOT_ID:
+            if message.user_id == BSE_BOT_ID:
                 continue
-            if content := message["content"]:
+            if content := message.content:
                 if not longest_message:
                     longest_message = message
                     continue
-                if len(content) > len(longest_message["content"]):
+                if len(content) > len(longest_message.content):
                     longest_message = message
 
         data_class = StatDB(
             type="award",
             guild_id=guild_id,
-            user_id=longest_message["user_id"],
+            user_id=longest_message.user_id,
             award=AwardsTypes.LONGEST_MESSAGE,
             month=start.strftime("%b %y"),
-            value=len(longest_message["content"]),
+            value=len(longest_message.content),
             timestamp=datetime.datetime.now(),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="longest_message",
@@ -1180,7 +1183,7 @@ class StatsGatherer:  # noqa: PLR0904
             Stat: the wordle stat
         """
         messages = self.cache.get_messages(guild_id, start, end)
-        wordle_messages = [m for m in messages if "wordle" in m["message_type"]]
+        wordle_messages = [m for m in messages if "wordle" in m.message_type]
 
         # number of days in the time period
         days = (end - start).days
@@ -1188,13 +1191,13 @@ class StatsGatherer:  # noqa: PLR0904
 
         wordle_count = {}
         for wordle in wordle_messages:
-            uid = wordle["user_id"]
+            uid = wordle.user_id
             if uid == BSE_BOT_ID:
                 continue
             if uid not in wordle_count:
                 wordle_count[uid] = []
 
-            result = re.search(r"[\dX]/\d", wordle["content"]).group()
+            result = re.search(r"[\dX]/\d", wordle.content).group()
             guesses = result.split("/")[0]
 
             if guesses == "X":
@@ -1239,9 +1242,9 @@ class StatsGatherer:  # noqa: PLR0904
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="lowest_avg_wordle",
             annual=self.annual,
+            kwargs={"wordle_avgs": {str(k): v for k, v in wordle_avgs.items()}},
         )
 
-        data_class.wordle_avgs = {str(k): v for k, v in wordle_avgs.items()}
         return self.add_annual_changes(start, data_class)
 
     def highest_average_wordle_score(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
@@ -1256,21 +1259,21 @@ class StatsGatherer:  # noqa: PLR0904
             Stat: the wordle stat
         """
         messages = self.cache.get_messages(guild_id, start, end)
-        wordle_messages = [m for m in messages if "wordle" in m["message_type"]]
+        wordle_messages = [m for m in messages if "wordle" in m.message_type]
 
         # number of days in the time period
         days = (end - start).days
         threshold = round(days / 2)
 
-        wordle_count = {}
+        wordle_count: dict[int, list[int]] = {}
         for wordle in wordle_messages:
-            uid = wordle["user_id"]
+            uid = wordle.user_id
             if uid == BSE_BOT_ID:
                 continue
             if uid not in wordle_count:
                 wordle_count[uid] = []
 
-            result = re.search(r"[\dX]/\d", wordle["content"]).group()
+            result = re.search(r"[\dX]/\d", wordle.content).group()
             guesses = result.split("/")[0]
 
             if guesses == "X":
@@ -1292,7 +1295,7 @@ class StatsGatherer:  # noqa: PLR0904
         else:
             self.logger.debug("Length of wordle count (%s) is less than one - skipping threshold", len(wordle_count))
 
-        wordle_avgs = {}
+        wordle_avgs: dict[int, float] = {}
         for uid in wordle_count:
             all_guesses = wordle_count[uid]
             avg = sum(all_guesses) / len(all_guesses)
@@ -1316,9 +1319,9 @@ class StatsGatherer:  # noqa: PLR0904
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="highest_avg_wordle",
             annual=self.annual,
+            kwargs={"wordle_avgs": {str(k): v for k, v in wordle_avgs.items()}},
         )
 
-        data_class.wordle_avgs = {str(k): v for k, v in wordle_avgs.items()}
         return self.add_annual_changes(start, data_class)
 
     def twitter_addict(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
@@ -1334,12 +1337,10 @@ class StatsGatherer:  # noqa: PLR0904
         """
         messages = self.cache.get_messages(guild_id, start, end)
 
-        tweet_users = {}
+        tweet_users: dict[int, int] = {}
         for message in messages:
-            if "twitter" in message["content"] or (
-                "https://x.com/" in message["content"] and "link" in message["message_type"]
-            ):
-                user_id = message["user_id"]
+            if "twitter" in message.content or ("https://x.com/" in message.content and "link" in message.message_type):
+                user_id = message.user_id
                 if user_id not in tweet_users:
                     tweet_users[user_id] = 0
                 tweet_users[user_id] += 1
@@ -1362,9 +1363,9 @@ class StatsGatherer:  # noqa: PLR0904
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="twitter_addict",
             annual=self.annual,
+            kwargs={"twitter_addict": {str(k): v for k, v in tweet_users.items()}},
         )
 
-        data_class.twitter_addict = {str(k): v for k, v in tweet_users.items()}
         return self.add_annual_changes(start, data_class)
 
     def jerk_off_contributor(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
@@ -1379,12 +1380,12 @@ class StatsGatherer:  # noqa: PLR0904
             Stat: jerk off stat
         """
         messages = self.cache.get_messages(guild_id, start, end)
-        jerk_off_messages = [m for m in messages if m["channel_id"] == JERK_OFF_CHAT]
+        jerk_off_messages = [m for m in messages if m.channel_id == JERK_OFF_CHAT]
 
-        jerk_off_users = {}
+        jerk_off_users: dict[int, int] = {}
         for message in jerk_off_messages:
-            if any(a for a in ["link", "attachment"] if a in message["message_type"]):
-                user_id = message["user_id"]
+            if any(a for a in ["link", "attachment"] if a in message.message_type):
+                user_id = message.user_id
                 if user_id not in jerk_off_users:
                     jerk_off_users[user_id] = 0
                 jerk_off_users[user_id] += 1
@@ -1407,9 +1408,9 @@ class StatsGatherer:  # noqa: PLR0904
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="masturbator",
             annual=self.annual,
+            kwargs={"masturbators": {str(k): v for k, v in jerk_off_users.items()}},
         )
 
-        data_class.masturbators = {str(k): v for k, v in jerk_off_users.items()}
         return self.add_annual_changes(start, data_class)
 
     def big_memer(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
@@ -1425,12 +1426,12 @@ class StatsGatherer:  # noqa: PLR0904
         """
         reaction_messages = self.cache.get_reactions(guild_id, start, end)
 
-        reaction_users = {}
+        reaction_users: dict[int, int] = {}
         for message in reaction_messages:
-            user_id = message["user_id"]
+            user_id = message.user_id
             if user_id not in reaction_users:
                 reaction_users[user_id] = 0
-            reactions = [r for r in message["reactions"] if r["user_id"] != user_id]
+            reactions = [r for r in message.reactions if r.user_id != user_id]
             reaction_users[user_id] += len(reactions)
 
         big_memer = sorted(reaction_users, key=lambda x: reaction_users[x], reverse=True)[0]
@@ -1446,9 +1447,9 @@ class StatsGatherer:  # noqa: PLR0904
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="big_memer",
             annual=self.annual,
+            kwargs={"reactees": {str(k): v for k, v in reaction_users.items()}},
         )
 
-        data_class.reactees = {str(k): v for k, v in reaction_users.items()}
         return self.add_annual_changes(start, data_class)
 
     def react_king(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
@@ -1463,13 +1464,13 @@ class StatsGatherer:  # noqa: PLR0904
             Stat: the react king award
         """
         reaction_messages = self.cache.get_reactions(guild_id, start, end)
-        reactions = []
+        reactions: list[ReactionDB] = []
         for react in reaction_messages:
-            reactions.extend(react["reactions"])
+            reactions.extend(react.reactions)
 
         reaction_users = {}
         for reaction in reactions:
-            user_id = reaction["user_id"]
+            user_id = reaction.user_id
             if user_id not in reaction_users:
                 reaction_users[user_id] = 0
             reaction_users[user_id] += 1
@@ -1487,9 +1488,9 @@ class StatsGatherer:  # noqa: PLR0904
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="react_king",
             annual=self.annual,
+            kwargs={"reaction_users": {str(k): v for k, v in reaction_users.items()}},
         )
 
-        data_class.reaction_users = {str(k): v for k, v in reaction_users.items()}
         return self.add_annual_changes(start, data_class)
 
     def most_replies(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> tuple[StatDB, StatDB]:
@@ -1504,18 +1505,18 @@ class StatsGatherer:  # noqa: PLR0904
             Tuple[Stat, Stat]: the two reply Stat objects
         """
         messages_with_replies = self.cache.get_replies(guild_id, start, end)
-        replies = {}  # replies someone has done
-        replied_to = {}  # replies _received_
+        replies: dict[int, int] = {}  # replies someone has done
+        replied_to: dict[int, int] = {}  # replies _received_
         for message in messages_with_replies:
-            _replies = message["replies"]
-            m_user_id = message["user_id"]
+            _replies = message.replies
+            m_user_id = message.user_id
             if m_user_id not in replied_to:
                 replied_to[m_user_id] = 0
             for reply in _replies:
-                if not (start < reply["timestamp"] < end):
+                if not (start < reply.timestamp < end):
                     continue
                 replied_to[m_user_id] += 1
-                user_id = reply["user_id"]
+                user_id = reply.user_id
                 if user_id not in replies:
                     replies[user_id] = 0
                 replies[user_id] += 1
@@ -1534,9 +1535,9 @@ class StatsGatherer:  # noqa: PLR0904
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="serial_replier",
             annual=self.annual,
+            kwargs={"repliers": {str(k): v for k, v in replies.items()}},
         )
 
-        replier_data_class.repliers = {str(k): v for k, v in replies.items()}
         replier_data_class = self.add_annual_changes(start, replier_data_class)
 
         conversation_data_class = StatDB(
@@ -1550,9 +1551,9 @@ class StatsGatherer:  # noqa: PLR0904
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="conversation_starter",
             annual=self.annual,
+            kwargs={"repliees": {str(k): v for k, v in replied_to.items()}},
         )
 
-        conversation_data_class.repliees = {str(k): v for k, v in replied_to.items()}
         conversation_data_class = self.add_annual_changes(start, conversation_data_class)
 
         return replier_data_class, conversation_data_class
@@ -1569,14 +1570,14 @@ class StatsGatherer:  # noqa: PLR0904
             Stat: the stat object
         """
         edited_messages = self.cache.get_edited_messages(guild_id, start, end)
-        message_users = {}
+        message_users: dict[int, dict[str, int]] = {}
         for message in edited_messages:
-            uid = message["user_id"]
+            uid = message.user_id
             if uid == BSE_BOT_ID:
                 continue
             if uid not in message_users:
                 message_users[uid] = {"count": 0, "messages": 0}
-            message_users[uid]["count"] += message["edit_count"]
+            message_users[uid]["count"] += message.edit_count
             message_users[uid]["messages"] += 1
 
         try:
@@ -1596,10 +1597,11 @@ class StatsGatherer:  # noqa: PLR0904
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="most_messages_edited",
             annual=self.annual,
+            kwargs={
+                "message_users": {str(k): v for k, v in message_users.items()},
+                "message_count": message_users[fattest_fingers]["messages"],
+            },
         )
-
-        data_class.message_users = {str(k): v for k, v in message_users.items()}
-        data_class.message_count = message_users[fattest_fingers]["messages"]
 
         return self.add_annual_changes(start, data_class)
 
@@ -1617,11 +1619,11 @@ class StatsGatherer:  # noqa: PLR0904
         swears = ["fuck", "shit", "cunt", "piss", "cock", "bollock", "dick", "twat"]
         all_messages = self.cache.get_messages(guild_id, start, end)
 
-        swear_dict = {}
+        swear_dict: dict[int, int] = {}
         for message in all_messages:
-            uid = message["user_id"]
-            content = message.get("content")
-            if content is None or content is False:
+            uid = message.user_id
+            content = message.content
+            if not content:
                 continue
 
             if uid not in swear_dict:
@@ -1648,8 +1650,9 @@ class StatsGatherer:  # noqa: PLR0904
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="most_swears",
             annual=self.annual,
+            kwargs={"swears": {str(k): v for k, v in swear_dict.items()}},
         )
-        data_class.swears = {str(k): v for k, v in swear_dict.items()}
+
         return self.add_annual_changes(start, data_class)
 
     def most_messages_to_a_single_channel(
@@ -1670,10 +1673,10 @@ class StatsGatherer:  # noqa: PLR0904
         """
         messages = self.cache.get_messages(guild_id, start, end)
 
-        users = {}
+        users: dict[int, dict[str, int]] = {}
         for message in messages:
-            user_id = message["user_id"]
-            channel_id = message["channel_id"]
+            user_id = message.user_id
+            channel_id = message.channel_id
 
             if user_id not in users:
                 users[user_id] = {"total": 0}
@@ -1707,9 +1710,9 @@ class StatsGatherer:  # noqa: PLR0904
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="single_minded",
             annual=self.annual,
+            kwargs={"users": {str(k): v for k, v in users.items()}, "channel": users[top]["channel"]},
         )
-        data_class.users = {str(k): v for k, v in users.items()}
-        data_class.channel = users[top]["channel"]
+
         return self.add_annual_changes(start, data_class)
 
     def most_messages_to_most_channels(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
@@ -1727,8 +1730,8 @@ class StatsGatherer:  # noqa: PLR0904
 
         users = {}
         for message in messages:
-            user_id = message["user_id"]
-            channel_id = message["channel_id"]
+            user_id = message.user_id
+            channel_id = message.channel_id
 
             if user_id not in users:
                 users[user_id] = {"channels": {}, "messages": 0}
@@ -1751,9 +1754,9 @@ class StatsGatherer:  # noqa: PLR0904
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="diverse_portfolio",
             annual=self.annual,
+            kwargs={"users": {str(k): v for k, v in users.items()}, "messages": users[top]["messages"]},
         )
-        data_class.users = {str(k): v for k, v in users.items()}
-        data_class.messages = users[top]["messages"]
+
         return self.add_annual_changes(start, data_class)
 
     # bets
@@ -1794,9 +1797,9 @@ class StatsGatherer:  # noqa: PLR0904
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="most_bets_created",
             annual=self.annual,
+            kwargs={"bookies": {str(k): v for k, v in bet_users.items()}},
         )
 
-        data_class.bookies = {str(k): v for k, v in bet_users.items()}
         return self.add_annual_changes(start, data_class)
 
     def most_eddies_bet(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
@@ -1837,9 +1840,9 @@ class StatsGatherer:  # noqa: PLR0904
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="most_eddies_placed",
             annual=self.annual,
+            kwargs={"betters": {str(k): v for k, v in bet_users.items()}},
         )
 
-        data_class.betters = {str(k): v for k, v in bet_users.items()}
         return self.add_annual_changes(start, data_class)
 
     def most_eddies_won(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
@@ -1880,9 +1883,9 @@ class StatsGatherer:  # noqa: PLR0904
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="most_eddies_won",
             annual=self.annual,
+            kwargs={"bet_winners": {str(k): v for k, v in bet_users.items()}},
         )
 
-        data_class.bet_winners = {str(k): v for k, v in bet_users.items()}
         return self.add_annual_changes(start, data_class)
 
     def most_time_king(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
@@ -1945,9 +1948,9 @@ class StatsGatherer:  # noqa: PLR0904
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="longest_king",
             annual=self.annual,
+            kwargs={"kings": {str(k): v for k, v in kings.items()}},
         )
 
-        data_class.kings = {str(k): v for k, v in kings.items()}
         return self.add_annual_changes(start, data_class)
 
     # vc
@@ -1966,13 +1969,13 @@ class StatsGatherer:  # noqa: PLR0904
 
         user_dict = {}
         for vc in vc_interactions:
-            user_id = vc["user_id"]
-            channel_id = vc["channel_id"]
+            user_id = vc.user_id
+            channel_id = vc.channel_id
 
             if user_id not in user_dict:
                 user_dict[user_id] = {"count": 0, "channels": []}
 
-            user_dict[user_id]["count"] += vc["time_in_vc"]
+            user_dict[user_id]["count"] += vc.time_in_vc
             if channel_id not in user_dict[user_id]["channels"]:
                 user_dict[user_id]["channels"].append(channel_id)
 
@@ -1993,10 +1996,12 @@ class StatsGatherer:  # noqa: PLR0904
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="big_gamer",
             annual=self.annual,
+            kwargs={
+                "users": {str(k): v for k, v in user_dict.items()},
+                "channels": len(user_dict[big_gamer]["channels"]),
+            },
         )
 
-        data_class.users = {str(k): v for k, v in user_dict.items()}
-        data_class.channels = len(user_dict[big_gamer]["channels"])
         return self.add_annual_changes(start, data_class)
 
     def big_streamer(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
@@ -2014,14 +2019,14 @@ class StatsGatherer:  # noqa: PLR0904
 
         user_dict = {}
         for vc in vc_interactions:
-            user_id = vc["user_id"]
-            channel_id = vc["channel_id"]
+            user_id = vc.user_id
+            channel_id = vc.channel_id
 
             if user_id not in user_dict:
                 user_dict[user_id] = {"count": 0, "channels": []}
 
-            user_dict[user_id]["count"] += vc["time_streaming"]
-            if channel_id not in user_dict[user_id]["channels"] and vc["time_streaming"]:
+            user_dict[user_id]["count"] += vc.time_streaming
+            if channel_id not in user_dict[user_id]["channels"] and vc.time_streaming:
                 user_dict[user_id]["channels"].append(channel_id)
 
         try:
@@ -2046,8 +2051,9 @@ class StatsGatherer:  # noqa: PLR0904
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="big_streamer",
             annual=self.annual,
+            kwargs={
+                "users": {str(k): v for k, v in user_dict.items()},
+                "channels": len(user_dict[big_streamer]["channels"]),
+            },
         )
-
-        data_class.users = {str(k): v for k, v in user_dict.items()}
-        data_class.channels = len(user_dict[big_streamer]["channels"])
         return self.add_annual_changes(start, data_class)

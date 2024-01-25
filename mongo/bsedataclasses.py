@@ -194,7 +194,12 @@ class Awards(BaseClass):
         """
         cls_fields = {f.name for f in dataclasses.fields(StatDB)}
         extras = {k: v for k, v in data.items() if k not in cls_fields}
-        return StatDB(**{k: v for k, v in data.items() if k in cls_fields}, kwargs=extras)
+        fields = {k: v for k, v in data.items() if k in cls_fields}
+        if kwargs := fields.get("kwargs"):
+            kwargs.update(extras)
+        else:
+            fields["kwargs"] = extras
+        return StatDB(**{k: v for k, v in data.items() if k in cls_fields})
 
     def document_stat(  # noqa: PLR0913, PLR0917
         self,

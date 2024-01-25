@@ -1438,9 +1438,11 @@ class StatsGatherer:  # noqa: PLR0904
             for row in squares:
                 if row[:2] != row[3:][::-1]:
                     # not symmetrical - skip this message
-                    continue
-
-            wordle_count[uid] += 1
+                    break
+            else:
+                # only increment if we make it through the for loop without breaking
+                # breaking means we're not symmetrical
+                wordle_count[uid] += 1
 
         try:
             user = sorted(wordle_count, key=lambda x: wordle_count[x], reverse=True)[0]

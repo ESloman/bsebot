@@ -357,7 +357,8 @@ class Awards(BaseClass):
         if stat.annual:
             query["year"] = int(stat.year) - 1
         else:
-            query["month"] = (stat.timestamp - datetime.timedelta(days=37)).strftime("%b %y")
+            now = datetime.datetime.now()
+            query["month"] = (stat.timestamp - datetime.timedelta(days=37 + now.day)).strftime("%b %y")
 
         match stat.type:
             case "award":

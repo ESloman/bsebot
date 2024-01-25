@@ -10,7 +10,7 @@ from discordbot.bot_enums import AwardsTypes, StatTypes
 class Stat:
     """A stat representation."""
 
-    type: str  # noqa: A003
+    type: str
     guild_id: int
     short_name: str
     timestamp: datetime.datetime

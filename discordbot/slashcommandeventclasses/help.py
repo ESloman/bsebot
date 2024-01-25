@@ -30,7 +30,7 @@ class Help(BSEddies):
         self.help_string = "This command"
         self.command_name = "help"
 
-    async def help(self, ctx: discord.ApplicationContext) -> None:  # noqa: A003
+    async def help(self, ctx: discord.ApplicationContext) -> None:
         """Basic view method for handling help slash commands.
 
         Args:

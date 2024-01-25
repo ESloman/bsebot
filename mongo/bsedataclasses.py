@@ -358,7 +358,10 @@ class Awards(BaseClass):
             case "stat":
                 query["stat"] = stat.stat
 
-        return self.query(query)
+        ret: list[StatDB] = self.query(query)
+        if not ret:
+            return None
+        return ret[0]
 
 
 class WordleAttempts(BaseClass):

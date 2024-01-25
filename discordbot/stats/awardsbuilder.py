@@ -280,7 +280,8 @@ class AwardsBuilder:
                 f"{comparisons.get(time_spent_in_vc.stat)}\n"
             ),
             (
-                f"- **Talkiest VC** 💬: <#{vc_most_time_spent.value}> (`{vc_most_time_spent.users}` users spent "
+                f"- **Talkiest VC** 💬: <#{vc_most_time_spent.value}> "
+                f"(`{vc_most_time_spent.kwargs["users"]}` users spent "
                 f"`{datetime.timedelta(seconds=vc_most_time_spent.kwargs["time"])!s}` in this VC)\n"
             ),
             (

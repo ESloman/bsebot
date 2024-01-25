@@ -58,16 +58,16 @@ class ActivityChanger(BaseTask):
             weights = []
 
             for activity in all_activities:
-                weight = total - activity["count"]
+                weight = total - activity.count
                 # just make sure that the weight is non-zero
                 weight += 0.1
                 weights.append(weight)
 
             _activity = random.choices(all_activities, weights)[0]
 
-            new_activity = {"name": _activity["name"], "details": "Waiting for commands!"}
+            new_activity = {"name": _activity.name, "details": "Waiting for commands!"}
 
-            match _activity["category"]:
+            match _activity.category:
                 case "listening":
                     new_activity["state"] = "Listening"
                     new_activity["type"] = discord.ActivityType.listening
@@ -82,7 +82,7 @@ class ActivityChanger(BaseTask):
 
             activity = discord.Activity(**new_activity)
             # increment count for this selected activity
-            self.bot_activities.update({"_id": _activity["_id"]}, {"$inc": {"count": 1}})
+            self.bot_activities.update({"_id": _activity._id}, {"$inc": {"count": 1}})  # noqa: SLF001
 
         await self.bot.change_presence(activity=activity)
 

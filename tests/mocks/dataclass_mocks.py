@@ -260,6 +260,39 @@ def get_bet_inputs() -> list[dict[str, any]]:
     ]
 
 
+def get_bot_activity_inputs() -> list[dict[str, any]]:
+    """Returns a bunch of bot activity inputs."""
+    return [
+        {
+            "_id": "647a0acf9e23a8c75991939b",
+            "category": "playing",
+            "name": "with pee poo shit fart and ass",
+            "created_by": 77458304837615616,
+            "created": "2023-06-02T16:29:19.242+0000",
+            "count": 41,
+            "archived": False,
+        },
+        {
+            "_id": "64cd06e9788f9403b3559589",
+            "category": "watching",
+            "name": "Sheldon playing Elden Ring",
+            "created_by": 189458414764687360,
+            "created": "2023-08-04T15:10:49.866+0000",
+            "count": 41,
+            "archived": False,
+        },
+        {
+            "_id": "6464933c21cba154102256f1",
+            "category": "listening",
+            "name": "Wikipedia podcasts",
+            "created_by": 189458414764687360,
+            "created": "2023-05-17T09:41:32.819+0000",
+            "count": 41,
+            "archived": False,
+        },
+    ]
+
+
 def get_emoji_inputs() -> list[dict[str, any]]:
     """Returns a bunch if emoji inputs."""
     return [

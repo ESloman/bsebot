@@ -740,9 +740,9 @@ class StatsGatherer:  # noqa: PLR0904
         users = []
 
         for interaction in vc_interactions:
-            time_spent = interaction["time_in_vc"]
-            user_id = interaction["user_id"]
-            channel_id = interaction["channel_id"]
+            time_spent = interaction.time_in_vc
+            user_id = interaction.user_id
+            channel_id = interaction.channel_id
             vc_time += time_spent
             if channel_id not in channels:
                 channels.append(channel_id)
@@ -777,12 +777,12 @@ class StatsGatherer:  # noqa: PLR0904
         """
         vc_interactions = self.cache.get_vc_interactions(guild_id, start, end)
 
-        channels = {}
+        channels: dict[int, dict[str, list | int]] = {}
 
         for interaction in vc_interactions:
-            time_spent = interaction["time_in_vc"]
-            user_id = interaction["user_id"]
-            channel_id = interaction["channel_id"]
+            time_spent = interaction.time_in_vc
+            user_id = interaction.user_id
+            channel_id = interaction.channel_id
             if channel_id not in channels:
                 channels[channel_id] = {"count": 0, "users": []}
             channels[channel_id]["count"] += time_spent
@@ -826,9 +826,9 @@ class StatsGatherer:  # noqa: PLR0904
         channels: dict[int, dict[str, int | list]] = {}
 
         for interaction in vc_interactions:
-            time_spent = interaction["time_in_vc"]
-            user_id = interaction["user_id"]
-            channel_id = interaction["channel_id"]
+            time_spent = interaction.time_in_vc
+            user_id = interaction.user_id
+            channel_id = interaction.channel_id
             if channel_id not in channels:
                 channels[channel_id] = {"count": 0, "users": []}
             channels[channel_id]["count"] += time_spent

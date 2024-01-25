@@ -50,7 +50,7 @@ class TestBetManager:
             (500, -0.00005, 2.3, 0, 2, 1138),
         ],
     )
-    def test_calculate_single_bet_winnings(  # noqa: PLR0913, PLR0917
+    def test_calculate_single_bet_winnings(  # noqa: PLR0913
         self, points_bet: int, multiplier: float, coeff: float, extra: int, winners: int, value: int
     ) -> None:
         """Tests our '_calculate_single_bet_winnings'."""

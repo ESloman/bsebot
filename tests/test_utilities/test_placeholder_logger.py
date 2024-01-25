@@ -20,7 +20,7 @@ class TestPlaceHolderLogger:
         """Tests an instance of our class."""
         logger = PlaceHolderLogger()
         for attr in ["info", "debug", "warning"]:
-            assert logger.__getattribute__(attr) is not None
+            assert getattr(logger, attr) is not None
         logger.info("Info")
         logger.warning("Warning")
         logger.debug("Debug")

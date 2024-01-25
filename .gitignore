@@ -135,3 +135,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+tests/mocks/mock_data/sanitise_data.py
+tests/mocks/mock_data/bestsummereverpoints/og_*

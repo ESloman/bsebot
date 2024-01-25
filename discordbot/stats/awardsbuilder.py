@@ -63,7 +63,10 @@ class AwardsBuilder:
         """
         diff = new_value - old_value
 
-        perc = round((diff / old_value) * 100, 2)
+        try:
+            perc = round((diff / old_value) * 100, 2)
+        except ZeroDivisionError:
+            perc = "∞"
 
         if perc < 0:
             # make percentage positive
@@ -503,7 +506,8 @@ class AwardsBuilder:
                 # most time spent in VC
                 "- The _'big talker'_ 🔊 award: "
                 f"<@!{big_gamer.user_id}> "
-                f"(`{datetime.timedelta(seconds=big_gamer.value)!s}` spent in {big_gamer.channels} channels)\n"
+                f"(`{datetime.timedelta(seconds=big_gamer.value)!s}` spent in "
+                f"{big_gamer.kwargs["channels"]} channels)\n"
             ),
             (
                 # most time streaming

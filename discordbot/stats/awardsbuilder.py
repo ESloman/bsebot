@@ -13,6 +13,7 @@ from discordbot.constants import (
     BSEDDIES_REVOLUTION_CHANNEL,
     JERK_OFF_CHAT,
     MONTHLY_AWARDS_PRIZE,
+    SLOMAN_SERVER_ID,
 )
 from discordbot.stats.statsclasses import StatDB, StatsGatherer
 from mongo.bsedataclasses import Awards
@@ -93,7 +94,13 @@ class AwardsBuilder:
 
         args = (self.guild_id, start, end)
 
-        guild = await self.bot.fetch_guild(self.guild_id)
+        try:
+            guild = await self.bot.fetch_guild(self.guild_id)
+        except discord.errors.NotFound:
+            if self.debug:
+                guild = await self.bot.fetch_guild(SLOMAN_SERVER_ID)
+            else:
+                raise
 
         # get a list of channel IDs here to use
         if self.debug:
@@ -126,14 +133,13 @@ class AwardsBuilder:
 
         busiest_day_format = busiest_day.value.strftime("%a %d %b")
         quietest_day_format = quietest_day.value.strftime("%a %d %b")
-        popular_channel_obj = await self.bot.fetch_channel(most_popular_channel.value)
-        vc_time_obj = await self.bot.fetch_channel(vc_most_time_spent.value)
-        vc_users_obj = await self.bot.fetch_channel(vc_most_users.value)
-        emoji_obj = await guild.fetch_emoji(most_used_server_emoji.emoji_id)
+        most_used_emoji_mention = f"<a:{most_used_server_emoji.value}:{most_used_server_emoji.kwargs["emoji_id"]}>"
 
-        thread_objects = [await self.bot.fetch_channel(thread_id) for thread_id in threads_created.kwargs["threads"]]
-
-        emoji_objects = [await guild.fetch_emoji(emoji_id) for emoji_id in emojis_created.kwargs["emoji_ids"]]
+        thread_mentions = [f"<#{thread_id}>" for thread_id in threads_created.kwargs["threads"]]
+        emoji_mentions = [
+            f"<a:{emoji[1]}:{emoji[0]}>"
+            for emoji in zip(emojis_created.kwargs["emoji_ids"], emojis_created.kwargs["emoji_names"], strict=True)
+        ]
 
         stats = [
             number_messages,
@@ -246,12 +252,12 @@ class AwardsBuilder:
                 f"(`{quietest_thread.kwargs["messages"]}` messages from `{quietest_thread.kwargs["users"]}` users)\n"
             ),
             (
-                f"- **Most popular channel** 💌: {popular_channel_obj.mention} "
+                f"- **Most popular channel** 💌: <#{most_popular_channel.value}> "
                 f"(`{most_popular_channel.kwargs["users"]}` unique users)\n"
             ),
             (
                 f"- **Threads created** 🖇️: {threads_created.value} ("
-                f"{','.join([t.mention for t in thread_objects]) if len(thread_objects) < 5 else '_too many to list_'}"  # noqa: PLR2004
+                f"{','.join(thread_mentions) if len(thread_mentions) < 5 else '_too many to list_'}"  # noqa: PLR2004
                 ")\n"
             ),
             (
@@ -274,11 +280,11 @@ class AwardsBuilder:
                 f"{comparisons.get(time_spent_in_vc.stat)}\n"
             ),
             (
-                f"- **Talkiest VC** 💬: {vc_time_obj.mention} (`{vc_most_time_spent.users}` users spent "
+                f"- **Talkiest VC** 💬: <#{vc_most_time_spent.value}> (`{vc_most_time_spent.users}` users spent "
                 f"`{datetime.timedelta(seconds=vc_most_time_spent.kwargs["time"])!s}` in this VC)\n"
             ),
             (
-                f"- **Most popular VC** 🎉: {vc_users_obj.mention} "
+                f"- **Most popular VC** 🎉: <#{vc_most_users.value}> "
                 f"(`{vc_most_users.kwargs["users"]}` unique users spent "
                 f"`{datetime.timedelta(seconds=vc_most_users.kwargs["time"])!s}` in this VC)\n"
             ),
@@ -286,12 +292,15 @@ class AwardsBuilder:
             (f"- **Eddies gained via salary** 👩🏼‍💼: `{salary_gains.value}`{comparisons.get(salary_gains.stat)}\n"),
             (f"- **Eddies placed on bets** 🧑🏼‍💻: `{eddies_placed.value}`{comparisons.get(eddies_placed.stat)}\n"),
             (f"- **Eddies won on bets** 🧑🏼‍🏫: `{eddies_won.value}`{comparisons.get(eddies_won.stat)}\n"),
-            (f"- **Most popular server emoji** 🗳️: {emoji_obj} (`{most_used_server_emoji.kwargs["count"]}`)"),
+            (
+                f"- **Most popular server emoji** 🗳️: {most_used_emoji_mention} "
+                f"(`{most_used_server_emoji.kwargs["count"]}`)"
+            ),
         ]
 
         if self.annual:
             stat_parts.append(
-                f"\n**Emojis created** : {emojis_created.value} ({', '.join([str(e) for e in emoji_objects])})",
+                f"\n**Emojis created** : {emojis_created.value} ({', '.join(emoji_mentions)})",
             )
 
         bseddies_stats = []
@@ -305,7 +314,7 @@ class AwardsBuilder:
 
         return stats, bseddies_stats
 
-    async def build_awards_and_message(self: "AwardsBuilder") -> tuple[list[StatDB], list[str]]:
+    async def build_awards_and_message(self: "AwardsBuilder") -> tuple[list[StatDB], list[str]]:  # noqa: PLR0915
         """Uses StatsGatherer to gather all the awards.
 
         Formats an awards message
@@ -323,7 +332,13 @@ class AwardsBuilder:
 
         args = (self.guild_id, start, end)
 
-        guild = await self.bot.fetch_guild(self.guild_id)
+        try:
+            guild = await self.bot.fetch_guild(self.guild_id)
+        except discord.errors.NotFound:
+            if self.debug:
+                guild = await self.bot.fetch_guild(SLOMAN_SERVER_ID)
+            else:
+                raise
 
         most_messages = self.stats.most_messages_sent(*args)
         least_messages = self.stats.least_messages_sent(*args)

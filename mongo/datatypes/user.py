@@ -19,7 +19,7 @@ class UserDB(NamedDBObject):
     # eddies stuff
     points: int
     """The amount of eddies the user has in the server."""
-    king: bool
+    king: bool = False
     """Whether the user is KING in the server."""
     daily_eddies: bool = False
     """Whether the user receives daily eddie messages."""

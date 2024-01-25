@@ -963,7 +963,7 @@ class StatsGatherer:  # noqa: PLR0904
             timestamp=datetime.datetime.now(),
             short_name="emojis_created",
             annual=self.annual,
-            kwargs={"emoji_ids": [e.eid for e in created]},
+            kwargs={"emoji_ids": [e.eid for e in created], "emoji_names": [e.name for e in created]},
         )
 
         return self.add_annual_changes(start, data_class)

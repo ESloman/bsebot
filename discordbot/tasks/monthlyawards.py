@@ -38,15 +38,16 @@ class MonthlyBSEddiesAwards(BaseTask):
         now = datetime.datetime.now()
 
         # whether to run in debug mode or not
-        debug = False
+        debug = True
 
         if (now.day != 1 or now.hour != 11) and not debug:  # noqa: PLR2004
             # we only want to trigger on the first of each month
             # and also trigger at 11am
             return
 
-        if BSE_SERVER_ID not in self.guild_ids:
+        if BSE_SERVER_ID not in self.guild_ids and not debug:
             # does not support other servers yet
+            self.logger.debug("%s not in guilds - not supported", BSE_SERVER_ID)
             return
 
         if not debug:
@@ -77,7 +78,7 @@ class MonthlyBSEddiesAwards(BaseTask):
         awards, bseddies_awards = await awards_builder.build_awards_and_message()
 
         send_messages = True
-        if now.month == 1:
+        if now.month == 1 and not debug:
             # don't send awards in Jan
             # will be superseded by the annual stuff
             send_messages = False

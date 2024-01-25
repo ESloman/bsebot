@@ -977,7 +977,7 @@ class StatsGatherer:  # noqa: PLR0904
             Stat: the emojis created stat
         """
         all_server_emojis = self.cache.server_emojis.get_all_emojis(guild_id)
-        created = [e for e in all_server_emojis if start < e["created"] < end]
+        created = [e for e in all_server_emojis if start < e.created < end]
 
         data_class = StatDB(
             _id="",

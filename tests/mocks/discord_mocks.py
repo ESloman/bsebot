@@ -17,7 +17,7 @@ class MemberMock:
 
 @dataclasses.dataclass
 class RoleMock:
-    id: int  # noqa: A003
+    id: int
     name: str
     mention: str
 
@@ -28,7 +28,7 @@ class ChannelMock:
         self._id = channel_id
 
     @property
-    def id(self) -> int:  # noqa: A003
+    def id(self) -> int:
         """ID property."""
         return self._id
 
@@ -42,7 +42,7 @@ class GuildMock:
         self._id = guild_id
 
     @property
-    def id(self) -> int:  # noqa: A003
+    def id(self) -> int:
         """ID property."""
         return self._id
 

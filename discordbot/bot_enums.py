@@ -120,6 +120,8 @@ class AwardsTypes(IntEnum):
     SINGLE_MINDED = 22
     DIVERSE_PORTFOLIO = 23
     WORST_AVG_WORDLE = 24
+    WORDLE_MOST_GREENS = 25
+    WORDLE_MOST_SYMMETRICAL = 26
 
 
 class StatTypes(IntEnum):

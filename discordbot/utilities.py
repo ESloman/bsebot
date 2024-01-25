@@ -73,7 +73,7 @@ class _ColourFormatter(logging.Formatter):
         for level, colour in LEVEL_COLOURS
     }
 
-    def format(self: "_ColourFormatter", record: LogRecord) -> str:  # noqa: A003
+    def format(self: "_ColourFormatter", record: LogRecord) -> str:
         """Formats the message appropriately with colour.
 
         Args:

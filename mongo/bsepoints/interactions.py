@@ -50,7 +50,7 @@ class UserInteractions(BaseClass):
 
     def paginated_query(self, query_dict: dict[str, any], limit: int = 1000, skip: int = 0) -> list[MessageDB]:
         """Overriding to define return type."""
-        return [super().paginated_query(query_dict, limit, skip)]
+        return super().paginated_query(query_dict, limit, skip)
 
     def get_all_messages_for_server(self, guild_id: int) -> list[MessageDB]:
         """Gets all messages for a given server.

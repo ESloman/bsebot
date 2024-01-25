@@ -227,7 +227,7 @@ class BaseClass:
             skip += limit
             len_ret = len(ret)
             docs.extend(ret)
-        return docs
+        return [self.make_data_class(doc) for doc in docs]
 
     def get_collection_names(self) -> None | list:
         """Gets collection names of database.

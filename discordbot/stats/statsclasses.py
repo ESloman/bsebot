@@ -107,12 +107,17 @@ class StatsGatherer:  # noqa: PLR0904
         """
         messages = self.cache.get_messages(guild_id, start, end)
 
-        channel_ids = {m.channel_id for m in messages}
-        user_ids = {m.user_id for m in messages}
+        for message in messages:
+            if isinstance(message, list):
+                self.logger.debug(message)
+
+        channel_ids = {message.channel_id for message in messages}
+        user_ids = {message.user_id for message in messages}
 
         data_class = StatDB(
-            "stat",
-            guild_id,
+            _id="",
+            type="stat",
+            guild_id=guild_id,
             stat=StatTypes.NUMBER_OF_MESSAGES,
             month=start.strftime("%b %y"),
             value=len(messages),
@@ -141,8 +146,9 @@ class StatsGatherer:  # noqa: PLR0904
         user_ids = {m.user_id for m in messages}
 
         data_class = StatDB(
-            "stat",
-            guild_id,
+            _id="",
+            type="stat",
+            guild_id=guild_id,
             stat=StatTypes.NUMBER_OF_THREAD_MESSAGES,
             month=start.strftime("%b %y"),
             value=len(messages),
@@ -181,8 +187,9 @@ class StatsGatherer:  # noqa: PLR0904
         average_word_number = round((sum(words) / len(words)), 2)
 
         data_class_a = StatDB(
-            "stat",
-            guild_id,
+            _id="",
+            type="stat",
+            guild_id=guild_id,
             stat=StatTypes.AVERAGE_MESSAGE_LENGTH_CHARS,
             month=start.strftime("%b %y"),
             value=average_message_len,
@@ -192,8 +199,9 @@ class StatsGatherer:  # noqa: PLR0904
         )
 
         data_class_b = StatDB(
-            "stat",
-            guild_id,
+            _id="",
+            type="stat",
+            guild_id=guild_id,
             stat=StatTypes.AVERAGE_MESSAGE_LENGTH_WORDS,
             month=start.strftime("%b %y"),
             value=average_word_number,
@@ -236,8 +244,9 @@ class StatsGatherer:  # noqa: PLR0904
         busiest = sorted(channels, key=lambda x: channels[x]["count"], reverse=True)[0]
 
         data_class = StatDB(
-            "stat",
-            guild_id,
+            _id="",
+            type="stat",
+            guild_id=guild_id,
             stat=StatTypes.BUSIEST_CHANNEL,
             month=start.strftime("%b %y"),
             value=busiest,
@@ -285,8 +294,9 @@ class StatsGatherer:  # noqa: PLR0904
             threads[0] = {"count": 0, "users": []}
 
         data_class = StatDB(
-            "stat",
-            guild_id,
+            _id="",
+            type="stat",
+            guild_id=guild_id,
             stat=StatTypes.BUSIEST_THREAD,
             month=start.strftime("%b %y"),
             value=busiest,
@@ -331,8 +341,9 @@ class StatsGatherer:  # noqa: PLR0904
         busiest = sorted(days, key=lambda x: days[x]["count"], reverse=True)[0]  # type: datetime.date
 
         data_class = StatDB(
-            "stat",
-            guild_id,
+            _id="",
+            type="stat",
+            guild_id=guild_id,
             stat=StatTypes.BUSIEST_DAY,
             month=start.strftime("%b %y"),
             value=busiest,
@@ -384,8 +395,9 @@ class StatsGatherer:  # noqa: PLR0904
         quietest = sorted(channels, key=lambda x: channels[x]["count"], reverse=False)[0]
 
         data_class = StatDB(
-            "stat",
-            guild_id,
+            _id="",
+            type="stat",
+            guild_id=guild_id,
             stat=StatTypes.QUIETEST_CHANNEL,
             month=start.strftime("%b %y"),
             value=quietest,
@@ -433,8 +445,9 @@ class StatsGatherer:  # noqa: PLR0904
             threads[0] = {"count": 0, "users": []}
 
         data_class = StatDB(
-            "stat",
-            guild_id,
+            _id="",
+            type="stat",
+            guild_id=guild_id,
             stat=StatTypes.QUIETEST_THREAD,
             month=start.strftime("%b %y"),
             value=quietest,
@@ -479,8 +492,9 @@ class StatsGatherer:  # noqa: PLR0904
         quietest = sorted(days, key=lambda x: days[x]["count"], reverse=False)[0]  # type: datetime.date
 
         data_class = StatDB(
-            "stat",
-            guild_id,
+            _id="",
+            type="stat",
+            guild_id=guild_id,
             stat=StatTypes.QUIETEST_DAY,
             month=start.strftime("%b %y"),
             value=quietest,
@@ -510,8 +524,9 @@ class StatsGatherer:  # noqa: PLR0904
         bets = self.cache.get_bets(guild_id, start, end)
 
         data_class = StatDB(
-            "stat",
-            guild_id,
+            _id="",
+            type="stat",
+            guild_id=guild_id,
             stat=StatTypes.NUMBER_OF_BETS,
             month=start.strftime("%b %y"),
             value=len(bets),
@@ -541,8 +556,9 @@ class StatsGatherer:  # noqa: PLR0904
             salary_total += trans.amount
 
         data_class = StatDB(
-            "stat",
-            guild_id,
+            _id="",
+            type="stat",
+            guild_id=guild_id,
             stat=StatTypes.SALARY_GAINS,
             month=start.strftime("%b %y"),
             value=salary_total,
@@ -599,8 +615,9 @@ class StatsGatherer:  # noqa: PLR0904
         average_bot_wordle = round((sum(bot_wordle_count) / len(bot_wordle_count)), 4)
 
         data_class = StatDB(
-            "stat",
-            guild_id,
+            _id="",
+            type="stat",
+            guild_id=guild_id,
             stat=StatTypes.AVERAGE_WORDLE_VICTORY,
             month=start.strftime("%b %y"),
             value=average_wordle,
@@ -637,8 +654,9 @@ class StatsGatherer:  # noqa: PLR0904
                 eddies_won += trans.amount
 
         data_class_a = StatDB(
-            "stat",
-            guild_id,
+            _id="",
+            type="stat",
+            guild_id=guild_id,
             stat=StatTypes.EDDIES_PLACED,
             month=start.strftime("%b %y"),
             value=eddies_placed,
@@ -648,8 +666,9 @@ class StatsGatherer:  # noqa: PLR0904
         )
 
         data_class_b = StatDB(
-            "stat",
-            guild_id,
+            _id="",
+            type="stat",
+            guild_id=guild_id,
             stat=StatTypes.EDDIES_WIN,
             month=start.strftime("%b %y"),
             value=eddies_won,
@@ -690,8 +709,9 @@ class StatsGatherer:  # noqa: PLR0904
         most_popular_channel = sorted(channels, key=lambda x: len(channels[x]), reverse=True)[0]
 
         data_class = StatDB(
-            "stat",
-            guild_id,
+            _id="",
+            type="stat",
+            guild_id=guild_id,
             stat=StatTypes.MOST_POPULAR_CHANNEL,
             month=start.strftime("%b %y"),
             value=most_popular_channel,
@@ -730,8 +750,9 @@ class StatsGatherer:  # noqa: PLR0904
                 users.append(user_id)
 
         data_class = StatDB(
-            "stat",
-            guild_id,
+            _id="",
+            type="stat",
+            guild_id=guild_id,
             stat=StatTypes.TIME_SPENT_IN_VC,
             month=start.strftime("%b %y"),
             value=int(vc_time),
@@ -771,8 +792,9 @@ class StatsGatherer:  # noqa: PLR0904
         vc_most_time = sorted(channels, key=lambda x: channels[x]["count"], reverse=True)[0]
 
         data_class = StatDB(
-            "stat",
-            guild_id,
+            _id="",
+            type="stat",
+            guild_id=guild_id,
             stat=StatTypes.VC_MOST_TIME,
             month=start.strftime("%b %y"),
             value=vc_most_time,
@@ -816,8 +838,9 @@ class StatsGatherer:  # noqa: PLR0904
         vc_most_users = sorted(channels, key=lambda x: len(channels[x]["users"]), reverse=True)[0]
 
         data_class = StatDB(
-            "stat",
-            guild_id,
+            _id="",
+            type="stat",
+            guild_id=guild_id,
             stat=StatTypes.VC_MOST_TIME,
             month=start.strftime("%b %y"),
             value=vc_most_users,
@@ -894,6 +917,7 @@ class StatsGatherer:  # noqa: PLR0904
             emoji_count[0] = None
 
         data_class = StatDB(
+            _id="",
             type="stat",
             guild_id=guild_id,
             stat=StatTypes.MOST_POPULAR_SERVER_EMOJI,
@@ -927,6 +951,7 @@ class StatsGatherer:  # noqa: PLR0904
             created_threads.append(thread)
 
         data_class = StatDB(
+            _id="",
             type="stat",
             guild_id=guild_id,
             stat=StatTypes.THREADS_CREATED,
@@ -955,6 +980,7 @@ class StatsGatherer:  # noqa: PLR0904
         created = [e for e in all_server_emojis if start < e["created"] < end]
 
         data_class = StatDB(
+            _id="",
             type="stat",
             guild_id=guild_id,
             stat=StatTypes.EMOJIS_CREATED,
@@ -982,6 +1008,7 @@ class StatsGatherer:  # noqa: PLR0904
         owner = guild.owner_id
 
         data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild.id,
             user_id=owner,
@@ -1030,6 +1057,7 @@ class StatsGatherer:  # noqa: PLR0904
             message_users[BSE_BOT_ID] = {"count": 0}
 
         data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=chattiest,
@@ -1074,6 +1102,7 @@ class StatsGatherer:  # noqa: PLR0904
             message_users[BSE_BOT_ID] = 0
 
         data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=least_chattiest,
@@ -1118,6 +1147,7 @@ class StatsGatherer:  # noqa: PLR0904
             message_users[BSE_BOT_ID] = 0
 
         data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=chattiest,
@@ -1157,6 +1187,7 @@ class StatsGatherer:  # noqa: PLR0904
                     longest_message = message
 
         data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=longest_message.user_id,
@@ -1232,6 +1263,7 @@ class StatsGatherer:  # noqa: PLR0904
             wordle_avgs[BSE_BOT_ID] = 0
 
         data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=best_avg,
@@ -1309,6 +1341,7 @@ class StatsGatherer:  # noqa: PLR0904
             wordle_avgs[BSE_BOT_ID] = 0
 
         data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=worst_avg,
@@ -1361,6 +1394,7 @@ class StatsGatherer:  # noqa: PLR0904
             wordle_count[BSE_BOT_ID] = 0
 
         data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=user,
@@ -1416,6 +1450,7 @@ class StatsGatherer:  # noqa: PLR0904
             wordle_count[BSE_BOT_ID] = 0
 
         data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=user,
@@ -1460,6 +1495,7 @@ class StatsGatherer:  # noqa: PLR0904
             tweet_users[0] = None
 
         data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=twitter_addict,
@@ -1505,6 +1541,7 @@ class StatsGatherer:  # noqa: PLR0904
             jerk_off_users[0] = None
 
         data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=masturbator,
@@ -1544,6 +1581,7 @@ class StatsGatherer:  # noqa: PLR0904
         big_memer = sorted(reaction_users, key=lambda x: reaction_users[x], reverse=True)[0]
 
         data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=big_memer,
@@ -1585,6 +1623,7 @@ class StatsGatherer:  # noqa: PLR0904
         react_king = sorted(reaction_users, key=lambda x: reaction_users[x], reverse=True)[0]
 
         data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=react_king,
@@ -1632,6 +1671,7 @@ class StatsGatherer:  # noqa: PLR0904
         conversation_starter = sorted(replied_to, key=lambda x: replied_to[x], reverse=True)[0]
 
         replier_data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=serial_replier,
@@ -1648,6 +1688,7 @@ class StatsGatherer:  # noqa: PLR0904
         replier_data_class = self.add_annual_changes(start, replier_data_class)
 
         conversation_data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=conversation_starter,
@@ -1694,6 +1735,7 @@ class StatsGatherer:  # noqa: PLR0904
             message_users = {0: {"count": 0, "messages": 0}}
 
         data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=fattest_fingers,
@@ -1747,6 +1789,7 @@ class StatsGatherer:  # noqa: PLR0904
             swear_dict[0] = None
 
         data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=most_swears,
@@ -1807,6 +1850,7 @@ class StatsGatherer:  # noqa: PLR0904
         top = sorted(users, key=lambda x: users[x]["percentage"], reverse=True)[0]
 
         data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=top,
@@ -1851,6 +1895,7 @@ class StatsGatherer:  # noqa: PLR0904
         top = sorted(users, key=lambda x: len(users[x]["channels"]), reverse=True)[0]
 
         data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=top,
@@ -1894,6 +1939,7 @@ class StatsGatherer:  # noqa: PLR0904
             bet_users[BSE_BOT_ID] = 0
 
         data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=busiest,
@@ -1937,6 +1983,7 @@ class StatsGatherer:  # noqa: PLR0904
             bet_users[BSE_BOT_ID] = 0
 
         data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=most_placed,
@@ -1980,6 +2027,7 @@ class StatsGatherer:  # noqa: PLR0904
             bet_users[BSE_BOT_ID] = 0
 
         data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=most_placed,
@@ -2045,6 +2093,7 @@ class StatsGatherer:  # noqa: PLR0904
         longest_king = sorted(kings, key=lambda x: kings[x], reverse=True)[0]
 
         data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=longest_king,
@@ -2093,6 +2142,7 @@ class StatsGatherer:  # noqa: PLR0904
             user_dict[0] = {"count": 0, "channels": {}}
 
         data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=big_gamer,
@@ -2148,6 +2198,7 @@ class StatsGatherer:  # noqa: PLR0904
             user_dict[BSE_BOT_ID] = {"count": 0, "channels": {}}
 
         data_class = StatDB(
+            _id="",
             type="award",
             guild_id=guild_id,
             user_id=big_streamer,

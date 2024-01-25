@@ -4,6 +4,7 @@ import asyncio
 import datetime
 import random
 from logging import Logger
+from typing import TYPE_CHECKING
 
 from discord.ext import tasks
 
@@ -11,6 +12,9 @@ from discordbot import utilities
 from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_BOT_ID
 from discordbot.tasks.basetask import BaseTask
+
+if TYPE_CHECKING:
+    from mongo.datatypes.message import MessageDB
 
 
 class WordleReminder(BaseTask):
@@ -67,11 +71,11 @@ class WordleReminder(BaseTask):
                 {"guild_id": guild.id, "message_type": "wordle", "timestamp": {"$gte": _start, "$lte": _end}},
             )
 
-            today_ids = [m["user_id"] for m in wordles_today]
+            today_ids: list[int] = [m.user_id for m in wordles_today]
 
-            reminders_needed = []
+            reminders_needed: list[MessageDB] = []
             for message in wordles_yesterday:
-                user_id = message["user_id"]
+                user_id = message.user_id
                 if user_id in today_ids:
                     continue
                 # user hasn't done a wordle
@@ -99,7 +103,7 @@ class WordleReminder(BaseTask):
                 "",
             ]
             for reminder in reminders_needed:
-                if reminder["user_id"] == BSE_BOT_ID:
+                if reminder.user_id == BSE_BOT_ID:
                     # skip bot reminder
                     continue
                 channel = await self.bot.fetch_channel(reminder["channel_id"])

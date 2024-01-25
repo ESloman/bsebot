@@ -618,15 +618,12 @@ class AwardsBuilder:
         for message in stats_message:
             self.logger.info("Stats message part is %s chars long", len(message))
 
-            if not self.debug:
-                await channel.send(content=message, silent=True)
-                continue
+            await channel.send(content=message, silent=True)
             self.logger.debug(message)
 
         self.logger.info("Awards message is %s messages long", len(awards_message))
         for message in awards_message:
             self.logger.info("Awards message part is %s chars long", len(message))
-            if not self.debug and send_messages:
+            if send_messages:
                 await channel.send(content=message, silent=True)
-                continue
             self.logger.debug(message)

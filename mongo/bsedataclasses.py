@@ -317,11 +317,13 @@ class Awards(BaseClass):
         query = {
             "type": award_or_stat.type,
             "guild_id": award_or_stat.guild_id,
-            "value": award_or_stat.value,
             "annual": award_or_stat.annual,
             "user_id": award_or_stat.user_id,
             "short_name": award_or_stat.short_name,
         }
+
+        if not isinstance(award_or_stat.value, datetime.date):
+            query["value"] = award_or_stat.value
 
         if award_or_stat.annual:
             query["year"] = award_or_stat.year

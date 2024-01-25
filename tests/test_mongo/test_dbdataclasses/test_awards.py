@@ -131,11 +131,8 @@ class TestAwards:
         """Tests Awards get_previous_stat with monthly items."""
         awards = Awards()
         found = awards.get_previous_stat(entry)
-        assert isinstance(found, list)
-        assert len(found) > 0
-        for item in found:
-            assert isinstance(item, StatDB)
-            assert item != entry
+        assert isinstance(found, StatDB)
+        assert found != entry
 
     @pytest.mark.parametrize(
         "entry", [Awards.make_data_class(entry) for entry in _get_award_data() if entry.get("year") == "2023"]
@@ -147,7 +144,5 @@ class TestAwards:
         """Tests Awards get_previous_stat with annual items."""
         awards = Awards()
         found = awards.get_previous_stat(entry)
-        assert isinstance(found, list)
-        for item in found:
-            assert isinstance(item, StatDB)
-            assert item != entry
+        assert isinstance(found, StatDB | None)
+        assert found != entry

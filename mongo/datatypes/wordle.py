@@ -3,7 +3,7 @@
 import dataclasses
 import datetime
 
-from mongo.datatypes.basedatatypes import GuildedDBObject
+from mongo.datatypes.basedatatypes import BaseDBObject, GuildedDBObject
 
 
 @dataclasses.dataclass(frozen=True)
@@ -28,3 +28,17 @@ class WordleAttemptDB(GuildedDBObject):
     """The wordle share text we generated."""
     wordle_num: int
     """The wordle number."""
+
+
+@dataclasses.dataclass(frozen=True)
+class WordleReminderDB(BaseDBObject):
+    """Represents a wordle reminder in the database."""
+
+    name: str
+    """The reminder text for the wordle reminder."""
+    created_by: int
+    """The ID of the discord user that created this wordle reminder."""
+    created: datetime.datetime
+    """When this wordle reminder was created."""
+    archived: bool = False
+    """Whether this wordle reminder has been archived or not."""

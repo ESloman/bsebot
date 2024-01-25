@@ -378,7 +378,7 @@ class WordleReminderConfirmView(discord.ui.View):
             interaction (discord.Interaction): the callback interaction
         """
         all_reminders = self.wordle_reminders.get_all_reminders()
-        reminder_names = [reminder["name"] for reminder in all_reminders]
+        reminder_names = [reminder.name for reminder in all_reminders]
 
         if self.name in reminder_names:
             # all our options existed already

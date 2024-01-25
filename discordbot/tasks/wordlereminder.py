@@ -86,10 +86,7 @@ class WordleReminder(BaseTask):
                 continue
 
             _messages = self.wordle_reminders.get_all_reminders()
-            _messages_list = [
-                _message["name"] if not _message.get("weight") else (_message["name"], _message["weight"])
-                for _message in _messages
-            ]
+            _messages_list = [_message.name for _message in _messages]
 
             odds = utilities.calculate_message_odds(
                 self.interactions,

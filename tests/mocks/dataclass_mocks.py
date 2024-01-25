@@ -889,3 +889,23 @@ def get_user_inputs() -> list[dict[str, any]]:
             "daily_summary": True,
         },
     ]
+
+
+def get_wordle_reminder_inputs() -> list[dict[str, any]]:
+    """Returns various wordle_reminder inputs."""
+    return [
+        {
+            "_id": "6478cf9c82e4285346a4cae4",
+            "name": "{mention}\nRoses are red\nViolets are blue\nI've done my Wordle\nDon't forget to do yours too!",
+            "created_by": 189458414764687360,
+            "archived": False,
+            "created": "2023-06-01T13:00:00.000+0000",
+        },
+        {
+            "_id": "6478cfbc82e4285346a4cae6",
+            "name": "Daddy wants you to complete your Wordle today {mention}",
+            "created_by": 189458414764687360,
+            "archived": False,
+            "created": "2023-06-01T13:00:00.000+0000",
+        },
+    ]

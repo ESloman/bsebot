@@ -370,6 +370,8 @@ class AwardsBuilder:
         most_swears = self.stats.most_swears(*args)
         single_minded = self.stats.most_messages_to_a_single_channel(*args)
         diverse_portfolio = self.stats.most_messages_to_most_channels(*args)
+        wordle_green = self.stats.wordle_most_greens(*args)
+        wordle_symmetry = self.stats.wordle_most_symmetry(*args)
 
         awards = [
             most_messages,
@@ -484,6 +486,16 @@ class AwardsBuilder:
                 # worst wordle score
                 "- The _'Is this bitch ESL?'_ :flag_eu: award: "
                 f"<@!{worst_wordle.user_id}> (`{round(worst_wordle.value, 4)}` average wordle score)\n"
+            ),
+            (
+                # most wordle greens score
+                "- The _'Five a Day'_ 🟩 award: "
+                f"<@!{wordle_green.user_id}> (`{wordle_green.value}` fully green wordle(s))\n"
+            ),
+            (
+                # most wordle symmetry score
+                "- The _'Perfectly Balanced'_ 🪞 award: "
+                f"<@!{wordle_symmetry.user_id}> (`{wordle_symmetry.value}` symmetrical wordle(s))\n"
             ),
             (
                 # most reacts

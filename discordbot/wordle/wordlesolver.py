@@ -338,7 +338,7 @@ class WordleSolver:
             possible_denies = []
             present_letters = []
             correct_letters = []
-            for tile in state:
+            for idx, tile in enumerate(state):
                 letter = word[idx]
                 if tile == "absent":
                     # this letter isn't anywhere
@@ -355,7 +355,6 @@ class WordleSolver:
                     present_letters.append(letter)
                     game_state[idx]["cannot"].append(letter)
                     emoji_str += "🟨"
-                idx += 1
             emoji_str += "\n"
 
             for letter in possible_denies:

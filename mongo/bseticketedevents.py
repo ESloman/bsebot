@@ -59,7 +59,7 @@ class RevolutionEvent(TicketedEvent):
         self.update({"type": "counter", "guild_id": guild_id}, {"$inc": {"count": 1}})
         return f"{count:03d}"
 
-    def create_event(  # noqa: PLR0913, PLR0917
+    def create_event(  # noqa: PLR0913
         self,
         guild_id: int,
         created: datetime.datetime,

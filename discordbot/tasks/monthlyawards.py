@@ -38,7 +38,7 @@ class MonthlyBSEddiesAwards(BaseTask):
         now = datetime.datetime.now()
 
         # whether to run in debug mode or not
-        debug = True
+        debug = False
 
         if (now.day != 1 or now.hour != 11) and not debug:  # noqa: PLR2004
             # we only want to trigger on the first of each month

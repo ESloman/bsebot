@@ -1324,6 +1324,113 @@ class StatsGatherer:  # noqa: PLR0904
 
         return self.add_annual_changes(start, data_class)
 
+    def wordle_most_greens(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
+        """Calculates which user had the most green only wordle scores.
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            StatDB: the wordle stat
+        """
+        messages = self.cache.get_messages(guild_id, start, end)
+        wordle_messages = [m for m in messages if "wordle" in m.message_type]
+
+        wordle_count: dict[int, int] = {}
+        for wordle in wordle_messages:
+            uid = wordle.user_id
+            if uid == BSE_BOT_ID:
+                continue
+            if uid not in wordle_count:
+                wordle_count[uid] = 0
+
+            if "🟨" in wordle.content or "🟩" not in wordle.content:
+                # don't count these
+                # only interested in responses that ONLY contain greens
+                continue
+
+            wordle_count[uid] += 1
+
+        try:
+            user = sorted(wordle_count, key=lambda x: wordle_count[x], reverse=True)[0]
+        except IndexError:
+            # no data - possible if they've never done a wordle
+            user = BSE_BOT_ID
+            wordle_count[BSE_BOT_ID] = 0
+
+        data_class = StatDB(
+            type="award",
+            guild_id=guild_id,
+            user_id=user,
+            award=AwardsTypes.WORDLE_MOST_GREENS,
+            month=start.strftime("%b %y"),
+            value=wordle_count[user],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="wordle_most_greens",
+            annual=self.annual,
+            kwargs={"green_counts": {str(k): v for k, v in wordle_count.items()}},
+        )
+
+        return self.add_annual_changes(start, data_class)
+
+    def wordle_most_symmetry(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
+        """Calculates which user had the most green only wordle scores.
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            StatDB: the wordle stat
+        """
+        messages = self.cache.get_messages(guild_id, start, end)
+        wordle_messages = [m for m in messages if "wordle" in m.message_type]
+
+        wordle_count: dict[int, int] = {}
+        for wordle in wordle_messages:
+            uid = wordle.user_id
+            if uid == BSE_BOT_ID:
+                continue
+            if uid not in wordle_count:
+                wordle_count[uid] = 0
+
+            _, squares = wordle.content.split("\n\n")
+            squares = squares.split("\n")
+            squares = [row.strip() for row in squares]
+            for row in squares:
+                if row[:2] != row[3:][::-1]:
+                    # not symmetrical - skip this message
+                    continue
+
+            wordle_count[uid] += 1
+
+        try:
+            user = sorted(wordle_count, key=lambda x: wordle_count[x], reverse=True)[0]
+        except IndexError:
+            # no data - possible if they've never done a wordle
+            user = BSE_BOT_ID
+            wordle_count[BSE_BOT_ID] = 0
+
+        data_class = StatDB(
+            type="award",
+            guild_id=guild_id,
+            user_id=user,
+            award=AwardsTypes.WORDLE_MOST_SYMMETRICAL,
+            month=start.strftime("%b %y"),
+            value=wordle_count[user],
+            timestamp=datetime.datetime.now(),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="wordle_most_symmetrical",
+            annual=self.annual,
+            kwargs={"symmetry_counts": {str(k): v for k, v in wordle_count.items()}},
+        )
+
+        return self.add_annual_changes(start, data_class)
+
     def twitter_addict(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates who's posted the most twitter links.
 

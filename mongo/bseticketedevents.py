@@ -68,7 +68,7 @@ class RevolutionEvent(TicketedEvent):
         """
         return RevolutionEventDB(**event)
 
-    def create_event(  # noqa: PLR0913, PLR0917
+    def create_event(  # noqa: PLR0913
         self,
         guild_id: int,
         created: datetime.datetime,

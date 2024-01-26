@@ -5,6 +5,7 @@ import random
 from unittest import mock
 
 import pytest
+import pytz
 
 from discordbot.bot_enums import TransactionTypes
 from mongo import interface
@@ -70,8 +71,9 @@ class TestUserTransactions:
         test that the function converts the returned entries into dataclasses.
         """
         transactions = UserTransactions()
+        now = datetime.datetime.now(tz=pytz.utc)
         all_transactions = transactions.get_guild_transactions_by_timestamp(
-            guild_id, datetime.datetime.now(), datetime.datetime.now()
+            guild_id, now.replace(year=2023, month=12, day=1), now
         )
         assert isinstance(all_transactions, list)
         for act in all_transactions:

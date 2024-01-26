@@ -38,15 +38,17 @@ def _datetime_convert(entry: dict[str, any]) -> None:
             "last_ad_time",
             "last_remind_me_suggest_time",
             "last_revolution_time",
+            "edited",
         }:
             with contextlib.suppress(ValueError):
                 entry[key] = datetime.datetime.strptime(entry[key], "%Y-%m-%dT%H:%M:%S.%f%z")
 
 
-def query_mock(collection_name: str, parameters: dict, *_args: tuple[any], **_kwargs: dict[str, any]) -> list:
+def query_mock(  # noqa: C901, PLR0912, PLR0915
+    collection_name: str, parameters: dict[str, any], *_args: tuple[any], **_kwargs: dict[str, any]
+) -> list[dict[str, any]]:
     """Query mock."""
     # load the data
-    print(collection_name)
     path = pathlib.Path("mock_data", "bestsummereverpoints", f"{collection_name}.json")
     path = pathlib.Path(_CURRENT_DIR, path)
 
@@ -66,15 +68,75 @@ def query_mock(collection_name: str, parameters: dict, *_args: tuple[any], **_kw
     for key, value in parameters.items():
         data_to_search = copy.deepcopy(_filtered_data)
         _filtered_data = []
-        if isinstance(value, dict):
-            # skip dicts for now
-            continue
         for data in data_to_search:
-            if key not in data:
+            if key not in data and key != "replies.timestamp":
                 # key not in data - won't match
                 continue
 
+            if key == "replies.timestamp":
+                # hard-code how we deal with this for now
+                # look at refactoring this method later to deal with this kind of query
+                # more dynamically
+                if not data.get("replies", []):
+                    continue
+                replies = data["replies"]
+                for reply in replies:
+                    try:
+                        data_val = reply["timestamp"]
+                    except TypeError:
+                        data_val = reply.timestamp
+                    for _key, _value in value.items():
+                        match _key:
+                            case "$gt":
+                                # data_val has got to bigger than _value
+                                if data_val > _value and data not in _filtered_data:
+                                    _filtered_data.append(data)
+                            case "$gte":
+                                # data_val has got to bigger or equal that _value
+                                if data_val >= _value and data not in _filtered_data:
+                                    _filtered_data.append(data)
+                            case "$lt":
+                                if data_val < _value and data not in _filtered_data:
+                                    _filtered_data.append(data)
+                continue
             data_val = data.get(key)
+
+            if isinstance(value, dict):
+                # handle more complicated queries
+                for _key, _value in value.items():
+                    match _key:
+                        case "$gt":
+                            # data_val has got to bigger than _value
+                            if data_val > _value:
+                                _filtered_data.append(data)
+                        case "$gte":
+                            # data_val has got to bigger or equal that _value
+                            if data_val >= _value:
+                                _filtered_data.append(data)
+                        case "$lt":
+                            if data_val < _value:
+                                _filtered_data.append(data)
+                        case "$ne":
+                            if data_val != _value:
+                                _filtered_data.append(data)
+                        case "$nin":
+                            # data_val can't be in _value
+                            if isinstance(data_val, list):
+                                # possible for our data_val to be a list
+                                for item in data_val:
+                                    if item in _value:
+                                        break
+                                else:
+                                    _filtered_data.append(data)
+                            elif data_val not in _value:
+                                _filtered_data.append(data)
+                # skip dicts for now
+                continue
+
+            if isinstance(data_val, list) and value in data_val:
+                # if data_val is list then check our value is in it
+                _filtered_data.append(data)
+
             if data_val == value:
                 _filtered_data.append(data)
 

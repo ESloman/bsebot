@@ -24,7 +24,7 @@ jobs:
           pip install pytest coverage pytest-cov pytest-asyncio freezegun
       - name: Pytest + Coverage
         run: |
-          coverage run --source . -m pytest
+          coverage run --source . -m pytest --durations=50
           coverage report --omit=tests/*
           coverage html --omit=tests/*
           coverage xml --omit=tests/*

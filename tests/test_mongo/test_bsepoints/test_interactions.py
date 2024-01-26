@@ -39,6 +39,10 @@ class TestUserInteractions:
         for entry in data:
             cls = user_interactions.make_data_class(entry)
             assert isinstance(cls, MessageDB | VCInteractionDB)
+            if isinstance(cls, MessageDB):
+                new_cls = user_interactions.make_data_class(cls)
+                # should be no change
+                assert new_cls is cls
 
     @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data()})
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)

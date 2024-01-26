@@ -276,6 +276,31 @@ class TestStatsDataCache:
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_stats_data_cache_get_reactions(self, guild_id: int) -> None:
+        """Tests StatsDataCache get_reactions."""
+        cache = StatsDataCache()
+        now = datetime.datetime.now(tz=pytz.utc)
+        start = now.replace(year=2023, month=12, day=1, hour=0, minute=1)
+        end = start.replace(year=2024, month=1)
+        reactions = cache.get_reactions(guild_id, start, end)
+        assert isinstance(reactions, list)
+
+        # test that we set all this correctly
+        assert cache._reactions_cache is not None
+        assert cache._reactions_cache is reactions
+        assert cache._start_cache == start
+        assert cache._end_cache == end
+
+        reactions_again = cache.get_reactions(guild_id, start, end)
+        assert isinstance(reactions_again, list)
+        # should be the same as above
+        assert reactions_again is cache._reactions_cache
+        assert reactions_again == reactions
+
+    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     def test_stats_data_cache_get_replies(self, guild_id: int) -> None:
         """Tests StatsDataCache get_replies."""
         cache = StatsDataCache()

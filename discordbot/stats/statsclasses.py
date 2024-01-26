@@ -45,7 +45,7 @@ class StatsGatherer:  # noqa: PLR0904
         """Returns two datetime objects that sandwich the previous month.
 
         Returns:
-            Tuple[datetime.datetime, datetime.datetime]:
+            tuple[datetime.datetime, datetime.datetime]:
         """
         now = datetime.datetime.now()
         start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=1)
@@ -63,7 +63,7 @@ class StatsGatherer:  # noqa: PLR0904
         """Returns two datetime objects that sandwich the previous year.
 
         Returns:
-            Tuple[datetime.datetime, datetime.datetime]:
+            tuple[datetime.datetime, datetime.datetime]:
         """
         now = datetime.datetime.now()
 
@@ -88,6 +88,7 @@ class StatsGatherer:  # noqa: PLR0904
             data_class = dataclasses.replace(
                 data_class,
                 month=None,
+                annual=True,
                 year=start.strftime("%Y"),
                 eddies=ANNUAL_AWARDS_AWARD if data_class.type == "award" else MONTHLY_AWARDS_PRIZE,
             )
@@ -106,10 +107,6 @@ class StatsGatherer:  # noqa: PLR0904
             Stat: the number of messages stat
         """
         messages = self.cache.get_messages(guild_id, start, end)
-
-        for message in messages:
-            if isinstance(message, list):
-                self.logger.debug(message)
 
         channel_ids = {message.channel_id for message in messages}
         user_ids = {message.user_id for message in messages}
@@ -174,7 +171,7 @@ class StatsGatherer:  # noqa: PLR0904
             end (datetime.datetime): end of the time period
 
         Returns:
-            Tuple[Stat, Stat]: returns a tuple of average message characters and average words per message stats
+            tuple[Stat, Stat]: returns a tuple of average message characters and average words per message stats
         """
         messages = self.cache.get_messages(guild_id, start, end)
         lengths = []

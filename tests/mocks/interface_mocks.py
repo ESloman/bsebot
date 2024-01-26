@@ -69,22 +69,23 @@ def query_mock(  # noqa: C901, PLR0912, PLR0915
         data_to_search = copy.deepcopy(_filtered_data)
         _filtered_data = []
         for data in data_to_search:
-            if key not in data and key != "replies.timestamp":
+            if key not in data and key not in {"replies.timestamp", "reactions.timestamp"}:
                 # key not in data - won't match
                 continue
 
-            if key == "replies.timestamp":
+            if key in {"replies.timestamp", "reactions.timestamp"}:
                 # hard-code how we deal with this for now
                 # look at refactoring this method later to deal with this kind of query
                 # more dynamically
-                if not data.get("replies", []):
+                first_part = key.split(".")[0]
+                if not data.get(first_part, []):
                     continue
-                replies = data["replies"]
-                for reply in replies:
+                items = data[first_part]
+                for item in items:
                     try:
-                        data_val = reply["timestamp"]
+                        data_val = item["timestamp"]
                     except TypeError:
-                        data_val = reply.timestamp
+                        data_val = item.timestamp
                     for _key, _value in value.items():
                         match _key:
                             case "$gt":

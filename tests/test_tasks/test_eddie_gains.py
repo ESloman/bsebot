@@ -5,13 +5,13 @@ from collections import Counter
 from unittest.mock import patch
 
 import pytest
+from freezegun import freeze_time
 
 from discordbot.tasks.eddiegains import BSEddiesManager, EddieGainMessager
 from discordbot.utilities import PlaceHolderLogger
 from tests.mocks.bsebot_mocks import BSEBotMock
 from tests.mocks.mongo_mocks import GuildsMock, UserPointsMock
 from tests.mocks.task_mocks import mock_bseddies_manager_counters, mock_eddie_manager_give_out_eddies
-from tests.mocks.util_mocks import datetime_now
 
 
 class TestEddieGainMessager:
@@ -37,6 +37,7 @@ class TestEddieGainMessager:
         assert result is None
 
     @pytest.mark.asyncio()
+    @freeze_time("2024-01-01 07:30:01")
     async def test_execution(self) -> None:
         """Tests running the task."""
         task = EddieGainMessager(self.bsebot, [123], PlaceHolderLogger, [], start=False)
@@ -45,10 +46,7 @@ class TestEddieGainMessager:
             patch.object(task.eddie_manager, "give_out_eddies", new=mock_eddie_manager_give_out_eddies),
             patch.object(task, "guilds", new=GuildsMock()),
             patch.object(task, "user_points", new=UserPointsMock()),
-            patch("discordbot.tasks.eddiegains.datetime.datetime") as mock_datetime,
         ):
-            mock_datetime.now.return_value = datetime_now(7, 30)
-
             result = await task.eddie_distributer()
             assert isinstance(result, list)
             assert len(result) > 0

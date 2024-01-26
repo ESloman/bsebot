@@ -8,6 +8,7 @@ from logging import Logger
 from typing import TYPE_CHECKING
 
 import discord
+import pytz
 
 from discordbot.bot_enums import ActivityTypes, AwardsTypes, StatTypes, TransactionTypes
 from discordbot.constants import (
@@ -608,8 +609,15 @@ class StatsGatherer:  # noqa: PLR0904
             guesses = int(guesses)
             bot_wordle_count.append(guesses)
 
-        average_wordle = round((sum(wordle_count) / len(wordle_count)), 4)
-        average_bot_wordle = round((sum(bot_wordle_count) / len(bot_wordle_count)), 4)
+        try:
+            average_wordle = round((sum(wordle_count) / len(wordle_count)), 4)
+        except ZeroDivisionError:
+            average_wordle = 0.0
+
+        try:
+            average_bot_wordle = round((sum(bot_wordle_count) / len(bot_wordle_count)), 4)
+        except ZeroDivisionError:
+            average_bot_wordle = 0.0
 
         data_class = StatDB(
             _id="",
@@ -1429,7 +1437,7 @@ class StatsGatherer:  # noqa: PLR0904
             if uid not in wordle_count:
                 wordle_count[uid] = 0
 
-            _, squares = wordle.content.split("\n\n")
+            *_, squares = wordle.content.split("\n\n")
             squares = squares.split("\n")
             squares = [row.strip() for row in squares]
             for row in squares:
@@ -1577,7 +1585,12 @@ class StatsGatherer:  # noqa: PLR0904
             reactions = [r for r in message.reactions if r.user_id != user_id]
             reaction_users[user_id] += len(reactions)
 
-        big_memer = sorted(reaction_users, key=lambda x: reaction_users[x], reverse=True)[0]
+        try:
+            big_memer = sorted(reaction_users, key=lambda x: reaction_users[x], reverse=True)[0]
+        except IndexError:
+            # no data
+            big_memer = BSE_BOT_ID
+            reaction_users[BSE_BOT_ID] = None
 
         data_class = StatDB(
             _id="",
@@ -1619,7 +1632,12 @@ class StatsGatherer:  # noqa: PLR0904
                 reaction_users[user_id] = 0
             reaction_users[user_id] += 1
 
-        react_king = sorted(reaction_users, key=lambda x: reaction_users[x], reverse=True)[0]
+        try:
+            react_king = sorted(reaction_users, key=lambda x: reaction_users[x], reverse=True)[0]
+        except IndexError:
+            # no data
+            react_king = BSE_BOT_ID
+            reaction_users[BSE_BOT_ID] = None
 
         data_class = StatDB(
             _id="",
@@ -1666,8 +1684,19 @@ class StatsGatherer:  # noqa: PLR0904
                     replies[user_id] = 0
                 replies[user_id] += 1
 
-        serial_replier = sorted(replies, key=lambda x: replies[x], reverse=True)[0]
-        conversation_starter = sorted(replied_to, key=lambda x: replied_to[x], reverse=True)[0]
+        try:
+            serial_replier = sorted(replies, key=lambda x: replies[x], reverse=True)[0]
+        except IndexError:
+            # no data
+            serial_replier = BSE_BOT_ID
+            replies[BSE_BOT_ID] = None
+
+        try:
+            conversation_starter = sorted(replied_to, key=lambda x: replied_to[x], reverse=True)[0]
+        except IndexError:
+            # no data
+            conversation_starter = BSE_BOT_ID
+            replied_to[BSE_BOT_ID] = None
 
         replier_data_class = StatDB(
             _id="",
@@ -2064,6 +2093,8 @@ class StatsGatherer:  # noqa: PLR0904
 
         for event in king_events:
             if event.type == ActivityTypes.KING_LOSS:
+                if previous_time is None:
+                    continue
                 uid = event.uid
 
                 timestamp = event.timestamp  # type: datetime.datetime
@@ -2080,7 +2111,7 @@ class StatsGatherer:  # noqa: PLR0904
         if king_events[-1] == event and event.type == ActivityTypes.KING_GAIN:
             # last thing someone did was become KING
             uid = event.uid
-            end_time = datetime.datetime.now()
+            end_time = datetime.datetime.now(tz=pytz.utc)
             if end_time > end:
                 end_time = end
             timestamp = event.timestamp  # type: datetime.datetime

@@ -1,6 +1,7 @@
 """Mocks for various discord classes."""
 
 import dataclasses
+import datetime
 
 
 class MemberMock:
@@ -37,14 +38,26 @@ class ChannelMock:
 
 
 class GuildMock:
-    def __init__(self, guild_id: int) -> None:
+    def __init__(self, guild_id: int, owner_id: int | None = None) -> None:
         """Init."""
         self._id = guild_id
+        self._owner_id = owner_id if owner_id else 987654
+        self._created_at = datetime.datetime.now()
 
     @property
     def id(self) -> int:
         """ID property."""
         return self._id
+
+    @property
+    def owner_id(self) -> int:
+        """Owner ID property."""
+        return self._owner_id
+
+    @property
+    def created_at(self) -> datetime.datetime:
+        """Created at property."""
+        return self._created_at
 
     @staticmethod
     def get_member(member_id: int) -> MemberMock | None:

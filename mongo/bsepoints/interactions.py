@@ -2,8 +2,6 @@
 
 import datetime
 
-from bson import ObjectId
-
 from mongo.baseclass import BaseClass
 from mongo.datatypes.message import MessageDB, ReactionDB, ReplyDB, VCInteractionDB
 
@@ -30,8 +28,12 @@ class UserInteractions(BaseClass):
                 message["message_id"] = None
             return VCInteractionDB(**message)
 
-        message["reactions"] = [ReactionDB(**react) for react in message.get("reactions", [])]
-        message["replies"] = [ReplyDB(**reply) for reply in message.get("replies", [])]
+        message["reactions"] = [
+            ReactionDB(**react) for react in message.get("reactions", []) if not isinstance(react, ReactionDB)
+        ]
+        message["replies"] = [
+            ReplyDB(**reply) for reply in message.get("replies", []) if not isinstance(reply, ReplyDB)
+        ]
         return MessageDB(**message)
 
     def query(  # noqa: PLR0913, PLR0917
@@ -133,7 +135,7 @@ class UserInteractions(BaseClass):
         timestamp: datetime.datetime,
         content: str,
         is_bot: bool = False,
-    ) -> None:
+    ) -> ReplyDB:
         """Adds a reply to a message.
 
         Args:
@@ -144,6 +146,9 @@ class UserInteractions(BaseClass):
             timestamp (datetime.datetime): _description_
             content (str): _description_
             is_bot (bool, optional): _description_. Defaults to False.
+
+        Returns:
+            ReplyDB: the datatype
         """
         entry = {
             "user_id": user_id,
@@ -157,6 +162,7 @@ class UserInteractions(BaseClass):
             {"message_id": reference_message_id, "guild_id": guild_id},
             {"$push": {"replies": entry}},
         )
+        return ReplyDB(**entry)
 
     def add_reaction_entry(  # noqa: PLR0913, PLR0917
         self,
@@ -167,7 +173,7 @@ class UserInteractions(BaseClass):
         message_content: str,
         timestamp: datetime.datetime,
         author_id: int,
-    ) -> None:
+    ) -> ReactionDB:
         """Adds a reaction entry into our interactions DB with the corresponding message.
 
         Args:
@@ -178,6 +184,9 @@ class UserInteractions(BaseClass):
             message_content (str): message content
             timestamp (datetime.datetime): when the reaction happened
             author_id (int): the author ID
+
+        Returns:
+            ReactionDB: the reaction datatype
         """
         entry = {
             "user_id": user_id,
@@ -189,6 +198,8 @@ class UserInteractions(BaseClass):
             {"message_id": message_id, "guild_id": guild_id, "channel_id": channel_id, "user_id": author_id},
             {"$push": {"reactions": entry}},
         )
+
+        return ReactionDB(**entry)
 
     def remove_reaction_entry(  # noqa: PLR0913, PLR0917
         self,
@@ -233,9 +244,7 @@ class UserInteractions(BaseClass):
             Optional[Message]: The Message or None
         """
         ret = self.query({"guild_id": guild_id, "message_id": message_id})
-        if ret:
-            return ret[0]
-        return None
+        return ret[0] if ret else None
 
     def add_voice_state_entry(  # noqa: PLR0913, PLR0917
         self,
@@ -246,7 +255,7 @@ class UserInteractions(BaseClass):
         muted: bool,
         deafened: bool,
         streaming: bool,
-    ) -> list[ObjectId]:
+    ) -> VCInteractionDB:
         """Adds a voice state entry.
 
         Args:
@@ -259,7 +268,7 @@ class UserInteractions(BaseClass):
             streaming (bool): _description_
 
         Returns:
-            list: _description_
+            VCInteractionDB: the voice state interaction
         """
         doc = {
             "guild_id": guild_id,
@@ -283,7 +292,8 @@ class UserInteractions(BaseClass):
             "events": [{"timestamp": timestamp, "event": "joined"}],
         }
 
-        return self.insert(doc)
+        doc["_id"] = self.insert(doc)[0]
+        return self.make_data_class(doc)
 
     def find_active_voice_state(
         self,
@@ -304,6 +314,4 @@ class UserInteractions(BaseClass):
             dict | None: _description_
         """
         ret = self.query({"guild_id": guild_id, "user_id": user_id, "channel_id": channel_id, "active": True})
-        if ret:
-            return ret[0]
-        return None
+        return ret[0] if ret else None

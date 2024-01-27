@@ -37,7 +37,11 @@ class ThreadConfigView(discord.ui.View):
         Can be called by child types when something changes.
         """
         # updates all the selects with new values
-        selected_thread = next(t for t in self.threads if str(t.thread_id) == self.thread_select._selected_values[0])  # noqa: SLF001
+        selected_thread = next(
+            t
+            for t in self.threads
+            if str(t.thread_id) == self.thread_select._selected_values[0]  # noqa: SLF001
+        )
 
         for opt in self.day_select.options:
             opt.default = False
@@ -59,7 +63,11 @@ class ThreadConfigView(discord.ui.View):
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        selected_thread = next(t for t in self.threads if str(t.thread_id) == self.thread_select._selected_values[0])  # noqa: SLF001
+        selected_thread = next(
+            t
+            for t in self.threads
+            if str(t.thread_id) == self.thread_select._selected_values[0]  # noqa: SLF001
+        )
 
         try:
             day = int(self.day_select._selected_values[0])  # noqa: SLF001
@@ -81,7 +89,10 @@ class ThreadConfigView(discord.ui.View):
             # true is default here
             active = True
 
-        self.spoiler_threads.update({"_id": selected_thread._id}, {"$set": {"active": active, "day": day}})  # noqa: SLF001
+        self.spoiler_threads.update(
+            {"_id": selected_thread._id},  # noqa: SLF001
+            {"$set": {"active": active, "day": day}},
+        )
 
         await interaction.response.edit_message(content="Thread updated.", view=None, delete_after=10)
 

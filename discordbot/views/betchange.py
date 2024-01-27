@@ -48,7 +48,10 @@ class BetChange(discord.ui.View):
 
         value = self.outcome_select.values[0]
 
-        self.user_bets.update({"_id": self.bet._id}, {"$set": {f"betters.{interaction.user.id}.emoji": value}})  # noqa: SLF001
+        self.user_bets.update(
+            {"_id": self.bet._id},  # noqa: SLF001
+            {"$set": {f"betters.{interaction.user.id}.emoji": value}},
+        )
 
         # refresh view for users
         bet = self.user_bets.get_bet_from_id(interaction.guild_id, self.bet.bet_id)

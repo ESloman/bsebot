@@ -114,7 +114,11 @@ class Wordle(BSEddies):
                     month_end = month_start.replace(year=month_start.year + 1, month=1)
 
                 wordles_this_month = [wordle for wordle in wordles if month_start < wordle.timestamp < month_end]
-                scores_this_month = [wordle.guesses for wordle in wordles_this_month if wordle.guesses != 7]  # noqa: PLR2004
+                scores_this_month = [
+                    wordle.guesses
+                    for wordle in wordles_this_month
+                    if wordle.guesses != 7  # noqa: PLR2004
+                ]
 
                 try:
                     avg_this_month = round(sum(scores_this_month) / len(scores_this_month), 2)

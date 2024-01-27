@@ -88,7 +88,7 @@ class AwardsBuilder:
         Returns all the stats object and the message.
 
         Returns:
-            Tuple[List[StatDB], List[str]]: Tuple of the list Stat objects and the stats message to send
+            tuple[list[StatDB], list[str]]: Tuple of the list Stat objects and the stats message to send
         """
         if not self.annual:
             start, end = self.stats.get_monthly_datetime_objects()
@@ -304,14 +304,16 @@ class AwardsBuilder:
 
         return stats, bseddies_stats
 
-    async def build_awards_and_message(self: "AwardsBuilder") -> tuple[list[StatDB], list[str]]:  # noqa: PLR0915
+    async def build_awards_and_message(  # noqa: PLR0915
+        self: "AwardsBuilder",
+    ) -> tuple[list[StatDB], list[str]]:
         """Uses StatsGatherer to gather all the awards.
 
         Formats an awards message
         Returns the list of awards and the message.
 
         Returns:
-            Tuple[List[Stat], List[str]]: tuple of List of Awards and the awards messages
+            tuple[list[StatDB], list[str]]: tuple of List of Awards and the awards messages
         """
         if not self.annual:
             start, end = self.stats.get_monthly_datetime_objects()
@@ -538,18 +540,18 @@ class AwardsBuilder:
     async def send_stats_and_awards(  # noqa: C901, PLR0912
         self: "AwardsBuilder",
         stats: list[StatDB],
-        stats_message: str,
+        stats_message: list[str],
         awards: list[StatDB],
-        awards_message: str,
+        awards_message: list[str],
         send_messages: bool = True,
     ) -> None:
         """Given the stats and awards - actually log those, distribute eddies and send the message.
 
         Args:
-            stats (_type_): _description_
-            stats_message (_type_): _description_
-            awards (_type_): _description_
-            awards_message (_type_): _description_
+            stats (list[StatDB]): _description_
+            stats_message (list[str]): _description_
+            awards (list[StatDB]): _description_
+            awards_message (list[str]): _description_
             send_messages (bool): whether to actually send messages
         """
         for stat in stats:

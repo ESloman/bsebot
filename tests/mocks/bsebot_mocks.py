@@ -1,9 +1,15 @@
 """BSEBot mock."""
 
+from discordbot.constants import BSE_BOT_ID
 from tests.mocks import discord_mocks
 
 
 class BSEBotMock:
+    @property
+    def user(self) -> discord_mocks.MemberMock:
+        """Mocks the user property."""
+        return discord_mocks.MemberMock(BSE_BOT_ID, "BSEBot")
+
     async def wait_until_ready(self) -> bool:
         """Mocks wait until ready method."""
         return True

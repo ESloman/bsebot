@@ -8,9 +8,9 @@ from collections import Counter
 from logging import Logger
 
 import discord
+import pytz
 from discord.ext import tasks
 
-from discordbot import utilities
 from discordbot.bot_enums import SupporterType, TransactionTypes
 from discordbot.bsebot import BSEBot
 from discordbot.constants import (
@@ -165,15 +165,10 @@ class BSEddiesManager(BaseTask):
         Returns:
             tuple[datetime.datetime, datetime.datetime]: start, end of day
         """
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
         yesterday = now - datetime.timedelta(days=days)
         start = yesterday.replace(hour=0, minute=0, second=0)
         end = yesterday.replace(hour=23, minute=59, second=59)
-
-        if not utilities.is_utc(now):
-            # need to add UTC offset
-            start = utilities.add_utc_offset(start)
-            end = utilities.add_utc_offset(end)
 
         return start, end
 

@@ -6,6 +6,7 @@ import random
 from logging import Logger
 
 import discord
+import pytz
 from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
@@ -37,7 +38,7 @@ class WordleTask(BaseTask):
 
     def _set_wordle(self) -> None:
         """Sets `sent_wordle` var based on whether or not we have actually sent wordle today."""
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         ret = self.wordles.find_wordles_at_timestamp(now, BSE_SERVER_ID)
         self.sent_wordle = ret is not None
@@ -45,7 +46,7 @@ class WordleTask(BaseTask):
     @tasks.loop(minutes=10)
     async def wordle_message(self) -> None:  # noqa: C901
         """Task that does the daily wordle."""
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         if now.hour < 9:  # noqa: PLR2004
             self.wait_iters = None

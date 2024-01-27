@@ -4,6 +4,7 @@ import datetime
 from logging import Logger
 
 import discord
+import pytz
 from discord.ext import tasks
 
 from apis.github import GitHubAPI
@@ -56,7 +57,7 @@ class GuildChecker(BaseTask):
     @tasks.loop(hours=12)
     async def guild_checker(self) -> None:  # noqa: C901, PLR0912, PLR0915
         """Loop that makes sure that guild information is synced correctly."""
-        datetime.datetime.now()
+        datetime.datetime.now(tz=pytz.utc)
 
         self.logger.info("Running guild sync")
         async for guild in self.bot.fetch_guilds():

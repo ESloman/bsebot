@@ -3,6 +3,7 @@
 import dataclasses
 import datetime
 
+import pytz
 from pymongo.results import InsertManyResult, InsertOneResult
 
 from discordbot.bot_enums import ActivityTypes
@@ -50,7 +51,12 @@ class UserActivities(BaseClass):
         Returns:
             InsertOneResult | InsertManyResult: _description_
         """
-        doc = {"uid": user_id, "guild_id": guild_id, "type": activity_type, "timestamp": datetime.datetime.now()}
+        doc = {
+            "uid": user_id,
+            "guild_id": guild_id,
+            "type": activity_type,
+            "timestamp": datetime.datetime.now(tz=pytz.utc),
+        }
 
         doc.update(kwargs)
         return self.insert(doc)

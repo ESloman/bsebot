@@ -7,6 +7,7 @@ import datetime
 import logging
 
 import discord
+import pytz
 
 import discordbot.clienteventclasses.onmessage
 from discordbot.bsebot import BSEBot
@@ -77,7 +78,7 @@ class OnMessageEdit(BaseEvent):
 
         message_type = await self.on_message.message_received(after, True)
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         self.interactions.update(
             {"_id": db_message._id},  # noqa: SLF001

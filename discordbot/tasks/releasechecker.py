@@ -4,6 +4,7 @@ import asyncio
 import datetime
 from logging import Logger
 
+import pytz
 from discord.ext import tasks
 
 from apis.github import GitHubAPI
@@ -40,7 +41,7 @@ class ReleaseChecker(BaseTask):
     @tasks.loop(minutes=60)
     async def release_checker(self) -> None:  # noqa: C901
         """Task to check github releases and post release notes when we get a new one."""
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         if now.hour != 12:  # noqa: PLR2004
             return

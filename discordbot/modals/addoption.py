@@ -6,8 +6,9 @@ from dataclasses import asdict
 from logging import Logger
 
 import discord
+import pytz
 
-import discordbot.views.bet  # avoiding a circular import (:
+import discordbot.views.bet
 from discordbot.embedmanager import EmbedManager
 from discordbot.slashcommandeventclasses.close import CloseBet
 from discordbot.slashcommandeventclasses.place import PlaceBet
@@ -67,7 +68,7 @@ class AddBetOption(discord.ui.Modal):
         outcome = self.bet_options.value
         outcomes = outcome.split("\n")
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         if not outcomes:
             await interaction.followup.send(

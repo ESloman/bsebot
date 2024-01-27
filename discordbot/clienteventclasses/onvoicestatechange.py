@@ -7,6 +7,7 @@ import datetime
 import logging
 
 import discord
+import pytz
 
 from discordbot.bsebot import BSEBot
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
@@ -37,7 +38,7 @@ class OnVoiceStateChange(BaseEvent):
             before (discord.VoiceState): before state
             after (discord.VoiceState): after state
         """
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         if before.self_mute == after.self_mute:
             return
@@ -65,7 +66,7 @@ class OnVoiceStateChange(BaseEvent):
             before (discord.VoiceState): before state
             after (discord.VoiceState): after state
         """
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         if before.self_deaf == after.self_deaf:
             return
@@ -93,7 +94,7 @@ class OnVoiceStateChange(BaseEvent):
             before (discord.VoiceState): before state
             after (discord.VoiceState): after state
         """
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         if before.self_deaf == after.self_deaf:
             return
@@ -161,7 +162,7 @@ class OnVoiceStateChange(BaseEvent):
             after.channel.guild.id,
             member.id,
             after.channel.id,
-            datetime.datetime.now(),
+            datetime.datetime.now(tz=pytz.utc),
             after.self_mute,
             after.self_deaf,
             after.self_stream,
@@ -176,7 +177,7 @@ class OnVoiceStateChange(BaseEvent):
         """
         self.logger.info("User %s, %s is leaving %s", member.id, member.name, before.channel)
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         vc_doc = self.interactions.find_active_voice_state(before.channel.guild.id, member.id, before.channel.id, now)
 
@@ -224,7 +225,7 @@ class OnVoiceStateChange(BaseEvent):
             before (discord.VoiceState): voice state object
             after (discord.VoiceState): voice state object
         """
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
         vc_doc = self.interactions.find_active_voice_state(before.channel.guild.id, member.id, before.channel.id, now)
 
         self._handle_mute_status(member, before, after, vc_doc)

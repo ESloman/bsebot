@@ -5,6 +5,7 @@ import datetime
 import logging
 
 import discord
+import pytz
 
 from discordbot import utilities
 from discordbot.bot_enums import ActivityTypes
@@ -131,7 +132,7 @@ class CreateBet(BSEddies):
             option_dict[self.multiple_options_emojis[8]] = {"val": option_ten_name}
 
         if timeout_str is None:
-            timeout = datetime.datetime.now() + datetime.timedelta(minutes=10)
+            timeout = datetime.datetime.now(tz=pytz.utc) + datetime.timedelta(minutes=10)
         else:
             timeout_str = timeout_str.strip()
             try:
@@ -151,7 +152,7 @@ class CreateBet(BSEddies):
                 await ctx.followup.send(content=msg, ephemeral=True)
                 return
 
-            timeout = datetime.datetime.now() + datetime.timedelta(seconds=_seconds)
+            timeout = datetime.datetime.now(tz=pytz.utc) + datetime.timedelta(seconds=_seconds)
 
         await ctx.channel.trigger_typing()
 

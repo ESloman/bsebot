@@ -5,6 +5,7 @@ import datetime
 import random
 from logging import Logger
 
+import pytz
 from discord.ext import tasks
 
 from discordbot import utilities
@@ -36,7 +37,7 @@ class AfterWorkVally(BaseTask):
         if BSE_SERVER_ID not in self.guild_ids:
             return
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         if now.weekday() not in {0, 1, 2, 3, 4}:
             return

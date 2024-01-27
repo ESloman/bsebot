@@ -4,6 +4,7 @@ import datetime
 from logging import Logger
 
 import discord
+import pytz
 
 from discordbot.constants import CREATOR
 from discordbot.selects.config import ConfigSelect
@@ -193,7 +194,7 @@ class ConfigView(discord.ui.View):
         guild_db = self.guilds.get_guild(interaction.guild_id)
         admins = guild_db.admins
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         configurable_threads = []
         for thread in threads:

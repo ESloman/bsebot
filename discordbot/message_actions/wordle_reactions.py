@@ -5,6 +5,7 @@ import re
 from logging import Logger
 
 import discord
+import pytz
 from discord import PartialEmoji
 from pymongo.errors import OperationFailure
 
@@ -77,7 +78,7 @@ class WordleMessageAction(BaseMessageAction):
         Args:
             message (discord.Message): the message
         """
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
         today = now.replace(hour=0, minute=0, second=0)
 
         if not utilities.is_utc(today):

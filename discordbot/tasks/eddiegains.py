@@ -52,7 +52,7 @@ class EddieGainMessager(BaseTask):
     @tasks.loop(minutes=1)
     async def eddie_distributer(self) -> None | list[dict]:  # noqa: PLR0912, C901
         """Task that distributes daily eddies."""
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         if now.hour != 7 or now.minute != 30:  # noqa: PLR2004
             return None

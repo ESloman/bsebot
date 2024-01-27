@@ -4,6 +4,7 @@ import asyncio
 import datetime
 from logging import Logger
 
+import pytz
 from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
@@ -30,7 +31,7 @@ class BetReminder(BaseTask):
     @tasks.loop(minutes=60)
     async def bet_reminder(self) -> None:
         """Loop that takes all our active bets and sends a reminder message."""
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
         for guild in self.bot.guilds:
             await self.bot.fetch_guild(guild.id)  # type: discord.Guild
             active = self.user_bets.get_all_active_bets(guild.id)

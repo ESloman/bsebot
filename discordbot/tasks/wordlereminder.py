@@ -6,6 +6,7 @@ import random
 from logging import Logger
 from typing import TYPE_CHECKING
 
+import pytz
 from discord.ext import tasks
 
 from discordbot import utilities
@@ -40,7 +41,7 @@ class WordleReminder(BaseTask):
         Only reminds users that did their wordle the day before,
         and haven't done it by ~7pm GMT/BST.
         """
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         if now.hour != 19:  # noqa: PLR2004
             return

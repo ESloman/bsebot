@@ -5,8 +5,10 @@ import logging
 import re
 
 import discord
+import pytz
 
-import discordbot.views.stats
+import discordbot.views.bet
+import discordbot.views.stats.StatsView
 from discordbot.bot_enums import ActivityTypes
 from discordbot.bsebot import BSEBot
 from discordbot.constants import WORDLE_SCORE_REGEX
@@ -269,7 +271,7 @@ class Stats(BSEddies):
         Returns:
             tuple[StatsData, StatsData]: a tuple of Stats Data, all time stats and this month's stats
         """
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
         start = now.replace(year=2012, month=1, day=1, hour=1, second=1, microsecond=1)
         end = start.replace(year=now.year + 1)
 

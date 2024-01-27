@@ -3,6 +3,7 @@
 import datetime
 
 import discord
+import pytz
 
 from discordbot.modals.addoption import AddBetOption
 from discordbot.slashcommandeventclasses.close import CloseBet
@@ -105,7 +106,7 @@ class BetView(discord.ui.View):
             return
 
         first_bet_time = _bet.betters[str(interaction.user.id)].first_bet
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
         if (
             (now - first_bet_time).seconds > 300  # noqa: PLR2004
             and (now - (_bet.updated or _bet.created)).seconds > 300  # noqa: PLR2004

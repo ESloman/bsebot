@@ -43,10 +43,7 @@ class CachedMongoClient:
             connection (str): the connection string for the MongoClient
         """
         if not self._client:
-            self._client = MongoClient(
-                connection,
-                serverSelectionTimeoutMS=1000,
-            )
+            self._client = MongoClient(connection, serverSelectionTimeoutMS=1000, tz_aware=True)
 
     @property
     def client(self: "CachedMongoClient") -> MongoClient:

@@ -5,6 +5,7 @@ import datetime
 from logging import Logger
 
 import discord
+import pytz
 from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
@@ -74,7 +75,7 @@ class MessageSync(BaseTask):
         Args:
             channel (discord.TextChannel | discord.Thread): the channel to check
         """
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
         offset_days = 7
         offset = now - datetime.timedelta(days=offset_days)
         before = now

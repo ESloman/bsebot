@@ -4,6 +4,7 @@ import asyncio
 import datetime
 from logging import Logger
 
+import pytz
 from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
@@ -35,7 +36,7 @@ class TaskManager(BaseTask):
 
         self.task_error_logs = {}
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         # init task error dict
         for task in self.tasks:
@@ -51,7 +52,7 @@ class TaskManager(BaseTask):
 
         Attempts to restart them if they are not running.
         """
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         for task in self.tasks:
             task_name = task.qualified_name

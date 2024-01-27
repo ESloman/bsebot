@@ -3,6 +3,7 @@
 import copy
 import datetime
 
+import pytz
 from bson import ObjectId
 
 from discordbot.bot_enums import TransactionTypes
@@ -65,8 +66,8 @@ class UserBets(BaseClass):
         doc = {
             "user_id": user_id,
             "emoji": emoji,
-            "first_bet": datetime.datetime.now(),
-            "last_bet": datetime.datetime.now(),
+            "first_bet": datetime.datetime.now(tz=pytz.utc),
+            "last_bet": datetime.datetime.now(tz=pytz.utc),
             "points": points,
         }
 
@@ -212,7 +213,7 @@ class UserBets(BaseClass):
             "user": user_id,
             "title": title,
             "options": options,
-            "created": datetime.datetime.now(),
+            "created": datetime.datetime.now(tz=pytz.utc),
             "timeout": timeout,
             "active": True,
             "betters": {},
@@ -221,7 +222,7 @@ class UserBets(BaseClass):
             "channel_id": None,
             "message_id": None,
             "private": private,
-            "updated": datetime.datetime.now(),
+            "updated": datetime.datetime.now(tz=pytz.utc),
             "users": [],
             "option_vals": [option_dict[o]["val"] for o in option_dict],
         }
@@ -279,7 +280,7 @@ class UserBets(BaseClass):
             {"_id": bet._id},  # noqa: SLF001
             {
                 "$inc": {f"betters.{user_id}.points": points},
-                "$set": {"last_bet": datetime.datetime.now(), "users": bet.users},
+                "$set": {"last_bet": datetime.datetime.now(tz=pytz.utc), "users": bet.users},
             },
         )
 
@@ -302,4 +303,6 @@ class UserBets(BaseClass):
         :param emoji: str - the winning result of the bet
         :return: None
         """
-        self.update({"_id": _id}, {"$set": {"active": False, "result": emoji, "closed": datetime.datetime.now()}})
+        self.update(
+            {"_id": _id}, {"$set": {"active": False, "result": emoji, "closed": datetime.datetime.now(tz=pytz.utc)}}
+        )

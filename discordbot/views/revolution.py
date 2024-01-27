@@ -5,6 +5,7 @@ import math
 from logging import Logger
 
 import discord
+import pytz
 
 from discordbot.bot_enums import ActivityTypes, TransactionTypes
 from discordbot.bsebot import BSEBot
@@ -103,7 +104,7 @@ class RevolutionView(discord.ui.View):
             # leave it disabled
             return
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         if event.expired < now:
             await followup.send(content="Unfortunately, this event has expired", ephemeral=True, delete_after=10)

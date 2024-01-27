@@ -6,6 +6,7 @@ import math
 import random
 from logging import Logger
 
+import pytz
 from discord.ext import tasks
 
 from apis.giphyapi import GiphyAPI
@@ -60,7 +61,7 @@ class BSEddiesRevolutionTask(BaseTask):
             self.logger.info("Startup tasks not complete - skipping loop")
             return
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         if not any(self.rev_started[g] for g in self.rev_started) and (
             now.weekday() != 6 or now.hour != 16 or now.minute != 0  # noqa: PLR2004
@@ -84,7 +85,7 @@ class BSEddiesRevolutionTask(BaseTask):
             # if we don't have an actual revolution event and it IS 4PM then we trigger a new event
             if not self.rev_started.get(guild.id) and now.hour == 16 and now.minute == 0:  # noqa: PLR2004
                 # only trigger if King was King for more than twenty four hours
-                king_since = guild_db.king_since or (datetime.datetime.now() - datetime.timedelta(days=1))
+                king_since = guild_db.king_since or (datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(days=1))
                 if (now - king_since).total_seconds() < 86400:  # noqa: PLR2004
                     # user hasn't been king for more than twenty four hours
                     channel = await self.bot.fetch_channel(guild_db.channel)
@@ -99,8 +100,8 @@ class BSEddiesRevolutionTask(BaseTask):
 
                 event = self.revolutions.create_event(
                     guild.id,
-                    datetime.datetime.now(),
-                    datetime.datetime.now() + datetime.timedelta(hours=3, minutes=30),
+                    datetime.datetime.now(tz=pytz.utc),
+                    datetime.datetime.now(tz=pytz.utc) + datetime.timedelta(hours=3, minutes=30),
                     king_user.uid,
                     user_points,
                     guild_db.channel,
@@ -332,7 +333,9 @@ class BSEddiesRevolutionTask(BaseTask):
         await channel.send(content=gif)
         self.revolutions.close_event(event.event_id, guild_id, success, points_to_lose)
         # set last revolution time in the database
-        self.guilds.update({"guild_id": guild_id}, {"$set": {"last_revolution_time": datetime.datetime.now()}})
+        self.guilds.update(
+            {"guild_id": guild_id}, {"$set": {"last_revolution_time": datetime.datetime.now(tz=pytz.utc)}}
+        )
 
     @revolution.before_loop
     async def before_revolution(self) -> None:

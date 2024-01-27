@@ -4,8 +4,9 @@ import datetime
 import logging
 
 import discord
+import pytz
 
-import discordbot.utilities
+import discordbot.views.bet
 from mongo.bsepoints.reminders import ServerReminders
 
 
@@ -48,7 +49,7 @@ class ReminderModal(discord.ui.Modal):
 
         timeout_seconds = discordbot.utilities.convert_time_str(timeout)
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
         timeout_date = now + datetime.timedelta(seconds=timeout_seconds)
 
         self.logger.info("%s - %s - %s", reason, timeout, timeout_seconds)

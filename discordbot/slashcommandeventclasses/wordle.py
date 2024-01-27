@@ -7,6 +7,7 @@ import re
 from dataclasses import asdict
 
 import discord
+import pytz
 import seaborn as sns
 
 from discordbot.bot_enums import ActivityTypes
@@ -81,7 +82,7 @@ class Wordle(BSEddies):
 
     @staticmethod
     def _calculate_averages(wordles: list[WordleMessageDB]) -> tuple[dict[int, float], dict[datetime.datetime, float]]:
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
         # calculate averages for all years and months
         monthly_avgs = {}
         yearly_avgs = {}
@@ -179,7 +180,7 @@ class Wordle(BSEddies):
         _, bot_month_avgs = self._calculate_averages(bot_wordles)
         _, server_month_avgs = self._calculate_averages(server_wordles)
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         msg += "\n## Monthly\n"
         for month in range(1, now.month):  # don't add one as we don't care about current month

@@ -4,6 +4,7 @@ import datetime
 import logging
 
 import discord
+import pytz
 
 from discordbot.bot_enums import ActivityTypes, TransactionTypes
 from discordbot.bsebot import BSEBot
@@ -74,7 +75,7 @@ class KingRename(BSEddies):
 
         key = f"rename_{role}"
         last_king_rename = getattr(db_guild, key)
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
         if last_king_rename:
             time_elapsed = now - last_king_rename
             if time_elapsed.total_seconds() < 3600:  # noqa: PLR2004

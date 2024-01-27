@@ -9,6 +9,7 @@ import random
 import re
 from logging import Logger
 
+import pytz
 from selenium import webdriver
 from selenium.common.exceptions import (
     ElementClickInterceptedException,
@@ -401,7 +402,7 @@ class WordleSolver:
             len(guesses),
             actual_word,
             game_state,
-            datetime.datetime.now(),
+            datetime.datetime.now(tz=pytz.utc),
             share_text,
             int(wordle_number),
         )

@@ -8,7 +8,7 @@ import discord
 import pytz
 
 import discordbot.views.bet
-import discordbot.views.stats.StatsView
+import discordbot.views.stats
 from discordbot.bot_enums import ActivityTypes
 from discordbot.bsebot import BSEBot
 from discordbot.constants import WORDLE_SCORE_REGEX

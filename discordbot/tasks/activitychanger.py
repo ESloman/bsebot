@@ -43,7 +43,7 @@ class ActivityChanger(BaseTask):
             self.task.start()
 
     @tasks.loop(hours=1)
-    async def activity_changer(self) -> None:
+    async def activity_changer(self) -> discord.Activity:
         """Loop that occasionally changes the activity."""
         now = datetime.datetime.now(tz=pytz.utc)
 
@@ -83,13 +83,14 @@ class ActivityChanger(BaseTask):
                     new_activity["state"] = "Playing"
                     new_activity["type"] = discord.ActivityType.playing
                 case _:
-                    return
+                    return None
 
             activity = discord.Activity(**new_activity)
             # increment count for this selected activity
             self.bot_activities.update({"_id": _activity._id}, {"$inc": {"count": 1}})  # noqa: SLF001
 
         await self.bot.change_presence(activity=activity)
+        return activity
 
     @activity_changer.before_loop
     async def before_activity_changer(self) -> None:

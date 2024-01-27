@@ -48,7 +48,7 @@ class StatsGatherer:  # noqa: PLR0904
         Returns:
             tuple[datetime.datetime, datetime.datetime]:
         """
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
         start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=1)
         try:
             start = start.replace(month=start.month - 1)

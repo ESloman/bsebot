@@ -339,7 +339,9 @@ class BSEddiesManager(BaseTask):
 
         return eddies_gained, count
 
-    def give_out_eddies(self, guild_id: int, real: bool = False, days: int = 1) -> dict[str, any]:  # noqa: PLR0915, PLR0912, C901
+    def give_out_eddies(  # noqa: PLR0915, PLR0912, C901
+        self, guild_id: int, real: bool = False, days: int = 1
+    ) -> dict[int, list[int, dict[str, float]]]:
         """Works out all the predicted salary gain for a given server's members.
 
         Only distributes them if specified.
@@ -369,7 +371,7 @@ class BSEddiesManager(BaseTask):
         user_ids = [u.uid for u in users]
         user_dict = {u.uid: u for u in users}
 
-        eddie_gain_dict = {}
+        eddie_gain_dict: dict[int, list[int, dict[str, float]]] = {}
         wordle_messages = []
 
         try:

@@ -121,3 +121,23 @@ class TestBSEddiesManager:
             manager = BSEddiesManager(self.bsebot, [], PlaceHolderLogger, [])
             results = manager.give_out_eddies(guild_id, False)
         assert isinstance(results, dict)
+
+    @pytest.mark.parametrize(
+        ("guild_id", "date"),
+        [
+            (gid, date)
+            for gid in {entry["guild_id"] for entry in _get_interaction_data(200)}
+            for date in ["2023-12-02", "2023-12-25", "2023-12-31"]
+        ],
+    )
+    @patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @patch.object(interface, "query", new=interface_mocks.query_mock)
+    @patch.object(interface, "update", new=interface_mocks.update_mock)
+    @patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    def test_give_out_eddies_real(self, guild_id: int, date: str) -> None:
+        """Tests our give_out_eddies method."""
+        with freeze_time(date):
+            manager = BSEddiesManager(self.bsebot, [], PlaceHolderLogger, [])
+            results = manager.give_out_eddies(guild_id, True)
+        assert isinstance(results, dict)

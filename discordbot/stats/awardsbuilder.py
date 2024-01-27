@@ -18,6 +18,7 @@ from discordbot.constants import (
 from discordbot.stats.statsclasses import StatDB, StatsGatherer
 from mongo.bsedataclasses import Awards
 from mongo.bsepoints.points import UserPoints
+import contextlib
 
 
 class AwardsBuilder:
@@ -160,20 +161,20 @@ class AwardsBuilder:
             message_start = f"{start.strftime('%Y')} server stats 📈:\n\n"
 
         if busiest_thread.value:
-            busiest_thread_obj = await self.bot.fetch_channel(busiest_thread.value)
-            if busiest_thread_obj.archived:
-                b_thread_text = f"`#{busiest_thread_obj.name} (archived)`"
-            else:
-                b_thread_text = busiest_thread_obj.mention
+            b_thread_text = f"<#{busiest_thread.value}>"
+            with contextlib.suppress(discord.errors.NotFound):
+                busiest_thread_obj = await self.bot.fetch_channel(busiest_thread.value)
+                if busiest_thread_obj.archived:
+                    b_thread_text = f"`#{busiest_thread_obj.name} (archived)`"
         else:
             b_thread_text = "none"
 
         if quietest_thread.value:
-            quietest_thread_obj = await self.bot.fetch_channel(quietest_thread.value)
-            if quietest_thread_obj.archived:
-                q_thread_text = f"`#{quietest_thread_obj.name} (archived)`"
-            else:
-                q_thread_text = quietest_thread_obj.mention
+            q_thread_text = f"<#{quietest_thread.value}>"
+            with contextlib.suppress(discord.errors.NotFound):
+                quietest_thread_obj = await self.bot.fetch_channel(quietest_thread.value)
+                if quietest_thread_obj.archived:
+                    q_thread_text = f"`#{quietest_thread_obj.name} (archived)`"
         else:
             q_thread_text = "none"
 

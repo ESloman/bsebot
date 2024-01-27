@@ -16,7 +16,9 @@ from discordbot.tasks.basetask import BaseTask
 class ActivityChanger(BaseTask):
     """Class for activity changer."""
 
-    def __init__(self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask]) -> None:
+    def __init__(
+        self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask], start: bool = True
+    ) -> None:
         """Initialisation method.
 
         Args:
@@ -24,6 +26,7 @@ class ActivityChanger(BaseTask):
             guild_ids (list[int]): the list of guild IDs
             logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
+            start (bool): whether to start the task automatically or not. Defaults to True.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
 
@@ -36,7 +39,8 @@ class ActivityChanger(BaseTask):
             details="Waiting for commands!",
         )
 
-        self.task.start()
+        if start:
+            self.task.start()
 
     @tasks.loop(hours=1)
     async def activity_changer(self) -> None:

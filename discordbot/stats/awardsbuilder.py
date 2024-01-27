@@ -1,5 +1,6 @@
 """Our Awards Builder class."""
 
+import contextlib
 import datetime
 from logging import Logger
 
@@ -18,7 +19,6 @@ from discordbot.constants import (
 from discordbot.stats.statsclasses import StatDB, StatsGatherer
 from mongo.bsedataclasses import Awards
 from mongo.bsepoints.points import UserPoints
-import contextlib
 
 
 class AwardsBuilder:

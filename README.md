@@ -14,9 +14,12 @@ Bot was originally created for the `BSE` server to fulfill a need to have someth
 # Contributing
 
 Contributions are welcome! See the [Contributing guide](.github/CONTRIBUTING.md). For contribution ideas:
-- check the list of issues
-- check the SonarCloud project for outstanding issues
+- check the list of GitHub issues
+- check the SonarCloud project for outstanding bugs/code smells/vulnerabilities
 - additional unit tests to increase coverage (can check the SonarCloud project for weaknesses)
-- refactoring/simplifying the code
+- refactoring/simplifying the code (a lot of functions are too complex and can be broken down)
+- reducing duplication
+- ensuring type hints are up to date/accurate
+- ensuring that comments are accurate and contain the right type hints
 - adding new features/functionality
 - localisation (tbc)

@@ -18,6 +18,19 @@ I try to adhere to `PEP8` standards as much as possible but with a line length o
 
 You can run `ruff` in the root directory `bsebot`. The configuration file already exists so it should pick that up. Additionally, we have a `ruff` pre-commit hook setup. You can install `pre-commit` and that should also lint your code before commit; it'll also attempt to fix any issues it's found.
 
+## Testing
+
+We have a suite of tests in the `tests/` directory that can be run to verify some changes. The test suite(s) are far from complete
+and may not catch everything. The requirements for testing are:
+- `pytest`
+- `pytest-asyncio`
+- `freezegun`
+
+## Setup
+
+The below instructions assume you want to be able to the run bot locally as well. Some changes won't need
+to run the bot locally - such as updating type hints/comments/etc. You can probably skip the requirements/setup for setting
+up a bot token and local MongoDB instance and just rely on `ruff` for formatting + linting. You can also run `pytest` to verify some changes.
 
 ### Starting requirements
 These are starting requirements that I assume you have met.
@@ -47,5 +60,11 @@ You may need to add the `bsebot` repo to your pythonpath.
 ### Starting to contribute
 - Make yourself a new branch - you won't have permissions to commit to `main` directly.
 - If you're not a collaborator, you will have to fork first and then create a PR as you won't have push access or the ability to create branches.
-- Pick an issue from the list of issues (or create one if you have another idea of something you want to work on)
+- Pick something to do:
+   - an issue from the list of issues (or create one if you have another idea of something you want to work on)
+   - look at the SonarCloud project for bugs/smells/vulnerabilities
+   - add tests to increase coverage
+   - add/fix comments/doc strings
+   - update type hints
+   - other general improvements/etc
 - Start work!

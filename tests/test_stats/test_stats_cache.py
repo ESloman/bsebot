@@ -1,7 +1,6 @@
 """Tests the StatsDataCache class."""
 
 import datetime
-import random
 from unittest import mock
 
 import pytest
@@ -10,18 +9,6 @@ import pytz
 from discordbot.stats.statsdatacache import StatsDataCache
 from mongo import interface
 from tests.mocks import interface_mocks
-
-INTERACTION_CACHE: list[dict[str, any]] | None = None
-
-
-def _get_interaction_data(number: int | None = None) -> list[dict[str, any]]:
-    """Function for getting and caching internal data."""
-    global INTERACTION_CACHE  # noqa: PLW0603
-    if INTERACTION_CACHE is None:
-        INTERACTION_CACHE = list(interface_mocks.query_mock("userinteractions", {}))
-    if not number:
-        return INTERACTION_CACHE
-    return random.choices(INTERACTION_CACHE, k=number)
 
 
 class TestStatsDataCache:
@@ -41,7 +28,11 @@ class TestStatsDataCache:
         assert cache.annual
         assert cache._user_id_cache == 123456
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -67,7 +58,11 @@ class TestStatsDataCache:
         assert messages_again is cache._message_cache
         assert messages_again is messages
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -93,7 +88,11 @@ class TestStatsDataCache:
         assert messages_again is cache._edit_cache
         assert messages_again is messages
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -119,7 +118,11 @@ class TestStatsDataCache:
         assert vcs_again is cache._vc_cache
         assert vcs_again is vcs
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -145,7 +148,11 @@ class TestStatsDataCache:
         assert bets_again is cache._bet_cache
         assert bets_again is bets
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -171,7 +178,11 @@ class TestStatsDataCache:
         assert users_again is cache._user_cache
         assert users_again is users
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -197,7 +208,11 @@ class TestStatsDataCache:
         assert transactions_again is cache._transaction_cache
         assert transactions_again is transactions
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -223,7 +238,11 @@ class TestStatsDataCache:
         assert activities_again is cache._activity_cache
         assert activities_again is activities
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -249,7 +268,11 @@ class TestStatsDataCache:
         assert emojis_again is cache._emoji_cache
         assert emojis_again is emojis
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -272,7 +295,11 @@ class TestStatsDataCache:
         # should be the same as above
         assert threaded_messages == threaded_messages_again
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -297,7 +324,11 @@ class TestStatsDataCache:
         assert reactions_again is cache._reactions_cache
         assert reactions_again == reactions
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)

@@ -1,7 +1,6 @@
 """Tests our eddie gains task."""
 
 import datetime
-import random
 from collections import Counter
 from unittest.mock import patch
 
@@ -17,21 +16,10 @@ from tests.mocks.bsebot_mocks import BSEBotMock
 from tests.mocks.mongo_mocks import GuildsMock, UserPointsMock
 from tests.mocks.task_mocks import mock_bseddies_manager_counters, mock_eddie_manager_give_out_eddies
 
-INTERACTION_CACHE: list[dict[str, any]] | None = None
-AWARD_CACHE: list[dict[str, any]] | None = None
-
-
-def _get_interaction_data(number: int | None = None) -> list[dict[str, any]]:
-    """Function for getting and caching internal data."""
-    global INTERACTION_CACHE  # noqa: PLW0603
-    if INTERACTION_CACHE is None:
-        INTERACTION_CACHE = list(interface_mocks.query_mock("userinteractions", {}))
-    if not number:
-        return INTERACTION_CACHE
-    return random.choices(INTERACTION_CACHE, k=number)
-
 
 class TestEddieGainMessager:
+    """Tests our EddieGainMessager class."""
+
     @pytest.fixture(autouse=True)
     def _test_data(self) -> None:
         """Fixture to get test data.
@@ -108,7 +96,7 @@ class TestBSEddiesManager:
         ("guild_id", "date"),
         [
             (gid, date)
-            for gid in {entry["guild_id"] for entry in _get_interaction_data(200)}
+            for gid in {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})}
             for date in ["2023-12-02", "2023-12-25", "2023-12-31"]
         ],
     )
@@ -126,7 +114,7 @@ class TestBSEddiesManager:
         ("guild_id", "date"),
         [
             (gid, date)
-            for gid in {entry["guild_id"] for entry in _get_interaction_data(200)}
+            for gid in {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})}
             for date in ["2023-12-02", "2023-12-25", "2023-12-31"]
         ],
     )

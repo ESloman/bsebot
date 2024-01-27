@@ -15,7 +15,6 @@ from mongo import interface
 from mongo.bsedataclasses import Awards
 from tests.mocks import discord_mocks, interface_mocks
 
-INTERACTION_CACHE: list[dict[str, any]] | None = None
 AWARD_CACHE: list[dict[str, any]] | None = None
 
 
@@ -27,16 +26,6 @@ def _get_award_data(number: int | None = None) -> list[dict[str, any]]:
     if not number:
         return AWARD_CACHE
     return random.choices(AWARD_CACHE, k=number)
-
-
-def _get_interaction_data(number: int | None = None) -> list[dict[str, any]]:
-    """Function for getting and caching internal data."""
-    global INTERACTION_CACHE  # noqa: PLW0603
-    if INTERACTION_CACHE is None:
-        INTERACTION_CACHE = list(interface_mocks.query_mock("userinteractions", {}))
-    if not number:
-        return INTERACTION_CACHE
-    return random.choices(INTERACTION_CACHE, k=number)
 
 
 class TestsStatsGatherer:
@@ -134,7 +123,11 @@ class TestsStatsGathererStatsMethods:
         self.start = now.replace(year=2023, month=12, day=1, hour=0, minute=1)
         self.end = self.start.replace(year=2024, month=1)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -144,7 +137,11 @@ class TestsStatsGathererStatsMethods:
         stat = stats.number_of_messages(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -154,7 +151,11 @@ class TestsStatsGathererStatsMethods:
         stat = stats.number_of_threaded_messages(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -165,7 +166,11 @@ class TestsStatsGathererStatsMethods:
         assert isinstance(character_stats, StatDB)
         assert isinstance(word_stats, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -175,7 +180,11 @@ class TestsStatsGathererStatsMethods:
         stat = stats.busiest_channel(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -185,7 +194,11 @@ class TestsStatsGathererStatsMethods:
         stat = stats.quietest_channel(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -195,7 +208,11 @@ class TestsStatsGathererStatsMethods:
         stat = stats.busiest_thread(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -205,7 +222,11 @@ class TestsStatsGathererStatsMethods:
         stat = stats.quietest_thread(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -215,7 +236,11 @@ class TestsStatsGathererStatsMethods:
         stat = stats.busiest_day(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -225,7 +250,11 @@ class TestsStatsGathererStatsMethods:
         stat = stats.quietest_day(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -235,7 +264,11 @@ class TestsStatsGathererStatsMethods:
         stat = stats.number_of_bets(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -245,7 +278,11 @@ class TestsStatsGathererStatsMethods:
         stat = stats.salary_gains(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -255,7 +292,11 @@ class TestsStatsGathererStatsMethods:
         stat = stats.average_wordle_victory(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -266,7 +307,11 @@ class TestsStatsGathererStatsMethods:
         assert isinstance(placed_stat, StatDB)
         assert isinstance(won_stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -276,7 +321,11 @@ class TestsStatsGathererStatsMethods:
         stat = stats.most_unique_channel_contributers(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -286,7 +335,11 @@ class TestsStatsGathererStatsMethods:
         stat = stats.total_time_spent_in_vc(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -296,7 +349,11 @@ class TestsStatsGathererStatsMethods:
         stat = stats.vc_with_most_time_spent(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -306,7 +363,11 @@ class TestsStatsGathererStatsMethods:
         stat = stats.vc_with_most_users(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -316,7 +377,11 @@ class TestsStatsGathererStatsMethods:
         stat = stats.most_popular_server_emoji(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -326,7 +391,11 @@ class TestsStatsGathererStatsMethods:
         stat = stats.threads_created(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -358,7 +427,11 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         stat = stats.server_owner(self.guild, self.start)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -368,7 +441,11 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         stat = stats.most_messages_sent(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -378,7 +455,11 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         stat = stats.least_messages_sent(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -388,7 +469,11 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         stat = stats.most_thread_messages_sent(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -398,7 +483,11 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         stat = stats.longest_message(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -408,7 +497,11 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         stat = stats.lowest_average_wordle_score(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -418,7 +511,11 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         stat = stats.highest_average_wordle_score(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -428,7 +525,11 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         stat = stats.wordle_most_greens(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -438,7 +539,11 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         stat = stats.wordle_most_symmetry(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -448,7 +553,11 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         stat = stats.twitter_addict(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -458,7 +567,11 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         stat = stats.jerk_off_contributor(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -468,7 +581,11 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         stat = stats.big_memer(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -478,7 +595,11 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         stat = stats.react_king(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -489,7 +610,11 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         assert isinstance(most_replies_stat, StatDB)
         assert isinstance(most_replied_to_stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -499,7 +624,11 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         stat = stats.most_edited_messages(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -509,7 +638,11 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         stat = stats.most_swears(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -519,7 +652,11 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         stat = stats.most_messages_to_a_single_channel(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -529,7 +666,11 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         stat = stats.most_messages_to_most_channels(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -539,7 +680,11 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         stat = stats.most_bets_created(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -549,7 +694,11 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         stat = stats.most_eddies_bet(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -559,7 +708,11 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         stat = stats.most_eddies_won(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -569,7 +722,11 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         stat = stats.most_time_king(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -579,7 +736,11 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         stat = stats.big_gamer(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_interaction_data(200)})
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)

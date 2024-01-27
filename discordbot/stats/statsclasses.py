@@ -362,7 +362,6 @@ class StatsGatherer:  # noqa: PLR0904
         guild_id: int,
         start: datetime.datetime,
         end: datetime.datetime,
-        channel_ids: list[int] | None = None,
     ) -> StatDB:
         """Returns the channel with the least messages for a given time period.
 
@@ -370,7 +369,6 @@ class StatsGatherer:  # noqa: PLR0904
             guild_id (int): the guild ID
             start (datetime.datetime): beginning of the time period
             end (datetime.datetime): end of the time period
-            channel_ids (list[int]): list of channel IDs
 
         Returns:
             Stat: the quietest channel stat
@@ -382,7 +380,7 @@ class StatsGatherer:  # noqa: PLR0904
         for message in messages:
             channel_id = message.channel_id
             user_id = message.user_id
-            if not channel_id or (channel_ids and channel_id not in channel_ids):
+            if not channel_id:
                 continue
             if channel_id not in channels:
                 channels[channel_id] = {"count": 0, "users": []}

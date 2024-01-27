@@ -79,7 +79,9 @@ class AwardsBuilder:
 
         return _string
 
-    async def build_stats_and_message(self: "AwardsBuilder") -> tuple[list[StatDB], list[str]]:  # noqa: PLR0912, C901, PLR0915
+    async def build_stats_and_message(  # noqa: PLR0912, C901, PLR0915
+        self: "AwardsBuilder",
+    ) -> tuple[list[StatDB], list[str]]:
         """Uses StatsGatherer to query for all the required stats.
 
         Formats an appropriate message
@@ -97,22 +99,6 @@ class AwardsBuilder:
 
         args = (self.guild_id, start, end)
 
-        try:
-            guild = await self.bot.fetch_guild(self.guild_id)
-        except discord.errors.NotFound:
-            if self.debug:
-                guild = await self.bot.fetch_guild(SLOMAN_SERVER_ID)
-            else:
-                raise
-
-        # get a list of channel IDs here to use
-        if self.debug:
-            _channel_ids = []
-        else:
-            _channels = await guild.fetch_channels()
-            _channels = [c for c in _channels if c.type in {discord.ChannelType.text, discord.ChannelType.private}]
-            _channel_ids = [c.id for c in _channels]
-
         number_messages = self.stats.number_of_messages(*args)
         avg_message_chars, avg_message_words = self.stats.average_message_length(*args)
         busiest_channel = self.stats.busiest_channel(*args)
@@ -129,7 +115,7 @@ class AwardsBuilder:
         most_used_server_emoji = self.stats.most_popular_server_emoji(*args)
         threads_created = self.stats.threads_created(*args)
         thread_messages = self.stats.number_of_threaded_messages(*args)
-        quietest_channel = self.stats.quietest_channel(*args, _channel_ids)
+        quietest_channel = self.stats.quietest_channel(*args)
         quietest_thread = self.stats.quietest_thread(*args)
         quietest_day = self.stats.quietest_day(*args)
         emojis_created = self.stats.emojis_created(*args)

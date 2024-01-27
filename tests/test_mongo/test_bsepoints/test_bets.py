@@ -79,7 +79,8 @@ class TestUserBets:
         assert count == exp
 
     @pytest.mark.parametrize(
-        "guild_id", sorted({entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})}),
+        "guild_id",
+        sorted({entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})}),
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -95,7 +96,8 @@ class TestUserBets:
             assert bet.guild_id == guild_id
 
     @pytest.mark.parametrize(
-        "guild_id", sorted({entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})}),
+        "guild_id",
+        sorted({entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})}),
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -112,7 +114,8 @@ class TestUserBets:
             assert bet.guild_id == guild_id
 
     @pytest.mark.parametrize(
-        "guild_id", sorted({entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})}),
+        "guild_id",
+        sorted({entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})}),
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -283,7 +286,11 @@ class TestUserBets:
 
     @pytest.mark.parametrize(
         "bet",
-        [UserBets.make_data_class(entry) for entry in sorted(_get_bet_data(100), key=lambda x: x["_id"]) if entry.get("betters")],
+        [
+            UserBets.make_data_class(entry)
+            for entry in sorted(_get_bet_data(100), key=lambda x: x["_id"])
+            if entry.get("betters")
+        ],
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -301,7 +308,11 @@ class TestUserBets:
 
     @pytest.mark.parametrize(
         "bet",
-        [UserBets.make_data_class(entry) for entry in sorted(_get_bet_data(50), key=lambda x: x["_id"]) if entry.get("betters")],
+        [
+            UserBets.make_data_class(entry)
+            for entry in sorted(_get_bet_data(50), key=lambda x: x["_id"])
+            if entry.get("betters")
+        ],
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)

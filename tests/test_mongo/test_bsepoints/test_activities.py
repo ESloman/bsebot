@@ -46,7 +46,7 @@ class TestUserActivities:
         activities = UserActivities()
         activities.add_activity(123, 456, ActivityTypes.BSEDDIES_VIEW, extra="some extra data")
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_activity_data()})
+    @pytest.mark.parametrize("guild_id", sorted({entry["guild_id"] for entry in _get_activity_data()}))
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -59,7 +59,7 @@ class TestUserActivities:
             assert isinstance(act, ActivityDB)
             assert act.guild_id == guild_id
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_activity_data()})
+    @pytest.mark.parametrize("guild_id", sorted({entry["guild_id"] for entry in _get_activity_data()}))
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)

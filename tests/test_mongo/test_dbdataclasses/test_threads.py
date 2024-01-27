@@ -40,7 +40,7 @@ class TestSpoilerThreads:
             cls = threads.make_data_class(entry)
             assert isinstance(cls, ThreadDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_thread_data()})
+    @pytest.mark.parametrize("guild_id", sorted({entry["guild_id"] for entry in _get_thread_data()}))
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -53,7 +53,7 @@ class TestSpoilerThreads:
             assert isinstance(thread, ThreadDB)
 
     @pytest.mark.parametrize(
-        ("guild_id", "thread_id"), {(entry["guild_id"], entry["thread_id"]) for entry in _get_thread_data()}
+        ("guild_id", "thread_id"), sorted({(entry["guild_id"], entry["thread_id"]) for entry in _get_thread_data()})
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)

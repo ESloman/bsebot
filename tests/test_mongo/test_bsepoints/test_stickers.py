@@ -30,7 +30,7 @@ class TestServerStickers:
     @pytest.mark.parametrize(
         ("guild_id", "sticker_id"),
         # load list of entries dynamically
-        {(entry["guild_id"], entry["stid"]) for entry in interface_mocks.query_mock("serverstickers", {})},
+        sorted({(entry["guild_id"], entry["stid"]) for entry in interface_mocks.query_mock("serverstickers", {})}),
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -46,7 +46,7 @@ class TestServerStickers:
     @pytest.mark.parametrize(
         ("guild_id", "name"),
         # load list of entries dynamically
-        {(entry["guild_id"], entry["name"]) for entry in interface_mocks.query_mock("serverstickers", {})},
+        sorted({(entry["guild_id"], entry["name"]) for entry in interface_mocks.query_mock("serverstickers", {})}),
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)

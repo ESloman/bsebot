@@ -131,7 +131,7 @@ class TestUserPoints:
     @pytest.mark.parametrize(
         "guild_id",
         # load list of entries dynamically
-        {entry["guild_id"] for entry in interface_mocks.query_mock("userpoints", {})},
+        sorted({entry["guild_id"] for entry in interface_mocks.query_mock("userpoints", {})}),
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -218,7 +218,7 @@ class TestUserPoints:
     @pytest.mark.parametrize(
         "guild_id",
         # load list of entries dynamically
-        {entry["guild_id"] for entry in interface_mocks.query_mock("userpoints", {})},
+        sorted({entry["guild_id"] for entry in interface_mocks.query_mock("userpoints", {})}),
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)

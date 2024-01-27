@@ -1,7 +1,6 @@
 """Tests the StatsDataCache class."""
 
 import datetime
-import random
 from unittest import mock
 
 import pytest
@@ -25,7 +24,7 @@ def _get_award_data(number: int | None = None) -> list[dict[str, any]]:
         AWARD_CACHE = list(interface_mocks.query_mock("awards", {}))
     if not number:
         return AWARD_CACHE
-    return random.choices(AWARD_CACHE, k=number)
+    return AWARD_CACHE[-number:]
 
 
 class TestsStatsGatherer:

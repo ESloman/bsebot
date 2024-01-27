@@ -25,7 +25,7 @@ class TestGuilds:  # noqa: PLR0904
     @pytest.mark.parametrize(
         "guild_id",
         # load list of entries dynamically
-        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+        sorted({entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})}),
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -49,7 +49,7 @@ class TestGuilds:  # noqa: PLR0904
     @pytest.mark.parametrize(
         "guild_id",
         # load list of entries dynamically
-        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+        sorted({entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})}),
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -62,7 +62,7 @@ class TestGuilds:  # noqa: PLR0904
     @pytest.mark.parametrize(
         "guild_id",
         # load list of entries dynamically
-        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+        sorted({entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})}),
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -86,7 +86,7 @@ class TestGuilds:  # noqa: PLR0904
     @pytest.mark.parametrize(
         "guild_id",
         # load list of entries dynamically
-        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+        sorted({entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})}),
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -101,7 +101,7 @@ class TestGuilds:  # noqa: PLR0904
     @pytest.mark.parametrize(
         "guild_id",
         # load list of entries dynamically
-        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+        sorted({entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})}),
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -125,7 +125,7 @@ class TestGuilds:  # noqa: PLR0904
     @pytest.mark.parametrize(
         "guild_id",
         # load list of entries dynamically
-        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+        sorted({entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})}),
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -166,7 +166,7 @@ class TestGuilds:  # noqa: PLR0904
     @pytest.mark.parametrize(
         "guild_id",
         # load list of entries dynamically
-        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+        sorted({entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})}),
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -214,7 +214,7 @@ class TestGuilds:  # noqa: PLR0904
     @pytest.mark.parametrize(
         "guild_id",
         # load list of entries dynamically
-        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+        sorted({entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})}),
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)

@@ -38,7 +38,7 @@ class TestServerReminders:
             rem_db = ServerReminders.make_data_class(reminder)
             assert isinstance(rem_db, ReminderDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_reminder_data()})
+    @pytest.mark.parametrize("guild_id", sorted({entry["guild_id"] for entry in _get_reminder_data()}))
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -50,7 +50,7 @@ class TestServerReminders:
         for reminder in open_reminders:
             assert isinstance(reminder, ReminderDB)
 
-    @pytest.mark.parametrize("object_id", {entry["_id"] for entry in _get_reminder_data()})
+    @pytest.mark.parametrize("object_id", sorted({entry["_id"] for entry in _get_reminder_data()}))
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "update", new=interface_mocks.update_mock)

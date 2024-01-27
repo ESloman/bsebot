@@ -1,7 +1,6 @@
 """Tests our UserTransactions class."""
 
 import datetime
-import random
 from unittest import mock
 
 import pytest
@@ -23,7 +22,7 @@ def _get_transaction_data(number: int | None = None) -> list[dict[str, any]]:
         TRANSACTION_CACHE = list(interface_mocks.query_mock("usertransactions", {}))
     if not number:
         return TRANSACTION_CACHE
-    return random.choices(TRANSACTION_CACHE, k=number)
+    return TRANSACTION_CACHE[-number:]
 
 
 class TestUserTransactions:
@@ -46,7 +45,9 @@ class TestUserTransactions:
         transactions = UserTransactions()
         transactions.add_transaction(123, 456, TransactionTypes.DAILY_SALARY, 50)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_transaction_data()})
+    @pytest.mark.parametrize(
+        "guild_id", sorted({entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})})
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -59,7 +60,9 @@ class TestUserTransactions:
             assert isinstance(act, TransactionDB)
             assert act.guild_id == guild_id
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_transaction_data()})
+    @pytest.mark.parametrize(
+        "guild_id", sorted({entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})})
+    )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)

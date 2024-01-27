@@ -1,7 +1,6 @@
 """Tests our TicketedEvents classes."""
 
 import datetime
-import random
 from unittest import mock
 
 import pytest
@@ -21,7 +20,7 @@ def _get_event_data(number: int | None = None) -> list[dict[str, any]]:
         EVENT_CACHE = list(interface_mocks.query_mock("ticketedevents", {}))
     if not number:
         return EVENT_CACHE
-    return random.choices(EVENT_CACHE, k=number)
+    return EVENT_CACHE[-number:]
 
 
 class TestRevolutionEvent:
@@ -72,7 +71,7 @@ class TestRevolutionEvent:
             cls = revolutions.make_data_class(entry)
             assert isinstance(cls, RevolutionEventDB)
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_event_data()})
+    @pytest.mark.parametrize("guild_id", sorted({entry["guild_id"] for entry in _get_event_data()}))
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -100,7 +99,9 @@ class TestRevolutionEvent:
 
     @pytest.mark.parametrize(
         ("guild_id", "event_id"),
-        {(entry["guild_id"], entry["event_id"]) for entry in _get_event_data() if entry.get("type") != "counter"},
+        sorted({
+            (entry["guild_id"], entry["event_id"]) for entry in _get_event_data() if entry.get("type") != "counter"
+        }),
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -122,7 +123,7 @@ class TestRevolutionEvent:
         event = revolutions.get_event(123456, "001")
         assert event is None
 
-    @pytest.mark.parametrize("guild_id", {entry["guild_id"] for entry in _get_event_data()})
+    @pytest.mark.parametrize("guild_id", sorted({entry["guild_id"] for entry in _get_event_data()}))
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)

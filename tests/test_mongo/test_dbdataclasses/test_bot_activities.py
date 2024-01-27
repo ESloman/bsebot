@@ -46,7 +46,7 @@ class TestBotActivities:
         assert isinstance(inserted, BotActivityDB)
 
     @pytest.mark.parametrize(
-        ("name", "category"), {(entry["name"], entry["category"]) for entry in _get_activity_data()}
+        ("name", "category"), sorted({(entry["name"], entry["category"]) for entry in _get_activity_data()})
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)

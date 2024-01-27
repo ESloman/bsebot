@@ -26,12 +26,18 @@ class RoleMock:
 class ChannelMock:
     def __init__(self, channel_id: int) -> None:
         """Init."""
-        self._id = channel_id
+        self._id: int = channel_id
+        self._archived: bool = False
 
     @property
     def id(self) -> int:
         """ID property."""
         return self._id
+
+    @property
+    def archived(self) -> bool:
+        """Archived property."""
+        return self._archived
 
     async def send(self, *args, **kwargs) -> None:
         """Mocks the send method."""

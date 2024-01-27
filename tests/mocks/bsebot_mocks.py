@@ -18,6 +18,10 @@ class BSEBotMock:
         """Mock for fetch guild."""
         return discord_mocks.GuildMock(guild_id)
 
+    async def fetch_channel(self, channel_id: int):
+        """Mock for fetch guild."""
+        return discord_mocks.ChannelMock(channel_id)
+
 
 def get_guild(self: any, guild_id: int) -> discord_mocks.GuildMock:
     """Get guild mock."""

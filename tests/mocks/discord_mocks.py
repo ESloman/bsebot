@@ -17,6 +17,16 @@ class MemberMock:
     async def send(self, content: str, silent: bool) -> None:
         """Mock the send method."""
 
+    @property
+    def bot(self) -> bool:
+        """Bot property."""
+        return False
+
+    @property
+    def nick(self) -> str:
+        """Nickname property."""
+        return self.display_name
+
 
 @dataclasses.dataclass
 class RoleMock:
@@ -84,7 +94,7 @@ class GuildMock:
         """Mock for fetch_member."""
         return self.get_member(member_id)
 
-    async def fetch_members(self):
+    def fetch_members(self):
         """Mock for fetch_memebers."""
         members = interface_mocks.query_mock("userpoints", {"guild_id": self.id})
         member_list = [MemberMock(member["uid"], member["name"]) for member in members]

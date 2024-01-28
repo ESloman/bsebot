@@ -16,6 +16,7 @@ from discordbot.tasks.basetask import BaseTask
 from discordbot.views.bet import BetView
 from discordbot.views.leaderboard import LeaderBoardView
 from discordbot.views.revolution import RevolutionView
+from mongo.datatypes.guild import GuildDB
 
 
 class GuildChecker(BaseTask):
@@ -53,6 +54,50 @@ class GuildChecker(BaseTask):
         if start:
             self.task.start()
 
+    def _create_new_guild(self, guild: discord.Guild) -> GuildDB:
+        """Inserting a new guild into the database.
+
+        Args:
+            guild (discord.Guild): the guild to insert
+
+        Returns:
+            GuildDB: the created guild object
+        """
+        db_guild = self.guilds.insert_guild(
+            guild.id,
+            guild.name,
+            guild.owner_id,
+            guild.created_at,
+        )
+        # get new instance of db_guild
+        self.guilds.update_tax_history(guild.id, 0.1, 0.0, self.bot.user.id)
+        return db_guild
+
+    def _check_guild_basic_info(self, guild: discord.Guild) -> GuildDB:
+        """Checks a guild's basic information.
+
+        Given a guild, check some basic information that should be present
+        in the database. Returns the GuildDB object.
+
+        Args:
+            guild (discord.Guild): the guild to check
+
+        Returns:
+            GuildDB: the guild DB object
+        """
+        db_guild = self.guilds.get_guild(guild.id)
+        if not db_guild:
+            db_guild = self._create_new_guild(guild)
+
+        self.logger.debug("Checking guild salary minimum")
+        if db_guild.daily_minimum is None:
+            self.guilds.set_daily_minimum(guild.id, 4)
+
+        if db_guild.name != guild.name:
+            self.logger.debug("Updating db name for %s", guild.name)
+            self.guilds.update({"_id": db_guild._id}, {"$set": {"name": guild.name}})  # noqa: SLF001
+        return db_guild
+
     @tasks.loop(hours=12)
     async def guild_checker(self) -> None:  # noqa: C901, PLR0912, PLR0915
         """Loop that makes sure that guild information is synced correctly."""
@@ -62,26 +107,7 @@ class GuildChecker(BaseTask):
         async for guild in self.bot.fetch_guilds():
             self.logger.debug("Checking guild: %s - %s", guild.id, guild.name)
 
-            db_guild = self.guilds.get_guild(guild.id)
-            if not db_guild:
-                # gotta insert into database
-                self.guilds.insert_guild(
-                    guild.id,
-                    guild.name,
-                    guild.owner_id,
-                    guild.created_at,
-                )
-                # get new instance of db_guild
-                db_guild = self.guilds.get_guild(guild.id)
-                self.guilds.update_tax_history(guild.id, 0.1, 0.0, self.bot.user.id)
-
-            self.logger.debug("Checking guild salary minimum")
-            if db_guild.daily_minimum is None:
-                self.guilds.set_daily_minimum(guild.id, 4)
-
-            if db_guild.name != guild.name:
-                self.logger.debug("Updating db name for %s", guild.name)
-                self.guilds.update({"_id": db_guild._id}, {"$set": {"name": guild.name}})  # noqa: SLF001
+            _: GuildDB = self._check_guild_basic_info(guild)
 
             self.logger.debug("Checking guilds for new members")
             members = await guild.fetch_members().flatten()

@@ -76,7 +76,8 @@ class Guilds(BaseClass):  # noqa: PLR0904
             "wordle_reminders": False,
         }
 
-        return self.insert(doc)
+        doc["_id"] = self.insert(doc)
+        return self.make_data_class(doc)
 
     #
     # Channel stuff

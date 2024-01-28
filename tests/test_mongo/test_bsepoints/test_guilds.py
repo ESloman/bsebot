@@ -57,7 +57,8 @@ class TestGuilds:  # noqa: PLR0904
     def test_guilds_insert_guild(self, guild_id: int) -> None:
         """Tests Guilds insert_guild method."""
         guilds = Guilds()
-        guilds.insert_guild(guild_id, "name", 123456, datetime.datetime.now())
+        guild_db = guilds.insert_guild(guild_id, "name", 123456, datetime.datetime.now())
+        assert isinstance(guild_db, GuildDB)
 
     @pytest.mark.parametrize(
         "guild_id",

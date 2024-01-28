@@ -50,5 +50,6 @@ class TestActivityChanger:
         with mock.patch("random.random", return_value=0.95):
             # should always set the default activity
             activity: discord.Activity = await task.activity_changer()
+        assert activity is not None
         assert activity is not task.default_activity
         assert activity != task.default_activity

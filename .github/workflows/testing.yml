@@ -24,7 +24,7 @@ jobs:
           pip install -r test-requirements.txt
       - name: Pytest + Coverage
         run: |
-          pytest -n 4 --cov=. --durations=50
+          pytest -n 8 --cov=. --cov-branch --durations=50
           coverage report --omit=tests/*
           coverage xml --omit=tests/*
       - name: SonarCloud Scan

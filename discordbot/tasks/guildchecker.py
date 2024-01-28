@@ -177,6 +177,50 @@ class GuildChecker(BaseTask):
                     guild.id,
                 )
 
+    async def _join_threads_for_channel(self, guild: discord.Guild, channel: discord.channel.TextChannel) -> None:
+        """Joins all the threads for a given channel.
+
+        Args:
+            guild (discord.Guild): the guild
+            channel (discord.channel.TextChannel): the channel
+        """
+        for thread in channel.threads:
+            if thread.archived or thread.locked:
+                continue
+
+            thread_members = await thread.fetch_members()
+            if self.bot.user.id not in [member.id for member in thread_members]:
+                await thread.join()
+                self.logger.debug("Joined %s", thread.name)
+
+            if self.spoilers.get_thread_by_id(guild.id, thread.id):
+                continue
+
+            self.logger.debug("No info for thread %s, %s. Inserting now.", thread.id, thread.name)
+            self.spoilers.insert_spoiler_thread(
+                guild.id,
+                thread.id,
+                thread.name,
+                thread.created_at,
+                thread.owner_id,
+            )
+
+    async def _check_guild_join_threads(self, guild: discord.Guild) -> None:
+        """Joins all the threads to ensure we're in them.
+
+        Args:
+            guild (discord.Guild): the guild to check
+        """
+        channels = await guild.fetch_channels()
+        for channel in channels:
+            if channel.type not in {discord.ChannelType.text, discord.ChannelType.private}:
+                continue
+
+            if not channel.threads:
+                continue
+
+            await self._join_threads_for_channel(guild, channel)
+
     @tasks.loop(hours=12)
     async def guild_checker(self) -> None:  # noqa: C901, PLR0912, PLR0915
         """Loop that makes sure that guild information is synced correctly."""
@@ -200,48 +244,23 @@ class GuildChecker(BaseTask):
             # thread stuff
             # join all threads
             self.logger.debug("Joining threads")
-            channels = await guild.fetch_channels()
-            for channel in channels:
-                if type(channel) != discord.channel.TextChannel:
-                    continue
-
-                if not channel.threads:
-                    continue
-
-                for thread in channel.threads:
-                    if thread.archived or thread.locked:
-                        continue
-
-                    thread_members = await thread.fetch_members()
-                    if self.bot.user.id not in [member.id for member in thread_members]:
-                        await thread.join()
-                        self.logger.debug("Joined %s", thread.name)
-
-                    thread_info = self.spoilers.get_thread_by_id(guild.id, thread.id)
-
-                    if not thread_info:
-                        self.logger.debug("No info for thread %s, %s. Inserting now.", thread.id, thread.name)
-                        self.spoilers.insert_spoiler_thread(
-                            guild.id,
-                            thread.id,
-                            thread.name,
-                            thread.created_at,
-                            thread.owner_id,
-                        )
+            self._check_guild_join_threads(guild)
 
             # sync threads in db with actual threads
             threads = self.spoilers.get_all_threads(guild.id)
             for thread_info in threads:
-                if not thread_info.created or not thread_info.owner:
-                    try:
-                        thread = await guild.fetch_channel(thread_info.thread_id)
-                    except discord.Forbidden:
-                        continue
+                if thread_info.created and thread_info.owner:
+                    continue
 
-                    self.spoilers.update(
-                        {"_id": thread_info._id},  # noqa: SLF001
-                        {"$set": {"created_at": thread.created_at, "owner": thread.owner.id}},
-                    )
+                try:
+                    thread = await guild.fetch_channel(thread_info.thread_id)
+                except discord.Forbidden:
+                    continue
+
+                self.spoilers.update(
+                    {"_id": thread_info._id},  # noqa: SLF001
+                    {"$set": {"created_at": thread.created_at, "owner": thread.owner.id}},
+                )
 
             if self.finished:
                 self.logger.info("Finished checking %s", guild.name)

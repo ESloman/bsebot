@@ -3,6 +3,8 @@
 import dataclasses
 import datetime
 
+import discord
+
 from tests.mocks import interface_mocks
 
 
@@ -36,10 +38,21 @@ class RoleMock:
 
 
 class ChannelMock:
-    def __init__(self, channel_id: int) -> None:
+    def __init__(
+        self,
+        channel_id: int,
+        name: str | None = None,
+        created_at: datetime.datetime | None = None,
+        owner_id: int = 123456,
+    ) -> None:
         """Init."""
         self._id: int = channel_id
+        self._name: str = name or ""
+        self._created_at = created_at or datetime.datetime.now()
+        self._owner_id = owner_id
         self._archived: bool = False
+        self._threads: list[ThreadMock] = []
+        self._type = discord.ChannelType.text
 
     @property
     def id(self) -> int:
@@ -47,12 +60,62 @@ class ChannelMock:
         return self._id
 
     @property
+    def type(self) -> discord.ChannelType:
+        """Type property."""
+        return self._type
+
+    @property
+    def name(self) -> int:
+        """Name property."""
+        return self._name
+
+    @property
+    def created_at(self) -> datetime.datetime:
+        """Created property."""
+        return self._created_at
+
+    @property
+    def owner_id(self) -> int:
+        """Owner ID property."""
+        return self._owner_id
+
+    @property
     def archived(self) -> bool:
         """Archived property."""
         return self._archived
 
+    @property
+    def threads(self) -> list:
+        """Threads property."""
+        return self._threads
+
     async def send(self, *args, **kwargs) -> None:
         """Mocks the send method."""
+
+
+class ThreadMock(ChannelMock):
+    def __init__(
+        self,
+        channel_id: int,
+        name: str | None = None,
+        created_at: datetime.datetime | None = None,
+        owner_id: int = 123456,
+    ) -> None:
+        """Init."""
+        super().__init__(channel_id, name, created_at, owner_id)
+
+    @property
+    def locked(self) -> bool:
+        """Locked property."""
+        return self._archived
+
+    async def join(self):
+        """Mock join."""
+
+    async def fetch_members(self):
+        """Mock the fetching members."""
+        members = interface_mocks.query_mock("userpoints", {"guild_id": self.id})
+        return [MemberMock(member["uid"], member["name"]) for member in members]
 
 
 class GuildMock:
@@ -162,6 +225,20 @@ class GuildMock:
                 return self.things
 
         return FlattenAbleList(member_list)
+
+    async def fetch_channels(self):
+        """Mock for fetch_channels."""
+        interactions = interface_mocks.query_mock("userinteractions", {"guild_id": self.id})[-500:]
+        channel_ids = {interaction["channel_id"] for interaction in interactions}
+        threads = interface_mocks.query_mock("spoilerthreads", {"guild_id": self.id})[-5:]
+        channels = [ChannelMock(channel_id) for channel_id in channel_ids]
+        threads = [
+            ThreadMock(thread["thread_id"], thread["name"], thread["created"], thread["owner"]) for thread in threads
+        ]
+        channels[0]._threads = threads
+        if len(channels) > 3:
+            channels[2]._type = discord.ChannelType.voice
+        return channels
 
 
 class EmojiMock:

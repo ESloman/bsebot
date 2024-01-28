@@ -98,6 +98,46 @@ class GuildChecker(BaseTask):
             self.guilds.update({"_id": db_guild._id}, {"$set": {"name": guild.name}})  # noqa: SLF001
         return db_guild
 
+    async def _check_guild_members(self, guild: discord.Guild) -> None:
+        """Checks a guild's members match what we have in the database.
+
+        Args:
+            guild (discord.Guild): the guild to check
+        """
+        members = await guild.fetch_members().flatten()
+
+        self.logger.debug("Checking guilds for new members")
+        for member in members:  # type: discord.Member
+            if member.bot:
+                continue
+
+            self.logger.debug("Checking %s - %s", member.id, member.name)
+            name = member.nick or member.name
+            user = self.user_points.find_user(member.id, guild.id)
+            if not user:
+                self.user_points.create_user(member.id, guild.id, name, False)
+                self.activities.add_activity(member.id, guild.id, ActivityTypes.SERVER_JOIN)
+                self.logger.debug(
+                    "Creating new user entry for %s - %s for %s - %s", member.id, member.name, guild.id, guild.name
+                )
+                continue
+
+            if name != user.name:
+                self.logger.debug("Updating db name for %s", name)
+                self.user_points.update({"_id": user._id}, {"$set": {"name": name}})  # noqa: SLF001
+
+        self.logger.debug("Checking for users that have left")
+        member_ids = [member.id for member in members]
+        if not member_ids:
+            return
+        # actually managed to get members
+        _users = self.user_points.get_all_users_for_guild(guild.id)
+        _users = [u for u in _users if not u.inactive]
+        for user in _users:
+            if user.uid not in member_ids:
+                self.user_points.update({"_id": user._id}, {"$set": {"inactive": True}})  # noqa: SLF001
+                self.activities.add_activity(user._id, guild.id, ActivityTypes.SERVER_LEAVE)  # noqa: SLF001
+
     @tasks.loop(hours=12)
     async def guild_checker(self) -> None:  # noqa: C901, PLR0912, PLR0915
         """Loop that makes sure that guild information is synced correctly."""
@@ -109,37 +149,8 @@ class GuildChecker(BaseTask):
 
             _: GuildDB = self._check_guild_basic_info(guild)
 
-            self.logger.debug("Checking guilds for new members")
-            members = await guild.fetch_members().flatten()
-            for member in members:  # type: discord.Member
-                if member.bot:
-                    continue
-
-                self.logger.debug("Checking %s - %s", member.id, member.name)
-                name = member.nick or member.name
-                user = self.user_points.find_user(member.id, guild.id)
-                if not user:
-                    self.user_points.create_user(member.id, guild.id, name, False)
-                    self.activities.add_activity(member.id, guild.id, ActivityTypes.SERVER_JOIN)
-                    self.logger.debug(
-                        "Creating new user entry for %s - %s for %s - %s", member.id, member.name, guild.id, guild.name
-                    )
-                    continue
-
-                if name != user.name:
-                    self.logger.debug("Updating db name for %s", name)
-                    self.user_points.update({"_id": user._id}, {"$set": {"name": name}})  # noqa: SLF001
-
-            self.logger.debug("Checking for users that have left")
-            member_ids = [member.id for member in members]
-            if member_ids:
-                # actually managed to get members
-                _users = self.user_points.get_all_users_for_guild(guild.id)
-                _users = [u for u in _users if not u.inactive]
-                for user in _users:
-                    if user.uid not in member_ids:
-                        self.user_points.update({"_id": user._id}, {"$set": {"inactive": True}})  # noqa: SLF001
-                        self.activities.add_activity(user._id, guild.id, ActivityTypes.SERVER_LEAVE)  # noqa: SLF001
+            self.logger.debug("Checking guild membership")
+            await self._check_guild_members(guild)
 
             self.logger.info("Checking guild emojis")
             # sort out emojis

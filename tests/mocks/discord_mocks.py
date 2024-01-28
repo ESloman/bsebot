@@ -99,6 +99,11 @@ class GuildMock:
         members = interface_mocks.query_mock("userpoints", {"guild_id": self.id})
         member_list = [MemberMock(member["uid"], member["name"]) for member in members]
 
+        if len(member_list) > 8:
+            # change some info to test different things
+            member_list[2].id = 123456
+            member_list[3].name = "something else"
+
         class FlattenAbleList:
             def __init__(self, things: list[MemberMock]) -> None:
                 """Init."""

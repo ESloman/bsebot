@@ -195,6 +195,7 @@ class GuildChecker(BaseTask):
             await self._check_guild_emojis(guild)
 
             self.logger.info("Checking guild stickers")
+            await self._check_guild_stickers(guild)
 
             # thread stuff
             # join all threads

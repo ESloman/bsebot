@@ -5,6 +5,7 @@ import datetime
 
 import discord
 
+from discordbot.constants import BSE_BOT_ID
 from tests.mocks import interface_mocks
 
 
@@ -15,6 +16,7 @@ class MemberMock:
         self.name: str = name
         self.mention: str = mention
         self.display_name = name
+        self._bot = False
 
     async def send(self, content: str, silent: bool) -> None:
         """Mock the send method."""
@@ -22,7 +24,7 @@ class MemberMock:
     @property
     def bot(self) -> bool:
         """Bot property."""
-        return False
+        return self._bot
 
     @property
     def nick(self) -> str:
@@ -103,6 +105,7 @@ class ThreadMock(ChannelMock):
     ) -> None:
         """Init."""
         super().__init__(channel_id, name, created_at, owner_id)
+        self._add_bot_id: bool = False
 
     @property
     def locked(self) -> bool:
@@ -115,6 +118,8 @@ class ThreadMock(ChannelMock):
     async def fetch_members(self):
         """Mock the fetching members."""
         members = interface_mocks.query_mock("userpoints", {"guild_id": self.id})
+        if self._add_bot_id:
+            members.append({"uid": BSE_BOT_ID, "name": "BSEBot"})
         return [MemberMock(member["uid"], member["name"]) for member in members]
 
 
@@ -213,8 +218,10 @@ class GuildMock:
 
         if len(member_list) > 8:
             # change some info to test different things
+            member_list[1]._bot = True
             member_list[2].id = 123456
             member_list[3].name = "something else"
+            member_list[3].display_name = "something else"
 
         class FlattenAbleList:
             def __init__(self, things: list[MemberMock]) -> None:
@@ -235,6 +242,10 @@ class GuildMock:
         threads = [
             ThreadMock(thread["thread_id"], thread["name"], thread["created"], thread["owner"]) for thread in threads
         ]
+        if len(threads) > 3:
+            threads[1]._archived = True
+            threads[2]._add_bot_id = True
+            threads[3]._id = 654321
         channels[0]._threads = threads
         if len(channels) > 3:
             channels[2]._type = discord.ChannelType.voice

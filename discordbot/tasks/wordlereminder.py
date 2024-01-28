@@ -21,7 +21,9 @@ if TYPE_CHECKING:
 class WordleReminder(BaseTask):
     """Class for Wordle Reminder task."""
 
-    def __init__(self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask]) -> None:
+    def __init__(
+        self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask], start: bool = True
+    ) -> None:
         """Initialisation method.
 
         Args:
@@ -32,7 +34,8 @@ class WordleReminder(BaseTask):
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
         self.task = self.wordle_reminder
-        self.task.start()
+        if start:
+            self.task.start()
 
     @tasks.loop(minutes=60)
     async def wordle_reminder(self) -> None:  # noqa: C901
@@ -49,11 +52,6 @@ class WordleReminder(BaseTask):
         start = now - datetime.timedelta(days=1)
         start = start.replace(hour=0, minute=0, second=0, microsecond=1)
         end = start.replace(hour=23, minute=59, second=59)
-
-        if not utilities.is_utc(now):
-            # need to add UTC offset
-            start = utilities.add_utc_offset(start)
-            end = utilities.add_utc_offset(end)
 
         for guild in self.bot.guilds:
             guild_db = self.guilds.get_guild(guild.id)

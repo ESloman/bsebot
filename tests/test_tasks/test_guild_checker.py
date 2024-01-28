@@ -11,8 +11,8 @@ from mongo.datatypes.guild import GuildDB
 from tests.mocks import bsebot_mocks, discord_mocks, interface_mocks, slashcommand_mocks
 
 
-class TestActivityChanger:
-    """Tests our ActivityChanger class."""
+class TestGuildChecker:
+    """Tests our GuildChecker class."""
 
     @pytest.fixture(autouse=True)
     def _test_data(self) -> None:

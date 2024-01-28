@@ -1,6 +1,5 @@
 """File for other small and useful classes that we may need in other parts of the code."""
 
-import datetime
 import logging
 import re
 import sys
@@ -162,42 +161,6 @@ def convert_time_str(time_str: str) -> int:
         amount = val * time_dict[unit]
         total_time += amount
     return total_time
-
-
-def get_utc_offset() -> int:
-    """Gets the UTC offset.
-
-    Returns:
-        int: the UTC offset in seconds
-    """
-    d = datetime.datetime.now(datetime.UTC).astimezone()
-    return d.utcoffset() // datetime.timedelta(seconds=1)
-
-
-def add_utc_offset(date: datetime.datetime) -> datetime.datetime:
-    """Adds the UTC offset.
-
-    Args:
-        date (datetime.datetime): the current date
-
-    Returns:
-        datetime.datetime: the date with offset added
-    """
-    offset = get_utc_offset()
-    return date - datetime.timedelta(seconds=offset)
-
-
-def is_utc(date: datetime.datetime) -> bool:
-    """Checks a given date is UTC.
-
-    Args:
-        date (datetime.datetime): the date to check
-
-    Returns:
-        bool: whether it is or not
-    """
-    now_utc = datetime.datetime.now(tz=datetime.UTC)
-    return now_utc.hour == date.hour
 
 
 def calculate_message_odds(

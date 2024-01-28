@@ -9,7 +9,6 @@ import pytz
 from discord import PartialEmoji
 from pymongo.errors import OperationFailure
 
-from discordbot import utilities
 from discordbot.bsebot import BSEBot
 from discordbot.constants import WORDLE_SCORE_REGEX
 from discordbot.message_actions.base import BaseMessageAction
@@ -80,9 +79,6 @@ class WordleMessageAction(BaseMessageAction):
         """
         now = datetime.datetime.now(tz=pytz.utc)
         today = now.replace(hour=0, minute=0, second=0)
-
-        if not utilities.is_utc(today):
-            today = utilities.add_utc_offset(today)
 
         # get number of 6/6 or X/6 wordles today
         try:

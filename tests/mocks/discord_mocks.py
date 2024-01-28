@@ -94,6 +94,10 @@ class ChannelMock:
     async def send(self, *args, **kwargs) -> None:
         """Mocks the send method."""
 
+    def get_partial_message(self, message_id: int):
+        """Get partial message mock."""
+        return MessageMock("", message_id)
+
 
 class ThreadMock(ChannelMock):
     def __init__(
@@ -251,6 +255,10 @@ class GuildMock:
             channels[2]._type = discord.ChannelType.voice
         return channels
 
+    async def fetch_channel(self, _id: int):
+        """Mock for fetch_channel."""
+        return ChannelMock(_id)
+
 
 class EmojiMock:
     def __init__(self, eid: int, name: str, created_at: datetime.datetime, owner: MemberMock, guild: GuildMock) -> None:
@@ -296,3 +304,6 @@ class MessageMock:
 
     async def add_reaction(self, reaction: str) -> None:
         """Mock add_reaction."""
+
+    async def edit(self, *args, **kwargs) -> None:
+        """Mocks the edit method."""

@@ -39,6 +39,7 @@ def _datetime_convert(entry: dict[str, any]) -> None:
             "last_remind_me_suggest_time",
             "last_revolution_time",
             "edited",
+            "timeout",
         }:
             with contextlib.suppress(ValueError):
                 entry[key] = datetime.datetime.strptime(entry[key], "%Y-%m-%dT%H:%M:%S.%f%z")

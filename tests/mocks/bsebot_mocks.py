@@ -12,6 +12,9 @@ class BSEBotMock:
         """Mocks the user property."""
         return discord_mocks.MemberMock(BSE_BOT_ID, "BSEBot")
 
+    def add_view(self, *args, **kwargs) -> None:
+        """Mock for adding a view."""
+
     async def wait_until_ready(self) -> bool:
         """Mocks wait until ready method."""
         return True

@@ -221,8 +221,77 @@ class GuildChecker(BaseTask):
 
             await self._join_threads_for_channel(guild, channel)
 
+    async def _check_threads(self, guild: discord.Guild) -> None:
+        """Checks that our thread information is accurate.
+
+        Args:
+            guild (discord.Guild): the guild to check
+        """
+        threads = self.spoilers.get_all_threads(guild.id)
+        for thread_info in threads:
+            if thread_info.created and thread_info.owner:
+                continue
+
+            try:
+                thread = await guild.fetch_channel(thread_info.thread_id)
+            except discord.Forbidden:
+                continue
+
+            self.spoilers.update(
+                {"_id": thread_info._id},  # noqa: SLF001
+                {"$set": {"created_at": thread.created_at, "owner": thread.owner.id}},
+            )
+
+    def _check_events(self, guild: discord.Guild) -> None:
+        """Checks open events and registers the views.
+
+        Args:
+            guild (discord.Guild): the guild to check events for
+        """
+        events = self.revolutions.get_open_events(guild.id)
+        if not events:
+            return
+        if len(events) > 1:
+            self.logger.debug("???")
+            return
+        event = events[0]
+        view = RevolutionView(self.bot, event, self.logger)
+        view.toggle_stuff(False)
+        self.bot.add_view(view)
+
+    async def _check_bets(self, guild: discord.Guild) -> None:
+        """Checks for open bets and makes sure to initialise their views.
+
+        Args:
+            guild (discord.Guild): the guild to check
+        """
+        bets = self.user_bets.get_all_active_bets(guild.id)
+        other_bets = self.user_bets.get_all_inactive_pending_bets(guild.id)
+        bets.extend(other_bets)
+        for bet in bets:
+            message_id = bet.message_id
+            channel_id = bet.channel_id
+            if not channel_id or not message_id:
+                continue
+
+            try:
+                channel = await self.bot.fetch_channel(channel_id)
+            except discord.errors.NotFound:
+                # possible the channel no longer exists
+                self.logger.debug("Issue with fetching channel: %s, %s", channel_id, bet)
+                continue
+
+            message = channel.get_partial_message(message_id)
+            embed = self.embed_manager.get_bet_embed(guild, bet)
+            view = BetView(bet, self.place, self.close)
+            content = f"# {bet.title}\n_Created by <@{bet.user}>_"
+            try:
+                await message.edit(content=content, view=view, embed=embed)
+            except (discord.NotFound, discord.Forbidden):
+                continue
+
     @tasks.loop(hours=12)
-    async def guild_checker(self) -> None:  # noqa: C901, PLR0912, PLR0915
+    async def guild_checker(self) -> None:
         """Loop that makes sure that guild information is synced correctly."""
         datetime.datetime.now(tz=pytz.utc)
 
@@ -244,23 +313,10 @@ class GuildChecker(BaseTask):
             # thread stuff
             # join all threads
             self.logger.debug("Joining threads")
-            self._check_guild_join_threads(guild)
+            await self._check_guild_join_threads(guild)
 
             # sync threads in db with actual threads
-            threads = self.spoilers.get_all_threads(guild.id)
-            for thread_info in threads:
-                if thread_info.created and thread_info.owner:
-                    continue
-
-                try:
-                    thread = await guild.fetch_channel(thread_info.thread_id)
-                except discord.Forbidden:
-                    continue
-
-                self.spoilers.update(
-                    {"_id": thread_info._id},  # noqa: SLF001
-                    {"$set": {"created_at": thread.created_at, "owner": thread.owner.id}},
-                )
+            await self._check_threads(guild)
 
             if self.finished:
                 self.logger.info("Finished checking %s", guild.name)
@@ -271,47 +327,11 @@ class GuildChecker(BaseTask):
             # same for all the open bet views
 
             self.logger.debug("Initialising event views")
-            if events := self.revolutions.get_open_events(guild.id):
-                if len(events) > 1:
-                    self.logger.debug("???")
-                    continue
-                event = events[0]
-                view = RevolutionView(self.bot, event, self.logger)
-                view.toggle_stuff(False)
-                self.bot.add_view(view)
-                message_id = event["message_id"]
-                channel_id = event["channel_id"]
-
-                channel = await self.bot.fetch_channel(channel_id)
-                message = channel.get_partial_message(message_id)
+            self._check_events(guild)
 
             # find all open bets
             self.logger.info("Initialising bet views")
-            bets = self.user_bets.get_all_active_bets(guild.id)
-            other_bets = self.user_bets.get_all_inactive_pending_bets(guild.id)
-            bets.extend(other_bets)
-            for bet in bets:
-                message_id = bet.message_id
-                channel_id = bet.channel_id
-                if not channel_id or not message_id:
-                    continue
-
-                try:
-                    channel = await self.bot.fetch_channel(channel_id)
-                except discord.errors.NotFound:
-                    # possible the channel no longer exists
-                    self.logger.debug("Issue with fetching channel: %s, %s", channel_id, bet)
-                    continue
-
-                message = channel.get_partial_message(message_id)
-
-                embed = self.embed_manager.get_bet_embed(guild, bet)
-                view = BetView(bet, self.place, self.close)
-                content = f"# {bet.title}\n_Created by <@{bet.user}>_"
-                try:
-                    await message.edit(content=content, view=view, embed=embed)
-                except (discord.NotFound, discord.Forbidden):
-                    continue
+            await self._check_bets(guild)
 
             self.bot.add_view(LeaderBoardView(self.embed_manager))
 

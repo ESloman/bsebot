@@ -1486,11 +1486,9 @@ class StatsGatherer:  # noqa: PLR0904
 
         tweet_users: dict[int, int] = {}
         for message in messages:
-            if (
-                ("twitter" in message["content"]
-                or "https://x.com/" in message["content"])
-                and "link" in message["message_type"]
-            ):
+            if ("twitter" in message["content"] or "https://x.com/" in message["content"]) and "link" in message[
+                "message_type"
+            ]:
                 user_id = message["user_id"]
                 if user_id not in tweet_users:
                     tweet_users[user_id] = 0

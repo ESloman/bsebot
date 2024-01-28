@@ -129,14 +129,53 @@ class GuildChecker(BaseTask):
         self.logger.debug("Checking for users that have left")
         member_ids = [member.id for member in members]
         if not member_ids:
+            # exit here if we failed to get members (and therefore IDs)
+            # otherwise we think everyone has left the server (which is not accurate)
             return
-        # actually managed to get members
         _users = self.user_points.get_all_users_for_guild(guild.id)
         _users = [u for u in _users if not u.inactive]
         for user in _users:
             if user.uid not in member_ids:
                 self.user_points.update({"_id": user._id}, {"$set": {"inactive": True}})  # noqa: SLF001
                 self.activities.add_activity(user._id, guild.id, ActivityTypes.SERVER_LEAVE)  # noqa: SLF001
+
+    async def _check_guild_emojis(self, guild: discord.Guild) -> None:
+        """Checks we have all the guild emojis in the database.
+
+        Args:
+            guild (discord.Guild): the guild to check.
+        """
+        for emoji in guild.emojis:
+            emoji_obj = await guild.fetch_emoji(emoji.id)
+            emoji_db_obj = self.server_emojis.get_emoji(guild.id, emoji_obj.id)
+            if not emoji_db_obj:
+                self.logger.debug("%s doesn't exist in the DB yet - inserting", emoji_obj.name)
+                self.server_emojis.insert_emoji(
+                    emoji_obj.id,
+                    emoji_obj.name,
+                    emoji_obj.created_at,
+                    emoji_obj.user.id,
+                    guild.id,
+                )
+
+    async def _check_guild_stickers(self, guild: discord.Guild) -> None:
+        """Checks we have all the guild stickers in the database.
+
+        Args:
+            guild (discord.Guild): the guild to check
+        """
+        for sticker in guild.stickers:
+            stick_obj = await guild.fetch_sticker(sticker.id)
+            sticker_db_obj = self.server_stickers.get_sticker(guild.id, stick_obj.id)
+            if not sticker_db_obj:
+                self.logger.info("%s doesn't exist in the DB yet - inserting", stick_obj.name)
+                self.server_stickers.insert_sticker(
+                    stick_obj.id,
+                    stick_obj.name,
+                    stick_obj.created_at,
+                    stick_obj.user.id,
+                    guild.id,
+                )
 
     @tasks.loop(hours=12)
     async def guild_checker(self) -> None:  # noqa: C901, PLR0912, PLR0915
@@ -153,34 +192,9 @@ class GuildChecker(BaseTask):
             await self._check_guild_members(guild)
 
             self.logger.info("Checking guild emojis")
-            # sort out emojis
-            for emoji in guild.emojis:
-                emoji_obj = await guild.fetch_emoji(emoji.id)
-                emoji_db_obj = self.server_emojis.get_emoji(guild.id, emoji_obj.id)
-                if not emoji_db_obj:
-                    self.logger.debug("%s doesn't exist in the DB yet - inserting", emoji_obj.name)
-                    self.server_emojis.insert_emoji(
-                        emoji_obj.id,
-                        emoji_obj.name,
-                        emoji_obj.created_at,
-                        emoji_obj.user.id,
-                        guild.id,
-                    )
+            await self._check_guild_emojis(guild)
 
             self.logger.info("Checking guild stickers")
-            # sort out stickers
-            for sticker in guild.stickers:
-                stick_obj = await guild.fetch_sticker(sticker.id)
-                sticker_db_obj = self.server_stickers.get_sticker(guild.id, stick_obj.id)
-                if not sticker_db_obj:
-                    self.logger.info("%s doesn't exist in the DB yet - inserting", stick_obj.name)
-                    self.server_stickers.insert_sticker(
-                        stick_obj.id,
-                        stick_obj.name,
-                        stick_obj.created_at,
-                        stick_obj.user.id,
-                        guild.id,
-                    )
 
             # thread stuff
             # join all threads

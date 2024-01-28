@@ -83,12 +83,61 @@ class GuildMock:
         """Name property."""
         return self._name
 
+    @property
+    def emojis(self) -> list:
+        """Mock for emojis."""
+        emojis = interface_mocks.query_mock("serveremojis", {"guild_id": self.id})
+        emoji_list: list[EmojiMock] = [
+            EmojiMock(
+                emoji["eid"], emoji["name"], emoji["created"], MemberMock(emoji["created_by"]), GuildMock(self.id)
+            )
+            for emoji in emojis
+        ]
+        emoji_list[2].id = 654321
+        return emoji_list
+
+    @property
+    def stickers(self) -> list:
+        """Mock for stickers."""
+        stickers = interface_mocks.query_mock("serverstickers", {"guild_id": self.id})
+        sticker_list: list[StickerMock] = [
+            StickerMock(
+                sticker["stid"],
+                sticker["name"],
+                sticker["created"],
+                MemberMock(sticker["created_by"]),
+                GuildMock(self.id),
+            )
+            for sticker in stickers
+        ]
+        if len(sticker_list) > 2:
+            sticker_list[1].id = 654321
+        return sticker_list
+
     @staticmethod
     def get_member(member_id: int) -> MemberMock | None:
         """Mock for get_member."""
         if member_id == 0:
             return None
         return MemberMock(member_id, str(member_id))
+
+    async def fetch_emoji(self, emoji_id: int):
+        """Mock for fetch emoji."""
+        emoji = interface_mocks.query_mock("serveremojis", {"guild_id": self.id, "eid": emoji_id})
+        emoji = emoji[0] if emoji else None
+        name = emoji["name"] if emoji else "some name"
+        created = emoji["created"] if emoji else datetime.datetime.now()
+        created_by = emoji["created_by"] if emoji else 123456
+        return EmojiMock(emoji_id, name, created, MemberMock(created_by), GuildMock(self.id))
+
+    async def fetch_sticker(self, sticker_id: int):
+        """Mock for fetch sticker."""
+        sticker = interface_mocks.query_mock("serverstickers", {"guild_id": self.id, "stid": sticker_id})
+        sticker = sticker[0] if sticker else None
+        name = sticker["name"] if sticker else "some name"
+        created = sticker["created"] if sticker else datetime.datetime.now()
+        created_by = sticker["created_by"] if sticker else 123456
+        return StickerMock(sticker_id, name, created, MemberMock(created_by), GuildMock(self.id))
 
     async def fetch_member(self, member_id: int) -> MemberMock | None:
         """Mock for fetch_member."""
@@ -113,6 +162,26 @@ class GuildMock:
                 return self.things
 
         return FlattenAbleList(member_list)
+
+
+class EmojiMock:
+    def __init__(self, eid: int, name: str, created_at: datetime.datetime, owner: MemberMock, guild: GuildMock) -> None:
+        """Init."""
+        self.id = eid
+        self.name = name
+        self.created_at = created_at
+        self.user = owner
+        self.guild = GuildMock
+
+
+class StickerMock:
+    def __init__(self, sid: int, name: str, created_at: datetime.datetime, owner: MemberMock, guild: GuildMock) -> None:
+        """Init."""
+        self.id = sid
+        self.name = name
+        self.created_at = created_at
+        self.user = owner
+        self.guild = GuildMock
 
 
 class MessageMock:

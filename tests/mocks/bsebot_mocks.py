@@ -3,7 +3,7 @@
 import discord
 
 from discordbot.constants import BSE_BOT_ID
-from tests.mocks import discord_mocks
+from tests.mocks import discord_mocks, interface_mocks
 
 
 class BSEBotMock:
@@ -26,6 +26,12 @@ class BSEBotMock:
 
     async def change_presence(self, activity: discord.Activity) -> None:
         """Mock for changing presence."""
+
+    async def fetch_guilds(self):
+        """Mock for fetching guilds."""
+        guilds = interface_mocks.query_mock("guilds", {})
+        for guild in guilds:
+            yield discord_mocks.GuildMock(guild["guild_id"], guild["owner_id"], guild["name"])
 
 
 def get_guild(self: any, guild_id: int) -> discord_mocks.GuildMock:

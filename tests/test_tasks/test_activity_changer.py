@@ -1,4 +1,4 @@
-"""Tests our eddie gains task."""
+"""Tests our activity changer task."""
 
 from unittest import mock
 

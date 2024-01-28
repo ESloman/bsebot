@@ -7,13 +7,11 @@ import discord
 import pytz
 from discord.ext import tasks
 
-from apis.github import GitHubAPI
+import discordbot.slashcommandeventclasses.close
+import discordbot.slashcommandeventclasses.place
 from discordbot.bot_enums import ActivityTypes
 from discordbot.bsebot import BSEBot
-from discordbot.clienteventclasses.onready import OnReadyEvent
 from discordbot.embedmanager import EmbedManager
-from discordbot.slashcommandeventclasses.close import CloseBet
-from discordbot.slashcommandeventclasses.place import PlaceBet
 from discordbot.tasks.basetask import BaseTask
 from discordbot.views.bet import BetView
 from discordbot.views.leaderboard import LeaderBoardView
@@ -29,10 +27,9 @@ class GuildChecker(BaseTask):
         guild_ids: list[int],
         logger: Logger,
         startup_tasks: list[BaseTask],
-        on_ready: OnReadyEvent,
-        github_api: GitHubAPI,
-        place: PlaceBet,
-        close: CloseBet,
+        place: discordbot.slashcommandeventclasses.place.PlaceBet,
+        close: discordbot.slashcommandeventclasses.close.CloseBet,
+        start: bool = True,
     ) -> None:
         """Initialisation method.
 
@@ -40,19 +37,21 @@ class GuildChecker(BaseTask):
             bot (BSEBot): the BSEBot client
             guild_ids (list[int]): the list of guild IDs
             logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
-            startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
+            startup_tasks (list | None, optional): the list of startup tasks.
+            place (PlaceBet): the PlaceBet class
+            close (CloseBet): the CloseBet class
+            start (bool): whether to start the task. Defaults to True.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
         self.task = self.guild_checker
 
-        self.on_ready = on_ready
         self.embed_manager = EmbedManager(logger)
-        self.github = github_api
 
         self.close = close
         self.place = place
 
-        self.task.start()
+        if start:
+            self.task.start()
 
     @tasks.loop(hours=12)
     async def guild_checker(self) -> None:  # noqa: C901, PLR0912, PLR0915

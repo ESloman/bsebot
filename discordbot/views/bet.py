@@ -6,8 +6,6 @@ import discord
 import pytz
 
 from discordbot.modals.addoption import AddBetOption
-from discordbot.slashcommandeventclasses.close import CloseBet
-from discordbot.slashcommandeventclasses.place import PlaceBet
 from discordbot.views.betchange import BetChange
 from mongo.bsepoints.bets import UserBets
 from mongo.datatypes.bet import BetDB
@@ -16,7 +14,7 @@ from mongo.datatypes.bet import BetDB
 class BetView(discord.ui.View):
     """Class for Bet view."""
 
-    def __init__(self, bet: BetDB, bseddies_place: PlaceBet, bseddies_close: CloseBet) -> None:
+    def __init__(self, bet: BetDB, bseddies_place: object, bseddies_close: object) -> None:
         """Initialisation method.
 
         Args:
@@ -26,8 +24,8 @@ class BetView(discord.ui.View):
         """
         super().__init__(timeout=None)
         self.bet: BetDB = bet
-        self.place: PlaceBet = bseddies_place
-        self.close: CloseBet = bseddies_close
+        self.place: object = bseddies_place
+        self.close: object = bseddies_close
         self.user_bets = UserBets()
 
     @discord.ui.button(label="Place a bet", style=discord.ButtonStyle.blurple, emoji="💰")

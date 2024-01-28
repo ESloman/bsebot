@@ -5,8 +5,6 @@ import discord
 import discordbot.views.bet
 from discordbot.embedmanager import EmbedManager
 from discordbot.selects.betoutcomes import BetOutcomesSelect
-from discordbot.slashcommandeventclasses.close import CloseBet
-from discordbot.slashcommandeventclasses.place import PlaceBet
 from mongo.bsepoints.bets import UserBets
 from mongo.datatypes.bet import BetDB
 
@@ -14,7 +12,7 @@ from mongo.datatypes.bet import BetDB
 class BetChange(discord.ui.View):
     """Class for bet change view."""
 
-    def __init__(self, bet: BetDB, place: PlaceBet, close: CloseBet) -> None:
+    def __init__(self, bet: BetDB, place: object, close: object) -> None:
         """Initialisation method.
 
         Args:

@@ -206,8 +206,6 @@ class CommandManager:
             guilds,
             self.logger,
             [],
-            self.on_ready,
-            self.githubapi,
             self.bseddies_place,
             self.bseddies_close,
         )

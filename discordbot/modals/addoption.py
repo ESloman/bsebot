@@ -10,8 +10,6 @@ import pytz
 
 import discordbot.views.bet
 from discordbot.embedmanager import EmbedManager
-from discordbot.slashcommandeventclasses.close import CloseBet
-from discordbot.slashcommandeventclasses.place import PlaceBet
 from discordbot.utilities import PlaceHolderLogger
 from mongo.bsepoints.bets import UserBets
 from mongo.datatypes.bet import BetDB
@@ -23,8 +21,8 @@ class AddBetOption(discord.ui.Modal):
     def __init__(
         self,
         bet: BetDB,
-        bseddies_place: PlaceBet,
-        bseddies_close: CloseBet,
+        bseddies_place: object,
+        bseddies_close: object,
         logger: Logger = PlaceHolderLogger,
         *args: tuple[any],
         **kwargs: dict[any],
@@ -44,8 +42,8 @@ class AddBetOption(discord.ui.Modal):
 
         self.logger: Logger = logger
         self.bet: BetDB = bet
-        self.place: PlaceBet = bseddies_place
-        self.close: CloseBet = bseddies_close
+        self.place: object = bseddies_place
+        self.close: object = bseddies_close
         self.embed_manager = EmbedManager()
         self.user_bets = UserBets()
 

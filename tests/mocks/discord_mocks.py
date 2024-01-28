@@ -3,6 +3,8 @@
 import dataclasses
 import datetime
 
+from tests.mocks import interface_mocks
+
 
 class MemberMock:
     def __init__(self, id: int, name: str = "some_name", mention: str = "some_mention") -> None:  # noqa: A002
@@ -44,11 +46,12 @@ class ChannelMock:
 
 
 class GuildMock:
-    def __init__(self, guild_id: int, owner_id: int | None = None) -> None:
+    def __init__(self, guild_id: int, owner_id: int | None = None, name: str = "") -> None:
         """Init."""
         self._id = guild_id
         self._owner_id = owner_id if owner_id else 987654
         self._created_at = datetime.datetime.now()
+        self._name = name
 
     @property
     def id(self) -> int:
@@ -65,6 +68,11 @@ class GuildMock:
         """Created at property."""
         return self._created_at
 
+    @property
+    def name(self) -> str:
+        """Name property."""
+        return self._name
+
     @staticmethod
     def get_member(member_id: int) -> MemberMock | None:
         """Mock for get_member."""
@@ -75,6 +83,21 @@ class GuildMock:
     async def fetch_member(self, member_id: int) -> MemberMock | None:
         """Mock for fetch_member."""
         return self.get_member(member_id)
+
+    async def fetch_members(self):
+        """Mock for fetch_memebers."""
+        members = interface_mocks.query_mock("userpoints", {"guild_id": self.id})
+        member_list = [MemberMock(member["uid"], member["name"]) for member in members]
+
+        class FlattenAbleList:
+            def __init__(self, things: list[MemberMock]) -> None:
+                """Init."""
+                self.things = things
+
+            async def flatten(self) -> list[MemberMock]:
+                return self.things
+
+        return FlattenAbleList(member_list)
 
 
 class MessageMock:

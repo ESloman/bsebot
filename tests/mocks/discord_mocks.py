@@ -288,8 +288,9 @@ class StickerMock:
 
 
 class MessageMock:
-    def __init__(self, content: str = "", guild_id: int = 123) -> None:
+    def __init__(self, content: str = "", guild_id: int = 123, message_id: int = 987654) -> None:
         """Init."""
+        self._id = message_id
         self._content = content
         self._guild = GuildMock(guild_id)
         self._channel = ChannelMock(654321)
@@ -305,6 +306,11 @@ class MessageMock:
         return self._guild
 
     @property
+    def id(self) -> int:
+        """ID prpoerty."""
+        return self._id
+
+    @property
     def channel(self) -> ChannelMock:
         """Channel property."""
         return self._channel
@@ -317,3 +323,43 @@ class MessageMock:
 
     async def reply(self, *args, **kwargs) -> None:
         """Mocks the reply method."""
+
+
+class FollowUpMock:
+    @staticmethod
+    async def send(*args, **kwargs) -> None:
+        """Mocks followup send."""
+
+    @staticmethod
+    async def edit_message(*args, **kwargs) -> None:
+        """Mocks followup edit_message."""
+
+
+class InteractionMock:
+    def __init__(self, guild_id: int | None) -> None:
+        """Init."""
+        if guild_id is None:
+            guild_id = 123456
+        self._guild = GuildMock(guild_id)
+        self._message = MessageMock("", guild_id)
+
+    @property
+    def followup(self) -> FollowUpMock:
+        """Mock followup property."""
+        return FollowUpMock
+
+    @property
+    def message(self) -> MessageMock:
+        """Message property."""
+        return self._message
+
+
+class ButtonMock:
+    def __init__(self, label: str = "") -> None:
+        """Init."""
+        self._label = label
+
+    @property
+    def label(self) -> str:
+        """Label property."""
+        return self._label

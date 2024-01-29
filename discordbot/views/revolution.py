@@ -125,7 +125,43 @@ class RevolutionView(discord.ui.View):
         if user_id in event.neutrals:
             event.neutrals.remove(user_id)
 
-    async def _revolution_button_logic(  # noqa: C901, PLR0912, PLR0915
+    @staticmethod
+    def _handle_impartial_button(
+        event: RevolutionEventDB,
+        user_id: int,
+    ) -> None:
+        if user_id in event.revolutionaries:
+            event.chance -= 15
+            event.revolutionaries.remove(user_id)
+        elif user_id in event.supporters:
+            event.chance += 15
+            event.supporters.remove(user_id)
+
+        if user_id not in event.neutrals:
+            event.neutrals.append(user_id)
+
+    def _handle_save_thyself_button(
+        self, event: RevolutionEventDB, user_id: int, interaction: discord.Interaction
+    ) -> str:
+        # work out how many eddies to subtract
+        our_user = self.user_points.find_user(user_id, interaction.guild_id, {"points": True, "king": True})
+        eddies = our_user.points
+        amount_to_subtract = math.floor(eddies * 0.1)
+        self.user_points.increment_points(
+            user_id,
+            interaction.guild_id,
+            amount_to_subtract * -1,
+            TransactionTypes.REVOLUTION_SAVE,
+        )
+
+        event.chance -= 15
+        event.times_saved += 1
+        return (
+            f"{interaction.user.mention} just spent `{amount_to_subtract}` "
+            "to reduce the overthrow chance by **15%**."
+        )
+
+    async def _revolution_button_logic(  # noqa: C901, PLR0915
         self, interaction: discord.Interaction, button: discord.Button
     ) -> None:
         """Function for abstracting the revolution button logic.
@@ -235,38 +271,12 @@ class RevolutionView(discord.ui.View):
 
         elif button.label == "Impartial":
             # logic for user pressing the impartial button
-
-            if user_id in event.revolutionaries:
-                event.chance -= 15
-                event.revolutionaries.remove(user_id)
-            elif user_id in event.supporters:
-                event.chance += 15
-                event.supporters.remove(user_id)
-
-            if user_id not in event.neutrals:
-                event.neutrals.append(user_id)
+            self._handle_impartial_button(event, user_id)
 
         elif button.label == self._SAVE_THYSELF_BUTTON_TEXT:
             # logic for saving thyself
             # it is different to supporter/revolutionary logic
-
-            # work out how many eddies to subtract
-            our_user = self.user_points.find_user(user_id, guild_id, {"points": True, "king": True})
-            eddies = our_user.points
-            amount_to_subtract = math.floor(eddies * 0.1)
-            self.user_points.increment_points(
-                user_id,
-                guild_id,
-                amount_to_subtract * -1,
-                TransactionTypes.REVOLUTION_SAVE,
-            )
-
-            event.chance -= 15
-            event.times_saved += 1
-            msg = (
-                f"{interaction.user.mention} just spent `{amount_to_subtract}` "
-                "to reduce the overthrow chance by **15%**."
-            )
+            msg = self._handle_save_thyself_button(event, user_id, interaction)
             await interaction.channel.send(content=msg)
 
         # update DB with all the changes we've made

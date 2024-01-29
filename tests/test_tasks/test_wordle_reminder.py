@@ -1,12 +1,14 @@
 """Tests our wordle reminder task."""
 
+from unittest import mock
 
 import pytest
 from freezegun import freeze_time
 
 from discordbot.tasks.wordlereminder import WordleReminder
 from discordbot.utilities import PlaceHolderLogger
-from tests.mocks import bsebot_mocks
+from mongo import interface
+from tests.mocks import bsebot_mocks, interface_mocks
 
 
 class TestWordleReminder:
@@ -28,5 +30,16 @@ class TestWordleReminder:
     @freeze_time("2024/01/29 13:00")
     async def test_default_execution(self) -> None:
         """Tests that we don't trigger on the wrong time."""
+        task = WordleReminder(self.bsebot, [], self.logger, [], start=False)
+        await task.wordle_reminder()
+
+    @freeze_time("2024/01/01 19:30")
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    async def test_default_execution_no_reminders(self) -> None:
+        """Tests execution with a day that had wordles done successfully."""
         task = WordleReminder(self.bsebot, [], self.logger, [], start=False)
         await task.wordle_reminder()

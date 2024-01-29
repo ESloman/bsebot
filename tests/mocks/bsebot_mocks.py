@@ -12,6 +12,12 @@ class BSEBotMock:
         """Mocks the user property."""
         return discord_mocks.MemberMock(BSE_BOT_ID, "BSEBot")
 
+    @property
+    def guilds(self):
+        """Mock for guilds property."""
+        _guilds = interface_mocks.query_mock("guilds", {})
+        return [discord_mocks.GuildMock(guild["guild_id"], guild["owner_id"], guild["name"]) for guild in _guilds]
+
     def add_view(self, *args, **kwargs) -> None:
         """Mock for adding a view."""
 

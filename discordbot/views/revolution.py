@@ -156,7 +156,7 @@ class RevolutionView(discord.ui.View):
 
         event.chance -= 15
         event.times_saved += 1
-        return f"<@!{user_id}> just spent `{amount_to_subtract}` " "to reduce the overthrow chance by **15%**."
+        return f"<@{user_id}> just spent `{amount_to_subtract}` " "to reduce the overthrow chance by **15%**."
 
     async def _revolution_button_logic(  # noqa: C901, PLR0915
         self, interaction: discord.Interaction, button: discord.Button

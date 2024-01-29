@@ -22,13 +22,14 @@ from mongo.datatypes.revolution import RevolutionEventDB
 class BSEddiesRevolutionTask(BaseTask):
     """Class for our revolution task."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         bot: BSEBot,
         guild_ids: list[int],
         logger: Logger,
         startup_tasks: list[BaseTask],
         giphy_token: str,
+        start: bool = True,
     ) -> None:
         """Initialisation method.
 
@@ -37,6 +38,8 @@ class BSEddiesRevolutionTask(BaseTask):
             guild_ids (list[int]): the list of guild IDs
             logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
+            giphy_token (str): the token to authenticate with giphy with
+            start (bool): whether to start the task. Defaulst to True.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
         self.task = self.revolution
@@ -48,7 +51,8 @@ class BSEddiesRevolutionTask(BaseTask):
             if _ := self.revolutions.get_open_events(guild_id):
                 self.rev_started[guild_id] = True
 
-        self.task.start()
+        if start:
+            self.task.start()
 
     @tasks.loop(minutes=1)
     async def revolution(self) -> None:  # noqa: C901, PLR0912
@@ -57,10 +61,6 @@ class BSEddiesRevolutionTask(BaseTask):
         Creates a revolution event weekly and then handles the
         closing/resolving of that event.
         """
-        if not self._check_start_up_tasks():
-            self.logger.info("Startup tasks not complete - skipping loop")
-            return
-
         now = datetime.datetime.now(tz=pytz.utc)
 
         if not any(self.rev_started[g] for g in self.rev_started) and (

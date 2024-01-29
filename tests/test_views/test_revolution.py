@@ -204,7 +204,7 @@ class TestRevolutionView:
         Needs to run with async as the parent class tries to get the running event loop.
         """
         event_data["open"] = True
-        event_data["expiry"] = datetime.datetime.now() + datetime.timedelta(hours=6)
+        event_data["expired"] = datetime.datetime.now(tz=pytz.utc) + datetime.timedelta(hours=6)
         _event = RevolutionEvent.make_data_class(event_data)
         view = RevolutionView(self.bsebot, _event, self.logger)
         interaction = discord_mocks.InteractionMock(_event.guild_id)

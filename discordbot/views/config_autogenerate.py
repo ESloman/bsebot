@@ -46,7 +46,7 @@ class AutoGenerateConfigView(discord.ui.View):
         """
         try:
             auto_val = self.auto_config.values[0]
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             for opt in self.auto_config.options:
                 if opt.default:
                     auto_val = opt.value
@@ -55,7 +55,7 @@ class AutoGenerateConfigView(discord.ui.View):
         cat_val = None
         try:
             cat_val = self.category_select.values[0]
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             for opt in self.auto_config.options:
                 if opt.default:
                     cat_val = opt.value
@@ -96,7 +96,7 @@ class AutoGenerateConfigView(discord.ui.View):
         """
         try:
             auto_val = self.auto_config.values[0]
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             for opt in self.auto_config.options:
                 if opt.default:
                     auto_val = opt.value
@@ -105,7 +105,7 @@ class AutoGenerateConfigView(discord.ui.View):
         cat_val = None
         try:
             cat_val = self.category_select.values[0]
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             for opt in self.auto_config.options:
                 if opt.default:
                     cat_val = opt.value

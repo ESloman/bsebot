@@ -59,7 +59,7 @@ class ActivityConfigView(discord.ui.View):
         """
         try:
             selected = self.activity_select.values[0]
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             # look for default as user didn't select one explicitly
             for opt in self.activity_select.options:
                 if opt.default:

@@ -94,9 +94,16 @@ class ChannelMock:
     async def send(self, *args, **kwargs) -> None:
         """Mocks the send method."""
 
+    async def fetch_message(self, message_id: int):
+        """Fetch message mock."""
+        return MessageMock("", message_id)
+
     def get_partial_message(self, message_id: int):
         """Get partial message mock."""
         return MessageMock("", message_id)
+
+    async def trigger_typing(self) -> None:
+        """Mock trigger typing."""
 
 
 class ThreadMock(ChannelMock):
@@ -307,3 +314,6 @@ class MessageMock:
 
     async def edit(self, *args, **kwargs) -> None:
         """Mocks the edit method."""
+
+    async def reply(self, *args, **kwargs) -> None:
+        """Mocks the reply method."""

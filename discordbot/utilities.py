@@ -210,7 +210,7 @@ def calculate_message_odds(
 
         try:
             results = interactions.query({"guild_id": guild_id, "is_bot": True, "$text": {"$search": message}})
-            results = [result for result in results if main_bit in result["content"]]
+            results = [result for result in results if main_bit in result.content]
         except OperationFailure:
             totals[message] = 0
             continue

@@ -4,8 +4,8 @@ import asyncio
 import datetime
 import random
 from logging import Logger
-from typing import TYPE_CHECKING
 
+import discord
 import pytz
 from discord.ext import tasks
 
@@ -13,9 +13,7 @@ from discordbot import utilities
 from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_BOT_ID
 from discordbot.tasks.basetask import BaseTask
-
-if TYPE_CHECKING:
-    from mongo.datatypes.message import MessageDB
+from mongo.datatypes.message import MessageDB
 
 
 class WordleReminder(BaseTask):
@@ -37,8 +35,48 @@ class WordleReminder(BaseTask):
         if start:
             self.task.start()
 
+    def _get_reminders_needed(
+        self, guild: discord.Guild, start: datetime.datetime, end: datetime.datetime
+    ) -> list[MessageDB]:
+        """Checks for users that need a reminder to do their wordle.
+
+        Args:
+            guild (discord.Guild): the guild to check
+            start (datetime.datetime): the start time to check
+            end (datetime.datetime): the end time to check
+
+        Returns:
+            list[MessageDB]: the list of messages to reminder users
+        """
+        guild_db = self.guilds.get_guild(guild.id)
+
+        if not guild_db.wordle_reminders:
+            # guild isn't configured for wordle reminders
+            return []
+
+        wordles_yesterday = self.interactions.query(
+            {"guild_id": guild.id, "message_type": "wordle", "timestamp": {"$gte": start, "$lte": end}},
+        )
+
+        _start = start + datetime.timedelta(days=1)
+        _end = end + datetime.timedelta(days=1)
+        wordles_today = self.interactions.query(
+            {"guild_id": guild.id, "message_type": "wordle", "timestamp": {"$gte": _start, "$lte": _end}},
+        )
+
+        today_ids: list[int] = [m.user_id for m in wordles_today]
+
+        reminders_needed: list[MessageDB] = []
+        for message in wordles_yesterday:
+            user_id = message.user_id
+            if user_id in today_ids:
+                continue
+            # user hasn't done a wordle
+            reminders_needed.append(message)
+        return reminders_needed
+
     @tasks.loop(minutes=60)
-    async def wordle_reminder(self) -> None:  # noqa: C901
+    async def wordle_reminder(self) -> None:
         """Loop that reminds users to do their wordle.
 
         Only reminds users that did their wordle the day before,
@@ -54,31 +92,7 @@ class WordleReminder(BaseTask):
         end = start.replace(hour=23, minute=59, second=59)
 
         for guild in self.bot.guilds:
-            guild_db = self.guilds.get_guild(guild.id)
-
-            if not guild_db.wordle_reminders:
-                # guild isn't configured for wordle reminders
-                return
-
-            wordles_yesterday = self.interactions.query(
-                {"guild_id": guild.id, "message_type": "wordle", "timestamp": {"$gte": start, "$lte": end}},
-            )
-
-            _start = start + datetime.timedelta(days=1)
-            _end = end + datetime.timedelta(days=1)
-            wordles_today = self.interactions.query(
-                {"guild_id": guild.id, "message_type": "wordle", "timestamp": {"$gte": _start, "$lte": _end}},
-            )
-
-            today_ids: list[int] = [m.user_id for m in wordles_today]
-
-            reminders_needed: list[MessageDB] = []
-            for message in wordles_yesterday:
-                user_id = message.user_id
-                if user_id in today_ids:
-                    continue
-                # user hasn't done a wordle
-                reminders_needed.append(message)
+            reminders_needed = self._get_reminders_needed(guild, start, end)
 
             if not reminders_needed:
                 self.logger.info("Everyone has done their wordle today!")
@@ -102,27 +116,29 @@ class WordleReminder(BaseTask):
                 if reminder.user_id == BSE_BOT_ID:
                     # skip bot reminder
                     continue
-                channel = await self.bot.fetch_channel(reminder["channel_id"])
+                channel = await self.bot.fetch_channel(reminder.channel_id)
                 await channel.trigger_typing()
-                channel_id = reminder["channel_id"]
+                channel_id = reminder.channel_id
 
                 if channel_id != channel.id:
                     self.logger.info(
-                        "%s for wordle message (%) didn't match %s", channel_id, reminder["message_id"], channel.id
+                        "%s for wordle message (%) didn't match %s", channel_id, reminder.message_id, channel.id
                     )
                     continue
 
-                y_message = await channel.fetch_message(reminder["message_id"])
+                y_message = await channel.fetch_message(reminder.message_id)
 
                 # make sure that we send different messages for each needed reminder
                 message = ""
-                while message in _messages_sent:
+                iterations = 0
+                while message in _messages_sent and iterations < 5:  # noqa: PLR2004
                     message = random.choices([message[0] for message in odds], [message[1] for message in odds])[0]
+                    iterations += 1
 
                 _messages_sent.append(message)
-                message = message.format(mention=y_message.author.mention)
+                message = message.format(mention=f"<@!{reminder.user_id}>")
 
-                self.logger.info(message)
+                self.logger.debug(message)
                 await y_message.reply(content=message)
 
     @wordle_reminder.before_loop

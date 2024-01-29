@@ -5,6 +5,7 @@ import copy
 import datetime
 import json
 import pathlib
+from difflib import SequenceMatcher
 
 from bson import ObjectId
 
@@ -70,7 +71,7 @@ def query_mock(  # noqa: C901, PLR0912, PLR0915
         data_to_search = copy.deepcopy(_filtered_data)
         _filtered_data = []
         for data in data_to_search:
-            if key not in data and key not in {"replies.timestamp", "reactions.timestamp"}:
+            if key not in data and key not in {"replies.timestamp", "reactions.timestamp", "$text"}:
                 # key not in data - won't match
                 continue
 
@@ -132,7 +133,9 @@ def query_mock(  # noqa: C901, PLR0912, PLR0915
                                     _filtered_data.append(data)
                             elif data_val not in _value:
                                 _filtered_data.append(data)
-                # skip dicts for now
+                        case "$search" if key == "$text":
+                            if SequenceMatcher(None, _value, data.get("content", "")).ratio() > 0.5:
+                                _filtered_data.append(data)
                 continue
 
             if isinstance(data_val, list) and value in data_val:

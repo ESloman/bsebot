@@ -604,7 +604,7 @@ class CommandManager:
             Args:
                 ctx (discord.ApplicationContext): the command context
             """
-            modal = BetCreateModal(client=self.client, guilds=self.guilds, logger=self.logger, title="Create a bet")
+            modal = BetCreateModal(client=self.client, guild_ids=self.guilds, logger=self.logger, title="Create a bet")
             await ctx.response.send_modal(modal)
 
         @self.client.command(description="Autogenerate bets")

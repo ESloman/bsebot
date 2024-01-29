@@ -38,12 +38,12 @@ class TaxRateView(discord.ui.View):
         """
         try:
             value = float(self.tax_select.values[0])
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             value = float(next(o for o in self.tax_select.options if o.default).value)
 
         try:
             supporter_value = float(self.supporter_tax_select.values[0])
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             supporter_value = float(next(o for o in self.supporter_tax_select.options if o.default).value)
 
         self.activities.add_activity(

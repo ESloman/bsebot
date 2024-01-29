@@ -35,7 +35,7 @@ class StatsView(discord.ui.View):
         value = None
         try:
             value = self.stats_mode.values[0]
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             for opt in self.stats_mode.options:
                 if opt.default:
                     value = opt.value
@@ -59,7 +59,7 @@ class StatsView(discord.ui.View):
         value = None
         try:
             value = self.stats_mode.values[0]
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             for opt in self.stats_mode.options:
                 if opt.default:
                     value = opt.value

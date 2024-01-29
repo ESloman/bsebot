@@ -41,7 +41,7 @@ class PledgeView(discord.ui.View):
 
         try:
             value = self.pledge_select.values[0]
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             value = next(o for o in self.pledge_select.options if o.default).value
 
         self.activities.add_activity(

@@ -73,6 +73,7 @@ max-complexity = 10
     "D101",    # undocumented-public-class: not bothered about fully documented test classes
     "PLR2004", # magic-value-comparison: not bothered about 'magic' values in tests
     "PLR6301", # don't care that test methods could be static - legit usecase when using pytest parameters
+    "PLR1702", # don't care about nested blocks in tests/mocks
     "S101",    # assert: assert is expected in test classes
     "S105",    # hardcoded-password-string: we use fake passwords during tests for mocked requests
     "S106",    # hardcoded-password-func-arg: we use fake passwords during tests for mocked requests

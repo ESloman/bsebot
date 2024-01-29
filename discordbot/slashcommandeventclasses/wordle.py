@@ -209,7 +209,7 @@ class Wordle(BSEddies):
 
         msg += "\n## Lifetime Score count\n"
 
-        guesses = {x: 0 for x in range(1, 8)}
+        guesses = dict.fromkeys(range(1, 8), 0)
         for wordle in all_wordles:
             guesses[wordle.guesses] += 1
 

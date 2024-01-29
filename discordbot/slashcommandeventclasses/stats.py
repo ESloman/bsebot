@@ -44,7 +44,7 @@ class Stats(BSEddies):
         _words = []
         _channels_dict = {}
         _users_dict = {}
-        _swears_dict = {k: 0 for k in _swears}
+        _swears_dict = dict.fromkeys(_swears, 0)
 
         # these two should only be different when NOT in server mode
         _replies_count = 0  # how many times this user received a reply

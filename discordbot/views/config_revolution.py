@@ -33,7 +33,7 @@ class RevolutionConfigView(discord.ui.View):
         """
         try:
             enabled = self.enabled_select._selected_values[0]  # noqa: SLF001
-        except (IndexError, AttributeError):
+        except (IndexError, AttributeError, TypeError):
             # look for default as user didn't select one explicitly
             for opt in self.enabled_select.options:
                 if opt.default:

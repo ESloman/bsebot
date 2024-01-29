@@ -118,14 +118,6 @@ class WordleReminder(BaseTask):
                     continue
                 channel = await self.bot.fetch_channel(reminder.channel_id)
                 await channel.trigger_typing()
-                channel_id = reminder.channel_id
-
-                if channel_id != channel.id:
-                    self.logger.info(
-                        "%s for wordle message (%) didn't match %s", channel_id, reminder.message_id, channel.id
-                    )
-                    continue
-
                 y_message = await channel.fetch_message(reminder.message_id)
 
                 # make sure that we send different messages for each needed reminder

@@ -336,12 +336,13 @@ class FollowUpMock:
 
 
 class InteractionMock:
-    def __init__(self, guild_id: int | None) -> None:
+    def __init__(self, guild_id: int | None, user_id: int = 123456) -> None:
         """Init."""
         if guild_id is None:
             guild_id = 123456
         self._guild = GuildMock(guild_id)
         self._message = MessageMock("", guild_id)
+        self._user = MemberMock(user_id)
 
     @property
     def followup(self) -> FollowUpMock:
@@ -367,6 +368,16 @@ class InteractionMock:
     def guild_id(self) -> int:
         """Guild ID property."""
         return self._guild.id
+
+    @property
+    def user(self) -> MemberMock:
+        """User property."""
+        return self._user
+
+    @property
+    def user_id(self) -> int:
+        """Guild ID property."""
+        return self._user.id
 
 
 class ButtonMock:

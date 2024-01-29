@@ -62,33 +62,33 @@ class BetCloser(BaseTask):
             guild_obj = await self.bot.fetch_guild(guild.id)  # type: discord.Guild
             active = self.user_bets.get_all_active_bets(guild.id)
             for bet in active:
-                if timeout := bet.timeout:
-                    if timeout > now:
-                        continue
-                    # set the bet to no longer active ??
-                    self.user_bets.update({"_id": bet._id}, {"$set": {"active": False}})  # noqa: SLF001
-                    member = guild_obj.get_member(bet.user)
-                    channel = await self.bot.fetch_channel(bet.channel_id)
-                    message = await channel.fetch_message(bet.message_id)
-                    # create a new bet with active set to False to pass around
-                    _bet = dataclasses.replace(bet, active=False)
+                timeout = bet.timeout
+                if not timeout or timeout > now:
+                    continue
+                # set the bet to no longer active
+                self.user_bets.update({"_id": bet._id}, {"$set": {"active": False}})  # noqa: SLF001
+                member = guild_obj.get_member(bet.user)
+                channel = await self.bot.fetch_channel(bet.channel_id)
+                message = await channel.fetch_message(bet.message_id)
+                # create a new bet with active set to False to pass around
+                _bet = dataclasses.replace(bet, active=False)
 
-                    embed = self.embed_manager.get_bet_embed(guild_obj, bet)
-                    content = f"# {_bet.title}\n_Created by <@{_bet.user}>_"
-                    bet_view = BetView(_bet, self.place, self.close)
+                embed = self.embed_manager.get_bet_embed(guild_obj, bet)
+                content = f"# {_bet.title}\n_Created by <@{_bet.user}>_"
+                bet_view = BetView(_bet, self.place, self.close)
 
-                    # disable bet button
-                    bet_view.children[0].disabled = True
+                # disable bet button
+                bet_view.children[0].disabled = True
 
-                    await message.edit(content=content, embed=embed, view=bet_view)
-                    msg = (
-                        f"[Your bet](<{message.jump_url}>) `{_bet.bet_id} - {_bet.title}` "
-                        f"is now closed for bets and is waiting a result from you."
-                    )
-                    if not member.dm_channel:
-                        await member.create_dm()
-                    with contextlib.suppress(discord.Forbidden):
-                        await member.send(content=msg, silent=True)
+                await message.edit(content=content, embed=embed, view=bet_view)
+                msg = (
+                    f"[Your bet](<{message.jump_url}>) `{_bet.bet_id} - {_bet.title}` "
+                    f"is now closed for bets and is waiting a result from you."
+                )
+                if not member.dm_channel:
+                    await member.create_dm()
+                with contextlib.suppress(discord.Forbidden):
+                    await member.send(content=msg, silent=True)
 
     @bet_closer.before_loop
     async def before_bet_closer(self) -> None:

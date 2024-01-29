@@ -50,7 +50,84 @@ class RevolutionView(discord.ui.View):
         for child in self.children:
             child.disabled = disable
 
-    async def _revolution_button_logic(self, interaction: discord.Interaction, button: discord.Button) -> None:  # noqa: C901, PLR0912, PLR0915
+    async def _handle_save_thyself_button_checks(
+        self, interaction: discord.Interaction, button: discord.Button, user_id: int, king_id: int
+    ) -> bool:
+        if (user_id == king_id) and button.label != self._SAVE_THYSELF_BUTTON_TEXT:
+            await interaction.followup.send(
+                content="You ARE the King - you can't overthrow/support yourself.",
+                ephemeral=True,
+                delete_after=10,
+            )
+            self.toggle_stuff(False)
+            await interaction.followup.edit_message(interaction.message.id, view=self)
+            return False
+
+        # check that users aren't using buttons they shouldn't
+        if button.label == self._SAVE_THYSELF_BUTTON_TEXT and (user_id != king_id):
+            await interaction.followup.send(
+                content="You're not the King - so you can't use this button.",
+                ephemeral=True,
+                delete_after=10,
+            )
+            self.toggle_stuff(False)
+            await interaction.followup.edit_message(interaction.message.id, view=self)
+            return False
+        return True
+
+    async def _handle_non_save_thyself_buttons(
+        self, interaction: discord.Interaction, user_id: int, event: RevolutionEventDB, faction_event_key: str
+    ) -> bool:
+        if user_id not in event.users:
+            event.users.append(user_id)
+
+        # make sure user isn't doing the same thing twice
+        if user_id in getattr(event, faction_event_key, []):
+            await interaction.followup.send(
+                content="You've already acted on this - you cannot do so again",
+                ephemeral=True,
+                delete_after=10,
+            )
+            self.toggle_stuff(False)
+            await interaction.followup.edit_message(interaction.message.id, view=self)
+            return False
+
+        # make sure locked in users stay locked in
+        if user_id in self.locked_in:
+            await interaction.followup.send(
+                content="You've pledged your support this week - you _cannot_ change your decision.",
+                ephemeral=True,
+                delete_after=10,
+            )
+            self.toggle_stuff(False)
+            await interaction.followup.edit_message(interaction.message.id, view=self)
+            return False
+        return True
+
+    @staticmethod
+    def _handle_overthrow_support_buttons(
+        event: RevolutionEventDB,
+        user_id: int,
+        faction_event_key: str,
+        other_faction_event_key: str,
+        faction_chance: float,
+    ) -> None:
+        # reverse actions of other faction
+        if user_id in getattr(event, other_faction_event_key):
+            event.chance -= faction_chance * -1
+            getattr(event, other_faction_event_key).remove(user_id)
+
+        # apply our actions (increasing/reducing chance)
+        getattr(event, faction_event_key).append(user_id)
+        event.chance += faction_chance
+
+        # remove user from neutrals if they're in it
+        if user_id in event.neutrals:
+            event.neutrals.remove(user_id)
+
+    async def _revolution_button_logic(  # noqa: C901, PLR0912, PLR0915
+        self, interaction: discord.Interaction, button: discord.Button
+    ) -> None:
         """Function for abstracting the revolution button logic.
 
         The logic is slightly different for each of the buttons but there's a lot of
@@ -117,26 +194,7 @@ class RevolutionView(discord.ui.View):
         guild_db = self.guilds.get_guild(guild_id)
         king_id = guild_db.king
 
-        # check that the King isn't using buttons they shouldn't
-        if (user_id == king_id) and button.label != self._SAVE_THYSELF_BUTTON_TEXT:
-            await followup.send(
-                content="You ARE the King - you can't overthrow/support yourself.",
-                ephemeral=True,
-                delete_after=10,
-            )
-            self.toggle_stuff(False)
-            await followup.edit_message(interaction.message.id, view=self)
-            return
-
-        # check that users aren't using buttons they shouldn't
-        if button.label == self._SAVE_THYSELF_BUTTON_TEXT and (user_id != king_id):
-            await followup.send(
-                content="You're not the King - so you can't use this button.",
-                ephemeral=True,
-                delete_after=10,
-            )
-            self.toggle_stuff(False)
-            await followup.edit_message(interaction.message.id, view=self)
+        if not await self._handle_save_thyself_button_checks(interaction, button, user_id, king_id):
             return
 
         # match statement for the variables that are different for the different factions
@@ -163,50 +221,17 @@ class RevolutionView(discord.ui.View):
 
         event = event.unfrozen()
 
-        if button.label != self._SAVE_THYSELF_BUTTON_TEXT:
+        if button.label != self._SAVE_THYSELF_BUTTON_TEXT:  # noqa: SIM102
             # only do this for the non-KING buttons
-
-            if user_id not in event.users:
-                event.users.append(user_id)
-
-            # make sure user isn't doing the same thing twice
-            if user_id in event.getattr(faction_event_key, []):
-                await followup.send(
-                    content="You've already acted on this - you cannot do so again",
-                    ephemeral=True,
-                    delete_after=10,
-                )
-                self.toggle_stuff(False)
-                await followup.edit_message(interaction.message.id, view=self)
-                return
-
-            # make sure locked in users stay locked in
-            if user_id in self.locked_in:
-                await followup.send(
-                    content="You've pledged your support this week - you _cannot_ change your decision.",
-                    ephemeral=True,
-                    delete_after=10,
-                )
-                self.toggle_stuff(False)
-                await followup.edit_message(interaction.message.id, view=self)
+            if not await self._handle_non_save_thyself_buttons(interaction, user_id, event, faction_event_key):
                 return
 
         if button.label in {"OVERTHROW", "SUPPORT THE KING"}:
             # logic for overthrow/supporting
             # different to king button logic
-
-            # reverse actions of other faction
-            if user_id in event.getattr(other_faction_event_key):
-                event.chance -= faction_chance * -1
-                event.getattr(other_faction_event_key).remove(user_id)
-
-            # apply our actions (increasing/reducing chance)
-            event.getattr(faction_event_key).append(user_id)
-            event.chance += faction_chance
-
-            # remove user from neutrals if they're in it
-            if user_id in event.neutrals:
-                event.neutrals.remove(user_id)
+            self._handle_overthrow_support_buttons(
+                event, user_id, faction_event_key, other_faction_event_key, faction_chance
+            )
 
         elif button.label == "Impartial":
             # logic for user pressing the impartial button

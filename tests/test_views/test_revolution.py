@@ -1,8 +1,10 @@
 """Tests our revolution views."""
 
+import datetime
 from unittest import mock
 
 import pytest
+import pytz
 
 from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.revolution import RevolutionView
@@ -191,3 +193,77 @@ class TestRevolutionView:
         for child in view.children:
             # should all be disabled after exiting
             assert child.disabled
+
+    @pytest.mark.parametrize("event_data", interface_mocks.query_mock("ticketedevents", {})[-1:])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    async def test_revolution_button_logic_check_fail(self, event_data: dict) -> None:
+        """Tests the revolution_button_logic with a failed button check.
+
+        Needs to run with async as the parent class tries to get the running event loop.
+        """
+        event_data["open"] = True
+        event_data["expiry"] = datetime.datetime.now() + datetime.timedelta(hours=6)
+        _event = RevolutionEvent.make_data_class(event_data)
+        view = RevolutionView(self.bsebot, _event, self.logger)
+        interaction = discord_mocks.InteractionMock(_event.guild_id)
+        button = discord_mocks.ButtonMock(label="something else")
+        with (
+            mock.patch.object(view.revolutions, "get_event", return_value=_event),
+            mock.patch.object(view, "_handle_save_thyself_button_checks", return_value=False) as func,
+        ):
+            await view._revolution_button_logic(interaction, button)
+            assert func.call_count == 1
+
+    @pytest.mark.parametrize("event_data", interface_mocks.query_mock("ticketedevents", {})[-1:])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    async def test_revolution_button_logic_other_buttons_fail(self, event_data: dict) -> None:
+        """Tests the revolution_button_logic with a failed button check.
+
+        Needs to run with async as the parent class tries to get the running event loop.
+        """
+        event_data["open"] = True
+        event_data["expired"] = datetime.datetime.now(tz=pytz.utc) + datetime.timedelta(hours=6)
+        _event = RevolutionEvent.make_data_class(event_data)
+        view = RevolutionView(self.bsebot, _event, self.logger)
+        interaction = discord_mocks.InteractionMock(_event.guild_id)
+        button = discord_mocks.ButtonMock(label="OVERTHROW")
+        for val in (True, False):
+            with (
+                mock.patch.object(view.revolutions, "get_event", return_value=_event),
+                mock.patch.object(view, "_handle_non_save_thyself_buttons", return_value=val) as _func,
+                mock.patch.object(view, "_handle_save_thyself_button_checks", return_value=True),
+            ):
+                await view._revolution_button_logic(interaction, button)
+                assert _func.call_count == 1
+
+    @pytest.mark.parametrize("event_data", interface_mocks.query_mock("ticketedevents", {})[-1:])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    async def test_revolution_button_logic(self, event_data: dict) -> None:
+        """Tests the revolution_button_logic with a failed button check.
+
+        Needs to run with async as the parent class tries to get the running event loop.
+        """
+        event_data["open"] = True
+        event_data["expired"] = datetime.datetime.now(tz=pytz.utc) + datetime.timedelta(hours=6)
+        _event = RevolutionEvent.make_data_class(event_data)
+        view = RevolutionView(self.bsebot, _event, self.logger)
+        for user in _event.users:
+            interaction = discord_mocks.InteractionMock(_event.guild_id, user)
+            for button_label in ("OVERTHROW", "SUPPORT THE KING", "Impartial", "Save THYSELF"):
+                button = discord_mocks.ButtonMock(label=button_label)
+                with (
+                    mock.patch.object(view.revolutions, "get_event", return_value=_event),
+                    mock.patch.object(view, "_handle_non_save_thyself_buttons", return_value=True),
+                    mock.patch.object(view, "_handle_save_thyself_button_checks", return_value=True),
+                ):
+                    await view._revolution_button_logic(interaction, button)

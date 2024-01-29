@@ -266,6 +266,10 @@ class GuildMock:
         """Mock for fetch_channel."""
         return ChannelMock(_id)
 
+    def get_role(self, role_id: int):
+        """Mock for get role."""
+        return RoleMock(role_id, "", "")
+
 
 class EmojiMock:
     def __init__(self, eid: int, name: str, created_at: datetime.datetime, owner: MemberMock, guild: GuildMock) -> None:
@@ -343,6 +347,7 @@ class InteractionMock:
         self._guild = GuildMock(guild_id)
         self._message = MessageMock("", guild_id)
         self._user = MemberMock(user_id)
+        self._channel = ChannelMock(123456)
 
     @property
     def followup(self) -> FollowUpMock:
@@ -378,6 +383,11 @@ class InteractionMock:
     def user_id(self) -> int:
         """Guild ID property."""
         return self._user.id
+
+    @property
+    def channel(self) -> ChannelMock:
+        """Channel property."""
+        return self._channel
 
 
 class ButtonMock:

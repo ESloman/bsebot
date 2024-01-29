@@ -25,6 +25,10 @@ class BSEBotMock:
         """Mocks wait until ready method."""
         return True
 
+    async def fetch_user(self, user_id: int):
+        """Mock for fetch user."""
+        return discord_mocks.MemberMock(user_id)
+
     async def fetch_guild(self, guild_id: int):
         """Mock for fetch guild."""
         return discord_mocks.GuildMock(guild_id)

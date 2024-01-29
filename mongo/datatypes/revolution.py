@@ -86,6 +86,10 @@ class RevolutionEventDB(BaseEventDB):
         """
         return RevolutionEventUnFrozenDB(**dataclasses.asdict(self))
 
+    open: bool
+    """whether the event is still open."""
+    expired: datetime.datetime
+    """When the event will expire and 'resolve'."""
     king: int
     """The king the event affects."""
     chance: int

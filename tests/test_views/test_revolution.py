@@ -1,5 +1,6 @@
 """Tests our revolution views."""
 
+import random
 from unittest import mock
 
 import pytest
@@ -151,3 +152,21 @@ class TestRevolutionView:
         msg = view._handle_save_thyself_button(_event.unfrozen(), _event.king, interaction)
         assert isinstance(msg, str)
         assert str(_event.king) in msg
+
+    @pytest.mark.parametrize("event_data", interface_mocks.query_mock("ticketedevents", {})[-5:])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    async def test_revolution_button_logic(self, event_data: dict) -> None:
+        """Tests the revolution_button_logic expired.
+
+        Needs to run with async as the parent class tries to get the running event loop.
+        """
+        _event = RevolutionEvent.make_data_class(event_data)
+        view = RevolutionView(self.bsebot, _event, self.logger)
+        interaction = discord_mocks.InteractionMock(_event.guild_id)
+        button = discord_mocks.ButtonMock(label="OVERTHROW")
+        event_data["open"] = random.random() > 0.4
+        await view._revolution_button_logic(interaction, button)

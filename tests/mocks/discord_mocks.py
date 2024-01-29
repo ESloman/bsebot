@@ -349,9 +349,19 @@ class InteractionMock:
         return FollowUpMock
 
     @property
+    def response(self) -> FollowUpMock:
+        """Mock response property."""
+        return FollowUpMock
+
+    @property
     def message(self) -> MessageMock:
         """Message property."""
         return self._message
+
+    @property
+    def guild(self) -> GuildMock:
+        """Guild property."""
+        return self._guild
 
     @property
     def guild_id(self) -> int:

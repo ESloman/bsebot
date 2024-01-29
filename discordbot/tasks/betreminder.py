@@ -15,7 +15,9 @@ from mongo.datatypes.bet import BetDB
 class BetReminder(BaseTask):
     """Class for bet reminder."""
 
-    def __init__(self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask]) -> None:
+    def __init__(
+        self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask], start: bool = True
+    ) -> None:
         """Initialisation method.
 
         Args:
@@ -27,7 +29,8 @@ class BetReminder(BaseTask):
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
         self.task = self.bet_reminder
-        self.task.start()
+        if start:
+            self.task.start()
 
     async def _check_bet_for_halfway_reminder(self, bet: BetDB, now: datetime.datetime) -> bool:
         """Checks to see if a bet needs a 'halfway' to go reminder.
@@ -85,7 +88,7 @@ class BetReminder(BaseTask):
         total_time = (bet.timeout - bet.created).total_seconds()
 
         if total_time <= 604800 or bet.timeout < now:  # noqa: PLR2004
-            # if bet timeout is less than a week - don't bother with halfway reminders
+            # if bet timeout is less than a week - don't bother with reminders
             return False
 
         diff = bet.timeout - now

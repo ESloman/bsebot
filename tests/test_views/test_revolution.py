@@ -1,9 +1,12 @@
 """Tests our revolution views."""
 
+from unittest import mock
+
 import pytest
 
 from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.revolution import RevolutionView
+from mongo import interface
 from mongo.bseticketedevents import RevolutionEvent
 from tests.mocks import bsebot_mocks, discord_mocks, interface_mocks
 
@@ -83,14 +86,12 @@ class TestRevolutionView:
     async def test_handle_non_save_thyself_buttons(self, event_data: dict) -> None:
         """Tests the handle_non_save_thyself_buttons.
 
-        Should return True as the King is using the right button.
-
         Needs to run with async as the parent class tries to get the running event loop.
         """
         _event = RevolutionEvent.make_data_class(event_data)
         view = RevolutionView(self.bsebot, _event, self.logger)
         interaction = discord_mocks.InteractionMock(123456)
-        for user in _event.users:
+        for user in [*_event.users, 123456789]:
             if "locked_in" in event_data:
                 event_data["locked_in"].append(user)
             for key in ("revolutionaries", "supporters"):
@@ -100,3 +101,53 @@ class TestRevolutionView:
                 assert expected == await view._handle_non_save_thyself_buttons(
                     interaction, user, RevolutionEvent.make_data_class(event_data), key
                 )
+
+    @pytest.mark.parametrize("event_data", interface_mocks.query_mock("ticketedevents", {})[-5:])
+    async def test_handle_overthrow_support_buttons(self, event_data: dict) -> None:
+        """Tests the handle_overthrow_support_buttons.
+
+        Needs to run with async as the parent class tries to get the running event loop.
+        """
+        _event = RevolutionEvent.make_data_class(event_data)
+        view = RevolutionView(self.bsebot, _event, self.logger)
+        for user in [*_event.users, 123456789]:
+            if "locked_in" in event_data:
+                event_data["locked_in"].append(user)
+            if user == 123456789:
+                event_data["neutrals"].append(user)
+            for key, other_key in (("revolutionaries", "supporters"), ("supporters", "revolutionaries")):
+                faction_chance = 15 if key == "revolutionaries" else -15
+                view._handle_overthrow_support_buttons(
+                    RevolutionEvent.make_data_class(event_data).unfrozen(), user, key, other_key, faction_chance
+                )
+
+    @pytest.mark.parametrize("event_data", interface_mocks.query_mock("ticketedevents", {})[-5:])
+    async def test_handle_impartial_button(self, event_data: dict) -> None:
+        """Tests the handle_impartial_button.
+
+        Needs to run with async as the parent class tries to get the running event loop.
+        """
+        _event = RevolutionEvent.make_data_class(event_data)
+        view = RevolutionView(self.bsebot, _event, self.logger)
+        for user in [*_event.users, 123456789]:
+            if user == 123456789:
+                event_data["neutrals"].append(user)
+            view._handle_impartial_button(RevolutionEvent.make_data_class(event_data).unfrozen(), user)
+
+    @pytest.mark.parametrize("event_data", interface_mocks.query_mock("ticketedevents", {})[-5:])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    async def test_handle_save_thyself_button(self, event_data: dict) -> None:
+        """Tests the handle_save_thyself_button.
+
+        Needs to run with async as the parent class tries to get the running event loop.
+        """
+        _event = RevolutionEvent.make_data_class(event_data)
+        view = RevolutionView(self.bsebot, _event, self.logger)
+        interaction = discord_mocks.InteractionMock(_event.guild_id)
+        msg = view._handle_save_thyself_button(_event.unfrozen(), _event.king, interaction)
+        assert isinstance(msg, str)
+        assert str(_event.king) in msg

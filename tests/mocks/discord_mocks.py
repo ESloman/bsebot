@@ -353,6 +353,11 @@ class InteractionMock:
         """Message property."""
         return self._message
 
+    @property
+    def guild_id(self) -> int:
+        """Guild ID property."""
+        return self._guild.id
+
 
 class ButtonMock:
     def __init__(self, label: str = "") -> None:

@@ -65,7 +65,10 @@ class ActivityChanger(BaseTask):
             for activity in all_activities:
                 weight = total - activity.count
                 # just make sure that the weight is non-zero
-                weight += 0.1
+                if weight < 0:
+                    weight = 0
+                if weight == 0:
+                    weight += 0.1
                 weights.append(weight)
 
             _activity = random.choices(all_activities, weights)[0]

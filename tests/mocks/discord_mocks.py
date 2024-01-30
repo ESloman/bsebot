@@ -18,7 +18,7 @@ class MemberMock:
         self.display_name = name
         self._bot = False
 
-    async def send(self, content: str, silent: bool) -> None:
+    async def send(self, *args, **kwargs) -> None:
         """Mock the send method."""
 
     @property
@@ -36,11 +36,19 @@ class MemberMock:
         """Roles property."""
         return [RoleMock(123456 << x, "", "") for x in range(5)]
 
+    @property
+    def dm_channel(self) -> bool:
+        """DM channel property."""
+        return random.randint(0, 1) == 1
+
     async def remove_roles(self, *args, **kwargs) -> None:
         """Remove roles mock."""
 
     async def add_roles(self, *args, **kwargs) -> None:
         """Add roles mock."""
+
+    async def create_dm(self, *args, **kwargs) -> None:
+        """Create DM mock."""
 
 
 class RoleMock:
@@ -355,6 +363,11 @@ class MessageMock:
     def channel(self) -> ChannelMock:
         """Channel property."""
         return self._channel
+
+    @property
+    def jump_url(self) -> str:
+        """Jump URL property."""
+        return ""
 
     async def add_reaction(self, reaction: str) -> None:
         """Mock add_reaction."""

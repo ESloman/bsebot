@@ -206,7 +206,7 @@ class CloseBet(BSEddies):
                 msg = (
                     f"**{author.name}** just closed bet "
                     f"`[{bet_id}]` - [{bet.title}](<{message.jump_url}>) and the result was {emoji} "
-                    f"(`{', '.join([n['val'] for n in ret_dict['outcome_name']])})`.\n"
+                    f"(`{', '.join([n.val for n in ret_dict['outcome_name']])})`.\n"
                     f"**This means you won!!** "
                     f"You have won `{ret_dict['winners'][winner]}` BSEDDIES!!"
                 )

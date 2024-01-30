@@ -8,6 +8,7 @@ from freezegun import freeze_time
 from discordbot.tasks.revolutiontask import BSEddiesRevolutionTask
 from discordbot.utilities import PlaceHolderLogger
 from mongo import interface
+from mongo.bsepoints.guilds import Guilds
 from mongo.bseticketedevents import RevolutionEvent
 from tests.mocks import bsebot_mocks, interface_mocks
 
@@ -48,6 +49,20 @@ class TestBSEddiesRevolutionTask:
         _event = RevolutionEvent.make_data_class(event_data)
         with mock.patch.object(task.giphy_api, "random_gif"):
             await task.send_excited_gif(_event, "2 hours", "two_hours")
+
+    @pytest.mark.parametrize("event_data", interface_mocks.query_mock("ticketedevents", {})[-5:])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    async def test_create_event(self, event_data: dict) -> None:
+        """Tests create event message."""
+        guild = interface_mocks.query_mock("guilds", {"guild_id": event_data["guild_id"]})[0]
+        task = BSEddiesRevolutionTask(self.bsebot, [], self.logger, [], "", start=False)
+        _event = RevolutionEvent.make_data_class(event_data)
+        with mock.patch.object(task.giphy_api, "random_gif"):
+            await task.create_event(_event.guild_id, _event, Guilds.make_data_class(guild))
 
     @freeze_time("2024/01/01 12:00")
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)

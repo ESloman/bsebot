@@ -91,8 +91,9 @@ class ChannelMock:
         """Threads property."""
         return self._threads
 
-    async def send(self, *args, **kwargs) -> None:
+    async def send(self, *args, **kwargs):
         """Mocks the send method."""
+        return MessageMock("", 123456, 6543210)
 
     async def fetch_message(self, message_id: int):
         """Fetch message mock."""

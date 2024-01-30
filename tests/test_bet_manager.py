@@ -7,7 +7,9 @@ import pytest
 
 from discordbot.betmanager import BetManager
 from discordbot.utilities import PlaceHolderLogger
-from tests.mocks import bet_manager_mocks
+from mongo.bsepoints.points import UserPoints
+from mongo.datatypes.bet import BetDB
+from tests.mocks import bet_manager_mocks, interface_mocks
 
 
 class TestBetManager:
@@ -61,7 +63,7 @@ class TestBetManager:
         assert points_won == value
 
     @pytest.mark.parametrize(
-        ("better_id", "tax", "actual_won", "points_won", "expected"),
+        ("supporter_type", "tax", "actual_won", "points_won", "expected"),
         [
             (0, (0.2, 0.1), 800, 1000, (840, 160)),
             (1, (0.2, 0.1), 800, 1000, (920, 80)),
@@ -72,13 +74,15 @@ class TestBetManager:
         ],
     )
     def test_calculate_taxed_winnings(
-        self, better_id: float, tax: int, actual_won: int, points_won: int, expected: tuple[int, int]
+        self, supporter_type: float, tax: int, actual_won: int, points_won: int, expected: tuple[int, int]
     ) -> None:
         """Tests our '_calculate_taxed_winnings'."""
         bet_manager = BetManager(PlaceHolderLogger)
-
-        with patch.object(bet_manager.user_points, "find_user", new=lambda _b, _g: {"supporter_type": better_id}):  # noqa: ARG005
-            result = bet_manager._calculate_taxed_winnings(better_id, 123, tax, actual_won, points_won)
+        _user = interface_mocks.query_mock("userpoints", {})[0]
+        _user["supporter_type"] = supporter_type
+        user = UserPoints.make_data_class(_user)
+        with patch.object(bet_manager.user_points, "find_user", return_value=user):
+            result = bet_manager._calculate_taxed_winnings(user.uid, user.guild_id, tax, actual_won, points_won)
         assert isinstance(result, tuple)
         assert result == expected
 
@@ -95,9 +99,13 @@ class TestBetManager:
             bet_manager_mocks.get_bet_dict(1),
         ],
     )
-    def test_close_a_bet(self, test_bet: dict) -> None:
+    def test_close_a_bet(self, test_bet: BetDB) -> None:
         """Tests our 'close_a_bet'."""
         bet_manager = BetManager(PlaceHolderLogger)
+
+        _user = interface_mocks.query_mock("userpoints", {})[0]
+        _user["supporter_type"] = 0 if int(test_bet.guild_id) < 900 else 1
+        user = UserPoints.make_data_class(_user)
 
         # SO MANY MOCKS
         with (
@@ -108,7 +116,7 @@ class TestBetManager:
             patch.object(
                 bet_manager.user_points,
                 "find_user",
-                new=lambda _b, _g: {"supporter_type": 0 if int(_b) < 900 else 1},  # noqa: ARG005
+                return_value=user,
             ),
             patch.object(bet_manager.guilds, "get_king", new=lambda _g: 567),  # noqa: ARG005
             patch.object(bet_manager.user_bets, "update", new=lambda _b, _e: None),  # noqa: ARG005

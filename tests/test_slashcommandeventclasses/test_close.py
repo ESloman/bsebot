@@ -10,6 +10,7 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.slashcommandeventclasses.close import CloseBet
 from discordbot.utilities import PlaceHolderLogger
 from mongo import interface
+from mongo.bsepoints.bets import UserBets
 from mongo.bsepoints.guilds import Guilds
 from tests.mocks import bsebot_mocks, discord_mocks, interface_mocks
 
@@ -36,8 +37,6 @@ class TestClose:
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
-    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
-    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
     async def test_create_bet_view(self, guild_data: dict) -> None:
         """Tests create_bet_view with no bets."""
         close = CloseBet(self.client, self.guild_ids, self.logger)
@@ -50,3 +49,48 @@ class TestClose:
                 break
         ctx = discord_mocks.ContextMock(guild.guild_id, user["uid"])
         await close.create_bet_view(ctx)
+
+    @pytest.mark.parametrize("guild_data", interface_mocks.query_mock("guilds", {}))
+    @pytest.mark.parametrize("number", [10, 30])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    async def test_create_bet_view_with_bets(self, guild_data: dict, number: int) -> None:
+        """Tests create_bet_view with bets."""
+        close = CloseBet(self.client, self.guild_ids, self.logger)
+
+        guild = Guilds.make_data_class(guild_data)
+        _bets = [b for b in interface_mocks.query_mock("userbets", {"guild_id": guild.guild_id}) if "type" not in b][
+            -number:
+        ]
+        ctx = discord_mocks.ContextMock(guild.guild_id, _bets[0]["user"])
+        await close.create_bet_view(
+            ctx, [UserBets.make_data_class(b) for b in _bets if b["user"] == _bets[0].get("user")]
+        )
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    async def test_close_bet_bad_id(self) -> None:
+        """Tests close bet with a bad bet ID."""
+        close = CloseBet(self.client, self.guild_ids, self.logger)
+
+        interaction = discord_mocks.InteractionMock(123456)
+        await close.close_bet(interaction, "0123", [":one:"])
+
+    @pytest.mark.parametrize(
+        "bet_data", [b for b in interface_mocks.query_mock("userbets", {"active": False}) if "type" not in b][-10:]
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    async def test_close_bet_bad_bets(self, bet_data: dict) -> None:
+        """Tests close_bet with bad bets."""
+        close = CloseBet(self.client, self.guild_ids, self.logger)
+        bet = UserBets.make_data_class(bet_data)
+        interaction = discord_mocks.InteractionMock(bet.guild_id, bet.user)
+        await close.close_bet(interaction, bet.bet_id, bet.options)

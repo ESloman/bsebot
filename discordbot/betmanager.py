@@ -131,7 +131,7 @@ class BetManager:
         """
         tax_value, supporter_tax = tax
         user_db = self.user_points.find_user(int(better_id), guild_id)
-        tr = supporter_tax if user_db.get("supporter_type", 0) == SupporterType.SUPPORTER else tax_value
+        tr = supporter_tax if user_db.supporter_type == SupporterType.SUPPORTER else tax_value
         tax_amount = math.floor(actual_amount_won * tr)
         eddies_won_minus_tax = points_won - tax_amount
         return eddies_won_minus_tax, tax_amount

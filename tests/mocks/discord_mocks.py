@@ -368,6 +368,10 @@ class MessageMock:
 
 class FollowUpMock:
     @staticmethod
+    async def defer(*args, **kwargs) -> None:
+        """Mocks followup defer."""
+
+    @staticmethod
     async def send(*args, **kwargs) -> None:
         """Mocks followup send."""
 

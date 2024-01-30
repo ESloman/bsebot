@@ -57,3 +57,15 @@ class TestBSEddiesRevolutionTask:
         """Tests we exit out of default execution with wrong time."""
         task = BSEddiesRevolutionTask(self.bsebot, [], self.logger, [], "", start=False)
         await task.revolution()
+
+    @pytest.mark.parametrize("timestamp", ["2024/01/21 16:00", "2024/01/21 16:01"])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    async def test_default_execution_create(self, timestamp: str) -> None:
+        """Tests default execution with creating the event."""
+        task = BSEddiesRevolutionTask(self.bsebot, [], self.logger, [], "", start=False)
+        with freeze_time(timestamp), mock.patch.object(task.giphy_api, "random_gif"):
+            await task.revolution()

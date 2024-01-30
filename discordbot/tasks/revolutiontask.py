@@ -119,9 +119,8 @@ class BSEddiesRevolutionTask(BaseTask):
                 await self.create_event(guild.id, event, guild_db)
                 continue
 
-            if now > event["expired"]:
+            if now > event.expired:
                 await self.resolve_revolution(guild.id, event)
-                self.logger.info("Changing revolution task interval to 30 minutes.")
                 continue
 
             if now.hour == 18 and now.minute == 30 and not event.one_hour:  # noqa: PLR2004

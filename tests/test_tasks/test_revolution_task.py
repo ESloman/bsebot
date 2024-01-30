@@ -1,8 +1,10 @@
 """Tests our revolution task."""
 
+import datetime
 from unittest import mock
 
 import pytest
+import pytz
 from freezegun import freeze_time
 
 from discordbot.tasks.revolutiontask import BSEddiesRevolutionTask
@@ -84,3 +86,45 @@ class TestBSEddiesRevolutionTask:
         task = BSEddiesRevolutionTask(self.bsebot, [], self.logger, [], "", start=False)
         with freeze_time(timestamp), mock.patch.object(task.giphy_api, "random_gif"):
             await task.revolution()
+
+    @freeze_time("2024/01/21 16:01")
+    @pytest.mark.parametrize("event_data", interface_mocks.query_mock("ticketedevents", {})[-2:])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    async def test_default_execution_started(self, event_data: dict) -> None:
+        """Tests default execution when the event has been started."""
+        task = BSEddiesRevolutionTask(self.bsebot, [], self.logger, [], "", start=False)
+        event = RevolutionEvent.make_data_class(event_data)
+        task.rev_started[event.guild_id] = True
+        with (
+            mock.patch.object(task.giphy_api, "random_gif"),
+            mock.patch.object(task.revolutions, "get_open_events", return_value=[event]),
+            mock.patch.object(task, "resolve_revolution"),
+        ):
+            await task.revolution()
+
+    @pytest.mark.parametrize("event_data", interface_mocks.query_mock("ticketedevents", {})[-2:])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    async def test_default_execution_reminders(self, event_data: dict) -> None:
+        """Tests default execution with the reminders for the event."""
+        task = BSEddiesRevolutionTask(self.bsebot, [], self.logger, [], "", start=False)
+
+        for timestamp in ("2024/01/21 18:00", "2024/01/21 19:00", "2024/01/21 19:30"):
+            with freeze_time(timestamp):
+                event_data["expired"] = datetime.datetime.now(tz=pytz.utc) + datetime.timedelta(hours=1)
+                event = RevolutionEvent.make_data_class(event_data)
+                task.rev_started[event.guild_id] = True
+
+                with (
+                    mock.patch.object(task.giphy_api, "random_gif"),
+                    mock.patch.object(task.revolutions, "get_open_events", return_value=[event]),
+                    mock.patch.object(task, "resolve_revolution"),
+                ):
+                    await task.revolution()

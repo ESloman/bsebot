@@ -116,6 +116,8 @@ class TestBSEddiesRevolutionTask:
         """Tests default execution with the reminders for the event."""
         task = BSEddiesRevolutionTask(self.bsebot, [], self.logger, [], "", start=False)
 
+        event_data["one_hour"] = False
+        event_data["quarter_hour"] = False
         for timestamp in ("2024/01/21 18:00", "2024/01/21 18:30", "2024/01/21 19:15"):
             with freeze_time(timestamp):
                 event_data["expired"] = datetime.datetime.now(tz=pytz.utc) + datetime.timedelta(hours=1)
@@ -128,3 +130,62 @@ class TestBSEddiesRevolutionTask:
                     mock.patch.object(task, "resolve_revolution"),
                 ):
                     await task.revolution()
+
+    @pytest.mark.parametrize("event_data", interface_mocks.query_mock("ticketedevents", {})[-1:])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    async def test_resolve_revolution_no_users(self, event_data: dict) -> None:
+        """Tests resolve revolutions with no users."""
+        task = BSEddiesRevolutionTask(self.bsebot, [], self.logger, [], "", start=False)
+
+        event_data["users"] = []
+        event = RevolutionEvent.make_data_class(event_data)
+        task.rev_started[event.guild_id] = True
+
+        with (
+            mock.patch.object(task.giphy_api, "random_gif"),
+        ):
+            await task.resolve_revolution(event.guild_id, event)
+
+    @pytest.mark.parametrize("event_data", interface_mocks.query_mock("ticketedevents", {})[-1:])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    async def test_resolve_revolution_not_success(self, event_data: dict) -> None:
+        """Tests resolve revolutions that doesn't succeed."""
+        task = BSEddiesRevolutionTask(self.bsebot, [], self.logger, [], "", start=False)
+
+        event_data["chance"] = 0
+        event = RevolutionEvent.make_data_class(event_data)
+        task.rev_started[event.guild_id] = True
+
+        with (
+            mock.patch.object(task.giphy_api, "random_gif"),
+        ):
+            await task.resolve_revolution(event.guild_id, event)
+
+    @pytest.mark.parametrize("event_data", interface_mocks.query_mock("ticketedevents", {})[-1:])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    async def test_resolve_revolution_success(self, event_data: dict) -> None:
+        """Tests resolve revolutions that succeeds."""
+        task = BSEddiesRevolutionTask(self.bsebot, [], self.logger, [], "", start=False)
+
+        event_data["chance"] = 100
+        if not event_data.get("revolutionaries", []):
+            event_data["revolutionaries"] = event_data["users"]
+        event = RevolutionEvent.make_data_class(event_data)
+        task.rev_started[event.guild_id] = True
+
+        with (
+            mock.patch.object(task.giphy_api, "random_gif"),
+        ):
+            await task.resolve_revolution(event.guild_id, event)

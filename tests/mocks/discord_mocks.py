@@ -1,7 +1,7 @@
 """Mocks for various discord classes."""
 
-import dataclasses
 import datetime
+import random
 
 import discord
 
@@ -31,12 +31,48 @@ class MemberMock:
         """Nickname property."""
         return self.display_name
 
+    @property
+    def roles(self) -> list:
+        """Roles property."""
+        return [RoleMock(123456 << x, "", "") for x in range(5)]
 
-@dataclasses.dataclass
+    async def remove_roles(self, *args, **kwargs) -> None:
+        """Remove roles mock."""
+
+    async def add_roles(self, *args, **kwargs) -> None:
+        """Add roles mock."""
+
+
 class RoleMock:
-    id: int
-    name: str
-    mention: str
+    def __init__(self, _id: int = 123, name: str = "", mention: str = "") -> None:
+        """Init."""
+        self._id = _id
+        self._name = name
+        self._mention = mention
+
+    @property
+    def id(self) -> int:
+        """ID property."""
+        return self._id
+
+    @property
+    def name(self) -> int:
+        """Name property."""
+        return self._name
+
+    @property
+    def mention(self) -> int:
+        """Mention property."""
+        return self._mention
+
+    @property
+    def members(self) -> list[MemberMock]:
+        """Members property."""
+        _members = random.choices(interface_mocks.query_mock("userpoints", {}), k=3)
+        return [MemberMock(member["uid"], member.get("name", ""), "") for member in _members]
+
+    async def edit(self, *args, **kwargs) -> None:
+        """Edit mock."""
 
 
 class ChannelMock:

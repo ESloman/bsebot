@@ -265,5 +265,6 @@ class TestRevolutionView:
                     mock.patch.object(view.revolutions, "get_event", return_value=_event),
                     mock.patch.object(view, "_handle_non_save_thyself_buttons", return_value=True),
                     mock.patch.object(view, "_handle_save_thyself_button_checks", return_value=True),
+                    mock.patch.object(view, "_handle_save_thyself_button", return_value=""),
                 ):
                     await view._revolution_button_logic(interaction, button)

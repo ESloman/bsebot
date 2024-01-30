@@ -116,7 +116,7 @@ class TestBSEddiesRevolutionTask:
         """Tests default execution with the reminders for the event."""
         task = BSEddiesRevolutionTask(self.bsebot, [], self.logger, [], "", start=False)
 
-        for timestamp in ("2024/01/21 18:00", "2024/01/21 19:00", "2024/01/21 19:30"):
+        for timestamp in ("2024/01/21 18:00", "2024/01/21 18:30", "2024/01/21 19:15"):
             with freeze_time(timestamp):
                 event_data["expired"] = datetime.datetime.now(tz=pytz.utc) + datetime.timedelta(hours=1)
                 event = RevolutionEvent.make_data_class(event_data)

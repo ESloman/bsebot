@@ -375,6 +375,10 @@ class FollowUpMock:
     async def edit_message(*args, **kwargs) -> None:
         """Mocks followup edit_message."""
 
+    @staticmethod
+    async def send_message(*args, **kwargs) -> None:
+        """Mocks followup send message."""
+
 
 class InteractionMock:
     def __init__(self, guild_id: int | None, user_id: int = 123456) -> None:
@@ -436,3 +440,33 @@ class ButtonMock:
     def label(self) -> str:
         """Label property."""
         return self._label
+
+
+class ContextMock:
+    def __init__(self, guild_id: int, user_id: int = 123456) -> None:
+        """Init."""
+        self._guild_id: int = guild_id
+        self._user = MemberMock(user_id)
+
+    @property
+    def guild_id(self) -> int:
+        """Guild ID property."""
+        return self._guild_id
+
+    @property
+    def user(self) -> MemberMock:
+        """User property."""
+        return self._user
+
+    @property
+    def followup(self) -> FollowUpMock:
+        """Mock followup property."""
+        return FollowUpMock
+
+    @property
+    def response(self) -> FollowUpMock:
+        """Mock response property."""
+        return FollowUpMock
+
+    async def respond(self, *args, **kwargs) -> None:
+        """Respond mock."""

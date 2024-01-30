@@ -1,5 +1,6 @@
 """Tests our revolution task."""
 
+import copy
 import datetime
 from unittest import mock
 
@@ -115,7 +116,7 @@ class TestBSEddiesRevolutionTask:
     async def test_default_execution_reminders(self, event_data: dict) -> None:
         """Tests default execution with the reminders for the event."""
         task = BSEddiesRevolutionTask(self.bsebot, [], self.logger, [], "", start=False)
-
+        event_data = copy.deepcopy(event_data)
         event_data["one_hour"] = False
         event_data["quarter_hour"] = False
         for timestamp in ("2024/01/21 18:00", "2024/01/21 18:30", "2024/01/21 19:15"):
@@ -141,6 +142,7 @@ class TestBSEddiesRevolutionTask:
         """Tests resolve revolutions with no users."""
         task = BSEddiesRevolutionTask(self.bsebot, [], self.logger, [], "", start=False)
 
+        event_data = copy.deepcopy(event_data)
         event_data["users"] = []
         event = RevolutionEvent.make_data_class(event_data)
         task.rev_started[event.guild_id] = True
@@ -160,6 +162,7 @@ class TestBSEddiesRevolutionTask:
         """Tests resolve revolutions that doesn't succeed."""
         task = BSEddiesRevolutionTask(self.bsebot, [], self.logger, [], "", start=False)
 
+        event_data = copy.deepcopy(event_data)
         event_data["chance"] = 0
         event = RevolutionEvent.make_data_class(event_data)
         task.rev_started[event.guild_id] = True
@@ -179,6 +182,7 @@ class TestBSEddiesRevolutionTask:
         """Tests resolve revolutions that succeeds."""
         task = BSEddiesRevolutionTask(self.bsebot, [], self.logger, [], "", start=False)
 
+        event_data = copy.deepcopy(event_data)
         event_data["chance"] = 100
         if not event_data.get("revolutionaries", []):
             event_data["revolutionaries"] = event_data["users"]

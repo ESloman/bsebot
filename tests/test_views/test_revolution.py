@@ -85,7 +85,8 @@ class TestRevolutionView:
         assert not await view._handle_save_thyself_button_checks(interaction, button, 123456, 654321)
 
     @pytest.mark.parametrize("event_data", interface_mocks.query_mock("ticketedevents", {})[-5:])
-    async def test_handle_non_save_thyself_buttons(self, event_data: dict) -> None:
+    @pytest.mark.parametrize("key", ["revolutionaries", "supporters"])
+    async def test_handle_non_save_thyself_buttons(self, event_data: dict, key: str) -> None:
         """Tests the handle_non_save_thyself_buttons.
 
         Needs to run with async as the parent class tries to get the running event loop.
@@ -96,13 +97,12 @@ class TestRevolutionView:
         for user in [*_event.users, 123456789]:
             if "locked_in" in event_data:
                 event_data["locked_in"].append(user)
-            for key in ("revolutionaries", "supporters"):
-                expected = user not in getattr(_event, key)
-                if expected and user in event_data.get("locked_in", []):
-                    expected = False
-                assert expected == await view._handle_non_save_thyself_buttons(
-                    interaction, user, RevolutionEvent.make_data_class(event_data), key
-                )
+            expected = user not in getattr(_event, key)
+            if expected and user in event_data.get("locked_in", []):
+                expected = False
+            assert expected == await view._handle_non_save_thyself_buttons(
+                interaction, user, RevolutionEvent.make_data_class(event_data), key
+            )
 
     @pytest.mark.parametrize("event_data", interface_mocks.query_mock("ticketedevents", {})[-5:])
     async def test_handle_overthrow_support_buttons(self, event_data: dict) -> None:

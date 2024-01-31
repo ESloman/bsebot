@@ -46,6 +46,15 @@ class PlaceHolderLogger:
         """
         print(msg)
 
+    @staticmethod
+    def exception(msg: str, *args: tuple[any], **kwargs: dict[str, any]) -> None:  # noqa: ARG004
+        """logger.exception mock.
+
+        Args:
+            msg (str): the message to print
+        """
+        print(msg)
+
 
 class _ColourFormatter(logging.Formatter):
     """Colour Formatter.

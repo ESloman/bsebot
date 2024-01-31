@@ -87,13 +87,16 @@ class AwardsBuilder:
         """
         diff = new_value - old_value
 
-        perc = round((diff / old_value) * 100, 2)
+        try:
+            perc = round((diff / old_value) * 100, 2)
+        except ZeroDivisionError:
+            perc = 0
 
         if perc < 0:
             # make percentage positive
             perc *= -1
 
-        _string = f" ({'up' if diff > 0 else 'down'} `{perc}%`)"
+        _string = f" ({'up' if diff > 0 else 'down'} `{perc if perc != 0 else "∞"}%`)"
 
         if diff == 0:
             _string = " (no change)"

@@ -72,7 +72,7 @@ def query_mock(  # noqa: C901, PLR0912, PLR0915
         data_to_search = copy.deepcopy(_filtered_data)
         _filtered_data = []
         for data in data_to_search:
-            if key not in data and key not in {"replies.timestamp", "reactions.timestamp", "$text"}:
+            if key not in data and key not in {"replies.timestamp", "reactions.timestamp", "$text", "selectable"}:
                 # key not in data - won't match
                 continue
 

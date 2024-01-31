@@ -81,7 +81,12 @@ class TestClose:
         await close.close_bet(interaction, "0123", [":one:"])
 
     @pytest.mark.parametrize(
-        "bet_data", [b for b in interface_mocks.query_mock("userbets", {"active": False}) if "type" not in b][-10:]
+        "bet_data",
+        [
+            b
+            for b in interface_mocks.query_mock("userbets", {"active": False})
+            if "type" not in b and not b.get("result")
+        ][-10:],
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -94,3 +99,65 @@ class TestClose:
         bet = UserBets.make_data_class(bet_data)
         interaction = discord_mocks.InteractionMock(bet.guild_id, bet.user)
         await close.close_bet(interaction, bet.bet_id, bet.options)
+
+    @pytest.mark.parametrize(
+        "bet_data", [b for b in interface_mocks.query_mock("userbets", {"active": False}) if "type" not in b][-15:]
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    async def test_close_bet(self, bet_data: dict) -> None:
+        """Tests close_bet."""
+        close = CloseBet(self.client, self.guild_ids, self.logger)
+        bet = UserBets.make_data_class(bet_data)
+        interaction = discord_mocks.InteractionMock(bet.guild_id, bet.user)
+        await close.close_bet(interaction, bet.bet_id, bet.options)
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    async def test_cancel_bet_bad_id(self) -> None:
+        """Tests cancel bet with a bad bet ID."""
+        close = CloseBet(self.client, self.guild_ids, self.logger)
+
+        interaction = discord_mocks.InteractionMock(123456)
+        await close.cancel_bet(interaction, "0123")
+
+    @pytest.mark.parametrize(
+        "bet_data",
+        [
+            b
+            for b in interface_mocks.query_mock("userbets", {"active": False})
+            if "type" not in b and not b.get("result")
+        ][-10:],
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    async def test_cancel_bet_bad_bets(self, bet_data: dict) -> None:
+        """Tests cancel_bet with bad bets."""
+        close = CloseBet(self.client, self.guild_ids, self.logger)
+        bet = UserBets.make_data_class(bet_data)
+        interaction = discord_mocks.InteractionMock(bet.guild_id, bet.user)
+        await close.cancel_bet(interaction, bet.bet_id)
+
+    @pytest.mark.parametrize(
+        "bet_data", [b for b in interface_mocks.query_mock("userbets", {"active": False}) if "type" not in b][-15:]
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    async def test_cancel_bet(self, bet_data: dict) -> None:
+        """Tests cancel_bet."""
+        close = CloseBet(self.client, self.guild_ids, self.logger)
+        bet = UserBets.make_data_class(bet_data)
+        interaction = discord_mocks.InteractionMock(bet.guild_id, bet.user)
+        await close.cancel_bet(interaction, bet.bet_id)

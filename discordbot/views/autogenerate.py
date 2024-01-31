@@ -182,7 +182,7 @@ class AutoGenerateView(discord.ui.View):
             self.view.data["timeout"] = selected
             await self.view.update(interaction)
 
-    class ChanelSelect(discord.ui.Select):
+    class ChannelSelect(discord.ui.Select):
         """Class for autogenerate channel select."""
 
         def __init__(self) -> None:
@@ -230,7 +230,7 @@ class AutoGenerateView(discord.ui.View):
 
         self.type_select = self.TypeSelect(categories)
         self.timeout_select = self.TimeoutSelect()
-        self.channel_select = self.ChanelSelect()
+        self.channel_select = self.ChannelSelect()
         self.method_select = self.MethodSelect(generation_methods)
         self.amount_select = None
         self.bets_select = None

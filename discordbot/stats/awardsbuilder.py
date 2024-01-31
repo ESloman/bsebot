@@ -227,6 +227,11 @@ class AwardsBuilder:
                 if not previous:
                     comparisons[stat.stat] = ""
                     continue
+                if len(previous) > 1:
+                    comparisons[stat.stat] = ""
+                    self.logger.debug("Found more than one previous stat for %s", stat)
+                    continue
+                previous = previous[0]
 
                 comparison_string = self._get_comparison_string(stat.value, previous["value"])
             except Exception:

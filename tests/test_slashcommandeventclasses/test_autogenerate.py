@@ -58,3 +58,16 @@ class TestAutoGenerate:
         guild = Guilds.make_data_class(guild_data)
         ctx = discord_mocks.ContextMock(guild.guild_id, guild.king)
         await autogenerate.autogenerate_wrapper(ctx, "something", "random", 4, [])
+
+    @pytest.mark.parametrize("guild_data", interface_mocks.query_mock("guilds", {}))
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    async def test_autogenerate_wrapper_random(self, guild_data: dict) -> None:
+        """Tests autogenerate_wrapper random."""
+        autogenerate = AutoGenerate(self.client, self.guild_ids, self.logger)
+
+        guild = Guilds.make_data_class(guild_data)
+        ctx = discord_mocks.ContextMock(guild.guild_id, guild.king)
+        await autogenerate.autogenerate_wrapper(ctx, "random", "random", 6, [])

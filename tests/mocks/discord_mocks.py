@@ -90,6 +90,7 @@ class ChannelMock:
         name: str | None = None,
         created_at: datetime.datetime | None = None,
         owner_id: int = 123456,
+        member_ids: list[int] | None = None,
     ) -> None:
         """Init."""
         self._id: int = channel_id
@@ -99,6 +100,7 @@ class ChannelMock:
         self._archived: bool = False
         self._threads: list[ThreadMock] = []
         self._type = discord.ChannelType.text
+        self._member_ids = member_ids
 
     @property
     def id(self) -> int:
@@ -134,6 +136,11 @@ class ChannelMock:
     def threads(self) -> list:
         """Threads property."""
         return self._threads
+
+    @property
+    def members(self) -> list[MemberMock]:
+        """Returns a list of members."""
+        return [MemberMock(_id) for _id in self._member_ids] if self._member_ids else []
 
     async def send(self, *args, **kwargs):
         """Mocks the send method."""

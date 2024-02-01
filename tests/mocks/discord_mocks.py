@@ -101,6 +101,8 @@ class ChannelMock:
         self._threads: list[ThreadMock] = []
         self._type = discord.ChannelType.text
         self._member_ids = member_ids
+        self._category_id = 123456
+        self._is_nsfw = False
 
     @property
     def id(self) -> int:
@@ -138,9 +140,18 @@ class ChannelMock:
         return self._threads
 
     @property
+    def category_id(self) -> int:
+        """Category ID property."""
+        return self._category_id
+
+    @property
     def members(self) -> list[MemberMock]:
         """Returns a list of members."""
         return [MemberMock(_id) for _id in self._member_ids] if self._member_ids else []
+
+    def is_nsfw(self) -> bool:
+        """Returns the _is_nsfw property."""
+        return self._is_nsfw
 
     async def send(self, *args, **kwargs):
         """Mocks the send method."""

@@ -167,6 +167,20 @@ class TestGuildChecker:
         guild = discord_mocks.GuildMock(guild_data["guild_id"], guild_data["owner_id"], guild_data["name"])
         await checker._check_bets(guild)
 
+    @pytest.mark.parametrize(
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    async def test_check_channels(self, guild_data: dict) -> None:
+        """Tests that we can check the channels of a guild."""
+        checker = GuildChecker(self.bsebot, [], self.logger, [], self.place, self.close, start=False)
+        guild = discord_mocks.GuildMock(guild_data["guild_id"], guild_data["owner_id"], guild_data["name"])
+        await checker._check_channels(guild)
+
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)

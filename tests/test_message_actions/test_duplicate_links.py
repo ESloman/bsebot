@@ -35,7 +35,7 @@ class TestDuplicateLinkAction:
         success = await action.pre_condition(message, entry["message_type"])
         assert isinstance(success, bool)
 
-    @pytest.mark.parametrize("entry", interface_mocks.query_mock("userinteractions", {"message_type": "message"})[-50:])
+    @pytest.mark.parametrize("entry", interface_mocks.query_mock("userinteractions", {"message_type": "link"})[-10:])
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -43,7 +43,5 @@ class TestDuplicateLinkAction:
         """Tests run with various bits of data."""
         action = DuplicateLinkAction(self.client, self.logger)
         message = discord_mocks.MessageMock(entry["content"], entry["guild_id"], entry["message_id"])
-        success = await action.pre_condition(message, entry["message_type"])
-        assert isinstance(success, bool)
-        if success:
-            await action.run(message)
+        action._results_map[message.id] = [discord_mocks.MessageMock(entry["content"], entry["guild_id"], 123456)]
+        await action.run(message)

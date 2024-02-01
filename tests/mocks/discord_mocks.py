@@ -389,6 +389,21 @@ class MessageMock:
         return self._channel
 
     @property
+    def channel_id(self) -> int:
+        """Channel ID property."""
+        return self._channel.id
+
+    @property
+    def message_id(self) -> int:
+        """Message ID property."""
+        return self.id
+
+    @property
+    def user_id(self) -> int:
+        """User ID property."""
+        return self._author.id
+
+    @property
     def jump_url(self) -> str:
         """Jump URL property."""
         return ""

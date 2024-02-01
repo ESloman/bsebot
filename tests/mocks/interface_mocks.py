@@ -60,6 +60,8 @@ def query_mock(  # noqa: C901, PLR0912, PLR0915
     if path in _CACHE:
         all_data = _CACHE[path]
     else:
+        if not path.exists():
+            return []
         with open(path, encoding="utf-8") as json_file:
             all_data = json.load(json_file)
             for entry in all_data:

@@ -1,5 +1,8 @@
 """Mocks for dataclasses."""
 
+import datetime
+
+import pytz
 from bson import ObjectId
 
 from mongo.datatypes.bet import BetterDB, OptionDB
@@ -290,6 +293,23 @@ def get_bot_activity_inputs() -> list[dict[str, any]]:
             "count": 41,
             "archived": False,
         },
+    ]
+
+
+def get_channel_inputs() -> list[dict[str, any]]:
+    """Returns a bunch of channel inputs."""
+    return [
+        {
+            "_id": ObjectId(),
+            "guild_id": 123456789,
+            "channel_id": 987654321,
+            "name": "some-channel-name",
+            "type": 5,
+            "created": datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(days=x),
+            "category_id": 123654789,
+            "is_nsfw": x < 5,
+        }
+        for x in range(7)
     ]
 
 

@@ -1,4 +1,4 @@
-"""Activities collection interface."""
+"""Channels collection interface."""
 
 import dataclasses
 import datetime

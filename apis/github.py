@@ -47,29 +47,3 @@ class GitHubAPI:
         data = {"title": title, "body": body, "labels": labels}
 
         return requests.post(url, headers=self.headers, json=data, timeout=10)
-
-    def get_releases(self: "GitHubAPI", owner: str, repo: str) -> requests.Response:
-        """Gets the releases for a given repo.
-
-        Args:
-            owner (str): _description_
-            repo (str): _description_
-
-        Returns:
-            requests.Response: _description_
-        """
-        url = f"{self.base_url}/repos/{owner}/{repo}/releases"
-        return requests.get(url, headers=self.headers, timeout=10)
-
-    def get_latest_release(self: "GitHubAPI", owner: str, repo: str) -> requests.Response:
-        """Gets the latest releases for a given repo.
-
-        Args:
-            owner (str): _description_
-            repo (str): _description_
-
-        Returns:
-            requests.Response: _description_
-        """
-        url = f"{self.base_url}/repos/{owner}/{repo}/releases/latest"
-        return requests.get(url, headers=self.headers, timeout=10)

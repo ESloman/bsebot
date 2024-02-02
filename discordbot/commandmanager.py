@@ -78,7 +78,6 @@ from discordbot.tasks.eddiekingtask import BSEddiesKingTask
 from discordbot.tasks.guildchecker import GuildChecker
 from discordbot.tasks.messagesync import MessageSync
 from discordbot.tasks.monthlyawards import MonthlyBSEddiesAwards
-from discordbot.tasks.releasechecker import ReleaseChecker
 from discordbot.tasks.reminders import RemindersTask
 from discordbot.tasks.revolutiontask import BSEddiesRevolutionTask
 from discordbot.tasks.taskmanager import TaskManager
@@ -226,7 +225,6 @@ class CommandManager:
         self.eddie_gain_message_task = EddieGainMessager(self.client, guilds, self.logger, startup_tasks)
         self.eddie_king_task = BSEddiesKingTask(self.client, guilds, self.logger, startup_tasks)
         self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger, startup_tasks, self.giphy_token)
-        self.release_task = ReleaseChecker(self.client, guilds, self.logger, startup_tasks, self.githubapi)
         self.thread_task = ThreadSpoilerTask(self.client, guilds, self.logger, startup_tasks)
         self.message_sync = MessageSync(self.client, guilds, self.logger, startup_tasks, self.on_message)
         self.vally_task = AfterWorkVally(self.client, guilds, self.logger, startup_tasks)

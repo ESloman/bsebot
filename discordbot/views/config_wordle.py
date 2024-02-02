@@ -200,7 +200,9 @@ class WordleConfigView(discord.ui.View):
         await interaction.response.edit_message(content=interaction.message.content, view=self)
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=4)
-    async def submit_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:  # noqa: C901, PLR0912
+    async def submit_callback(  # noqa: C901, PLR0912
+        self, _: discord.ui.Button, interaction: discord.Interaction
+    ) -> None:
         """Button callback.
 
         Args:

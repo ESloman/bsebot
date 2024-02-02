@@ -62,7 +62,6 @@ from discordbot.slashcommandeventclasses.predict import Predict
 from discordbot.slashcommandeventclasses.refresh import RefreshBet
 from discordbot.slashcommandeventclasses.stats import Stats
 from discordbot.slashcommandeventclasses.taxrate import TaxRate
-from discordbot.slashcommandeventclasses.transactions import TransactionHistory
 from discordbot.slashcommandeventclasses.view import View
 from discordbot.slashcommandeventclasses.wordle import Wordle
 
@@ -173,7 +172,6 @@ class CommandManager:
         self.bseddies_config = Config(client, guilds, self.logger)
         self.bseddies_place = PlaceBet(client, guilds, self.logger)
         self.bseddies_pending = Pending(client, guilds, self.logger)
-        self.bseddies_transactions = TransactionHistory(client, guilds, self.logger)
         self.bseddies_admin_give = AdminGive(client, guilds, self.logger)
         self.bseddies_high_score = HighScore(client, guilds, self.logger)
         self.bseddies_predict = Predict(client, guilds, self.logger)
@@ -576,24 +574,6 @@ class CommandManager:
                 amount (int): the amount of eddies to gift
             """
             await self.bseddies_gift.gift_eddies(ctx, friend, amount)
-
-        @self.client.command(description="View your transaction history.")
-        async def transactions(
-            ctx: discord.ApplicationContext,
-            full: discord.Option(
-                bool,
-                description="Do you want the full transaction history?",
-                default=False,
-            ),
-        ) -> None:
-            """Slash command that allows the user to see their eddie transaction history.
-
-            Args:
-                ctx (discord.ApplicationContext): the command context
-                full (bool): whether to do the full transaction history or not
-            """
-            await ctx.defer(ephemeral=True)
-            await self.bseddies_transactions.transaction_history(ctx, full)
 
         @self.client.command(description="Create a bet")
         async def create(ctx: discord.ApplicationContext) -> None:

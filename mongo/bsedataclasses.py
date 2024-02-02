@@ -344,7 +344,7 @@ class Awards(BaseClass):
 
         return self.query(query)
 
-    def get_previous_stat(self, stat: StatDB) -> StatDB:
+    def get_previous_stat(self, stat: StatDB) -> StatDB | None:
         """Searches the database for the previous stat of the same time.
 
         Args:
@@ -368,9 +368,7 @@ class Awards(BaseClass):
                 query["stat"] = stat.stat
 
         ret: list[StatDB] = self.query(query)
-        if not ret:
-            return None
-        return ret[0]
+        return ret[0] if ret else None
 
 
 class WordleAttempts(BaseClass):

@@ -15,7 +15,7 @@ from discordbot.clienteventclasses.baseeventclass import BaseEvent
 class OnMemberLeave(BaseEvent):
     """Class for handling when a member leaves the server."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:

@@ -34,7 +34,7 @@ class BirthdayReplies(BaseMessageAction):
             "😍",
         ]
 
-    async def pre_condition(self, message: discord.Message, _: list) -> bool:
+    async def pre_condition(self, message: discord.Message, _: list[str]) -> bool:
         """Precondition.
 
         Checks whether or not the message is a 'happy birthday' style
@@ -42,7 +42,7 @@ class BirthdayReplies(BaseMessageAction):
 
         Args:
             message (discord.Message): the message to check
-            _ (list): pre-calculated message_type to help with condition
+            _ (list[str]): pre-calculated message_type to help with condition
 
         Returns:
             bool: whether or not to run this action on this message

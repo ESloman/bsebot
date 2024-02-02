@@ -60,7 +60,9 @@ class ConfigView(discord.ui.View):
         self.config_select = ConfigSelect(configurable_items)
         self.add_item(self.config_select)
 
-    def _check_perms(self, value: str, user_id: int, guild_id: int | None = None, guild_db: GuildDB = None) -> bool:  # noqa: PLR0911
+    def _check_perms(  # noqa: PLR0911
+        self, value: str, user_id: int, guild_id: int | None = None, guild_db: GuildDB = None
+    ) -> bool:
         """Checks if the user has the right perms to configure this item.
 
         Args:

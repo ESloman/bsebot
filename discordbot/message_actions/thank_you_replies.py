@@ -52,7 +52,7 @@ class ThankYouReplies(BaseMessageAction):
             "😍",
         ]
 
-    async def pre_condition(self, message: discord.Message, _: list) -> bool:
+    async def pre_condition(self, message: discord.Message, _: list[str]) -> bool:
         """Than you precondition.
 
         Checks that any of the 'thank you' terms are in the message

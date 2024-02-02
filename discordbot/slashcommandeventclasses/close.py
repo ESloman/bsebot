@@ -58,7 +58,9 @@ class CloseBet(BSEddies):
         except AttributeError:
             await ctx.response.send_message(content="**Closing a bet**", view=close_bet_view, ephemeral=True)
 
-    async def close_bet(self, ctx: discord.Interaction, bet_id: str, emoji: list[str]) -> None:  # noqa: C901, PLR0912, PLR0915
+    async def close_bet(  # noqa: C901, PLR0912, PLR0915
+        self, ctx: discord.Interaction, bet_id: str, emoji: list[str]
+    ) -> None:
         """This is the method for handling when we close a bet.
 
         We validate that the user initiating the command is the user who created the bet and that

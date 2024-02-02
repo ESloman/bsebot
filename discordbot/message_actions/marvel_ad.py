@@ -31,7 +31,7 @@ class MarvelComicsAdAction(BaseMessageAction):
             "marvel",
         ]
 
-    async def pre_condition(self, message: discord.Message, _: list) -> bool:
+    async def pre_condition(self, message: discord.Message, _: list[str]) -> bool:
         """Marvel comics ad precondition.
 
         Checks that the message contains our triggers and that it's mean more than the cooldown since the

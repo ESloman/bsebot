@@ -17,7 +17,7 @@ from discordbot.clienteventclasses.baseeventclass import BaseEvent
 class OnReactionAdd(BaseEvent):
     """Class for handling on_reaction_add events from Discord."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:

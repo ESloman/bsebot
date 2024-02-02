@@ -15,7 +15,7 @@ from mongo.bsedataclasses import SpoilerThreads
 class OnThreadUpdate(BaseEvent):
     """Class for handling on_thread_update event."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:

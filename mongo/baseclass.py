@@ -91,6 +91,14 @@ class BaseClass:
         """
         if not self.minimum_projection:
             return
+
+        if all(value is False for value in projection.values()):
+            # everything is false - make sure we're not excluding things we care about
+            for key in self.minimum_projection:
+                if key in projection:
+                    projection.pop(key)
+            return
+
         projection.update(self.minimum_projection)
 
     @staticmethod
@@ -196,6 +204,9 @@ class BaseClass:
         Returns:
             list | Cursor: either a list of dataclasses, or a Cursor of the documents
         """
+        if projection is not None:
+            self._update_projection(projection)
+
         if as_gen:
             return interface.query(self.vault, parameters, limit, projection, as_gen, skip=skip, sort=sort)
         if use_paginated and not projection:

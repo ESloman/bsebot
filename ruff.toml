@@ -1,4 +1,13 @@
 
+# both linting and formatting options
+
+line-length = 120
+target-version = "py312"
+
+# stuff to do with ruff linting
+
+[lint]
+
 # list of rules here: https://beta.ruff.rs/docs/rules/#ruff-specific-rules-ruf
 # we enable most of the relevant ones and explicitly exclude the ones we're not interested
 select = ["ALL"]
@@ -46,20 +55,21 @@ exclude = [
     "node_modules",
     "venv",
     "wvenv",
-    "docs/",
+    "docs/",    
     "datafiles"
 ]
 
-line-length = 120
 dummy-variable-rgx = "^_$"
+preview = true
 
-target-version = "py312"
+[lint.pylint]
+max-args = 6
 
-[mccabe]
+[lint.mccabe]
 # Unlike Flake8, default to a complexity level of 10.
 max-complexity = 10
 
-[per-file-ignores]
+[lint.per-file-ignores]
 "*/*__init__.py" = [
     "D104",  # undocumented-public-package: happy for __init__'s not to have docstrings
     "F401",  # unused-import: okay for __init__'s to have unused imports
@@ -81,14 +91,10 @@ max-complexity = 10
     "TRY301",  # raise-within-try: need to raise exceptions within try in testing for tests
 ]
 
-[pydocstyle]
+[lint.pydocstyle]
 convention = "google"
 
-[pylint]
-max-args = 6
-
-[lint]
-preview = true
+# stuff ro do with ruff-format
 
 [format]
 preview = true

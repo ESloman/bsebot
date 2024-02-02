@@ -4,15 +4,20 @@ import copy
 import datetime
 from dataclasses import asdict
 from logging import Logger
+from typing import TYPE_CHECKING
 
 import discord
 import pytz
 
-import discordbot.views.bet
 from discordbot.embedmanager import EmbedManager
 from discordbot.utilities import PlaceHolderLogger
 from mongo.bsepoints.bets import UserBets
 from mongo.datatypes.bet import BetDB
+
+if TYPE_CHECKING:
+    from discordbot.slashcommandeventclasses.close import CloseBet
+    from discordbot.slashcommandeventclasses.place import PlaceBet
+    from discordbot.views.bet import BetView
 
 
 class AddBetOption(discord.ui.Modal):
@@ -21,8 +26,9 @@ class AddBetOption(discord.ui.Modal):
     def __init__(
         self,
         bet: BetDB,
-        bseddies_place: object,
-        bseddies_close: object,
+        view: "BetView",
+        bseddies_place: "PlaceBet",
+        bseddies_close: "CloseBet",
         logger: Logger = PlaceHolderLogger,
         *args: tuple[any],
         **kwargs: dict[any],
@@ -42,8 +48,9 @@ class AddBetOption(discord.ui.Modal):
 
         self.logger: Logger = logger
         self.bet: BetDB = bet
-        self.place: object = bseddies_place
-        self.close: object = bseddies_close
+        self.place: "PlaceBet" = bseddies_place
+        self.close: "CloseBet" = bseddies_close
+        self.view: "BetView" = view
         self.embed_manager = EmbedManager()
         self.user_bets = UserBets()
 
@@ -103,8 +110,6 @@ class AddBetOption(discord.ui.Modal):
         expired = now - created
         ending += expired
 
-        self.bet.timeout = ending
-
         self.user_bets.update(
             {"_id": self.bet._id},  # noqa: SLF001
             {
@@ -117,10 +122,11 @@ class AddBetOption(discord.ui.Modal):
                 },
             },
         )
+        self.bet: BetDB = self.user_bets.get_bet_from_id(self.bet.guild_id, self.bet.bet_id)
 
         channel = await interaction.guild.fetch_channel(self.bet.channel_id)
         message = await channel.fetch_message(self.bet.message_id)
         embed = self.embed_manager.get_bet_embed(interaction.guild, self.bet)
-        view = discordbot.views.bet.BetView(self.bet, self.place, self.close)
-        await message.edit(embed=embed, view=view)
+        self.view.bet = self.bet
+        await message.edit(embed=embed, view=self.view)
         await interaction.followup.send(content="Sorted.", ephemeral=True)

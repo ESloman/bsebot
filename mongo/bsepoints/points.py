@@ -76,9 +76,6 @@ class UserPoints(BaseClass):
         :param projection:
         :return: either a user dict or None if the user couldn't be found
         """
-        if projection is not None:
-            self._update_projection(projection)
-
         ret = self.query({"uid": user_id, "guild_id": guild_id}, projection=projection)
         if ret:
             return ret[0]

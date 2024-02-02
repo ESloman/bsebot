@@ -1,6 +1,7 @@
 """Guilds collection interface."""
 
 import datetime
+import typing
 
 import pytz
 from pymongo.results import InsertOneResult, UpdateResult
@@ -14,6 +15,13 @@ from mongo.datatypes.user import UserDB
 
 class Guilds(BaseClass):  # noqa: PLR0904
     """Class for interacting with the 'guilds' MongoDB collection in the 'bestsummereverpoints' DB."""
+
+    _MINIMUM_PROJECTION_DICT: typing.ClassVar = {
+        "_id": True,
+        "guild_id": True,
+        "name": True,
+        "owner_id": True,
+    }
 
     def __init__(self) -> None:
         """Constructor method for the class. Initialises the collection object."""
@@ -83,7 +91,7 @@ class Guilds(BaseClass):  # noqa: PLR0904
     # Channel stuff
     #
 
-    def get_channel(self, guild_id: int) -> int:
+    def get_channel(self, guild_id: int) -> int | None:
         """Gets the bseddies channel to send messages to.
 
         Args:
@@ -180,7 +188,7 @@ class Guilds(BaseClass):  # noqa: PLR0904
     # Salary stuff
     #
 
-    def get_daily_minimum(self, guild_id: int) -> int:
+    def get_daily_minimum(self, guild_id: int) -> int | None:
         """Gets daily minimum for the given guild.
 
         Args:
@@ -190,9 +198,7 @@ class Guilds(BaseClass):  # noqa: PLR0904
             int: the minimum
         """
         ret: list[GuildDB] = self.query({"guild_id": guild_id})
-        if ret:
-            return ret[0].daily_minimum
-        return None
+        return ret[0].daily_minimum if ret else None
 
     def set_daily_minimum(self, guild_id: int, amount: int) -> UpdateResult:
         """Updates daily minimum salary for given guild ID with given amount.

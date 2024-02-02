@@ -164,6 +164,8 @@ class TestBSEddiesRevolutionTask:
 
         event_data = copy.deepcopy(event_data)
         event_data["chance"] = 0
+        if not event_data.get("revolutionaries", []):
+            event_data["revolutionaries"] = event_data["users"]
         event = RevolutionEvent.make_data_class(event_data)
         task.rev_started[event.guild_id] = True
 

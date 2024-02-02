@@ -7,14 +7,13 @@ import re
 import discord
 import pytz
 
-import discordbot.views.bet
-import discordbot.views.stats
 from discordbot.bot_enums import ActivityTypes
 from discordbot.bsebot import BSEBot
 from discordbot.constants import WORDLE_SCORE_REGEX
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.stats.statsdatacache import StatsDataCache
 from discordbot.stats.statsdataclasses import StatsData
+from discordbot.views.stats import StatsView
 from mongo.datatypes.message import MessageDB
 
 
@@ -131,7 +130,7 @@ class Stats(BSEddies):
 
         self._add_event_type_to_activity_history(ctx.author, ctx.guild_id, ActivityTypes.STATS)
 
-        _view = discordbot.views.stats.StatsView(self)
+        _view = StatsView(self)
         _msg = "# Stats\nSelect stats generation method."
 
         await ctx.followup.send(content=_msg, view=_view, ephemeral=True)

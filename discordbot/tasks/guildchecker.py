@@ -2,13 +2,12 @@
 
 import datetime
 from logging import Logger
+from typing import TYPE_CHECKING
 
 import discord
 import pytz
 from discord.ext import tasks
 
-import discordbot.slashcommandeventclasses.close
-import discordbot.slashcommandeventclasses.place
 from discordbot.bot_enums import ActivityTypes
 from discordbot.bsebot import BSEBot
 from discordbot.embedmanager import EmbedManager
@@ -17,6 +16,10 @@ from discordbot.views.bet import BetView
 from discordbot.views.leaderboard import LeaderBoardView
 from discordbot.views.revolution import RevolutionView
 from mongo.datatypes.guild import GuildDB
+
+if TYPE_CHECKING:
+    from discordbot.slashcommandeventclasses.close import CloseBet
+    from discordbot.slashcommandeventclasses.place import PlaceBet
 
 
 class GuildChecker(BaseTask):
@@ -28,8 +31,8 @@ class GuildChecker(BaseTask):
         guild_ids: list[int],
         logger: Logger,
         startup_tasks: list[BaseTask],
-        place: discordbot.slashcommandeventclasses.place.PlaceBet,
-        close: discordbot.slashcommandeventclasses.close.CloseBet,
+        place: "PlaceBet",
+        close: "CloseBet",
         start: bool = True,
     ) -> None:
         """Initialisation method.
@@ -48,8 +51,8 @@ class GuildChecker(BaseTask):
 
         self.embed_manager = EmbedManager(logger)
 
-        self.close = close
-        self.place = place
+        self.close: "CloseBet" = close
+        self.place: "PlaceBet" = place
 
         if start:
             self.task.start()

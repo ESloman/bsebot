@@ -14,7 +14,9 @@ from discordbot.tasks.basetask import BaseTask
 class RemindersTask(BaseTask):
     """Class for our reminders task."""
 
-    def __init__(self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask]) -> None:
+    def __init__(
+        self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask], start: bool = True
+    ) -> None:
         """Initialisation method.
 
         Args:
@@ -25,7 +27,8 @@ class RemindersTask(BaseTask):
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
         self.task = self.reminders
-        self.task.start()
+        if start:
+            self.task.start()
 
     @tasks.loop(minutes=1)
     async def reminders(self) -> None:
@@ -34,15 +37,15 @@ class RemindersTask(BaseTask):
         for guild in self.bot.guilds:
             open_reminders = self.server_reminders.get_open_reminders(guild.id)
             for reminder in open_reminders:
-                if now > reminder["timeout"]:
+                if now > reminder.timeout:
                     # time to do reminder
-                    channel = await guild.fetch_channel(reminder["channel_id"])
-                    message = await channel.fetch_message(reminder["message_id"])
+                    channel = await guild.fetch_channel(reminder.channel_id)
+                    message = await channel.fetch_message(reminder.message_id)
 
-                    msg = f"Hey, <@{reminder['user_id']}>, don't forget about `{reminder['reason']}`!"
+                    msg = f"Hey, <@{reminder.user_id}>, don't forget about `{reminder.reason}`!"
 
                     await message.reply(content=msg)
-                    self.server_reminders.close_reminder(reminder["_id"])
+                    self.server_reminders.close_reminder(reminder._id)  # noqa: SLF001
 
     @reminders.before_loop
     async def before_reminders(self) -> None:

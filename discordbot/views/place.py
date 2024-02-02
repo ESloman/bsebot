@@ -1,6 +1,7 @@
 """Place bet views."""
 
 import contextlib
+from typing import TYPE_CHECKING
 
 import discord
 
@@ -9,17 +10,20 @@ from discordbot.selects.betamount import BetSelectAmount
 from discordbot.selects.betoutcomes import BetOutcomesSelect
 from mongo.datatypes.bet import BetDB
 
+if TYPE_CHECKING:
+    from discordbot.slashcommandeventclasses.place import PlaceBet
+
 
 class PlaceABetView(discord.ui.View):
     """Class for place bet view."""
 
-    def __init__(self, bets: list[BetDB], user_eddies: int, submit_callback: callable) -> None:
+    def __init__(self, bets: list[BetDB], user_eddies: int, place: "PlaceBet") -> None:
         """Initialisation method.
 
         Args:
             bets (list): the bets
             user_eddies (int): the amount of user eddies
-            submit_callback (callable): the submit callback function
+            place (PlaceBet): the submit callback function
         """
         super().__init__(timeout=60)
         self.add_item(BetSelect(bets))
@@ -33,7 +37,7 @@ class PlaceABetView(discord.ui.View):
         self.add_item(BetOutcomesSelect(options))
         self.add_item(BetSelectAmount(user_eddies))
 
-        self.submit_callback = submit_callback
+        self.place: "PlaceBet" = place
 
     async def on_timeout(self) -> None:
         """View timeout function.
@@ -70,7 +74,7 @@ class PlaceABetView(discord.ui.View):
                 data["amount"] = int(child.values[0])
 
         # call the callback that actually places the bet
-        await self.submit_callback(interaction, data["bet_id"], data["amount"], data["emoji"])
+        await self.place.place_bet(interaction, data["bet_id"], data["amount"], data["emoji"])
 
     @staticmethod
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=3, disabled=False, emoji="✖️")

@@ -1,21 +1,26 @@
 """Close views."""
 
+from typing import TYPE_CHECKING
+
 import discord
 
 from discordbot.selects.bet import BetSelect
 from discordbot.selects.betoutcomes import BetOutcomesSelect
 from mongo.datatypes.bet import BetDB
 
+if TYPE_CHECKING:
+    from discordbot.slashcommandeventclasses.close import CloseBet
+
 
 class CloseABetView(discord.ui.View):
     """Class for closing a bet view."""
 
-    def __init__(self, bets: list[BetDB], submit_callback: callable) -> None:
+    def __init__(self, bets: list[BetDB], close: "CloseBet") -> None:
         """Initialisation method.
 
         Args:
             bets (list[Bet]): the list of available bet IDs
-            submit_callback (callable): the function to call when closing
+            close (CloseBet): the close class
         """
         super().__init__(timeout=60)
         self.add_item(BetSelect(bets))
@@ -27,7 +32,7 @@ class CloseABetView(discord.ui.View):
             options = []
 
         self.add_item(BetOutcomesSelect(options, discord.ui.Button, True))
-        self._submit_callback = submit_callback
+        self.close: "CloseBet" = close
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=2, disabled=True)
     async def submit_button_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:
@@ -49,7 +54,7 @@ class CloseABetView(discord.ui.View):
                 data["emoji"] = child.values
 
         # call the callback that actually places the bet
-        await self._submit_callback(interaction, data["bet_id"], data["emoji"])
+        await self.close.close_bet(interaction, data["bet_id"], data["emoji"])
 
     @staticmethod
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=2, disabled=False, emoji="✖️")

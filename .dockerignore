@@ -4,6 +4,7 @@
 .flake8
 Dockerfile
 LICENSE
+test-requirements.txt
 *.sh
 *.ini
 *.yaml

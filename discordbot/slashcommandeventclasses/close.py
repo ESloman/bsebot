@@ -52,7 +52,7 @@ class CloseBet(BSEddies):
             bets = sorted(bets, key=lambda x: x.created, reverse=True)
             bets = bets[:24]
 
-        close_bet_view = CloseABetView(bets, submit_callback=self.close_bet)
+        close_bet_view = CloseABetView(bets, self)
         try:
             await ctx.respond(content="**Closing a bet**", view=close_bet_view, ephemeral=True)
         except AttributeError:

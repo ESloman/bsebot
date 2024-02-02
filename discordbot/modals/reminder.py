@@ -6,7 +6,7 @@ import logging
 import discord
 import pytz
 
-import discordbot.views.bet
+from discordbot import utilities
 from mongo.bsepoints.reminders import ServerReminders
 
 
@@ -20,7 +20,7 @@ class ReminderModal(discord.ui.Modal):
             logger (logging.Logger): the logger
             message_id (int): the message ID
         """
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, title="Create a reminder", **kwargs)
 
         self.logger = logger
         self.server_reminders = ServerReminders()
@@ -47,7 +47,7 @@ class ReminderModal(discord.ui.Modal):
         reason = self.reminder_reason.value
         timeout = self.reminder_timeout.value
 
-        timeout_seconds = discordbot.utilities.convert_time_str(timeout)
+        timeout_seconds = utilities.convert_time_str(timeout)
 
         now = datetime.datetime.now(tz=pytz.utc)
         timeout_date = now + datetime.timedelta(seconds=timeout_seconds)

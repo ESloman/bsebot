@@ -118,7 +118,7 @@ class BetView(discord.ui.View):
             await interaction.response.send_message(content=message, ephemeral=True, delete_after=10)
             return
 
-        _view = BetChange(_bet, self.place, self.close)
+        _view = BetChange(_bet, self, self.place, self.close)
         await interaction.response.send_message(content="Select another bet option.", view=_view, ephemeral=True)
 
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, emoji="✖️")

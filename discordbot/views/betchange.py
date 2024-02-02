@@ -1,27 +1,35 @@
 """Bet Change view."""
 
+from typing import TYPE_CHECKING
+
 import discord
 
-import discordbot.views.bet
 from discordbot.embedmanager import EmbedManager
 from discordbot.selects.betoutcomes import BetOutcomesSelect
 from mongo.bsepoints.bets import UserBets
 from mongo.datatypes.bet import BetDB
 
+if TYPE_CHECKING:
+    from discordbot.slashcommandeventclasses.close import CloseBet
+    from discordbot.slashcommandeventclasses.place import PlaceBet
+    from discordbot.views.bet import BetView
+
 
 class BetChange(discord.ui.View):
     """Class for bet change view."""
 
-    def __init__(self, bet: BetDB, place: object, close: object) -> None:
+    def __init__(self, bet: BetDB, view: "BetView", place: "PlaceBet", close: "CloseBet") -> None:
         """Initialisation method.
 
         Args:
             bet (Bet): the bet
+            view (BetView): the view
             bseddies_place (PlaceBet): the place class
             bseddies_close (CloseBet): the close class
         """
         super().__init__(timeout=None)
         self.bet: BetDB = bet
+        self.view: "BetView" = view
         self.user_bets = UserBets()
         self.embed_manager = EmbedManager()
 
@@ -56,8 +64,8 @@ class BetChange(discord.ui.View):
         channel = await interaction.guild.fetch_channel(bet.channel_id)
         message = await channel.fetch_message(bet.message_id)
         embed = self.embed_manager.get_bet_embed(interaction.guild, bet)
-        view = discordbot.views.bet.BetView(bet, self.place, self.close)
-        await message.edit(embed=embed, view=view)
+        self.view.bet = bet
+        await message.edit(embed=embed, view=self.view)
         await interaction.followup.edit_message(
             message_id=interaction.message.id,
             content="Updated your bet for you.",

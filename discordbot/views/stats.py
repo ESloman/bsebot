@@ -1,8 +1,13 @@
 """Stats views."""
 
+from typing import TYPE_CHECKING
+
 import discord
 
 from discordbot.selects.stats import StatsModeSelect
+
+if TYPE_CHECKING:
+    from discordbot.slashcommandeventclasses.stats import Stats
 
 
 class StatsView(discord.ui.View):
@@ -10,7 +15,7 @@ class StatsView(discord.ui.View):
 
     def __init__(
         self,
-        stats_class: object,
+        stats_class: "Stats",
     ) -> None:
         """Initialisation method.
 
@@ -19,7 +24,7 @@ class StatsView(discord.ui.View):
         """
         super().__init__(timeout=None)
 
-        self.stats_class = stats_class
+        self.stats_class: "Stats" = stats_class
         self.stats_mode = StatsModeSelect()
 
         self.add_item(self.stats_mode)

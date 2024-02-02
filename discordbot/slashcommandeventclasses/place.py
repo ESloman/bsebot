@@ -4,11 +4,11 @@ import logging
 
 import discord
 
-import discordbot.views.bet
 from discordbot.bot_enums import ActivityTypes
 from discordbot.bsebot import BSEBot
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.slashcommandeventclasses.close import CloseBet
+from discordbot.views.bet import BetView
 from discordbot.views.place import PlaceABetView
 from mongo.datatypes.bet import BetDB
 
@@ -103,7 +103,7 @@ class PlaceBet(BSEddies):
             await response.edit_message(content=msg, view=None, delete_after=10)
             return None
 
-        view = discordbot.views.bet.BetView(bet, self, self.bseddies_close)
+        view = BetView(bet, self, self.bseddies_close)
 
         if not bet.active:
             msg = f"Your reaction on **Bet {bet_id}** failed as the bet is closed for new bets."

@@ -418,6 +418,8 @@ class InteractionMock:
         self._user = MemberMock(user_id)
         self._channel = ChannelMock(123456)
 
+        self.data: dict[str, any] = {}
+
     @property
     def followup(self) -> FollowUpMock:
         """Mock followup property."""

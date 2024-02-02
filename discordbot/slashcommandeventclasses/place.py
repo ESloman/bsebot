@@ -53,7 +53,7 @@ class PlaceBet(BSEddies):
 
         points = self.user_points.get_user_points(ctx.user.id, ctx.guild_id)
 
-        place_bet_view = PlaceABetView(bets, points, submit_callback=self.place_bet)
+        place_bet_view = PlaceABetView(bets, points, self)
         try:
             await ctx.respond(content="**Placing a bet**", view=place_bet_view, ephemeral=True)
         except AttributeError:

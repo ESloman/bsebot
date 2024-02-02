@@ -64,6 +64,8 @@ class TestAddOption:
     @pytest.mark.parametrize("bet_data", interface_mocks.query_mock("userbets", {})[-5:])
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
     async def test_add_option_no_outcomes(self, bet_data: dict) -> None:
         """Tests basic adding an option with empty string."""
         bet = UserBets.make_data_class(bet_data)
@@ -78,6 +80,8 @@ class TestAddOption:
     @pytest.mark.parametrize("bet_data", interface_mocks.query_mock("userbets", {})[-5:])
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
     async def test_add_option_too_many_outcomes(self, bet_data: dict) -> None:
         """Tests basic adding an option with too many outcomes."""
         bet = UserBets.make_data_class(bet_data)

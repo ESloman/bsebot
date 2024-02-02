@@ -5,6 +5,7 @@ import contextlib
 import dataclasses
 import datetime
 from logging import Logger
+from typing import TYPE_CHECKING
 
 import discord
 import pytz
@@ -12,23 +13,26 @@ from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
 from discordbot.embedmanager import EmbedManager
-from discordbot.slashcommandeventclasses.close import CloseBet
-from discordbot.slashcommandeventclasses.place import PlaceBet
 from discordbot.tasks.basetask import BaseTask
 from discordbot.views.bet import BetView
+
+if TYPE_CHECKING:
+    from discordbot.slashcommandeventclasses.close import CloseBet
+    from discordbot.slashcommandeventclasses.place import PlaceBet
 
 
 class BetCloser(BaseTask):
     """Class for bet closer."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(  # noqa: PLR0913, PLR0917
         self,
         bot: BSEBot,
         guild_ids: list[int],
         logger: Logger,
         startup_tasks: list[BaseTask],
-        place: PlaceBet,
-        close: CloseBet,
+        place: "PlaceBet",
+        close: "CloseBet",
+        start: bool = True,
     ) -> None:
         """Initialisation method.
 
@@ -37,19 +41,19 @@ class BetCloser(BaseTask):
             guild_ids (list[int]): the list of guild IDs
             logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
-            on_ready (OnReadyEvent): on ready event
             github_api (GitHubAPI): the authenticated Github api class
             place (PlaceBet): the place bet class
             close (CloseBet): the close bet class
+            start (bool) whether to start the task. Defaults to True.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
         self.task = self.bet_closer
 
         self.embed_manager = EmbedManager(self.logger)
-        self.task.start()
-
-        self.place = place
-        self.close = close
+        self.place: "PlaceBet" = place
+        self.close: "CloseBet" = close
+        if start:
+            self.task.start()
 
     @tasks.loop(seconds=10.0)
     async def bet_closer(self) -> None:

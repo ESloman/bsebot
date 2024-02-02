@@ -6,6 +6,7 @@ import random
 from logging import Logger
 
 import discord
+import pytz
 from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
@@ -15,7 +16,9 @@ from discordbot.tasks.basetask import BaseTask
 class ActivityChanger(BaseTask):
     """Class for activity changer."""
 
-    def __init__(self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask]) -> None:
+    def __init__(
+        self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask], start: bool = True
+    ) -> None:
         """Initialisation method.
 
         Args:
@@ -23,6 +26,7 @@ class ActivityChanger(BaseTask):
             guild_ids (list[int]): the list of guild IDs
             logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
+            start (bool): whether to start the task automatically or not. Defaults to True.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
 
@@ -35,12 +39,13 @@ class ActivityChanger(BaseTask):
             details="Waiting for commands!",
         )
 
-        self.task.start()
+        if start:
+            self.task.start()
 
     @tasks.loop(hours=1)
-    async def activity_changer(self) -> None:
+    async def activity_changer(self) -> discord.Activity:
         """Loop that occasionally changes the activity."""
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         threshold = 0.9 if now.hour == 23 or 0 < now.hour < 8 else 0.65  # noqa: PLR2004
 
@@ -58,16 +63,19 @@ class ActivityChanger(BaseTask):
             weights = []
 
             for activity in all_activities:
-                weight = total - activity["count"]
+                weight = total - activity.count
                 # just make sure that the weight is non-zero
-                weight += 0.1
+                if weight < 0:
+                    weight = 0
+                if weight == 0:
+                    weight += 0.1
                 weights.append(weight)
 
             _activity = random.choices(all_activities, weights)[0]
 
-            new_activity = {"name": _activity["name"], "details": "Waiting for commands!"}
+            new_activity = {"name": _activity.name, "details": "Waiting for commands!"}
 
-            match _activity["category"]:
+            match _activity.category:
                 case "listening":
                     new_activity["state"] = "Listening"
                     new_activity["type"] = discord.ActivityType.listening
@@ -78,13 +86,14 @@ class ActivityChanger(BaseTask):
                     new_activity["state"] = "Playing"
                     new_activity["type"] = discord.ActivityType.playing
                 case _:
-                    return
+                    return None
 
             activity = discord.Activity(**new_activity)
             # increment count for this selected activity
-            self.bot_activities.update({"_id": _activity["_id"]}, {"$inc": {"count": 1}})
+            self.bot_activities.update({"_id": _activity._id}, {"$inc": {"count": 1}})  # noqa: SLF001
 
         await self.bot.change_presence(activity=activity)
+        return activity
 
     @activity_changer.before_loop
     async def before_activity_changer(self) -> None:

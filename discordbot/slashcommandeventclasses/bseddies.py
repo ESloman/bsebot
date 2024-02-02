@@ -19,7 +19,7 @@ class BSEddies(BaseEvent):
     All slash command classes will inherit from this class.
     """
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:
@@ -31,9 +31,9 @@ class BSEddies(BaseEvent):
         self.dmable = False
 
         # these need to be set
-        self.activity_type: ActivityTypes = None
-        self.help_string: str = None
-        self.command_name: str = None
+        self.activity_type: ActivityTypes | None = None
+        self.help_string: str | None = None
+        self.command_name: str | None = None
 
     async def _handle_validation(
         self, ctx: discord.ApplicationContext | discord.Interaction, **kwargs: dict[str, any]

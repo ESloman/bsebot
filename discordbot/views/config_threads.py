@@ -4,13 +4,13 @@ import discord
 
 from discordbot.selects.threadconfig import ThreadActiveSelect, ThreadConfigSelect, ThreadDaySelect
 from mongo.bsedataclasses import SpoilerThreads
-from mongo.datatypes import Thread
+from mongo.datatypes.thread import ThreadDB
 
 
 class ThreadConfigView(discord.ui.View):
     """Class for thread config view."""
 
-    def __init__(self, threads: list[Thread]) -> None:
+    def __init__(self, threads: list[ThreadDB]) -> None:
         """Initialisation method.
 
         Args:
@@ -20,7 +20,7 @@ class ThreadConfigView(discord.ui.View):
 
         self.spoiler_threads = SpoilerThreads()
 
-        threads = [t for t in threads if t["active"]]
+        threads = [t for t in threads if t.active]
         self.threads = threads
         self.thread_select = ThreadConfigSelect(threads)
         self.add_item(self.thread_select)
@@ -37,14 +37,18 @@ class ThreadConfigView(discord.ui.View):
         Can be called by child types when something changes.
         """
         # updates all the selects with new values
-        selected_thread = next(t for t in self.threads if str(t["thread_id"]) == self.thread_select._selected_values[0])  # noqa: SLF001
+        selected_thread = next(
+            t
+            for t in self.threads
+            if str(t.thread_id) == self.thread_select._selected_values[0]  # noqa: SLF001
+        )
 
         for opt in self.day_select.options:
             opt.default = False
 
-        if selected_thread["day"]:
+        if selected_thread.day:
             for opt in self.day_select.options:
-                if int(opt.value) == selected_thread["day"]:
+                if int(opt.value) == selected_thread.day:
                     opt.default = True
                     break
 
@@ -59,7 +63,11 @@ class ThreadConfigView(discord.ui.View):
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        selected_thread = next(t for t in self.threads if str(t["thread_id"]) == self.thread_select._selected_values[0])  # noqa: SLF001
+        selected_thread = next(
+            t
+            for t in self.threads
+            if str(t.thread_id) == self.thread_select._selected_values[0]  # noqa: SLF001
+        )
 
         try:
             day = int(self.day_select._selected_values[0])  # noqa: SLF001
@@ -81,7 +89,10 @@ class ThreadConfigView(discord.ui.View):
             # true is default here
             active = True
 
-        self.spoiler_threads.update({"_id": selected_thread["_id"]}, {"$set": {"active": active, "day": day}})
+        self.spoiler_threads.update(
+            {"_id": selected_thread._id},  # noqa: SLF001
+            {"$set": {"active": active, "day": day}},
+        )
 
         await interaction.response.edit_message(content="Thread updated.", view=None, delete_after=10)
 

@@ -4,6 +4,7 @@ import datetime
 import logging
 
 import discord
+import pytz
 
 from discordbot.bot_enums import ActivityTypes
 from discordbot.bsebot import BSEBot
@@ -14,7 +15,7 @@ class Help(BSEddies):
     """Class for handling `/help` commands."""
 
     def __init__(
-        self, client: BSEBot, guild_ids: list, logger: logging.Logger, command_list: list[BSEddies] | None = None
+        self, client: BSEBot, guild_ids: list[int], logger: logging.Logger, command_list: list[BSEddies] | None = None
     ) -> None:
         """Initialisation method.
 
@@ -44,20 +45,20 @@ class Help(BSEddies):
         available_commands = [com.activity_type for com in self.command_list]
 
         # get all activities from the last couple of months
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
         now += datetime.timedelta(hours=1)
         threshold = now - datetime.timedelta(days=60)
         activities = self.activities.get_guild_activities_by_timestamp(ctx.guild_id, threshold, now)
 
-        activities = [act for act in activities if act.get("type") in available_commands]
+        activities = [act for act in activities if act.type in available_commands]
 
         app_commands = self.client.application_commands
 
         counts = {}
         for act in activities:
-            if act["type"] not in counts:
-                counts[act["type"]] = 0
-            counts[act["type"]] += 1
+            if act.type not in counts:
+                counts[act.type] = 0
+            counts[act.type] += 1
 
         sorted_types = sorted(counts, key=lambda x: counts[x], reverse=True)
         if len(sorted_types) > 10:  # noqa: PLR2004
@@ -73,7 +74,7 @@ class Help(BSEddies):
                 help_string = f"- {app_command.mention} - {command.help_string}"
                 message += "\n"
                 message += help_string
-            except (IndexError, AttributeError):
+            except (IndexError, AttributeError, TypeError):
                 continue
 
         message += (

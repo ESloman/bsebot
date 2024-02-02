@@ -5,6 +5,7 @@ import datetime
 from logging import Logger
 
 import discord
+import pytz
 from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
@@ -35,7 +36,7 @@ class AnnualBSEddiesAwards(BaseTask):
 
         This should only trigger on the 1st Jan. It will do annual stats and awards.
         """
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         if now.day != 2 or now.hour != 14 or now.month != 1:  # noqa: PLR2004
             # we only want to trigger on the first of each YEAR

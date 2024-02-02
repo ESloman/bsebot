@@ -8,16 +8,17 @@ from discordbot.embedmanager import EmbedManager
 from discordbot.selects.bet import BetSelect
 from discordbot.views.bet import BetView
 from mongo.bsepoints.bets import UserBets
+from mongo.datatypes.bet import BetDB
 
 
 class RefreshBetView(discord.ui.View):
     """Class for refresh bet view."""
 
-    def __init__(self, bet_ids: list, place: callable, close: callable) -> None:
+    def __init__(self, bets: list[BetDB], place: callable, close: callable) -> None:
         """Initialisation method.
 
         Args:
-            bet_ids (list): the bet IDs
+            bets (list): the bet IDs
             place (callable): the place function
             close (callable): the close function
         """
@@ -26,7 +27,7 @@ class RefreshBetView(discord.ui.View):
         self.bseddies_place = place
         self.bseddies_close = close
         self.embed_manager = EmbedManager()
-        self.add_item(BetSelect(bet_ids))
+        self.add_item(BetSelect(bets))
 
     async def on_timeout(self) -> None:
         """View timeout function.
@@ -59,10 +60,10 @@ class RefreshBetView(discord.ui.View):
                 break
 
         bet = self.bets.get_bet_from_id(interaction.guild_id, bet_id)
-        channel = await interaction.guild.fetch_channel(bet["channel_id"])
-        message = await channel.fetch_message(bet["message_id"])
+        channel = await interaction.guild.fetch_channel(bet.channel_id)
+        message = await channel.fetch_message(bet.message_id)
         embed = self.embed_manager.get_bet_embed(interaction.guild, bet)
-        content = f"# {bet['title']}\n_Created by <@{bet['user']}>_"
+        content = f"# {bet.title}\n_Created by <@{bet.user}>_"
         view = BetView(bet, self.bseddies_place, self.bseddies_close)
         await message.edit(content=content, view=view, embed=embed)
         await interaction.response.edit_message(content="Refreshed the bet for you.", view=None)

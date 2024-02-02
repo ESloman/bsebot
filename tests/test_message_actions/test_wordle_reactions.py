@@ -3,10 +3,12 @@
 from unittest import mock
 
 import pytest
+from bson import ObjectId
 
 from discordbot.message_actions.base import BaseMessageAction
 from discordbot.message_actions.wordle_reactions import WordleMessageAction
 from discordbot.utilities import PlaceHolderLogger
+from mongo.datatypes.guild import GuildDB
 from tests.mocks import message_action_mocks
 from tests.mocks.bsebot_mocks import BSEBotMock
 from tests.mocks.discord_mocks import MessageMock
@@ -95,7 +97,7 @@ class TestWordleReactions:
             mock.patch.object(wordle_reaction, "_handle_adding_squares") as squares_patch,
             mock.patch.object(wordle_reaction, "_handle_tough_day_status") as tough_day_patch,
             mock.patch.object(message, "add_reaction") as message_patch,
-            mock.patch.object(wordle_reaction.guilds, "get_guild", return_value={}),
+            mock.patch.object(wordle_reaction.guilds, "get_guild", return_value=GuildDB(ObjectId(), 123, "guild", 456)),
         ):
             await wordle_reaction.run(message)
             assert squares_patch.called

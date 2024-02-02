@@ -15,7 +15,7 @@ from discordbot.clienteventclasses.baseeventclass import BaseEvent
 class OnMemberJoin(BaseEvent):
     """Class for handling when a new member joins the server."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:
@@ -38,7 +38,7 @@ class OnMemberJoin(BaseEvent):
         self.activities.add_activity(user_id, member.guild.id, ActivityTypes.SERVER_JOIN)
 
         if user := self.user_points.find_user(user_id, member.guild.id):
-            self.user_points.update({"_id": user["_id"]}, {"$set": {"inactive": False}})
+            self.user_points.update({"_id": user._id}, {"$set": {"inactive": False}})  # noqa: SLF001
             self.logger.info("Activating BSEddies account for existing user - %s - %s", user_id, member.display_name)
             return
 

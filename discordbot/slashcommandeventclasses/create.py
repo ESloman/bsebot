@@ -5,6 +5,7 @@ import datetime
 import logging
 
 import discord
+import pytz
 
 from discordbot import utilities
 from discordbot.bot_enums import ActivityTypes
@@ -16,7 +17,7 @@ from discordbot.views.bet import BetView
 class CreateBet(BSEddies):
     """Class for handling `/bseddies bet create` command."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:
@@ -131,15 +132,15 @@ class CreateBet(BSEddies):
             option_dict[self.multiple_options_emojis[8]] = {"val": option_ten_name}
 
         if timeout_str is None:
-            timeout = datetime.datetime.now() + datetime.timedelta(minutes=10)
+            timeout = datetime.datetime.now(tz=pytz.utc) + datetime.timedelta(minutes=10)
         else:
             timeout_str = timeout_str.strip()
             try:
                 _seconds = utilities.convert_time_str(timeout_str)
-            except (IndexError, AttributeError, Exception) as e:
+            except Exception as exc:
                 # leaving Exception in for now until we're sure that all exception types have been caught
-                if type(e) not in {IndexError, AttributeError}:
-                    self.logger.debug("Got an error with a timestring: %s", e)
+                if type(exc) not in {IndexError, AttributeError}:
+                    self.logger.debug("Got an error with a timestring: %s", exc)
                 _seconds = None
 
             if not _seconds:
@@ -151,7 +152,7 @@ class CreateBet(BSEddies):
                 await ctx.followup.send(content=msg, ephemeral=True)
                 return
 
-            timeout = datetime.datetime.now() + datetime.timedelta(seconds=_seconds)
+            timeout = datetime.datetime.now(tz=pytz.utc) + datetime.timedelta(seconds=_seconds)
 
         await ctx.channel.trigger_typing()
 
@@ -165,14 +166,14 @@ class CreateBet(BSEddies):
         )
 
         embed = self.embed_manager.get_bet_embed(ctx.guild, bet)
-        content = f"# {bet['title']}\n_Created by <@{bet['user']}>_"
+        content = f"# {bet.title}\n_Created by <@{bet.user}>_"
 
         bet_view = BetView(bet, bseddies_place, bseddies_close)
 
         message = await ctx.channel.send(content=content, embed=embed, view=bet_view)
 
         self.user_bets.update(
-            {"_id": bet["_id"]},
+            {"_id": bet._id},  # noqa: SLF001
             {"$set": {"message_id": message.id, "channel_id": message.channel.id}},
         )
 

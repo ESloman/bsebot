@@ -1,21 +1,21 @@
 """Stats data classes."""
 
+import dataclasses
 import datetime
-from dataclasses import dataclass
 
 from discordbot.bot_enums import AwardsTypes, StatTypes
+from mongo.datatypes.basedatatypes import GuildedDBObject
 
 
-@dataclass
-class Stat:
+@dataclasses.dataclass(frozen=True)
+class StatDB(GuildedDBObject):
     """A stat representation."""
 
     type: str
-    guild_id: int
     short_name: str
     timestamp: datetime.datetime
     value: int | (float | datetime.datetime)
-    annual: bool
+    annual: bool = False
     month: str | None = None
     year: str | None = None
     user_id: int | list[int] | None = None
@@ -25,7 +25,7 @@ class Stat:
     kwargs: dict | None = None
 
 
-@dataclass
+@dataclasses.dataclass
 class StatsData:
     """A stats data representation."""
 

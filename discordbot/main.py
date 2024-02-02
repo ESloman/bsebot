@@ -21,9 +21,8 @@ except ImportError:
 
 import sys
 
-from bsebot import BSEBot
-
 from discordbot import utilities
+from discordbot.bsebot import BSEBot
 from discordbot.commandmanager import CommandManager
 from discordbot.constants import BSE_SERVER_ID, SLOMAN_SERVER_ID
 from mongo.bsepoints.bets import UserBets

@@ -6,6 +6,7 @@ import random
 from logging import Logger
 
 import discord
+import pytz
 from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
@@ -37,15 +38,15 @@ class WordleTask(BaseTask):
 
     def _set_wordle(self) -> None:
         """Sets `sent_wordle` var based on whether or not we have actually sent wordle today."""
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
-        ret = self.wordles.query({"guild_id": BSE_SERVER_ID, "timestamp": f"{now.strftime('%Y-%m-%d')}"})
-        self.sent_wordle = bool(ret)
+        ret = self.wordles.find_wordles_at_timestamp(now, BSE_SERVER_ID)
+        self.sent_wordle = ret is not None
 
     @tasks.loop(minutes=10)
     async def wordle_message(self) -> None:  # noqa: C901
         """Task that does the daily wordle."""
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         if now.hour < 9:  # noqa: PLR2004
             self.wait_iters = None
@@ -99,12 +100,12 @@ class WordleTask(BaseTask):
         self.logger.info("Sending wordle message: %s", message)
         for guild in self.bot.guilds:
             guild_db = self.guilds.get_guild(guild.id)
-            if not guild_db.get("wordle"):
+            if not guild_db.wordle:
                 self.logger.debug("%s has wordle turned off", guild.name)
                 continue
 
-            channel_id = guild_db.get("wordle_channel")
-            if not channel_id or not guild_db.get("wordle"):
+            channel_id = guild_db.wordle_channel
+            if not channel_id or not guild_db.wordle:
                 self.logger.debug("%s hasn't got a wordle channel configured - skipping", guild.name)
                 continue
 

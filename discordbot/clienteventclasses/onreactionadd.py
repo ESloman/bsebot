@@ -7,6 +7,7 @@ import datetime
 import logging
 
 import discord
+import pytz
 from discord.emoji import Emoji
 
 from discordbot.bsebot import BSEBot
@@ -94,7 +95,7 @@ class OnReactionAdd(BaseEvent):
             user.id,
             channel.id,
             reaction,
-            datetime.datetime.now(),
+            datetime.datetime.now(tz=pytz.utc),
             author.id,
         )
 
@@ -114,6 +115,6 @@ class OnReactionAdd(BaseEvent):
                 "emoji_used",
             ],
             reaction,
-            datetime.datetime.now(),
+            datetime.datetime.now(tz=pytz.utc),
             additional_keys={"emoji_id": emoji_obj["eid"]},
         )

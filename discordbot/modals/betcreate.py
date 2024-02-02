@@ -17,7 +17,7 @@ class BetCreateModal(discord.ui.Modal):
     def __init__(
         self,
         client: BSEBot,
-        guild_ids: list,
+        guild_ids: list[int],
         logger: logging.Logger = PlaceHolderLogger,
         *args: tuple[any],
         **kwargs: dict[any],

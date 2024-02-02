@@ -10,19 +10,17 @@ import datetime
 
 from pymongo.results import UpdateResult
 
-from mongo import interface
+from mongo.baseclass import BaseClass
 from mongo.bsepoints.guilds import Guilds
-from mongo.datatypes import RevolutionEventType
-from mongo.db_classes import BestSummerEverPointsDB
+from mongo.datatypes.revolution import RevolutionEventDB
 
 
-class TicketedEvent(BestSummerEverPointsDB):
+class TicketedEvent(BaseClass):
     """Class for interacting with the 'ticketevents' MongoDB collection in the 'bestsummereverpoints' DB."""
 
     def __init__(self) -> None:
         """Constructor method that initialises the vault object."""
-        super().__init__()
-        self._vault = interface.get_collection(self.database, "ticketedevents")
+        super().__init__(collection="ticketedevents")
 
 
 class RevolutionEvent(TicketedEvent):
@@ -33,16 +31,16 @@ class RevolutionEvent(TicketedEvent):
         super().__init__()
         self.guilds = Guilds()
 
-    def __create_counter_document(self, guild_id: int) -> None:
+    def _create_counter_document(self, guild_id: int) -> None:
         """Method that creates our base 'counter' document for counting loan IDs.
 
         :param guild_id: int - guild ID to create document for
         :return: None
         """
-        if not self.query({"type": "counter", "guild_id": guild_id}):
+        if not self.query({"type": "counter", "guild_id": guild_id}, convert=False):
             self.insert({"type": "counter", "guild_id": guild_id, "count": 1})
 
-    def __get_new_id(self, guild_id: int) -> str:
+    def _get_new_id(self, guild_id: int) -> str:
         """Generate new unique ID and return it in the format we want.
 
         Args:
@@ -51,13 +49,24 @@ class RevolutionEvent(TicketedEvent):
         Returns:
             str: new unique ID
         """
-        try:
-            count = self.query({"type": "counter", "guild_id": guild_id}, projection={"count": True})[0]["count"]
-        except IndexError:
-            self.__create_counter_document(guild_id)
-            count = self.query({"type": "counter", "guild_id": guild_id}, projection={"count": True})[0]["count"]
+        self._create_counter_document(guild_id)
+        count = self.query({"type": "counter", "guild_id": guild_id}, projection={"count": True}, convert=False)[0][
+            "count"
+        ]
         self.update({"type": "counter", "guild_id": guild_id}, {"$inc": {"count": 1}})
         return f"{count:03d}"
+
+    @staticmethod
+    def make_data_class(event: dict[str, any]) -> RevolutionEventDB:
+        """Converts an event dict into a dataclass.
+
+        Args:
+            event (dict): the event dict
+
+        Returns:
+            RevolutionEventDB: the dataclass
+        """
+        return RevolutionEventDB(**event)
 
     def create_event(  # noqa: PLR0913
         self,
@@ -67,7 +76,7 @@ class RevolutionEvent(TicketedEvent):
         king_id: int,
         locked_in_eddies: int,
         channel_id: int | None = None,
-    ) -> RevolutionEventType:
+    ) -> RevolutionEventDB:
         """Create event class. Puts an entry into the DB for future use.
 
         Args:
@@ -81,7 +90,7 @@ class RevolutionEvent(TicketedEvent):
         Returns:
             RevolutionEventType: _description_
         """
-        event_id = self.__get_new_id(guild_id)
+        event_id = self._get_new_id(guild_id)
 
         event_doc = {
             "type": "revolution",
@@ -108,27 +117,15 @@ class RevolutionEvent(TicketedEvent):
 
         # add guild "pledges" to supporters by default and lock them in
         guild_db = self.guilds.get_guild(guild_id)
-        pledges = guild_db.get("pledged", [])
+        pledges = guild_db.pledged
         event_doc["supporters"].extend(pledges)
         event_doc["users"].extend(pledges)
         event_doc["chance"] += -15 * len(pledges)
         event_doc["locked"] = pledges
 
-        self.insert(document=event_doc)
-        return event_doc
-
-    def increment_eddies_total(self, event_id: str, guild_id: int, points: int) -> UpdateResult:
-        """Increments the amount of eddies that have been spent on an event.
-
-        Args:
-            event_id (str): _description_
-            guild_id (int): _description_
-            points (int): _description_
-
-        Returns:
-            _type_: _description_
-        """
-        return self.update({"event_id": event_id, "guild_id": guild_id}, {"$inc": {"eddies_spent": points}})
+        _id = self.insert(document=event_doc)[0]
+        event_doc["_id"] = _id
+        return self.make_data_class(event_doc)
 
     def increment_chance(self, event_id: str, guild_id: int, chance: int) -> UpdateResult:
         """Increments the chance the event will pass.
@@ -143,20 +140,7 @@ class RevolutionEvent(TicketedEvent):
         """
         return self.update({"event_id": event_id, "guild_id": guild_id}, {"$inc": {"chance": chance}})
 
-    def add_user_to_buyers(self, event_id: str, guild_id: int, user_id: int) -> UpdateResult:
-        """Adds an individual to the list of ticket buyers.
-
-        Args:
-            event_id (str): _description_
-            guild_id (int): _description_
-            user_id (int): _description_
-
-        Returns:
-            UpdateResult: _description_
-        """
-        return self.update({"event_id": event_id, "guild_id": guild_id}, {"$push": {"ticket_buyers": user_id}})
-
-    def get_event(self, guild_id: int, event_id: str) -> RevolutionEventType:
+    def get_event(self, guild_id: int, event_id: str) -> RevolutionEventDB | None:
         """Returns the specified event for the given guild.
 
         Args:
@@ -166,12 +150,12 @@ class RevolutionEvent(TicketedEvent):
         Returns:
             RevolutionEventType: _description_
         """
-        ret = self.query({"guild_id": guild_id, "event_id": event_id})
+        ret: list[RevolutionEventDB] = self.query({"guild_id": guild_id, "event_id": event_id})
         if ret:
             return ret[0]
         return None
 
-    def get_open_events(self, guild_id: int) -> list[RevolutionEventType]:
+    def get_open_events(self, guild_id: int) -> list[RevolutionEventDB]:
         """Gets all open events.
 
         Args:

@@ -21,12 +21,11 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install pytest coverage pytest-cov pytest-asyncio
+          pip install -r test-requirements.txt
       - name: Pytest + Coverage
         run: |
-          coverage run --source . -m pytest
+          pytest -n 8 --cov=. --cov-branch --durations=50
           coverage report --omit=tests/*
-          coverage html --omit=tests/*
           coverage xml --omit=tests/*
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master

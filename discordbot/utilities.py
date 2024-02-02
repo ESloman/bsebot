@@ -1,6 +1,5 @@
 """File for other small and useful classes that we may need in other parts of the code."""
 
-import datetime
 import logging
 import re
 import sys
@@ -47,8 +46,19 @@ class PlaceHolderLogger:
         """
         print(msg)
 
+    @staticmethod
+    def exception(msg: str, *args: tuple[any], **kwargs: dict[str, any]) -> None:  # noqa: ARG004
+        """logger.exception mock.
+
+        Args:
+            msg (str): the message to print
+        """
+        print(msg)
+
 
 class _ColourFormatter(logging.Formatter):
+    """Colour Formatter.
+
     # ANSI codes are a bit weird to decipher if you're unfamiliar with them, so here's a refresher
     # It starts off with a format like \x1b[XXXm where XXX is a semicolon separated list of commands
     # The important ones here relate to colour.
@@ -57,6 +67,7 @@ class _ColourFormatter(logging.Formatter):
     # 90-97 are the same but "bright" foreground
     # 100-107 are the same as the bright ones but for the background.
     # 1 means bold, 2 means dim, 0 means reset, and 4 means underline.
+    """
 
     LEVEL_COLOURS: ClassVar = [
         (logging.DEBUG, "\x1b[40;1m"),
@@ -161,42 +172,6 @@ def convert_time_str(time_str: str) -> int:
     return total_time
 
 
-def get_utc_offset() -> int:
-    """Gets the UTC offset.
-
-    Returns:
-        int: the UTC offset in seconds
-    """
-    d = datetime.datetime.now(datetime.UTC).astimezone()
-    return d.utcoffset() // datetime.timedelta(seconds=1)
-
-
-def add_utc_offset(date: datetime.datetime) -> datetime.datetime:
-    """Adds the UTC offset.
-
-    Args:
-        date (datetime.datetime): the current date
-
-    Returns:
-        datetime.datetime: the date with offset added
-    """
-    offset = get_utc_offset()
-    return date - datetime.timedelta(seconds=offset)
-
-
-def is_utc(date: datetime.datetime) -> bool:
-    """Checks a given date is UTC.
-
-    Args:
-        date (datetime.datetime): the date to check
-
-    Returns:
-        bool: whether it is or not
-    """
-    now_utc = datetime.datetime.now(tz=datetime.UTC)
-    return now_utc.hour == date.hour
-
-
 def calculate_message_odds(
     interactions: UserInteractions,
     guild_id: int,
@@ -244,7 +219,7 @@ def calculate_message_odds(
 
         try:
             results = interactions.query({"guild_id": guild_id, "is_bot": True, "$text": {"$search": message}})
-            results = [result for result in results if main_bit in result["content"]]
+            results = [result for result in results if main_bit in result.content]
         except OperationFailure:
             totals[message] = 0
             continue

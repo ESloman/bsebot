@@ -4,6 +4,7 @@ import datetime
 import logging
 
 import discord
+import pytz
 
 from discordbot.bot_enums import ActivityTypes, TransactionTypes
 from discordbot.bsebot import BSEBot
@@ -13,7 +14,7 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 class KingRename(BSEddies):
     """Class for handling `/renameking` commands."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:
@@ -44,7 +45,7 @@ class KingRename(BSEddies):
         self._add_event_type_to_activity_history(ctx.author, ctx.guild_id, ActivityTypes.RENAME_KING)
 
         ret = self.user_points.find_user(ctx.author.id, ctx.guild.id, projection={"points": True})
-        points = ret["points"]
+        points = ret.points
 
         db_guild = self.guilds.get_guild(ctx.guild.id)
 
@@ -54,13 +55,13 @@ class KingRename(BSEddies):
 
         match role:
             case "king":
-                role_id = db_guild["role"]
+                role_id = db_guild.role
                 spend = 500
             case "supporter":
-                role_id = db_guild["supporter_role"]
+                role_id = db_guild.supporter_role
                 spend = 250
             case "revolutionary":
-                role_id = db_guild["revolutionary_role"]
+                role_id = db_guild.revolutionary_role
                 spend = 250
 
         if points < spend:
@@ -73,8 +74,8 @@ class KingRename(BSEddies):
             return
 
         key = f"rename_{role}"
-        last_king_rename = db_guild.get(key)
-        now = datetime.datetime.now()
+        last_king_rename = getattr(db_guild, key)
+        now = datetime.datetime.now(tz=pytz.utc)
         if last_king_rename:
             time_elapsed = now - last_king_rename
             if time_elapsed.total_seconds() < 3600:  # noqa: PLR2004
@@ -110,13 +111,13 @@ class KingRename(BSEddies):
 
         self.guilds.update({"guild_id": ctx.guild.id}, {"$set": {key: now}})
 
-        channel_id = db_guild.get("channel")
+        channel_id = db_guild.channel
         if channel_id:
             channel = await self.client.fetch_channel(channel_id)
             await channel.trigger_typing()
 
             # get king user
-            king_id = db_guild["king"]
+            king_id = db_guild.king
             _insert = f"<@{king_id}>" if role == "king" else f"{role.capitalize()}"
             ann = (
                 f"{ctx.author.mention} changed the `bseddies` {role.upper()} role "

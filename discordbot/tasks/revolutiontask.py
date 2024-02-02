@@ -6,6 +6,7 @@ import math
 import random
 from logging import Logger
 
+import pytz
 from discord.ext import tasks
 
 from apis.giphyapi import GiphyAPI
@@ -14,19 +15,21 @@ from discordbot.bsebot import BSEBot
 from discordbot.embedmanager import EmbedManager
 from discordbot.tasks.basetask import BaseTask
 from discordbot.views.revolution import RevolutionView
-from mongo.datatypes import GuildDB, RevolutionEventType
+from mongo.datatypes.guild import GuildDB
+from mongo.datatypes.revolution import RevolutionEventDB
 
 
 class BSEddiesRevolutionTask(BaseTask):
     """Class for our revolution task."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         bot: BSEBot,
         guild_ids: list[int],
         logger: Logger,
         startup_tasks: list[BaseTask],
         giphy_token: str,
+        start: bool = True,
     ) -> None:
         """Initialisation method.
 
@@ -35,6 +38,8 @@ class BSEddiesRevolutionTask(BaseTask):
             guild_ids (list[int]): the list of guild IDs
             logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
+            giphy_token (str): the token to authenticate with giphy with
+            start (bool): whether to start the task. Defaulst to True.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
         self.task = self.revolution
@@ -46,7 +51,8 @@ class BSEddiesRevolutionTask(BaseTask):
             if _ := self.revolutions.get_open_events(guild_id):
                 self.rev_started[guild_id] = True
 
-        self.task.start()
+        if start:
+            self.task.start()
 
     @tasks.loop(minutes=1)
     async def revolution(self) -> None:  # noqa: C901, PLR0912
@@ -55,11 +61,7 @@ class BSEddiesRevolutionTask(BaseTask):
         Creates a revolution event weekly and then handles the
         closing/resolving of that event.
         """
-        if not self._check_start_up_tasks():
-            self.logger.info("Startup tasks not complete - skipping loop")
-            return
-
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         if not any(self.rev_started[g] for g in self.rev_started) and (
             now.weekday() != 6 or now.hour != 16 or now.minute != 0  # noqa: PLR2004
@@ -69,27 +71,27 @@ class BSEddiesRevolutionTask(BaseTask):
         for guild in self.bot.guilds:
             guild_db = self.guilds.get_guild(guild.id)
 
-            if not guild_db.get("revolution", True):
+            if guild_db.revolution is False:
                 # revolution event has been disabled
                 if now.hour == 16 and now.minute == 0:  # noqa: PLR2004
                     # only log once per revolution event that this guild is disabled
                     self.logger.debug("Revolution event has been disabled for %s", guild.name)
                 continue
 
-            king_user = self.user_points.find_user(guild_db["king"], guild.id)
+            king_user = self.user_points.find_user(guild_db.king, guild.id)
 
-            user_points = king_user["points"]
+            user_points = king_user.points
 
             # if we don't have an actual revolution event and it IS 4PM then we trigger a new event
             if not self.rev_started.get(guild.id) and now.hour == 16 and now.minute == 0:  # noqa: PLR2004
                 # only trigger if King was King for more than twenty four hours
-                king_since = guild_db.get("king_since", datetime.datetime.now() - datetime.timedelta(days=1))
+                king_since = guild_db.king_since or (datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(days=1))
                 if (now - king_since).total_seconds() < 86400:  # noqa: PLR2004
                     # user hasn't been king for more than twenty four hours
-                    channel = await self.bot.fetch_channel(guild_db["channel"])
+                    channel = await self.bot.fetch_channel(guild_db.channel)
                     await channel.send(
                         content=(
-                            f"<@{guild_db['king']}> has been <@&{guild_db['role']}> for less than **24** hours. "
+                            f"<@{guild_db.king}> has been <@&{guild_db.role}> for less than **24** hours. "
                             "There will be no revolution today."
                         ),
                         silent=True,
@@ -98,11 +100,11 @@ class BSEddiesRevolutionTask(BaseTask):
 
                 event = self.revolutions.create_event(
                     guild.id,
-                    datetime.datetime.now(),
-                    datetime.datetime.now() + datetime.timedelta(hours=3, minutes=30),
-                    king_user["uid"],
+                    datetime.datetime.now(tz=pytz.utc),
+                    datetime.datetime.now(tz=pytz.utc) + datetime.timedelta(hours=3, minutes=30),
+                    king_user.uid,
                     user_points,
-                    guild_db["channel"],
+                    guild_db.channel,
                 )
             else:
                 try:
@@ -113,23 +115,21 @@ class BSEddiesRevolutionTask(BaseTask):
 
             self.rev_started[guild.id] = True
 
-            message = event.get("message_id")
-            if message is None:
+            if event.message_id is None:
                 await self.create_event(guild.id, event, guild_db)
                 continue
 
-            if now > event["expired"]:
+            if now > event.expired:
                 await self.resolve_revolution(guild.id, event)
-                self.logger.info("Changing revolution task interval to 30 minutes.")
                 continue
 
-            if now.hour == 18 and now.minute == 30 and not event.get("one_hour"):  # noqa: PLR2004
+            if now.hour == 18 and now.minute == 30 and not event.one_hour:  # noqa: PLR2004
                 await self.send_excited_gif(event, "One hour", "one_hour")
 
-            elif now.hour == 19 and now.minute == 15 and not event.get("quarter_house"):  # noqa: PLR2004
+            elif now.hour == 19 and now.minute == 15 and not event.quarter_hour:  # noqa: PLR2004
                 await self.send_excited_gif(event, "15 MINUTES", "quarter_hour")
 
-    async def send_excited_gif(self, event: RevolutionEventType, hours_string: str, key: str) -> None:
+    async def send_excited_gif(self, event: RevolutionEventDB, hours_string: str, key: str) -> None:
         """Method for sending a countdown gif in regards to tickets and things.
 
         Args:
@@ -137,15 +137,15 @@ class BSEddiesRevolutionTask(BaseTask):
             hours_string (str): the text to send
             key (str): the key in the database to modify
         """
-        channel = await self.bot.fetch_channel(event["channel_id"])
-        _message = await channel.fetch_message(event["message_id"])
+        channel = await self.bot.fetch_channel(event.channel_id)
+        _message = await channel.fetch_message(event.message_id)
         await channel.trigger_typing()
         gif = await self.giphy_api.random_gif("celebrate")
         await _message.reply(content=f"Just under **{hours_string.upper()}** to go now - remember to choose your side!️")
         await channel.send(content=gif)
-        self.revolutions.update({"_id": event["_id"]}, {"$set": {key: True}})
+        self.revolutions.update({"_id": event._id}, {"$set": {key: True}})  # noqa: SLF001
 
-    async def create_event(self, guild_id: int, event: RevolutionEventType, guild_db: GuildDB) -> None:
+    async def create_event(self, guild_id: int, event: RevolutionEventDB, guild_db: GuildDB) -> None:
         """Handle event creation - this takes a DB entry and posts the message into the channel.
 
         We also set the Channel ID and the Message ID for the event.
@@ -159,8 +159,8 @@ class BSEddiesRevolutionTask(BaseTask):
 
         king = await self.bot.fetch_user(king_id)
         guild_obj = await self.bot.fetch_guild(guild_id)
-        role = guild_obj.get_role(guild_db["role"])
-        channel = await self.bot.fetch_channel(guild_db["channel"])
+        role = guild_obj.get_role(guild_db.role)
+        channel = await self.bot.fetch_channel(guild_db.channel)
         await channel.trigger_typing()
 
         revolution_view = RevolutionView(self.bot, event, self.logger)
@@ -169,14 +169,14 @@ class BSEddiesRevolutionTask(BaseTask):
         message_obj = await channel.send(content=message, view=revolution_view)
 
         self.revolutions.update(
-            {"_id": event["_id"]},
+            {"_id": event._id},  # noqa: SLF001
             {"$set": {"message_id": message_obj.id, "channel_id": message_obj.channel.id}},
         )
 
         gif = await self.giphy_api.random_gif("revolution")
         await channel.send(content=gif)
 
-    async def resolve_revolution(self, guild_id: int, event: RevolutionEventType) -> None:  # noqa: C901, PLR0915, PLR0912
+    async def resolve_revolution(self, guild_id: int, event: RevolutionEventDB) -> None:  # noqa: C901, PLR0915, PLR0912
         """Method for handling an event that needs resolving.
 
         We take the event chance and see if we generate a number between 0-100 that's lower than it. If it is, then
@@ -186,17 +186,17 @@ class BSEddiesRevolutionTask(BaseTask):
             guild_id (int): the guild ID
             event (RevolutionEventType): the event
         """
-        chance = event["chance"]
-        king_id = event.get("king", self.guilds.get_king(guild_id))
-        _users = event["users"]
-        revolutionaries = event["revolutionaries"]
-        supporters = event["supporters"]
-        channel_id = event["channel_id"]
+        chance = event.chance
+        king_id = event.king or self.guilds.get_king(guild_id)
+        _users = event.users
+        revolutionaries = event.revolutionaries
+        supporters = event.supporters
+        channel_id = event.channel_id
         guild_db = self.guilds.get_guild(guild_id)
 
         guild = await self.bot.fetch_guild(guild_id)
         channel = await self.bot.fetch_channel(channel_id)
-        _message = await channel.fetch_message(event["message_id"])
+        _message = await channel.fetch_message(event.message_id)
 
         await channel.trigger_typing()
 
@@ -205,7 +205,7 @@ class BSEddiesRevolutionTask(BaseTask):
         if not _users:
             message = "No-one supported or overthrew the King - nothing happens."
             await channel.send(content=message)
-            self.revolutions.close_event(event["event_id"], guild_id, False, 0)
+            self.revolutions.close_event(event.event_id, guild_id, False, 0)
             return
 
         val = random.random() * 100
@@ -221,8 +221,8 @@ class BSEddiesRevolutionTask(BaseTask):
             message = "Sadly, our revolution has failed. THE KING LIVES :crown: Better luck next week!"
             gif = await self.giphy_api.random_gif("disappointed")
         else:
-            king_dict = self.user_points.find_user(king_id, guild_id, projection={"points": True})
-            points_to_lose = math.floor(event.get("locked_in_eddies", king_dict["points"]) / 2)
+            king_dict = self.user_points.find_user(king_id, guild_id)
+            points_to_lose = math.floor((event.locked_in_eddies or king_dict.points) / 2)
 
             total_points_to_distribute = points_to_lose
             for supporter in supporters:
@@ -234,7 +234,7 @@ class BSEddiesRevolutionTask(BaseTask):
                     guild_id,
                     supporter_eddies_to_lose * -1,
                     TransactionTypes.SUPPORTER_LOST_REVOLUTION,
-                    event_id=event["event_id"],
+                    event_id=event.event_id,
                     comment="Supporter lost a revolution",
                 )
 
@@ -251,7 +251,7 @@ class BSEddiesRevolutionTask(BaseTask):
                 guild_id,
                 points_to_lose * -1,
                 TransactionTypes.REV_TICKET_KING_LOSS,
-                event_id=event["event_id"],
+                event_id=event.event_id,
                 comment="King lost a REVOLUTION",
             )
 
@@ -263,7 +263,7 @@ class BSEddiesRevolutionTask(BaseTask):
                     guild_id,
                     points_each,
                     TransactionTypes.REV_TICKET_WIN,
-                    event_id=event["event_id"],
+                    event_id=event.event_id,
                     comment="User won a REVOLUTION",
                 )
 
@@ -272,8 +272,8 @@ class BSEddiesRevolutionTask(BaseTask):
 
         # do roles
 
-        supporter_role = guild.get_role(guild_db["supporter_role"])
-        revo_role = guild.get_role(guild_db["revolutionary_role"])
+        supporter_role = guild.get_role(guild_db.supporter_role)
+        revo_role = guild.get_role(guild_db.revolutionary_role)
 
         # clear anyone that has the role already
         for member in supporter_role.members:
@@ -330,9 +330,11 @@ class BSEddiesRevolutionTask(BaseTask):
         await _message.edit(content=_message.content, view=None)
         await _message.reply(content=message)
         await channel.send(content=gif)
-        self.revolutions.close_event(event["event_id"], guild_id, success, points_to_lose)
+        self.revolutions.close_event(event.event_id, guild_id, success, points_to_lose)
         # set last revolution time in the database
-        self.guilds.update({"guild_id": guild_id}, {"$set": {"last_revolution_time": datetime.datetime.now()}})
+        self.guilds.update(
+            {"guild_id": guild_id}, {"$set": {"last_revolution_time": datetime.datetime.now(tz=pytz.utc)}}
+        )
 
     @revolution.before_loop
     async def before_revolution(self) -> None:

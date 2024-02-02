@@ -4,13 +4,13 @@ from discord import Interaction, SelectOption
 from discord.ui import Select
 
 from discordbot.constants import BET_TITLE_DISPLAY_LENTH
-from mongo.datatypes import Thread
+from mongo.datatypes.thread import ThreadDB
 
 
 class ThreadConfigSelect(Select):
     """Class for thread config select."""
 
-    def __init__(self, threads: list[Thread]) -> None:
+    def __init__(self, threads: list[ThreadDB]) -> None:
         """Initialisation method.
 
         Args:
@@ -18,11 +18,11 @@ class ThreadConfigSelect(Select):
         """
         options = []
         for thread in threads:
-            label = thread["name"]
+            label = thread.name
             if len(label) > BET_TITLE_DISPLAY_LENTH:
                 label = label[:99]
 
-            value = str(thread["thread_id"])
+            value = str(thread.thread_id)
             opt = SelectOption(label=label, value=value)
             options.append(opt)
 

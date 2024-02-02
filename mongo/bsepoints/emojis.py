@@ -2,12 +2,14 @@
 
 import datetime
 
+from bson import ObjectId
+
 from mongo import interface
-from mongo.datatypes import Emoji
-from mongo.db_classes import BestSummerEverPointsDB
+from mongo.baseclass import BaseClass
+from mongo.datatypes.customs import EmojiDB
 
 
-class ServerEmojis(BestSummerEverPointsDB):
+class ServerEmojis(BaseClass):
     """Class for interacting with the 'serveremojis' MongoDB collection in the 'bestsummereverpoints' DB."""
 
     def __init__(self) -> None:
@@ -15,7 +17,19 @@ class ServerEmojis(BestSummerEverPointsDB):
         super().__init__()
         self._vault = interface.get_collection(self.database, "serveremojis")
 
-    def get_all_emojis(self, guild_id: int) -> list[Emoji]:
+    @staticmethod
+    def make_data_class(emoji: dict[str, any]) -> EmojiDB:
+        """Converts into a dataclass.
+
+        Args:
+            emoji (dict): the emoji dict
+
+        Returns:
+            EmojiDB: the emoji dataclass
+        """
+        return EmojiDB(**emoji)
+
+    def get_all_emojis(self, guild_id: int) -> list[EmojiDB]:
         """Gets all emoji objects from the database.
 
         Args:
@@ -26,7 +40,7 @@ class ServerEmojis(BestSummerEverPointsDB):
         """
         return self.query({"guild_id": guild_id})
 
-    def get_emoji(self, guild_id: int, emoji_id: int) -> Emoji | None:
+    def get_emoji(self, guild_id: int, emoji_id: int) -> EmojiDB | None:
         """Gets an already created emoji document from the database.
 
         :param guild_id: int - The guild ID the emoji exists in
@@ -38,7 +52,7 @@ class ServerEmojis(BestSummerEverPointsDB):
             return ret[0]
         return None
 
-    def get_emoji_from_name(self, guild_id: int, name: str) -> Emoji | None:
+    def get_emoji_from_name(self, guild_id: int, name: str) -> EmojiDB | None:
         """Gets emoji from name.
 
         Args:
@@ -53,7 +67,9 @@ class ServerEmojis(BestSummerEverPointsDB):
             return ret[0]
         return None
 
-    def insert_emoji(self, emoji_id: int, name: str, created: datetime.datetime, user_id: int, guild_id: int) -> list:
+    def insert_emoji(
+        self, emoji_id: int, name: str, created: datetime.datetime, user_id: int, guild_id: int
+    ) -> list[ObjectId]:
         """Inserts an emoji into the database.
 
         Args:

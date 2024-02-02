@@ -13,7 +13,7 @@ from discordbot.views.usergift import GiftUserEddiesView
 class ContextUserGift(BaseContextCommand):
     """Context class for gifting."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger, gift: Gift) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger, gift: Gift) -> None:
         """Initialisation method.
 
         Args:
@@ -33,7 +33,7 @@ class ContextUserGift(BaseContextCommand):
             user (discord.Member): the user right-clicked
         """
         our_user = self.user_points.find_user(ctx.user.id, ctx.guild.id)
-        eddies = our_user["points"]
+        eddies = our_user.points
         view = GiftUserEddiesView(eddies, user, self.gift)
 
         await ctx.respond(view=view, ephemeral=True)

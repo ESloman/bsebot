@@ -5,10 +5,10 @@ import re
 from logging import Logger
 
 import discord
+import pytz
 from discord import PartialEmoji
 from pymongo.errors import OperationFailure
 
-from discordbot import utilities
 from discordbot.bsebot import BSEBot
 from discordbot.constants import WORDLE_SCORE_REGEX
 from discordbot.message_actions.base import BaseMessageAction
@@ -29,7 +29,7 @@ class WordleMessageAction(BaseMessageAction):
         super().__init__(client, logger)
 
     @staticmethod
-    async def pre_condition(_: discord.Message, message_type: list) -> bool:
+    async def pre_condition(_: discord.Message, message_type: list[str]) -> bool:
         """Wordle precondition. Checks that we're a wordle message using the precalc message_type.
 
         Args:
@@ -77,11 +77,8 @@ class WordleMessageAction(BaseMessageAction):
         Args:
             message (discord.Message): the message
         """
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
         today = now.replace(hour=0, minute=0, second=0)
-
-        if not utilities.is_utc(today):
-            today = utilities.add_utc_offset(today)
 
         # get number of 6/6 or X/6 wordles today
         try:
@@ -145,13 +142,9 @@ class WordleMessageAction(BaseMessageAction):
             return
 
         guild_db = self.guilds.get_guild(guild_id)
-        x_emoji = guild_db.get("wordle_x_emoji")
-        two_emoji = guild_db.get(
-            "wordle_two_emoji",
-        )
-        six_emoji = guild_db.get(
-            "wordle_six_emoji",
-        )
+        x_emoji = guild_db.wordle_x_emoji
+        two_emoji = guild_db.wordle_two_emoji
+        six_emoji = guild_db.wordle_six_emoji
 
         x_emoji = "😞" if not x_emoji else PartialEmoji.from_str(x_emoji)
         two_emoji = "🎉" if not two_emoji else PartialEmoji.from_str(two_emoji)

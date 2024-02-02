@@ -7,6 +7,7 @@ import datetime
 import logging
 
 import discord
+import pytz
 
 from discordbot.bsebot import BSEBot
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
@@ -15,7 +16,7 @@ from discordbot.clienteventclasses.baseeventclass import BaseEvent
 class OnVoiceStateChange(BaseEvent):
     """Class for handling on_thread_update event."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:
@@ -26,7 +27,7 @@ class OnVoiceStateChange(BaseEvent):
         super().__init__(client, guild_ids, logger)
 
     def _handle_mute_status(
-        self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState, vc_doc: dict
+        self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState, vc_doc: dict[str, any]
     ) -> None:
         """Handles mute status.
 
@@ -37,7 +38,7 @@ class OnVoiceStateChange(BaseEvent):
             before (discord.VoiceState): before state
             after (discord.VoiceState): after state
         """
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         if before.self_mute == after.self_mute:
             return
@@ -48,13 +49,13 @@ class OnVoiceStateChange(BaseEvent):
         if not after.self_mute:
             vc_doc["time_muted"] = (now - vc_doc["muted_time"]).total_seconds()
             vc_doc["muted_time"] = None
-        elif after.self_mute:
+        else:
             vc_doc["muted_time"] = now
 
         vc_doc["events"].append({"timestamp": now, "event": "muted" if after.self_mute else "unmuted"})
 
     def _handle_deaf_status(
-        self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState, vc_doc: dict
+        self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState, vc_doc: dict[str, any]
     ) -> None:
         """Handles deaf status.
 
@@ -65,7 +66,7 @@ class OnVoiceStateChange(BaseEvent):
             before (discord.VoiceState): before state
             after (discord.VoiceState): after state
         """
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         if before.self_deaf == after.self_deaf:
             return
@@ -76,13 +77,13 @@ class OnVoiceStateChange(BaseEvent):
         if not after.self_deaf:
             vc_doc["time_deafened"] = (now - vc_doc["deafened_time"]).total_seconds()
             vc_doc["deafened_time"] = None
-        elif after.self_deaf:
+        else:
             vc_doc["deafened_time"] = now
 
         vc_doc["events"].append({"timestamp": now, "event": "deafened" if after.self_deaf else "undeafened"})
 
     def _handle_stream_status(
-        self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState, vc_doc: dict
+        self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState, vc_doc: dict[str, any]
     ) -> None:
         """Handles stream status.
 
@@ -93,7 +94,7 @@ class OnVoiceStateChange(BaseEvent):
             before (discord.VoiceState): before state
             after (discord.VoiceState): after state
         """
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         if before.self_deaf == after.self_deaf:
             return
@@ -104,7 +105,7 @@ class OnVoiceStateChange(BaseEvent):
         if not after.self_stream:
             vc_doc["time_streaming"] = (now - vc_doc["streaming_time"]).total_seconds()
             vc_doc["streaming_time"] = None
-        elif after.self_stream:
+        else:
             vc_doc["streaming_time"] = now
 
         vc_doc["events"].append({"timestamp": now, "event": "streaming" if after.self_stream else "unstreaming"})
@@ -161,7 +162,7 @@ class OnVoiceStateChange(BaseEvent):
             after.channel.guild.id,
             member.id,
             after.channel.id,
-            datetime.datetime.now(),
+            datetime.datetime.now(tz=pytz.utc),
             after.self_mute,
             after.self_deaf,
             after.self_stream,
@@ -176,7 +177,7 @@ class OnVoiceStateChange(BaseEvent):
         """
         self.logger.info("User %s, %s is leaving %s", member.id, member.name, before.channel)
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         vc_doc = self.interactions.find_active_voice_state(before.channel.guild.id, member.id, before.channel.id, now)
 
@@ -224,7 +225,7 @@ class OnVoiceStateChange(BaseEvent):
             before (discord.VoiceState): voice state object
             after (discord.VoiceState): voice state object
         """
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
         vc_doc = self.interactions.find_active_voice_state(before.channel.guild.id, member.id, before.channel.id, now)
 
         self._handle_mute_status(member, before, after, vc_doc)

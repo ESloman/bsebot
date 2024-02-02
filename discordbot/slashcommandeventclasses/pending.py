@@ -12,7 +12,7 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 class Pending(BSEddies):
     """Class for handling `/bseddies pending` commands."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:
@@ -45,17 +45,17 @@ class Pending(BSEddies):
         message = "Here are all your pending bets:\n"
 
         for bet in bets:
-            if "channel_id" not in bet or "message_id" not in bet:
+            if not bet.channel_id or not bet.message_id:
                 continue
 
-            link = f"https://discordapp.com/channels/{ctx.guild.id}/{bet['channel_id']}/{bet['message_id']}"
+            link = f"https://discordapp.com/channels/{ctx.guild.id}/{bet.channel_id}/{bet.message_id}"
 
-            add_text = "OPEN FOR NEW BETS" if bet.get("active") else "CLOSED - AWAITING RESULT"
+            add_text = "OPEN FOR NEW BETS" if bet.active else "CLOSED - AWAITING RESULT"
 
             pt = (
-                f"- **{bets.index(bet) + 1})** [{bet['bet_id']} - `{add_text}`] _[{bet['title']}](<{link}>)_"
-                f"\nOutcome: {bet['betters'][str(ctx.author.id)]['emoji']}\n"
-                f"Points: **{bet['betters'][str(ctx.author.id)]['points']}**\n\n"
+                f"- **{bets.index(bet) + 1})** [{bet.bet_id} - `{add_text}`] _[{bet.title}](<{link}>)_"
+                f"\nOutcome: {bet.betters[str(ctx.author.id)].emoji}\n"
+                f"Points: **{bet.betters[str(ctx.author.id)].points}**\n\n"
             )
             message += pt
 

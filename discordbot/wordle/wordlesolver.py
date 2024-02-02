@@ -9,6 +9,7 @@ import random
 import re
 from logging import Logger
 
+import pytz
 from selenium import webdriver
 from selenium.common.exceptions import (
     ElementClickInterceptedException,
@@ -201,7 +202,9 @@ class WordleSolver:
             weights=[self.words_freq.get(word, 0) for word in self.possible_words],
         )
 
-    def _filter_word_list(self, game_state: dict, present_letters: list, correct_letters: list) -> None:
+    def _filter_word_list(
+        self, game_state: dict[str, any], present_letters: list[str], correct_letters: list[str]
+    ) -> None:
         """Filters the possible word list based on our current game state.
 
         Args:
@@ -229,7 +232,7 @@ class WordleSolver:
             if re.match(pattern, word):
                 # still need to filter to match 'present' letters
                 for letter in present_letters:
-                    if not word.count(letter) >= (present_letters.count(letter) + correct_letters.count(letter)):
+                    if word.count(letter) < (present_letters.count(letter) + correct_letters.count(letter)):
                         break
                 else:
                     new_possible_words.append(word)
@@ -399,7 +402,7 @@ class WordleSolver:
             len(guesses),
             actual_word,
             game_state,
-            datetime.datetime.now(),
+            datetime.datetime.now(tz=pytz.utc),
             share_text,
             int(wordle_number),
         )

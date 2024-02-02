@@ -90,9 +90,9 @@ class WordleRootConfigView(discord.ui.View):
         match wordle_config_val:
             case "wordle_config":
                 guild_db = self.guilds.get_guild(interaction.guild_id)
-                _chan = guild_db.get("wordle_channel")
+                _chan = guild_db.wordle_channel
                 chan_mention = f"<#{_chan}>" if _chan else "_None_"
-                view = WordleConfigView(guild_db["guild_id"])
+                view = WordleConfigView(guild_db.guild_id)
                 msg = (
                     "## Wordle Config\n\n"
                     "Select the following options:\n"
@@ -152,7 +152,7 @@ class WordleConfigView(discord.ui.View):
         self.guilds = Guilds()
 
         guild_db = self.guilds.get_guild(guild_id)
-        active = "1" if guild_db.get("wordle") else "0"
+        active = "1" if guild_db.wordle else "0"
 
         self.active_select = WordleActiveSelect(active)
         self.channel_select = WordleChannelSelect()
@@ -160,7 +160,7 @@ class WordleConfigView(discord.ui.View):
         if int(active):
             self.channel_select.disabled = False
 
-        reminder = "1" if guild_db.get("wordle_reminders") else "0"
+        reminder = "1" if guild_db.wordle_reminders else "0"
         self.reminder_select = WordleReminderSelect(reminder)
 
         self.add_item(self.active_select)
@@ -267,9 +267,9 @@ class WordleEmojiReactionConfigView(discord.ui.View):
         guild_db = self.guilds.get_guild(guild_id)
         emoji_list = self.emojis.get_all_emojis(guild_id)
 
-        current_x = guild_db.get("wordle_x_emoji")
-        current_two = guild_db.get("wordle_two_emoji")
-        current_six = guild_db.get("wordle_six_emoji")
+        current_x = guild_db.wordle_x_emoji
+        current_two = guild_db.wordle_two_emoji
+        current_six = guild_db.wordle_six_emoji
 
         self.x_select = WordleEmojiSelect(emoji_list, "X", current_x)
         self.two_select = WordleEmojiSelect(emoji_list, "2", current_two)
@@ -378,7 +378,7 @@ class WordleReminderConfirmView(discord.ui.View):
             interaction (discord.Interaction): the callback interaction
         """
         all_reminders = self.wordle_reminders.get_all_reminders()
-        reminder_names = [reminder["name"] for reminder in all_reminders]
+        reminder_names = [reminder.name for reminder in all_reminders]
 
         if self.name in reminder_names:
             # all our options existed already

@@ -403,6 +403,10 @@ class FollowUpMock:
     async def send_message(*args, **kwargs) -> None:
         """Mocks followup send message."""
 
+    @staticmethod
+    async def send_modal(*args, **kwargs) -> None:
+        """Mocks followup send modal."""
+
 
 class InteractionMock:
     def __init__(self, guild_id: int | None, user_id: int = 123456) -> None:

@@ -1,4 +1,4 @@
-"""Tests our revolution views."""
+"""Tests our config views."""
 
 from unittest import mock
 
@@ -12,7 +12,7 @@ from tests.mocks import bsebot_mocks, discord_mocks, interface_mocks
 
 
 class TestConfigView:
-    """Tests our RevolutionView view."""
+    """Tests our ConfigView view."""
 
     @pytest.fixture(autouse=True)
     def _test_data(self) -> None:

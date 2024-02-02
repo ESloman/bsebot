@@ -109,7 +109,7 @@ class Guilds(BaseClass):  # noqa: PLR0904
     # King stuff
     #
 
-    def get_king(self, guild_id: int, whole_class: bool = False) -> int | UserDB:
+    def get_king(self, guild_id: int, whole_class: bool = False) -> int | UserDB | None:
         """Gets the King ID for the specified guild.
 
         Args:

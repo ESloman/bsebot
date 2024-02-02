@@ -27,14 +27,14 @@ class BaseMessageAction:
         self.guilds = Guilds()
         self.revolutions = RevolutionEvent()
 
-    async def pre_condition(self, message: discord.Message, message_type: list) -> bool:
+    async def pre_condition(self, message: discord.Message, message_type: list[str]) -> bool:
         """Empty precondition function.
 
         Should return True if an _should_ be fun and False if not.
 
         Args:
             message (discord.Message): the discord Messageto check
-            message_type (list): precalculated message type to help with precondition check
+            message_type (list[str]): precalculated message type to help with precondition check
 
         Raises:
             NotImplementedError: if not implemented

@@ -16,7 +16,7 @@ from discordbot.clienteventclasses.baseeventclass import BaseEvent
 class OnEmojiCreate(BaseEvent):
     """Class for handling OnEmojiCreate events."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:

@@ -13,7 +13,7 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 class AdminGive(BSEddies):
     """Class for handling `/bseddies admin give` command."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:

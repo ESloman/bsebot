@@ -28,7 +28,7 @@ class DuplicateLinkAction(BaseMessageAction):
         # allow the precondition to store results for the run to use
         self._results_map = {}
 
-    async def pre_condition(self, message: discord.Message, message_type: list) -> bool:
+    async def pre_condition(self, message: discord.Message, message_type: list[str]) -> bool:
         """Duplicated links precondition.
 
         Args:

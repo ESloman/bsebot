@@ -18,7 +18,7 @@ class OnDirectMessage(BaseEvent):
     def __init__(
         self,
         client: BSEBot,
-        guild_ids: list,
+        guild_ids: list[int],
         logger: logging.Logger,
         giphyapi: GiphyAPI,
     ) -> None:

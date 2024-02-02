@@ -96,7 +96,10 @@ class Stats(BSEddies):
         top_three_swears = [(_swear, _swears_dict[_swear]) for _swear in top_swears[:3] if _swears_dict[_swear]]
 
         top_users = sorted(_users_dict, key=lambda x: _users_dict[x], reverse=True)
-        top_five_users = [(_user, _users_dict[_user]) for _user in top_users[: 5 if len(top_users) > 5 else -1]]  # noqa: PLR2004
+        top_five_users = [
+            (_user, _users_dict[_user])
+            for _user in top_users[: 5 if len(top_users) > 5 else -1]  # noqa: PLR2004
+        ]
 
         _dict["top_five"] = top_five_channels
         _dict["average_length"] = round((sum(_lengths) / len(_lengths)), 2)

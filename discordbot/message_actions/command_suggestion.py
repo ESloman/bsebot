@@ -24,7 +24,7 @@ class CommandSuggest(BaseMessageAction):
         """
         super().__init__(client, logger)
 
-    async def pre_condition(self, message: discord.Message, _: list) -> bool:
+    async def pre_condition(self, message: discord.Message, _: list[str]) -> bool:
         """Checks that a message contains `/COMMAND_NAME` and that it's a valid command name.
 
         Args:

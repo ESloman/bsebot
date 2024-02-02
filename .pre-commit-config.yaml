@@ -5,11 +5,3 @@ repos:
     - id: ruff
       args: [--fix, --exit-non-zero-on-fix]
     - id: ruff-format
-- repo: local
-  hooks:
-    - id: pytest
-      name: pytest
-      entry: pytest -n 8 --ignore=tests/tests_stats
-      language: system
-      pass_filenames: false
-      always_run: true

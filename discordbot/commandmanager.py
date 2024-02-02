@@ -101,7 +101,7 @@ class CommandManager:
     def __init__(  # noqa: PLR0915
         self: "CommandManager",
         client: BSEBot,
-        guilds: list,
+        guilds: list[int],
         logger: logging.Logger,
         giphy_token: str | None = None,
         github_token: str | None = None,
@@ -206,8 +206,6 @@ class CommandManager:
             guilds,
             self.logger,
             [],
-            self.on_ready,
-            self.githubapi,
             self.bseddies_place,
             self.bseddies_close,
         )
@@ -257,7 +255,7 @@ class CommandManager:
         self._register_context_commands()
 
     # noinspection PyProtectedMember
-    def __get_cached_messages_list(self: "CommandManager") -> list:
+    def __get_cached_messages_list(self: "CommandManager") -> list[discord.Message]:
         """Method for getting a list of cached message IDs.
 
         Returns:

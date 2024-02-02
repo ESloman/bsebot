@@ -6,6 +6,7 @@ import re
 from logging import Logger
 
 import discord
+import pytz
 
 from discordbot.bsebot import BSEBot
 from discordbot.constants import MARVEL_AD_COOLDOWN
@@ -45,7 +46,7 @@ class MarvelComicsAdAction(BaseMessageAction):
         """
         if any(re.findall(rf"\b{a}\b", message.content.lower()) for a in self._comic_terms):
             # check last time that we sent a marvel comic ad
-            now = datetime.datetime.now()
+            now = datetime.datetime.now(tz=pytz.utc)
             _last_time = self.guilds.get_last_ad_time(message.guild.id)
             if _last_time and (now - _last_time).total_seconds() < MARVEL_AD_COOLDOWN:
                 return False

@@ -5,6 +5,7 @@ import datetime
 import random
 from logging import Logger
 
+import pytz
 from discord.ext import tasks
 
 from discordbot import utilities
@@ -36,7 +37,7 @@ class AfterWorkVally(BaseTask):
         if BSE_SERVER_ID not in self.guild_ids:
             return
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         if now.weekday() not in {0, 1, 2, 3, 4}:
             return
@@ -52,11 +53,11 @@ class AfterWorkVally(BaseTask):
 
             guild_db = self.guilds.get_guild(guild.id)
 
-            if not guild_db.get("valorant_rollcall"):
+            if not guild_db.valorant_rollcall:
                 self.logger.info("Valorant rollcall is disabled")
                 continue
 
-            valorant_channel = guild_db.get("valorant_channel")
+            valorant_channel = guild_db.valorant_channel
             if not valorant_channel:
                 self.logger.info("Valorant channel isn't configured")
                 continue
@@ -96,7 +97,7 @@ class AfterWorkVally(BaseTask):
             channel = await self.bot.fetch_channel(valorant_channel)
             await channel.trigger_typing()
 
-            if role_id := guild_db.get("valorant_role"):
+            if role_id := guild_db.valorant_role:
                 role = _guild.get_role(role_id)
                 _mention = role.mention
             else:

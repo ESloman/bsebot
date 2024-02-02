@@ -7,6 +7,7 @@ import datetime
 import logging
 
 import discord
+import pytz
 
 from discordbot.bsebot import BSEBot
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
@@ -54,6 +55,6 @@ class OnEmojiCreate(BaseEvent):
                     "emoji_created",
                 ],
                 emoji.name,
-                datetime.datetime.now(),
+                datetime.datetime.now(tz=pytz.utc),
                 additional_keys={"emoji_id": emoji.id, "created_at": emoji.created_at},
             )

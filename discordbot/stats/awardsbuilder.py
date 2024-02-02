@@ -1,5 +1,6 @@
 """Our Awards Builder class."""
 
+import contextlib
 import datetime
 from logging import Logger
 
@@ -13,8 +14,9 @@ from discordbot.constants import (
     BSEDDIES_REVOLUTION_CHANNEL,
     JERK_OFF_CHAT,
     MONTHLY_AWARDS_PRIZE,
+    SLOMAN_SERVER_ID,
 )
-from discordbot.stats.statsclasses import Stat, StatsGatherer
+from discordbot.stats.statsclasses import StatDB, StatsGatherer
 from mongo.bsedataclasses import Awards
 from mongo.bsepoints.points import UserPoints
 
@@ -49,31 +51,6 @@ class AwardsBuilder:
         self.awards = Awards()
         self.user_points = UserPoints()
 
-    def _get_previous_stat(self: "AwardsBuilder", stat: Stat) -> dict:
-        """Searches the database for the previous stat of the same time.
-
-        Args:
-            stat (Stat): the stat to get previous values for
-
-        Returns:
-            dict: the previous stat object
-        """
-        query = {"guild_id": stat.guild_id, "type": stat.type}
-
-        if stat.annual:
-            query["year"] = int(stat.year) - 1
-        else:
-            query["month"] = (stat.timestamp - datetime.timedelta(days=37)).strftime("%b %y")
-
-        match stat.type:
-            case "award":
-                query["award"] = stat.award
-            case "stat":
-                query["stat"] = stat.stat
-
-        self.logger.debug(query)
-        return self.awards.query(query)
-
     @staticmethod
     def _get_comparison_string(new_value: float, old_value: float) -> str:
         """Creates a basic comparison string we can use in stats text.
@@ -103,14 +80,16 @@ class AwardsBuilder:
 
         return _string
 
-    async def build_stats_and_message(self: "AwardsBuilder") -> tuple[list[Stat], list[str]]:  # noqa: PLR0912, C901, PLR0915
+    async def build_stats_and_message(  # noqa: PLR0912, C901, PLR0915
+        self: "AwardsBuilder",
+    ) -> tuple[list[StatDB], list[str]]:
         """Uses StatsGatherer to query for all the required stats.
 
         Formats an appropriate message
         Returns all the stats object and the message.
 
         Returns:
-            Tuple[List[Stat], List[str]]: Tuple of the list Stat objects and the stats message to send
+            tuple[list[StatDB], list[str]]: Tuple of the list Stat objects and the stats message to send
         """
         if not self.annual:
             start, end = self.stats.get_monthly_datetime_objects()
@@ -120,16 +99,6 @@ class AwardsBuilder:
         self.logger.info("Got start/end to be: %s, %s", start, end)
 
         args = (self.guild_id, start, end)
-
-        guild = await self.bot.fetch_guild(self.guild_id)
-
-        # get a list of channel IDs here to use
-        if self.debug:
-            _channel_ids = []
-        else:
-            _channels = await guild.fetch_channels()
-            _channels = [c for c in _channels if c.type in {discord.ChannelType.text, discord.ChannelType.private}]
-            _channel_ids = [c.id for c in _channels]
 
         number_messages = self.stats.number_of_messages(*args)
         avg_message_chars, avg_message_words = self.stats.average_message_length(*args)
@@ -147,21 +116,20 @@ class AwardsBuilder:
         most_used_server_emoji = self.stats.most_popular_server_emoji(*args)
         threads_created = self.stats.threads_created(*args)
         thread_messages = self.stats.number_of_threaded_messages(*args)
-        quietest_channel = self.stats.quietest_channel(*args, _channel_ids)
+        quietest_channel = self.stats.quietest_channel(*args)
         quietest_thread = self.stats.quietest_thread(*args)
         quietest_day = self.stats.quietest_day(*args)
         emojis_created = self.stats.emojis_created(*args)
 
         busiest_day_format = busiest_day.value.strftime("%a %d %b")
         quietest_day_format = quietest_day.value.strftime("%a %d %b")
-        popular_channel_obj = await self.bot.fetch_channel(most_popular_channel.value)
-        vc_time_obj = await self.bot.fetch_channel(vc_most_time_spent.value)
-        vc_users_obj = await self.bot.fetch_channel(vc_most_users.value)
-        emoji_obj = await guild.fetch_emoji(most_used_server_emoji.emoji_id)
+        most_used_emoji_mention = f"<a:{most_used_server_emoji.value}:{most_used_server_emoji.kwargs["emoji_id"]}>"
 
-        thread_objects = [await self.bot.fetch_channel(thread_id) for thread_id in threads_created.threads]
-
-        emoji_objects = [await guild.fetch_emoji(emoji_id) for emoji_id in emojis_created.emoji_ids]
+        thread_mentions = [f"<#{thread_id}>" for thread_id in threads_created.kwargs["threads"]]
+        emoji_mentions = [
+            f"<a:{emoji[1]}:{emoji[0]}>"
+            for emoji in zip(emojis_created.kwargs["emoji_ids"], emojis_created.kwargs["emoji_names"], strict=True)
+        ]
 
         stats = [
             number_messages,
@@ -193,20 +161,20 @@ class AwardsBuilder:
             message_start = f"{start.strftime('%Y')} server stats 📈:\n\n"
 
         if busiest_thread.value:
-            busiest_thread_obj = await self.bot.fetch_channel(busiest_thread.value)
-            if busiest_thread_obj.archived:
-                b_thread_text = f"`#{busiest_thread_obj.name} (archived)`"
-            else:
-                b_thread_text = busiest_thread_obj.mention
+            b_thread_text = f"<#{busiest_thread.value}>"
+            with contextlib.suppress(discord.errors.NotFound):
+                busiest_thread_obj = await self.bot.fetch_channel(busiest_thread.value)
+                if busiest_thread_obj.archived:
+                    b_thread_text = f"`#{busiest_thread_obj.name} (archived)`"
         else:
             b_thread_text = "none"
 
         if quietest_thread.value:
-            quietest_thread_obj = await self.bot.fetch_channel(quietest_thread.value)
-            if quietest_thread_obj.archived:
-                q_thread_text = f"`#{quietest_thread_obj.name} (archived)`"
-            else:
-                q_thread_text = quietest_thread_obj.mention
+            q_thread_text = f"<#{quietest_thread.value}>"
+            with contextlib.suppress(discord.errors.NotFound):
+                quietest_thread_obj = await self.bot.fetch_channel(quietest_thread.value)
+                if quietest_thread_obj.archived:
+                    q_thread_text = f"`#{quietest_thread_obj.name} (archived)`"
         else:
             q_thread_text = "none"
 
@@ -225,9 +193,10 @@ class AwardsBuilder:
             time_spent_in_vc,
         ]:
             try:
-                previous = self._get_previous_stat(stat)
+                previous = self.awards.get_previous_stat(stat)
 
                 if not previous:
+                    self.logger.debug("Couldn't find previous stat for %s", stat.short_name)
                     comparisons[stat.stat] = ""
                     continue
                 if len(previous) > 1:
@@ -236,7 +205,7 @@ class AwardsBuilder:
                     continue
                 previous = previous[0]
 
-                comparison_string = self._get_comparison_string(stat.value, previous["value"])
+                comparison_string = self._get_comparison_string(stat.value, previous.value)
             except Exception:
                 self.logger.exception("Got an error working out %s comparison string", stat.short_name)
                 comparisons[stat.stat] = ""
@@ -248,14 +217,14 @@ class AwardsBuilder:
         stat_parts = [
             message_start,
             (
-                f"- **Number of messages sent** 📬: `{number_messages.value}` "
-                f"(in `{number_messages.channels}` channel{'s' if thread_messages.channels != 1 else ''} "
-                f"from `{number_messages.users}` users){comparisons.get(number_messages.stat)}\n"
+                f"- **Number of messages sent** 📬: `{number_messages.value}` (in `"
+                f"{number_messages.kwargs["channels"]}` channel{'s' if thread_messages.kwargs["channels"] != 1 else ''}"
+                f" from `{number_messages.kwargs["users"]}` users){comparisons.get(number_messages.stat)}\n"
             ),
             (
-                f"- **Number of thread messages sent** 📟: `{thread_messages.value}` "
-                f"(in `{thread_messages.channels}` thread{'s' if thread_messages.channels != 1 else ''} "
-                f"from `{thread_messages.users}` users){comparisons.get(thread_messages.stat)}\n"
+                f"- **Number of thread messages sent** 📟: `{thread_messages.value}` (in `"
+                f"{thread_messages.kwargs["channels"]}` thread{'s' if thread_messages.kwargs["channels"] != 1 else ''} "
+                f"from `{thread_messages.kwargs["users"]}` users){comparisons.get(thread_messages.stat)}\n"
             ),
             (
                 f"- **Average message length** 📰: Characters (`{avg_message_chars.value}`), "
@@ -263,66 +232,71 @@ class AwardsBuilder:
             ),
             (
                 f"- **Chattiest channel** 🖨️: <#{busiest_channel.value}> "
-                f"(`{busiest_channel.messages}` messages from `{busiest_channel.users}` users)\n"
+                f"(`{busiest_channel.kwargs["messages"]}` messages from `{busiest_channel.kwargs["users"]}` users)\n"
             ),
             (
                 f"- **Quietest channel** 📭: <#{quietest_channel.value}> "
-                f"(`{quietest_channel.messages}` messages from `{quietest_channel.users}` users)\n"
+                f"(`{quietest_channel.kwargs["messages"]}` messages from `{quietest_channel.kwargs["users"]}` users)\n"
             ),
             (
                 f"- **Chattiest thread** 📧: {b_thread_text} "
-                f"(`{busiest_thread.messages}` messages from `{busiest_thread.users}` users)\n"
+                f"(`{busiest_thread.kwargs["messages"]}` messages from `{busiest_thread.kwargs["users"]}` users)\n"
             ),
             (
                 f"- **Quietest thread** 📖: {q_thread_text} "
-                f"(`{quietest_thread.messages}` messages from `{quietest_thread.users}` users)\n"
+                f"(`{quietest_thread.kwargs["messages"]}` messages from `{quietest_thread.kwargs["users"]}` users)\n"
             ),
             (
-                f"- **Most popular channel** 💌: {popular_channel_obj.mention} "
-                f"(`{most_popular_channel.users}` unique users)\n"
+                f"- **Most popular channel** 💌: <#{most_popular_channel.value}> "
+                f"(`{most_popular_channel.kwargs["users"]}` unique users)\n"
             ),
             (
                 f"- **Threads created** 🖇️: {threads_created.value} ("
-                f"{','.join([t.mention for t in thread_objects]) if len(thread_objects) < 5 else '_too many to list_'}"  # noqa: PLR2004
+                f"{','.join(thread_mentions) if len(thread_mentions) < 5 else '_too many to list_'}"  # noqa: PLR2004
                 ")\n"
             ),
             (
                 f"- **Chattiest day** 🗓️: {busiest_day_format} "
-                f"(`{busiest_day.messages}` messages in `{busiest_day.channels}` "
-                f"channels from `{busiest_day.users}` users)\n"
+                f"(`{busiest_day.kwargs["messages"]}` messages in `{busiest_day.kwargs["channels"]}` "
+                f"channels from `{busiest_day.kwargs["users"]}` users)\n"
             ),
             (
                 f"- **Quietest day** 📆: {quietest_day_format} "
-                f"(`{quietest_day.messages}` messages in `{quietest_day.channels}` "
-                f"channels from `{quietest_day.users}` users)\n"
+                f"(`{quietest_day.kwargs["messages"]}` messages in `{quietest_day.kwargs["channels"]}` "
+                f"channels from `{quietest_day.kwargs["users"]}` users)\n"
             ),
             (
                 f"- **Average wordle score** 🟩: `{average_wordle.value}` "
-                f"(the bot's: `{average_wordle.bot_average}`){comparisons.get(average_wordle.stat)}\n"
+                f"(the bot's: `{average_wordle.kwargs["bot_average"]}`){comparisons.get(average_wordle.stat)}\n"
             ),
             (
                 f"- **Total time spent in VCs** 📱: `{datetime.timedelta(seconds=time_spent_in_vc.value)!s}` "
-                f"(`in {time_spent_in_vc.channels}` channels from `{time_spent_in_vc.users}` users)"
+                f"(`in {time_spent_in_vc.kwargs["channels"]}` channels from `{time_spent_in_vc.kwargs["users"]}` users)"
                 f"{comparisons.get(time_spent_in_vc.stat)}\n"
             ),
             (
-                f"- **Talkiest VC** 💬: {vc_time_obj.mention} (`{vc_most_time_spent.users}` users spent "
-                f"`{datetime.timedelta(seconds=vc_most_time_spent.time)!s}` in this VC)\n"
+                f"- **Talkiest VC** 💬: <#{vc_most_time_spent.value}> "
+                f"(`{vc_most_time_spent.kwargs["users"]}` users spent "
+                f"`{datetime.timedelta(seconds=vc_most_time_spent.kwargs["time"])!s}` in this VC)\n"
             ),
             (
-                f"- **Most popular VC** 🎉: {vc_users_obj.mention} (`{vc_most_users.users}` unique users spent "
-                f"`{datetime.timedelta(seconds=vc_most_users.time)!s}` in this VC)\n"
+                f"- **Most popular VC** 🎉: <#{vc_most_users.value}> "
+                f"(`{vc_most_users.kwargs["users"]}` unique users spent "
+                f"`{datetime.timedelta(seconds=vc_most_users.kwargs["time"])!s}` in this VC)\n"
             ),
             (f"- **Bets created** 🗃️: `{num_bets.value}`{comparisons.get(num_bets.stat)}\n"),
             (f"- **Eddies gained via salary** 👩🏼‍💼: `{salary_gains.value}`{comparisons.get(salary_gains.stat)}\n"),
             (f"- **Eddies placed on bets** 🧑🏼‍💻: `{eddies_placed.value}`{comparisons.get(eddies_placed.stat)}\n"),
             (f"- **Eddies won on bets** 🧑🏼‍🏫: `{eddies_won.value}`{comparisons.get(eddies_won.stat)}\n"),
-            (f"- **Most popular server emoji** 🗳️: {emoji_obj} (`{most_used_server_emoji.count}`)"),
+            (
+                f"- **Most popular server emoji** 🗳️: {most_used_emoji_mention} "
+                f"(`{most_used_server_emoji.kwargs["count"]}`)"
+            ),
         ]
 
         if self.annual:
             stat_parts.append(
-                f"\n**Emojis created** : {emojis_created.value} ({', '.join([str(e) for e in emoji_objects])})",
+                f"\n**Emojis created** : {emojis_created.value} ({', '.join(emoji_mentions)})",
             )
 
         bseddies_stats = []
@@ -336,14 +310,16 @@ class AwardsBuilder:
 
         return stats, bseddies_stats
 
-    async def build_awards_and_message(self: "AwardsBuilder") -> tuple[list[Stat], list[str]]:
+    async def build_awards_and_message(  # noqa: PLR0915
+        self: "AwardsBuilder",
+    ) -> tuple[list[StatDB], list[str]]:
         """Uses StatsGatherer to gather all the awards.
 
         Formats an awards message
         Returns the list of awards and the message.
 
         Returns:
-            Tuple[List[Stat], List[str]]: tuple of List of Awards and the awards messages
+            tuple[list[StatDB], list[str]]: tuple of List of Awards and the awards messages
         """
         if not self.annual:
             start, end = self.stats.get_monthly_datetime_objects()
@@ -354,7 +330,13 @@ class AwardsBuilder:
 
         args = (self.guild_id, start, end)
 
-        guild = await self.bot.fetch_guild(self.guild_id)
+        try:
+            guild = await self.bot.fetch_guild(self.guild_id)
+        except discord.errors.NotFound:
+            if self.debug:
+                guild = await self.bot.fetch_guild(SLOMAN_SERVER_ID)
+            else:
+                raise
 
         most_messages = self.stats.most_messages_sent(*args)
         least_messages = self.stats.least_messages_sent(*args)
@@ -445,12 +427,12 @@ class AwardsBuilder:
                 # single minded
                 "- The _'single minded'_ 🧠 award: "
                 f"<@!{single_minded.user_id}> (`{single_minded.value}%` of messages "
-                f"sent to <#{single_minded.channel}>)\n"
+                f"sent to <#{single_minded.kwargs["channel"]}>)\n"
             ),
             (
                 # diverse portfolio
                 "- The _'diverse portfolio'_ 💼 award: "
-                f"<@!{diverse_portfolio.user_id}> (`{diverse_portfolio.messages}` sent to "
+                f"<@!{diverse_portfolio.user_id}> (`{diverse_portfolio.kwargs["messages"]}` sent to "
                 f"`{diverse_portfolio.value}` channels)\n"
             ),
             (
@@ -479,7 +461,7 @@ class AwardsBuilder:
                 # edited messages
                 "- The _'fat fingers'_ 🖐🏼 award: "
                 f"<@!{fattest_fingers.user_id}> (`{fattest_fingers.value}` edits to "
-                f"`{fattest_fingers.message_count}` messages)\n"
+                f"`{fattest_fingers.kwargs["message_count"]}` messages)\n"
             ),
             (
                 # most swears
@@ -518,13 +500,14 @@ class AwardsBuilder:
                 # most time spent in VC
                 "- The _'big talker'_ 🔊 award: "
                 f"<@!{big_gamer.user_id}> "
-                f"(`{datetime.timedelta(seconds=big_gamer.value)!s}` spent in {big_gamer.channels} channels)\n"
+                f"(`{datetime.timedelta(seconds=big_gamer.value)!s}` spent in "
+                f"{big_gamer.kwargs["channels"]} channels)\n"
             ),
             (
                 # most time streaming
                 "- The _'wannabe streamer'_ 🖥️ award: "
                 f"<@!{big_streamer.user_id}> (`{datetime.timedelta(seconds=big_streamer.value)!s}` "
-                f"spent streaming in {big_streamer.channels} channels)\n"
+                f"spent streaming in {big_streamer.kwargs["channels"]} channels)\n"
             ),
             (
                 # most bets created
@@ -562,19 +545,19 @@ class AwardsBuilder:
 
     async def send_stats_and_awards(  # noqa: C901, PLR0912
         self: "AwardsBuilder",
-        stats: list[Stat],
-        stats_message: str,
-        awards: list[Stat],
-        awards_message: str,
+        stats: list[StatDB],
+        stats_message: list[str],
+        awards: list[StatDB],
+        awards_message: list[str],
         send_messages: bool = True,
     ) -> None:
         """Given the stats and awards - actually log those, distribute eddies and send the message.
 
         Args:
-            stats (_type_): _description_
-            stats_message (_type_): _description_
-            awards (_type_): _description_
-            awards_message (_type_): _description_
+            stats (list[StatDB]): _description_
+            stats_message (list[str]): _description_
+            awards (list[StatDB]): _description_
+            awards_message (list[str]): _description_
             send_messages (bool): whether to actually send messages
         """
         for stat in stats:
@@ -629,15 +612,12 @@ class AwardsBuilder:
         for message in stats_message:
             self.logger.info("Stats message part is %s chars long", len(message))
 
-            if not self.debug:
-                await channel.send(content=message, silent=True)
-                continue
+            await channel.send(content=message, silent=True)
             self.logger.debug(message)
 
         self.logger.info("Awards message is %s messages long", len(awards_message))
         for message in awards_message:
             self.logger.info("Awards message part is %s chars long", len(message))
-            if not self.debug and send_messages:
+            if send_messages:
                 await channel.send(content=message, silent=True)
-                continue
             self.logger.debug(message)

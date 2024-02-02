@@ -5,16 +5,14 @@ import discord
 import discordbot.views.bet
 from discordbot.embedmanager import EmbedManager
 from discordbot.selects.betoutcomes import BetOutcomesSelect
-from discordbot.slashcommandeventclasses.close import CloseBet
-from discordbot.slashcommandeventclasses.place import PlaceBet
 from mongo.bsepoints.bets import UserBets
-from mongo.datatypes import Bet
+from mongo.datatypes.bet import BetDB
 
 
 class BetChange(discord.ui.View):
     """Class for bet change view."""
 
-    def __init__(self, bet: Bet, place: PlaceBet, close: CloseBet) -> None:
+    def __init__(self, bet: BetDB, place: object, close: object) -> None:
         """Initialisation method.
 
         Args:
@@ -23,21 +21,21 @@ class BetChange(discord.ui.View):
             bseddies_close (CloseBet): the close class
         """
         super().__init__(timeout=None)
-        self.bet: Bet = bet
+        self.bet: BetDB = bet
         self.user_bets = UserBets()
         self.embed_manager = EmbedManager()
 
         self.place = place
         self.close = close
 
-        outcomes = bet["option_dict"]
-        options = [discord.SelectOption(label=outcomes[key]["val"], value=key, emoji=key) for key in outcomes]
+        outcomes = bet.option_dict
+        options = [discord.SelectOption(label=outcomes[key].val, value=key, emoji=key) for key in outcomes]
 
         self.outcome_select = BetOutcomesSelect(options, discord.ui.Button)
         self.add_item(self.outcome_select)
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=2)
-    async def place_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:
+    async def submit_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:
         """Button callback.
 
         Args:
@@ -48,14 +46,15 @@ class BetChange(discord.ui.View):
 
         value = self.outcome_select.values[0]
 
-        self.bet["betters"][str(interaction.user.id)]["emoji"] = value
-
-        self.user_bets.update({"_id": self.bet["_id"]}, {"$set": {f"betters.{interaction.user.id}.emoji": value}})
+        self.user_bets.update(
+            {"_id": self.bet._id},  # noqa: SLF001
+            {"$set": {f"betters.{interaction.user.id}.emoji": value}},
+        )
 
         # refresh view for users
-        bet = self.user_bets.get_bet_from_id(interaction.guild_id, self.bet["bet_id"])
-        channel = await interaction.guild.fetch_channel(bet["channel_id"])
-        message = await channel.fetch_message(bet["message_id"])
+        bet = self.user_bets.get_bet_from_id(interaction.guild_id, self.bet.bet_id)
+        channel = await interaction.guild.fetch_channel(bet.channel_id)
+        message = await channel.fetch_message(bet.message_id)
         embed = self.embed_manager.get_bet_embed(interaction.guild, bet)
         view = discordbot.views.bet.BetView(bet, self.place, self.close)
         await message.edit(embed=embed, view=view)

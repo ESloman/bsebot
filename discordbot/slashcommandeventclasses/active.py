@@ -12,7 +12,7 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 class Active(BSEddies):
     """Class for handling `/active` commands."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:
@@ -48,17 +48,17 @@ class Active(BSEddies):
         message = "Here are all the active bets:\n"
 
         for bet in bets:
-            if "channel_id" not in bet or "message_id" not in bet:
+            if not bet.channel_id or not bet.message_id:
                 continue
 
-            if bet.get("private") and bet["channel_id"] != ctx.channel_id:
+            if bet.private and bet.channel_id != ctx.channel_id:
                 continue
 
-            link = f"https://discordapp.com/channels/{ctx.guild.id}/{bet['channel_id']}/{bet['message_id']}"
+            link = f"https://discordapp.com/channels/{ctx.guild.id}/{bet.channel_id}/{bet.message_id}"
 
-            add_text = "OPEN FOR NEW BETS" if bet.get("active") else "CLOSED - AWAITING RESULT"
+            add_text = "OPEN FOR NEW BETS" if bet.active else "CLOSED - AWAITING RESULT"
 
-            pt = f"- **{bets.index(bet) + 1})** [{bet['bet_id']} - `{add_text}`] _[{bet['title']}](<{link}>)_\n"
+            pt = f"- **{bets.index(bet) + 1})** [{bet.bet_id} - `{add_text}`] _[{bet.title}](<{link}>)_\n"
             message += pt
 
             if (len(message) + 400) > 2000 and bet != bets[-1]:  # noqa: PLR2004

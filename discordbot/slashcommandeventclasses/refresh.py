@@ -15,7 +15,7 @@ from discordbot.views.refresh import RefreshBetView
 class RefreshBet(BSEddies):
     """Class for handling `/refresh` commands."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:
@@ -43,10 +43,8 @@ class RefreshBet(BSEddies):
             bets.extend(self.user_bets.get_all_pending_bets(ctx.guild_id))
             _bets = []
             for bet in bets:
-                if bet.get("type"):
-                    continue
-                if bet["bet_id"] not in _ids:
-                    _ids.append(bet["bet_id"])
+                if bet.bet_id not in _ids:
+                    _ids.append(bet.bet_id)
                     _bets.append(bet)
             bet_ids = _bets
 

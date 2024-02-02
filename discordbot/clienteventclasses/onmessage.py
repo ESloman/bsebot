@@ -28,7 +28,7 @@ from discordbot.message_actions.wordle_reactions import WordleMessageAction
 class OnMessage(BaseEvent):
     """Class for handling on_message events from Discord."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Sets up our list of post message action classes.
@@ -94,7 +94,7 @@ class OnMessage(BaseEvent):
         return is_bot, is_thread, is_vc
 
     @staticmethod
-    def _handle_attachments(message: discord.Message, message_type: list) -> None:
+    def _handle_attachments(message: discord.Message, message_type: list[str]) -> None:
         """Handles attachments.
 
         Args:
@@ -111,7 +111,7 @@ class OnMessage(BaseEvent):
             if attachment.filename == "voice-message.ogg":
                 message_type.append("voice_message")
 
-    def _handle_mentions(self, message: discord.Message, message_type: list) -> None:
+    def _handle_mentions(self, message: discord.Message, message_type: list[str]) -> None:
         """Handles mentions.
 
         Works out if there were any mentions in the message the user should get eddies for
@@ -138,7 +138,7 @@ class OnMessage(BaseEvent):
             message_type.append("everyone_mention")
 
     def _handle_stickers(
-        self, message: discord.Message, guild_id: int, message_type: list, message_type_only: bool = False
+        self, message: discord.Message, guild_id: int, message_type: list[str], message_type_only: bool = False
     ) -> None:
         """Handles stickers.
 
@@ -166,29 +166,31 @@ class OnMessage(BaseEvent):
 
             # used a custom sticker!
             message_type.append("custom_sticker")
-            if sticker_obj := self.server_stickers.get_sticker(guild_id, sticker_id):
-                # used a server sticker
-                message_type.append("server_sticker")
-                if user_id == sticker_obj["created_by"]:
-                    continue
-                if not message_type_only:
-                    self.interactions.add_entry(
-                        sticker_obj["stid"],
-                        guild_id,
-                        sticker_obj["created_by"],
-                        channel_id,
-                        [
-                            "sticker_used",
-                        ],
-                        message.content,
-                        message.created_at,
-                        is_thread=is_thread,
-                        is_vc=is_vc,
-                        additional_keys={"og_mid": message.id},
-                    )
+            sticker_obj = self.server_stickers.get_sticker(guild_id, sticker_id)
+            if not sticker_obj:
+                continue
+            # used a server sticker
+            message_type.append("server_sticker")
+            if user_id == sticker_obj.created_by:
+                continue
+            if not message_type_only:
+                self.interactions.add_entry(
+                    sticker_obj.stid,
+                    guild_id,
+                    sticker_obj.created_by,
+                    channel_id,
+                    [
+                        "sticker_used",
+                    ],
+                    message.content,
+                    message.created_at,
+                    is_thread=is_thread,
+                    is_vc=is_vc,
+                    additional_keys={"og_mid": message.id},
+                )
 
     def _handle_emojis(
-        self, message: discord.Message, guild_id: int, message_type: list, message_type_only: bool = False
+        self, message: discord.Message, guild_id: int, message_type: list[str], message_type_only: bool = False
     ) -> None:
         """Handles emojis.
 
@@ -203,7 +205,7 @@ class OnMessage(BaseEvent):
         Returns:
             None
         """
-        emojis = re.findall(r"<:[a-zA-Z_0-9]*:\d*>", message.content)
+        emojis = re.findall(r"<:\w*:\d*>", message.content)
 
         if not emojis:
             return
@@ -220,13 +222,13 @@ class OnMessage(BaseEvent):
                 continue
 
             message_type.append("server_emoji")
-            if user_id == emoji_obj["created_by"]:
+            if user_id == emoji_obj.created_by:
                 continue
             if not message_type_only:
                 self.interactions.add_entry(
-                    emoji_obj["eid"],
+                    emoji_obj.eid,
                     guild_id,
-                    emoji_obj["created_by"],
+                    emoji_obj.created_by,
                     channel_id,
                     ["emoji_used"],
                     message.content,
@@ -240,7 +242,7 @@ class OnMessage(BaseEvent):
         self,
         message: discord.Message,
         guild_id: int,
-        message_type: list,
+        message_type: list[str],
         message_type_only: bool = False,
     ) -> bool:
         """Handles references/replies.
@@ -363,7 +365,7 @@ class OnMessage(BaseEvent):
 
         return message_type
 
-    async def post_message_actions(self, message: discord.Message, message_type: list) -> None:
+    async def post_message_actions(self, message: discord.Message, message_type: list[str]) -> None:
         """Checks message actions preconditions and executes the action if precondition is true.
 
         Args:

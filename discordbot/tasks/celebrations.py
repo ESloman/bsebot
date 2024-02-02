@@ -4,6 +4,7 @@ import asyncio
 import datetime
 from logging import Logger
 
+import pytz
 from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
@@ -30,7 +31,7 @@ class Celebrations(BaseTask):
     @tasks.loop(minutes=15)
     async def celebrations(self) -> None:  # noqa: PLR0911
         """Send celebration message."""
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         if BSE_SERVER_ID not in self.guild_ids:
             return
@@ -83,7 +84,6 @@ class Celebrations(BaseTask):
             channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
             await channel.trigger_typing()
             await channel.send(content=msg)
-            return
 
     @celebrations.before_loop
     async def before_celebrations(self) -> None:

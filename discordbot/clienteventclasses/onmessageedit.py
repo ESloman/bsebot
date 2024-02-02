@@ -7,6 +7,7 @@ import datetime
 import logging
 
 import discord
+import pytz
 
 import discordbot.clienteventclasses.onmessage
 from discordbot.bsebot import BSEBot
@@ -17,7 +18,7 @@ from discordbot.constants import BSE_BOT_ID
 class OnMessageEdit(BaseEvent):
     """Class for handling on_message_edit events from Discord."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:
@@ -77,15 +78,15 @@ class OnMessageEdit(BaseEvent):
 
         message_type = await self.on_message.message_received(after, True)
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         self.interactions.update(
-            {"_id": db_message["_id"]},
+            {"_id": db_message._id},  # noqa: SLF001
             {
                 "$set": {"content": after.content, "edited": now, "message_type": message_type},
-                "$push": {"content_old": db_message["content"]},
+                "$push": {"content_old": db_message.content},
                 "$inc": {"edit_count": 1},
             },
         )
 
-        self.logger.info("%s was edited - updated DB", after.id)
+        self.logger.debug("%s was edited - updated DB", after.id)

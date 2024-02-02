@@ -1,22 +1,36 @@
 """Transactions collection interface."""
 
+import dataclasses
 import datetime
 
+import pytz
 from pymongo.results import InsertManyResult, InsertOneResult
 
 from discordbot.bot_enums import TransactionTypes
-from mongo import interface
-from mongo.datatypes import Transaction
-from mongo.db_classes import BestSummerEverPointsDB
+from mongo.baseclass import BaseClass
+from mongo.datatypes.actions import TransactionDB
 
 
-class UserTransactions(BestSummerEverPointsDB):
+class UserTransactions(BaseClass):
     """Class for interacting with the 'usertransactions' MongoDB collection in the 'bestsummereverpoints' DB."""
 
     def __init__(self) -> None:
         """Constructor method that initialises the vault object."""
-        super().__init__()
-        self._vault = interface.get_collection(self.database, "usertransactions")
+        super().__init__(collection="usertransactions")
+
+    @staticmethod
+    def make_data_class(transaction: dict[str, any]) -> TransactionDB:
+        """Convert the dict into a dataclass.
+
+        Args:
+            transaction (dict): the transaction dict
+
+        Returns:
+            TransactionDB: the dataclass.
+        """
+        cls_fields = {f.name for f in dataclasses.fields(TransactionDB)}
+        extras = {k: v for k, v in transaction.items() if k not in cls_fields}
+        return TransactionDB(**{k: v for k, v in transaction.items() if k in cls_fields}, extras=extras)
 
     def add_transaction(
         self,
@@ -42,7 +56,7 @@ class UserTransactions(BestSummerEverPointsDB):
             "guild_id": guild_id,
             "type": transaction_type,
             "amount": amount,
-            "timestamp": datetime.datetime.now(),
+            "timestamp": datetime.datetime.now(tz=pytz.utc),
         }
 
         doc.update(kwargs)
@@ -53,7 +67,7 @@ class UserTransactions(BestSummerEverPointsDB):
         guild_id: int,
         start: datetime.datetime,
         end: datetime.datetime,
-    ) -> list[Transaction]:
+    ) -> list[TransactionDB]:
         """Get guild transactions between two timestamps.
 
         Args:
@@ -66,7 +80,7 @@ class UserTransactions(BestSummerEverPointsDB):
         """
         return self.query({"guild_id": guild_id, "timestamp": {"$gt": start, "$lt": end}}, limit=10000)
 
-    def get_all_guild_transactions(self, guild_id: int) -> list[Transaction]:
+    def get_all_guild_transactions(self, guild_id: int) -> list[TransactionDB]:
         """Get all transactions for a given guild ID.
 
         Args:

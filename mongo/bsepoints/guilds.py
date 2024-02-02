@@ -1,24 +1,44 @@
 """Guilds collection interface."""
 
 import datetime
+import typing
 
+import pytz
 from pymongo.results import InsertOneResult, UpdateResult
 
 from discordbot.bot_enums import ActivityTypes
-from mongo import interface
+from mongo.baseclass import BaseClass
 from mongo.bsepoints.points import UserPoints
-from mongo.datatypes import GuildDB
-from mongo.db_classes import BestSummerEverPointsDB
+from mongo.datatypes.guild import GuildDB
+from mongo.datatypes.user import UserDB
 
 
-class Guilds(BestSummerEverPointsDB):  # noqa: PLR0904
+class Guilds(BaseClass):  # noqa: PLR0904
     """Class for interacting with the 'guilds' MongoDB collection in the 'bestsummereverpoints' DB."""
+
+    _MINIMUM_PROJECTION_DICT: typing.ClassVar = {
+        "_id": True,
+        "guild_id": True,
+        "name": True,
+        "owner_id": True,
+    }
 
     def __init__(self) -> None:
         """Constructor method for the class. Initialises the collection object."""
-        super().__init__()
-        self._vault = interface.get_collection(self.database, "guilds")
-        self.user_points = UserPoints()
+        super().__init__(collection="guilds")
+        self.user_points: UserPoints = UserPoints()
+
+    @staticmethod
+    def make_data_class(data: dict[str, any]) -> GuildDB:
+        """Converts the data entry into a dataclass.
+
+        Args:
+            data (dict[str, any]): the given entry
+
+        Returns:
+            GuildDB: the guild data class
+        """
+        return GuildDB(**data)
 
     def get_guild(self, guild_id: int) -> GuildDB | None:
         """Gets an already created guild document from the database.
@@ -26,7 +46,9 @@ class Guilds(BestSummerEverPointsDB):  # noqa: PLR0904
         :param guild_id: int - The guild ID
         :return: a dict of the guild or None if there's no matching ID
         """
-        ret = self.query({"guild_id": guild_id}, projection={"tax_rate_history": False, "king_history": False})
+        ret: list[GuildDB] = self.query(
+            {"guild_id": guild_id}, projection={"tax_rate_history": False, "king_history": False}
+        )
         if ret:
             return ret[0]
         return None
@@ -62,13 +84,14 @@ class Guilds(BestSummerEverPointsDB):  # noqa: PLR0904
             "wordle_reminders": False,
         }
 
-        return self.insert(doc)
+        doc["_id"] = self.insert(doc)
+        return self.make_data_class(doc)
 
     #
     # Channel stuff
     #
 
-    def get_channel(self, guild_id: int) -> int:
+    def get_channel(self, guild_id: int) -> int | None:
         """Gets the bseddies channel to send messages to.
 
         Args:
@@ -77,17 +100,16 @@ class Guilds(BestSummerEverPointsDB):  # noqa: PLR0904
         Returns:
             int: the channel ID
         """
-        ret = self.query({"guild_id": guild_id}, projection={"channel": True})
-        if not ret or "channel" not in ret[0]:
+        ret: list[GuildDB] = self.query({"guild_id": guild_id}, projection={"channel": True})
+        if not ret or not ret[0].channel:
             return None
-        ret = ret[0]
-        return ret["channel"]
+        return ret[0].channel
 
     #
     # King stuff
     #
 
-    def get_king(self, guild_id: int, whole_class: bool = False) -> int | dict:
+    def get_king(self, guild_id: int, whole_class: bool = False) -> int | UserDB:
         """Gets the King ID for the specified guild.
 
         Args:
@@ -97,17 +119,16 @@ class Guilds(BestSummerEverPointsDB):  # noqa: PLR0904
         Returns:
             int | dict: king ID, or the user dict
         """
-        ret = self.query({"guild_id": guild_id}, projection={"king": True})
-        if not ret or "king" not in ret[0]:
+        ret: list[GuildDB] = self.query({"guild_id": guild_id}, projection={"king": True})
+        if not ret or not ret[0].king:
             # king ID not set
             return None
 
-        ret = ret[0]
         if not whole_class:
-            return ret["king"]
+            return ret[0].king
 
         # fetch the user dict
-        return self.user_points.find_user(ret["king"], guild_id)
+        return self.user_points.find_user(ret[0].king, guild_id)
 
     def set_king(self, guild_id: int, user_id: int) -> UpdateResult:
         """Sets the king user ID in the guild collection. Updates king history too.
@@ -119,30 +140,14 @@ class Guilds(BestSummerEverPointsDB):  # noqa: PLR0904
         Returns:
             UpdateResult: return result
         """
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
         previous_king = self.get_king(guild_id, False)
         previous_doc = {"timestamp": now, "type": ActivityTypes.KING_LOSS, "user_id": previous_king}
-        doc = {"timestamp": datetime.datetime.now(), "type": ActivityTypes.KING_GAIN, "user_id": user_id}
+        doc = {"timestamp": datetime.datetime.now(tz=pytz.utc), "type": ActivityTypes.KING_GAIN, "user_id": user_id}
         return self.update(
             {"guild_id": guild_id},
             {"$set": {"king": user_id, "king_since": now}, "$push": {"king_history": {"$each": [previous_doc, doc]}}},
         )
-
-    def get_king_time(self, guild_id: int) -> datetime.datetime:
-        """Returns the time that the current King has been King.
-
-        Args:
-            guild_id (int): the guild ID
-
-        Returns:
-            datetime.datetime: the datetime object
-        """
-        ret = self.query({"guild_id": guild_id}, projection={"king_since": True})
-        if not ret or "king" not in ret[0]:
-            # king_since not set
-            return None
-        ret = ret[0]
-        return ret["king"]
 
     def add_pledger(self, guild_id: int, user_id: int) -> UpdateResult:
         """Add a supporting pledger to the pledges list.
@@ -180,106 +185,10 @@ class Guilds(BestSummerEverPointsDB):  # noqa: PLR0904
         return self.update({"guild_id": guild_id}, {"$set": {"revolution": enabled}})
 
     #
-    # Hash stuff
-    #
-
-    def get_update_message(self, guild_id: int) -> bool:
-        """Gets whether or not we should send bot update messages to this guild. Default is false."""
-        ret = self.query({"guild_id": guild_id}, projection={"update_messages": True})
-        if not ret or "update_messages" not in ret[0]:
-            return False
-        return ret["update_messages"]
-
-    def get_last_hash(self, guild_id: int) -> str | None:
-        """Get last update hash for the specific guild.
-
-        Args:
-            guild_id (int): guild ID to get hash for
-
-        Returns:
-            Optional[str]: The hash or None
-        """
-        ret = self.query({"guild_id": guild_id}, projection={"hash": True})
-        if not ret or "hash" not in ret[0]:
-            return None
-        ret = ret[0]
-        return ret["hash"]
-
-    def set_last_hash(self, guild_id: int, _hash: str) -> UpdateResult:
-        """Sets hash of last update message.
-
-        Args:
-            guild_id (int): guild ID to set hash for
-            _hash (str): the hash value
-
-        Returns:
-            UpdateResult: _description_
-        """
-        return self.update({"guild_id": guild_id}, {"$set": {"hash": _hash}})
-
-    def get_update_channel(self, guild_id: int) -> int | None:
-        """Gets channel we should send update messages to.
-
-        Args:
-            guild_id (int): the guild ID
-
-        Returns:
-            int: the channel ID
-        """
-        return self.get_channel(guild_id)
-
-    #
-    #  Release stuff
-    #
-
-    def get_release_flag(self, guild_id: int) -> bool:
-        """_summary_.
-
-        Args:
-            guild_id (int): _description_
-
-        Returns:
-            bool: _description_
-        """
-        ret = self.query({"guild_id": guild_id}, projection={"release_notes": True})
-        if not ret or "release_notes" not in ret[0]:
-            self.update({"guild_id": guild_id}, {"$set": {"release_notes": False}})
-            return False
-        ret = ret[0]
-        return ret["release_notes"]
-
-    def get_latest_release(self, guild_id: int) -> str | None:
-        """_summary_.
-
-        Args:
-            guild_id (int): _description_
-
-        Returns:
-            bool: _description_
-        """
-        ret = self.query({"guild_id": guild_id}, projection={"release_ver": True})
-        if not ret or "release_ver" not in ret[0]:
-            return None
-        ret = ret[0]
-        return ret["release_ver"]
-
-    def set_latest_release(self, guild_id: int, release_ver: str) -> UpdateResult:
-        """_summary_.
-
-        Args:
-            guild_id (int): _description_
-            release_ver (str): _description_
-
-        Returns:
-            UpdateResult: _description_
-        """
-        return self.update({"guild_id": guild_id}, {"$set": {"release_ver": release_ver}})
-
-    #
     # Salary stuff
     #
 
-    def get_daily_minimum(self, guild_id: int) -> int:
+    def get_daily_minimum(self, guild_id: int) -> int | None:
         """Gets daily minimum for the given guild.
 
         Args:
@@ -288,10 +197,8 @@ class Guilds(BestSummerEverPointsDB):  # noqa: PLR0904
         Returns:
             int: the minimum
         """
-        ret = self.query({"guild_id": guild_id})
-        if ret:
-            return ret[0].get("daily_minimum")
-        return None
+        ret: list[GuildDB] = self.query({"guild_id": guild_id})
+        return ret[0].daily_minimum if ret else None
 
     def set_daily_minimum(self, guild_id: int, amount: int) -> UpdateResult:
         """Updates daily minimum salary for given guild ID with given amount.
@@ -321,7 +228,7 @@ class Guilds(BestSummerEverPointsDB):  # noqa: PLR0904
             "tax_rate": tax_rate,
             "supporter_tax_rate": supporter_tax_rate,
             "user_id": user_id,
-            "timestamp": datetime.datetime.now(),
+            "timestamp": datetime.datetime.now(tz=pytz.utc),
         }
         return self.update({"guild_id": guild_id}, {"$push": {"tax_rate_history": doc}})
 
@@ -350,13 +257,14 @@ class Guilds(BestSummerEverPointsDB):  # noqa: PLR0904
         Returns:
             float: tax rate as float
         """
-        ret = self.query({"guild_id": guild_id}, projection={"tax_rate": True, "supporter_tax_rate": True})
-        if not ret or "tax_rate" not in ret[0]:
+        ret: list[GuildDB] = self.query(
+            {"guild_id": guild_id}, projection={"tax_rate": True, "supporter_tax_rate": True}
+        )
+        if not ret or not ret[0].tax_rate:
             self.set_tax_rate(guild_id, 0.1, 0.0)
             self.update_tax_history(guild_id, 0.1, 0.0, 0)
             return 0.1, 0.0
-        ret = ret[0]
-        return ret["tax_rate"], ret["supporter_tax_rate"]
+        return ret[0].tax_rate, ret[0].supporter_tax_rate
 
     #
     # Ad stuff
@@ -371,11 +279,10 @@ class Guilds(BestSummerEverPointsDB):  # noqa: PLR0904
         Returns:
             dateteime: the time this guild last had a marvel comics ad
         """
-        ret = self.query({"guild_id": guild_id}, projection={"last_ad_time": True})
-        if not ret or "last_ad_time" not in ret[0]:
+        ret: list[GuildDB] = self.query({"guild_id": guild_id}, projection={"last_ad_time": True})
+        if not ret or not ret[0].last_ad_time:
             return None
-        ret = ret[0]
-        return ret["last_ad_time"]
+        return ret[0].last_ad_time
 
     def set_last_ad_time(self, guild_id: int, timestamp: datetime.datetime) -> UpdateResult:
         """Sets the last ad time.
@@ -402,11 +309,10 @@ class Guilds(BestSummerEverPointsDB):  # noqa: PLR0904
         Returns:
             dateteime: the time this guild last had a marvel comics ad
         """
-        ret = self.query({"guild_id": guild_id}, projection={"last_remind_me_suggest_time": True})
-        if not ret or "last_remind_me_suggest_time" not in ret[0]:
+        ret: list[GuildDB] = self.query({"guild_id": guild_id}, projection={"last_remind_me_suggest_time": True})
+        if not ret or not ret[0].last_remind_me_suggest_time:
             return None
-        ret = ret[0]
-        return ret["last_remind_me_suggest_time"]
+        return ret[0].last_remind_me_suggest_time
 
     def set_last_remind_me_time(self, guild_id: int, timestamp: datetime.datetime) -> UpdateResult:
         """Sets the last remind me suggested time.
@@ -483,5 +389,5 @@ class Guilds(BestSummerEverPointsDB):  # noqa: PLR0904
         Returns:
             UpdateResult: update result
         """
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
         return self.update({"guild_id": guild_id}, {"$set": {"last_rigged_time": now}})

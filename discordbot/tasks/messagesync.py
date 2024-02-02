@@ -5,6 +5,7 @@ import datetime
 from logging import Logger
 
 import discord
+import pytz
 from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
@@ -74,7 +75,7 @@ class MessageSync(BaseTask):
         Args:
             channel (discord.TextChannel | discord.Thread): the channel to check
         """
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
         offset_days = 7
         offset = now - datetime.timedelta(days=offset_days)
         before = now
@@ -82,7 +83,7 @@ class MessageSync(BaseTask):
         self.logger.info("Checking %s for unsynced messages", channel.name)
 
         _cached_messages = self.interactions.get_all_messages_for_channel(channel.guild.id, channel.id)
-        _cached_ids = [c["message_id"] for c in _cached_messages]
+        _cached_ids = [c.message_id for c in _cached_messages]
 
         sync = True
         while sync:

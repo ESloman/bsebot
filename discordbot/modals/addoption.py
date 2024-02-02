@@ -1,17 +1,23 @@
 """AddBetOption modal class."""
 
+import copy
 import datetime
+from dataclasses import asdict
 from logging import Logger
+from typing import TYPE_CHECKING
 
 import discord
+import pytz
 
-import discordbot.views.bet  # avoiding a circular import (:
 from discordbot.embedmanager import EmbedManager
-from discordbot.slashcommandeventclasses.close import CloseBet
-from discordbot.slashcommandeventclasses.place import PlaceBet
 from discordbot.utilities import PlaceHolderLogger
 from mongo.bsepoints.bets import UserBets
-from mongo.datatypes import Bet
+from mongo.datatypes.bet import BetDB
+
+if TYPE_CHECKING:
+    from discordbot.slashcommandeventclasses.close import CloseBet
+    from discordbot.slashcommandeventclasses.place import PlaceBet
+    from discordbot.views.bet import BetView
 
 
 class AddBetOption(discord.ui.Modal):
@@ -19,9 +25,10 @@ class AddBetOption(discord.ui.Modal):
 
     def __init__(
         self,
-        bet: Bet,
-        bseddies_place: PlaceBet,
-        bseddies_close: CloseBet,
+        bet: BetDB,
+        view: "BetView",
+        bseddies_place: "PlaceBet",
+        bseddies_close: "CloseBet",
         logger: Logger = PlaceHolderLogger,
         *args: tuple[any],
         **kwargs: dict[any],
@@ -40,9 +47,10 @@ class AddBetOption(discord.ui.Modal):
         self.multiple_options_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "0️⃣"]
 
         self.logger: Logger = logger
-        self.bet: Bet = bet
-        self.place: PlaceBet = bseddies_place
-        self.close: CloseBet = bseddies_close
+        self.bet: BetDB = bet
+        self.place: "PlaceBet" = bseddies_place
+        self.close: "CloseBet" = bseddies_close
+        self.view: "BetView" = view
         self.embed_manager = EmbedManager()
         self.user_bets = UserBets()
 
@@ -65,9 +73,9 @@ class AddBetOption(discord.ui.Modal):
         outcome = self.bet_options.value
         outcomes = outcome.split("\n")
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
-        if not outcomes:
+        if not outcomes or not [out for out in outcomes if out]:
             await interaction.followup.send(
                 content="You need to provide at least one additional outcome",
                 ephemeral=True,
@@ -75,7 +83,7 @@ class AddBetOption(discord.ui.Modal):
             )
             return
 
-        outcome_count = len(self.bet["options"])
+        outcome_count = len(self.bet.options)
 
         if len(outcomes) + outcome_count > 10:  # noqa: PLR2004
             await interaction.followup.send(
@@ -85,39 +93,40 @@ class AddBetOption(discord.ui.Modal):
             )
             return
 
-        self.bet["options"].extend(outcomes)
+        new_options = self.bet.options + outcomes
+        new_option_dict = {key: asdict(value) for key, value in self.bet.option_dict.items()}
+        new_option_vals = copy.deepcopy(self.bet.option_vals)
 
         for outcome in outcomes:
             _index = outcome_count + outcomes.index(outcome)
             _emoji = self.multiple_options_emojis[_index]
-            self.bet["option_dict"][_emoji] = {"val": outcome}
-            self.bet["option_vals"].append(outcome)
+            new_option_dict[_emoji] = {"val": outcome}
+            new_option_vals.append(outcome)
 
         # extend bet's timeout
-        created = self.bet["created"]
-        ending = self.bet["timeout"]
+        created = self.bet.created
+        ending = self.bet.timeout
 
         expired = now - created
         ending += expired
 
-        self.bet["timeout"] = ending
-
         self.user_bets.update(
-            {"_id": self.bet["_id"]},
+            {"_id": self.bet._id},  # noqa: SLF001
             {
                 "$set": {
-                    "options": self.bet["options"],
-                    "option_dict": self.bet["option_dict"],
+                    "options": new_options,
+                    "option_dict": new_option_dict,
                     "updated": now,
                     "timeout": ending,
-                    "option_vals": self.bet["option_vals"],
+                    "option_vals": new_option_vals,
                 },
             },
         )
+        self.bet: BetDB = self.user_bets.get_bet_from_id(self.bet.guild_id, self.bet.bet_id)
 
-        channel = await interaction.guild.fetch_channel(self.bet["channel_id"])
-        message = await channel.fetch_message(self.bet["message_id"])
+        channel = await interaction.guild.fetch_channel(self.bet.channel_id)
+        message = await channel.fetch_message(self.bet.message_id)
         embed = self.embed_manager.get_bet_embed(interaction.guild, self.bet)
-        view = discordbot.views.bet.BetView(self.bet, self.place, self.close)
-        await message.edit(embed=embed, view=view)
+        self.view.bet = self.bet
+        await message.edit(embed=embed, view=self.view)
         await interaction.followup.send(content="Sorted.", ephemeral=True)

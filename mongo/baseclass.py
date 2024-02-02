@@ -1,9 +1,11 @@
 """Mongo baseclass."""
 
+from bson import ObjectId
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.cursor import Cursor
-from pymongo.results import InsertManyResult, InsertOneResult, UpdateResult
+from pymongo.database import Database
+from pymongo.results import UpdateResult
 
 from mongo import interface
 
@@ -15,16 +17,38 @@ class BaseClass:
     If not username or password is provided - authenticate without username and password.
     """
 
-    def __init__(self, ip: str = "127.0.0.1", username: str | None = None, password: str | None = None) -> None:
+    _NO_VAULT_MESSAGE = "No vault instantiated."
+    _MINIMUM_PROJECTION_DICT: dict | None = None
+
+    def __init__(
+        self,
+        ip: str = "127.0.0.1",
+        username: str | None = None,
+        password: str | None = None,
+        database: str = "bestsummereverpoints",
+        collection: str | None = None,
+    ) -> None:
         """Initialisation method.
 
         Args:
             ip (str, optional): ip to connect to. Defaults to "127.0.0.1".
             username (str | None, optional): username. Defaults to None.
             password (str | None, optional): password. Defaults to None.
+            database (str): the database to connect to. Defaults to 'bestsummereverpoints'.
+            collection (str | None): the collection to connect to. Defaults to None.
         """
         self.cli = interface.get_client(ip, username, password)
-        self._vault = None
+        self._bse_db = interface.get_database(self.mongo_client, database)
+        self._vault = interface.get_collection(self.database, collection) if collection else None
+
+    @property
+    def database(self) -> Database:
+        """Basic database property.
+
+        Returns:
+            Database: the database
+        """
+        return self._bse_db
 
     @property
     def mongo_client(self) -> MongoClient:
@@ -39,28 +63,73 @@ class BaseClass:
     def vault(self) -> Collection:
         """Vault property.
 
+        Raises:
+            NoVaultError: raised when vault isn't instantiated
+
         Returns:
             Collection: the collection/vault
         """
+        if self._vault is None:
+            msg = self._NO_VAULT_MESSAGE
+            raise NoVaultError(msg)
         return self._vault
 
-    def insert(self, document: dict | list) -> InsertOneResult | InsertManyResult:
+    @property
+    def minimum_projection(self) -> dict | None:
+        """Minimum projection property.
+
+        Returns:
+            dict | None: None, or the minimum projection
+        """
+        return self._MINIMUM_PROJECTION_DICT
+
+    def _update_projection(self, projection: dict[str, any]) -> None:
+        """Updates the given projection with the minimum values defined.
+
+        Args:
+            projection (dict): _description_
+        """
+        if not self.minimum_projection:
+            return
+
+        if all(value is False for value in projection.values()):
+            # everything is false - make sure we're not excluding things we care about
+            for key in self.minimum_projection:
+                if key in projection:
+                    projection.pop(key)
+            return
+
+        projection.update(self.minimum_projection)
+
+    @staticmethod
+    def make_data_class(data: dict[str, any]) -> any:
+        """Method to convert query data into a dataclass.
+
+        Expected to be implemented by each collection class.
+
+        Args:
+            data (dict[str, any]): the data to convert
+
+        Raises:
+            NotImplementedError: raised when not implemented
+
+        Returns:
+            any: the dataclass type
+        """
+        raise NotImplementedError
+
+    def insert(self, document: dict | list) -> list[ObjectId]:
         """Inserts the given object into this class' Collection object.
 
         Args:
             document (dict | list): the document or list of documents to insert
 
         Raises:
-            NoVaultError: _description_
-            IncorrectDocument: _description_
-            IncorrectDocument: _description_
+            IncorrectDocument: raised when document isn't formatted correctly
 
         Returns:
-            InsertOneResult | InsertManyResult: _description_
+            list[ObjectId]: list of inserted IDs
         """
-        if self.vault is None:
-            msg = "No vault instantiated."
-            raise NoVaultError(msg)
         if not isinstance(document, list | dict):
             msg = "Given document isn't a dictionary or a list."
             raise IncorrectDocumentError(msg)
@@ -68,55 +137,47 @@ class BaseClass:
         if isinstance(document, list) and not all(isinstance(k, dict) for k in document):
             msg = "Not all documents in the list are dictionaries."
             raise IncorrectDocumentError(msg)
-        return interface.insert(self._vault, document)
 
-    def update(self, parameters: dict, updated_vals: dict, many: bool = False) -> UpdateResult:
+        return interface.insert(self.vault, document)
+
+    def update(self, parameters: dict[str, any], updated_vals: dict[str, any], many: bool = False) -> UpdateResult:
         """Updates all documents based on the given parameters with the provided values.
 
         Args:
-            parameters (dict): _description_
-            updated_vals (dict): _description_
-            many (bool, optional): _description_. Defaults to False.
-
-        Raises:
-            NoVaultError: _description_
+            parameters (dict): the parameters to match documents on
+            updated_vals (dict): the update parameters
+            many (bool, optional): whether to update many. Defaults to False.
 
         Returns:
-            UpdateResult: _description_
+            UpdateResult: the update result
         """
-        if self.vault is None:
-            msg = "No vault instantiated."
-            raise NoVaultError(msg)
         return interface.update(self.vault, parameters, updated_vals, many)
 
-    def delete(self, parameters: dict, many: bool = True) -> int:
-        """Deletes documents based on the given parameters. If many=False, only deletes one else it deletes all matches.
+    def delete(self, parameters: dict[str, any], many: bool = True) -> int:
+        """Deletes documents based on the given parameters.
+
+        If many=False, only deletes one else it deletes all matches.
 
         Args:
-            parameters (dict): _description_
-            many (bool, optional): _description_. Defaults to True.
-
-        Raises:
-            NoVaultError: _description_
+            parameters (dict): the parameters to match documents on
+            many (bool, optional): whether to delete many or not. Defaults to True.
 
         Returns:
-            int: _description_
+            int: the number of documents deleted
         """
-        if self.vault is None:
-            msg = "No vault instantiated."
-            raise NoVaultError(msg)
         return interface.delete(self.vault, parameters, many)
 
     def query(  # noqa: PLR0913, PLR0917
         self,
-        parameters: dict,
+        parameters: dict[str, any],
         limit: int = 1000,
         projection: dict | None = None,
         as_gen: bool = False,
         skip: int | None = None,
         use_paginated: bool = False,
         sort: list[tuple] | None = None,
-    ) -> list | Cursor:
+        convert: bool = True,
+    ) -> list[any] | Cursor:
         """Searches a collection for documents based on given parameters.
 
         Parameters should be dictionaries : {key : search}. Where key is an existing key in the collection and
@@ -132,28 +193,33 @@ class BaseClass:
             projection = {"_id": False}.
 
         Args:
-            parameters (dict): _description_
-            limit (int, optional): _description_. Defaults to 1000.
-            projection (dict | None, optional): _description_. Defaults to None.
-            as_gen (bool, optional): _description_. Defaults to False.
-            skip (int | None, optional): _description_. Defaults to None.
-            use_paginated (bool, optional): _description_. Defaults to False.
-            sort (list[tuple] | None, optional): _description_. Defaults to None.
-
-        Raises:
-            NoVaultError: _description_
+            parameters (dict): parameters to match documents on.
+            limit (int, optional): the max number of documents to return. Defaults to 1000.
+            projection (dict | None, optional): which keys to return/not return. Defaults to None.
+            as_gen (bool, optional): whether to return a Cursor or not. Defaults to False.
+            skip (int | None, optional): how many documents to skip. Defaults to None.
+            use_paginated (bool, optional): whether to use a paginated response. Defaults to False.
+            sort (list[tuple] | None, optional): sort options for the results. Defaults to None.
 
         Returns:
-            list | Cursor: _description_
+            list | Cursor: either a list of dataclasses, or a Cursor of the documents
         """
-        if self.vault is None:
-            msg = "No vault instantiated."
-            raise NoVaultError(msg)
-        if not projection or as_gen or not use_paginated:
-            return interface.query(self.vault, parameters, limit, projection, as_gen, skip=skip, sort=sort)
-        return self.paginated_query(parameters, limit, skip)
+        if projection is not None:
+            self._update_projection(projection)
 
-    def paginated_query(self, query_dict: dict, limit: int = 1000, skip: int = 0) -> list[dict]:
+        if as_gen:
+            return interface.query(self.vault, parameters, limit, projection, as_gen, skip=skip, sort=sort)
+        if use_paginated and not projection:
+            return [
+                self.make_data_class(data) if convert else data
+                for data in self.paginated_query(parameters, limit, skip)
+            ]
+        return [
+            self.make_data_class(data) if convert else data
+            for data in interface.query(self.vault, parameters, limit, projection, as_gen, skip=skip, sort=sort)
+        ]
+
+    def paginated_query(self, query_dict: dict[str, any], limit: int = 1000, skip: int = 0) -> list[dict[str, any]]:
         """Performs a paginated query with the specified query dict.
 
         Args:
@@ -172,51 +238,33 @@ class BaseClass:
             skip += limit
             len_ret = len(ret)
             docs.extend(ret)
-        return docs
+        return [self.make_data_class(doc) for doc in docs]
 
     def get_collection_names(self) -> None | list:
         """Gets collection names of database.
 
-        Raises:
-            NoVaultError: _description_
-
         Returns:
-            None | list: _description_
+            None | list: list of names
         """
-        if not hasattr(self, "database"):
-            msg = "No vault instantiated."
-            raise NoVaultError(msg)
         return interface.get_collection_names(self.database)
 
-    def create_index(self, field: str) -> bool | (str | list):
+    def create_index(self, field: str) -> bool | str:
         """Creates an index on the current collection.
 
         Args:
-            self (_type_): _description_
-
-        Raises:
-            NoVaultError: _description_
+            field (str): field to create an index on
 
         Returns:
-            _type_: _description_
+            bool | (str | list): False, or the string
         """
-        if self.vault is None:
-            msg = "No vault instantiated."
-            raise NoVaultError(msg)
         return interface.create_index(self.vault, field)
 
-    def get_indexes(self) -> list:
+    def get_indexes(self) -> list[str]:
         """Gets a list of indexes on the current collection.
 
-        Raises:
-            NoVaultError: _description_
-
         Returns:
-            list: _description_
+            list: list of indexes
         """
-        if self.vault is None:
-            msg = "No vault instantiated."
-            raise NoVaultError(msg)
         return interface.get_indexes(self.vault)
 
 
@@ -227,7 +275,7 @@ class NoVaultError(Exception):
         """Initialisation method.
 
         Args:
-            message (str): _description_
+            message (str): the message to raise
         """
         super().__init__(message)
 
@@ -239,6 +287,6 @@ class IncorrectDocumentError(Exception):
         """Initialisation method.
 
         Args:
-            message (str): _description_
+            message (str): the message to raise
         """
         super().__init__(message)

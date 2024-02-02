@@ -52,7 +52,7 @@ class BlessView(discord.ui.View):
             return
 
         user_db = self.user_points.find_user(interaction.user.id, interaction.guild.id)
-        points = user_db["points"]
+        points = user_db.points
         if points < value:
             msg = "Not enough eddies to give out this many."
             await interaction.response.edit_message(content=msg, view=None)
@@ -62,14 +62,10 @@ class BlessView(discord.ui.View):
         _users = self.user_points.get_all_users_for_guild(interaction.guild.id)
 
         if class_value == "all":
-            users = [u for u in _users if u.get("daily_minimum", 0) and not u.get("king", False)]
+            users = [u for u in _users if u.daily_minimum and not u.king]
         else:
             users = [
-                u
-                for u in _users
-                if u.get("daily_minimum", 0)
-                and not u.get("king", False)
-                and u.get("supporter_type", 0) == SupporterType.SUPPORTER
+                u for u in _users if u.daily_minimum and not u.king and u.supporter_type == SupporterType.SUPPORTER
             ]
 
         num_users = len(users)
@@ -83,7 +79,7 @@ class BlessView(discord.ui.View):
         eddies_given = 0
         for user in users:
             self.user_points.increment_points(
-                user["uid"],
+                user.uid,
                 interaction.guild.id,
                 eddies_each,
                 TransactionTypes.BLESS_RECEIVE,

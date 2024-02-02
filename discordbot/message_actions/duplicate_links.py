@@ -6,6 +6,7 @@ import re
 from logging import Logger
 
 import discord
+import pytz
 from pymongo.errors import OperationFailure
 
 from discordbot.bsebot import BSEBot
@@ -51,7 +52,7 @@ class DuplicateLinkAction(BaseMessageAction):
             return False
 
         # only care about dupes if the original was posted within a couple of days
-        threshold = datetime.datetime.now() - datetime.timedelta(days=2)
+        threshold = datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(days=2)
         try:
             results = self.user_interactions.query(
                 {

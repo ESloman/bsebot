@@ -13,7 +13,7 @@ from discordbot.views.pledge import PledgeView
 class Pledge(BSEddies):
     """Class for pledge command."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:
@@ -39,21 +39,21 @@ class Pledge(BSEddies):
 
         guild_id = ctx.guild.id
         guild_db = self.guilds.get_guild(guild_id)
-        king_id = guild_db["king"]
+        king_id = guild_db.king
 
         if ctx.user.id == king_id:
             message = "You are not the King - you cannot pledge."
             await ctx.respond(content=message, ephemeral=True, delete_after=10)
             return
 
-        if ctx.user.id in guild_db.get("pledged", []):
+        if ctx.user.id in guild_db.pledged:
             # can't pledge again when they've already pledged support
             message = "You're already locked in to support the King this week."
             await ctx.respond(content=message, ephemeral=True, delete_after=10)
             return
 
         user_db = self.user_points.find_user(ctx.user.id, guild_id)
-        current = user_db.get("supporter_type", 0)
+        current = user_db.supporter_type
 
         view = PledgeView(current)
 

@@ -1,0 +1,7 @@
+pytest==7.4.4
+ruff
+pytest-asyncio
+pytest-cov
+pytest-xdist
+coverage
+freezegun

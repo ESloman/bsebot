@@ -6,6 +6,7 @@ import random
 from logging import Logger
 
 import discord
+import pytz
 from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
@@ -39,7 +40,7 @@ class ThreadSpoilerTask(BaseTask):
     @tasks.loop(minutes=15)
     async def thread_mute(self) -> None:
         """Task that sends daily "remember to mute this spoiler thread" messages."""
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
         if now.hour != 8 or not (0 <= now.minute < 15):  # noqa: PLR2004
             return
 
@@ -48,20 +49,20 @@ class ThreadSpoilerTask(BaseTask):
 
         self.logger.info("Checking spoiler threads for mute messages")
         all_threads = self.spoilers.get_all_threads(BSE_SERVER_ID)
-        all_threads = [a for a in all_threads if a["active"]]
+        all_threads = [a for a in all_threads if a.active]
 
         for thread_info in all_threads:
-            self.logger.info("Checking %s for spoiler message", thread_info["name"])
+            self.logger.info("Checking %s for spoiler message", thread_info.name)
 
-            day = thread_info["day"]
+            day = thread_info.day
             if now.weekday() != day:
                 self.logger.info(
-                    "Not the right day for %s: our day: %s, required: %s", thread_info["name"], now.weekday(), day
+                    "Not the right day for %s: our day: %s, required: %s", thread_info.name, now.weekday(), day
                 )
                 # not the right day for this spoiler thread
                 continue
 
-            thread = await self.bot.fetch_channel(thread_info["thread_id"])
+            thread = await self.bot.fetch_channel(thread_info.thread_id)
             await thread.trigger_typing()
 
             message = random.choice(MESSAGES)

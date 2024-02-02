@@ -7,6 +7,7 @@ import datetime
 import logging
 
 import discord
+import pytz
 
 from discordbot.bsebot import BSEBot
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
@@ -65,6 +66,6 @@ class OnStickerCreate(BaseEvent):
                     "sticker_created",
                 ],
                 sticker.name,
-                datetime.datetime.now(),
+                datetime.datetime.now(tz=pytz.utc),
                 additional_keys={"sticker_id": sticker.id, "created_at": sticker.created_at},
             )

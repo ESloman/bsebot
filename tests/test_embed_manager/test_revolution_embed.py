@@ -1,5 +1,6 @@
 """Tests our revolution related functions in Embed Manager."""
 
+import dataclasses
 import re
 from unittest.mock import patch
 
@@ -27,10 +28,9 @@ class TestRevolutionEmbed:
     @pytest.mark.parametrize("chance", [0, 15, 30, 60, -100, 115])
     def test_get_revolution_message_different_chances(self, chance: int) -> None:
         """Tests our get_revolution_message with different chances."""
-        self.event["chance"] = chance
-
+        event = dataclasses.replace(self.event, chance=chance)
         embeds = EmbedManager()
-        embed = embeds.get_revolution_message(self.king, self.role, self.event, self.guild)
+        embed = embeds.get_revolution_message(self.king, self.role, event, self.guild)
         assert isinstance(embed, str)
 
         # make sure that chance is within 5% -> 95%
@@ -48,9 +48,8 @@ class TestRevolutionEmbed:
 
     def test_get_revolution_message_no_users(self) -> None:
         """Tests our get_revolution_message with empty participants."""
-        self.event["revolutionaries"] = []
-        self.event["supporters"] = []
+        event = dataclasses.replace(self.event, revolutionaries=[], supporters=[])
 
         embeds = EmbedManager()
-        embed = embeds.get_revolution_message(self.king, self.role, self.event, self.guild)
+        embed = embeds.get_revolution_message(self.king, self.role, event, self.guild)
         assert isinstance(embed, str)

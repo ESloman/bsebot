@@ -6,6 +6,7 @@ import datetime
 from logging import Logger
 
 import discord
+import pytz
 from discord.ext import tasks
 
 from discordbot.bot_enums import ActivityTypes
@@ -41,7 +42,7 @@ class BSEddiesKingTask(BaseTask):
 
             if event := self.events_cache.get(_guild.id):
                 # there was a recent event
-                now = datetime.datetime.now()
+                now = datetime.datetime.now(tz=pytz.utc)
                 expiry_time = event["expired"]  # type: datetime.datetime
                 if (now - expiry_time).total_seconds() < 60:  # noqa: PLR2004
                     # only been two minutes since the event - wait
@@ -53,10 +54,10 @@ class BSEddiesKingTask(BaseTask):
             guild = await self.bot.fetch_guild(_guild.id)  # type: discord.Guild
             member_ids = [member.id for member in await guild.fetch_members().flatten()]
 
-            role_id = guild_db.get("role")
+            role_id = guild_db.role
 
             role = guild.get_role(role_id)  # type: discord.Role
-            current_king = guild_db.get("king")
+            current_king = guild_db.king
             prev_king_id = None
 
             if not role and not role_id:
@@ -75,22 +76,22 @@ class BSEddiesKingTask(BaseTask):
                         )
 
             users = self.user_points.get_all_users_for_guild(guild.id)
-            users = [u for u in users if not u.get("inactive") and u["uid"] in member_ids]
-            top_user = sorted(users, key=lambda x: x["points"], reverse=True)[0]
+            users = [u for u in users if not u.inactive and u.uid in member_ids]
+            top_user = sorted(users, key=lambda x: x.points, reverse=True)[0]
 
-            if current_king is not None and top_user["uid"] == current_king:
+            if current_king is not None and top_user.uid == current_king:
                 # current king is fine
                 continue
 
-            new = guild.get_member(top_user["uid"])  # type: discord.Member
+            new = guild.get_member(top_user.uid)  # type: discord.Member
             if not new:
-                new = await guild.fetch_member(top_user["uid"])
+                new = await guild.fetch_member(top_user.uid)
 
-            supporter_role = guild.get_role(guild_db["supporter_role"])  # type: discord.Role
-            revo_role = guild.get_role(guild_db["revolutionary_role"])  # type: discord.Role
+            supporter_role = guild.get_role(guild_db.supporter_role)  # type: discord.Role
+            revo_role = guild.get_role(guild_db.revolutionary_role)  # type: discord.Role
 
             # remove KING from current user
-            if current_king is not None and top_user["uid"] != current_king:
+            if current_king is not None and top_user.uid != current_king:
                 prev_king_id = current_king
 
                 current = guild.get_member(current_king)
@@ -112,7 +113,7 @@ class BSEddiesKingTask(BaseTask):
                     current_king,
                     guild.id,
                     ActivityTypes.KING_LOSS,
-                    comment=f"Losing King to {top_user['uid']}",
+                    comment=f"Losing King to {top_user.uid}",
                 )
                 current_king = None
 
@@ -127,7 +128,7 @@ class BSEddiesKingTask(BaseTask):
                 self.logger.info("Adding a new king: %s", new.display_name)
 
                 self.activities.add_activity(
-                    top_user["uid"],
+                    top_user.uid,
                     guild.id,
                     ActivityTypes.KING_GAIN,
                     comment=f"Taking King from {prev_king_id}",
@@ -135,8 +136,8 @@ class BSEddiesKingTask(BaseTask):
 
                 await new.add_roles(role, reason="User is now KING!")
 
-                self.user_points.set_king_flag(top_user["uid"], guild.id, True)
-                self.guilds.set_king(guild.id, top_user["uid"])
+                self.user_points.set_king_flag(top_user.uid, guild.id, True)
+                self.guilds.set_king(guild.id, top_user.uid)
 
                 message = f"You are now the KING of {guild.name}! :crown:"
                 with contextlib.suppress(discord.Forbidden):
@@ -149,7 +150,7 @@ class BSEddiesKingTask(BaseTask):
                 for member in revo_role.members:
                     await member.remove_roles(revo_role)
 
-                channel_id = guild_db.get("channel")
+                channel_id = guild_db.channel
                 if not channel_id:
                     continue
 

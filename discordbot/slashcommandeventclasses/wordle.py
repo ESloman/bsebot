@@ -4,14 +4,17 @@ import contextlib
 import datetime
 import logging
 import re
+from dataclasses import asdict
 
 import discord
+import pytz
 import seaborn as sns
 
 from discordbot.bot_enums import ActivityTypes
 from discordbot.bsebot import BSEBot
 from discordbot.constants import WORDLE_SCORE_REGEX
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
+from mongo.datatypes.message import MessageDB, WordleMessageDB
 
 
 class WordleStatsShareView(discord.ui.View):
@@ -48,7 +51,7 @@ class WordleStatsShareView(discord.ui.View):
 class Wordle(BSEddies):
     """Class for handling `/wordle` commands."""
 
-    def __init__(self, client: BSEBot, guild_ids: list, logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
         """Initialisation method.
 
         Args:
@@ -62,22 +65,24 @@ class Wordle(BSEddies):
         self.command_name = "wordle"
 
     @staticmethod
-    def _add_guesses(_wordles: list[dict]) -> None:
+    def _add_guesses(wordles: list[MessageDB]) -> list[WordleMessageDB]:
         """Adds the 'guesses' key to a list of wordle interactions.
 
         Args:
             _wordles (list[dict]): the list of wordle messages
         """
-        for wordle in _wordles:
-            result = re.search(WORDLE_SCORE_REGEX, wordle["content"]).group()
+        _wordles = []
+        for wordle in wordles:
+            result = re.search(WORDLE_SCORE_REGEX, wordle.content).group()
             guesses = result.split("/")[0]
 
             guesses = 7 if guesses == "X" else int(guesses)
-            wordle["guesses"] = guesses
+            _wordles.append(WordleMessageDB(**asdict(wordle), guesses=guesses))
+        return _wordles
 
     @staticmethod
-    def _calculate_averages(_wordles: list[dict]) -> tuple[dict[int, float], dict[datetime.datetime, float]]:
-        now = datetime.datetime.now()
+    def _calculate_averages(wordles: list[WordleMessageDB]) -> tuple[dict[int, float], dict[datetime.datetime, float]]:
+        now = datetime.datetime.now(tz=pytz.utc)
         # calculate averages for all years and months
         monthly_avgs = {}
         yearly_avgs = {}
@@ -85,8 +90,8 @@ class Wordle(BSEddies):
             # we only started doing it in 2022
             year_start = now.replace(year=year, day=1, month=1, hour=0, minute=0, second=1, microsecond=0)
             year_end = year_start.replace(year=year_start.year + 1)
-            wordles_this_year = [wordle for wordle in _wordles if year_start < wordle["timestamp"] < year_end]
-            scores_this_year = [wordle["guesses"] for wordle in wordles_this_year if wordle["guesses"] != 7]  # noqa: PLR2004
+            wordles_this_year = [wordle for wordle in wordles if year_start < wordle.timestamp < year_end]
+            scores_this_year = [wordle.guesses for wordle in wordles_this_year if wordle.guesses != 7]  # noqa: PLR2004
 
             try:
                 avg_this_year = round(sum(scores_this_year) / len(scores_this_year), 2)
@@ -109,8 +114,12 @@ class Wordle(BSEddies):
                     # can't have 13 months
                     month_end = month_start.replace(year=month_start.year + 1, month=1)
 
-                wordles_this_month = [wordle for wordle in _wordles if month_start < wordle["timestamp"] < month_end]
-                scores_this_month = [wordle["guesses"] for wordle in wordles_this_month if wordle["guesses"] != 7]  # noqa: PLR2004
+                wordles_this_month = [wordle for wordle in wordles if month_start < wordle.timestamp < month_end]
+                scores_this_month = [
+                    wordle.guesses
+                    for wordle in wordles_this_month
+                    if wordle.guesses != 7  # noqa: PLR2004
+                ]
 
                 try:
                     avg_this_month = round(sum(scores_this_month) / len(scores_this_month), 2)
@@ -142,21 +151,22 @@ class Wordle(BSEddies):
 
         _all_wordles = self.interactions.query({"message_type": "wordle", "guild_id": ctx.guild.id}, limit=100000)
 
-        all_wordles = [wordle for wordle in _all_wordles if wordle["user_id"] == user_id]
-        bot_wordles = [wordle for wordle in _all_wordles if wordle["user_id"] == self.client.user.id]
-        server_wordles = [wordle for wordle in _all_wordles if wordle["user_id"] != self.client.user.id]
+        all_wordles = [wordle for wordle in _all_wordles if wordle.user_id == user_id]
+        bot_wordles = [wordle for wordle in _all_wordles if wordle.user_id == self.client.user.id]
+        server_wordles = [wordle for wordle in _all_wordles if wordle.user_id != self.client.user.id]
 
-        failed_wordles = [wordle for wordle in all_wordles if "X/6" in wordle["content"]]
+        failed_wordles = [wordle for wordle in all_wordles if "X/6" in wordle.content]
         failed_perc = round((len(failed_wordles) / len(all_wordles)) * 100, 2)
 
         msg = "# Your Wordle Stats\n\n"
         msg += f"- You have attempted `{len(all_wordles)}` and posted them to this server.\n"
         msg += f"- You have failed **{len(failed_wordles)}** (`{failed_perc}%`) of them.\n"
 
-        for wordle_list in [all_wordles, bot_wordles, server_wordles]:
-            self._add_guesses(wordle_list)
+        all_wordles = self._add_guesses(all_wordles)
+        bot_wordles = self._add_guesses(bot_wordles)
+        server_wordles = self._add_guesses(server_wordles)
 
-        scores = [wordle["guesses"] for wordle in all_wordles if wordle["guesses"] != 7]  # noqa: PLR2004
+        scores = [wordle.guesses for wordle in all_wordles if wordle.guesses != 7]  # noqa: PLR2004
         total_avg = round(sum(scores) / len(scores), 2)
 
         msg += f"- Your *lifetime* average is `{total_avg}`.\n"
@@ -170,7 +180,7 @@ class Wordle(BSEddies):
         _, bot_month_avgs = self._calculate_averages(bot_wordles)
         _, server_month_avgs = self._calculate_averages(server_wordles)
 
-        now = datetime.datetime.now()
+        now = datetime.datetime.now(tz=pytz.utc)
 
         msg += "\n## Monthly\n"
         for month in range(1, now.month):  # don't add one as we don't care about current month
@@ -181,8 +191,8 @@ class Wordle(BSEddies):
         # calculate average for this month
         month_start = now.replace(day=1, hour=0, minute=0, second=1)
         month_end = month_start + datetime.timedelta(days=31)  # month end is any day beyond today
-        wordles_this_month = [wordle for wordle in all_wordles if month_start < wordle["timestamp"] < month_end]
-        scores_this_month = [wordle["guesses"] for wordle in wordles_this_month if wordle["guesses"] != 7]  # noqa: PLR2004
+        wordles_this_month = [wordle for wordle in all_wordles if month_start < wordle.timestamp < month_end]
+        scores_this_month = [wordle.guesses for wordle in wordles_this_month if wordle.guesses != 7]  # noqa: PLR2004
         try:
             avg_this_month = round(sum(scores_this_month) / len(scores_this_month), 2)
         except ZeroDivisionError:
@@ -201,7 +211,7 @@ class Wordle(BSEddies):
 
         guesses = dict.fromkeys(range(1, 8), 0)
         for wordle in all_wordles:
-            guesses[wordle["guesses"]] += 1
+            guesses[wordle.guesses] += 1
 
         for x in range(1, 7):
             msg += f"- **{x}**: `{guesses[x]}`\n"

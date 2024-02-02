@@ -75,7 +75,7 @@ class AddBetOption(discord.ui.Modal):
 
         now = datetime.datetime.now(tz=pytz.utc)
 
-        if not outcomes:
+        if not outcomes or not [out for out in outcomes if out]:
             await interaction.followup.send(
                 content="You need to provide at least one additional outcome",
                 ephemeral=True,

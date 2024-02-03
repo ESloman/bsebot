@@ -14,6 +14,7 @@ from discordbot.utilities import PlaceHolderLogger
 from mongo.bsedataclasses import BotActivities, SpoilerThreads, WordleAttempts, WordleReminders
 from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.bets import UserBets
+from mongo.bsepoints.channels import GuildChannels
 from mongo.bsepoints.emojis import ServerEmojis
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.interactions import UserInteractions
@@ -67,6 +68,7 @@ class BaseTask(commands.Cog):
         self.spoilers = SpoilerThreads()
         self.wordles = WordleAttempts()
         self.wordle_reminders = WordleReminders()
+        self.guild_channels = GuildChannels()
 
     def _check_start_up_tasks(self) -> bool:
         """Checks start up tasks."""

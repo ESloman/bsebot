@@ -293,6 +293,36 @@ class GuildChecker(BaseTask):
             except (discord.NotFound, discord.Forbidden):
                 continue
 
+    async def _check_channels(self, guild: discord.Guild) -> None:
+        """Checks and caches our channels in the database.
+
+        Args:
+            guild (discord.Guild): the discord Guild to check.
+        """
+        channels = await guild.fetch_channels()
+        for channel in channels:
+            if channel.type == discord.ChannelType.category:
+                # don't care about caching these
+                continue
+            # get channel here from database
+            # if not in database - add it to the database
+            # update information if incorrect
+            channel_db = self.guild_channels.find_channel(guild.id, channel.id)
+            if not channel_db:
+                channel_db = self.guild_channels.insert_channel(
+                    guild.id,
+                    channel.id,
+                    channel.type,
+                    channel.name,
+                    channel.created_at,
+                    channel.category_id,
+                    channel.is_nsfw(),
+                )
+                self.logger.debug("Inserted channel %s: %s into the database", channel_db.channel_id, channel_db.name)
+                continue
+            if channel_db.name != channel.name or channel_db.is_nsfw != channel.is_nsfw():
+                self.guild_channels.update_channel(channel_db, channel.name, channel.is_nsfw())
+
     @tasks.loop(hours=12)
     async def guild_checker(self) -> None:
         """Loop that makes sure that guild information is synced correctly."""
@@ -317,6 +347,9 @@ class GuildChecker(BaseTask):
             # join all threads
             self.logger.debug("Joining threads")
             await self._check_guild_join_threads(guild)
+
+            # sync channel cache
+            await self._check_channels(guild)
 
             # sync threads in db with actual threads
             await self._check_threads(guild)

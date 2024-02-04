@@ -355,17 +355,23 @@ class StickerMock:
 
 
 class MessageMock:
-    def __init__(self, content: str = "", guild_id: int = 123, message_id: int = 987654) -> None:
+    def __init__(self, content: str = "", guild_id: int = 123, message_id: int = 987654, user_id: int = 567890) -> None:
         """Init."""
         self._id = message_id
         self._content = content
         self._guild = GuildMock(guild_id)
         self._channel = ChannelMock(654321)
+        self._author = MemberMock(user_id)
 
     @property
     def content(self) -> str:
         """Content property."""
         return self._content
+
+    @property
+    def author(self) -> MemberMock:
+        """Author property."""
+        return self._author
 
     @property
     def guild(self) -> GuildMock:
@@ -381,6 +387,21 @@ class MessageMock:
     def channel(self) -> ChannelMock:
         """Channel property."""
         return self._channel
+
+    @property
+    def channel_id(self) -> int:
+        """Channel ID property."""
+        return self._channel.id
+
+    @property
+    def message_id(self) -> int:
+        """Message ID property."""
+        return self.id
+
+    @property
+    def user_id(self) -> int:
+        """User ID property."""
+        return self._author.id
 
     @property
     def jump_url(self) -> str:

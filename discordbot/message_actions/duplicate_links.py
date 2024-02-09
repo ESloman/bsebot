@@ -46,11 +46,14 @@ class DuplicateLinkAction(BaseMessageAction):
             return False
 
         # extract link from content
-        link = next(
-            _link
-            for _link in re.split(" \n", message.content)
-            if "https" in _link and any(x in _link for x in ["twitter", "x.com", "youtube"])
-        )
+        try:
+            link = next(
+                _link
+                for _link in re.split(" \n", message.content)
+                if "https" in _link and any(x in _link for x in ["twitter", "x.com", "youtube"])
+            )
+        except StopIteration:
+            return False
 
         if "youtube" not in link:
             link = link.split("?")[0]

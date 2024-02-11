@@ -3,6 +3,7 @@
 Handles on_voice_state_change events.
 """
 
+import dataclasses
 import datetime
 import logging
 
@@ -28,7 +29,7 @@ class OnVoiceStateChange(BaseEvent):
 
     def _handle_mute_status(
         self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState, vc_doc: dict[str, any]
-    ) -> None:
+    ) -> dict[str, str] | None:
         """Handles mute status.
 
         Updates the document if the mute status has changed.
@@ -41,7 +42,7 @@ class OnVoiceStateChange(BaseEvent):
         now = datetime.datetime.now(tz=pytz.utc)
 
         if before.self_mute == after.self_mute:
-            return
+            return None
 
         self.logger.info("Toggling mute status for %s in %s", member.id, after.channel.id)
         vc_doc["muted"] = after.self_mute
@@ -52,11 +53,11 @@ class OnVoiceStateChange(BaseEvent):
         else:
             vc_doc["muted_time"] = now
 
-        vc_doc["events"].append({"timestamp": now, "event": "muted" if after.self_mute else "unmuted"})
+        return {"timestamp": now, "event": "muted" if after.self_mute else "unmuted"}
 
     def _handle_deaf_status(
         self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState, vc_doc: dict[str, any]
-    ) -> None:
+    ) -> dict[str, str] | None:
         """Handles deaf status.
 
         Updates the document if the deaf status has changed.
@@ -69,7 +70,7 @@ class OnVoiceStateChange(BaseEvent):
         now = datetime.datetime.now(tz=pytz.utc)
 
         if before.self_deaf == after.self_deaf:
-            return
+            return None
 
         self.logger.info("Toggling deaf status for %s in %s", member.id, after.channel.id)
 
@@ -80,11 +81,11 @@ class OnVoiceStateChange(BaseEvent):
         else:
             vc_doc["deafened_time"] = now
 
-        vc_doc["events"].append({"timestamp": now, "event": "deafened" if after.self_deaf else "undeafened"})
+        return {"timestamp": now, "event": "deafened" if after.self_deaf else "undeafened"}
 
     def _handle_stream_status(
         self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState, vc_doc: dict[str, any]
-    ) -> None:
+    ) -> dict[str, str] | None:
         """Handles stream status.
 
         Updates the document if the stream status has changed.
@@ -96,8 +97,8 @@ class OnVoiceStateChange(BaseEvent):
         """
         now = datetime.datetime.now(tz=pytz.utc)
 
-        if before.self_deaf == after.self_deaf:
-            return
+        if before.self_stream == after.self_stream:
+            return None
 
         self.logger.info("Toggling stream status for %s in %s", member.id, after.channel.id)
         vc_doc["streaming"] = after.self_stream
@@ -108,10 +109,9 @@ class OnVoiceStateChange(BaseEvent):
         else:
             vc_doc["streaming_time"] = now
 
-        vc_doc["events"].append({"timestamp": now, "event": "streaming" if after.self_stream else "unstreaming"})
-
         if "vc_streaming" not in vc_doc["message_type"]:
             vc_doc["message_type"].append("vc_streaming")
+        return {"timestamp": now, "event": "streaming" if after.self_stream else "unstreaming"}
 
     async def on_voice_state_change(
         self,
@@ -179,11 +179,15 @@ class OnVoiceStateChange(BaseEvent):
 
         now = datetime.datetime.now(tz=pytz.utc)
 
-        vc_doc = self.interactions.find_active_voice_state(before.channel.guild.id, member.id, before.channel.id, now)
+        vc_doc_db = self.interactions.find_active_voice_state(
+            before.channel.guild.id, member.id, before.channel.id, now
+        )
 
-        if not vc_doc:
+        if not vc_doc_db:
             self.logger.info("Couldn't find VC doc for %s, %s", member, before)
             return
+
+        vc_doc = dataclasses.asdict(vc_doc_db)
 
         vc_doc["active"] = False
         vc_doc["left"] = now
@@ -198,7 +202,7 @@ class OnVoiceStateChange(BaseEvent):
         if before.self_stream:
             vc_doc["time_streaming"] += (now - vc_doc["streaming_time"]).total_seconds()
 
-        vc_doc["events"].append({"timestamp": now, "event": "left"})
+        event = {"timestamp": now, "event": "left"}
 
         self.interactions.update(
             {"_id": vc_doc["_id"]},
@@ -210,8 +214,8 @@ class OnVoiceStateChange(BaseEvent):
                     "time_muted": vc_doc["time_muted"],
                     "time_deafened": vc_doc["time_deafened"],
                     "time_streaming": vc_doc["time_streaming"],
-                    "events": vc_doc["events"],
                 },
+                "$push": {"events": event},
             },
         )
 
@@ -226,11 +230,20 @@ class OnVoiceStateChange(BaseEvent):
             after (discord.VoiceState): voice state object
         """
         now = datetime.datetime.now(tz=pytz.utc)
-        vc_doc = self.interactions.find_active_voice_state(before.channel.guild.id, member.id, before.channel.id, now)
+        vc_doc_db = self.interactions.find_active_voice_state(
+            before.channel.guild.id, member.id, before.channel.id, now
+        )
 
-        self._handle_mute_status(member, before, after, vc_doc)
-        self._handle_deaf_status(member, before, after, vc_doc)
-        self._handle_stream_status(member, before, after, vc_doc)
+        vc_doc = dataclasses.asdict(vc_doc_db)
+
+        new_events = [
+            event
+            for event in [
+                getattr(self, attr)(member, before, after, vc_doc)
+                for attr in ("_handle_mute_status", "_handle_deaf_status", "_handle_stream_status")
+            ]
+            if event
+        ]
 
         self.interactions.update(
             {"_id": vc_doc["_id"]},
@@ -245,8 +258,8 @@ class OnVoiceStateChange(BaseEvent):
                     "streaming": vc_doc["streaming"],
                     "time_streaming": vc_doc["time_streaming"],
                     "streaming_time": vc_doc["streaming_time"],
-                    "events": vc_doc["events"],
                     "message_type": vc_doc["message_type"],
                 },
+                "$push": {"events": {"$each": new_events}},
             },
         )

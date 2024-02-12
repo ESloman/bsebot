@@ -94,7 +94,7 @@ class ConfigView(discord.ui.View):
             return False
 
         # now we check server perms
-        if not guild_db:
+        if not guild_db and guild_id:
             guild_db = self.guilds.get_guild(guild_id)
 
         # is user the server owner
@@ -325,17 +325,19 @@ class ConfigView(discord.ui.View):
             user = self.user_points.find_user(interaction.user.id, interaction.guild.id)
             daily_eddies = user.daily_eddies
             daily_summary = user.daily_summary
+            guild_id = interaction.guild.id
         else:
             users = self.user_points.find_user_guildless(interaction.user.id)
             daily_eddies = False
             daily_summary = False
+            guild_id = None
             for user in users:
                 if user.daily_eddies:
                     daily_eddies = True
                 if user.daily_summary:
                     daily_summary = True
 
-        is_admin = self._check_perms("salary_summary", interaction.user.id, interaction.guild.id)
+        is_admin = self._check_perms("salary_summary", interaction.user.id, guild_id)
 
         view = DailyMessageView(daily_eddies, is_admin, daily_summary)
         msg = (

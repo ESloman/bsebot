@@ -4,6 +4,7 @@ import asyncio
 import contextlib
 import datetime
 from logging import Logger
+from typing import TYPE_CHECKING
 
 import discord
 import pytz
@@ -12,6 +13,9 @@ from discord.ext import tasks
 from discordbot.bot_enums import ActivityTypes
 from discordbot.bsebot import BSEBot
 from discordbot.tasks.basetask import BaseTask
+
+if TYPE_CHECKING:
+    from mongo.datatypes.revolution import RevolutionEventDB
 
 
 class BSEddiesKingTask(BaseTask):
@@ -29,7 +33,7 @@ class BSEddiesKingTask(BaseTask):
         super().__init__(bot, guild_ids, logger, startup_tasks)
         self.task = self.king_checker
         self.task.start()
-        self.events_cache = {}
+        self.events_cache: dict[int, RevolutionEventDB] = {}
 
     @tasks.loop(minutes=1)
     async def king_checker(self) -> None:  # noqa: C901, PLR0912, PLR0915
@@ -43,7 +47,7 @@ class BSEddiesKingTask(BaseTask):
             if event := self.events_cache.get(_guild.id):
                 # there was a recent event
                 now = datetime.datetime.now(tz=pytz.utc)
-                expiry_time = event["expired"]  # type: datetime.datetime
+                expiry_time = event.expired  # type: datetime.datetime
                 if (now - expiry_time).total_seconds() < 60:  # noqa: PLR2004
                     # only been two minutes since the event - wait
                     self.logger.info("The recent event %s only finished %s - waiting...", event, expiry_time)

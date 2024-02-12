@@ -8,6 +8,7 @@ import os
 import random
 import re
 from logging import Logger
+from typing import TYPE_CHECKING
 
 import pytz
 from selenium import webdriver
@@ -40,6 +41,9 @@ from discordbot.wordle.constants import (
 from discordbot.wordle.data_type import WordleSolve
 from mongo.bsedataclasses import WordleAttempts
 from mongo.bsepoints.generic import DataStore
+
+if TYPE_CHECKING:
+    from mongo.datatypes.wordle import WordleAttemptDB
 
 
 class WordleSolver:
@@ -168,21 +172,21 @@ class WordleSolver:
                 starting_word = starting_word[0]
         else:
             for word in self._starting_words:
-                results = self.wordles.query({"starting_word": word})
+                results: list[WordleAttemptDB] = self.wordles.query({"starting_word": word})
 
                 if not results:
                     _attempts[word] = _default_weight
                     continue
 
-                results = sorted(results, key=lambda x: x["timestamp"])
+                results = sorted(results, key=lambda x: x.timestamp)
                 _last_timestamp = None
                 _scores = []
                 for res in results:
                     # gotta do this as we don't have guild ID here to limit
-                    if res["timestamp"] == _last_timestamp:
+                    if res.timestamp == _last_timestamp:
                         continue
-                    _last_timestamp = res["timestamp"]
-                    _scores.append(res["guess_count"])
+                    _last_timestamp = res.timestamp
+                    _scores.append(res.guess_count)
                 _attempts[word] = 6 - (sum(_scores) / len(_scores))
 
             _sorted_words = sorted(_attempts, key=lambda x: _attempts[x], reverse=True)

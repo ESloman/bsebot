@@ -4,5 +4,5 @@ pymongo==4.6.1
 xlsxwriter==3.1.9
 py-cord[speed] @ git+https://github.com/Pycord-Development/pycord
 selenium==4.17.2
-pre-commit==3.6.0
+pre-commit==3.6.1
 seaborn==0.13.2

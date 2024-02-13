@@ -165,7 +165,7 @@ class CreateBet(BSEddies):
             timeout=timeout,
         )
 
-        embed = self.embed_manager.get_bet_embed(ctx.guild, bet)
+        embed = self.embed_manager.get_bet_embed(bet)
         content = f"# {bet.title}\n_Created by <@{bet.user}>_"
 
         bet_view = BetView(bet, bseddies_place, bseddies_close)

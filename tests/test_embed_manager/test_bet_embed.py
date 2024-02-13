@@ -2,59 +2,68 @@
 
 import copy
 import dataclasses
-from unittest.mock import patch
+from unittest import mock
 
 import discord
+import pytest
 
 from discordbot.embedmanager import EmbedManager
+from mongo import interface
+from mongo.bsepoints.bets import UserBets
 from mongo.datatypes.bet import BetterDB
-from tests.mocks import embed_mocks, mongo_mocks
-from tests.mocks.discord_mocks import GuildMock
+from tests.mocks import interface_mocks
 
 
 class TestBetEmbed:
-    @staticmethod
-    def test_get_bet_embed() -> None:
+    @pytest.mark.parametrize("bet_data", interface_mocks.query_mock("userbets", {})[-10:])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_get_bet_embed(self, bet_data: dict[str, any]) -> None:
         """Tests our get_bet_embed with some standard parameters."""
-        bet = embed_mocks.get_bet()
-        guild = GuildMock(123456)
+        bet = UserBets.make_data_class(bet_data)
 
         embeds = EmbedManager()
-        embed = embeds.get_bet_embed(guild, bet)
+        embed = embeds.get_bet_embed(bet)
         assert isinstance(embed, discord.Embed)
 
-    @staticmethod
-    def test_get_bet_embed_empty() -> None:
+    @pytest.mark.parametrize("bet_data", interface_mocks.query_mock("userbets", {})[-2:])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_get_bet_embed_empty(self, bet_data: dict[str, any]) -> None:
         """Tests our get_bet_embed with no betters."""
-        bet = embed_mocks.get_bet()
+        bet = UserBets.make_data_class(bet_data)
         dataclasses.replace(bet, option_dict={})
-        guild = GuildMock(123456)
 
         embeds = EmbedManager()
-        embed = embeds.get_bet_embed(guild, bet)
+        embed = embeds.get_bet_embed(bet)
         assert isinstance(embed, discord.Embed)
 
-    @staticmethod
-    def test_get_bet_not_active() -> None:
+    @pytest.mark.parametrize("bet_data", interface_mocks.query_mock("userbets", {})[-2:])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_get_bet_not_active(self, bet_data: dict[str, any]) -> None:
         """Tests our get_bet_embed with an inactive bet."""
-        bet = embed_mocks.get_bet()
+        bet = UserBets.make_data_class(bet_data)
         bet = dataclasses.replace(bet, active=False)
-        guild = GuildMock(123456)
 
         embeds = EmbedManager()
-        embed = embeds.get_bet_embed(guild, bet)
+        embed = embeds.get_bet_embed(bet)
         assert isinstance(embed, discord.Embed)
 
-    @staticmethod
-    def test_get_bet_embed_with_empty_id() -> None:
+    @pytest.mark.parametrize("bet_data", interface_mocks.query_mock("userbets", {})[-1:])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_get_bet_embed_with_empty_id(self, bet_data: dict[str, any]) -> None:
         """Tests our get_bet_embed with an empty id."""
-        bet = embed_mocks.get_bet()
+        bet = UserBets.make_data_class(bet_data)
         new_betters = copy.deepcopy(bet.betters)
         new_betters["0"] = BetterDB(user_id=0, emoji="1", points=10)
         bet = dataclasses.replace(bet, betters=new_betters)
-        guild = GuildMock(123456)
 
         embeds = EmbedManager()
-        with patch.object(embeds, "user_points", new=mongo_mocks.UserPointsMock()):
-            embed = embeds.get_bet_embed(guild, bet)
+        embed = embeds.get_bet_embed(bet)
         assert isinstance(embed, discord.Embed)

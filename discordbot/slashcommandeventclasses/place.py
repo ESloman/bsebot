@@ -137,7 +137,7 @@ class PlaceBet(BSEddies):
             channel = guild.get_thread(bet.channel_id)
 
         message = channel.get_partial_message(bet.message_id)
-        embed = self.embed_manager.get_bet_embed(guild, bet)
+        embed = self.embed_manager.get_bet_embed(bet)
         content = f"# {bet.title}\n_Created by <@{bet.user}>_"
         await message.edit(content=content, embed=embed, view=view)
         await response.edit_message(content="Placed the bet for you!", view=None, delete_after=10)

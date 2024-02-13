@@ -62,7 +62,7 @@ class RefreshBetView(discord.ui.View):
         bet = self.bets.get_bet_from_id(interaction.guild_id, bet_id)
         channel = await interaction.guild.fetch_channel(bet.channel_id)
         message = await channel.fetch_message(bet.message_id)
-        embed = self.embed_manager.get_bet_embed(interaction.guild, bet)
+        embed = self.embed_manager.get_bet_embed(bet)
         content = f"# {bet.title}\n_Created by <@{bet.user}>_"
         view = BetView(bet, self.bseddies_place, self.bseddies_close)
         await message.edit(content=content, view=view, embed=embed)

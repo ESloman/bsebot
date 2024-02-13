@@ -77,7 +77,7 @@ class BetCloser(BaseTask):
                 # create a new bet with active set to False to pass around
                 _bet = dataclasses.replace(bet, active=False)
 
-                embed = self.embed_manager.get_bet_embed(guild_obj, bet)
+                embed = self.embed_manager.get_bet_embed(bet)
                 content = f"# {_bet.title}\n_Created by <@{_bet.user}>_"
                 bet_view = BetView(_bet, self.place, self.close)
 

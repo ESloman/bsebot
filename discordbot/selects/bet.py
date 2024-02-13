@@ -32,6 +32,25 @@ class BetSelect(Select):
         super().__init__(placeholder="Select a bet", min_values=1, max_values=1, options=options)
         self.user_bets = UserBets()
 
+    def _enable_submit_button(self) -> None:
+        """Enables the submit button."""
+        for child in self.view.children:
+            if type(child) is Button and child.label == "Submit":
+                child.disabled = False
+
+    def _enable_outcome_select(self, outcome_select: BetOutcomesSelect, bet: BetDB) -> None:
+        """Enable the outcome select."""
+        outcomes = bet.option_dict
+        outcome_select.options = [SelectOption(label=outcomes[key].val, value=key, emoji=key) for key in outcomes]
+        outcome_select.disabled = False
+        # disable the other ui elements when this changes
+        for child in self.view.children:
+            if type(child) is BetSelectAmount:
+                child.disabled = True
+
+            if type(child) is Button and child.label == "Submit":
+                child.disabled = True
+
     async def callback(self, interaction: Interaction) -> None:
         """Callback method.
 
@@ -42,25 +61,11 @@ class BetSelect(Select):
         for option in self.options:
             option.default = option.value == selected_bet
 
-        bet_obj = self.user_bets.get_bet_from_id(interaction.guild_id, selected_bet)
-        outcomes = bet_obj.option_dict
+        bet_db = self.user_bets.get_bet_from_id(interaction.guild_id, selected_bet)
 
-        outcome_select = [item for item in self.view.children if type(item) is BetOutcomesSelect]
-
-        if outcome_select:
-            outcome_select = outcome_select[0]
-            outcome_select.options = [SelectOption(label=outcomes[key].val, value=key, emoji=key) for key in outcomes]
-            outcome_select.disabled = False
-            # disable the other ui elements when this changes
-            for child in self.view.children:
-                if type(child) is BetSelectAmount:
-                    child.disabled = True
-
-                if type(child) is Button and child.label == "Submit":
-                    child.disabled = True
+        try:
+            outcome_select = next(item for item in self.view.children if type(item) is BetOutcomesSelect)
+        except StopIteration:
+            self._enable_submit_button()
         else:
-            for child in self.view.children:
-                if type(child) is Button and child.label == "Submit":
-                    child.disabled = False
-
-        await interaction.response.edit_message(view=self.view)
+            self._enable_outcome_select(outcome_select, bet_db)

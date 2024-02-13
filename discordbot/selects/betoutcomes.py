@@ -9,7 +9,7 @@ from discordbot.selects.betamount import BetSelectAmount
 class BetOutcomesSelect(Select):
     """Class for bet outcomes."""
 
-    def __init__(self, outcomes: list[str], enable_type: type = BetSelectAmount, close: bool = False) -> None:
+    def __init__(self, outcomes: list[SelectOption], enable_type: type = BetSelectAmount, close: bool = False) -> None:
         """Initialisation method.
 
         Args:

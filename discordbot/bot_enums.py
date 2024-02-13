@@ -122,6 +122,7 @@ class AwardsTypes(IntEnum):
     WORST_AVG_WORDLE = 24
     WORDLE_MOST_GREENS = 25
     WORDLE_MOST_SYMMETRICAL = 26
+    MOST_ALPHABETICAL = 27
 
 
 class StatTypes(IntEnum):

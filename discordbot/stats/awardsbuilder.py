@@ -362,6 +362,7 @@ class AwardsBuilder:
         diverse_portfolio = self.stats.most_messages_to_most_channels(*args)
         wordle_green = self.stats.wordle_most_greens(*args)
         wordle_symmetry = self.stats.wordle_most_symmetry(*args)
+        most_alphabetical = self.stats.most_alphabetical_messages(*args)
 
         awards = [
             most_messages,
@@ -387,6 +388,7 @@ class AwardsBuilder:
             single_minded,
             diverse_portfolio,
             worst_wordle,
+            most_alphabetical,
         ]
 
         if not self.annual:
@@ -462,6 +464,12 @@ class AwardsBuilder:
                 "- The _'fat fingers'_ 🖐🏼 award: "
                 f"<@!{fattest_fingers.user_id}> (`{fattest_fingers.value}` edits to "
                 f"`{fattest_fingers.kwargs["message_count"]}` messages)\n"
+            ),
+            (
+                # most alphabetical
+                "- The _'nerd alert'_ 🤓 award: "
+                f"<@!{most_alphabetical.user_id}> (`{most_alphabetical.value}` messages in "
+                "alphabetical order)\n"
             ),
             (
                 # most swears

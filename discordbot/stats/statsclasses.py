@@ -1205,6 +1205,58 @@ class StatsGatherer:  # noqa: PLR0904
 
         return self.add_annual_changes(start, data_class)
 
+    def most_alphabetical_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
+        """Calculates which user has the most alphabetical messages.
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: the stat
+        """
+        messages = self.cache.get_messages(guild_id, start, end)
+
+        message_users: dict[int, int] = {}
+        for message in messages:
+            if not message.content:
+                continue
+            message_parts = message.content.lower().split()
+            if len(message_parts) < 4:  # noqa: PLR2004
+                # don't count short messages
+                continue
+            sorted_message_parts = sorted(message_parts)
+            if message_parts == sorted_message_parts:
+                self.logger.debug(message_parts)
+                # match! message parts are alphabetical
+                if message.user_id not in message_users:
+                    message_users[message.user_id] = 0
+                message_users[message.user_id] += 1
+
+        try:
+            user = sorted(message_users, key=lambda x: message_users[x], reverse=True)[0]
+        except IndexError:
+            # no data - possible if they've never done a wordle
+            user = BSE_BOT_ID
+            message_users[BSE_BOT_ID] = 0
+
+        data_class = StatDB(
+            _id="",
+            type="award",
+            guild_id=guild_id,
+            user_id=user,
+            award=AwardsTypes.MOST_ALPHABETICAL,
+            month=start.strftime("%b %y"),
+            value=message_users[user],
+            timestamp=datetime.datetime.now(tz=pytz.utc),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="most_alphabetical",
+            annual=self.annual,
+        )
+
+        return self.add_annual_changes(start, data_class)
+
     def lowest_average_wordle_score(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates which user has the best average wordle score.
 

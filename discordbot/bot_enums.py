@@ -123,6 +123,7 @@ class AwardsTypes(IntEnum):
     WORDLE_MOST_GREENS = 25
     WORDLE_MOST_SYMMETRICAL = 26
     MOST_ALPHABETICAL = 27
+    WORDLE_MOST_YELLOWS = 28
 
 
 class StatTypes(IntEnum):

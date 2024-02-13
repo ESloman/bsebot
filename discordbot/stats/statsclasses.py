@@ -1228,7 +1228,6 @@ class StatsGatherer:  # noqa: PLR0904
                 continue
             sorted_message_parts = sorted(message_parts)
             if message_parts == sorted_message_parts:
-                self.logger.debug(message_parts)
                 # match! message parts are alphabetical
                 if message.user_id not in message_users:
                     message_users[message.user_id] = 0
@@ -1519,6 +1518,62 @@ class StatsGatherer:  # noqa: PLR0904
             short_name="wordle_most_symmetrical",
             annual=self.annual,
             kwargs={"symmetry_counts": {str(k): v for k, v in wordle_count.items()}},
+        )
+
+        return self.add_annual_changes(start, data_class)
+
+    def wordle_most_yellows(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
+        """Calculates which user had the most yellows in their wordle scores.
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            StatDB: the wordle stat
+        """
+        messages = self.cache.get_messages(guild_id, start, end)
+        wordle_messages = [m for m in messages if "wordle" in m.message_type]
+
+        wordle_count: dict[int, int] = {}
+        for wordle in wordle_messages:
+            uid = wordle.user_id
+            if uid == BSE_BOT_ID:
+                continue
+            if uid not in wordle_count:
+                wordle_count[uid] = 0
+
+            if "🟨" not in wordle.content:
+                # don't count these
+                # only interested in responses that contain yellows
+                continue
+
+            if wordle.content.count("🟨") < wordle.content.count("🟩"):
+                continue
+
+            wordle_count[uid] += 1
+
+        try:
+            user = sorted(wordle_count, key=lambda x: wordle_count[x], reverse=True)[0]
+        except IndexError:
+            # no data - possible if they've never done a wordle
+            user = BSE_BOT_ID
+            wordle_count[BSE_BOT_ID] = 0
+
+        data_class = StatDB(
+            _id="",
+            type="award",
+            guild_id=guild_id,
+            user_id=user,
+            award=AwardsTypes.WORDLE_MOST_YELLOWS,
+            month=start.strftime("%b %y"),
+            value=wordle_count[user],
+            timestamp=datetime.datetime.now(tz=pytz.utc),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="wordle_most_yellows",
+            annual=self.annual,
+            kwargs={"yellow_counts": {str(k): v for k, v in wordle_count.items()}},
         )
 
         return self.add_annual_changes(start, data_class)

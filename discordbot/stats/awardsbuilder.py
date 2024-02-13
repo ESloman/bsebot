@@ -363,6 +363,7 @@ class AwardsBuilder:
         wordle_green = self.stats.wordle_most_greens(*args)
         wordle_symmetry = self.stats.wordle_most_symmetry(*args)
         most_alphabetical = self.stats.most_alphabetical_messages(*args)
+        wordle_yellows = self.stats.wordle_most_yellows(*args)
 
         awards = [
             most_messages,
@@ -389,6 +390,7 @@ class AwardsBuilder:
             diverse_portfolio,
             worst_wordle,
             most_alphabetical,
+            wordle_yellows,
         ]
 
         if not self.annual:
@@ -489,6 +491,11 @@ class AwardsBuilder:
                 # most wordle greens score
                 "- The _'Five a Day'_ 🟩 award: "
                 f"<@!{wordle_green.user_id}> (`{wordle_green.value}` fully green wordle(s))\n"
+            ),
+            (
+                # most wordle yellows score
+                "- The _'Just One More Guess'_ 🟨 award: "
+                f"<@!{wordle_yellows.user_id}> (`{wordle_yellows.value}` more yellow than green wordle(s))\n"
             ),
             (
                 # most wordle symmetry score

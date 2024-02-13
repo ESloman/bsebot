@@ -490,6 +490,20 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_stats_most_alphabetical(self, guild_id: int) -> None:
+        """Tests StatsGatherer most_alphabetical_messages award."""
+        stats = StatsGatherer(self.logger)
+        stat = stats.most_alphabetical_messages(guild_id, self.start, self.end)
+        assert isinstance(stat, StatDB)
+
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     def test_stats_lowest_average_wordle_score(self, guild_id: int) -> None:
         """Tests StatsGatherer lowest_average_wordle_score award."""
         stats = StatsGatherer(self.logger)
@@ -522,6 +536,20 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         """Tests StatsGatherer wordle_most_greens award."""
         stats = StatsGatherer(self.logger)
         stat = stats.wordle_most_greens(guild_id, self.start, self.end)
+        assert isinstance(stat, StatDB)
+
+    @pytest.mark.parametrize(
+        "guild_id",
+        # load list of entries dynamically
+        {entry["guild_id"] for entry in interface_mocks.query_mock("guilds", {})},
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_stats_wordle_most_yellows(self, guild_id: int) -> None:
+        """Tests StatsGatherer wordle_most_yellows award."""
+        stats = StatsGatherer(self.logger)
+        stat = stats.wordle_most_yellows(guild_id, self.start, self.end)
         assert isinstance(stat, StatDB)
 
     @pytest.mark.parametrize(

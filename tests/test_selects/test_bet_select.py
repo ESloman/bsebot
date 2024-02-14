@@ -58,7 +58,30 @@ class TestBetSelect:
         Needs to run with async as the parent class tries to get the running event loop.
         """
         bets = [UserBets.make_data_class(bet) for bet in interface_mocks.query_mock("userbets", {})[-10:]]
-        _ = BetSelect(bets)
+        select = BetSelect(bets)
+        assert len(select.options) == len(bets)
+
+    async def test_init_with_one_bet(self) -> None:
+        """Tests basic init with one bet.
+
+        Needs to run with async as the parent class tries to get the running event loop.
+        """
+        bets = [UserBets.make_data_class(bet) for bet in interface_mocks.query_mock("userbets", {})[-1:]]
+        select = BetSelect(bets)
+        assert select.options[0].default
+
+    async def test_init_with_some_long_titles(self) -> None:
+        """Tests basic init with some long titles.
+
+        Needs to run with async as the parent class tries to get the running event loop.
+        """
+        bet_data = interface_mocks.query_mock("userbets", {})[-5:]
+        bets = []
+        for bet in bet_data:
+            bet["title"] += "some random long string so that we can have some really long bet titles that get truncated"
+            bets.append(UserBets.make_data_class(bet))
+        select = BetSelect(bets)
+        assert len(select.options) == len(bets)
 
     async def test_enable_submit_button(self) -> None:
         """Tests _enable_submit_button.

@@ -4,12 +4,13 @@ import discord
 
 from discordbot.bot_enums import ActivityTypes, SupporterType, TransactionTypes
 from discordbot.selects.bless import BlessAmountSelect, BlessClassSelect
+from discordbot.views.bseview import BSEView
 from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.points import UserPoints
 
 
-class BlessView(discord.ui.View):
+class BlessView(BSEView):
     """Class for Bless view."""
 
     def __init__(self) -> None:

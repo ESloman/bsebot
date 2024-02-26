@@ -8,6 +8,7 @@ import pytz
 
 from discordbot.modals.addoption import AddBetOption
 from discordbot.views.betchange import BetChange
+from discordbot.views.bseview import BSEView
 from mongo.bsepoints.bets import UserBets
 from mongo.datatypes.bet import BetDB
 
@@ -16,7 +17,7 @@ if TYPE_CHECKING:
     from discordbot.slashcommandeventclasses.place import PlaceBet
 
 
-class BetView(discord.ui.View):
+class BetView(BSEView):
     """Class for Bet view."""
 
     def __init__(self, bet: BetDB, bseddies_place: "PlaceBet", bseddies_close: "CloseBet") -> None:

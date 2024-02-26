@@ -57,6 +57,6 @@ class ActivityModal(discord.ui.Modal):
         _act = "activity" if len(activity) == 1 else "activities"
         msg = f"Your {_act} will appear as:\n\n"
         for act in activity:
-            msg += f"- `{self.placeholder.strip('.')} {act.strip()}`\n"
+            msg += f"- `{self.placeholder.strip(".")} {act.strip()}`\n"
 
         await interaction.followup.send(content=msg, ephemeral=True, view=view)

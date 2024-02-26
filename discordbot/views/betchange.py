@@ -6,6 +6,7 @@ import discord
 
 from discordbot.embedmanager import EmbedManager
 from discordbot.selects.betoutcomes import BetOutcomesSelect
+from discordbot.views.bseview import BSEView
 from mongo.bsepoints.bets import UserBets
 from mongo.datatypes.bet import BetDB
 
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
     from discordbot.views.bet import BetView
 
 
-class BetChange(discord.ui.View):
+class BetChange(BSEView):
     """Class for bet change view."""
 
     def __init__(self, bet: BetDB, view: "BetView", place: "PlaceBet", close: "CloseBet") -> None:

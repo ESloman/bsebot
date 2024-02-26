@@ -149,7 +149,7 @@ class ActivityConfirmView(discord.ui.View):
             )
             return
 
-        content = f"Submitted your activit{'y' if len(self.name) == 1 else 'ies'} to the database."
+        content = f"Submitted your activit{"y" if len(self.name) == 1 else "ies"} to the database."
         if _already_existed:
             content += f" These, (`{_already_existed}`) existed already and weren't added again."
 

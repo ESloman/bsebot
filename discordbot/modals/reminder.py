@@ -56,7 +56,7 @@ class ReminderModal(discord.ui.Modal):
 
         reminder_msg = (
             f"{interaction.user.mention} you will be reminded about **{reason}** "
-            f"at {timeout_date.strftime('%d %b %y %H:%M')}"
+            f"at {timeout_date.strftime("%d %b %y %H:%M")}"
         )
 
         if not self.message_id:

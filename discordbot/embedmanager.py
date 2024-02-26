@@ -62,7 +62,7 @@ class EmbedManager:
         if not bet.active:
             footer = "This bet is closed for new bets. Awaiting results from the bet creator."
         elif timeout := bet.timeout:
-            footer = f"This bet will stop taking bets on {timeout.strftime('%d %b %y %H:%M:%S')}."
+            footer = f"This bet will stop taking bets on {timeout.strftime("%d %b %y %H:%M:%S")}."
         else:
             footer = "Unknown state."
 
@@ -107,7 +107,7 @@ class EmbedManager:
             message += f"\n- **{users.index(user) + 1})**  {name}  :  {user.points}"
 
         message += (
-            f"\n\nLast refreshed at `{datetime.datetime.now(tz=datetime.UTC).strftime('%d %b %y %H:%M')}` "
+            f"\n\nLast refreshed at `{datetime.datetime.now(tz=datetime.UTC).strftime("%d %b %y %H:%M")}` "
             f"by _{username}_."
         )
 
@@ -151,7 +151,7 @@ class EmbedManager:
             message += f"\n- **{users.index(user) + 1})**  {name}  :  {user.high_score}"
 
         message += (
-            f"\n\nLast refreshed at `{datetime.datetime.now(tz=datetime.UTC).strftime('%d %b %y %H:%M')}` "
+            f"\n\nLast refreshed at `{datetime.datetime.now(tz=datetime.UTC).strftime("%d %b %y %H:%M")}` "
             f"by _{username}_."
         )
 
@@ -201,7 +201,7 @@ class EmbedManager:
             "The KING may spend 10% of their eddies using the _Save Thyself_ "
             "button to reduce revolution chance by 15%.\n"
             f"**Success rate**: `{chance}%`\n"
-            f"**Revolutionaries**: `{', '.join(revos) if revos else None}`\n"
-            f"**Supporters**: `{', '.join(supps) if supps else None}`\n"
+            f"**Revolutionaries**: `{", ".join(revos) if revos else None}`\n"
+            f"**Supporters**: `{", ".join(supps) if supps else None}`\n"
             f"**Locked in KING eddies**: `{event.locked_in_eddies}`"
         )

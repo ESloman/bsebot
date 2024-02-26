@@ -1,6 +1,5 @@
 """Wordle config views."""
 
-import contextlib
 
 import discord
 from bson import Int64
@@ -13,13 +12,14 @@ from discordbot.selects.wordleconfig import (
     WordleReminderSelect,
     WordleRootSelect,
 )
+from discordbot.views.bseview import BSEView
 from mongo.bsedataclasses import WordleReminders
 from mongo.bsepoints.emojis import ServerEmojis
 from mongo.bsepoints.generic import DataStore
 from mongo.bsepoints.guilds import Guilds
 
 
-class WordleRootConfigView(discord.ui.View):
+class WordleRootConfigView(BSEView):
     """Class for wordle config root view."""
 
     def __init__(self, selectable_options: list[str] | None = None) -> None:
@@ -33,19 +33,6 @@ class WordleRootConfigView(discord.ui.View):
         self.data_store = DataStore()
         self.wordle_config_select = WordleRootSelect(selectable_options)
         self.add_item(self.wordle_config_select)
-
-    async def on_timeout(self) -> None:
-        """View timeout function.
-
-        Is invoked when the message times out.
-        """
-        for child in self.children:
-            child.disabled = True
-
-        with contextlib.suppress(discord.NotFound, AttributeError):
-            # not found is when the message has already been deleted
-            # don't need to edit in that case
-            await self.message.edit(content="This timed out - please _place_ another one", view=None)
 
     async def update(self, interaction: discord.Interaction) -> None:
         """View update method.
@@ -139,7 +126,7 @@ class WordleRootConfigView(discord.ui.View):
         await interaction.response.edit_message(content="Cancelled", view=None, delete_after=2)
 
 
-class WordleConfigView(discord.ui.View):
+class WordleConfigView(BSEView):
     """Class for wordle config view."""
 
     def __init__(self, guild_id: int) -> None:
@@ -166,19 +153,6 @@ class WordleConfigView(discord.ui.View):
         self.add_item(self.active_select)
         self.add_item(self.channel_select)
         self.add_item(self.reminder_select)
-
-    async def on_timeout(self) -> None:
-        """View timeout function.
-
-        Is invoked when the message times out.
-        """
-        for child in self.children:
-            child.disabled = True
-
-        with contextlib.suppress(discord.NotFound, AttributeError):
-            # not found is when the message has already been deleted
-            # don't need to edit in that case
-            await self.message.edit(content="This timed out - please _place_ another one", view=None)
 
     async def update(self, interaction: discord.Interaction) -> None:
         """View update method.
@@ -253,7 +227,7 @@ class WordleConfigView(discord.ui.View):
         await interaction.response.edit_message(content="Cancelled", view=None, delete_after=2)
 
 
-class WordleEmojiReactionConfigView(discord.ui.View):
+class WordleEmojiReactionConfigView(BSEView):
     """Class for wordle emoji reaction config view."""
 
     def __init__(self, guild_id: int) -> None:
@@ -345,7 +319,7 @@ class WordleEmojiReactionConfigView(discord.ui.View):
         await interaction.response.edit_message(content="Cancelled", view=None, delete_after=2)
 
 
-class WordleReminderConfirmView(discord.ui.View):
+class WordleReminderConfirmView(BSEView):
     """Class for wordle reminder config view."""
 
     def __init__(self, name: str) -> None:
@@ -357,19 +331,6 @@ class WordleReminderConfirmView(discord.ui.View):
         super().__init__(timeout=120)
         self.name = name
         self.wordle_reminders = WordleReminders()
-
-    async def on_timeout(self) -> None:
-        """View timeout function.
-
-        Is invoked when the message times out.
-        """
-        for child in self.children:
-            child.disabled = True
-
-        with contextlib.suppress(discord.NotFound, AttributeError):
-            # not found is when the message has already been deleted
-            # don't need to edit in that case
-            await self.message.edit(content="This timed out - please _place_ another one", view=None)
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=4, disabled=False)
     async def submit_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:

@@ -4,10 +4,11 @@ import discord
 from bson import Int64
 
 from discordbot.selects.bseddiesconfig import BSEddiesChannelSelect, BSEddiesRoleSelect
+from discordbot.views.bseview import BSEView
 from mongo.bsepoints.guilds import Guilds
 
 
-class BSEddiesConfigView(discord.ui.View):
+class BSEddiesConfigView(BSEView):
     """Class for BSEddies config view."""
 
     def __init__(self) -> None:

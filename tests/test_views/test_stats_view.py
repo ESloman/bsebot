@@ -5,7 +5,7 @@ import pytest
 from discordbot.slashcommandeventclasses.stats import Stats
 from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.stats import StatsView
-from tests.mocks import bsebot_mocks
+from tests.mocks import bsebot_mocks, discord_mocks
 
 
 class TestStatsView:
@@ -27,3 +27,9 @@ class TestStatsView:
         Needs to run with async as the parent class tries to get the running event loop.
         """
         _ = StatsView(self.stats)
+
+    async def test_cancel_callback(self) -> None:
+        """Tests cancel callback."""
+        view = StatsView(self.stats)
+        interaction = discord_mocks.InteractionMock(123456)
+        await view.cancel_callback(None, interaction)

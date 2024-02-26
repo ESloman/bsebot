@@ -3,11 +3,12 @@
 import discord
 
 from discordbot.selects.salaryconfig import SalaryMinimumSelect
+from discordbot.views.bseview import BSEView
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.points import UserPoints
 
 
-class SalaryConfigView(discord.ui.View):
+class SalaryConfigView(BSEView):
     """Class for salary config view."""
 
     def __init__(self, amount: int | None = None) -> None:

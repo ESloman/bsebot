@@ -33,6 +33,12 @@ class TestConfigView:
         """
         _ = ConfigView(self.bsebot)
 
+    async def test_cancel_callback(self) -> None:
+        """Tests cancel callback."""
+        view = ConfigView(self.bsebot)
+        interaction = discord_mocks.InteractionMock(123456)
+        await view.cancel_callback(None, interaction)
+
     @pytest.mark.parametrize("user_data", interface_mocks.query_mock("userpoints", {})[-5:])
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)

@@ -38,6 +38,15 @@ class TestBetChange:
         view = BetView(bet, self.place, self.close)
         _ = BetChange(bet, view, self.place, self.close)
 
+    @pytest.mark.parametrize("bet_data", interface_mocks.query_mock("userbets", {})[-1:])
+    async def test_cancel_callback(self, bet_data: dict[str, any]) -> None:
+        """Tests cancel callback."""
+        bet = UserBets.make_data_class(bet_data)
+        bet_view = BetView(bet, self.place, self.close)
+        view = BetChange(bet, bet_view, self.place, self.close)
+        interaction = discord_mocks.InteractionMock(123456)
+        await view.cancel_callback(None, interaction)
+
     @pytest.mark.parametrize("bet_data", interface_mocks.query_mock("userbets", {})[-5:])
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)

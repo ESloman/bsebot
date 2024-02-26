@@ -10,6 +10,7 @@ from discordbot.constants import CREATOR
 from discordbot.selects.config import ConfigSelect
 from discordbot.selects.wordleconfig import WordleRootSelect
 from discordbot.utilities import PlaceHolderLogger
+from discordbot.views.bseview import BSEView
 from discordbot.views.config_activities import ActivityConfigView
 from discordbot.views.config_admin import AdminConfigView
 from discordbot.views.config_autogenerate import AutoGenerateConfigView
@@ -26,7 +27,7 @@ from mongo.bsepoints.points import UserPoints
 from mongo.datatypes.guild import GuildDB
 
 
-class ConfigView(discord.ui.View):
+class ConfigView(BSEView):
     """Class for config view."""
 
     def __init__(

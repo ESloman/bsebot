@@ -3,10 +3,11 @@
 import discord
 
 from discordbot.selects.salaryconfig import DailySalaryMessageSelect, DailySalarySummaryMessageSelect
+from discordbot.views.bseview import BSEView
 from mongo.bsepoints.points import UserPoints
 
 
-class DailyMessageView(discord.ui.View):
+class DailyMessageView(BSEView):
     """Class for daily message config view."""
 
     def __init__(self, enabled: bool = False, is_admin: bool = False, summary_enabled: bool = False) -> None:

@@ -26,8 +26,7 @@ class BSEView(discord.ui.View):
 
         Is invoked when the message times out.
         """
-        for child in self.children:
-            child.disabled = True
+        self.disable_all_items()
 
         with contextlib.suppress(discord.NotFound, AttributeError):
             # not found is when the message has already been deleted

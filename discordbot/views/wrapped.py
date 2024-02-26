@@ -2,8 +2,10 @@
 
 import discord
 
+from discordbot.views.bseview import BSEView
 
-class WrappedView(discord.ui.View):
+
+class WrappedView(BSEView):
     """Class for wrapped view."""
 
     def __init__(self) -> None:

@@ -8,13 +8,14 @@ import discord
 from discordbot.selects.bet import BetSelect
 from discordbot.selects.betamount import BetSelectAmount
 from discordbot.selects.betoutcomes import BetOutcomesSelect
+from discordbot.views.bseview import BSEView
 from mongo.datatypes.bet import BetDB
 
 if TYPE_CHECKING:
     from discordbot.slashcommandeventclasses.place import PlaceBet
 
 
-class PlaceABetView(discord.ui.View):
+class PlaceABetView(BSEView):
     """Class for place bet view."""
 
     def __init__(self, bets: list[BetDB], user_eddies: int, place: "PlaceBet") -> None:

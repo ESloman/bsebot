@@ -4,7 +4,7 @@ import pytest
 
 from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.pledge import PledgeView
-from tests.mocks import bsebot_mocks
+from tests.mocks import bsebot_mocks, discord_mocks
 
 
 class TestPledgeView:
@@ -25,3 +25,9 @@ class TestPledgeView:
         Needs to run with async as the parent class tries to get the running event loop.
         """
         _ = PledgeView()
+
+    async def test_cancel_callback(self) -> None:
+        """Tests cancel callback."""
+        view = PledgeView()
+        interaction = discord_mocks.InteractionMock(123456)
+        await view.cancel_callback(None, interaction)

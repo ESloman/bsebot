@@ -10,6 +10,7 @@ import pytz
 from discordbot.bot_enums import ActivityTypes, TransactionTypes
 from discordbot.bsebot import BSEBot
 from discordbot.embedmanager import EmbedManager
+from discordbot.views.bseview import BSEView
 from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.points import UserPoints
@@ -17,7 +18,7 @@ from mongo.bseticketedevents import RevolutionEvent
 from mongo.datatypes.revolution import RevolutionEventDB
 
 
-class RevolutionView(discord.ui.View):
+class RevolutionView(BSEView):
     """Class for revolution view."""
 
     _SAVE_THYSELF_BUTTON_TEXT = "Save THYSELF"

@@ -3,11 +3,12 @@
 import discord
 
 from discordbot.selects.threadconfig import ThreadActiveSelect, ThreadConfigSelect, ThreadDaySelect
+from discordbot.views.bseview import BSEView
 from mongo.bsedataclasses import SpoilerThreads
 from mongo.datatypes.thread import ThreadDB
 
 
-class ThreadConfigView(discord.ui.View):
+class ThreadConfigView(BSEView):
     """Class for thread config view."""
 
     def __init__(self, threads: list[ThreadDB]) -> None:

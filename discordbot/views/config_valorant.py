@@ -4,10 +4,11 @@ import discord
 from bson import Int64
 
 from discordbot.selects.valorantconfig import ValorantActiveSelect, ValorantChannelSelect, ValorantRoleSelect
+from discordbot.views.bseview import BSEView
 from mongo.bsepoints.guilds import Guilds
 
 
-class ValorantConfigView(discord.ui.View):
+class ValorantConfigView(BSEView):
     """Class for valorant config views."""
 
     def __init__(self, guild_id: int) -> None:

@@ -4,12 +4,13 @@ import discord
 
 from discordbot.bot_enums import ActivityTypes
 from discordbot.selects.taxrate import TaxRateSelect
+from discordbot.views.bseview import BSEView
 from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.points import UserPoints
 
 
-class TaxRateView(discord.ui.View):
+class TaxRateView(BSEView):
     """Class for tax rate view."""
 
     def __init__(self, current_tax: float, supporter_tax: float) -> None:

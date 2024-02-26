@@ -3,11 +3,12 @@
 import discord
 
 from discordbot.selects.revolutionconfig import RevolutionEnableSelect
+from discordbot.views.bseview import BSEView
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.points import UserPoints
 
 
-class RevolutionConfigView(discord.ui.View):
+class RevolutionConfigView(BSEView):
     """Class for revolution config view."""
 
     def __init__(self, enabled: bool = True) -> None:

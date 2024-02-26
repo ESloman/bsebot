@@ -3,9 +3,10 @@
 import discord
 
 from discordbot.embedmanager import EmbedManager
+from discordbot.views.bseview import BSEView
 
 
-class LeaderBoardView(discord.ui.View):
+class LeaderBoardView(BSEView):
     """Class for leaderboard view."""
 
     def __init__(self, embed_manager: EmbedManager) -> None:

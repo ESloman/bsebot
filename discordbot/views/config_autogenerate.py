@@ -1,16 +1,16 @@
 """Autogenerate config views."""
 
-import contextlib
 
 import discord
 
 from discordbot.modals.autogenerate import AddBet, AddCategory
 from discordbot.selects.autogenerateconfig import AutogenerateCategorySelect, AutogenerateConfigSelect
 from discordbot.utilities import PlaceHolderLogger
+from discordbot.views.bseview import BSEView
 from mongo.bsepoints.guilds import Guilds
 
 
-class AutoGenerateConfigView(discord.ui.View):
+class AutoGenerateConfigView(BSEView):
     """Class for autogenerate config view."""
 
     def __init__(self) -> None:
@@ -22,19 +22,6 @@ class AutoGenerateConfigView(discord.ui.View):
         self.category_select = AutogenerateCategorySelect()
 
         self.add_item(self.auto_config)
-
-    async def on_timeout(self) -> None:
-        """View timeout function.
-
-        Is invoked when the message times out.
-        """
-        for child in self.children:
-            child.disabled = True
-
-        with contextlib.suppress(discord.NotFound, AttributeError):
-            # not found is when the message has already been deleted
-            # don't need to edit in that case
-            await self.message.edit(content="This timed out - please _place_ another one", view=None)
 
     async def update(self, interaction: discord.Interaction) -> None:  # noqa: C901, PLR0912
         """View update method.

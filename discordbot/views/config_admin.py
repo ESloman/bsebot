@@ -3,10 +3,11 @@
 import discord
 
 from discordbot.selects.adminconfig import AdminUserSelect
+from discordbot.views.bseview import BSEView
 from mongo.bsepoints.guilds import Guilds
 
 
-class AdminConfigView(discord.ui.View):
+class AdminConfigView(BSEView):
     """Class for admin config view."""
 
     def __init__(self) -> None:

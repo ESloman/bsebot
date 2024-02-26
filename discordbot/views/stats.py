@@ -5,12 +5,13 @@ from typing import TYPE_CHECKING
 import discord
 
 from discordbot.selects.stats import StatsModeSelect
+from discordbot.views.bseview import BSEView
 
 if TYPE_CHECKING:
     from discordbot.slashcommandeventclasses.stats import Stats
 
 
-class StatsView(discord.ui.View):
+class StatsView(BSEView):
     """Class for stats view."""
 
     def __init__(

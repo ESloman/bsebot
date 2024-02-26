@@ -6,13 +6,14 @@ import discord
 
 from discordbot.selects.bet import BetSelect
 from discordbot.selects.betoutcomes import BetOutcomesSelect
+from discordbot.views.bseview import BSEView
 from mongo.datatypes.bet import BetDB
 
 if TYPE_CHECKING:
     from discordbot.slashcommandeventclasses.close import CloseBet
 
 
-class CloseABetView(discord.ui.View):
+class CloseABetView(BSEView):
     """Class for closing a bet view."""
 
     def __init__(self, bets: list[BetDB], close: "CloseBet") -> None:

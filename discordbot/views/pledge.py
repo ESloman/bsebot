@@ -4,12 +4,13 @@ import discord
 
 from discordbot.bot_enums import ActivityTypes, SupporterType
 from discordbot.selects.pledge import PledgeSelect
+from discordbot.views.bseview import BSEView
 from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.points import UserPoints
 
 
-class PledgeView(discord.ui.View):
+class PledgeView(BSEView):
     """Class for pledge view."""
 
     def __init__(self, current: SupporterType = None) -> None:
@@ -118,7 +119,7 @@ class PledgeView(discord.ui.View):
 
     @staticmethod
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.gray, emoji="✖️", row=2)
-    async def close_callback(_: discord.ui.Button, interaction: discord.Interaction) -> None:
+    async def cancel_callback(_: discord.ui.Button, interaction: discord.Interaction) -> None:
         """Button callback.
 
         Args:

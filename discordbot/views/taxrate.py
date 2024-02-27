@@ -71,7 +71,7 @@ class TaxRateView(BSEView):
 
     @staticmethod
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.gray, emoji="✖️", row=2)
-    async def close_callback(_: discord.ui.Button, interaction: discord.Interaction) -> None:
+    async def cancel_callback(_: discord.ui.Button, interaction: discord.Interaction) -> None:
         """Button callback.
 
         Args:

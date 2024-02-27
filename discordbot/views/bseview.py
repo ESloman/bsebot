@@ -21,6 +21,13 @@ class BSEView(discord.ui.View):
         """
         super().__init__(*args, timeout=timeout, disable_on_timeout=disable_on_timeout, **kwargs)
 
+    async def update(self, interaction: discord.Interaction) -> None:
+        """Method for updating the view.
+
+        Needs to be implemented by the subclasses.
+        """
+        raise NotImplementedError
+
     async def on_timeout(self) -> None:
         """View timeout function.
 
@@ -32,3 +39,15 @@ class BSEView(discord.ui.View):
             # not found is when the message has already been deleted
             # don't need to edit in that case
             await self.message.edit(content="This command timed out - please place another one.", view=None)
+
+    def toggle_button(self, disabled: bool, label: str = "Submit") -> None:
+        """Toggles a button.
+
+        Args:
+            disabled (bool): whether the button should be disabled or not
+            label (str): the button label to use as an identifier
+        """
+        for child in self.children:
+            if type(child) is discord.ui.Button and child.label == label:
+                child.disabled = disabled
+                break

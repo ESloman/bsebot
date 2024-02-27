@@ -27,11 +27,7 @@ class AdminConfigView(BSEView):
             interaction (discord.Interaction): _description_
         """
         selected = self.admins_select.values
-
-        for child in self.children:
-            if type(child) is discord.ui.Button and child.label == "Submit":
-                child.disabled = not bool(selected)
-                break
+        self.toggle_submit_button(not bool(selected))
 
         await interaction.response.edit_message(content=interaction.message.content, view=self)
 

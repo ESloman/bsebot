@@ -47,11 +47,7 @@ class StatsView(BSEView):
                     value = opt.value
                     break
 
-        for child in self.children:
-            if type(child) is discord.ui.Button and child.label == "Submit":
-                child.disabled = not bool(value)
-                break
-
+        self.toggle_submit_button(not bool(value))
         await interaction.response.edit_message(content=interaction.message.content, view=self)
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=3, disabled=False)

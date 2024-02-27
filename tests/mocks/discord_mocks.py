@@ -445,7 +445,7 @@ class FollowUpMock:
 
 
 class InteractionMock:
-    def __init__(self, guild_id: int | None, user_id: int = 123456) -> None:
+    def __init__(self, guild_id: int | None = None, user_id: int = 123456) -> None:
         """Init."""
         if guild_id is None:
             guild_id = 123456

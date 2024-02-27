@@ -25,7 +25,7 @@ class TestTaxRateView:
         interaction = discord_mocks.InteractionMock(654321)
         await view.cancel_callback(None, interaction)
 
-    @pytest.mark.parametrize("guild_id", {guild["guild_id"] for guild in interface_mocks.query_mock("guilds", {})})
+    @pytest.mark.parametrize("guild_id", [guild["guild_id"] for guild in interface_mocks.query_mock("guilds", {})])
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
@@ -50,7 +50,7 @@ class TestTaxRateView:
 
         await view.submit_callback.callback(interaction)
 
-    @pytest.mark.parametrize("guild_id", {guild["guild_id"] for guild in interface_mocks.query_mock("guilds", {})})
+    @pytest.mark.parametrize("guild_id", [guild["guild_id"] for guild in interface_mocks.query_mock("guilds", {})])
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)

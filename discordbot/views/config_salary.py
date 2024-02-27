@@ -24,12 +24,6 @@ class SalaryConfigView(BSEView):
         self.min_select = SalaryMinimumSelect(amount)
         self.add_item(self.min_select)
 
-    async def update(self, interaction: discord.Interaction) -> None:
-        """View update method.
-
-        Can be called by child types when something changes.
-        """
-
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=4)
     async def submit_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:
         """Button callback.

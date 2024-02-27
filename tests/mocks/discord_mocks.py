@@ -325,7 +325,11 @@ class GuildMock:
             channels[2]._type = discord.ChannelType.voice
         return channels
 
-    async def fetch_channel(self, _id: int):
+    def get_channel(self, _id: int) -> ChannelMock:
+        """Mock for get_channel."""
+        return ChannelMock(_id)
+
+    async def fetch_channel(self, _id: int) -> ChannelMock:
         """Mock for fetch_channel."""
         return ChannelMock(_id)
 

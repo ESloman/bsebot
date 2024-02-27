@@ -228,7 +228,7 @@ class TestConfigView:
         assert isinstance(view, WordleRootConfigView)
 
     @pytest.mark.parametrize("user_data", interface_mocks.query_mock("userpoints", {})[-10:])
-    @pytest.mark.parametrize("value", {value[1] for value in ConfigSelect._values})
+    @pytest.mark.parametrize("value", [value[1] for value in ConfigSelect._values])
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)

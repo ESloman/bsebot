@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 class AutoGenerateView(BSEView):
     """Class for Autogenerate view."""
 
-    def __init__(self, auto_class: object) -> None:
+    def __init__(self, auto_class: "AutoGenerate") -> None:
         """Initialisation method.
 
         Args:

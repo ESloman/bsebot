@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 class RefreshBetView(BSEView):
     """Class for refresh bet view."""
 
-    def __init__(self, bets: list[BetDB], place: object, close: object) -> None:
+    def __init__(self, bets: list[BetDB], place: "PlaceBet", close: "CloseBet") -> None:
         """Initialisation method.
 
         Args:

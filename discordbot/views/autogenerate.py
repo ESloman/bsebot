@@ -151,7 +151,7 @@ class AutoGenerateView(BSEView):
             interaction,
             self.data.get("type"),
             self.data.get("method"),
-            self.data.get("number"),
+            int(self.data.get("number", 3)),
             self.data.get("_ids"),
             self.data.get("timeout"),
             self.data.get("channel"),

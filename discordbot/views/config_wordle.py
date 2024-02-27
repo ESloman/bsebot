@@ -1,6 +1,5 @@
 """Wordle config views."""
 
-
 import discord
 from bson import Int64
 

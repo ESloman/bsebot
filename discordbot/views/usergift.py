@@ -1,6 +1,5 @@
 """User gift views."""
 
-
 import discord
 
 from discordbot.selects.giftamount import GiftAmount

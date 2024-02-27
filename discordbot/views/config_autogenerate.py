@@ -1,6 +1,5 @@
 """Autogenerate config views."""
 
-
 import discord
 
 from discordbot.modals.autogenerate import AddBet, AddCategory

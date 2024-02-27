@@ -1,6 +1,5 @@
 """Place bet views."""
 
-import contextlib
 from typing import TYPE_CHECKING
 
 import discord
@@ -39,19 +38,6 @@ class PlaceABetView(BSEView):
         self.add_item(BetSelectAmount(user_eddies))
 
         self.place: "PlaceBet" = place
-
-    async def on_timeout(self) -> None:
-        """View timeout function.
-
-        Is invoked when the message times out.
-        """
-        for child in self.children:
-            child.disabled = True
-
-        with contextlib.suppress(discord.NotFound, AttributeError):
-            # not found is when the message has already been deleted
-            # don't need to edit in that case
-            await self.message.edit(content="This `place` command timed out - please _place_ another one", view=None)
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=3, disabled=True, emoji="💰")
     async def submit_button_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:

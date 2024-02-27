@@ -1,6 +1,5 @@
 """Views for config activities."""
 
-
 import discord
 
 from discordbot.modals.activities import ActivityModal

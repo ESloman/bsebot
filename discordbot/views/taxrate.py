@@ -37,15 +37,11 @@ class TaxRateView(BSEView):
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        try:
-            value = float(self.tax_select.values[0])
-        except (IndexError, AttributeError, TypeError):
-            value = float(next(o for o in self.tax_select.options if o.default).value)
+        value = self.get_select_value(self.tax_select)
+        value = float(value) if value is not None else 0.25
 
-        try:
-            supporter_value = float(self.supporter_tax_select.values[0])
-        except (IndexError, AttributeError, TypeError):
-            supporter_value = float(next(o for o in self.supporter_tax_select.options if o.default).value)
+        supporter_value = self.get_select_value(self.supporter_tax_select)
+        supporter_value = float(supporter_value) if supporter_value is not None else 0.1
 
         self.activities.add_activity(
             interaction.user.id,

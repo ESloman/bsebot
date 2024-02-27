@@ -1,5 +1,7 @@
 """Refresh bet views."""
 
+from typing import TYPE_CHECKING
+
 import discord
 
 from discordbot.embedmanager import EmbedManager
@@ -9,22 +11,26 @@ from discordbot.views.bseview import BSEView
 from mongo.bsepoints.bets import UserBets
 from mongo.datatypes.bet import BetDB
 
+if TYPE_CHECKING:
+    from discordbot.slashcommandeventclasses.close import CloseBet
+    from discordbot.slashcommandeventclasses.place import PlaceBet
+
 
 class RefreshBetView(BSEView):
     """Class for refresh bet view."""
 
-    def __init__(self, bets: list[BetDB], place: callable, close: callable) -> None:
+    def __init__(self, bets: list[BetDB], place: object, close: object) -> None:
         """Initialisation method.
 
         Args:
-            bets (list): the bet IDs
-            place (callable): the place function
-            close (callable): the close function
+            bets (list[BetDB]): the bet IDs
+            place (PlaceBet): the place function
+            close (CloseBet): the close function
         """
         super().__init__(timeout=60)
         self.bets = UserBets()
-        self.bseddies_place = place
-        self.bseddies_close = close
+        self.bseddies_place: PlaceBet = place
+        self.bseddies_close: CloseBet = close
         self.embed_manager = EmbedManager()
         self.bet_select = BetSelect(bets)
         self.add_item(self.bet_select)
@@ -37,12 +43,7 @@ class RefreshBetView(BSEView):
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        try:
-            bet_id = self.bet_select.values[0]
-        except (IndexError, AttributeError, TypeError):
-            # this means that this was default
-            bet_id = self.bet_select.options[0].value
-
+        bet_id = self.get_select_value(self.bet_select)
         bet = self.bets.get_bet_from_id(interaction.guild_id, bet_id)
         channel = await interaction.guild.fetch_channel(bet.channel_id)
         message = await channel.fetch_message(bet.message_id)

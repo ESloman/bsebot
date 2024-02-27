@@ -32,12 +32,10 @@ class BlessView(BSEView):
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        try:
-            value = int(self.amount_select.values[0])
-        except (IndexError, AttributeError, TypeError):
-            value = int(next(o for o in self.amount_select.options if o.default).value)
+        value = self.get_select_value(self.amount_select)
+        value = int(value) if value else 100
 
-        class_value = next(o for o in self.class_select.options if o.default).value
+        class_value = self.get_select_value(self.class_select)
 
         self.activities.add_activity(
             interaction.user.id,

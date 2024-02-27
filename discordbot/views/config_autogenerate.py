@@ -22,7 +22,7 @@ class AutoGenerateConfigView(BSEView):
 
         self.add_item(self.auto_config)
 
-    async def update(self, interaction: discord.Interaction) -> None:  # noqa: C901, PLR0912
+    async def update(self, interaction: discord.Interaction) -> None:
         """View update method.
 
         Can be called by child types when something changes.
@@ -30,22 +30,8 @@ class AutoGenerateConfigView(BSEView):
         Args:
             interaction (discord.Interaction): _description_
         """
-        try:
-            auto_val = self.auto_config.values[0]
-        except (IndexError, AttributeError, TypeError):
-            for opt in self.auto_config.options:
-                if opt.default:
-                    auto_val = opt.value
-                    break
-
-        cat_val = None
-        try:
-            cat_val = self.category_select.values[0]
-        except (IndexError, AttributeError, TypeError):
-            for opt in self.auto_config.options:
-                if opt.default:
-                    cat_val = opt.value
-                    break
+        auto_val = self.get_select_value(self.auto_config)
+        cat_val = self.get_select_value(self.category_select)
 
         if auto_val == "category":
             # remove category select as we don't need it
@@ -55,20 +41,14 @@ class AutoGenerateConfigView(BSEView):
             except Exception as exc:
                 PlaceHolderLogger.debug(exc)
 
-            for child in self.children:
-                if type(child) is discord.ui.Button and child.label == "Submit":
-                    child.disabled = False
-                    break
+            self.toggle_button(False, "Submit")
 
         elif auto_val == "new":
             # add category select
             if len(self.children) < 4:  # noqa: PLR2004
                 self.add_item(self.category_select)
 
-            for child in self.children:
-                if type(child) is discord.ui.Button and child.label == "Submit":
-                    child.disabled = not bool(cat_val)
-                    break
+            self.toggle_button(not bool(cat_val), "Submit")
 
         await interaction.response.edit_message(content=interaction.message.content, view=self)
 
@@ -80,22 +60,8 @@ class AutoGenerateConfigView(BSEView):
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        try:
-            auto_val = self.auto_config.values[0]
-        except (IndexError, AttributeError, TypeError):
-            for opt in self.auto_config.options:
-                if opt.default:
-                    auto_val = opt.value
-                    break
-
-        cat_val = None
-        try:
-            cat_val = self.category_select.values[0]
-        except (IndexError, AttributeError, TypeError):
-            for opt in self.auto_config.options:
-                if opt.default:
-                    cat_val = opt.value
-                    break
+        auto_val = self.get_select_value(self.auto_config)
+        cat_val = self.get_select_value(self.category_select)
 
         if auto_val == "category":
             modal = AddCategory()

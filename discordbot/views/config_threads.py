@@ -32,10 +32,13 @@ class ThreadConfigView(BSEView):
         self.day_select = ThreadDaySelect()
         self.add_item(self.day_select)
 
-    async def update(self) -> None:
+    async def update(self, _: discord.Interaction) -> None:
         """View update method.
 
         Can be called by child types when something changes.
+
+        Args:
+            _ (discord.Interaction): the interaction. Not used here.
         """
         # updates all the selects with new values
         selected_thread = next(
@@ -70,25 +73,15 @@ class ThreadConfigView(BSEView):
             if str(t.thread_id) == self.thread_select._selected_values[0]  # noqa: SLF001
         )
 
-        try:
-            day = int(self.day_select._selected_values[0])  # noqa: SLF001
-        except (IndexError, AttributeError, TypeError):
-            # look for default as user didn't select one explicitly
-            for opt in self.day_select.options:
-                if opt.default:
-                    day = int(opt.value)
-                    break
+        day = self.get_select_value(self.day_select)
+        day = int(day) if day else 7
 
         if day == 7:  # noqa: PLR2004
             # 7 is for when user doesn't want a day set
             day = None
 
-        try:
-            active = bool(int(self.active_select._selected_values[0]))  # noqa: SLF001
-        except (IndexError, AttributeError, TypeError):
-            # user didn't select a value
-            # true is default here
-            active = True
+        active = self.get_select_value(self.active_select)
+        active = bool(int(active)) if active is not None else True
 
         self.spoiler_threads.update(
             {"_id": selected_thread._id},  # noqa: SLF001

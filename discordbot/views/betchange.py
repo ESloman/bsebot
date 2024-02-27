@@ -53,7 +53,7 @@ class BetChange(BSEView):
         """
         await interaction.response.defer(ephemeral=True)
 
-        value = self.outcome_select.values[0]
+        value = self.get_select_value(self.outcome_select)
 
         self.user_bets.update(
             {"_id": self.bet._id},  # noqa: SLF001

@@ -61,11 +61,8 @@ class AutoGenerateView(BSEView):
         timeout = self.data.get("timeout")
 
         if not timeout:
-            try:
-                timeout = next(opt.value for opt in self.timeout_select.options if opt.default is True)
-            except StopIteration:
-                timeout = None
-            else:
+            timeout = self.get_select_value(self.timeout_select)
+            if timeout:
                 self.data["timeout"] = timeout
 
         if channel and auto_type and timeout:

@@ -40,6 +40,28 @@ class BSEView(discord.ui.View):
             # don't need to edit in that case
             await self.message.edit(content="This command timed out - please place another one.", view=None)
 
+    @staticmethod
+    def get_select_value(select: discord.ui.Select) -> str | None:
+        """Wrapper for getting a single value out of a select.
+
+        Args:
+            select (discord.ui.Select): the select
+
+        Returns:
+            str | None: the found value or None
+        """
+        try:
+            value = select._selected_values[0]  # noqa: SLF001
+        except (IndexError, AttributeError, TypeError):
+            try:
+                value = select.values[0]
+            except (IndexError, AttributeError, TypeError):
+                try:
+                    value = next(o for o in select.options if o.default).value
+                except StopIteration:
+                    value = None
+        return value
+
     def toggle_item(self, disabled: bool, select_type: type) -> None:
         """Toggles an item by type.
 

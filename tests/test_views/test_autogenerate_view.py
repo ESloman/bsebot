@@ -172,6 +172,9 @@ class TestAutoGenerateView:
         await view.update(interaction)
 
     @pytest.mark.parametrize("number", [1, 2])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_submit_callback(self, number: int) -> None:
         """Tests submit callback method."""
         view = AutoGenerateView(self.auto)

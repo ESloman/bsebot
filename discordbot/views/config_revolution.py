@@ -32,15 +32,7 @@ class RevolutionConfigView(BSEView):
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        try:
-            enabled = self.enabled_select._selected_values[0]  # noqa: SLF001
-        except (IndexError, AttributeError, TypeError):
-            # look for default as user didn't select one explicitly
-            for opt in self.enabled_select.options:
-                if opt.default:
-                    enabled = opt.value
-                    break
-
+        enabled = self.get_select_value(self.enabled_select)
         enabled_bool = enabled == "enabled"
 
         self.guilds.set_revolution_toggle(interaction.guild_id, enabled_bool)

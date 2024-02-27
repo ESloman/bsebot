@@ -48,8 +48,10 @@ class RevolutionView(BSEView):
         Args:
             disable (bool): whether the children are disabled or not
         """
-        for child in self.children:
-            child.disabled = disable
+        if disable:
+            self.disable_all_items()
+        else:
+            self.enable_all_items()
 
     async def _handle_save_thyself_button_checks(
         self, interaction: discord.Interaction, button: discord.Button, user_id: int, king_id: int

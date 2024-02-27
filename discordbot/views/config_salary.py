@@ -24,7 +24,7 @@ class SalaryConfigView(BSEView):
         self.min_select = SalaryMinimumSelect(amount)
         self.add_item(self.min_select)
 
-    async def update(self) -> None:
+    async def update(self, interaction: discord.Interaction) -> None:
         """View update method.
 
         Can be called by child types when something changes.
@@ -38,15 +38,7 @@ class SalaryConfigView(BSEView):
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        try:
-            amount = int(self.min_select._selected_values[0])  # noqa: SLF001
-        except (IndexError, AttributeError, TypeError):
-            # look for default as user didn't select one explicitly
-            for opt in self.min_select.options:
-                if opt.default:
-                    amount = int(opt.value)
-                    break
-
+        amount = int(self.get_select_value(self.min_select))
         old_min = self.guilds.get_daily_minimum(interaction.guild_id)
 
         # update users on current min to new min

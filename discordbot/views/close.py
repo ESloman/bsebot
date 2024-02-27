@@ -24,7 +24,8 @@ class CloseABetView(BSEView):
             close (CloseBet): the close class
         """
         super().__init__(timeout=60)
-        self.add_item(BetSelect(bets))
+        self.bet_select = BetSelect(bets)
+        self.add_item(self.bet_select)
 
         if len(bets) == 1 and bets[0].option_dict:
             outcomes = bets[0].option_dict
@@ -32,7 +33,8 @@ class CloseABetView(BSEView):
         else:
             options = []
 
-        self.add_item(BetOutcomesSelect(options, discord.ui.Button, True))
+        self.bet_outcome_select = BetOutcomesSelect(options, discord.ui.Button, True)
+        self.add_item(self.bet_outcome_select)
         self.close: "CloseBet" = close
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=2, disabled=True)
@@ -43,19 +45,11 @@ class CloseABetView(BSEView):
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        data = {}
-        for child in self.children:
-            if type(child) is BetSelect:
-                try:
-                    data["bet_id"] = child.values[0]
-                except (IndexError, AttributeError, TypeError):
-                    # this means that this was default
-                    data["bet_id"] = child.options[0].value
-            elif type(child) is BetOutcomesSelect:
-                data["emoji"] = child.values
+        bet_id = self.get_select_value(self.bet_select)
+        emoji = self.get_select_value(self.bet_outcome_select)
 
         # call the callback that actually places the bet
-        await self.close.close_bet(interaction, data["bet_id"], data["emoji"])
+        await self.close.close_bet(interaction, bet_id, emoji)
 
     @staticmethod
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=2, disabled=False, emoji="✖️")

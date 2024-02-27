@@ -27,7 +27,7 @@ class AdminConfigView(BSEView):
             interaction (discord.Interaction): _description_
         """
         selected = self.admins_select.values
-        self.toggle_submit_button(not bool(selected))
+        self.toggle_button(not bool(selected))
 
         await interaction.response.edit_message(content=interaction.message.content, view=self)
 

@@ -42,10 +42,7 @@ class PledgeView(BSEView):
         # defer first
         await interaction.response.defer(ephemeral=True)
 
-        try:
-            value = self.pledge_select.values[0]
-        except (IndexError, AttributeError, TypeError):
-            value = next(o for o in self.pledge_select.options if o.default).value
+        value = self.get_select_value(self.pledge_select)
 
         self.activities.add_activity(
             interaction.user.id,

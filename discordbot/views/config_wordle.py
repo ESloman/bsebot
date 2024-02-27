@@ -41,20 +41,10 @@ class WordleRootConfigView(BSEView):
         Args:
             interaction (discord.Interaction): _description_
         """
-        wordle_config_val = None
-        try:
-            wordle_config_val = self.wordle_config_select.values[0]
-        except (IndexError, AttributeError, TypeError):
-            for opt in self.wordle_config_select.options:
-                if opt.default:
-                    wordle_config_val = opt.value
-                    break
+        wordle_config_val = self.get_select_value(self.wordle_config_select)
 
-        if wordle_config_val:
-            for child in self.children:
-                if type(child) is discord.ui.Button and child.label == "Submit":
-                    child.disabled = not wordle_config_val
-                    break
+        if wordle_config_val is not None:
+            self.toggle_button(not wordle_config_val, "Submit")
         await interaction.response.edit_message(content=interaction.message.content, view=self)
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=4)
@@ -65,13 +55,7 @@ class WordleRootConfigView(BSEView):
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        try:
-            wordle_config_val = self.wordle_config_select.values[0]
-        except (IndexError, AttributeError, TypeError):
-            for opt in self.wordle_config_select.options:
-                if opt.default:
-                    wordle_config_val = opt.value
-                    break
+        wordle_config_val = self.get_select_value(self.wordle_config_select)
 
         match wordle_config_val:
             case "wordle_config":
@@ -161,54 +145,27 @@ class WordleConfigView(BSEView):
         Args:
             interaction (discord.Interaction): _description_
         """
-        try:
-            active_val = bool(int(self.active_select.values[0]))
-        except (IndexError, AttributeError, TypeError):
-            for opt in self.active_select.options:
-                if opt.default:
-                    active_val = bool(int(opt.value))
-                    break
-
+        active_val = bool(int(self.get_select_value(self.active_select)))
         self.channel_select.disabled = not active_val
         await interaction.response.edit_message(content=interaction.message.content, view=self)
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=4)
-    async def submit_callback(  # noqa: C901, PLR0912
-        self, _: discord.ui.Button, interaction: discord.Interaction
-    ) -> None:
+    async def submit_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:
         """Button callback.
 
         Args:
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        try:
-            active_val = bool(int(self.active_select.values[0]))
-        except (IndexError, AttributeError, TypeError):
-            for opt in self.active_select.options:
-                if opt.default:
-                    active_val = bool(int(opt.value))
-                    break
+        active_val = bool(int(self.get_select_value(self.active_select)))
 
-        channel = None
-        try:
-            channel = self.channel_select.values[0]
-        except (IndexError, AttributeError, TypeError):
-            for opt in self.channel_select.options:
-                if opt.default:
-                    channel = opt.value
-                    break
-
+        channel = self.get_select_value(self.channel_select)
+        channel = int(channel) if channel is not None else None
         if channel and type(channel) not in {int, Int64}:
             channel = channel.id
 
-        try:
-            reminders = bool(int(self.reminder_select.values[0]))
-        except (IndexError, AttributeError, TypeError):
-            for opt in self.reminder_select.options:
-                if opt.default:
-                    reminders = bool(int(opt.value))
-                    break
+        reminders = self.get_select_value(self.reminder_select) or False
+        reminders = bool(int(reminders))
 
         self.guilds.set_wordle_config(interaction.guild_id, active_val, channel, reminders)
 
@@ -272,32 +229,9 @@ class WordleEmojiReactionConfigView(BSEView):
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        x_val = None
-        try:
-            x_val = self.x_select.values[0]
-        except (IndexError, AttributeError, TypeError):
-            for opt in self.x_select.options:
-                if opt.default:
-                    x_val = opt.value
-                    break
-
-        two_val = None
-        try:
-            two_val = self.two_select.values[0]
-        except (IndexError, AttributeError, TypeError):
-            for opt in self.two_select.options:
-                if opt.default:
-                    two_val = opt.value
-                    break
-
-        six_val = None
-        try:
-            six_val = self.six_select.values[0]
-        except (IndexError, AttributeError, TypeError):
-            for opt in self.six_select.options:
-                if opt.default:
-                    six_val = opt.value
-                    break
+        x_val = self.get_select_value(self.x_select)
+        two_val = self.get_select_value(self.two_select)
+        six_val = self.get_select_value(self.six_select)
 
         self.guilds.update(
             {"guild_id": interaction.guild.id},

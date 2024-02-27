@@ -28,10 +28,7 @@ class ActivityConfigView(BSEView):
         """
         selected = self.activity_select.values
 
-        for child in self.children:
-            if type(child) is discord.ui.Button and child.label == "Next":
-                child.disabled = not bool(selected)
-                break
+        self.toggle_button(not bool(selected), "Next")
 
         await interaction.response.edit_message(content=interaction.message.content, view=self)
 
@@ -43,14 +40,7 @@ class ActivityConfigView(BSEView):
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        try:
-            selected = self.activity_select.values[0]
-        except (IndexError, AttributeError, TypeError):
-            # look for default as user didn't select one explicitly
-            for opt in self.activity_select.options:
-                if opt.default:
-                    selected = opt.value
-                    break
+        selected = self.get_select_value(self.activity_select)
 
         match selected:
             case "listening":

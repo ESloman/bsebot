@@ -33,11 +33,7 @@ class GiftUserEddiesView(BSEView):
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        try:
-            value = self.gift_amount.values[0]
-        except (IndexError, AttributeError, TypeError):
-            value = next(o for o in self.gift_amount.options if o.default).value
-
+        value = self.get_select_value(self.gift_amount)
         await self.gift.gift_eddies(interaction, self.friend, int(value))
         await interaction.followup.edit_message(interaction.message.id, view=None, content="Done.")
 

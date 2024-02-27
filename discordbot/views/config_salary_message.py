@@ -38,26 +38,11 @@ class DailyMessageView(BSEView):
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        try:
-            enabled = self.enabled_select._selected_values[0]  # noqa: SLF001
-        except (IndexError, AttributeError, TypeError):
-            # look for default as user didn't select one explicitly
-            for opt in self.enabled_select.options:
-                if opt.default:
-                    enabled = opt.value
-                    break
-
+        enabled = self.get_select_value(self.enabled_select)
         enabled_bool = enabled == "enabled"
 
         if self.summary_select:
-            try:
-                summary_enabled = self.summary_select._selected_values[0]  # noqa: SLF001
-            except (IndexError, AttributeError, TypeError):
-                # look for default as user didn't select one explicitly
-                for opt in self.summary_select.options:
-                    if opt.default:
-                        summary_enabled = opt.value
-                        break
+            summary_enabled = self.get_select_value(self.summary_select)
             summary_bool = summary_enabled == "enabled"
         else:
             summary_bool = False

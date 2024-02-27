@@ -130,7 +130,7 @@ class ConfigView(BSEView):
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        value = self.config_select._selected_values[0]  # noqa: SLF001
+        value = self.get_select_value(self.config_select)
 
         if value != "wordle_reminders":
             await interaction.response.edit_message(

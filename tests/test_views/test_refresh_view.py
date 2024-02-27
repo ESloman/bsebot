@@ -40,7 +40,7 @@ class TestRefreshBetView:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_submit_callback_default(self) -> None:
         """Tests submit callback does what we want it to with the default bet."""
-        bets = [UserBets.make_data_class(bet) for bet in interface_mocks.query_mock("userbets", {})[-5:]]
+        bets = [UserBets.make_data_class(bet) for bet in interface_mocks.query_mock("userbets", {})[-1:]]
         view = RefreshBetView(bets, self.place, self.close)
         interaction = discord_mocks.InteractionMock(bets[0].guild_id, bets[0].user)
 

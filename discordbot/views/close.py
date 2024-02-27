@@ -48,7 +48,7 @@ class CloseABetView(BSEView):
         bet_id = self.get_select_value(self.bet_select)
         emoji = self.get_select_value(self.bet_outcome_select)
 
-        # call the callback that actually places the bet
+        # call the callback that actually closes the bet
         await self.close.close_bet(interaction, bet_id, emoji)
 
     @staticmethod

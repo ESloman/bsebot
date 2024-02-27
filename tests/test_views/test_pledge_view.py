@@ -19,12 +19,13 @@ class TestPledgeView:
         self.bsebot = bsebot_mocks.BSEBotMock()
         self.logger = PlaceHolderLogger
 
-    async def test_init(self) -> None:
+    @pytest.mark.parametrize("current", [0, 1, 2, None])
+    async def test_init(self, current: int | None) -> None:
         """Tests basic init.
 
         Needs to run with async as the parent class tries to get the running event loop.
         """
-        _ = PledgeView()
+        _ = PledgeView(current)
 
     async def test_cancel_callback(self) -> None:
         """Tests cancel callback."""

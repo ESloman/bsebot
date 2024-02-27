@@ -40,6 +40,18 @@ class BSEView(discord.ui.View):
             # don't need to edit in that case
             await self.message.edit(content="This command timed out - please place another one.", view=None)
 
+    def toggle_item(self, disabled: bool, select_type: type) -> None:
+        """Toggles an item by type.
+
+        Args:
+            disabled (bool): whether the item should be disabled or not
+            select_type (type): the type to use as an identifier
+        """
+        for child in self.children:
+            if type(child) is select_type:
+                child.disabled = disabled
+                break
+
     def toggle_button(self, disabled: bool, label: str = "Submit") -> None:
         """Toggles a button.
 

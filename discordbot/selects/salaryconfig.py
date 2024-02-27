@@ -1,10 +1,11 @@
 """Salary config selects."""
 
 from discord import Interaction, SelectOption
-from discord.ui import Select
+
+from discordbot.selects.bseselect import BSESelect
 
 
-class SalaryMinimumSelect(Select):
+class SalaryMinimumSelect(BSESelect):
     """Class for salary minimum select."""
 
     _amounts = (1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 15, 20, 25, 30, 35, 40, 50)
@@ -44,7 +45,7 @@ class SalaryMinimumSelect(Select):
         await interaction.response.edit_message(view=self.view)
 
 
-class DailySalaryMessageSelect(Select):
+class DailySalaryMessageSelect(BSESelect):
     """Class for daily salary message select."""
 
     def __init__(self, enabled: bool = False) -> None:
@@ -79,7 +80,7 @@ class DailySalaryMessageSelect(Select):
         await interaction.response.edit_message(view=self.view)
 
 
-class DailySalarySummaryMessageSelect(Select):
+class DailySalarySummaryMessageSelect(BSESelect):
     """Class for daily summary message select."""
 
     def __init__(self, enabled: bool = False) -> None:

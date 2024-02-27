@@ -9,7 +9,8 @@ from discordbot.selects.autogenerate import AutoBetsSelect, BetsAmountSelect
 from discordbot.slashcommandeventclasses.autogenerate import AutoGenerate
 from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.autogenerate import AutoGenerateView
-from tests.mocks import bsebot_mocks, discord_mocks
+from mongo import interface
+from tests.mocks import bsebot_mocks, discord_mocks, interface_mocks
 
 
 class TestHighscoreView:
@@ -66,6 +67,9 @@ class TestHighscoreView:
                 assert not child.disabled
 
     @pytest.mark.parametrize("select", [True, False])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_update_second_page_random_no_amount_select(self, select: bool) -> None:
         """Tests update second page."""
         view = AutoGenerateView(self.auto)
@@ -81,6 +85,9 @@ class TestHighscoreView:
         assert view.amount_select is not None
 
     @pytest.mark.parametrize("select", [True, False])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_update_second_page_selected_no_bet_select(self, select: bool) -> None:
         """Tests update second page."""
         view = AutoGenerateView(self.auto)
@@ -96,6 +103,9 @@ class TestHighscoreView:
         assert view.amount_select is None
 
     @pytest.mark.parametrize("method", ["random", "selected"])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_update_second_page_without_data(self, method: str) -> None:
         """Tests update second page."""
         view = AutoGenerateView(self.auto)
@@ -109,6 +119,9 @@ class TestHighscoreView:
         view._update_second_page()
 
     @pytest.mark.parametrize("method", ["random", "selected"])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_update_second_page_with_data(self, method: str) -> None:
         """Tests update second page."""
         view = AutoGenerateView(self.auto)
@@ -127,6 +140,9 @@ class TestHighscoreView:
         view._update_second_page()
 
     @pytest.mark.parametrize("number", [1, 2])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_update_method(self, number: int) -> None:
         """Tests update method."""
         view = AutoGenerateView(self.auto)

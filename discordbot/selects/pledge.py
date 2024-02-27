@@ -1,12 +1,12 @@
 """Pledge selects."""
 
 from discord import Interaction, SelectOption
-from discord.ui import Select
 
 from discordbot.bot_enums import SupporterType
+from discordbot.selects.bseselect import BSESelect
 
 
-class PledgeSelect(Select):
+class PledgeSelect(BSESelect):
     """Class for pledge type select."""
 
     _values = ("Neutral", "Supporter", "Revolutionary")

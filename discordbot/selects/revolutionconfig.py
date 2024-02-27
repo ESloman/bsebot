@@ -1,10 +1,11 @@
 """Revolution config selects."""
 
 from discord import Interaction, SelectOption
-from discord.ui import Select
+
+from discordbot.selects.bseselect import BSESelect
 
 
-class RevolutionEnableSelect(Select):
+class RevolutionEnableSelect(BSESelect):
     """Class for revolution enable select."""
 
     def __init__(self, enabled: bool = True) -> None:

@@ -4,10 +4,11 @@ import datetime
 
 import pytz
 from discord import Interaction, SelectOption
-from discord.ui import Select
+
+from discordbot.selects.bseselect import BSESelect
 
 
-class StatsModeSelect(Select):
+class StatsModeSelect(BSESelect):
     """Class for stats mode select."""
 
     _modes: tuple[tuple[str, str]] = (
@@ -42,7 +43,7 @@ class StatsModeSelect(Select):
         await self.view.update(interaction)
 
 
-class StatsYearSelect(Select):
+class StatsYearSelect(BSESelect):
     """Class for stats year select."""
 
     _years = tuple(range(2021, datetime.datetime.now(tz=pytz.utc).year + 1))
@@ -63,4 +64,4 @@ class StatsYearSelect(Select):
         for option in self.options:
             option.default = option.value == selected_amount
 
-        await self.view.update()
+        await self.view.update(interaction)

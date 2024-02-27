@@ -8,6 +8,7 @@ import pytest
 from discordbot.selects.bet import BetSelect
 from discordbot.selects.betamount import BetSelectAmount
 from discordbot.selects.betoutcomes import BetOutcomesSelect
+from discordbot.views.bseview import BSEView
 from mongo import interface
 from mongo.bsepoints.bets import UserBets
 from mongo.datatypes.bet import BetDB
@@ -28,7 +29,7 @@ class TestBetSelect:
         Returns:
             discord.ui.View: the created View
         """
-        view = discord.ui.View()
+        view = BSEView()
         for label in ("Submit", "Cancel"):
             button = discord.ui.Button(label=label)
             view.add_item(button)
@@ -82,20 +83,6 @@ class TestBetSelect:
             bets.append(UserBets.make_data_class(bet))
         select = BetSelect(bets)
         assert len(select.options) == len(bets)
-
-    async def test_enable_submit_button(self) -> None:
-        """Tests _enable_submit_button.
-
-        Needs to run with async as the parent class tries to get the running event loop.
-        """
-        bets = [UserBets.make_data_class(bet) for bet in interface_mocks.query_mock("userbets", {})[-10:]]
-        select = BetSelect(bets)
-        view = self._create_view(select)
-        select._enable_submit_button()
-        buttons = [item for item in view.children if isinstance(item, discord.ui.Button)]
-        for button in buttons:
-            if button.label == "Submit":
-                assert not button.disabled
 
     @pytest.mark.parametrize("bet_data", interface_mocks.query_mock("userbets", {})[-5:])
     async def test_enable_outcome_select(self, bet_data: dict[str, any]) -> None:

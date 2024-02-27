@@ -2,12 +2,12 @@
 
 import discord
 from discord import Interaction, SelectOption
-from discord.ui import Select
 
+from discordbot.selects.bseselect import BSESelect
 from mongo.datatypes.customs import EmojiDB
 
 
-class WordleRootSelect(Select):
+class WordleRootSelect(BSESelect):
     """Class for wordle root select."""
 
     selectable_options = ("wordle_config", "wordle_reactions", "wordle_reminders", "wordle_starting_words")
@@ -39,7 +39,7 @@ class WordleRootSelect(Select):
         await self.view.update(interaction)
 
 
-class WordleChannelSelect(Select):
+class WordleChannelSelect(BSESelect):
     """Class for wordle channel select."""
 
     def __init__(self) -> None:
@@ -67,7 +67,7 @@ class WordleChannelSelect(Select):
         await self.view.update(interaction)
 
 
-class WordleActiveSelect(Select):
+class WordleActiveSelect(BSESelect):
     """Class for wordle active select."""
 
     def __init__(self, default: int | None = None) -> None:
@@ -109,7 +109,7 @@ class WordleActiveSelect(Select):
         await self.view.update(interaction)
 
 
-class WordleReminderSelect(Select):
+class WordleReminderSelect(BSESelect):
     """Class for wordle reminder select."""
 
     def __init__(self, default: int | None = None) -> None:
@@ -151,7 +151,7 @@ class WordleReminderSelect(Select):
         await self.view.update(interaction)
 
 
-class WordleEmojiSelect(Select):
+class WordleEmojiSelect(BSESelect):
     """Class for wordle emoji select."""
 
     def __init__(self, server_emojis: list[EmojiDB], score_num: str | None = None, current: str | None = None) -> None:

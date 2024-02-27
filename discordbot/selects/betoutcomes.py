@@ -1,12 +1,12 @@
 """Bet outcome select."""
 
 from discord import Interaction, SelectOption
-from discord.ui import Select
 
 from discordbot.selects.betamount import BetSelectAmount
+from discordbot.selects.bseselect import BSESelect
 
 
-class BetOutcomesSelect(Select):
+class BetOutcomesSelect(BSESelect):
     """Class for bet outcomes."""
 
     def __init__(self, outcomes: list[SelectOption], enable_type: type = BetSelectAmount, close: bool = False) -> None:
@@ -32,7 +32,7 @@ class BetOutcomesSelect(Select):
         )
 
         # the item we need to enable when we get a value
-        self.enable = enable_type
+        self.enable_type: type = enable_type
 
     async def callback(self, interaction: Interaction) -> None:
         """Callback method.
@@ -44,9 +44,5 @@ class BetOutcomesSelect(Select):
         for option in self.options:
             option.default = option.value in selected_outcomes
 
-        for child in self.view.children:
-            if type(child) is self.enable:
-                child.disabled = False
-                break
-
+        self.view.toggle_item(False, self.enable_type)
         await interaction.response.edit_message(view=self.view)

@@ -1,10 +1,11 @@
 """Tax rate selects."""
 
 from discord import Interaction, SelectOption
-from discord.ui import Select
+
+from discordbot.selects.bseselect import BSESelect
 
 
-class TaxRateSelect(Select):
+class TaxRateSelect(BSESelect):
     """Class for tax rate select."""
 
     _amounts = (5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90)

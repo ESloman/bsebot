@@ -476,6 +476,11 @@ class InteractionMock:
         """Guild property."""
         return self._guild
 
+    @guild.setter
+    def guild(self, _guild: GuildMock | None) -> None:
+        """Guild property."""
+        self._guild = _guild
+
     @property
     def guild_id(self) -> int:
         """Guild ID property."""

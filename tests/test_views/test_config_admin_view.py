@@ -10,7 +10,7 @@ from tests.mocks import discord_mocks, interface_mocks
 class TestSalaryConfigView:
     """Tests our SalaryConfigView view."""
 
-    async def test_init(self, amount: int | None) -> None:
+    async def test_init(self) -> None:
         """Tests basic init.
 
         Needs to run with async as the parent class tries to get the running event loop.

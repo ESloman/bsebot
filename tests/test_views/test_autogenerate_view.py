@@ -1,4 +1,4 @@
-"""Tests our highscore view."""
+"""Tests our autogenerate view."""
 
 from unittest import mock
 
@@ -13,8 +13,8 @@ from mongo import interface
 from tests.mocks import bsebot_mocks, discord_mocks, interface_mocks
 
 
-class TestHighscoreView:
-    """Tests our Highscore view."""
+class TestAutoGenerateView:
+    """Tests our AutoGenerate view."""
 
     @pytest.fixture(autouse=True)
     def _test_data(self) -> None:
@@ -26,6 +26,9 @@ class TestHighscoreView:
         self.logger = PlaceHolderLogger
         self.auto = AutoGenerate(self.bsebot, [], self.logger)
 
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_init(self) -> None:
         """Tests basic init.
 
@@ -33,12 +36,18 @@ class TestHighscoreView:
         """
         _ = AutoGenerateView(self.auto)
 
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_cancel_callback(self) -> None:
         """Tests cancel callback."""
         view = AutoGenerateView(self.auto)
         interaction = discord_mocks.InteractionMock(123456)
         await view.cancel_callback(None, interaction)
 
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_update_first_page(self) -> None:
         """Tests update first page."""
         view = AutoGenerateView(self.auto)
@@ -47,6 +56,9 @@ class TestHighscoreView:
             if type(child) == discord.ui.Button and child.label == "Next":
                 assert child.disabled
 
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_update_first_page_without_timeout(self) -> None:
         """Tests update first page with no timeout."""
         view = AutoGenerateView(self.auto)
@@ -56,6 +68,9 @@ class TestHighscoreView:
             if type(child) == discord.ui.Button and child.label == "Next":
                 assert child.disabled
 
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_update_first_page_with_data(self) -> None:
         """Tests update first page with all data present."""
         view = AutoGenerateView(self.auto)

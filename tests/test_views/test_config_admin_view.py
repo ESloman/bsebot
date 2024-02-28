@@ -1,4 +1,4 @@
-"""Tests our Salary Config views."""
+"""Tests our Admin Config views."""
 
 from unittest import mock
 
@@ -7,8 +7,8 @@ from mongo import interface
 from tests.mocks import discord_mocks, interface_mocks
 
 
-class TestSalaryConfigView:
-    """Tests our SalaryConfigView view."""
+class TestAdminConfigView:
+    """Tests our AdminConfigView view."""
 
     async def test_init(self) -> None:
         """Tests basic init.

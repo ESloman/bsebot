@@ -1,5 +1,7 @@
 """Tests our stats views."""
 
+from unittest import mock
+
 import pytest
 
 from discordbot.slashcommandeventclasses.stats import Stats
@@ -33,3 +35,22 @@ class TestStatsView:
         view = StatsView(self.stats)
         interaction = discord_mocks.InteractionMock(123456)
         await view.cancel_callback(None, interaction)
+
+    @pytest.mark.parametrize("mode", ["quick", "server", "other"])
+    async def test_update(self, mode: str) -> None:
+        """Tests update method."""
+        view = StatsView(self.stats)
+        interaction = discord_mocks.InteractionMock()
+        interaction.data["values"] = [mode]
+        view.stats_mode.refresh_state(interaction)
+        await view.update(interaction)
+
+    @pytest.mark.parametrize("mode", ["quick", "server", "other"])
+    async def test_submit_callback(self, mode: str) -> None:
+        """Tests submit_callback method."""
+        view = StatsView(self.stats)
+        interaction = discord_mocks.InteractionMock()
+        interaction.data["values"] = [mode]
+        view.stats_mode.refresh_state(interaction)
+        with mock.patch.object(view.stats_class, "stats_quick"), mock.patch.object(view.stats_class, "stats_server"):
+            await view.submit_button_callback.callback(interaction)

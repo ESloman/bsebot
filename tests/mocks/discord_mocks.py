@@ -423,6 +423,8 @@ class MessageMock:
 
 
 class FollowUpMock:
+    """Mock for FollowUp/Response."""
+
     @staticmethod
     async def defer(*args, **kwargs) -> None:
         """Mocks followup defer."""
@@ -436,6 +438,10 @@ class FollowUpMock:
         """Mocks followup edit_message."""
 
     @staticmethod
+    async def delete_message(*args, **kwargs) -> None:
+        """Mocks followup delete_message."""
+
+    @staticmethod
     async def send_message(*args, **kwargs) -> None:
         """Mocks followup send message."""
 
@@ -445,6 +451,8 @@ class FollowUpMock:
 
 
 class InteractionMock:
+    """Mock for Interaction."""
+
     def __init__(self, guild_id: int | None = None, user_id: int = 123456) -> None:
         """Init."""
         if guild_id is None:

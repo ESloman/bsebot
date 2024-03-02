@@ -166,12 +166,12 @@ class CloseBet(BSEddies):
         desc += "\n## Winners"
 
         for better in ret_dict["winners"]:
-            desc += f"\n- {guild.get_member(int(better)).name} won `{ret_dict['winners'][better]}` eddies!"
+            desc += f"\n- {guild.get_member(int(better)).name} won `{ret_dict["winners"][better]}` eddies!"
 
         if not ret_dict["winners"]:
             desc += "\n- There were no winners 😦"
 
-        desc += f"\n\nThe **KING** (<@{ret_dict['king']}>) gained _{ret_dict['king_tax']}_ eddies from tax."
+        desc += f"\n\nThe **KING** (<@{ret_dict["king"]}>) gained _{ret_dict["king_tax"]}_ eddies from tax."
 
         author = guild.get_member(ctx.user.id)
         if not author:
@@ -192,7 +192,7 @@ class CloseBet(BSEddies):
                 msg = (
                     f"**{author.name}** just closed bet "
                     f"`[{bet_id}]` - [{bet.title}](<{message.jump_url}>) and the result was {emoji} "
-                    f"(`{', '.join([n.val for n in ret_dict['outcome_name']])})`.\n"
+                    f"(`{", ".join([n.val for n in ret_dict["outcome_name"]])})`.\n"
                     f"As this wasn't what you voted for - you have lost. You bet **{points_bet}** eddies."
                 )
                 await mem.send(content=msg, silent=True)
@@ -208,9 +208,9 @@ class CloseBet(BSEddies):
                 msg = (
                     f"**{author.name}** just closed bet "
                     f"`[{bet_id}]` - [{bet.title}](<{message.jump_url}>) and the result was {emoji} "
-                    f"(`{', '.join([n.val for n in ret_dict['outcome_name']])})`.\n"
+                    f"(`{", ".join([n.val for n in ret_dict["outcome_name"]])})`.\n"
                     f"**This means you won!!** "
-                    f"You have won `{ret_dict['winners'][winner]}` BSEDDIES!!"
+                    f"You have won `{ret_dict["winners"][winner]}` BSEDDIES!!"
                 )
                 await mem.send(content=msg, silent=True)
             except discord.Forbidden:

@@ -1603,8 +1603,8 @@ class StatsGatherer:  # noqa: PLR0904
             twitter_addict = sorted(tweet_users, key=lambda x: tweet_users[x], reverse=True)[0]
         except IndexError:
             # no data for anyone yet
-            twitter_addict = 0
-            tweet_users[0] = None
+            twitter_addict = BSE_BOT_ID
+            tweet_users[BSE_BOT_ID] = 0
 
         data_class = StatDB(
             _id="",
@@ -1649,8 +1649,8 @@ class StatsGatherer:  # noqa: PLR0904
             masturbator = sorted(jerk_off_users, key=lambda x: jerk_off_users[x], reverse=True)[0]
         except IndexError:
             # no data
-            masturbator = 0
-            jerk_off_users[0] = None
+            masturbator = BSE_BOT_ID
+            jerk_off_users[BSE_BOT_ID] = 0
 
         data_class = StatDB(
             _id="",
@@ -1695,7 +1695,7 @@ class StatsGatherer:  # noqa: PLR0904
         except IndexError:
             # no data
             big_memer = BSE_BOT_ID
-            reaction_users[BSE_BOT_ID] = None
+            reaction_users[BSE_BOT_ID] = 0
 
         data_class = StatDB(
             _id="",
@@ -1742,7 +1742,7 @@ class StatsGatherer:  # noqa: PLR0904
         except IndexError:
             # no data
             react_king = BSE_BOT_ID
-            reaction_users[BSE_BOT_ID] = None
+            reaction_users[BSE_BOT_ID] = 0
 
         data_class = StatDB(
             _id="",
@@ -1794,14 +1794,14 @@ class StatsGatherer:  # noqa: PLR0904
         except IndexError:
             # no data
             serial_replier = BSE_BOT_ID
-            replies[BSE_BOT_ID] = None
+            replies[BSE_BOT_ID] = 0
 
         try:
             conversation_starter = sorted(replied_to, key=lambda x: replied_to[x], reverse=True)[0]
         except IndexError:
             # no data
             conversation_starter = BSE_BOT_ID
-            replied_to[BSE_BOT_ID] = None
+            replied_to[BSE_BOT_ID] = 0
 
         replier_data_class = StatDB(
             _id="",
@@ -1864,8 +1864,8 @@ class StatsGatherer:  # noqa: PLR0904
         try:
             fattest_fingers = sorted(message_users, key=lambda x: message_users[x]["count"], reverse=True)[0]
         except IndexError:
-            fattest_fingers = 0
-            message_users = {0: {"count": 0, "messages": 0}}
+            fattest_fingers = BSE_BOT_ID
+            message_users = {BSE_BOT_ID: {"count": 0, "messages": 0}}
 
         data_class = StatDB(
             _id="",
@@ -1918,8 +1918,8 @@ class StatsGatherer:  # noqa: PLR0904
         try:
             most_swears = sorted(swear_dict, key=lambda x: swear_dict[x], reverse=True)[0]
         except IndexError:
-            most_swears = 0
-            swear_dict[0] = None
+            most_swears = BSE_BOT_ID
+            swear_dict[BSE_BOT_ID] = None
 
         data_class = StatDB(
             _id="",
@@ -1980,7 +1980,11 @@ class StatsGatherer:  # noqa: PLR0904
             u_dict["channel"] = int(top_channel_id)
 
         # sort the percentages
-        top = sorted(users, key=lambda x: users[x]["percentage"], reverse=True)[0]
+        try:
+            top = sorted(users, key=lambda x: users[x]["percentage"], reverse=True)[0]
+        except IndexError:
+            top = BSE_BOT_ID
+            users[BSE_BOT_ID] = {"percentage": 0, "channel": 0}
 
         data_class = StatDB(
             _id="",
@@ -2273,8 +2277,8 @@ class StatsGatherer:  # noqa: PLR0904
         try:
             big_gamer = sorted(user_dict, key=lambda x: user_dict[x]["count"], reverse=True)[0]
         except IndexError:
-            big_gamer = 0
-            user_dict[0] = {"count": 0, "channels": {}}
+            big_gamer = BSE_BOT_ID
+            user_dict[BSE_BOT_ID] = {"count": 0, "channels": {}}
 
         data_class = StatDB(
             _id="",

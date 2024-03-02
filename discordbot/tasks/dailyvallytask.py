@@ -107,7 +107,7 @@ class AfterWorkVally(BaseTask):
                 self.interactions,
                 _guild.id,
                 MESSAGES,
-                "{role}",
+                "{role}",  # noqa: RUF027
                 [0, 1],
             )
 

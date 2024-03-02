@@ -73,7 +73,7 @@ class AwardsBuilder:
             # make percentage positive
             perc *= -1
 
-        _string = f" ({'up' if diff > 0 else 'down'} `{perc if perc != 0 else "∞"}%`)"
+        _string = f" ({"up" if diff > 0 else "down"} `{perc if perc != 0 else "∞"}%`)"
 
         if diff == 0:
             _string = " (no change)"
@@ -156,9 +156,9 @@ class AwardsBuilder:
         ]
 
         if not self.annual:
-            message_start = f"{start.strftime('%B')} server stats 📈:\n\n"
+            message_start = f"{start.strftime("%B")} server stats 📈:\n\n"
         else:
-            message_start = f"{start.strftime('%Y')} server stats 📈:\n\n"
+            message_start = f"{start.strftime("%Y")} server stats 📈:\n\n"
 
         if busiest_thread.value:
             b_thread_text = f"<#{busiest_thread.value}>"
@@ -199,11 +199,6 @@ class AwardsBuilder:
                     self.logger.debug("Couldn't find previous stat for %s", stat.short_name)
                     comparisons[stat.stat] = ""
                     continue
-                if len(previous) > 1:
-                    comparisons[stat.stat] = ""
-                    self.logger.debug("Found more than one previous stat for %s", stat)
-                    continue
-                previous = previous[0]
 
                 comparison_string = self._get_comparison_string(stat.value, previous.value)
             except Exception:
@@ -218,12 +213,12 @@ class AwardsBuilder:
             message_start,
             (
                 f"- **Number of messages sent** 📬: `{number_messages.value}` (in `"
-                f"{number_messages.kwargs["channels"]}` channel{'s' if thread_messages.kwargs["channels"] != 1 else ''}"
+                f"{number_messages.kwargs["channels"]}` channel{"s" if thread_messages.kwargs["channels"] != 1 else ""}"
                 f" from `{number_messages.kwargs["users"]}` users){comparisons.get(number_messages.stat)}\n"
             ),
             (
                 f"- **Number of thread messages sent** 📟: `{thread_messages.value}` (in `"
-                f"{thread_messages.kwargs["channels"]}` thread{'s' if thread_messages.kwargs["channels"] != 1 else ''} "
+                f"{thread_messages.kwargs["channels"]}` thread{"s" if thread_messages.kwargs["channels"] != 1 else ""} "
                 f"from `{thread_messages.kwargs["users"]}` users){comparisons.get(thread_messages.stat)}\n"
             ),
             (
@@ -252,7 +247,7 @@ class AwardsBuilder:
             ),
             (
                 f"- **Threads created** 🖇️: {threads_created.value} ("
-                f"{','.join(thread_mentions) if len(thread_mentions) < 5 else '_too many to list_'}"  # noqa: PLR2004
+                f"{",".join(thread_mentions) if len(thread_mentions) < 5 else "_too many to list_"}"  # noqa: PLR2004
                 ")\n"
             ),
             (
@@ -296,7 +291,7 @@ class AwardsBuilder:
 
         if self.annual:
             stat_parts.append(
-                f"\n**Emojis created** : {emojis_created.value} ({', '.join(emoji_mentions)})",
+                f"\n**Emojis created** : {emojis_created.value} ({", ".join(emoji_mentions)})",
             )
 
         bseddies_stats = []
@@ -394,10 +389,10 @@ class AwardsBuilder:
         ]
 
         if not self.annual:
-            message_start = f"# {start.strftime('%B')} BSEddies Awards 🏆\n"
+            message_start = f"# {start.strftime("%B")} BSEddies Awards 🏆\n"
             prize = MONTHLY_AWARDS_PRIZE
         else:
-            message_start = f"# {start.strftime('%Y')} BSEddies Awards 🏆\n\n"
+            message_start = f"# {start.strftime("%Y")} BSEddies Awards 🏆\n\n"
             prize = ANNUAL_AWARDS_AWARD
 
         awards_parts = [

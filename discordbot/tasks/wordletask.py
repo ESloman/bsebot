@@ -95,7 +95,7 @@ class WordleTask(BaseTask):
 
         # format 'spoiler message' to output solved word and guesses
         spoiler_message = f"Solved wordle in `{solved_wordle.guess_count}`, word was: || {solved_wordle.actual_word} ||"
-        spoiler_message += f". Guesses: || {' -> '.join(solved_wordle.guesses)} ||"
+        spoiler_message += f". Guesses: || {" -> ".join(solved_wordle.guesses)} ||"
 
         self.logger.info("Sending wordle message: %s", message)
         for guild in self.bot.guilds:

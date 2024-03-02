@@ -186,7 +186,7 @@ class Wordle(BSEddies):
         for month in range(1, now.month):  # don't add one as we don't care about current month
             month_start = now.replace(day=1, month=month, hour=0, minute=0, second=1, microsecond=0)
             avg_this_month = all_month_avgs[month_start]
-            msg += f"- Your *{month_start.strftime('%b %y')}* average is `{avg_this_month}`.\n"
+            msg += f"- Your *{month_start.strftime("%b %y")}* average is `{avg_this_month}`.\n"
 
         # calculate average for this month
         month_start = now.replace(day=1, hour=0, minute=0, second=1)
@@ -205,7 +205,7 @@ class Wordle(BSEddies):
             key=lambda x: all_month_avgs[x],
             reverse=False,
         )[0]
-        msg += f"\n- Your **best** ever month was {top_month.strftime('%b %y')} with `{all_month_avgs[top_month]}`\n"
+        msg += f"\n- Your **best** ever month was {top_month.strftime("%b %y")} with `{all_month_avgs[top_month]}`\n"
 
         msg += "\n## Lifetime Score count\n"
 

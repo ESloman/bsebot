@@ -1205,6 +1205,57 @@ class StatsGatherer:  # noqa: PLR0904
 
         return self.add_annual_changes(start, data_class)
 
+    def most_alphabetical_messages(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
+        """Calculates which user has the most alphabetical messages.
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            Stat: the stat
+        """
+        messages = self.cache.get_messages(guild_id, start, end)
+
+        message_users: dict[int, int] = {}
+        for message in messages:
+            if not message.content:
+                continue
+            message_parts = message.content.lower().split()
+            if len(message_parts) < 4:  # noqa: PLR2004
+                # don't count short messages
+                continue
+            sorted_message_parts = sorted(message_parts)
+            if message_parts == sorted_message_parts:
+                # match! message parts are alphabetical
+                if message.user_id not in message_users:
+                    message_users[message.user_id] = 0
+                message_users[message.user_id] += 1
+
+        try:
+            user = sorted(message_users, key=lambda x: message_users[x], reverse=True)[0]
+        except IndexError:
+            # no data - possible if they've never done a wordle
+            user = BSE_BOT_ID
+            message_users[BSE_BOT_ID] = 0
+
+        data_class = StatDB(
+            _id="",
+            type="award",
+            guild_id=guild_id,
+            user_id=user,
+            award=AwardsTypes.MOST_ALPHABETICAL,
+            month=start.strftime("%b %y"),
+            value=message_users[user],
+            timestamp=datetime.datetime.now(tz=pytz.utc),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="most_alphabetical",
+            annual=self.annual,
+        )
+
+        return self.add_annual_changes(start, data_class)
+
     def lowest_average_wordle_score(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates which user has the best average wordle score.
 
@@ -1471,6 +1522,62 @@ class StatsGatherer:  # noqa: PLR0904
 
         return self.add_annual_changes(start, data_class)
 
+    def wordle_most_yellows(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
+        """Calculates which user had the most yellows in their wordle scores.
+
+        Args:
+            guild_id (int): the guild ID to query for
+            start (datetime.datetime): beginning of time period
+            end (datetime.datetime): end of time period
+
+        Returns:
+            StatDB: the wordle stat
+        """
+        messages = self.cache.get_messages(guild_id, start, end)
+        wordle_messages = [m for m in messages if "wordle" in m.message_type]
+
+        wordle_count: dict[int, int] = {}
+        for wordle in wordle_messages:
+            uid = wordle.user_id
+            if uid == BSE_BOT_ID:
+                continue
+            if uid not in wordle_count:
+                wordle_count[uid] = 0
+
+            if "🟨" not in wordle.content:
+                # don't count these
+                # only interested in responses that contain yellows
+                continue
+
+            if wordle.content.count("🟨") < wordle.content.count("🟩"):
+                continue
+
+            wordle_count[uid] += 1
+
+        try:
+            user = sorted(wordle_count, key=lambda x: wordle_count[x], reverse=True)[0]
+        except IndexError:
+            # no data - possible if they've never done a wordle
+            user = BSE_BOT_ID
+            wordle_count[BSE_BOT_ID] = 0
+
+        data_class = StatDB(
+            _id="",
+            type="award",
+            guild_id=guild_id,
+            user_id=user,
+            award=AwardsTypes.WORDLE_MOST_YELLOWS,
+            month=start.strftime("%b %y"),
+            value=wordle_count[user],
+            timestamp=datetime.datetime.now(tz=pytz.utc),
+            eddies=MONTHLY_AWARDS_PRIZE,
+            short_name="wordle_most_yellows",
+            annual=self.annual,
+            kwargs={"yellow_counts": {str(k): v for k, v in wordle_count.items()}},
+        )
+
+        return self.add_annual_changes(start, data_class)
+
     def twitter_addict(self, guild_id: int, start: datetime.datetime, end: datetime.datetime) -> StatDB:
         """Calculates who's posted the most twitter links.
 
@@ -1496,8 +1603,8 @@ class StatsGatherer:  # noqa: PLR0904
             twitter_addict = sorted(tweet_users, key=lambda x: tweet_users[x], reverse=True)[0]
         except IndexError:
             # no data for anyone yet
-            twitter_addict = 0
-            tweet_users[0] = None
+            twitter_addict = BSE_BOT_ID
+            tweet_users[BSE_BOT_ID] = 0
 
         data_class = StatDB(
             _id="",
@@ -1542,8 +1649,8 @@ class StatsGatherer:  # noqa: PLR0904
             masturbator = sorted(jerk_off_users, key=lambda x: jerk_off_users[x], reverse=True)[0]
         except IndexError:
             # no data
-            masturbator = 0
-            jerk_off_users[0] = None
+            masturbator = BSE_BOT_ID
+            jerk_off_users[BSE_BOT_ID] = 0
 
         data_class = StatDB(
             _id="",
@@ -1588,7 +1695,7 @@ class StatsGatherer:  # noqa: PLR0904
         except IndexError:
             # no data
             big_memer = BSE_BOT_ID
-            reaction_users[BSE_BOT_ID] = None
+            reaction_users[BSE_BOT_ID] = 0
 
         data_class = StatDB(
             _id="",
@@ -1635,7 +1742,7 @@ class StatsGatherer:  # noqa: PLR0904
         except IndexError:
             # no data
             react_king = BSE_BOT_ID
-            reaction_users[BSE_BOT_ID] = None
+            reaction_users[BSE_BOT_ID] = 0
 
         data_class = StatDB(
             _id="",
@@ -1687,14 +1794,14 @@ class StatsGatherer:  # noqa: PLR0904
         except IndexError:
             # no data
             serial_replier = BSE_BOT_ID
-            replies[BSE_BOT_ID] = None
+            replies[BSE_BOT_ID] = 0
 
         try:
             conversation_starter = sorted(replied_to, key=lambda x: replied_to[x], reverse=True)[0]
         except IndexError:
             # no data
             conversation_starter = BSE_BOT_ID
-            replied_to[BSE_BOT_ID] = None
+            replied_to[BSE_BOT_ID] = 0
 
         replier_data_class = StatDB(
             _id="",
@@ -1757,8 +1864,8 @@ class StatsGatherer:  # noqa: PLR0904
         try:
             fattest_fingers = sorted(message_users, key=lambda x: message_users[x]["count"], reverse=True)[0]
         except IndexError:
-            fattest_fingers = 0
-            message_users = {0: {"count": 0, "messages": 0}}
+            fattest_fingers = BSE_BOT_ID
+            message_users = {BSE_BOT_ID: {"count": 0, "messages": 0}}
 
         data_class = StatDB(
             _id="",
@@ -1811,8 +1918,8 @@ class StatsGatherer:  # noqa: PLR0904
         try:
             most_swears = sorted(swear_dict, key=lambda x: swear_dict[x], reverse=True)[0]
         except IndexError:
-            most_swears = 0
-            swear_dict[0] = None
+            most_swears = BSE_BOT_ID
+            swear_dict[BSE_BOT_ID] = None
 
         data_class = StatDB(
             _id="",
@@ -1873,7 +1980,11 @@ class StatsGatherer:  # noqa: PLR0904
             u_dict["channel"] = int(top_channel_id)
 
         # sort the percentages
-        top = sorted(users, key=lambda x: users[x]["percentage"], reverse=True)[0]
+        try:
+            top = sorted(users, key=lambda x: users[x]["percentage"], reverse=True)[0]
+        except IndexError:
+            top = BSE_BOT_ID
+            users[BSE_BOT_ID] = {"percentage": 0, "channel": 0}
 
         data_class = StatDB(
             _id="",
@@ -2166,8 +2277,8 @@ class StatsGatherer:  # noqa: PLR0904
         try:
             big_gamer = sorted(user_dict, key=lambda x: user_dict[x]["count"], reverse=True)[0]
         except IndexError:
-            big_gamer = 0
-            user_dict[0] = {"count": 0, "channels": {}}
+            big_gamer = BSE_BOT_ID
+            user_dict[BSE_BOT_ID] = {"count": 0, "channels": {}}
 
         data_class = StatDB(
             _id="",

@@ -103,18 +103,18 @@ class OnReactionAdd(BaseEvent):
         if not emoji_obj:
             return
 
-        if user.id == emoji_obj["created_by"]:
+        if user.id == emoji_obj.created_by:
             self.logger.info("user used their own emoji")
             return
         self.interactions.add_entry(
             message_id,
             guild_id,
-            emoji_obj["created_by"],
+            emoji_obj.created_by,
             channel.id,
             [
                 "emoji_used",
             ],
             reaction,
             datetime.datetime.now(tz=pytz.utc),
-            additional_keys={"emoji_id": emoji_obj["eid"]},
+            additional_keys={"emoji_id": emoji_obj.eid},
         )

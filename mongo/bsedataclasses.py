@@ -305,6 +305,8 @@ class Awards(BaseClass):
         }
 
         for key in kwargs:
+            if key == "_id":
+                continue
             if key not in doc:
                 doc[key] = kwargs[key]
 

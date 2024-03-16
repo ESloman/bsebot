@@ -135,7 +135,7 @@ MONTHLY_AWARDS_PRIZE = 100
 ANNUAL_AWARDS_AWARD = 500
 
 # regex for recognising a message is wordle
-WORDLE_REGEX = r"Wordle \d?\d\d\d [\dX]/\d\n\n"
+WORDLE_REGEX = r"Wordle \d?\,?\d\d\d [\dX]/\d\n\n"
 # regex for getting wordle score
 WORDLE_SCORE_REGEX = r"[\dX]/\d"
 

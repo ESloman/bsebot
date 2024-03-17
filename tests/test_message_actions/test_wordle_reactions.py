@@ -1,5 +1,6 @@
 """Tests our WordleReactions message action class."""
 
+import datetime
 from unittest import mock
 
 import pytest
@@ -9,6 +10,7 @@ from discordbot.message_actions.base import BaseMessageAction
 from discordbot.message_actions.wordle_reactions import WordleMessageAction
 from discordbot.utilities import PlaceHolderLogger
 from mongo.datatypes.guild import GuildDB
+from mongo.datatypes.message import MessageDB
 from tests.mocks import message_action_mocks
 from tests.mocks.bsebot_mocks import BSEBotMock
 from tests.mocks.discord_mocks import MessageMock
@@ -67,8 +69,21 @@ class TestWordleReactions:
         """Tests the tough_day_status function."""
         action = WordleMessageAction(self.client, self.logger)
         message = MessageMock("")
+        messages = [
+            MessageDB(
+                message.channel_id,
+                message.message_id,
+                ObjectId(),
+                message.guild.id,
+                message.user_id,
+                datetime.datetime.now(),
+                mess["content"],
+                ["message", "wordle"],
+            )
+            for mess in return_val
+        ]
         with (
-            mock.patch.object(action.user_interactions, "query", return_value=return_val),
+            mock.patch.object(action.user_interactions, "query", return_value=messages),
             mock.patch.object(message.channel, "send") as send_patch,
         ):
             await action._handle_tough_day_status(message)

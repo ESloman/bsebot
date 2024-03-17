@@ -1,6 +1,11 @@
 """Mocks for message actions."""
 
+import datetime
+
+from bson import ObjectId
 from pymongo.errors import OperationFailure
+
+from mongo.datatypes.message import MessageDB
 
 
 def query_tough_day_exc(query: dict) -> None:
@@ -11,7 +16,19 @@ def query_tough_day_exc(query: dict) -> None:
 def query_tough_day_exc_sec(query: dict) -> None | list[dict]:
     """Mock for tough day query."""
     if not query["is_bot"]:
-        return [{"content": "6/6"} for _ in range(4)]
+        return [
+            MessageDB(
+                123456,
+                123456,
+                ObjectId(),
+                123456,
+                123456,
+                datetime.datetime.now(),
+                "6/6",
+                ["message", "wordle"],
+            )
+            for _ in range(4)
+        ]
     raise OperationFailure("")
 
 

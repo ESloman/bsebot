@@ -91,7 +91,7 @@ class WordleMessageAction(BaseMessageAction):
                     "message_type": "wordle",
                 },
             )
-            wordle_results = [r for r in wordle_results if any(a in r["content"] for a in ["6/6", "X/6"])]
+            wordle_results = [r for r in wordle_results if any(a in r.content for a in ["6/6", "X/6"])]
         except OperationFailure:
             # text index not set correctly
             return
@@ -111,7 +111,7 @@ class WordleMessageAction(BaseMessageAction):
                     "message_type": "link",
                 },
             )
-            link_results = [r for r in link_results if r["content"] == self._TOUGH_ONE_DAY_LINK]
+            link_results = [r for r in link_results if r.content == self._TOUGH_ONE_DAY_LINK]
         except OperationFailure:
             # text index not set correctly
             return

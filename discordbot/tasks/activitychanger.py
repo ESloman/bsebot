@@ -4,9 +4,9 @@ import asyncio
 import datetime
 import random
 from logging import Logger
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
@@ -45,7 +45,7 @@ class ActivityChanger(BaseTask):
     @tasks.loop(hours=1)
     async def activity_changer(self) -> discord.Activity:
         """Loop that occasionally changes the activity."""
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         threshold = 0.9 if now.hour == 23 or 0 < now.hour < 8 else 0.65  # noqa: PLR2004
 

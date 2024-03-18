@@ -3,9 +3,10 @@
 import discord
 
 from discordbot.embedmanager import EmbedManager
+from discordbot.views.bseview import BSEView
 
 
-class HighScoreBoardView(discord.ui.View):
+class HighScoreBoardView(BSEView):
     """Class for highscore view."""
 
     def __init__(self, embed_manager: EmbedManager) -> None:

@@ -2,10 +2,11 @@
 
 import discord
 from discord import Interaction, SelectOption
-from discord.ui import Select
+
+from discordbot.selects.bseselect import BSESelect
 
 
-class ValorantChannelSelect(Select):
+class ValorantChannelSelect(BSESelect):
     """Class for valorant channel select."""
 
     def __init__(self) -> None:
@@ -33,7 +34,7 @@ class ValorantChannelSelect(Select):
         await self.view.update(interaction)
 
 
-class ValorantActiveSelect(Select):
+class ValorantActiveSelect(BSESelect):
     """Class for valorant active select."""
 
     def __init__(self, default: str | None = None) -> None:
@@ -75,7 +76,7 @@ class ValorantActiveSelect(Select):
         await self.view.update(interaction)
 
 
-class ValorantRoleSelect(Select):
+class ValorantRoleSelect(BSESelect):
     """Class for valorant role select."""
 
     def __init__(self) -> None:

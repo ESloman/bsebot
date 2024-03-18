@@ -4,10 +4,11 @@ import discord
 from bson import Int64
 
 from discordbot.selects.valorantconfig import ValorantActiveSelect, ValorantChannelSelect, ValorantRoleSelect
+from discordbot.views.bseview import BSEView
 from mongo.bsepoints.guilds import Guilds
 
 
-class ValorantConfigView(discord.ui.View):
+class ValorantConfigView(BSEView):
     """Class for valorant config views."""
 
     def __init__(self, guild_id: int) -> None:
@@ -42,23 +43,14 @@ class ValorantConfigView(discord.ui.View):
         Args:
             interaction (discord.Interaction): _description_
         """
-        try:
-            active_val = self.active_select.values[0]
-        except (IndexError, AttributeError, TypeError):
-            for opt in self.active_select.options:
-                if opt.default:
-                    active_val = bool(int(opt.value))
-                    break
-
+        active_val = bool(int(self.get_select_value(self.active_select)))
         self.channel_select.disabled = not active_val
         self.role_select.disabled = not active_val
 
         await interaction.response.edit_message(content=interaction.message.content, view=self)
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=4)
-    async def submit_callback(  # noqa: C901, PLR0912
-        self, _: discord.ui.Button, interaction: discord.Interaction
-    ) -> None:
+    async def submit_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:
         """Button callback.
 
         Args:
@@ -67,35 +59,15 @@ class ValorantConfigView(discord.ui.View):
         """
         guild_db = self.guilds.get_guild(interaction.guild_id)
 
-        try:
-            active_val = bool(int(self.active_select.values[0]))
-        except (IndexError, AttributeError, TypeError):
-            for opt in self.active_select.options:
-                if opt.default:
-                    active_val = bool(int(opt.value))
-                    break
+        active_val = bool(int(self.get_select_value(self.active_select)))
 
-        channel = guild_db.valorant_channel
-        try:
-            channel = self.channel_select.values[0]
-        except (AttributeError, IndexError):
-            for opt in self.channel_select.options:
-                if opt.default:
-                    channel = opt.value
-                    break
-
+        channel = self.get_select_value(self.channel_select) or guild_db.valorant_channel
+        channel = int(channel) if channel is not None else guild_db.valorant_channel
         if channel and type(channel) not in {int, Int64}:
             channel = channel.id
 
-        role = guild_db.valorant_role
-        try:
-            role = self.role_select.values[0]
-        except (AttributeError, IndexError):
-            for opt in self.role_select.options:
-                if opt.default:
-                    role = opt.value
-                    break
-
+        role = self.get_select_value(self.role_select) or guild_db.valorant_role
+        role = int(role) if role is not None else guild_db.valorant_role
         if role and type(role) not in {int, Int64}:
             role = role.id
 

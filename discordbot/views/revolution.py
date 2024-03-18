@@ -3,13 +3,14 @@
 import datetime
 import math
 from logging import Logger
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 
 from discordbot.bot_enums import ActivityTypes, TransactionTypes
 from discordbot.bsebot import BSEBot
 from discordbot.embedmanager import EmbedManager
+from discordbot.views.bseview import BSEView
 from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.points import UserPoints
@@ -17,7 +18,7 @@ from mongo.bseticketedevents import RevolutionEvent
 from mongo.datatypes.revolution import RevolutionEventDB
 
 
-class RevolutionView(discord.ui.View):
+class RevolutionView(BSEView):
     """Class for revolution view."""
 
     _SAVE_THYSELF_BUTTON_TEXT = "Save THYSELF"
@@ -47,8 +48,10 @@ class RevolutionView(discord.ui.View):
         Args:
             disable (bool): whether the children are disabled or not
         """
-        for child in self.children:
-            child.disabled = disable
+        if disable:
+            self.disable_all_items()
+        else:
+            self.enable_all_items()
 
     async def _handle_save_thyself_button_checks(
         self, interaction: discord.Interaction, button: discord.Button, user_id: int, king_id: int
@@ -214,7 +217,7 @@ class RevolutionView(discord.ui.View):
             # leave it disabled
             return
 
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         if event.expired < now:
             await followup.send(content="Unfortunately, this event has expired", ephemeral=True, delete_after=10)

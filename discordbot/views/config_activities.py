@@ -1,15 +1,14 @@
 """Views for config activities."""
 
-import contextlib
-
 import discord
 
 from discordbot.modals.activities import ActivityModal
 from discordbot.selects.activitiesconfig import ActivityTypeSelect
+from discordbot.views.bseview import BSEView
 from mongo.bsedataclasses import BotActivities
 
 
-class ActivityConfigView(discord.ui.View):
+class ActivityConfigView(BSEView):
     """Class for activity config view."""
 
     def __init__(self) -> None:
@@ -18,19 +17,6 @@ class ActivityConfigView(discord.ui.View):
 
         self.activity_select = ActivityTypeSelect()
         self.add_item(self.activity_select)
-
-    async def on_timeout(self) -> None:
-        """View timeout function.
-
-        Is invoked when the message times out.
-        """
-        for child in self.children:
-            child.disabled = True
-
-        with contextlib.suppress(discord.NotFound, AttributeError):
-            # not found is when the message has already been deleted
-            # don't need to edit in that case
-            await self.message.edit(content="This timed out - please _place_ another one", view=None)
 
     async def update(self, interaction: discord.Interaction) -> None:
         """View update method.
@@ -42,10 +28,7 @@ class ActivityConfigView(discord.ui.View):
         """
         selected = self.activity_select.values
 
-        for child in self.children:
-            if type(child) is discord.ui.Button and child.label == "Next":
-                child.disabled = not bool(selected)
-                break
+        self.toggle_button(not bool(selected), "Next")
 
         await interaction.response.edit_message(content=interaction.message.content, view=self)
 
@@ -57,14 +40,7 @@ class ActivityConfigView(discord.ui.View):
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        try:
-            selected = self.activity_select.values[0]
-        except (IndexError, AttributeError, TypeError):
-            # look for default as user didn't select one explicitly
-            for opt in self.activity_select.options:
-                if opt.default:
-                    selected = opt.value
-                    break
+        selected = self.get_select_value(self.activity_select)
 
         match selected:
             case "listening":
@@ -92,7 +68,7 @@ class ActivityConfigView(discord.ui.View):
         await interaction.response.edit_message(content="Cancelled", view=None, delete_after=2)
 
 
-class ActivityConfirmView(discord.ui.View):
+class ActivityConfirmView(BSEView):
     """Class for activity config view."""
 
     def __init__(self, activity_type: str, placeholder: str, name: list[str]) -> None:
@@ -108,19 +84,6 @@ class ActivityConfirmView(discord.ui.View):
         self.placeholder = placeholder
         self.name = name
         self.bot_activities = BotActivities()
-
-    async def on_timeout(self) -> None:
-        """View timeout function.
-
-        Is invoked when the message times out.
-        """
-        for child in self.children:
-            child.disabled = True
-
-        with contextlib.suppress(discord.NotFound, AttributeError):
-            # not found is when the message has already been deleted
-            # don't need to edit in that case
-            await self.message.edit(content="This timed out - please _place_ another one", view=None)
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=4, disabled=False)
     async def submit_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:

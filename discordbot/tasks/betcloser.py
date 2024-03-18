@@ -6,9 +6,9 @@ import dataclasses
 import datetime
 from logging import Logger
 from typing import TYPE_CHECKING
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
@@ -61,7 +61,7 @@ class BetCloser(BaseTask):
 
         If they have expired - they get closed.
         """
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         for guild in self.bot.guilds:
             guild_obj = await self.bot.fetch_guild(guild.id)  # type: discord.Guild
             active = self.user_bets.get_all_active_bets(guild.id)
@@ -77,7 +77,7 @@ class BetCloser(BaseTask):
                 # create a new bet with active set to False to pass around
                 _bet = dataclasses.replace(bet, active=False)
 
-                embed = self.embed_manager.get_bet_embed(guild_obj, bet)
+                embed = self.embed_manager.get_bet_embed(bet)
                 content = f"# {_bet.title}\n_Created by <@{_bet.user}>_"
                 bet_view = BetView(_bet, self.place, self.close)
 

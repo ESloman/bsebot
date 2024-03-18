@@ -2,8 +2,8 @@
 
 import dataclasses
 import datetime
+from zoneinfo import ZoneInfo
 
-import pytz
 from pymongo.results import InsertManyResult, InsertOneResult
 
 from discordbot.bot_enums import ActivityTypes
@@ -55,7 +55,7 @@ class UserActivities(BaseClass):
             "uid": user_id,
             "guild_id": guild_id,
             "type": activity_type,
-            "timestamp": datetime.datetime.now(tz=pytz.utc),
+            "timestamp": datetime.datetime.now(tz=ZoneInfo("UTC")),
         }
 
         doc.update(kwargs)

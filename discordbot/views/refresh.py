@@ -1,46 +1,39 @@
 """Refresh bet views."""
 
-import contextlib
+from typing import TYPE_CHECKING
 
 import discord
 
 from discordbot.embedmanager import EmbedManager
 from discordbot.selects.bet import BetSelect
 from discordbot.views.bet import BetView
+from discordbot.views.bseview import BSEView
 from mongo.bsepoints.bets import UserBets
 from mongo.datatypes.bet import BetDB
 
+if TYPE_CHECKING:
+    from discordbot.slashcommandeventclasses.close import CloseBet
+    from discordbot.slashcommandeventclasses.place import PlaceBet
 
-class RefreshBetView(discord.ui.View):
+
+class RefreshBetView(BSEView):
     """Class for refresh bet view."""
 
-    def __init__(self, bets: list[BetDB], place: callable, close: callable) -> None:
+    def __init__(self, bets: list[BetDB], place: "PlaceBet", close: "CloseBet") -> None:
         """Initialisation method.
 
         Args:
-            bets (list): the bet IDs
-            place (callable): the place function
-            close (callable): the close function
+            bets (list[BetDB]): the bet IDs
+            place (PlaceBet): the place function
+            close (CloseBet): the close function
         """
         super().__init__(timeout=60)
         self.bets = UserBets()
-        self.bseddies_place = place
-        self.bseddies_close = close
+        self.bseddies_place: PlaceBet = place
+        self.bseddies_close: CloseBet = close
         self.embed_manager = EmbedManager()
-        self.add_item(BetSelect(bets))
-
-    async def on_timeout(self) -> None:
-        """View timeout function.
-
-        Is invoked when the message times out.
-        """
-        for child in self.children:
-            child.disabled = True
-
-        with contextlib.suppress(discord.NotFound, AttributeError):
-            # not found is when the message has already been deleted
-            # don't need to edit in that case
-            await self.message.edit(content="This `refresh` command timed out - please _place_ another one", view=None)
+        self.bet_select = BetSelect(bets)
+        self.add_item(self.bet_select)
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=3, disabled=True, emoji="💰")
     async def submit_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:
@@ -50,23 +43,15 @@ class RefreshBetView(discord.ui.View):
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        for child in self.children:
-            if type(child) is BetSelect:
-                try:
-                    bet_id = child.values[0]
-                except (IndexError, AttributeError, TypeError):
-                    # this means that this was default
-                    bet_id = child.options[0].value
-                break
-
+        bet_id = self.get_select_value(self.bet_select)
         bet = self.bets.get_bet_from_id(interaction.guild_id, bet_id)
         channel = await interaction.guild.fetch_channel(bet.channel_id)
         message = await channel.fetch_message(bet.message_id)
-        embed = self.embed_manager.get_bet_embed(interaction.guild, bet)
+        embed = self.embed_manager.get_bet_embed(bet)
         content = f"# {bet.title}\n_Created by <@{bet.user}>_"
         view = BetView(bet, self.bseddies_place, self.bseddies_close)
         await message.edit(content=content, view=view, embed=embed)
-        await interaction.response.edit_message(content="Refreshed the bet for you.", view=None)
+        await interaction.response.edit_message(content="Refreshed the bet for you.", view=None, delete_after=2)
 
     @staticmethod
     @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red, row=3, disabled=False, emoji="✖️")
@@ -77,4 +62,4 @@ class RefreshBetView(discord.ui.View):
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        await interaction.response.edit_message(content="Cancelled", view=None, delete_after=2)
+        await interaction.response.edit_message(content="Cancelled.", view=None, delete_after=2)

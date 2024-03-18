@@ -6,9 +6,9 @@ import math
 import re
 from collections import Counter
 from logging import Logger
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 from discord.ext import tasks
 
 from discordbot.bot_enums import SupporterType, TransactionTypes
@@ -52,7 +52,7 @@ class EddieGainMessager(BaseTask):
     @tasks.loop(minutes=1)
     async def eddie_distributer(self) -> None | list[dict]:  # noqa: PLR0912, C901
         """Task that distributes daily eddies."""
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         if now.hour != 7 or now.minute != 30:  # noqa: PLR2004
             return None
@@ -165,7 +165,7 @@ class BSEddiesManager(BaseTask):
         Returns:
             tuple[datetime.datetime, datetime.datetime]: start, end of day
         """
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         yesterday = now - datetime.timedelta(days=days)
         start = yesterday.replace(hour=0, minute=0, second=0)
         end = yesterday.replace(hour=23, minute=59, second=59)

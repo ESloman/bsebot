@@ -2,8 +2,10 @@
 
 import discord
 
+from discordbot.views.bseview import BSEView
 
-class WrappedView(discord.ui.View):
+
+class WrappedView(BSEView):
     """Class for wrapped view."""
 
     def __init__(self) -> None:
@@ -12,7 +14,7 @@ class WrappedView(discord.ui.View):
         self.shared = False
 
     @discord.ui.button(label="Share", style=discord.ButtonStyle.green)
-    async def submit_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:
+    async def share_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:
         """Button callback.
 
         Args:
@@ -21,8 +23,10 @@ class WrappedView(discord.ui.View):
         """
         if self.shared:
             return
+
         await interaction.channel.send(content=interaction.message.content)
         self.shared = True
+
         try:
             await interaction.response.edit_message(content=interaction.message.content, view=None)
         except Exception:

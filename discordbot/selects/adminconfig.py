@@ -2,10 +2,11 @@
 
 import discord
 from discord import Interaction
-from discord.ui import Select
+
+from discordbot.selects.bseselect import BSESelect
 
 
-class AdminUserSelect(Select):
+class AdminUserSelect(BSESelect):
     """The admin user select."""
 
     def __init__(self) -> None:

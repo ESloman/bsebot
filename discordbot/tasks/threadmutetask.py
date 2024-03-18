@@ -4,9 +4,9 @@ import asyncio
 import datetime
 import random
 from logging import Logger
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
@@ -40,7 +40,7 @@ class ThreadSpoilerTask(BaseTask):
     @tasks.loop(minutes=15)
     async def thread_mute(self) -> None:
         """Task that sends daily "remember to mute this spoiler thread" messages."""
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         if now.hour != 8 or not (0 <= now.minute < 15):  # noqa: PLR2004
             return
 

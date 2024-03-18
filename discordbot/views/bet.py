@@ -2,12 +2,13 @@
 
 import datetime
 from typing import TYPE_CHECKING
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 
 from discordbot.modals.addoption import AddBetOption
 from discordbot.views.betchange import BetChange
+from discordbot.views.bseview import BSEView
 from mongo.bsepoints.bets import UserBets
 from mongo.datatypes.bet import BetDB
 
@@ -16,7 +17,7 @@ if TYPE_CHECKING:
     from discordbot.slashcommandeventclasses.place import PlaceBet
 
 
-class BetView(discord.ui.View):
+class BetView(BSEView):
     """Class for Bet view."""
 
     def __init__(self, bet: BetDB, bseddies_place: "PlaceBet", bseddies_close: "CloseBet") -> None:
@@ -109,7 +110,7 @@ class BetView(discord.ui.View):
             return
 
         first_bet_time = _bet.betters[str(interaction.user.id)].first_bet
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         if (
             (now - first_bet_time).seconds > 300  # noqa: PLR2004
             and (now - (_bet.updated or _bet.created)).seconds > 300  # noqa: PLR2004

@@ -3,10 +3,11 @@
 import discord
 
 from discordbot.selects.adminconfig import AdminUserSelect
+from discordbot.views.bseview import BSEView
 from mongo.bsepoints.guilds import Guilds
 
 
-class AdminConfigView(discord.ui.View):
+class AdminConfigView(BSEView):
     """Class for admin config view."""
 
     def __init__(self) -> None:
@@ -26,11 +27,7 @@ class AdminConfigView(discord.ui.View):
             interaction (discord.Interaction): _description_
         """
         selected = self.admins_select.values
-
-        for child in self.children:
-            if type(child) is discord.ui.Button and child.label == "Submit":
-                child.disabled = not bool(selected)
-                break
+        self.toggle_button(not bool(selected))
 
         await interaction.response.edit_message(content=interaction.message.content, view=self)
 

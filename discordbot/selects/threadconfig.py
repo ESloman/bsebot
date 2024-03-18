@@ -1,13 +1,13 @@
 """Thread config selects."""
 
 from discord import Interaction, SelectOption
-from discord.ui import Select
 
 from discordbot.constants import BET_TITLE_DISPLAY_LENTH
+from discordbot.selects.bseselect import BSESelect
 from mongo.datatypes.thread import ThreadDB
 
 
-class ThreadConfigSelect(Select):
+class ThreadConfigSelect(BSESelect):
     """Class for thread config select."""
 
     def __init__(self, threads: list[ThreadDB]) -> None:
@@ -44,11 +44,11 @@ class ThreadConfigSelect(Select):
         for option in self.options:
             option.default = option.value == selected_amount
 
-        await self.view.update()
+        await self.view.update(interaction)
         await interaction.response.edit_message(view=self.view)
 
 
-class ThreadActiveSelect(Select):
+class ThreadActiveSelect(BSESelect):
     """Class for active select."""
 
     def __init__(self) -> None:
@@ -79,7 +79,7 @@ class ThreadActiveSelect(Select):
         await interaction.response.edit_message(view=self.view)
 
 
-class ThreadDaySelect(Select):
+class ThreadDaySelect(BSESelect):
     """Class for day select."""
 
     def __init__(self) -> None:

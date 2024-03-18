@@ -5,9 +5,9 @@ Handles on_emoji_create events.
 
 import datetime
 import logging
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 
 from discordbot.bsebot import BSEBot
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
@@ -55,6 +55,6 @@ class OnEmojiCreate(BaseEvent):
                     "emoji_created",
                 ],
                 emoji.name,
-                datetime.datetime.now(tz=pytz.utc),
+                datetime.datetime.now(tz=ZoneInfo("UTC")),
                 additional_keys={"emoji_id": emoji.id, "created_at": emoji.created_at},
             )

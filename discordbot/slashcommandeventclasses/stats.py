@@ -3,9 +3,9 @@
 import datetime
 import logging
 import re
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 
 from discordbot.bot_enums import ActivityTypes
 from discordbot.bsebot import BSEBot
@@ -273,7 +273,7 @@ class Stats(BSEddies):
         Returns:
             tuple[StatsData, StatsData]: a tuple of Stats Data, all time stats and this month's stats
         """
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         start = now.replace(year=2012, month=1, day=1, hour=1, second=1, microsecond=1)
         end = start.replace(year=now.year + 1)
 

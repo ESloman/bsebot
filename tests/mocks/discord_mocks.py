@@ -325,7 +325,11 @@ class GuildMock:
             channels[2]._type = discord.ChannelType.voice
         return channels
 
-    async def fetch_channel(self, _id: int):
+    def get_channel(self, _id: int) -> ChannelMock:
+        """Mock for get_channel."""
+        return ChannelMock(_id)
+
+    async def fetch_channel(self, _id: int) -> ChannelMock:
         """Mock for fetch_channel."""
         return ChannelMock(_id)
 
@@ -419,6 +423,8 @@ class MessageMock:
 
 
 class FollowUpMock:
+    """Mock for FollowUp/Response."""
+
     @staticmethod
     async def defer(*args, **kwargs) -> None:
         """Mocks followup defer."""
@@ -432,6 +438,10 @@ class FollowUpMock:
         """Mocks followup edit_message."""
 
     @staticmethod
+    async def delete_message(*args, **kwargs) -> None:
+        """Mocks followup delete_message."""
+
+    @staticmethod
     async def send_message(*args, **kwargs) -> None:
         """Mocks followup send message."""
 
@@ -441,7 +451,9 @@ class FollowUpMock:
 
 
 class InteractionMock:
-    def __init__(self, guild_id: int | None, user_id: int = 123456) -> None:
+    """Mock for Interaction."""
+
+    def __init__(self, guild_id: int | None = None, user_id: int = 123456) -> None:
         """Init."""
         if guild_id is None:
             guild_id = 123456
@@ -471,6 +483,11 @@ class InteractionMock:
     def guild(self) -> GuildMock:
         """Guild property."""
         return self._guild
+
+    @guild.setter
+    def guild(self, _guild: GuildMock | None) -> None:
+        """Guild property."""
+        self._guild = _guild
 
     @property
     def guild_id(self) -> int:

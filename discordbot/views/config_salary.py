@@ -3,11 +3,12 @@
 import discord
 
 from discordbot.selects.salaryconfig import SalaryMinimumSelect
+from discordbot.views.bseview import BSEView
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.points import UserPoints
 
 
-class SalaryConfigView(discord.ui.View):
+class SalaryConfigView(BSEView):
     """Class for salary config view."""
 
     def __init__(self, amount: int | None = None) -> None:
@@ -23,12 +24,6 @@ class SalaryConfigView(discord.ui.View):
         self.min_select = SalaryMinimumSelect(amount)
         self.add_item(self.min_select)
 
-    async def update(self) -> None:
-        """View update method.
-
-        Can be called by child types when something changes.
-        """
-
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=4)
     async def submit_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:
         """Button callback.
@@ -37,15 +32,7 @@ class SalaryConfigView(discord.ui.View):
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        try:
-            amount = int(self.min_select._selected_values[0])  # noqa: SLF001
-        except (IndexError, AttributeError, TypeError):
-            # look for default as user didn't select one explicitly
-            for opt in self.min_select.options:
-                if opt.default:
-                    amount = int(opt.value)
-                    break
-
+        amount = int(self.get_select_value(self.min_select))
         old_min = self.guilds.get_daily_minimum(interaction.guild_id)
 
         # update users on current min to new min

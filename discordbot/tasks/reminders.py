@@ -3,8 +3,8 @@
 import asyncio
 import datetime
 from logging import Logger
+from zoneinfo import ZoneInfo
 
-import pytz
 from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
@@ -33,7 +33,7 @@ class RemindersTask(BaseTask):
     @tasks.loop(minutes=1)
     async def reminders(self) -> None:
         """Loop that triggers reminders from the database."""
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         for guild in self.bot.guilds:
             open_reminders = self.server_reminders.get_open_reminders(guild.id)
             for reminder in open_reminders:

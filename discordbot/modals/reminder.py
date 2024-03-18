@@ -2,9 +2,9 @@
 
 import datetime
 import logging
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 
 from discordbot import utilities
 from mongo.bsepoints.reminders import ServerReminders
@@ -49,7 +49,7 @@ class ReminderModal(discord.ui.Modal):
 
         timeout_seconds = utilities.convert_time_str(timeout)
 
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         timeout_date = now + datetime.timedelta(seconds=timeout_seconds)
 
         self.logger.info("%s - %s - %s", reason, timeout, timeout_seconds)

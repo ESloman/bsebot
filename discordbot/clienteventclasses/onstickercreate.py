@@ -5,9 +5,9 @@ Handles on_sticker_update events.
 
 import datetime
 import logging
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 
 from discordbot.bsebot import BSEBot
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
@@ -66,6 +66,6 @@ class OnStickerCreate(BaseEvent):
                     "sticker_created",
                 ],
                 sticker.name,
-                datetime.datetime.now(tz=pytz.utc),
+                datetime.datetime.now(tz=ZoneInfo("UTC")),
                 additional_keys={"sticker_id": sticker.id, "created_at": sticker.created_at},
             )

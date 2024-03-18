@@ -28,9 +28,20 @@ class EmbedManager:
         self.user_points = UserPoints()
         self.logger = logger
 
+    def _get_bet_embed_option_val(self, bet: BetDB, option: str) -> str:
+        betters = [bet.betters[b] for b in bet.betters if bet.betters[b].emoji == option]
+        if not betters:
+            return "No-one has bet on this option yet."
+        val = ""
+        for better in sorted(betters, key=lambda b: b.points, reverse=True):
+            if val:
+                val += "\n"
+            better_db = self.user_points.find_user(better.user_id, bet.guild_id)
+            val += f"**{better_db.name or better.user_id}** (_{better.points}_)"
+        return val
+
     def get_bet_embed(
         self: "EmbedManager",
-        guild: discord.Guild,
         bet: BetDB,
     ) -> discord.Embed:
         """Generates a bet embed from the given bet.
@@ -45,20 +56,7 @@ class EmbedManager:
         embed = discord.Embed(colour=discord.Colour.random())
 
         for option in bet.option_dict:
-            betters = [bet.betters[b] for b in bet.betters if bet.betters[b].emoji == option]
-            if betters:
-                val = ""
-                for better in sorted(betters, key=lambda b: b.points, reverse=True):
-                    if val:
-                        val += "\n"
-                    better_info = guild.get_member(better.user_id)
-                    _better = self.user_points.find_user(better.user_id, guild.id) if not better_info else {}
-                    val += (
-                        f"**{better_info.name if better_info else (_better.name or better.user_id)}** "
-                        f"(_{better.points}_)"
-                    )
-            else:
-                val = "No-one has bet on this option yet."
+            val = self._get_bet_embed_option_val(bet, option)
             embed.add_field(name=f"{option} - {bet.option_dict[option].val}", value=val, inline=False)
 
         if not bet.active:

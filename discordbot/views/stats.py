@@ -5,12 +5,13 @@ from typing import TYPE_CHECKING
 import discord
 
 from discordbot.selects.stats import StatsModeSelect
+from discordbot.views.bseview import BSEView
 
 if TYPE_CHECKING:
     from discordbot.slashcommandeventclasses.stats import Stats
 
 
-class StatsView(discord.ui.View):
+class StatsView(BSEView):
     """Class for stats view."""
 
     def __init__(
@@ -37,20 +38,8 @@ class StatsView(discord.ui.View):
         Args:
             interaction (discord.Interaction): _description_
         """
-        value = None
-        try:
-            value = self.stats_mode.values[0]
-        except (IndexError, AttributeError, TypeError):
-            for opt in self.stats_mode.options:
-                if opt.default:
-                    value = opt.value
-                    break
-
-        for child in self.children:
-            if type(child) is discord.ui.Button and child.label == "Submit":
-                child.disabled = not bool(value)
-                break
-
+        value = self.get_select_value(self.stats_mode)
+        self.toggle_button(not bool(value))
         await interaction.response.edit_message(content=interaction.message.content, view=self)
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=3, disabled=False)
@@ -61,14 +50,7 @@ class StatsView(discord.ui.View):
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        value = None
-        try:
-            value = self.stats_mode.values[0]
-        except (IndexError, AttributeError, TypeError):
-            for opt in self.stats_mode.options:
-                if opt.default:
-                    value = opt.value
-                    break
+        value = self.get_select_value(self.stats_mode)
 
         match value:
             case "quick":

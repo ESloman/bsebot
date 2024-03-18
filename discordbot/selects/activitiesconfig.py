@@ -1,10 +1,11 @@
 """Activity selects."""
 
 from discord import Interaction, SelectOption
-from discord.ui import Select
+
+from discordbot.selects.bseselect import BSESelect
 
 
-class ActivityTypeSelect(Select):
+class ActivityTypeSelect(BSESelect):
     """Class for Activity Type select."""
 
     def __init__(self) -> None:

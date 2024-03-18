@@ -2,10 +2,11 @@
 
 import discord
 from discord import Interaction
-from discord.ui import Select
+
+from discordbot.selects.bseselect import BSESelect
 
 
-class BSEddiesChannelSelect(Select):
+class BSEddiesChannelSelect(BSESelect):
     """Class for BSEddies channel select."""
 
     def __init__(self) -> None:
@@ -38,7 +39,7 @@ class BSEddiesChannelSelect(Select):
         await self.view.update(interaction)
 
 
-class BSEddiesRoleSelect(Select):
+class BSEddiesRoleSelect(BSESelect):
     """Class for BSEddies role select."""
 
     def __init__(self, role_type: str = "KING") -> None:

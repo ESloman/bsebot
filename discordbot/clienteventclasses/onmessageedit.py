@@ -5,9 +5,9 @@ Handles on_message_edit and on_raw_message_edit events.
 
 import datetime
 import logging
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 
 import discordbot.clienteventclasses.onmessage
 from discordbot.bsebot import BSEBot
@@ -78,7 +78,7 @@ class OnMessageEdit(BaseEvent):
 
         message_type = await self.on_message.message_received(after, True)
 
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         self.interactions.update(
             {"_id": db_message._id},  # noqa: SLF001

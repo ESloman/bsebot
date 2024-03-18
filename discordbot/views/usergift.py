@@ -1,14 +1,13 @@
 """User gift views."""
 
-import contextlib
-
 import discord
 
 from discordbot.selects.giftamount import GiftAmount
 from discordbot.slashcommandeventclasses.gift import Gift
+from discordbot.views.bseview import BSEView
 
 
-class GiftUserEddiesView(discord.ui.View):
+class GiftUserEddiesView(BSEView):
     """Class for user eddies gift view."""
 
     def __init__(self, user_eddies: int, friend: discord.Member, gift: Gift) -> None:
@@ -26,19 +25,6 @@ class GiftUserEddiesView(discord.ui.View):
         self.gift_amount = GiftAmount(user_eddies)
         self.add_item(self.gift_amount)
 
-    async def on_timeout(self) -> None:
-        """View timeout function.
-
-        Is invoked when the message times out.
-        """
-        for child in self.children:
-            child.disabled = True
-
-        with contextlib.suppress(discord.NotFound, AttributeError):
-            # not found is when the message has already been deleted
-            # don't need to edit in that case
-            await self.message.edit(content="This command timed out - please _place_ another one", view=None)
-
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=3, disabled=True)
     async def submit_button_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:
         """Button callback.
@@ -47,11 +33,7 @@ class GiftUserEddiesView(discord.ui.View):
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        try:
-            value = self.gift_amount.values[0]
-        except (IndexError, AttributeError, TypeError):
-            value = next(o for o in self.gift_amount.options if o.default).value
-
+        value = self.get_select_value(self.gift_amount)
         await self.gift.gift_eddies(interaction, self.friend, int(value))
         await interaction.followup.edit_message(interaction.message.id, view=None, content="Done.")
 

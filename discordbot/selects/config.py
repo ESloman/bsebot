@@ -1,10 +1,11 @@
 """Config selects."""
 
 from discord import Interaction, SelectOption
-from discord.ui import Select
+
+from discordbot.selects.bseselect import BSESelect
 
 
-class ConfigSelect(Select):
+class ConfigSelect(BSESelect):
     """Config selects."""
 
     _values = (

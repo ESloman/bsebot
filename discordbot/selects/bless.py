@@ -1,10 +1,11 @@
 """Bless selects."""
 
 from discord import Interaction, SelectOption
-from discord.ui import Select
+
+from discordbot.selects.bseselect import BSESelect
 
 
-class BlessAmountSelect(Select):
+class BlessAmountSelect(BSESelect):
     """Class for bless outcome select."""
 
     amounts = (100, 250, 500, 750, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 10000)
@@ -34,7 +35,7 @@ class BlessAmountSelect(Select):
         await interaction.response.edit_message(view=self.view)
 
 
-class BlessClassSelect(Select):
+class BlessClassSelect(BSESelect):
     """Class for bless classes."""
 
     values = (("all", "All the recently active server member"), ("supporters", "Your loyal followers only"))

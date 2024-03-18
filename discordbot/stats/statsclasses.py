@@ -6,9 +6,9 @@ import re
 from copy import deepcopy
 from logging import Logger
 from typing import TYPE_CHECKING
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 
 from discordbot.bot_enums import ActivityTypes, AwardsTypes, StatTypes, TransactionTypes
 from discordbot.constants import (
@@ -48,7 +48,7 @@ class StatsGatherer:  # noqa: PLR0904
         Returns:
             tuple[datetime.datetime, datetime.datetime]:
         """
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=1)
         try:
             start = start.replace(month=start.month - 1)
@@ -66,7 +66,7 @@ class StatsGatherer:  # noqa: PLR0904
         Returns:
             tuple[datetime.datetime, datetime.datetime]:
         """
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         # always create so it's the first of the month of the current year
         end = now.replace(month=1, day=1, hour=0, minute=0, second=0, microsecond=1)
@@ -119,7 +119,7 @@ class StatsGatherer:  # noqa: PLR0904
             stat=StatTypes.NUMBER_OF_MESSAGES,
             month=start.strftime("%b %y"),
             value=len(messages),
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             short_name="number_of_messages",
             annual=self.annual,
             kwargs={"channels": len(channel_ids), "users": len(user_ids)},
@@ -150,7 +150,7 @@ class StatsGatherer:  # noqa: PLR0904
             stat=StatTypes.NUMBER_OF_THREAD_MESSAGES,
             month=start.strftime("%b %y"),
             value=len(messages),
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             short_name="number_of_thread_messages",
             annual=self.annual,
             kwargs={"channels": len(channel_ids), "users": len(user_ids)},
@@ -191,7 +191,7 @@ class StatsGatherer:  # noqa: PLR0904
             stat=StatTypes.AVERAGE_MESSAGE_LENGTH_CHARS,
             month=start.strftime("%b %y"),
             value=average_message_len,
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             short_name="average_message_length_chars",
             annual=self.annual,
         )
@@ -203,7 +203,7 @@ class StatsGatherer:  # noqa: PLR0904
             stat=StatTypes.AVERAGE_MESSAGE_LENGTH_WORDS,
             month=start.strftime("%b %y"),
             value=average_word_number,
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             short_name="average_message_length_words",
             annual=self.annual,
         )
@@ -248,7 +248,7 @@ class StatsGatherer:  # noqa: PLR0904
             stat=StatTypes.BUSIEST_CHANNEL,
             month=start.strftime("%b %y"),
             value=busiest,
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             short_name="busiest_channel",
             annual=self.annual,
             kwargs={
@@ -298,7 +298,7 @@ class StatsGatherer:  # noqa: PLR0904
             stat=StatTypes.BUSIEST_THREAD,
             month=start.strftime("%b %y"),
             value=busiest,
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             short_name="busiest_thread",
             annual=self.annual,
             kwargs={
@@ -345,7 +345,7 @@ class StatsGatherer:  # noqa: PLR0904
             stat=StatTypes.BUSIEST_DAY,
             month=start.strftime("%b %y"),
             value=busiest,
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             short_name="busiest_day",
             annual=self.annual,
             kwargs={
@@ -397,7 +397,7 @@ class StatsGatherer:  # noqa: PLR0904
             stat=StatTypes.QUIETEST_CHANNEL,
             month=start.strftime("%b %y"),
             value=quietest,
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             short_name="quietest_channel",
             annual=self.annual,
             kwargs={
@@ -447,7 +447,7 @@ class StatsGatherer:  # noqa: PLR0904
             stat=StatTypes.QUIETEST_THREAD,
             month=start.strftime("%b %y"),
             value=quietest,
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             short_name="quietest_thread",
             annual=self.annual,
             kwargs={
@@ -494,7 +494,7 @@ class StatsGatherer:  # noqa: PLR0904
             stat=StatTypes.QUIETEST_DAY,
             month=start.strftime("%b %y"),
             value=quietest,
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             short_name="quietest_day",
             annual=self.annual,
             kwargs={
@@ -526,7 +526,7 @@ class StatsGatherer:  # noqa: PLR0904
             stat=StatTypes.NUMBER_OF_BETS,
             month=start.strftime("%b %y"),
             value=len(bets),
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             short_name="number_of_bets",
             annual=self.annual,
         )
@@ -558,7 +558,7 @@ class StatsGatherer:  # noqa: PLR0904
             stat=StatTypes.SALARY_GAINS,
             month=start.strftime("%b %y"),
             value=salary_total,
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             short_name="salary_total",
             annual=self.annual,
         )
@@ -624,7 +624,7 @@ class StatsGatherer:  # noqa: PLR0904
             stat=StatTypes.AVERAGE_WORDLE_VICTORY,
             month=start.strftime("%b %y"),
             value=average_wordle,
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             short_name="average_wordle_victory",
             annual=self.annual,
             kwargs={"bot_average": average_bot_wordle},
@@ -663,7 +663,7 @@ class StatsGatherer:  # noqa: PLR0904
             stat=StatTypes.EDDIES_PLACED,
             month=start.strftime("%b %y"),
             value=eddies_placed,
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             short_name="number_of_eddies_placed",
             annual=self.annual,
         )
@@ -675,7 +675,7 @@ class StatsGatherer:  # noqa: PLR0904
             stat=StatTypes.EDDIES_WIN,
             month=start.strftime("%b %y"),
             value=eddies_won,
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             short_name="number_of_eddies_won",
             annual=self.annual,
         )
@@ -718,7 +718,7 @@ class StatsGatherer:  # noqa: PLR0904
             stat=StatTypes.MOST_POPULAR_CHANNEL,
             month=start.strftime("%b %y"),
             value=most_popular_channel,
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             short_name="most_popular_channel",
             annual=self.annual,
             kwargs={"users": len(channels[most_popular_channel])},
@@ -759,7 +759,7 @@ class StatsGatherer:  # noqa: PLR0904
             stat=StatTypes.TIME_SPENT_IN_VC,
             month=start.strftime("%b %y"),
             value=int(vc_time),
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             short_name="total_time_spent_in_vc",
             annual=self.annual,
             kwargs={"users": len(users), "channels": len(channels)},
@@ -801,7 +801,7 @@ class StatsGatherer:  # noqa: PLR0904
             stat=StatTypes.VC_MOST_TIME,
             month=start.strftime("%b %y"),
             value=vc_most_time,
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             short_name="vc_most_time",
             annual=self.annual,
             kwargs={
@@ -847,7 +847,7 @@ class StatsGatherer:  # noqa: PLR0904
             stat=StatTypes.VC_MOST_TIME,
             month=start.strftime("%b %y"),
             value=vc_most_users,
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             short_name="vc_most_time",
             annual=self.annual,
             kwargs={
@@ -926,7 +926,7 @@ class StatsGatherer:  # noqa: PLR0904
             stat=StatTypes.MOST_POPULAR_SERVER_EMOJI,
             month=start.strftime("%b %y"),
             value=most_used_emoji,
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             short_name="most_used_server_emoji",
             annual=self.annual,
             kwargs={"emojis": emoji_count, "count": emoji_count[most_used_emoji], "emoji_id": emoji_id},
@@ -960,7 +960,7 @@ class StatsGatherer:  # noqa: PLR0904
             stat=StatTypes.THREADS_CREATED,
             month=start.strftime("%b %y"),
             value=len(created_threads),
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             short_name="threads_created",
             annual=self.annual,
             kwargs={"threads": [thread.thread_id for thread in created_threads]},
@@ -989,7 +989,7 @@ class StatsGatherer:  # noqa: PLR0904
             stat=StatTypes.EMOJIS_CREATED,
             month=start.strftime("%b %y"),
             value=len(created),
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             short_name="emojis_created",
             annual=self.annual,
             kwargs={"emoji_ids": [e.eid for e in created], "emoji_names": [e.name for e in created]},
@@ -1018,7 +1018,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.GUILD_OWNER_AWARD,
             month=start.strftime("%b %y"),
             value=guild.created_at,
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="guild_owner_award",
             annual=self.annual,
@@ -1067,7 +1067,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.MOST_MESSAGES,
             month=start.strftime("%b %y"),
             value=message_users[chattiest]["count"],
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="most_messages_sent",
             annual=self.annual,
@@ -1112,7 +1112,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.LEAST_MESSAGES,
             month=start.strftime("%b %y"),
             value=message_users[least_chattiest],
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="least_messages_sent",
             annual=self.annual,
@@ -1157,7 +1157,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.MOST_MESSAGES,
             month=start.strftime("%b %y"),
             value=message_users[chattiest],
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="most_thread_messages_sent",
             annual=self.annual,
@@ -1197,7 +1197,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.LONGEST_MESSAGE,
             month=start.strftime("%b %y"),
             value=len(longest_message.content),
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="longest_message",
             annual=self.annual,
@@ -1248,7 +1248,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.MOST_ALPHABETICAL,
             month=start.strftime("%b %y"),
             value=message_users[user],
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="most_alphabetical",
             annual=self.annual,
@@ -1324,7 +1324,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.BEST_AVG_WORDLE,
             month=start.strftime("%b %y"),
             value=wordle_avgs[best_avg],
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="lowest_avg_wordle",
             annual=self.annual,
@@ -1402,7 +1402,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.WORST_AVG_WORDLE,
             month=start.strftime("%b %y"),
             value=wordle_avgs[worst_avg],
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="highest_avg_wordle",
             annual=self.annual,
@@ -1455,7 +1455,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.WORDLE_MOST_GREENS,
             month=start.strftime("%b %y"),
             value=wordle_count[user],
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="wordle_most_greens",
             annual=self.annual,
@@ -1513,7 +1513,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.WORDLE_MOST_SYMMETRICAL,
             month=start.strftime("%b %y"),
             value=wordle_count[user],
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="wordle_most_symmetrical",
             annual=self.annual,
@@ -1569,7 +1569,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.WORDLE_MOST_YELLOWS,
             month=start.strftime("%b %y"),
             value=wordle_count[user],
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="wordle_most_yellows",
             annual=self.annual,
@@ -1614,7 +1614,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.TWITTER_ADDICT,
             month=start.strftime("%b %y"),
             value=tweet_users[twitter_addict],
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="twitter_addict",
             annual=self.annual,
@@ -1660,7 +1660,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.MASTURBATOR,
             month=start.strftime("%b %y"),
             value=jerk_off_users[masturbator],
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="masturbator",
             annual=self.annual,
@@ -1705,7 +1705,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.BIG_MEMER,
             month=start.strftime("%b %y"),
             value=reaction_users[big_memer],
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="big_memer",
             annual=self.annual,
@@ -1752,7 +1752,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.REACT_KING,
             month=start.strftime("%b %y"),
             value=reaction_users[react_king],
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="react_king",
             annual=self.annual,
@@ -1811,7 +1811,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.SERIAL_REPLIER,
             month=start.strftime("%b %y"),
             value=replies[serial_replier],
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="serial_replier",
             annual=self.annual,
@@ -1828,7 +1828,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.CONVERSATION_STARTER,
             month=start.strftime("%b %y"),
             value=replied_to[conversation_starter],
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="conversation_starter",
             annual=self.annual,
@@ -1875,7 +1875,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.FAT_FINGERS,
             month=start.strftime("%b %y"),
             value=message_users[fattest_fingers]["count"],
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="most_messages_edited",
             annual=self.annual,
@@ -1929,7 +1929,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.POTTY_MOUTH,
             month=start.strftime("%b %y"),
             value=swear_dict[most_swears],
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="most_swears",
             annual=self.annual,
@@ -1994,7 +1994,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.SINGLE_MINDED,
             month=start.strftime("%b %y"),
             value=users[top]["percentage"],
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="single_minded",
             annual=self.annual,
@@ -2039,7 +2039,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.DIVERSE_PORTFOLIO,
             month=start.strftime("%b %y"),
             value=len(users[top]["channels"]),
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="diverse_portfolio",
             annual=self.annual,
@@ -2083,7 +2083,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.MOST_BETS,
             month=start.strftime("%b %y"),
             value=bet_users[busiest],
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="most_bets_created",
             annual=self.annual,
@@ -2127,7 +2127,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.MOST_EDDIES_BET,
             month=start.strftime("%b %y"),
             value=bet_users[most_placed],
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="most_eddies_placed",
             annual=self.annual,
@@ -2171,7 +2171,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.MOST_EDDIES_WON,
             month=start.strftime("%b %y"),
             value=bet_users[most_placed],
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="most_eddies_won",
             annual=self.annual,
@@ -2220,7 +2220,7 @@ class StatsGatherer:  # noqa: PLR0904
         if king_events[-1] == event and event.type == ActivityTypes.KING_GAIN:
             # last thing someone did was become KING
             uid = event.uid
-            end_time = datetime.datetime.now(tz=pytz.utc)
+            end_time = datetime.datetime.now(tz=ZoneInfo("UTC"))
             if end_time > end:
                 end_time = end
             timestamp = event.timestamp  # type: datetime.datetime
@@ -2239,7 +2239,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.LONGEST_KING,
             month=start.strftime("%b %y"),
             value=int(kings[longest_king]),
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="longest_king",
             annual=self.annual,
@@ -2288,7 +2288,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.BIG_GAMER,
             month=start.strftime("%b %y"),
             value=int(user_dict[big_gamer]["count"]),
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="big_gamer",
             annual=self.annual,
@@ -2344,7 +2344,7 @@ class StatsGatherer:  # noqa: PLR0904
             award=AwardsTypes.BIG_STREAMER,
             month=start.strftime("%b %y"),
             value=int(user_dict[big_streamer]["count"]),
-            timestamp=datetime.datetime.now(tz=pytz.utc),
+            timestamp=datetime.datetime.now(tz=ZoneInfo("UTC")),
             eddies=MONTHLY_AWARDS_PRIZE,
             short_name="big_streamer",
             annual=self.annual,

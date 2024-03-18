@@ -5,9 +5,9 @@ Handles on_reaction and on_raw_reaction_add events.
 
 import datetime
 import logging
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 from discord.emoji import Emoji
 
 from discordbot.bsebot import BSEBot
@@ -95,7 +95,7 @@ class OnReactionAdd(BaseEvent):
             user.id,
             channel.id,
             reaction,
-            datetime.datetime.now(tz=pytz.utc),
+            datetime.datetime.now(tz=ZoneInfo("UTC")),
             author.id,
         )
 
@@ -115,6 +115,6 @@ class OnReactionAdd(BaseEvent):
                 "emoji_used",
             ],
             reaction,
-            datetime.datetime.now(tz=pytz.utc),
+            datetime.datetime.now(tz=ZoneInfo("UTC")),
             additional_keys={"emoji_id": emoji_obj.eid},
         )

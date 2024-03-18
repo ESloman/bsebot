@@ -6,7 +6,7 @@ from discordbot.slashcommandeventclasses.place import PlaceBet
 from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.place import PlaceABetView
 from mongo.bsepoints.bets import UserBets
-from tests.mocks import bsebot_mocks, interface_mocks
+from tests.mocks import bsebot_mocks, discord_mocks, interface_mocks
 
 
 class TestPlaceABetView:
@@ -31,3 +31,11 @@ class TestPlaceABetView:
         bet_data = interface_mocks.query_mock("userbets", {"guild_id": user_data["guild_id"]})[-5:]
         bets = [UserBets.make_data_class(bet) for bet in bet_data]
         _ = PlaceABetView(bets, user_data["points"], self.place)
+
+    async def test_cancel_callback(self) -> None:
+        """Tests cancel callback."""
+        bet_data = interface_mocks.query_mock("userbets", {})[-5:]
+        bets = [UserBets.make_data_class(bet) for bet in bet_data]
+        view = PlaceABetView(bets, 1000, self.place)
+        interaction = discord_mocks.InteractionMock(123456)
+        await view.cancel_callback(None, interaction)

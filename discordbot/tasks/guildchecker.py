@@ -3,9 +3,9 @@
 import datetime
 from logging import Logger
 from typing import TYPE_CHECKING
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 from discord.ext import tasks
 
 from discordbot.bot_enums import ActivityTypes
@@ -285,7 +285,7 @@ class GuildChecker(BaseTask):
                 continue
 
             message = channel.get_partial_message(message_id)
-            embed = self.embed_manager.get_bet_embed(guild, bet)
+            embed = self.embed_manager.get_bet_embed(bet)
             view = BetView(bet, self.place, self.close)
             content = f"# {bet.title}\n_Created by <@{bet.user}>_"
             try:
@@ -326,7 +326,7 @@ class GuildChecker(BaseTask):
     @tasks.loop(hours=12)
     async def guild_checker(self) -> None:
         """Loop that makes sure that guild information is synced correctly."""
-        datetime.datetime.now(tz=pytz.utc)
+        datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         self.logger.info("Running guild sync")
         async for guild in self.bot.fetch_guilds():

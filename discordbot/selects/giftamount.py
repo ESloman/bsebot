@@ -3,10 +3,11 @@
 import math
 
 from discord import Interaction, SelectOption
-from discord.ui import Button, Select
+
+from discordbot.selects.bseselect import BSESelect
 
 
-class GiftAmount(Select):
+class GiftAmount(BSESelect):
     """Class for gift amount select."""
 
     amounts = (1, 5, 10, 25, 50, 75, 100, 175, 250, 500, 750, 1000, 1250, 1500, 1750, 2000, 5000, 10000)
@@ -54,9 +55,5 @@ class GiftAmount(Select):
         for option in self.options:
             option.default = option.value == selected_amount
 
-        for child in self.view.children:
-            if type(child) is Button and child.label == "Submit":
-                child.disabled = False
-                break
-
+        self.view.toggle_button(False, "Submit")
         await interaction.response.edit_message(view=self.view)

@@ -4,12 +4,13 @@ import discord
 
 from discordbot.bot_enums import ActivityTypes, SupporterType, TransactionTypes
 from discordbot.selects.bless import BlessAmountSelect, BlessClassSelect
+from discordbot.views.bseview import BSEView
 from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.points import UserPoints
 
 
-class BlessView(discord.ui.View):
+class BlessView(BSEView):
     """Class for Bless view."""
 
     def __init__(self) -> None:
@@ -31,12 +32,10 @@ class BlessView(discord.ui.View):
             _ (discord.ui.Button): the button pressed
             interaction (discord.Interaction): the callback interaction
         """
-        try:
-            value = int(self.amount_select.values[0])
-        except (IndexError, AttributeError, TypeError):
-            value = int(next(o for o in self.amount_select.options if o.default).value)
+        value = self.get_select_value(self.amount_select)
+        value = int(value) if value else 100
 
-        class_value = next(o for o in self.class_select.options if o.default).value
+        class_value = self.get_select_value(self.class_select)
 
         self.activities.add_activity(
             interaction.user.id,

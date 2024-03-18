@@ -6,6 +6,7 @@ import discord
 
 from discordbot.embedmanager import EmbedManager
 from discordbot.selects.betoutcomes import BetOutcomesSelect
+from discordbot.views.bseview import BSEView
 from mongo.bsepoints.bets import UserBets
 from mongo.datatypes.bet import BetDB
 
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
     from discordbot.views.bet import BetView
 
 
-class BetChange(discord.ui.View):
+class BetChange(BSEView):
     """Class for bet change view."""
 
     def __init__(self, bet: BetDB, view: "BetView", place: "PlaceBet", close: "CloseBet") -> None:
@@ -52,7 +53,7 @@ class BetChange(discord.ui.View):
         """
         await interaction.response.defer(ephemeral=True)
 
-        value = self.outcome_select.values[0]
+        value = self.get_select_value(self.outcome_select)
 
         self.user_bets.update(
             {"_id": self.bet._id},  # noqa: SLF001
@@ -63,7 +64,7 @@ class BetChange(discord.ui.View):
         bet = self.user_bets.get_bet_from_id(interaction.guild_id, self.bet.bet_id)
         channel = await interaction.guild.fetch_channel(bet.channel_id)
         message = await channel.fetch_message(bet.message_id)
-        embed = self.embed_manager.get_bet_embed(interaction.guild, bet)
+        embed = self.embed_manager.get_bet_embed(bet)
         self.view.bet = bet
         await message.edit(embed=embed, view=self.view)
         await interaction.followup.edit_message(

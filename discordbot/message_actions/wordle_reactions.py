@@ -3,9 +3,9 @@
 import datetime
 import re
 from logging import Logger
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 from discord import PartialEmoji
 from pymongo.errors import OperationFailure
 
@@ -77,7 +77,7 @@ class WordleMessageAction(BaseMessageAction):
         Args:
             message (discord.Message): the message
         """
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         today = now.replace(hour=0, minute=0, second=0)
 
         # get number of 6/6 or X/6 wordles today

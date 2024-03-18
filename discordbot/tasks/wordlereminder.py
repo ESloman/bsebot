@@ -4,9 +4,9 @@ import asyncio
 import datetime
 import random
 from logging import Logger
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 from discord.ext import tasks
 
 from discordbot import utilities
@@ -82,7 +82,7 @@ class WordleReminder(BaseTask):
         Only reminds users that did their wordle the day before,
         and haven't done it by ~7pm GMT/BST.
         """
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         if now.hour != 19:  # noqa: PLR2004
             return

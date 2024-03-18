@@ -133,7 +133,7 @@ def create_logger(level: int | None = None) -> logging.Logger:
     stream_handler.setFormatter(colour_formatter)
 
     # this makes sure we're logging to a file
-    file_handler = RotatingFileHandler(Path(path, "bsebot.log"), maxBytes=10485760, backupCount=1)
+    file_handler = RotatingFileHandler(Path(path, "bsebot.log"), maxBytes=50485760, backupCount=5)
     file_handler.setFormatter(formatter)
 
     _logger.addHandler(stream_handler)

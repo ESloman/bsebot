@@ -52,15 +52,11 @@ jobs:
           push: false
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            GIT_USER=ESloman
-            GIT_PASS=${{ secrets.GIT_PASS }}
-            GITHUB_API_KEY=${{ secrets.GIT_API_KEY }}
       - name: Run BSEBot docker image to test
         run: |
           set -ux
           HASH=$(git rev-parse --short "$GITHUB_SHA")
-          docker run -d --name bsebot --network="host" -e "DEBUG_MODE=1" -e "DISCORD_TOKEN=${{ secrets.DISCORD_TEST_TOKEN}}" elliotsloman/bsebot:sha-$HASH
+          docker run -d --name bsebot --network="host" -e "DEBUG_MODE=1" -e "DISCORD_TOKEN=${{ secrets.DISCORD_TEST_TOKEN }}" -e "GITHUB_API_KEY=${{ secrets.GIT_API_KEY }}" elliotsloman/bsebot:sha-$HASH
           sleep 90
           docker logs bsebot
           E_COUNT=$(docker logs bsebot | { grep -ic 'traceback' || true; })

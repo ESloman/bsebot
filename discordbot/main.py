@@ -64,14 +64,24 @@ if __name__ == "__main__":
     if _github := os.environ.get("GITHUB_API_KEY"):
         GITHUB_TOKEN = _github
 
-    if TOKEN is None:
-        sys.exit(-1)
-
     DEBUG_MODE = False if DEBUG_MODE is None else bool(int(DEBUG_MODE))
 
     IDS = [SLOMAN_SERVER_ID] if DEBUG_MODE is True else [BSE_SERVER_ID]
 
-    logger = utilities.create_logger(logging.DEBUG)
+    logger = utilities.create_logger(logging.DEBUG if DEBUG_MODE else logging.INFO)
+
+    logger.info("Logging mode set to %s", logging.DEBUG if DEBUG_MODE else logging.INFO)
+
+    if TOKEN is None:
+        logger.error("Token isn't set - can't authenticate with Discord. Exiting.")
+        sys.exit(-1)
+
+    if DEBUG_MODE:
+        logger.info("Debug mode enabled.")
+    if GIPHY_TOKEN:
+        logger.debug("Giphy token set.")
+    if GITHUB_TOKEN:
+        logger.debug("Github token set.")
 
     intents = discord.Intents.all()
 

@@ -2,8 +2,8 @@
 
 import datetime
 import typing
+from zoneinfo import ZoneInfo
 
-import pytz
 from pymongo.results import InsertOneResult, UpdateResult
 
 from discordbot.bot_enums import ActivityTypes
@@ -140,10 +140,14 @@ class Guilds(BaseClass):  # noqa: PLR0904
         Returns:
             UpdateResult: return result
         """
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         previous_king = self.get_king(guild_id, False)
         previous_doc = {"timestamp": now, "type": ActivityTypes.KING_LOSS, "user_id": previous_king}
-        doc = {"timestamp": datetime.datetime.now(tz=pytz.utc), "type": ActivityTypes.KING_GAIN, "user_id": user_id}
+        doc = {
+            "timestamp": datetime.datetime.now(tz=ZoneInfo("UTC")),
+            "type": ActivityTypes.KING_GAIN,
+            "user_id": user_id,
+        }
         return self.update(
             {"guild_id": guild_id},
             {"$set": {"king": user_id, "king_since": now}, "$push": {"king_history": {"$each": [previous_doc, doc]}}},
@@ -228,7 +232,7 @@ class Guilds(BaseClass):  # noqa: PLR0904
             "tax_rate": tax_rate,
             "supporter_tax_rate": supporter_tax_rate,
             "user_id": user_id,
-            "timestamp": datetime.datetime.now(tz=pytz.utc),
+            "timestamp": datetime.datetime.now(tz=ZoneInfo("UTC")),
         }
         return self.update({"guild_id": guild_id}, {"$push": {"tax_rate_history": doc}})
 
@@ -389,5 +393,5 @@ class Guilds(BaseClass):  # noqa: PLR0904
         Returns:
             UpdateResult: update result
         """
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         return self.update({"guild_id": guild_id}, {"$set": {"last_rigged_time": now}})

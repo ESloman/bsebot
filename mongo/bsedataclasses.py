@@ -3,8 +3,8 @@
 import dataclasses
 import datetime
 import random
+from zoneinfo import ZoneInfo
 
-import pytz
 from bson import ObjectId
 
 from discordbot.bot_enums import AwardsTypes, StatTypes
@@ -296,7 +296,7 @@ class Awards(BaseClass):
             "guild_id": guild_id,
             "user_id": user_id,
             "award": award,
-            "timestamp": datetime.datetime.now(tz=pytz.utc),
+            "timestamp": datetime.datetime.now(tz=ZoneInfo("UTC")),
             "month": month,
             "eddies": eddies,
             "value": value,
@@ -364,7 +364,7 @@ class Awards(BaseClass):
         if stat.annual:
             query["year"] = int(stat.year) - 1
         else:
-            now = datetime.datetime.now(tz=pytz.utc)
+            now = datetime.datetime.now(tz=ZoneInfo("UTC"))
             query["month"] = (stat.timestamp - datetime.timedelta(days=37 + now.day)).strftime("%b %y")
 
         match stat.type:
@@ -467,7 +467,7 @@ class BotActivities(BaseClass):
             "category": category,
             "name": name,
             "created_by": created_by,
-            "created": datetime.datetime.now(tz=pytz.utc),
+            "created": datetime.datetime.now(tz=ZoneInfo("UTC")),
             "count": 0,
             "archived": False,
         }
@@ -530,7 +530,7 @@ class WordleReminders(BaseClass):
         doc = {
             "name": name,
             "created_by": created_by,
-            "created": datetime.datetime.now(tz=pytz.utc),
+            "created": datetime.datetime.now(tz=ZoneInfo("UTC")),
             "archived": False,
         }
 

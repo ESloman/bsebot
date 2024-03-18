@@ -2,8 +2,8 @@
 
 import dataclasses
 import datetime
+from zoneinfo import ZoneInfo
 
-import pytz
 from pymongo.results import InsertManyResult, InsertOneResult
 
 from discordbot.bot_enums import TransactionTypes
@@ -56,7 +56,7 @@ class UserTransactions(BaseClass):
             "guild_id": guild_id,
             "type": transaction_type,
             "amount": amount,
-            "timestamp": datetime.datetime.now(tz=pytz.utc),
+            "timestamp": datetime.datetime.now(tz=ZoneInfo("UTC")),
         }
 
         doc.update(kwargs)

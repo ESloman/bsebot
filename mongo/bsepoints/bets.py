@@ -2,8 +2,8 @@
 
 import copy
 import datetime
+from zoneinfo import ZoneInfo
 
-import pytz
 from bson import ObjectId
 
 from discordbot.bot_enums import TransactionTypes
@@ -66,8 +66,8 @@ class UserBets(BaseClass):
         doc = {
             "user_id": user_id,
             "emoji": emoji,
-            "first_bet": datetime.datetime.now(tz=pytz.utc),
-            "last_bet": datetime.datetime.now(tz=pytz.utc),
+            "first_bet": datetime.datetime.now(tz=ZoneInfo("UTC")),
+            "last_bet": datetime.datetime.now(tz=ZoneInfo("UTC")),
             "points": points,
         }
 
@@ -213,7 +213,7 @@ class UserBets(BaseClass):
             "user": user_id,
             "title": title,
             "options": options,
-            "created": datetime.datetime.now(tz=pytz.utc),
+            "created": datetime.datetime.now(tz=ZoneInfo("UTC")),
             "timeout": timeout,
             "active": True,
             "betters": {},
@@ -222,7 +222,7 @@ class UserBets(BaseClass):
             "channel_id": None,
             "message_id": None,
             "private": private,
-            "updated": datetime.datetime.now(tz=pytz.utc),
+            "updated": datetime.datetime.now(tz=ZoneInfo("UTC")),
             "users": [],
             "option_vals": [option_dict[o]["val"] for o in option_dict],
         }
@@ -280,7 +280,7 @@ class UserBets(BaseClass):
             {"_id": bet._id},  # noqa: SLF001
             {
                 "$inc": {f"betters.{user_id}.points": points},
-                "$set": {"last_bet": datetime.datetime.now(tz=pytz.utc), "users": bet.users},
+                "$set": {"last_bet": datetime.datetime.now(tz=ZoneInfo("UTC")), "users": bet.users},
             },
         )
 
@@ -304,5 +304,6 @@ class UserBets(BaseClass):
         :return: None
         """
         self.update(
-            {"_id": _id}, {"$set": {"active": False, "result": emoji, "closed": datetime.datetime.now(tz=pytz.utc)}}
+            {"_id": _id},
+            {"$set": {"active": False, "result": emoji, "closed": datetime.datetime.now(tz=ZoneInfo("UTC"))}},
         )

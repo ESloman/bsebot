@@ -1,11 +1,5 @@
 FROM python:3.12.2
 
-ARG DISCORD_TOKEN
-ARG GIPHY_TOKEN
-ARG GIT_USER
-ARG GIT_PASS
-ARG GITHUB_API_KEY
-
 SHELL ["/bin/bash", "-c"]
 
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
@@ -29,12 +23,7 @@ COPY . /home/app/
 
 ENV PYTHONPATH=/home/app/
 
-RUN pip install -r home/app/requirements.txt \
-    && touch /home/app/discordbot/.env \
-    && echo "DEBUG_MODE=0" >> /home/app/discordbot/.env \
-    && echo "DISCORD_TOKEN=${DISCORD_TOKEN}" >> /home/app/discordbot/.env \
-    && echo "GIPHY_API_KEY=${GIPHY_TOKEN}" >> /home/app/discordbot/.env \
-    && echo "GITHUB_API_KEY=${GITHUB_API_KEY}" >> /home/app/discordbot/.env
+RUN pip install -r home/app/requirements.txt
 
 WORKDIR /home/app/discordbot
 

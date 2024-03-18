@@ -1,7 +1,9 @@
 # individual files to ignore
+.coveragerc
 .dockerignore
 .gitignore
 .flake8
+conftest.py
 Dockerfile
 LICENSE
 test-requirements.txt

@@ -3,9 +3,9 @@
 import datetime
 import re
 from logging import Logger
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 
 from discordbot.bsebot import BSEBot
 from discordbot.constants import REMIND_ME_COOLDOWN
@@ -48,7 +48,7 @@ class RemindMeAction(BaseMessageAction):
         """
         if any(re.match(rf"\b{a}\b", message.content.lower()) for a in self._reminder_terms):
             # check last time that we sent a marvel comic ad
-            now = datetime.datetime.now(tz=pytz.utc)
+            now = datetime.datetime.now(tz=ZoneInfo("UTC"))
             _last_time = self.guilds.get_last_remind_me_time(message.guild.id)
             if _last_time and (now - _last_time).total_seconds() < REMIND_ME_COOLDOWN:
                 return False

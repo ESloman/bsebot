@@ -3,9 +3,9 @@
 import datetime
 import math
 from logging import Logger
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 
 from discordbot.bot_enums import ActivityTypes, TransactionTypes
 from discordbot.bsebot import BSEBot
@@ -217,7 +217,7 @@ class RevolutionView(BSEView):
             # leave it disabled
             return
 
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         if event.expired < now:
             await followup.send(content="Unfortunately, this event has expired", ephemeral=True, delete_after=10)

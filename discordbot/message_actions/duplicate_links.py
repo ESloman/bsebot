@@ -5,9 +5,9 @@ import random
 import re
 from logging import Logger
 from typing import TYPE_CHECKING
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 from pymongo.errors import OperationFailure
 
 from discordbot.bsebot import BSEBot
@@ -59,7 +59,7 @@ class DuplicateLinkAction(BaseMessageAction):
             link = link.split("?")[0]
 
         # only care about dupes if the original was posted within a couple of days
-        threshold = datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(days=2)
+        threshold = datetime.datetime.now(tz=ZoneInfo("UTC")) - datetime.timedelta(days=2)
         try:
             results = self.user_interactions.query(
                 {

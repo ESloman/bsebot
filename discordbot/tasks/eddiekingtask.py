@@ -5,9 +5,9 @@ import contextlib
 import datetime
 from logging import Logger
 from typing import TYPE_CHECKING
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 from discord.ext import tasks
 
 from discordbot.bot_enums import ActivityTypes
@@ -46,7 +46,7 @@ class BSEddiesKingTask(BaseTask):
 
             if event := self.events_cache.get(_guild.id):
                 # there was a recent event
-                now = datetime.datetime.now(tz=pytz.utc)
+                now = datetime.datetime.now(tz=ZoneInfo("UTC"))
                 expiry_time = event.expired  # type: datetime.datetime
                 if (now - expiry_time).total_seconds() < 60:  # noqa: PLR2004
                     # only been two minutes since the event - wait

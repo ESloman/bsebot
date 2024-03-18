@@ -5,9 +5,9 @@ import datetime
 from dataclasses import asdict
 from logging import Logger
 from typing import TYPE_CHECKING
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 
 from discordbot.embedmanager import EmbedManager
 from discordbot.utilities import PlaceHolderLogger
@@ -73,7 +73,7 @@ class AddBetOption(discord.ui.Modal):
         outcome = self.bet_options.value
         outcomes = outcome.split("\n")
 
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         if not outcomes or not [out for out in outcomes if out]:
             await interaction.followup.send(

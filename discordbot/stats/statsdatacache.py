@@ -1,8 +1,7 @@
 """Stats data cache."""
 
 import datetime
-
-import pytz
+from zoneinfo import ZoneInfo
 
 from mongo.bsedataclasses import SpoilerThreads
 from mongo.bsepoints.activities import UserActivities
@@ -88,7 +87,7 @@ class StatsDataCache:
         Returns:
             list[MessageDB]: list of messages
         """
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         if start != self._start_cache or end != self._end_cache:
             self._message_cache = []
@@ -126,7 +125,7 @@ class StatsDataCache:
         Returns:
             list[MessageDB]: list of edited messages
         """
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         if start != self._start_cache or end != self._end_cache:
             self._edit_cache = []
@@ -170,7 +169,7 @@ class StatsDataCache:
         Returns:
             list[VCInteractionDB]: list of VC interactions
         """
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         if start != self._start_cache or end != self._end_cache:
             self._vc_cache = []
@@ -203,7 +202,7 @@ class StatsDataCache:
         Returns:
             list[BetDB]: list of bets
         """
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         if start != self._start_cache or end != self._end_cache:
             self._bet_cache = []
@@ -231,7 +230,7 @@ class StatsDataCache:
         Returns:
             list[UserDB]: list of users
         """
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         if start != self._start_cache or end != self._end_cache:
             self._user_cache = []
@@ -258,7 +257,7 @@ class StatsDataCache:
         Returns:
             list[TransactionDB]: a list of transactions
         """
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         if start != self._start_cache or end != self._end_cache:
             self._transaction_cache = []
@@ -288,7 +287,7 @@ class StatsDataCache:
         Returns:
             List[dict]: a list of activities
         """
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         if start != self._start_cache or end != self._end_cache:
             self._activity_cache = []
@@ -318,7 +317,7 @@ class StatsDataCache:
         Returns:
             list: list of message dicts
         """
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         if start != self._start_cache or end != self._end_cache:
             self._reactions_cache = []
@@ -348,7 +347,7 @@ class StatsDataCache:
         Returns:
             list: list of message dicts
         """
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         if start != self._start_cache or end != self._end_cache:
             self._emoji_cache = []
@@ -389,7 +388,7 @@ class StatsDataCache:
         Returns:
             list[MessageDB]: list of messages
         """
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         if start != self._start_cache or end != self._end_cache:
             self._reply_cache = []

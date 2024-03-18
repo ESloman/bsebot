@@ -9,8 +9,8 @@ import random
 import re
 from logging import Logger
 from typing import TYPE_CHECKING
+from zoneinfo import ZoneInfo
 
-import pytz
 from selenium import webdriver
 from selenium.common.exceptions import (
     ElementClickInterceptedException,
@@ -406,7 +406,7 @@ class WordleSolver:
             len(guesses),
             actual_word,
             game_state,
-            datetime.datetime.now(tz=pytz.utc),
+            datetime.datetime.now(tz=ZoneInfo("UTC")),
             share_text,
             int(wordle_number),
         )

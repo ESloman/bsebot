@@ -2,9 +2,9 @@
 
 import datetime
 from typing import TYPE_CHECKING
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 
 from discordbot.modals.addoption import AddBetOption
 from discordbot.views.betchange import BetChange
@@ -110,7 +110,7 @@ class BetView(BSEView):
             return
 
         first_bet_time = _bet.betters[str(interaction.user.id)].first_bet
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         if (
             (now - first_bet_time).seconds > 300  # noqa: PLR2004
             and (now - (_bet.updated or _bet.created)).seconds > 300  # noqa: PLR2004

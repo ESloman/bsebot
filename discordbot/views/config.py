@@ -2,9 +2,9 @@
 
 import datetime
 from logging import Logger
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 
 from discordbot.constants import CREATOR
 from discordbot.selects.config import ConfigSelect
@@ -201,7 +201,7 @@ class ConfigView(BSEView):
         guild_db = self.guilds.get_guild(interaction.guild_id)
         admins = guild_db.admins
 
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         configurable_threads = []
         for thread in threads:

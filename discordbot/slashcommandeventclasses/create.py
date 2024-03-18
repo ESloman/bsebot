@@ -4,9 +4,9 @@ import contextlib
 import datetime
 import logging
 from typing import TYPE_CHECKING
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 
 from discordbot import utilities
 from discordbot.bot_enums import ActivityTypes
@@ -100,7 +100,7 @@ class CreateBet(BSEddies):
         }
 
         if timeout_str is None:
-            timeout = datetime.datetime.now(tz=pytz.utc) + datetime.timedelta(minutes=10)
+            timeout = datetime.datetime.now(tz=ZoneInfo("UTC")) + datetime.timedelta(minutes=10)
         else:
             timeout_str = timeout_str.strip()
             try:
@@ -120,7 +120,7 @@ class CreateBet(BSEddies):
                 await ctx.followup.send(content=msg, ephemeral=True)
                 return
 
-            timeout = datetime.datetime.now(tz=pytz.utc) + datetime.timedelta(seconds=_seconds)
+            timeout = datetime.datetime.now(tz=ZoneInfo("UTC")) + datetime.timedelta(seconds=_seconds)
 
         await ctx.channel.trigger_typing()
 

@@ -1,8 +1,8 @@
 """Stats selects."""
 
 import datetime
+from zoneinfo import ZoneInfo
 
-import pytz
 from discord import Interaction, SelectOption
 
 from discordbot.selects.bseselect import BSESelect
@@ -46,7 +46,7 @@ class StatsModeSelect(BSESelect):
 class StatsYearSelect(BSESelect):
     """Class for stats year select."""
 
-    _years = tuple(range(2021, datetime.datetime.now(tz=pytz.utc).year + 1))
+    _years = tuple(range(2021, datetime.datetime.now(tz=ZoneInfo("UTC")).year + 1))
 
     def __init__(self) -> None:
         """Initialisation method."""

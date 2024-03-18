@@ -4,8 +4,8 @@ import asyncio
 import datetime
 import random
 from logging import Logger
+from zoneinfo import ZoneInfo
 
-import pytz
 from discord.ext import tasks
 
 from discordbot import utilities
@@ -37,7 +37,7 @@ class AfterWorkVally(BaseTask):
         if BSE_SERVER_ID not in self.guild_ids:
             return
 
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         if now.weekday() not in {0, 1, 2, 3, 4}:
             return

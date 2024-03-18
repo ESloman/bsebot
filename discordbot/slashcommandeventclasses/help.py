@@ -2,9 +2,9 @@
 
 import datetime
 import logging
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 
 from discordbot.bot_enums import ActivityTypes
 from discordbot.bsebot import BSEBot
@@ -45,7 +45,7 @@ class Help(BSEddies):
         available_commands = [com.activity_type for com in self.command_list]
 
         # get all activities from the last couple of months
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         now += datetime.timedelta(hours=1)
         threshold = now - datetime.timedelta(days=60)
         activities = self.activities.get_guild_activities_by_timestamp(ctx.guild_id, threshold, now)

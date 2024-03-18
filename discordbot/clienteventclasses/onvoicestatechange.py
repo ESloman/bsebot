@@ -6,9 +6,9 @@ Handles on_voice_state_change events.
 import dataclasses
 import datetime
 import logging
+from zoneinfo import ZoneInfo
 
 import discord
-import pytz
 
 from discordbot.bsebot import BSEBot
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
@@ -39,7 +39,7 @@ class OnVoiceStateChange(BaseEvent):
             before (discord.VoiceState): before state
             after (discord.VoiceState): after state
         """
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         if before.self_mute == after.self_mute:
             return None
@@ -67,7 +67,7 @@ class OnVoiceStateChange(BaseEvent):
             before (discord.VoiceState): before state
             after (discord.VoiceState): after state
         """
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         if before.self_deaf == after.self_deaf:
             return None
@@ -95,7 +95,7 @@ class OnVoiceStateChange(BaseEvent):
             before (discord.VoiceState): before state
             after (discord.VoiceState): after state
         """
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         if before.self_stream == after.self_stream:
             return None
@@ -162,7 +162,7 @@ class OnVoiceStateChange(BaseEvent):
             after.channel.guild.id,
             member.id,
             after.channel.id,
-            datetime.datetime.now(tz=pytz.utc),
+            datetime.datetime.now(tz=ZoneInfo("UTC")),
             after.self_mute,
             after.self_deaf,
             after.self_stream,
@@ -177,7 +177,7 @@ class OnVoiceStateChange(BaseEvent):
         """
         self.logger.info("User %s, %s is leaving %s", member.id, member.name, before.channel)
 
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         vc_doc_db = self.interactions.find_active_voice_state(
             before.channel.guild.id, member.id, before.channel.id, now
@@ -229,7 +229,7 @@ class OnVoiceStateChange(BaseEvent):
             before (discord.VoiceState): voice state object
             after (discord.VoiceState): voice state object
         """
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         vc_doc_db = self.interactions.find_active_voice_state(
             before.channel.guild.id, member.id, before.channel.id, now
         )

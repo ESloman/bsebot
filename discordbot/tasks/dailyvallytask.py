@@ -12,13 +12,15 @@ from discordbot import utilities
 from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_SERVER_ID
 from discordbot.message_strings.valorant_rollcalls import MESSAGES
-from discordbot.tasks.basetask import BaseTask
+from discordbot.tasks.basetask import BaseTask, TaskSchedule
 
 
 class AfterWorkVally(BaseTask):
     """Class for after work vally task."""
 
-    def __init__(self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask]) -> None:
+    def __init__(
+        self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask], start: bool = False
+    ) -> None:
         """Initialisation method.
 
         Args:
@@ -26,10 +28,14 @@ class AfterWorkVally(BaseTask):
             guild_ids (list[int]): the list of guild IDs
             logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
+            start (bool): whether to start the task by default. Defaults to False.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.schedule = TaskSchedule(days=[0, 1, 2, 3, 4], hours=[15])
+
         self.task = self.vally_message
-        self.task.start()
+        if start:
+            self.task.start()
 
     @tasks.loop(minutes=10)
     async def vally_message(self) -> None:

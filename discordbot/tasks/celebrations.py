@@ -9,13 +9,15 @@ from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_SERVER_ID, BSEDDIES_REVOLUTION_CHANNEL
-from discordbot.tasks.basetask import BaseTask
+from discordbot.tasks.basetask import BaseTask, TaskSchedule
 
 
 class Celebrations(BaseTask):
     """Class for celebrations task."""
 
-    def __init__(self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask]) -> None:
+    def __init__(
+        self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask], start: bool = False
+    ) -> None:
         """Initialisation method.
 
         Args:
@@ -23,10 +25,28 @@ class Celebrations(BaseTask):
             guild_ids (list[int]): the list of guild IDs
             logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
+            start (bool): whether to start the task on startup. Defaults to False.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
+
+        self.schedule = TaskSchedule(
+            days=[],
+            hours=[
+                0,
+                8,
+                10,
+            ],
+            dates=[
+                datetime.datetime(2021, 12, 25),
+                datetime.datetime(2021, 1, 1),
+                datetime.datetime(2021, 2, 11),
+                datetime.datetime(2021, 5, 14),
+            ],
+        )
+
         self.task = self.celebrations
-        self.task.start()
+        if start:
+            self.task.start()
 
     @tasks.loop(minutes=15)
     async def celebrations(self) -> None:  # noqa: PLR0911

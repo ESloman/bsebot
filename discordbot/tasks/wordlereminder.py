@@ -12,7 +12,7 @@ from discord.ext import tasks
 from discordbot import utilities
 from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_BOT_ID
-from discordbot.tasks.basetask import BaseTask
+from discordbot.tasks.basetask import BaseTask, TaskSchedule
 from mongo.datatypes.message import MessageDB
 
 
@@ -20,7 +20,7 @@ class WordleReminder(BaseTask):
     """Class for Wordle Reminder task."""
 
     def __init__(
-        self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask], start: bool = True
+        self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask], start: bool = False
     ) -> None:
         """Initialisation method.
 
@@ -29,8 +29,10 @@ class WordleReminder(BaseTask):
             guild_ids (list[int]): the list of guild IDs
             logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
+            start (bool): whether to start the task on startup. Defaults to False.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.schedule = TaskSchedule(range(7), [19], 30)
         self.task = self.wordle_reminder
         if start:
             self.task.start()
@@ -75,7 +77,7 @@ class WordleReminder(BaseTask):
             reminders_needed.append(message)
         return reminders_needed
 
-    @tasks.loop(minutes=60)
+    @tasks.loop(minutes=1)
     async def wordle_reminder(self) -> None:
         """Loop that reminds users to do their wordle.
 
@@ -84,7 +86,7 @@ class WordleReminder(BaseTask):
         """
         now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
-        if now.hour != 19:  # noqa: PLR2004
+        if now.hour != 19 or now.minute != 30:  # noqa: PLR2004
             return
 
         start = now - datetime.timedelta(days=1)

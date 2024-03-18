@@ -11,13 +11,15 @@ from discord.ext import tasks
 from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_SERVER_ID, BSEDDIES_REVOLUTION_CHANNEL
 from discordbot.stats.awardsbuilder import AwardsBuilder
-from discordbot.tasks.basetask import BaseTask
+from discordbot.tasks.basetask import BaseTask, TaskSchedule
 
 
 class MonthlyBSEddiesAwards(BaseTask):
     """Class for monthly bseddies awards."""
 
-    def __init__(self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask]) -> None:
+    def __init__(
+        self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask], start: bool = False
+    ) -> None:
         """Initialisation method.
 
         Args:
@@ -25,14 +27,17 @@ class MonthlyBSEddiesAwards(BaseTask):
             guild_ids (list[int]): the list of guild IDs
             logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
+            start (bool): whether to start the task at startup. Defaults to False.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.schedule = TaskSchedule([], [11], dates=[datetime.datetime(2021, x, 1) for x in range(1, 13)])
         self.task = self.bseddies_awards
-        self.task.start()
+        if start:
+            self.task.start()
 
     @tasks.loop(minutes=60)
     async def bseddies_awards(self) -> None:
-        """Loop that triggers our monthly awards.
+        """Loop that trig   gers our monthly awards.
 
         This will trigger on the 1st of a month. Calculates guild stats/awards.
         """

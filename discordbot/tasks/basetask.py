@@ -5,6 +5,8 @@ This is where we should initialise all the database Collection classes we want t
 in the various tasks.
 """
 
+import dataclasses
+import datetime
 from logging import Logger
 
 from discord.ext import commands, tasks
@@ -22,6 +24,22 @@ from mongo.bsepoints.points import UserPoints
 from mongo.bsepoints.reminders import ServerReminders
 from mongo.bsepoints.stickers import ServerStickers
 from mongo.bseticketedevents import RevolutionEvent
+
+
+@dataclasses.dataclass
+class TaskSchedule:
+    """Defines a task's schedule."""
+
+    days: list[int]
+    """The days of the week a task should be running."""
+    hours: list[int]
+    """The hours a given task should be running."""
+    minute: int | None = None
+    """The minute a task should run at. Defaults to None."""
+    overriden: bool = False
+    """Whether we're overriding the schedule and forcing it to run."""
+    dates: list[datetime.datetime] | None = None
+    """Particular dates the task should be running."""
 
 
 class BaseTask(commands.Cog):
@@ -52,7 +70,8 @@ class BaseTask(commands.Cog):
 
         self.startup_tasks: list[BaseTask] = startup_tasks
 
-        self._task = None
+        self._task: tasks.Loop | None = None
+        self._schedule: TaskSchedule | None = None
 
         # database classes
         self.activities = UserActivities()
@@ -81,7 +100,20 @@ class BaseTask(commands.Cog):
 
     @task.setter
     def task(self, task: tasks.Loop) -> None:
+        """Task setter."""
         self._task = task
+
+    @property
+    def schedule(self) -> TaskSchedule:
+        """Schedule property."""
+        if not self._schedule:
+            raise NotImplementedError
+        return self._schedule
+
+    @schedule.setter
+    def schedule(self, _schedule: TaskSchedule) -> None:
+        """Schedule setter."""
+        self._schedule = _schedule
 
     def cog_unload(self) -> None:
         """Method for cancelling the loop."""

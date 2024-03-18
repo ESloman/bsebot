@@ -11,14 +11,16 @@ from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_SERVER_ID
-from discordbot.tasks.basetask import BaseTask
+from discordbot.tasks.basetask import BaseTask, TaskSchedule
 from discordbot.wordle.wordlesolver import WordleSolver
 
 
 class WordleTask(BaseTask):
     """Class for our wordle task."""
 
-    def __init__(self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask]) -> None:
+    def __init__(
+        self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask], start: bool = False
+    ) -> None:
         """Initialisation method.
 
         Args:
@@ -26,15 +28,20 @@ class WordleTask(BaseTask):
             guild_ids (list[int]): the list of guild IDs
             logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
+            start (bool): whether to start the task on startup. Defaults to False.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
+
+        self.schedule = TaskSchedule(range(7), [8, 9, 10, 11, 12])
+
         self.task = self.wordle_message
 
         self.sent_wordle = False
         self.wait_iters = None
 
         self._set_wordle()
-        self.task.start()
+        if start:
+            self.task.start()
 
     def _set_wordle(self) -> None:
         """Sets `sent_wordle` var based on whether or not we have actually sent wordle today."""
@@ -42,18 +49,21 @@ class WordleTask(BaseTask):
 
         ret = self.wordles.find_wordles_at_timestamp(now, BSE_SERVER_ID)
         self.sent_wordle = ret is not None
+        self.schedule.overriden = ret is not None
 
     @tasks.loop(minutes=10)
-    async def wordle_message(self) -> None:  # noqa: C901
+    async def wordle_message(self) -> None:  # noqa: C901, PLR0915
         """Task that does the daily wordle."""
         now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         if now.hour < 9:  # noqa: PLR2004
             self.wait_iters = None
             self.sent_wordle = False
+            self.schedule.overriden = False
             return
 
         if self.sent_wordle:
+            self.schedule.overriden = False
             return
 
         if self.wait_iters is None:
@@ -120,6 +130,7 @@ class WordleTask(BaseTask):
             self.wordles.document_wordle(guild.id, solved_wordle)
 
         self.sent_wordle = True
+        self.schedule.overriden = False
 
         self.logger.info("Setting activity back to default")
         listening_activity = discord.Activity(

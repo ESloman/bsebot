@@ -27,7 +27,7 @@ class RemindersTask(BaseTask):
             start (bool): whether to start the task on startup. Defaults to False.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
-        self.schedule = TaskSchedule(range(7), range(25))
+        self.schedule = TaskSchedule(range(7), range(24))
         self.task = self.reminders
         if start:
             self.task.start()

@@ -30,12 +30,12 @@ class MonthlyBSEddiesAwards(BaseTask):
             start (bool): whether to start the task at startup. Defaults to False.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
-        self.schedule = TaskSchedule([], [11], dates=[datetime.datetime(2021, x, 1) for x in range(1, 13)])
+        self.schedule = TaskSchedule([], [11], 15, dates=[datetime.datetime(2021, x, 1) for x in range(1, 13)])
         self.task = self.bseddies_awards
         if start:
             self.task.start()
 
-    @tasks.loop(minutes=60)
+    @tasks.loop(count=1)
     async def bseddies_awards(self) -> None:
         """Loop that trig   gers our monthly awards.
 
@@ -49,6 +49,7 @@ class MonthlyBSEddiesAwards(BaseTask):
         if (now.day != 1 or now.hour != 11) and not debug:  # noqa: PLR2004
             # we only want to trigger on the first of each month
             # and also trigger at 11am
+            self.logger.warning("Somehow task was started outside operational hours - %s", now)
             return
 
         if BSE_SERVER_ID not in self.guild_ids and not debug:

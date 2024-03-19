@@ -30,12 +30,12 @@ class AnnualBSEddiesAwards(BaseTask):
             start (bool): whether to start the task on startup. Defaults to False.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
-        self.schedule = TaskSchedule([], hours=[14], dates=[datetime.datetime(2021, 1, 1)])
+        self.schedule = TaskSchedule([], hours=[14], minute=15, dates=[datetime.datetime(2021, 1, 1)])
         self.task = self.annual_bseddies_awards
         if start:
             self.task.start()
 
-    @tasks.loop(minutes=60)
+    @tasks.loop(count=1)
     async def annual_bseddies_awards(self) -> None:
         """Task that checks if we need to do the Annual BSEddies Awards.
 
@@ -43,9 +43,10 @@ class AnnualBSEddiesAwards(BaseTask):
         """
         now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
-        if now.day != 2 or now.hour != 14 or now.month != 1:  # noqa: PLR2004
+        if now.day != 1 or now.hour != 14 or now.month != 1:  # noqa: PLR2004
             # we only want to trigger on the first of each YEAR
             # and also trigger at 2pm
+            self.logger.warning("Somehow task was started outside operational hours - %s", now)
             return
 
         if BSE_SERVER_ID not in self.guild_ids:

@@ -31,31 +31,30 @@ class AfterWorkVally(BaseTask):
             start (bool): whether to start the task by default. Defaults to False.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
-        self.schedule = TaskSchedule(days=[0, 1, 2, 3, 4], hours=[15])
+        self.schedule = TaskSchedule(days=[0, 1, 2, 3, 4], hours=[16], minute=8)
 
         self.task = self.vally_message
         if start:
             self.task.start()
 
-    @tasks.loop(minutes=10)
+    @tasks.loop()
     async def vally_message(self) -> None:
         """Loop that sends the daily vally rollcall."""
-        if BSE_SERVER_ID not in self.guild_ids:
-            return
-
         now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         if now.weekday() not in {0, 1, 2, 3, 4}:
+            self.logger.warning("Somehow task was started outside operational hours - %s", now)
             return
 
-        if now.hour != 15 or not (45 <= now.minute <= 54):  # noqa: PLR2004
+        if now.hour != 16 or not (0 <= now.minute <= 14):  # noqa: PLR2004
+            self.logger.warning("Somehow task was started outside operational hours - %s", now)
             return
 
         for guild in self.bot.guilds:
             # set this up for theoretically working with other guilds
             # but only work for BSE Server for now
             if guild.id != BSE_SERVER_ID:
-                continue
+                pass  # continue
 
             guild_db = self.guilds.get_guild(guild.id)
 

@@ -31,16 +31,17 @@ class ThreadSpoilerTask(BaseTask):
             start (bool): whether to start the task at startup. Defaults to False.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
-        self.schedule = TaskSchedule(range(7), hours=[8])
+        self.schedule = TaskSchedule(range(7), hours=[8], minute=10)
         self.task = self.thread_mute
         if start:
             self.task.start()
 
-    @tasks.loop(minutes=15)
+    @tasks.loop(count=1)
     async def thread_mute(self) -> None:
         """Task that sends daily "remember to mute this spoiler thread" messages."""
         now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         if now.hour != 8 or not (0 <= now.minute < 15):  # noqa: PLR2004
+            self.logger.warning("Somehow task was started outside operational hours - %s", now)
             return
 
         if BSE_SERVER_ID not in self.guild_ids:

@@ -37,7 +37,7 @@ class MonthlyBSEddiesAwards(BaseTask):
 
     @tasks.loop(count=1)
     async def bseddies_awards(self) -> None:
-        """Loop that trig   gers our monthly awards.
+        """Loop that triggers our monthly awards.
 
         This will trigger on the 1st of a month. Calculates guild stats/awards.
         """

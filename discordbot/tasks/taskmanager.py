@@ -27,22 +27,12 @@ class TaskManager(BaseTask):
             bot (BSEBot): the BSEBot client
             guild_ids (list[int]): the list of guild IDs
             logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
-            startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
+            startup_tasks (list | None, optional): the list of startup tasks.
+            tasks (list[BaseTask]): the list of all the other tasks to manager.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
-        self.tasks = tasks
         self.task = self.task_checker
-
-        self.task_error_logs = {}
-
-        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
-
-        # init task error dict
-        for task in self.tasks:
-            _task = {"last_running": now, "error_count": 0, "last_error": None}
-
-            self.task_error_logs[task.qualified_name] = _task
-
+        self.tasks = tasks
         self.task.start()
 
     def _should_task_be_running(self, task: BaseTask, now: datetime.datetime) -> bool:

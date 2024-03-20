@@ -11,7 +11,7 @@ from discord.ext import tasks
 from discordbot.bot_enums import ActivityTypes
 from discordbot.bsebot import BSEBot
 from discordbot.embedmanager import EmbedManager
-from discordbot.tasks.basetask import BaseTask
+from discordbot.tasks.basetask import BaseTask, TaskSchedule
 from discordbot.views.bet import BetView
 from discordbot.views.leaderboard import LeaderBoardView
 from discordbot.views.revolution import RevolutionView
@@ -33,7 +33,7 @@ class GuildChecker(BaseTask):
         startup_tasks: list[BaseTask],
         place: "PlaceBet",
         close: "CloseBet",
-        start: bool = True,
+        start: bool = False,
     ) -> None:
         """Initialisation method.
 
@@ -44,15 +44,20 @@ class GuildChecker(BaseTask):
             startup_tasks (list | None, optional): the list of startup tasks.
             place (PlaceBet): the PlaceBet class
             close (CloseBet): the CloseBet class
-            start (bool): whether to start the task. Defaults to True.
+            start (bool): whether to start the task. Defaults to False.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.schedule = TaskSchedule(range(7), [3], 15)
         self.task = self.guild_checker
+        self.finished: bool = False
 
         self.embed_manager = EmbedManager(logger)
 
         self.close: "CloseBet" = close
         self.place: "PlaceBet" = place
+
+        # override to run at startup
+        self.schedule.overriden = not self.finished
 
         if start:
             self.task.start()
@@ -323,7 +328,7 @@ class GuildChecker(BaseTask):
             if channel_db.name != channel.name or channel_db.is_nsfw != channel.is_nsfw():
                 self.guild_channels.update_channel(channel_db, channel.name, channel.is_nsfw())
 
-    @tasks.loop(hours=12)
+    @tasks.loop(count=1)
     async def guild_checker(self) -> None:
         """Loop that makes sure that guild information is synced correctly."""
         datetime.datetime.now(tz=ZoneInfo("UTC"))
@@ -374,6 +379,7 @@ class GuildChecker(BaseTask):
             self.logger.info("Finishing checking %s", guild.name)
 
         self.finished = True
+        self.schedule.overriden = False
 
     @guild_checker.before_loop
     async def before_guild_checker(self) -> None:

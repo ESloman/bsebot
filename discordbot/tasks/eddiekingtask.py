@@ -12,7 +12,7 @@ from discord.ext import tasks
 
 from discordbot.bot_enums import ActivityTypes
 from discordbot.bsebot import BSEBot
-from discordbot.tasks.basetask import BaseTask
+from discordbot.tasks.basetask import BaseTask, TaskSchedule
 
 if TYPE_CHECKING:
     from mongo.datatypes.revolution import RevolutionEventDB
@@ -31,6 +31,7 @@ class BSEddiesKingTask(BaseTask):
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.schedule = TaskSchedule(range(7), range(24))
         self.task = self.king_checker
         self.task.start()
         self.events_cache: dict[int, RevolutionEventDB] = {}
@@ -72,7 +73,7 @@ class BSEddiesKingTask(BaseTask):
 
             if len(role.members) > 1:
                 self.logger.info("We have multiple people with this role - purging the list.")
-                for member in role.members:  # type: discord.Member
+                for member in role.members:
                     if member.id != current_king:
                         await member.remove_roles(
                             role,
@@ -87,21 +88,18 @@ class BSEddiesKingTask(BaseTask):
                 # current king is fine
                 continue
 
-            new = guild.get_member(top_user.uid)  # type: discord.Member
+            new: discord.Member = guild.get_member(top_user.uid)
             if not new:
                 new = await guild.fetch_member(top_user.uid)
 
-            supporter_role = guild.get_role(guild_db.supporter_role)  # type: discord.Role
-            revo_role = guild.get_role(guild_db.revolutionary_role)  # type: discord.Role
+            supporter_role: discord.Role = guild.get_role(guild_db.supporter_role)
+            revo_role: discord.Role = guild.get_role(guild_db.revolutionary_role)
 
             # remove KING from current user
             if current_king is not None and top_user.uid != current_king:
                 prev_king_id = current_king
 
-                current = guild.get_member(current_king)
-                if not current:
-                    current = await guild.fetch_member(current_king)  # type: discord.Member
-
+                current: discord.Member = guild.get_member(current_king) or await guild.fetch_member(current_king)
                 self.logger.info("Removing a king: %s", current.display_name)
 
                 await current.remove_roles(role, reason="User is not longer King!")

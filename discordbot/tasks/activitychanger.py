@@ -10,14 +10,14 @@ import discord
 from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
-from discordbot.tasks.basetask import BaseTask
+from discordbot.tasks.basetask import BaseTask, TaskSchedule
 
 
 class ActivityChanger(BaseTask):
     """Class for activity changer."""
 
     def __init__(
-        self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask], start: bool = True
+        self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask], start: bool = False
     ) -> None:
         """Initialisation method.
 
@@ -26,9 +26,11 @@ class ActivityChanger(BaseTask):
             guild_ids (list[int]): the list of guild IDs
             logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
-            start (bool): whether to start the task automatically or not. Defaults to True.
+            start (bool): whether to start the task automatically or not. Defaults to False.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
+
+        self.schedule = TaskSchedule(range(7), range(24), 45)
 
         self.task = self.activity_changer
 
@@ -42,7 +44,7 @@ class ActivityChanger(BaseTask):
         if start:
             self.task.start()
 
-    @tasks.loop(hours=1)
+    @tasks.loop(count=1)
     async def activity_changer(self) -> discord.Activity:
         """Loop that occasionally changes the activity."""
         now = datetime.datetime.now(tz=ZoneInfo("UTC"))

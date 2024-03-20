@@ -13,7 +13,7 @@ from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
 from discordbot.embedmanager import EmbedManager
-from discordbot.tasks.basetask import BaseTask
+from discordbot.tasks.basetask import BaseTask, TaskSchedule
 from discordbot.views.bet import BetView
 
 if TYPE_CHECKING:
@@ -32,7 +32,7 @@ class BetCloser(BaseTask):
         startup_tasks: list[BaseTask],
         place: "PlaceBet",
         close: "CloseBet",
-        start: bool = True,
+        start: bool = False,
     ) -> None:
         """Initialisation method.
 
@@ -44,9 +44,10 @@ class BetCloser(BaseTask):
             github_api (GitHubAPI): the authenticated Github api class
             place (PlaceBet): the place bet class
             close (CloseBet): the close bet class
-            start (bool) whether to start the task. Defaults to True.
+            start (bool) whether to start the task. Defaults to False.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.schedule = TaskSchedule(range(7), range(24))
         self.task = self.bet_closer
 
         self.embed_manager = EmbedManager(self.logger)
@@ -55,7 +56,7 @@ class BetCloser(BaseTask):
         if start:
             self.task.start()
 
-    @tasks.loop(seconds=10.0)
+    @tasks.loop(seconds=15.0)
     async def bet_closer(self) -> None:
         """Loop that takes all our active bets and ensures they haven't expired.
 

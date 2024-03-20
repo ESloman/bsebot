@@ -22,7 +22,7 @@ from discordbot.constants import (
     WORDLE_SCORE_REGEX,
     WORDLE_VALUES,
 )
-from discordbot.tasks.basetask import BaseTask
+from discordbot.tasks.basetask import BaseTask, TaskSchedule
 from mongo.datatypes.message import MessageDB, VCInteractionDB
 from mongo.datatypes.user import UserDB
 
@@ -31,7 +31,7 @@ class EddieGainMessager(BaseTask):
     """Class for eddie gains task."""
 
     def __init__(
-        self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask], start: bool = True
+        self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask], start: bool = False
     ) -> None:
         """Initialisation method.
 
@@ -40,21 +40,23 @@ class EddieGainMessager(BaseTask):
             guild_ids (list[int]): the list of guild IDs
             logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
-            start (bool): whether to start the task automatically or not. Defaults to True.
+            start (bool): whether to start the task automatically or not. Defaults to False.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.schedule = TaskSchedule(range(7), [7], 30)
         self.task = self.eddie_distributer
 
         self.eddie_manager = BSEddiesManager(self.bot, guild_ids, self.logger, startup_tasks)
         if start:
             self.task.start()
 
-    @tasks.loop(minutes=1)
+    @tasks.loop(count=1)
     async def eddie_distributer(self) -> None | list[dict]:  # noqa: PLR0912, C901
         """Task that distributes daily eddies."""
         now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
         if now.hour != 7 or now.minute != 30:  # noqa: PLR2004
+            self.logger.warning("Somehow task was started outside operational hours - %s?", now)
             return None
 
         data = []

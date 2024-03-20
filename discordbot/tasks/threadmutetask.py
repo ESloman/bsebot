@@ -12,18 +12,14 @@ from discord.ext import tasks
 from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_SERVER_ID
 from discordbot.message_strings.thread_mute_reminders import MESSAGES
-from discordbot.tasks.basetask import BaseTask
+from discordbot.tasks.basetask import BaseTask, TaskSchedule
 
 
 class ThreadSpoilerTask(BaseTask):
     """Class for Thread spoiler task."""
 
     def __init__(
-        self,
-        bot: BSEBot,
-        guild_ids: list[int],
-        logger: Logger,
-        startup_tasks: list[BaseTask],
+        self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask], start: bool = False
     ) -> None:
         """Initialisation method.
 
@@ -32,16 +28,20 @@ class ThreadSpoilerTask(BaseTask):
             guild_ids (list[int]): the list of guild IDs
             logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
+            start (bool): whether to start the task at startup. Defaults to False.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.schedule = TaskSchedule(range(7), hours=[8], minute=10)
         self.task = self.thread_mute
-        self.task.start()
+        if start:
+            self.task.start()
 
-    @tasks.loop(minutes=15)
+    @tasks.loop(count=1)
     async def thread_mute(self) -> None:
         """Task that sends daily "remember to mute this spoiler thread" messages."""
         now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         if now.hour != 8 or not (0 <= now.minute < 15):  # noqa: PLR2004
+            self.logger.warning("Somehow task was started outside operational hours - %s", now)
             return
 
         if BSE_SERVER_ID not in self.guild_ids:

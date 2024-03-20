@@ -10,19 +10,20 @@ from discord.ext import tasks
 
 from discordbot.bsebot import BSEBot
 from discordbot.clienteventclasses.onmessage import OnMessage
-from discordbot.tasks.basetask import BaseTask
+from discordbot.tasks.basetask import BaseTask, TaskSchedule
 
 
 class MessageSync(BaseTask):
     """Class for message sync task."""
 
-    def __init__(
+    def __init__(  # noqa: PLR0913
         self,
         bot: BSEBot,
         guild_ids: list[int],
         logger: Logger,
         startup_tasks: list[BaseTask],
         on_message: OnMessage,
+        start: bool = False,
     ) -> None:
         """Initialisation method.
 
@@ -31,11 +32,15 @@ class MessageSync(BaseTask):
             guild_ids (list[int]): the list of guild IDs
             logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
+            on_message (OnMessage): the OnMessage class.
+            start (bool): whether to start the task automatically. Defaults to False.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.schedule = TaskSchedule(range(7), [2], minute=15, overriden=True)
         self.task = self.message_sync
         self.on_message = on_message
-        self.task.start()
+        if start:
+            self.task.start()
 
     @staticmethod
     async def get_unsynced_messages(
@@ -109,7 +114,7 @@ class MessageSync(BaseTask):
             offset = now - datetime.timedelta(days=offset_days)
             self.logger.debug("Setting offset to %s and looping again", offset)
 
-    @tasks.loop(hours=16)
+    @tasks.loop(count=1)
     async def message_sync(self) -> None:
         """Loop that makes sure all messages are synced correctly."""
         for guild in self.bot.guilds:
@@ -133,6 +138,7 @@ class MessageSync(BaseTask):
                         self.logger.debug("Don't have permissions to access %s", channel.name)
                         continue
             self.logger.debug("Finished sync for %s", guild.name)
+        self.schedule.overriden = False
 
     @message_sync.before_loop
     async def before_message_sync(self) -> None:

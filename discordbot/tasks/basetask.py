@@ -106,8 +106,6 @@ class BaseTask(commands.Cog):
     @property
     def schedule(self) -> TaskSchedule:
         """Schedule property."""
-        if not self._schedule:
-            raise NotImplementedError
         return self._schedule
 
     @schedule.setter

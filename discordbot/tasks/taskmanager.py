@@ -45,7 +45,7 @@ class TaskManager(BaseTask):
 
         self.task.start()
 
-    def _should_task_be_running(self, task: BaseTask, now: datetime.datetime) -> bool:  # noqa: PLR0911
+    def _should_task_be_running(self, task: BaseTask, now: datetime.datetime) -> bool:
         """Checks whether or not a given task should be running.
 
         Using the task schedule - validate when the task should be running.
@@ -64,43 +64,38 @@ class TaskManager(BaseTask):
         Returns:
             bool: whether the task should be running or not
         """
-        try:
-            _ = task.schedule
-        except NotImplementedError:
-            # not implemented the schedule yet
-            return True
-
-        if task.schedule.overriden:
+        if not task.schedule or task.schedule.overriden:
             # overriden schedule - pass
             return True
 
+        should_run: bool = True
         if task.schedule.days and now.weekday() not in task.schedule.days:
             # not the right day or hour for this task - exit
             self.logger.debug(
                 "%s: weekday %s not in scheduled days %s", task.qualified_name, now.weekday(), task.schedule.days
             )
-            return False
+            should_run = False
 
-        if now.hour not in task.schedule.hours:
+        if should_run and now.hour not in task.schedule.hours:
             self.logger.debug(
                 "%s: hour %s not in scheduled hours %s", task.qualified_name, now.hour, task.schedule.hours
             )
-            return False
+            should_run = False
 
-        if task.schedule.minute and now.minute != task.schedule.minute:
+        if should_run and task.schedule.minute and now.minute != task.schedule.minute:
             # if we define a specific minute - make sure that we're within a few minutes of that time
             # otherwise - exit
             self.logger.debug("%s: minute %s not as scheduled %s", task.qualified_name, now.hour, task.schedule.minute)
-            return False
+            should_run = False
 
-        if task.schedule.dates:
+        if should_run and task.schedule.dates:
             viable_months = [date.month for date in task.schedule.dates]
             viable_days = [date.day for date in task.schedule.dates]
             if now.month not in viable_months or now.day not in viable_days:
                 # not the right day or month - exit
-                return False
+                should_run = False
 
-        return True
+        return should_run
 
     def _stop_task(self, task: BaseTask, now: datetime.datetime) -> None:
         """Stops a given task.

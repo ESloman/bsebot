@@ -30,7 +30,7 @@ class ActivityChanger(BaseTask):
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
 
-        self.schedule = TaskSchedule(range(7), range(24))
+        self.schedule = TaskSchedule(range(7), range(24), 45)
 
         self.task = self.activity_changer
 
@@ -44,7 +44,7 @@ class ActivityChanger(BaseTask):
         if start:
             self.task.start()
 
-    @tasks.loop(hours=1)
+    @tasks.loop(count=1)
     async def activity_changer(self) -> discord.Activity:
         """Loop that occasionally changes the activity."""
         now = datetime.datetime.now(tz=ZoneInfo("UTC"))

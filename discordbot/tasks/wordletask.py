@@ -12,6 +12,7 @@ from discord.ext import tasks
 from discordbot.bsebot import BSEBot
 from discordbot.constants import BSE_SERVER_ID
 from discordbot.tasks.basetask import BaseTask, TaskSchedule
+from discordbot.wordle.data_type import WordleSolve
 from discordbot.wordle.wordlesolver import WordleSolver
 
 
@@ -51,8 +52,44 @@ class WordleTask(BaseTask):
         self.sent_wordle = ret is not None
         self.schedule.overriden = ret is not None
 
+    async def _send_wordles(self, solved_wordle: WordleSolve) -> None:
+        """Sends the solved wordle to the necessary guilds.
+
+        Args:
+            solved_wordle (WordleSolve): the solved wordle
+        """
+        # put it into dark mode
+        message = solved_wordle.share_text.replace("⬜", "⬛")
+
+        # format 'spoiler message' to output solved word and guesses
+        spoiler_message = f"Solved wordle in `{solved_wordle.guess_count}`, word was: || {solved_wordle.actual_word} ||"
+        spoiler_message += f". Guesses: || {" -> ".join(solved_wordle.guesses)} ||"
+
+        self.logger.info("Sending wordle message: %s", message)
+
+        for guild in self.bot.guilds:
+            guild_db = self.guilds.get_guild(guild.id)
+            if not guild_db.wordle:
+                self.logger.debug("%s has wordle turned off", guild.name)
+                continue
+
+            channel_id = guild_db.wordle_channel
+            if not channel_id or not guild_db.wordle:
+                self.logger.debug("%s hasn't got a wordle channel configured - skipping", guild.name)
+                continue
+
+            channel = await self.bot.fetch_channel(channel_id)
+            await channel.trigger_typing()
+
+            sent_message = await channel.send(content=message, silent=True)
+
+            if solved_wordle.solved:
+                await sent_message.reply(content=spoiler_message, silent=True)
+
+            self.wordles.document_wordle(guild.id, solved_wordle)
+
     @tasks.loop(minutes=10)
-    async def wordle_message(self) -> None:  # noqa: C901, PLR0915
+    async def wordle_message(self) -> None:
         """Task that does the daily wordle."""
         now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
@@ -100,34 +137,7 @@ class WordleTask(BaseTask):
             solved_wordle = await wordle_solver.solve()
             attempts += 1
 
-        # put it into dark mode
-        message = solved_wordle.share_text.replace("⬜", "⬛")
-
-        # format 'spoiler message' to output solved word and guesses
-        spoiler_message = f"Solved wordle in `{solved_wordle.guess_count}`, word was: || {solved_wordle.actual_word} ||"
-        spoiler_message += f". Guesses: || {" -> ".join(solved_wordle.guesses)} ||"
-
-        self.logger.info("Sending wordle message: %s", message)
-        for guild in self.bot.guilds:
-            guild_db = self.guilds.get_guild(guild.id)
-            if not guild_db.wordle:
-                self.logger.debug("%s has wordle turned off", guild.name)
-                continue
-
-            channel_id = guild_db.wordle_channel
-            if not channel_id or not guild_db.wordle:
-                self.logger.debug("%s hasn't got a wordle channel configured - skipping", guild.name)
-                continue
-
-            channel = await self.bot.fetch_channel(channel_id)
-            await channel.trigger_typing()
-
-            sent_message = await channel.send(content=message, silent=True)
-
-            if solved_wordle.solved:
-                await sent_message.reply(content=spoiler_message, silent=True)
-
-            self.wordles.document_wordle(guild.id, solved_wordle)
+        await self._send_wordles(solved_wordle)
 
         self.sent_wordle = True
         self.schedule.overriden = False

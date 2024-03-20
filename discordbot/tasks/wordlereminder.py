@@ -32,7 +32,7 @@ class WordleReminder(BaseTask):
             start (bool): whether to start the task on startup. Defaults to False.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
-        self.schedule = TaskSchedule(range(7), [20], 5)
+        self.schedule = TaskSchedule(range(7), [19], 30)
         self.task = self.wordle_reminder
         if start:
             self.task.start()
@@ -86,7 +86,9 @@ class WordleReminder(BaseTask):
         """
         now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
-        self.logger.info("Wordle reminder task.")
+        if now.hour != 19 or now.minute != 30:  # noqa: PLR2004
+            self.logger.warning("Somehow task was started outside operational hours - %s?", now)
+            return
 
         start = now - datetime.timedelta(days=1)
         start = start.replace(hour=0, minute=0, second=0, microsecond=1)

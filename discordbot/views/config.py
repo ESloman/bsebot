@@ -73,9 +73,7 @@ class ConfigView(BSEView):
         Returns:
             bool: whether we pass or fail our permission check
         """
-        if value == "daily_salary":
-            return True
-        return False
+        return value == "daily_salary"
 
     def _check_perms(self, value: str, user_id: int, guild_id: int | None = None, guild_db: GuildDB = None) -> bool:
         """Checks if the user has the right perms to configure this item.
@@ -107,10 +105,7 @@ class ConfigView(BSEView):
             guild_db = self.guilds.get_guild(guild_id)
 
         # is user the server owner or an admin
-        if user_id == guild_db.owner_id or user_id in guild_db.admins:
-            return True
-
-        return False
+        return bool(user_id == guild_db.owner_id or user_id in guild_db.admins)
 
     @staticmethod
     async def _send_no_perms_message(interaction: discord.Interaction) -> None:

@@ -116,7 +116,7 @@ class TestBSEddiesRevolutionTask:
         """Tests event bribe conditions with a few save attempts."""
         task = RevolutionBribeTask(self.bsebot, [], self.logger, [])
         event = interface_mocks.query_mock("ticketedevents", {"guild_id": guild_data["guild_id"]})[-1]
-        event["chance"] = 30
+        event["chance"] = 90
         event["times_saved"] += 1
         event_db = RevolutionEvent.make_data_class(event)
         assert not task._check_event_bribe_conditions(event_db)

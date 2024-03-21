@@ -75,14 +75,15 @@ class RevolutionBribeTask(BaseTask):
                 kings[event.uid] += time_king
                 previous_time = None
 
-            elif event.type == ActivityTypes.KING_GAIN:
+            else:
+                # has to be a ActivityTypes.KING_GAIN event
                 previous_time = event.timestamp
 
         if king_events[-1] == event and event.type == ActivityTypes.KING_GAIN:
             # last thing someone did was become KING
-            time_king = (now - event.timestamp).total_seconds()
             if event.uid not in kings:
                 kings[event.uid] = 0
+            time_king = (now - event.timestamp).total_seconds()
             kings[event.uid] += time_king
 
         return kings
@@ -212,7 +213,7 @@ class RevolutionBribeTask(BaseTask):
             self.logger.debug("Bribe message: %s", bribe_message)
             self.logger.debug("Bribe message is %s chars long.", len(bribe_message))
 
-            view = RevolutionBribeView(self.bot, event, self.logger)
+            view = RevolutionBribeView(self.bot, event, bribe_cost, self.logger)
             member = await guild.fetch_member(king_user.uid)
             try:
                 await member.send(content=bribe_message, view=view)

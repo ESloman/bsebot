@@ -10,6 +10,8 @@ from tests.mocks import interface_mocks
 
 
 class TestRevolutionEmbed:
+    """Class for testing revolution embed things."""
+
     @pytest.fixture(autouse=True)
     def _test_data(self) -> None:
         self.guild = Guilds.make_data_class(interface_mocks.query_mock("guilds", {"revolution": True})[0])
@@ -23,3 +25,4 @@ class TestRevolutionEmbed:
         embeds = EmbedManager()
         message = embeds.get_revolution_bribe_message(self.guild, self.event, self.user, 2000)
         assert isinstance(message, str)
+        assert len(message) < 2000

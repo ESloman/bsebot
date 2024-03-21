@@ -278,7 +278,7 @@ class TestBSEddiesRevolutionTask:
         with (
             mock.patch.object(task, "_check_bribe_conditions", new=lambda *_: False),  # noqa: PT008
         ):
-            assert task.bribe()
+            await task.bribe()
 
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -290,6 +290,8 @@ class TestBSEddiesRevolutionTask:
         event = interface_mocks.query_mock("ticketedevents", {})[-1]
         with (
             mock.patch.object(task, "_check_bribe_conditions", new=lambda *_: True),  # noqa: PT008
-            mock.patch.object(task.revolutions, "get_open_events", return_val=[RevolutionEvent.make_data_class(event)]),
+            mock.patch.object(  # noqa: PT008
+                task.revolutions, "get_open_events", new=lambda *_: [RevolutionEvent.make_data_class(event)]
+            ),
         ):
-            assert task.bribe()
+            await task.bribe()

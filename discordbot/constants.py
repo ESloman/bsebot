@@ -33,10 +33,12 @@ MESSAGE_TYPES = [
     "vc_streaming",
     "voice_message",
     "wordle_word_used",
+    "alphabetical",
 ]
 
 # a mapping of the above message types to a more human readable/understandable version
 HUMAN_MESSAGE_TYPES = {
+    "alphabetical": "Alphabetical messages",
     "message": "Messages",
     "reply": "Replies to messages",
     "attachment": "Attachments sent",
@@ -97,6 +99,7 @@ MESSAGE_VALUES = {
     "vc_streaming": 0.0025,
     "voice_message": 4,
     "wordle_word_used": 2,
+    "alphabetical": 0.5,
 }
 
 # the number of eddies a user received for each wordle score

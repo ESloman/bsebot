@@ -88,7 +88,7 @@ class OnMessageEdit(BaseEvent):
             message_type = await self.on_message.message_received(after)
             db_message = self.interactions.get_message(guild_id, after.id)
             if not db_message:
-                self.logger.debug("Message couldn't be processed: %s %s", message_type, after)
+                self.logger.warning("Message couldn't be processed: %s %s", message_type, after)
                 return
 
         message_type = await self.on_message.message_received(after, True)

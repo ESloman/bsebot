@@ -364,7 +364,7 @@ class StickerMock:
         self.guild = GuildMock
 
 
-class MessageMock:
+class MessageMock:  # noqa: PLR0904
     def __init__(self, content: str = "", guild_id: int = 123, message_id: int = 987654, user_id: int = 567890) -> None:
         """Init."""
         self._id = message_id
@@ -372,11 +372,26 @@ class MessageMock:
         self._guild = GuildMock(guild_id)
         self._channel = ChannelMock(654321)
         self._author = MemberMock(user_id)
+        self._flags: discord.MessageFlags = discord.MessageFlags()
+        self._type: discord.MessageType = discord.MessageType.default
+        self._embeds: list[discord.Embed] = []
+        self._created_at: datetime.datetime = datetime.datetime.now(tz=ZoneInfo("UTC"))
+        self._reference = None
 
     @property
     def content(self) -> str:
         """Content property."""
         return self._content
+
+    @property
+    def created_at(self) -> datetime.datetime:
+        """Created_at property."""
+        return self._created_at
+
+    @property
+    def embeds(self) -> list[discord.Embed]:
+        """Embeds property."""
+        return self._embeds
 
     @property
     def author(self) -> MemberMock:
@@ -417,6 +432,45 @@ class MessageMock:
     def jump_url(self) -> str:
         """Jump URL property."""
         return ""
+
+    @property
+    def flags(self) -> discord.MessageFlags:
+        """Message flags property."""
+        return self._flags
+
+    @property
+    def type(self) -> discord.MessageType:
+        """Message type property."""
+        return self._type
+
+    @property
+    def reference(self) -> None:
+        """Reference property."""
+        return self._reference
+
+    @property
+    def stickers(self) -> None:
+        """Stickers property."""
+
+    @property
+    def attachments(self) -> None:
+        """Attachments property."""
+
+    @property
+    def mentions(self) -> None:
+        """Mentions property."""
+
+    @property
+    def mention_everyone(self) -> None:
+        """Mention everyone property."""
+
+    @property
+    def role_mentions(self) -> None:
+        """Role mentions property."""
+
+    @property
+    def channel_mentions(self) -> None:
+        """Channel mentions property."""
 
     async def add_reaction(self, reaction: str) -> None:
         """Mock add_reaction."""

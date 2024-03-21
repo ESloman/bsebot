@@ -37,7 +37,7 @@ class AfterWorkVally(BaseTask):
         if start:
             self.task.start()
 
-    @tasks.loop()
+    @tasks.loop(count=1)
     async def vally_message(self) -> None:
         """Loop that sends the daily vally rollcall."""
         now = datetime.datetime.now(tz=ZoneInfo("UTC"))

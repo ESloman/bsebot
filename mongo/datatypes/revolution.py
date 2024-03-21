@@ -61,6 +61,12 @@ class RevolutionEventUnFrozenDB:
     locked: list[int] = dataclasses.field(default_factory=list)
     """Users who can't change their decision."""
 
+    # bribe stuff
+    bribe_offered: bool = False
+    """Whether a bribe was offered to the event King."""
+    bribe_accepted: bool | None = None
+    """Whether the King accepted/refused a bribe. None if they weren't offered one."""
+
     # deprecated
     ticket_cost: int | None = None
     """DEPRECATED"""
@@ -120,6 +126,12 @@ class RevolutionEventDB(BaseEventDB):
     """list of those impartial to the event."""
     locked: list[int] = dataclasses.field(default_factory=list)
     """Users who can't change their decision."""
+
+    # bribe stuff
+    bribe_offered: bool = False
+    """Whether a bribe was offered to the event King."""
+    bribe_accepted: bool | None = None
+    """Whether the King accepted/refused a bribe. None if they weren't offered one."""
 
     # deprecated
     ticket_cost: int | None = None

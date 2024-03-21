@@ -170,15 +170,38 @@ class RevolutionEvent(TicketedEvent):
         """Closes an event and sets all the correct flags in the DB.
 
         Args:
-            event_id (str): _description_
-            guild_id (int): _description_
-            success (bool): _description_
-            points (int): _description_
+            event_id (str): the event ID
+            guild_id (int): the guild ID
+            success (bool): whether the event was successful or not
+            points (int): eddies given out
 
         Returns:
-            UpdateResult: _description_
+            UpdateResult: the update result
         """
         return self.update(
             {"event_id": event_id, "guild_id": guild_id},
             {"$set": {"success": success, "points_distributed": points, "open": False}},
         )
+
+    def set_bribe_offered_flag(self, event_id: str) -> UpdateResult:
+        """Sets the bribe offered flag when we offer a bribe.
+
+        Args:
+            event_id (str): the event ID
+
+        Returns:
+            UpdateResult: the update result
+        """
+        return self.update({"event_id": event_id}, {"$set": {"bribe_offered": True}})
+
+    def set_bribe_accepted_flag(self, event_id: str, accepted: bool) -> UpdateResult:
+        """Sets the bribe accepted flag when the user responds to a bribe.
+
+        Args:
+            event_id (str): the event ID
+            accepted (bool): whether the bribe was accepted or not
+
+        Returns:
+            UpdateResult: the update result
+        """
+        return self.update({"event_id": event_id}, {"$set": {"bribe_accepted": accepted}})

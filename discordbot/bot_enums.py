@@ -36,6 +36,7 @@ class TransactionTypes(IntEnum):
     REVOLUTION_SAVE = 29
     BLESS_GIVE = 30
     BLESS_RECEIVE = 31
+    REVOLUTION_BRIBE = 32
     OVERRIDE = 99
 
 

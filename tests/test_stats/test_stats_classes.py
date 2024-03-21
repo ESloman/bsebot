@@ -2,9 +2,9 @@
 
 import datetime
 from unittest import mock
+from zoneinfo import ZoneInfo
 
 import pytest
-import pytz
 from freezegun import freeze_time
 
 from discordbot.stats.statsclasses import StatsGatherer
@@ -118,7 +118,7 @@ class TestsStatsGathererStatsMethods:
     def _setup(self) -> None:
         """Setup fixture."""
         self.logger = PlaceHolderLogger
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         self.start = now.replace(year=2023, month=12, day=1, hour=0, minute=1)
         self.end = self.start.replace(year=2024, month=1)
 
@@ -413,7 +413,7 @@ class TestsStatsGathererAwardsMethods:  # noqa: PLR0904
         """Setup fixture."""
         self.guild = discord_mocks.GuildMock(123456)
         self.logger = PlaceHolderLogger
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         self.start = now.replace(year=2023, month=12, day=1, hour=0, minute=1)
         self.end = self.start.replace(year=2024, month=1)
 

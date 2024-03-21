@@ -3,9 +3,9 @@
 import datetime
 from collections import Counter
 from unittest.mock import patch
+from zoneinfo import ZoneInfo
 
 import pytest
-import pytz
 from freezegun import freeze_time
 
 from discordbot.tasks.eddiegains import BSEddiesManager, EddieGainMessager
@@ -76,7 +76,7 @@ class TestBSEddiesManager:
     @pytest.mark.parametrize("days", [1, 2, 3, 4, 5, 10])
     def test_get_datetime_objects(self, days: int) -> None:
         """Tests our get_datetime_objects method."""
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         manager = BSEddiesManager(self.bsebot, [], PlaceHolderLogger, [])
         start, end = manager.get_datetime_objects(days)
 

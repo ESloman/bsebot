@@ -2,9 +2,9 @@
 
 import datetime
 from unittest import mock
+from zoneinfo import ZoneInfo
 
 import pytest
-import pytz
 
 from discordbot.stats.statsdatacache import StatsDataCache
 from mongo import interface
@@ -39,7 +39,7 @@ class TestStatsDataCache:
     def test_stats_data_cache_get_messages(self, guild_id: int) -> None:
         """Tests StatsDataCache get_messages."""
         cache = StatsDataCache()
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         start = now.replace(year=2023, month=12, day=1, hour=0, minute=1)
         end = start.replace(year=2024, month=1)
         messages = cache.get_messages(guild_id, start, end)
@@ -69,7 +69,7 @@ class TestStatsDataCache:
     def test_stats_data_cache_get_edited_messages(self, guild_id: int) -> None:
         """Tests StatsDataCache get_edited_messages."""
         cache = StatsDataCache()
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         start = now.replace(year=2023, month=12, day=1, hour=0, minute=1)
         end = start.replace(year=2024, month=1)
         messages = cache.get_edited_messages(guild_id, start, end)
@@ -99,7 +99,7 @@ class TestStatsDataCache:
     def test_stats_data_cache_get_vc_interactions(self, guild_id: int) -> None:
         """Tests StatsDataCache get_vc_interactions."""
         cache = StatsDataCache()
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         start = now.replace(year=2023, month=12, day=1, hour=0, minute=1)
         end = start.replace(year=2024, month=1)
         vcs = cache.get_vc_interactions(guild_id, start, end)
@@ -129,7 +129,7 @@ class TestStatsDataCache:
     def test_stats_data_cache_get_bets(self, guild_id: int) -> None:
         """Tests StatsDataCache get_bets."""
         cache = StatsDataCache()
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         start = now.replace(year=2023, month=12, day=1, hour=0, minute=1)
         end = start.replace(year=2024, month=1)
         bets = cache.get_bets(guild_id, start, end)
@@ -159,7 +159,7 @@ class TestStatsDataCache:
     def test_stats_data_cache_get_users(self, guild_id: int) -> None:
         """Tests StatsDataCache get_users."""
         cache = StatsDataCache()
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         start = now.replace(year=2023, month=12, day=1, hour=0, minute=1)
         end = start.replace(year=2024, month=1)
         users = cache.get_users(guild_id, start, end)
@@ -189,7 +189,7 @@ class TestStatsDataCache:
     def test_stats_data_cache_get_transactions(self, guild_id: int) -> None:
         """Tests StatsDataCache get_transactions."""
         cache = StatsDataCache()
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         start = now.replace(year=2023, month=12, day=1, hour=0, minute=1)
         end = start.replace(year=2024, month=1)
         transactions = cache.get_transactions(guild_id, start, end)
@@ -219,7 +219,7 @@ class TestStatsDataCache:
     def test_stats_data_cache_get_activities(self, guild_id: int) -> None:
         """Tests StatsDataCache get_activities."""
         cache = StatsDataCache()
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         start = now.replace(year=2023, month=12, day=1, hour=0, minute=1)
         end = start.replace(year=2024, month=1)
         activities = cache.get_activities(guild_id, start, end)
@@ -249,7 +249,7 @@ class TestStatsDataCache:
     def test_stats_data_cache_get_emojis(self, guild_id: int) -> None:
         """Tests StatsDataCache get_emojis."""
         cache = StatsDataCache()
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         start = now.replace(year=2023, month=12, day=1, hour=0, minute=1)
         end = start.replace(year=2024, month=1)
         emojis = cache.get_emojis(guild_id, start, end)
@@ -279,7 +279,7 @@ class TestStatsDataCache:
     def test_stats_data_cache_get_threaded_messages(self, guild_id: int) -> None:
         """Tests StatsDataCache get_threaded_messages."""
         cache = StatsDataCache()
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         start = now.replace(year=2023, month=12, day=1, hour=0, minute=1)
         end = start.replace(year=2024, month=1)
         threaded_messages = cache.get_threaded_messages(guild_id, start, end)
@@ -306,7 +306,7 @@ class TestStatsDataCache:
     def test_stats_data_cache_get_reactions(self, guild_id: int) -> None:
         """Tests StatsDataCache get_reactions."""
         cache = StatsDataCache()
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         start = now.replace(year=2023, month=12, day=1, hour=0, minute=1)
         end = start.replace(year=2024, month=1)
         reactions = cache.get_reactions(guild_id, start, end)
@@ -335,7 +335,7 @@ class TestStatsDataCache:
     def test_stats_data_cache_get_replies(self, guild_id: int) -> None:
         """Tests StatsDataCache get_replies."""
         cache = StatsDataCache()
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         start = now.replace(year=2023, month=12, day=1, hour=0, minute=1)
         end = start.replace(year=2024, month=1)
         replies = cache.get_replies(guild_id, start, end)

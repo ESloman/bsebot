@@ -3,9 +3,9 @@
 import copy
 import datetime
 from unittest import mock
+from zoneinfo import ZoneInfo
 
 import pytest
-import pytz
 from freezegun import freeze_time
 
 from discordbot.tasks.revolutiontask import BSEddiesRevolutionTask
@@ -121,7 +121,7 @@ class TestBSEddiesRevolutionTask:
         event_data["quarter_hour"] = False
         for timestamp in ("2024/01/21 18:00", "2024/01/21 18:30", "2024/01/21 19:15"):
             with freeze_time(timestamp):
-                event_data["expired"] = datetime.datetime.now(tz=pytz.utc) + datetime.timedelta(hours=1)
+                event_data["expired"] = datetime.datetime.now(tz=ZoneInfo("UTC")) + datetime.timedelta(hours=1)
                 event = RevolutionEvent.make_data_class(event_data)
                 task.rev_started[event.guild_id] = True
 

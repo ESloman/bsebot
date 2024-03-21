@@ -2,8 +2,8 @@
 
 import datetime
 from unittest import mock
+from zoneinfo import ZoneInfo
 
-import pytz
 from bson import ObjectId
 
 from mongo import interface
@@ -28,7 +28,7 @@ class TestGuildChannels:
         """Tests GuildChannels insert."""
         guild_channels = GuildChannels()
         guild_channels.insert_channel(
-            123456, 654321, 5, "some-channel-name", datetime.datetime.now(tz=pytz.utc), 654789, False
+            123456, 654321, 5, "some-channel-name", datetime.datetime.now(tz=ZoneInfo("UTC")), 654789, False
         )
 
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
@@ -52,7 +52,7 @@ class TestGuildChannels:
             "channel_id": 987654321,
             "name": "some-channel-name",
             "type": 5,
-            "created": datetime.datetime.now(tz=pytz.utc),
+            "created": datetime.datetime.now(tz=ZoneInfo("UTC")),
             "category_id": 123654789,
             "is_nsfw": False,
         })

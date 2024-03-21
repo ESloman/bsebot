@@ -3,9 +3,9 @@
 import datetime
 from typing import TYPE_CHECKING
 from unittest import mock
+from zoneinfo import ZoneInfo
 
 import pytest
-import pytz
 
 from discordbot.tasks.betreminder import BetReminder
 from discordbot.utilities import PlaceHolderLogger
@@ -42,7 +42,7 @@ class TestBetReminder:
     async def test_check_for_day_reminder(self, bet_data: dict) -> None:
         """Tests check_for_day_reminder function."""
         task = BetReminder(self.bsebot, [], self.logger, [], start=False)
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         bet_data["active"] = True
         bet_data["timeout"] = now + datetime.timedelta(hours=23)
         bet_db: BetDB = UserBets.make_data_class(bet_data)
@@ -58,7 +58,7 @@ class TestBetReminder:
     async def test_check_for_day_reminder_already_gone(self, bet_data: dict) -> None:
         """Tests check_for_day_reminder function."""
         task = BetReminder(self.bsebot, [], self.logger, [], start=False)
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         bet_data["active"] = True
         bet_db: BetDB = UserBets.make_data_class(bet_data)
         success = await task._check_bet_for_day_reminder(bet_db, now)
@@ -73,7 +73,7 @@ class TestBetReminder:
     async def test_check_for_day_reminder_not_yet(self, bet_data: dict) -> None:
         """Tests check_for_day_reminder function."""
         task = BetReminder(self.bsebot, [], self.logger, [], start=False)
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         bet_data["active"] = True
         bet_data["timeout"] = now + datetime.timedelta(hours=30)
         bet_db: BetDB = UserBets.make_data_class(bet_data)
@@ -89,7 +89,7 @@ class TestBetReminder:
     async def test_check_for_half_day_reminder(self, bet_data: dict) -> None:
         """Tests check_for_half_day_reminder function."""
         task = BetReminder(self.bsebot, [], self.logger, [], start=False)
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         bet_data["active"] = True
         bet_data["created"] = now - datetime.timedelta(hours=5)
         bet_data["timeout"] = now + datetime.timedelta(hours=30)
@@ -106,7 +106,7 @@ class TestBetReminder:
     async def test_check_for_half_day_reminder_success(self, bet_data: dict) -> None:
         """Tests check_for_half_day_reminder function."""
         task = BetReminder(self.bsebot, [], self.logger, [], start=False)
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         bet_data["active"] = True
         bet_data["created"] = now - datetime.timedelta(days=10, hours=12)
         bet_data["timeout"] = now + datetime.timedelta(days=10, hours=13)
@@ -123,7 +123,7 @@ class TestBetReminder:
     async def test_check_for_half_day_reminder_gone(self, bet_data: dict) -> None:
         """Tests check_for_half_day_reminder function."""
         task = BetReminder(self.bsebot, [], self.logger, [], start=False)
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         bet_data["active"] = True
         bet_data["created"] = now - datetime.timedelta(days=10, hours=12)
         bet_data["timeout"] = now + datetime.timedelta(days=1, hours=13)

@@ -2,9 +2,9 @@
 
 import datetime
 from unittest import mock
+from zoneinfo import ZoneInfo
 
 import pytest
-import pytz
 
 from discordbot.bot_enums import TransactionTypes
 from mongo import interface
@@ -74,7 +74,7 @@ class TestUserTransactions:
         test that the function converts the returned entries into dataclasses.
         """
         transactions = UserTransactions()
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         all_transactions = transactions.get_guild_transactions_by_timestamp(
             guild_id, now.replace(year=2023, month=12, day=1), now
         )

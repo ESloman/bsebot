@@ -2,9 +2,9 @@
 
 import datetime
 from unittest import mock
+from zoneinfo import ZoneInfo
 
 import pytest
-import pytz
 from freezegun import freeze_time
 
 from discordbot.tasks.wordlereminder import WordleReminder
@@ -49,7 +49,7 @@ class TestWordleReminder:
         """Tests get_reminders where we should find no reminders needed."""
         task = WordleReminder(self.bsebot, [], self.logger, [], start=False)
         guild = discord_mocks.GuildMock(guild_data["guild_id"], guild_data["owner_id"], guild_data["name"])
-        start = datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(days=1)
+        start = datetime.datetime.now(tz=ZoneInfo("UTC")) - datetime.timedelta(days=1)
         start = start.replace(hour=0, minute=0, second=0, microsecond=1)
         end = start.replace(hour=23, minute=59, second=59)
         reminders = task._get_reminders_needed(guild, start, end)
@@ -67,7 +67,7 @@ class TestWordleReminder:
         """Tests get_reminders where the guild isn't configured for reminders."""
         task = WordleReminder(self.bsebot, [], self.logger, [], start=False)
         guild = discord_mocks.GuildMock(guild_data["guild_id"], guild_data["owner_id"], guild_data["name"])
-        start = datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(days=1)
+        start = datetime.datetime.now(tz=ZoneInfo("UTC")) - datetime.timedelta(days=1)
         start = start.replace(hour=0, minute=0, second=0, microsecond=1)
         end = start.replace(hour=23, minute=59, second=59)
 
@@ -93,7 +93,7 @@ class TestWordleReminder:
         """Tests get_reminders where we should find reminders needed."""
         task = WordleReminder(self.bsebot, [], self.logger, [], start=False)
         guild = discord_mocks.GuildMock(guild_data["guild_id"], guild_data["owner_id"], guild_data["name"])
-        start = datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(days=1)
+        start = datetime.datetime.now(tz=ZoneInfo("UTC")) - datetime.timedelta(days=1)
         start = start.replace(hour=0, minute=0, second=0, microsecond=1)
         end = start.replace(hour=23, minute=59, second=59)
         reminders = task._get_reminders_needed(guild, start, end)

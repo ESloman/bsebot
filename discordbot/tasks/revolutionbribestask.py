@@ -149,12 +149,9 @@ class RevolutionBribeTask(BaseTask):
         guild_db = self.guilds.get_guild(guild.id)
         open_events = self.revolutions.get_open_events(guild_db.guild_id)
 
-        if not self._check_guild_bribe_conditions(guild_db, open_events):
-            return False
-
-        event = open_events[0]
-
-        if not self._check_event_bribe_conditions(event):
+        if not self._check_guild_bribe_conditions(guild_db, open_events) or not self._check_event_bribe_conditions(
+            open_events[0]
+        ):
             return False
 
         users = self.user_points.get_all_users_for_guild(guild.id, {"points": True})

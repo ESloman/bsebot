@@ -34,6 +34,7 @@ class TestRevolutionBribeView:
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
     async def test_accept_callback(self) -> None:
         """Tests accept callback."""
         event_data = interface_mocks.query_mock("ticketedevents", {})[-1]

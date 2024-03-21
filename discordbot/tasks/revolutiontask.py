@@ -13,7 +13,7 @@ from apis.giphyapi import GiphyAPI
 from discordbot.bot_enums import SupporterType, TransactionTypes
 from discordbot.bsebot import BSEBot
 from discordbot.embedmanager import EmbedManager
-from discordbot.tasks.basetask import BaseTask
+from discordbot.tasks.basetask import BaseTask, TaskSchedule
 from discordbot.views.revolution import RevolutionView
 from mongo.datatypes.guild import GuildDB
 from mongo.datatypes.revolution import RevolutionEventDB
@@ -29,7 +29,7 @@ class BSEddiesRevolutionTask(BaseTask):
         logger: Logger,
         startup_tasks: list[BaseTask],
         giphy_token: str,
-        start: bool = True,
+        start: bool = False,
     ) -> None:
         """Initialisation method.
 
@@ -39,9 +39,10 @@ class BSEddiesRevolutionTask(BaseTask):
             logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
             giphy_token (str): the token to authenticate with giphy with
-            start (bool): whether to start the task. Defaulst to True.
+            start (bool): whether to start the task at startup. Default to False.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)
+        self.schedule = TaskSchedule([6], [16, 17, 18, 19])
         self.task = self.revolution
         self.embed_manager = EmbedManager(logger)
         self.giphy_api = GiphyAPI(giphy_token)

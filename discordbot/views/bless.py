@@ -33,7 +33,7 @@ class BlessView(BSEView):
             interaction (discord.Interaction): the callback interaction
         """
         value = self.get_select_value(self.amount_select)
-        value = int(value) if value else 0
+        value = int(value) if value else 100
 
         class_value = self.get_select_value(self.class_select)
 

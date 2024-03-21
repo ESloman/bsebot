@@ -464,7 +464,7 @@ class AwardsBuilder:
             ),
             (
                 # most alphabetical
-                "- The _'nerd alert'_ 🤓 award: "
+                "- The _'nerd alert'_ 🔤 award: "
                 f"<@!{most_alphabetical.user_id}> (`{most_alphabetical.value}` messages in "
                 "alphabetical order)\n"
             ),

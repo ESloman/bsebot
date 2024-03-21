@@ -6,15 +6,16 @@ Handles on_message events.
 import contextlib
 import logging
 import re
+from typing import TYPE_CHECKING
 
 import discord
 
 from discordbot.bsebot import BSEBot
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from discordbot.constants import WORDLE_REGEX
-from discordbot.message_actions.base import BaseMessageAction  # noqa
 
 # message actions
+from discordbot.message_actions.alphabetical_reactions import AlphabeticalMessageAction
 from discordbot.message_actions.birthday_replies import BirthdayReplies
 from discordbot.message_actions.command_suggestion import CommandSuggest
 from discordbot.message_actions.duplicate_links import DuplicateLinkAction
@@ -23,6 +24,9 @@ from discordbot.message_actions.remind_me import RemindMeAction
 from discordbot.message_actions.rigged import RiggedAction
 from discordbot.message_actions.thank_you_replies import ThankYouReplies
 from discordbot.message_actions.wordle_reactions import WordleMessageAction
+
+if TYPE_CHECKING:
+    from discordbot.message_actions.base import BaseMessageAction
 
 
 class OnMessage(BaseEvent):
@@ -39,7 +43,8 @@ class OnMessage(BaseEvent):
             logger (logging.Logger): the logger
         """
         super().__init__(client, guild_ids, logger)
-        self._post_message_action_classes = [
+        self._post_message_action_classes: list[BaseMessageAction] = [
+            AlphabeticalMessageAction(client, logger),
             BirthdayReplies(client, logger),
             CommandSuggest(client, logger),
             DuplicateLinkAction(client, logger),
@@ -48,7 +53,7 @@ class OnMessage(BaseEvent):
             RiggedAction(client, logger),
             ThankYouReplies(client, logger),
             WordleMessageAction(client, logger),
-        ]  # type: list[BaseMessageAction]
+        ]
 
     @staticmethod
     def _get_ids(message: discord.Message) -> tuple[int, int]:
@@ -161,7 +166,7 @@ class OnMessage(BaseEvent):
         _, is_thread, is_vc = self._get_message_flags(message)
         stickers = message.stickers
 
-        for sticker in stickers:  # type: discord.StickerItem
+        for sticker in stickers:
             sticker_id = sticker.id
 
             # used a custom sticker!

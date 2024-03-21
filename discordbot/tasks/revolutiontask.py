@@ -144,7 +144,7 @@ class BSEddiesRevolutionTask(BaseTask):
         _message = await channel.fetch_message(event.message_id)
         await channel.trigger_typing()
         gif = await self.giphy_api.random_gif("celebrate")
-        await _message.reply(content=f"Just under **{hours_string.upper()}** to go now - remember to choose your side!️")
+        await _message.reply(f"Just under **{hours_string.upper()}** to go now - remember to choose your side!️")
         await channel.send(content=gif)
         self.revolutions.update({"_id": event._id}, {"$set": {key: True}})  # noqa: SLF001
 
@@ -372,7 +372,7 @@ class BSEddiesRevolutionTask(BaseTask):
 
         if event.bribe_offered:
             # handle letting the King know about bribe results
-            await self.handle_bribe_stuff()
+            await self.handle_bribe_stuff(event, val)
 
     @revolution.before_loop
     async def before_revolution(self) -> None:

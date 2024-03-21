@@ -224,7 +224,8 @@ class EmbedManager:
         return (
             f"Hey {guild_db.king},\n"
             f"Looks like you're in a bit of trouble with that revolution in **{guild_db.name}**. "
-            f"The chance is currently **{event.chance}%** {"(capped at 95%) " if event.chance >= 95 else ""}"  # noqa: PLR2004
+            f"The chance is currently **{event.chance}%** "
+            f"{"(capped at 95%) " if event.chance >= 95 else ""}"  # noqa: PLR2004
             "and you can't afford to save thyself to reduce that. "
             "_But_, I have an offer for you that might help if you're willing to accept it.\n\n"
             "For a small price, I will _secretly_ reduce the revolution chance by *50* for you. "

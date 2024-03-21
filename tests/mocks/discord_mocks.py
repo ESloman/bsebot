@@ -2,6 +2,7 @@
 
 import datetime
 import random
+from zoneinfo import ZoneInfo
 
 import discord
 
@@ -40,6 +41,11 @@ class MemberMock:
     def dm_channel(self) -> bool:
         """DM channel property."""
         return random.randint(0, 1) == 1
+
+    @property
+    def created_at(self) -> datetime.datetime:
+        """Created at property."""
+        return datetime.datetime.now(tz=ZoneInfo("UTC")) - datetime.timedelta(days=7)
 
     async def remove_roles(self, *args, **kwargs) -> None:
         """Remove roles mock."""

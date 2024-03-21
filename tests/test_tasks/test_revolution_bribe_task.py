@@ -164,3 +164,53 @@ class TestBSEddiesRevolutionTask:
             mock.patch.object(task.revolutions, "get_open_events", return_val=[RevolutionEvent.make_data_class(event)]),
         ):
             assert not task._check_bribe_conditions(guild)
+
+    @pytest.mark.parametrize(
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])[-1:]
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    async def test_bribe_conditions_different_king_fail(self, guild_data: dict[str, any]) -> None:
+        """Tests bribe conditions with a different king fail."""
+        task = RevolutionBribeTask(self.bsebot, [], self.logger, [])
+        guild = discord_mocks.GuildMock(guild_data["guild_id"])
+        event = interface_mocks.query_mock("ticketedevents", {"guild_id": guild_data["guild_id"]})[-1]
+        users = interface_mocks.query_mock("userpoints", {"guild_id": guild_data["guild_id"]})
+        for user in users:
+            if user["uid"] == guild_data["king"]:
+                user["points"] = 1
+        users = [UserPoints.make_data_class(user) for user in users]
+
+        with (
+            mock.patch.object(task, "_check_guild_bribe_conditions", new=lambda *_: True),  # noqa: PT008
+            mock.patch.object(task, "_check_event_bribe_conditions", new=lambda _: True),  # noqa: PT008
+            mock.patch.object(task.revolutions, "get_open_events", return_val=[RevolutionEvent.make_data_class(event)]),
+            mock.patch.object(task.user_points, "get_all_users_for_guild", new=lambda *_: users),  # noqa: PT008
+        ):
+            assert not task._check_bribe_conditions(guild)
+
+    @pytest.mark.parametrize(
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])[-1:]
+    )
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    async def test_bribe_conditions_save_cost_fail(self, guild_data: dict[str, any]) -> None:
+        """Tests bribe conditions where the king can afford to save thyself."""
+        task = RevolutionBribeTask(self.bsebot, [], self.logger, [])
+        guild = discord_mocks.GuildMock(guild_data["guild_id"])
+        event = interface_mocks.query_mock("ticketedevents", {"guild_id": guild_data["guild_id"]})[-1]
+        users = interface_mocks.query_mock("userpoints", {"guild_id": guild_data["guild_id"]})
+        for user in users:
+            if user["uid"] != guild_data["king"]:
+                user["points"] = 1
+        users = [UserPoints.make_data_class(user) for user in users]
+
+        with (
+            mock.patch.object(task, "_check_guild_bribe_conditions", new=lambda *_: True),  # noqa: PT008
+            mock.patch.object(task, "_check_event_bribe_conditions", new=lambda _: True),  # noqa: PT008
+            mock.patch.object(task.revolutions, "get_open_events", return_val=[RevolutionEvent.make_data_class(event)]),
+            mock.patch.object(task.user_points, "get_all_users_for_guild", new=lambda *_: users),  # noqa: PT008
+        ):
+            assert not task._check_bribe_conditions(guild)

@@ -88,11 +88,20 @@ class RevolutionBribeTask(BaseTask):
         return kings
 
     def _check_guild_bribe_conditions(self, guild_db: GuildDB, open_events: list[RevolutionEventDB]) -> bool:
+        """Checks guild bribe conditions.
+
+        The following needs to be true:
+          - revolution needs to be enabled
+          - need to have an open event
+          - king can't be king for more than a month
+
+        Returns:
+            bool: whether the above conditions are met or not
+        """
         if not guild_db.revolution:
             self.logger.debug("Revolution not enabled for %s - no need to bribe.", guild_db.name)
             return False
 
-        open_events = self.revolutions.get_open_events(guild_db.guild_id)
         if not open_events:
             self.logger.debug("No open events for %s to bribe", guild_db.name)
             return False
@@ -107,6 +116,15 @@ class RevolutionBribeTask(BaseTask):
         return True
 
     def _check_event_bribe_conditions(self, event: RevolutionEventDB) -> bool:
+        """Checks event bribe conditions.
+
+        The following needs to be true:
+          - chance needs to be above the threshold
+          - king can't have used the 'save thyself' button
+
+        Returns:
+            bool: whether the above conditions are met or not
+        """
         if event.chance < BRIBE_THRESHOLD:
             self.logger.debug("Event chance is too low (%s) - not bribing.", event.chance)
             return False
@@ -117,6 +135,17 @@ class RevolutionBribeTask(BaseTask):
         return True
 
     def _check_bribe_conditions(self, guild: discord.Guild) -> bool:
+        """Checks bribe conditions.
+
+        The following needs to be true:
+          - guild and event conditions have to be true
+          - user must still have the most points
+          - king can't afford to save thyself
+          - can't be someone who's king a lot
+
+        Returns:
+            bool: whether the above conditions are met or not
+        """
         guild_db = self.guilds.get_guild(guild.id)
         open_events = self.revolutions.get_open_events(guild_db.guild_id)
 

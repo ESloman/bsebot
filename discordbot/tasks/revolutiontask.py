@@ -19,7 +19,7 @@ from mongo.datatypes.guild import GuildDB
 from mongo.datatypes.revolution import RevolutionEventDB
 
 
-class BSEddiesRevolutionTask(BaseTask):
+class RevolutionTask(BaseTask):
     """Class for our revolution task."""
 
     def __init__(  # noqa: PLR0913

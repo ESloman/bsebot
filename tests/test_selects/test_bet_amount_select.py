@@ -1,6 +1,5 @@
 """Tests our bet amount select."""
 
-
 import discord
 import pytest
 

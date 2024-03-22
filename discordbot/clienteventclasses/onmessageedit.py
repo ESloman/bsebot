@@ -59,10 +59,8 @@ class OnMessageEdit(BaseEvent):
             # only care about the above channel types
             return False
 
-        if before and before.content == after.content and after.embeds and not before.embeds:
-            # edit is just adding an embed - skip
-            return False
-        return True
+        # edit is just adding an embed - skip
+        return before and before.content == after.content and after.embeds and not before.embeds
 
     async def message_edit(self, before: discord.Message | None, after: discord.Message) -> None:
         """Handles our on_message_edit and on_raw_message_edit events.

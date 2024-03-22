@@ -48,10 +48,7 @@ class BaseContextCommand(BaseEvent):
             return True
 
         # is user in server admins
-        if ctx.user.id in guild_db.admins:
-            return True
-
-        return False
+        return ctx.user.id in guild_db.admins
 
     @staticmethod
     async def _send_no_perms_message(ctx: discord.ApplicationContext) -> None:

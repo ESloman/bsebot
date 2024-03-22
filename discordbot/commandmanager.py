@@ -79,7 +79,7 @@ from discordbot.tasks.guildchecker import GuildChecker
 from discordbot.tasks.messagesync import MessageSync
 from discordbot.tasks.monthlyawards import MonthlyBSEddiesAwards
 from discordbot.tasks.reminders import RemindersTask
-from discordbot.tasks.revolutiontask import BSEddiesRevolutionTask
+from discordbot.tasks.revolutiontask import RevolutionTask
 from discordbot.tasks.taskmanager import TaskManager
 from discordbot.tasks.threadmutetask import ThreadSpoilerTask
 from discordbot.tasks.wordlereminder import WordleReminder
@@ -224,7 +224,7 @@ class CommandManager:
         self.bet_reminder_task = BetReminder(self.client, guilds, self.logger, startup_tasks)
         self.eddie_gain_message_task = EddieGainMessager(self.client, guilds, self.logger, startup_tasks)
         self.eddie_king_task = BSEddiesKingTask(self.client, guilds, self.logger, startup_tasks)
-        self.revolution_task = BSEddiesRevolutionTask(self.client, guilds, self.logger, startup_tasks, self.giphy_token)
+        self.revolution_task = RevolutionTask(self.client, guilds, self.logger, startup_tasks, self.giphy_token)
         self.thread_task = ThreadSpoilerTask(self.client, guilds, self.logger, startup_tasks)
         self.message_sync = MessageSync(self.client, guilds, self.logger, startup_tasks, self.on_message)
         self.vally_task = AfterWorkVally(self.client, guilds, self.logger, startup_tasks)

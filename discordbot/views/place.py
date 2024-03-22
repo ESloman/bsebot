@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 import discord
 
 from discordbot.selects.bet import BetSelect
-from discordbot.selects.betamount import BetSelectAmount
+from discordbot.selects.betamount import BetAmountSelect
 from discordbot.selects.betoutcomes import BetOutcomesSelect
 from discordbot.views.bseview import BSEView
 from mongo.datatypes.bet import BetDB
@@ -35,7 +35,7 @@ class PlaceABetView(BSEView):
             options = []
 
         self.add_item(BetOutcomesSelect(options))
-        self.add_item(BetSelectAmount(user_eddies))
+        self.add_item(BetAmountSelect(user_eddies))
 
         self.place: "PlaceBet" = place
 
@@ -57,7 +57,7 @@ class PlaceABetView(BSEView):
                     data["bet_id"] = child.options[0].value
             elif type(child) is BetOutcomesSelect:
                 data["emoji"] = child.values[0]
-            elif type(child) is BetSelectAmount:
+            elif type(child) is BetAmountSelect:
                 data["amount"] = int(child.values[0])
 
         # call the callback that actually places the bet

@@ -19,7 +19,7 @@ from mongo.datatypes.guild import GuildDB
 from mongo.datatypes.revolution import RevolutionEventDB
 
 
-class BSEddiesRevolutionTask(BaseTask):
+class RevolutionTask(BaseTask):
     """Class for our revolution task."""
 
     def __init__(  # noqa: PLR0913
@@ -144,7 +144,7 @@ class BSEddiesRevolutionTask(BaseTask):
         _message = await channel.fetch_message(event.message_id)
         await channel.trigger_typing()
         gif = await self.giphy_api.random_gif("celebrate")
-        await _message.reply(content=f"Just under **{hours_string.upper()}** to go now - remember to choose your side!️")
+        await _message.reply(f"Just under **{hours_string.upper()}** to go now - remember to choose your side!️")
         await channel.send(content=gif)
         self.revolutions.update({"_id": event._id}, {"$set": {key: True}})  # noqa: SLF001
 
@@ -179,6 +179,32 @@ class BSEddiesRevolutionTask(BaseTask):
         gif = await self.giphy_api.random_gif("revolution")
         await channel.send(content=gif)
 
+    async def handle_bribe_stuff(self, event: RevolutionEventDB, result: float) -> None:
+        """Handle updating the King know if the bribe was successful or not.
+
+        Args:
+            event (RevolutionEventDB): the revolution event
+            result (float): the original result
+        """
+        # refresh the event
+        event = self.revolutions.get_event(event.guild_id, event.event_id)
+        if event.success:
+            # users won
+            return
+
+        # the King won
+        outcome = result <= event.chance
+        if not outcome:
+            # king would have won regardless
+            message = "It looks like you would have won without my help. But never hurts to be careful."
+        else:
+            message = "You wouldn't have won without my help - _you're welcome_. Long live the King!"
+
+        # we had to send the user a message to get to this point
+        # no need to suppress the error
+        member = await self.bot.fetch_user(event.king)
+        await member.send(content=message)
+
     async def resolve_revolution(self, guild_id: int, event: RevolutionEventDB) -> None:  # noqa: C901, PLR0915, PLR0912
         """Method for handling an event that needs resolving.
 
@@ -210,6 +236,11 @@ class BSEddiesRevolutionTask(BaseTask):
             await channel.send(content=message)
             self.revolutions.close_event(event.event_id, guild_id, False, 0)
             return
+
+        if event.bribe_accepted:
+            # King accepted a bribe
+            chance -= 50
+            chance = max(chance, 50)
 
         val = random.random() * 100
         # cap and min chance so that each side _could_ always win
@@ -338,6 +369,10 @@ class BSEddiesRevolutionTask(BaseTask):
         self.guilds.update(
             {"guild_id": guild_id}, {"$set": {"last_revolution_time": datetime.datetime.now(tz=ZoneInfo("UTC"))}}
         )
+
+        if event.bribe_offered:
+            # handle letting the King know about bribe results
+            await self.handle_bribe_stuff(event, val)
 
     @revolution.before_loop
     async def before_revolution(self) -> None:

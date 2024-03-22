@@ -6,7 +6,7 @@ import discord
 import pytest
 
 from discordbot.selects.bet import BetSelect
-from discordbot.selects.betamount import BetSelectAmount
+from discordbot.selects.betamount import BetAmountSelect
 from discordbot.selects.betoutcomes import BetOutcomesSelect
 from discordbot.views.bseview import BSEView
 from mongo import interface
@@ -35,7 +35,7 @@ class TestBetSelect:
             view.add_item(button)
 
         # add the amount select
-        amount_select = BetSelectAmount(3000)
+        amount_select = BetAmountSelect(3000)
         view.add_item(amount_select)
 
         # add the bet outcome select

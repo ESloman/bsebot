@@ -26,14 +26,7 @@ class BetSelectAmount(BSESelect):
         Args:
             user_eddies (int): the amount of eddies the user has
         """
-        amounts = [amount for amount in self.min_amounts if amount <= user_eddies]
-        rounded = round(user_eddies, -int(math.floor(math.log10(abs(user_eddies)))))
-        percs = (x / 10.0 for x in range(1, 10))
-        for perc in percs:
-            value = rounded * perc
-            if value not in amounts:
-                amounts.append(int(value))
-
+        amounts = self._get_bet_amounts(user_eddies)
         options = [SelectOption(label=f"{opt}", value=f"{opt}") for opt in amounts]
 
         if user_eddies != 0:
@@ -60,6 +53,26 @@ class BetSelectAmount(BSESelect):
             max_values=1,
             options=options,
         )
+
+    def _get_bet_amounts(self, user_eddies: int) -> list[int]:
+        """Get bet amounts.
+
+        Tries to dynamically select our bet amounts.
+
+        Args:
+            user_eddies (int): the eddies the user has
+
+        Returns:
+            list[int]: a list of amounts
+        """
+        amounts = [amount for amount in self.min_amounts if amount <= user_eddies]
+        rounded = round(user_eddies, -int(math.floor(math.log10(abs(user_eddies)))))
+        percs = (x / 10.0 for x in range(1, 10))
+        for perc in percs:
+            value = rounded * perc
+            if value not in amounts:
+                amounts.append(int(value))
+        return amounts
 
     async def callback(self, interaction: Interaction) -> None:
         """Callback method.

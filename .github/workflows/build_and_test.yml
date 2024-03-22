@@ -34,14 +34,14 @@ jobs:
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
-          username: elliotsloman
+          username: esloman
           password: ${{ secrets.dockerhub_token }}
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
         uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81
         with:
-          images: elliotsloman/bsebot
+          images: esloman/bsebot
           tags: |
             type=sha
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
@@ -56,7 +56,7 @@ jobs:
         run: |
           set -ux
           HASH=$(git rev-parse --short "$GITHUB_SHA")
-          docker run -d --name bsebot --network="host" -e "DEBUG_MODE=1" -e "DISCORD_TOKEN=${{ secrets.DISCORD_TEST_TOKEN }}" -e "GITHUB_API_KEY=${{ secrets.GIT_API_KEY }}" elliotsloman/bsebot:sha-$HASH
+          docker run -d --name bsebot --network="host" -e "DEBUG_MODE=1" -e "DISCORD_TOKEN=${{ secrets.DISCORD_TEST_TOKEN }}" -e "GITHUB_API_KEY=${{ secrets.GIT_API_KEY }}" esloman/bsebot:sha-$HASH
           sleep 90
           docker logs bsebot
           E_COUNT=$(docker logs bsebot | { grep -ic 'traceback' || true; })

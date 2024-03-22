@@ -193,7 +193,7 @@ class RevolutionTask(BaseTask):
             return
 
         # the King won
-        outcome = event.chance <= result
+        outcome = result <= event.chance
         if not outcome:
             # king would have won regardless
             message = "It looks like you would have won without my help. But never hurts to be careful."

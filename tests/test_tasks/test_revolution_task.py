@@ -220,3 +220,26 @@ class TestBSEddiesRevolutionTask:
             mock.patch.object(task.giphy_api, "random_gif"),
         ):
             await task.resolve_revolution(event.guild_id, event)
+
+    @pytest.mark.parametrize("event_data", interface_mocks.query_mock("ticketedevents", {})[-1:])
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
+    async def test_resolve_revolution_with_accepted_bribe(self, event_data: dict) -> None:
+        """Tests resolve revolution with a bribe."""
+        task = RevolutionTask(self.bsebot, [], self.logger, [], "")
+
+        event_data = copy.deepcopy(event_data)
+        event_data["chance"] = 100
+        event_data["bribe_accepted"] = True
+        if not event_data.get("revolutionaries", []):
+            event_data["revolutionaries"] = event_data["users"]
+        event = RevolutionEvent.make_data_class(event_data)
+        task.rev_started[event.guild_id] = True
+
+        with (
+            mock.patch.object(task.giphy_api, "random_gif"),
+        ):
+            await task.resolve_revolution(event.guild_id, event)

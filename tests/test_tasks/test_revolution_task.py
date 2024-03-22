@@ -155,7 +155,8 @@ class TestBSEddiesRevolutionTask:
         task = RevolutionTask(self.bsebot, [], self.logger, [], "")
         event_data["chance"] = 60
         event = RevolutionEvent.make_data_class(event_data)
-        await task.handle_bribe_stuff(event, result)
+        with mock.patch.object(task.revolutions, "get_event", new=lambda *_: event):  # noqa: PT008
+            await task.handle_bribe_stuff(event, result)
 
     @pytest.mark.parametrize("event_data", interface_mocks.query_mock("ticketedevents", {})[-1:])
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
@@ -234,6 +235,7 @@ class TestBSEddiesRevolutionTask:
         event_data = copy.deepcopy(event_data)
         event_data["chance"] = 100
         event_data["bribe_accepted"] = True
+        event_data["bribe_offered"] = True
         if not event_data.get("revolutionaries", []):
             event_data["revolutionaries"] = event_data["users"]
         event = RevolutionEvent.make_data_class(event_data)

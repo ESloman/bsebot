@@ -2,14 +2,14 @@
 
 from discord import Interaction, SelectOption
 
-from discordbot.selects.betamount import BetSelectAmount
+from discordbot.selects.betamount import BetAmountSelect
 from discordbot.selects.bseselect import BSESelect
 
 
 class BetOutcomesSelect(BSESelect):
     """Class for bet outcomes."""
 
-    def __init__(self, outcomes: list[SelectOption], enable_type: type = BetSelectAmount, close: bool = False) -> None:
+    def __init__(self, outcomes: list[SelectOption], enable_type: type = BetAmountSelect, close: bool = False) -> None:
         """Initialisation method.
 
         Args:

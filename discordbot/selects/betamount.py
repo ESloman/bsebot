@@ -7,7 +7,7 @@ from discord import Interaction, SelectOption
 from discordbot.selects.bseselect import BSESelect
 
 
-class BetSelectAmount(BSESelect):
+class BetAmountSelect(BSESelect):
     """Class for bet amount selects."""
 
     min_amounts = (1, 5, 10, 25, 50, 75, 100, 250, 500, 1000, 5000)
@@ -65,6 +65,8 @@ class BetSelectAmount(BSESelect):
         Returns:
             list[int]: a list of amounts
         """
+        if not user_eddies:
+            return [0]
         amounts = [amount for amount in self.min_amounts if amount <= user_eddies]
         rounded = round(user_eddies, -int(math.floor(math.log10(abs(user_eddies)))))
         percs = (x / 10.0 for x in range(1, 10))
@@ -80,7 +82,7 @@ class BetSelectAmount(BSESelect):
         Args:
             interaction (Interaction): the interaction to callback to
         """
-        selected_amount = interaction.data["values"][0]
+        selected_amount = self.view.get_select_value(self)
         for option in self.options:
             option.default = option.value == selected_amount
 

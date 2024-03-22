@@ -3,7 +3,7 @@
 from discord import Interaction, SelectOption
 
 from discordbot.constants import BET_TITLE_DISPLAY_LENTH
-from discordbot.selects.betamount import BetSelectAmount
+from discordbot.selects.betamount import BetAmountSelect
 from discordbot.selects.betoutcomes import BetOutcomesSelect
 from discordbot.selects.bseselect import BSESelect
 from mongo.bsepoints.bets import UserBets
@@ -39,7 +39,7 @@ class BetSelect(BSESelect):
         outcome_select.disabled = False
         # disable the other ui elements when this changes
         self.view.toggle_button(True, "Submit")
-        self.view.toggle_item(True, BetSelectAmount)
+        self.view.toggle_item(True, BetAmountSelect)
 
     async def callback(self, interaction: Interaction) -> None:
         """Callback method.

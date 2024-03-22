@@ -60,7 +60,7 @@ class OnMessageEdit(BaseEvent):
             return False
 
         # edit is just adding an embed - skip
-        return before and before.content == after.content and after.embeds and not before.embeds
+        return not (before and before.content == after.content and after.embeds and not before.embeds)
 
     async def message_edit(self, before: discord.Message | None, after: discord.Message) -> None:
         """Handles our on_message_edit and on_raw_message_edit events.

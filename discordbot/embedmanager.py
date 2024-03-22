@@ -9,7 +9,9 @@ from discordbot.constants import MIN_USERS_FILTER, USER_POINTS_FILTER
 from discordbot.utilities import PlaceHolderLogger
 from mongo.bsepoints.points import UserPoints
 from mongo.datatypes.bet import BetDB
+from mongo.datatypes.guild import GuildDB
 from mongo.datatypes.revolution import RevolutionEventDB
+from mongo.datatypes.user import UserDB
 
 
 class EmbedManager:
@@ -204,4 +206,52 @@ class EmbedManager:
             f"**Revolutionaries**: `{", ".join(revos) if revos else None}`\n"
             f"**Supporters**: `{", ".join(supps) if supps else None}`\n"
             f"**Locked in KING eddies**: `{event.locked_in_eddies}`"
+        )
+
+    @staticmethod
+    def get_revolution_bribe_message(guild_db: GuildDB, event: RevolutionEventDB, user: UserDB, bribe_cost: int) -> str:
+        """Generates a revolution bribe message.
+
+        Args:
+            guild_db (GuildDB): the guild DB
+            event (RevolutionEventDB): the revolution event
+            user (UserDB): the user
+            bribe_cost (int): the cost of a bribe
+
+        Returns:
+            str: the generated message
+        """
+        return (
+            f"Hey {guild_db.king},\n"
+            f"Looks like you're in a bit of trouble with that revolution in **{guild_db.name}**. "
+            f"The chance is currently **{event.chance}%** "
+            f"{"(capped at 95%) " if event.chance >= 95 else ""}"  # noqa: PLR2004
+            "and you can't afford to save thyself to reduce that. "
+            "_But_, I have an offer for you that might help if you're willing to accept it.\n\n"
+            "For a small price, I will _secretly_ reduce the revolution chance by *50* for you. "
+            "Here are the details:\n"
+            "### What happens if you accept?\n"
+            f"- revolution chance reduced by 50 (so to _{event.chance - 50}_ for you)\n"
+            f"- if the chance is still above 50, chance is capped to 50 "
+            f"({"won't affect you" if (event.chance - 50) > 50 else "will affect you"})\n"  # noqa: PLR2004
+            f"- I will take _{bribe_cost}_ eddies off of you (leaving you on _{user.points - bribe_cost}_)\n"
+            f"- once the event is over, I will let you know if accepting the bribe actually helped or not\n"
+            "\n"
+            "### What happens if you refuse?\n"
+            "- absolutely nothing.\n"
+            "\n"
+            f"### Why {bribe_cost}?\n"
+            f"There's currently {bribe_cost * 2} eddies between you and the next person on the leaderboard. "
+            "This is half that so it keeps you in the lead. Remember to up the taxrate to keep your lead!\n"
+            "\n"
+            "### Will anyone find out?\n"
+            "Nope! I won't change the 'publicly' viewable chance.\n"
+            "\n"
+            "### Are there any downsides?\n"
+            "Reducing the chance doesn't guarantee a win. It's still possible you accept and still lose.\n"
+            "\n"
+            "### Is every King offered this chance?\n"
+            "Nope! Only Kings that look like they're going to fail a revolution and have no other options "
+            "(aka, not enough eddies to use 'save thyself'). This option is also only available to Kings "
+            "who haven't been King for too long and Kings who aren't often King.\n"
         )

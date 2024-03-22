@@ -12,6 +12,7 @@ from logging import Logger
 from discord.ext import commands, tasks
 
 from discordbot.bsebot import BSEBot
+from discordbot.embedmanager import EmbedManager
 from discordbot.utilities import PlaceHolderLogger
 from mongo.bsedataclasses import BotActivities, SpoilerThreads, WordleAttempts, WordleReminders
 from mongo.bsepoints.activities import UserActivities
@@ -72,6 +73,8 @@ class BaseTask(commands.Cog):
 
         self._task: tasks.Loop | None = None
         self._schedule: TaskSchedule | None = None
+
+        self.embed_manager = EmbedManager(self.logger)
 
         # database classes
         self.activities = UserActivities()

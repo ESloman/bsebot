@@ -9,8 +9,10 @@ rest of the codebase.
 
 import logging
 import os
+from pathlib import Path
 
 import discord
+from slomanlogger import SlomanLogger
 
 try:
     import dotenv
@@ -21,7 +23,6 @@ except ImportError:
 
 import sys
 
-from discordbot import utilities
 from discordbot.bsebot import BSEBot
 from discordbot.commandmanager import CommandManager
 from discordbot.constants import BSE_SERVER_ID, SLOMAN_SERVER_ID
@@ -68,7 +69,8 @@ if __name__ == "__main__":
 
     IDS = [SLOMAN_SERVER_ID] if DEBUG_MODE is True else [BSE_SERVER_ID]
 
-    logger = utilities.create_logger(logging.DEBUG if DEBUG_MODE else logging.INFO)
+    output_path: Path = Path(Path.home(), "bsebotlogs", "bsebot.log")
+    logger = SlomanLogger("bsebot", logging.DEBUG if DEBUG_MODE else logging.INFO, output_file=output_path)
 
     logger.info("Logging mode set to %s", logging.DEBUG if DEBUG_MODE else logging.INFO)
 
@@ -94,9 +96,9 @@ if __name__ == "__main__":
         details="Waiting for commands!",
     )
 
-    cli = BSEBot(intents=intents, activity=listening_activity, max_messages=5000, logger=logger)
+    cli = BSEBot(intents=intents, activity=listening_activity, max_messages=5000)
 
-    com = CommandManager(cli, IDS, logger, giphy_token=GIPHY_TOKEN, github_token=GITHUB_TOKEN)
+    com = CommandManager(cli, IDS, giphy_token=GIPHY_TOKEN, github_token=GITHUB_TOKEN)
 
     user_bets = UserBets(IDS)
 

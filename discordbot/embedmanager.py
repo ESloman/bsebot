@@ -1,12 +1,11 @@
 """Contains our EmbedManager class."""
 
 import datetime
-from logging import Logger
 
 import discord
+from slomanlogger import SlomanLogger
 
 from discordbot.constants import MIN_USERS_FILTER, USER_POINTS_FILTER
-from discordbot.utilities import PlaceHolderLogger
 from mongo.bsepoints.points import UserPoints
 from mongo.datatypes.bet import BetDB
 from mongo.datatypes.guild import GuildDB
@@ -21,14 +20,10 @@ class EmbedManager:
     Centralises where we generate repeated bits of text like bet messages, revolution text, etc.
     """
 
-    def __init__(self: "EmbedManager", logger: Logger = PlaceHolderLogger) -> None:
-        """Initialisation method.
-
-        Args:
-            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
-        """
+    def __init__(self: "EmbedManager") -> None:
+        """Initialisation method."""
         self.user_points = UserPoints()
-        self.logger = logger
+        self.logger = SlomanLogger("bsebot")
 
     def _get_bet_embed_option_val(self, bet: BetDB, option: str) -> str:
         betters = [bet.betters[b] for b in bet.betters if bet.betters[b].emoji == option]

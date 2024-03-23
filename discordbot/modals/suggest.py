@@ -1,8 +1,7 @@
 """Suggest modal class."""
 
-import logging
-
 import discord
+from slomanlogger import SlomanLogger
 
 from apis.github import GitHubAPI
 
@@ -10,16 +9,15 @@ from apis.github import GitHubAPI
 class SuggestModal(discord.ui.Modal):
     """Suggest modal class."""
 
-    def __init__(self, logger: logging.Logger, github_api: GitHubAPI, *args: tuple[any], **kwargs: dict[any]) -> None:
+    def __init__(self, github_api: GitHubAPI, *args: tuple[any], **kwargs: dict[any]) -> None:
         """Initialisation method.
 
         Args:
-            logger (logging.Logger): the logger
             github_api (GitHubAPI): initialised github API class
         """
         super().__init__(*args, **kwargs)
 
-        self.logger = logger
+        self.logger = SlomanLogger("bsebot")
         self.github = github_api
 
         self.add_item(discord.ui.InputText(label="Issue title", placeholder="Enter a summary of your issue"))

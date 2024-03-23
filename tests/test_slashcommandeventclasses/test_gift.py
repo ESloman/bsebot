@@ -6,7 +6,6 @@ from discordbot.bot_enums import ActivityTypes
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.slashcommandeventclasses.gift import Gift
-from discordbot.utilities import PlaceHolderLogger
 from tests.mocks.bsebot_mocks import BSEBotMock
 
 
@@ -17,11 +16,10 @@ class TestGift:
     def _data(self) -> None:
         self.client = BSEBotMock()
         self.guild_ids = [123456, 65321]
-        self.logger = PlaceHolderLogger
 
     def test_init(self) -> None:
         """Tests basic initialisation."""
-        active = Gift(self.client, self.guild_ids, self.logger)
+        active = Gift(self.client, self.guild_ids)
         assert isinstance(active, Gift)
         assert isinstance(active, BSEddies)
         assert isinstance(active, BaseEvent)

@@ -4,7 +4,6 @@ Handles on_message_edit and on_raw_message_edit events.
 """
 
 import datetime
-import logging
 from zoneinfo import ZoneInfo
 
 import discord
@@ -18,16 +17,15 @@ from discordbot.constants import BSE_BOT_ID
 class OnMessageEdit(BaseEvent):
     """Class for handling on_message_edit events from Discord."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
             guild_ids (list): list of supported guild IDs
-            logger (logging.Logger): the logger
         """
-        super().__init__(client, guild_ids, logger)
-        self.on_message = discordbot.clienteventclasses.onmessage.OnMessage(client, guild_ids, logger)
+        super().__init__(client, guild_ids)
+        self.on_message = discordbot.clienteventclasses.onmessage.OnMessage(client, guild_ids)
 
     async def message_edit(self, before: discord.Message | None, after: discord.Message) -> None:
         """Handles our on_message_edit and on_raw_message_edit events.

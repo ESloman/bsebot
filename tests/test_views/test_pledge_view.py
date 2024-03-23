@@ -2,7 +2,6 @@
 
 import pytest
 
-from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.pledge import PledgeView
 from tests.mocks import bsebot_mocks, discord_mocks
 
@@ -17,7 +16,6 @@ class TestPledgeView:
         Automatically called before each test.
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
-        self.logger = PlaceHolderLogger
 
     @pytest.mark.parametrize("current", [0, 1, 2, None])
     async def test_init(self, current: int | None) -> None:

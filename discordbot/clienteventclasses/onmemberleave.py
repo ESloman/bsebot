@@ -3,8 +3,6 @@
 Handles on_member_leave events.
 """
 
-import logging
-
 import discord
 
 from discordbot.bot_enums import ActivityTypes
@@ -15,15 +13,14 @@ from discordbot.clienteventclasses.baseeventclass import BaseEvent
 class OnMemberLeave(BaseEvent):
     """Class for handling when a member leaves the server."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
             guild_ids (list): list of supported guild IDs
-            logger (logging.Logger): the logger
         """
-        super().__init__(client, guild_ids, logger)
+        super().__init__(client, guild_ids)
 
     def on_leave(self, member: discord.Member) -> None:
         """Method for handling when a member leaves the server.

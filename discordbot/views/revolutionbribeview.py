@@ -1,7 +1,5 @@
 """Revolution views."""
 
-from logging import Logger
-
 import discord
 
 from discordbot.bot_enums import TransactionTypes
@@ -21,14 +19,13 @@ GIF_LINK = (
 class RevolutionBribeView(BSEView):
     """Class for revolution bribe view."""
 
-    def __init__(self, client: BSEBot, event: RevolutionEventDB, bribe_cost: int, logger: Logger) -> None:
+    def __init__(self, client: BSEBot, event: RevolutionEventDB, bribe_cost: int) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the BSEBot client
             event (RevolutionEventType): the revolution event
             bribe_cost (int): the cost of the bribe
-            logger (Logger): the logger to use
         """
         super().__init__(timeout=1800)
         self.client = client
@@ -37,7 +34,6 @@ class RevolutionBribeView(BSEView):
         self.bribe_cost: int = bribe_cost
         self.revolutions = RevolutionEvent()
         self.user_points = UserPoints()
-        self.logger = logger
 
     @discord.ui.button(label="Accept Offer", style=discord.ButtonStyle.green, emoji="👑")
     async def accept_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:

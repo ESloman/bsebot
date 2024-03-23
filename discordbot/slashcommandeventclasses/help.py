@@ -1,7 +1,6 @@
 """Help slash command."""
 
 import datetime
-import logging
 from zoneinfo import ZoneInfo
 
 import discord
@@ -14,18 +13,16 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 class Help(BSEddies):
     """Class for handling `/help` commands."""
 
-    def __init__(
-        self, client: BSEBot, guild_ids: list[int], logger: logging.Logger, command_list: list[BSEddies] | None = None
-    ) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int], command_list: list[BSEddies] | None = None) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
             guild_ids (list): list of supported guild IDs
-            logger (logging.Logger): the logger
+
             command_list (list[BSEddies] | None): the list of commands
         """
-        super().__init__(client, guild_ids, logger)
+        super().__init__(client, guild_ids)
         self.command_list = command_list
         self.activity_type = ActivityTypes.HELP
         self.help_string = "This command"

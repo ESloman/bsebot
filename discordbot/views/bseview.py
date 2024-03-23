@@ -3,6 +3,7 @@
 import contextlib
 
 import discord
+from slomanlogger import SlomanLogger
 
 
 class BSEView(discord.ui.View):
@@ -20,6 +21,7 @@ class BSEView(discord.ui.View):
             kwargs (dict[str, any]): kwargs
         """
         super().__init__(*args, timeout=timeout, disable_on_timeout=disable_on_timeout, **kwargs)
+        self.logger = SlomanLogger("bsebot")
 
     async def update(self, interaction: discord.Interaction) -> None:
         """Method for updating the view.

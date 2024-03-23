@@ -4,7 +4,6 @@ import pytest
 
 from discordbot.contextcommands.base import BaseContextCommand
 from discordbot.contextcommands.message_delete import ContextDeleteMessage
-from discordbot.utilities import PlaceHolderLogger
 from tests.mocks.bsebot_mocks import BSEBotMock
 
 
@@ -14,9 +13,8 @@ class TestContextDeleteMessage:
     @pytest.fixture(autouse=True)
     def _data(self) -> None:
         self.client = BSEBotMock()
-        self.logger = PlaceHolderLogger
 
     def test_init(self) -> None:
         """Tests init."""
-        command = ContextDeleteMessage(self.client, [], self.logger)
+        command = ContextDeleteMessage(self.client, [])
         assert isinstance(command, BaseContextCommand)

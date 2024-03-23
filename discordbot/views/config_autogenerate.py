@@ -4,7 +4,6 @@ import discord
 
 from discordbot.modals.autogenerate import AddBet, AddCategory
 from discordbot.selects.autogenerateconfig import AutogenerateCategorySelect, AutogenerateConfigSelect
-from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.bseview import BSEView
 from mongo.bsepoints.guilds import Guilds
 
@@ -39,7 +38,7 @@ class AutoGenerateConfigView(BSEView):
                 if len(self.children) > 3:  # noqa: PLR2004
                     self.remove_item(self.category_select)
             except Exception as exc:
-                PlaceHolderLogger.debug(exc)
+                self.logger.debug(exc)
 
             self.toggle_button(False, "Submit")
 

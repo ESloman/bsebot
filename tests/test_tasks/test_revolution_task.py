@@ -9,7 +9,6 @@ import pytz
 from freezegun import freeze_time
 
 from discordbot.tasks.revolutiontask import RevolutionTask
-from discordbot.utilities import PlaceHolderLogger
 from mongo import interface
 from mongo.bsepoints.guilds import Guilds
 from mongo.bseticketedevents import RevolutionEvent
@@ -26,13 +25,12 @@ class TestBSEddiesRevolutionTask:
         Automatically called before each test.
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
-        self.logger = PlaceHolderLogger
 
     def test_init(self) -> None:
         """Tests if we can initialise the task with empty data."""
-        task = RevolutionTask(self.bsebot, [], self.logger, [], "")
+        task = RevolutionTask(self.bsebot, [], [], "")
         assert not task.task.is_running()
-        task = RevolutionTask(self.bsebot, [], self.logger, [], "", start=True)
+        task = RevolutionTask(self.bsebot, [], [], "", start=True)
         assert task.task.is_running()
 
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
@@ -41,7 +39,7 @@ class TestBSEddiesRevolutionTask:
     def test_init_with_guilds(self) -> None:
         """Tests if we can initialise the task with guild ids."""
         guild_ids = [guild["guild_id"] for guild in interface_mocks.query_mock("guilds", {})]
-        _ = RevolutionTask(self.bsebot, guild_ids, self.logger, [], "")
+        _ = RevolutionTask(self.bsebot, guild_ids, [], "")
 
     @pytest.mark.parametrize("event_data", interface_mocks.query_mock("ticketedevents", {})[-1:])
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
@@ -51,7 +49,7 @@ class TestBSEddiesRevolutionTask:
     @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
     async def test_send_excited_gif(self, event_data: dict) -> None:
         """Tests send excited gif."""
-        task = RevolutionTask(self.bsebot, [], self.logger, [], "")
+        task = RevolutionTask(self.bsebot, [], [], "")
         _event = RevolutionEvent.make_data_class(event_data)
         with mock.patch.object(task.giphy_api, "random_gif"):
             await task.send_excited_gif(_event, "2 hours", "two_hours")
@@ -65,7 +63,7 @@ class TestBSEddiesRevolutionTask:
     async def test_create_event(self, event_data: dict) -> None:
         """Tests create event message."""
         guild = interface_mocks.query_mock("guilds", {"guild_id": event_data["guild_id"]})[0]
-        task = RevolutionTask(self.bsebot, [], self.logger, [], "")
+        task = RevolutionTask(self.bsebot, [], [], "")
         _event = RevolutionEvent.make_data_class(event_data)
         with mock.patch.object(task.giphy_api, "random_gif"):
             await task.create_event(_event.guild_id, _event, Guilds.make_data_class(guild))
@@ -76,7 +74,7 @@ class TestBSEddiesRevolutionTask:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_default_execution_wrong_time(self) -> None:
         """Tests we exit out of default execution with wrong time."""
-        task = RevolutionTask(self.bsebot, [], self.logger, [], "")
+        task = RevolutionTask(self.bsebot, [], [], "")
         await task.revolution()
 
     @pytest.mark.parametrize("timestamp", ["2024/01/21 16:00", "2024/01/21 16:01"])
@@ -87,7 +85,7 @@ class TestBSEddiesRevolutionTask:
     @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
     async def test_default_execution_create(self, timestamp: str) -> None:
         """Tests default execution with creating the event."""
-        task = RevolutionTask(self.bsebot, [], self.logger, [], "")
+        task = RevolutionTask(self.bsebot, [], [], "")
         with freeze_time(timestamp), mock.patch.object(task.giphy_api, "random_gif"):
             await task.revolution()
 
@@ -100,7 +98,7 @@ class TestBSEddiesRevolutionTask:
     @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
     async def test_default_execution_started(self, event_data: dict) -> None:
         """Tests default execution when the event has been started."""
-        task = RevolutionTask(self.bsebot, [], self.logger, [], "")
+        task = RevolutionTask(self.bsebot, [], [], "")
         event = RevolutionEvent.make_data_class(event_data)
         task.rev_started[event.guild_id] = True
         with (
@@ -118,7 +116,7 @@ class TestBSEddiesRevolutionTask:
     @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
     async def test_default_execution_reminders(self, event_data: dict) -> None:
         """Tests default execution with the reminders for the event."""
-        task = RevolutionTask(self.bsebot, [], self.logger, [], "")
+        task = RevolutionTask(self.bsebot, [], [], "")
         event_data = copy.deepcopy(event_data)
         event_data["one_hour"] = False
         event_data["quarter_hour"] = False
@@ -141,7 +139,7 @@ class TestBSEddiesRevolutionTask:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_handle_bribe_stuff_event_success(self, event_data: dict[str, any]) -> None:
         """Tests handle_bribe_stuff with success being True."""
-        task = RevolutionTask(self.bsebot, [], self.logger, [], "")
+        task = RevolutionTask(self.bsebot, [], [], "")
         event = RevolutionEvent.make_data_class(event_data)
         await task.handle_bribe_stuff(event, 0.0)
 
@@ -152,7 +150,7 @@ class TestBSEddiesRevolutionTask:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_handle_bribe_stuff(self, event_data: dict[str, any], result: float) -> None:
         """Tests handle_bribe_stuff with success being True."""
-        task = RevolutionTask(self.bsebot, [], self.logger, [], "")
+        task = RevolutionTask(self.bsebot, [], [], "")
         event_data["chance"] = 60
         event = RevolutionEvent.make_data_class(event_data)
         with mock.patch.object(task.revolutions, "get_event", new=lambda *_: event):  # noqa: PT008
@@ -166,7 +164,7 @@ class TestBSEddiesRevolutionTask:
     @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
     async def test_resolve_revolution_no_users(self, event_data: dict) -> None:
         """Tests resolve revolutions with no users."""
-        task = RevolutionTask(self.bsebot, [], self.logger, [], "")
+        task = RevolutionTask(self.bsebot, [], [], "")
 
         event_data = copy.deepcopy(event_data)
         event_data["users"] = []
@@ -186,7 +184,7 @@ class TestBSEddiesRevolutionTask:
     @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
     async def test_resolve_revolution_not_success(self, event_data: dict) -> None:
         """Tests resolve revolutions that doesn't succeed."""
-        task = RevolutionTask(self.bsebot, [], self.logger, [], "")
+        task = RevolutionTask(self.bsebot, [], [], "")
 
         event_data = copy.deepcopy(event_data)
         event_data["chance"] = 0
@@ -208,7 +206,7 @@ class TestBSEddiesRevolutionTask:
     @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
     async def test_resolve_revolution_success(self, event_data: dict) -> None:
         """Tests resolve revolutions that succeeds."""
-        task = RevolutionTask(self.bsebot, [], self.logger, [], "")
+        task = RevolutionTask(self.bsebot, [], [], "")
 
         event_data = copy.deepcopy(event_data)
         event_data["chance"] = 100
@@ -230,7 +228,7 @@ class TestBSEddiesRevolutionTask:
     @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
     async def test_resolve_revolution_with_accepted_bribe(self, event_data: dict) -> None:
         """Tests resolve revolution with a bribe."""
-        task = RevolutionTask(self.bsebot, [], self.logger, [], "")
+        task = RevolutionTask(self.bsebot, [], [], "")
 
         event_data = copy.deepcopy(event_data)
         event_data["chance"] = 100

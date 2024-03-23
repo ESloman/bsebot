@@ -5,7 +5,6 @@ from unittest import mock
 import pytest
 
 from discordbot.embedmanager import EmbedManager
-from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.highscore import HighScoreBoardView
 from mongo import interface
 from tests.mocks import discord_mocks, interface_mocks
@@ -20,7 +19,7 @@ class TestHighscoreView:
 
         Automatically called before each test.
         """
-        self.embed_manager = EmbedManager(PlaceHolderLogger)
+        self.embed_manager = EmbedManager()
 
     async def test_init(self) -> None:
         """Tests basic init.

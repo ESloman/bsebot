@@ -3,14 +3,13 @@
 import copy
 import datetime
 from dataclasses import asdict
-from logging import Logger
 from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
 import discord
+from slomanlogger import SlomanLogger
 
 from discordbot.embedmanager import EmbedManager
-from discordbot.utilities import PlaceHolderLogger
 from mongo.bsepoints.bets import UserBets
 from mongo.datatypes.bet import BetDB
 
@@ -29,7 +28,6 @@ class AddBetOption(discord.ui.Modal):
         view: "BetView",
         bseddies_place: "PlaceBet",
         bseddies_close: "CloseBet",
-        logger: Logger = PlaceHolderLogger,
         *args: tuple[any],
         **kwargs: dict[any],
     ) -> None:
@@ -46,7 +44,7 @@ class AddBetOption(discord.ui.Modal):
         # option emojis
         self.multiple_options_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "0️⃣"]
 
-        self.logger: Logger = logger
+        self.logger = SlomanLogger("bsebot")
         self.bet: BetDB = bet
         self.place: "PlaceBet" = bseddies_place
         self.close: "CloseBet" = bseddies_close

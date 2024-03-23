@@ -8,7 +8,6 @@ import pytz
 from freezegun import freeze_time
 
 from discordbot.tasks.wordlereminder import WordleReminder
-from discordbot.utilities import PlaceHolderLogger
 from mongo import interface
 from mongo.bsepoints.guilds import Guilds
 from mongo.datatypes.guild import GuildDB
@@ -26,16 +25,15 @@ class TestWordleReminder:
         Automatically called before each test.
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
-        self.logger = PlaceHolderLogger
 
     def test_init(self) -> None:
         """Tests if we can initialise the task."""
-        _ = WordleReminder(self.bsebot, [], self.logger, [], start=False)
+        _ = WordleReminder(self.bsebot, [], [], start=False)
 
     @freeze_time("2024/01/29 13:00")
     async def test_default_execution(self) -> None:
         """Tests that we don't trigger on the wrong time."""
-        task = WordleReminder(self.bsebot, [], self.logger, [], start=False)
+        task = WordleReminder(self.bsebot, [], [], start=False)
         await task.wordle_reminder()
 
     @freeze_time("2024/01/01 19:30")
@@ -47,7 +45,7 @@ class TestWordleReminder:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_get_reminders_no_reminders(self, guild_data: dict[str, any]) -> None:
         """Tests get_reminders where we should find no reminders needed."""
-        task = WordleReminder(self.bsebot, [], self.logger, [], start=False)
+        task = WordleReminder(self.bsebot, [], [], start=False)
         guild = discord_mocks.GuildMock(guild_data["guild_id"], guild_data["owner_id"], guild_data["name"])
         start = datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(days=1)
         start = start.replace(hour=0, minute=0, second=0, microsecond=1)
@@ -65,7 +63,7 @@ class TestWordleReminder:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_get_reminders_no_reminders_config(self, guild_data: dict[str, any]) -> None:
         """Tests get_reminders where the guild isn't configured for reminders."""
-        task = WordleReminder(self.bsebot, [], self.logger, [], start=False)
+        task = WordleReminder(self.bsebot, [], [], start=False)
         guild = discord_mocks.GuildMock(guild_data["guild_id"], guild_data["owner_id"], guild_data["name"])
         start = datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(days=1)
         start = start.replace(hour=0, minute=0, second=0, microsecond=1)
@@ -91,7 +89,7 @@ class TestWordleReminder:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_get_reminders_reminders(self, guild_data: dict[str, any]) -> None:
         """Tests get_reminders where we should find reminders needed."""
-        task = WordleReminder(self.bsebot, [], self.logger, [], start=False)
+        task = WordleReminder(self.bsebot, [], [], start=False)
         guild = discord_mocks.GuildMock(guild_data["guild_id"], guild_data["owner_id"], guild_data["name"])
         start = datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(days=1)
         start = start.replace(hour=0, minute=0, second=0, microsecond=1)
@@ -108,7 +106,7 @@ class TestWordleReminder:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_default_execution_no_reminders(self) -> None:
         """Tests execution with a day that had wordles done successfully."""
-        task = WordleReminder(self.bsebot, [], self.logger, [], start=False)
+        task = WordleReminder(self.bsebot, [], [], start=False)
         await task.wordle_reminder()
 
     @freeze_time("2024/01/08 19:30")
@@ -117,5 +115,5 @@ class TestWordleReminder:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_default_execution_reminders(self) -> None:
         """Tests execution where reminders are needed."""
-        task = WordleReminder(self.bsebot, [], self.logger, [], start=False)
+        task = WordleReminder(self.bsebot, [], [], start=False)
         await task.wordle_reminder()

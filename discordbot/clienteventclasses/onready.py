@@ -3,8 +3,6 @@
 Handles on_ready events.
 """
 
-import logging
-
 from discordbot.bsebot import BSEBot
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
 
@@ -12,15 +10,14 @@ from discordbot.clienteventclasses.baseeventclass import BaseEvent
 class OnReadyEvent(BaseEvent):
     """Class for handling on_ready event."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
             guild_ids (list): list of supported guild IDs
-            logger (logging.Logger): the logger
         """
-        super().__init__(client, guild_ids, logger)
+        super().__init__(client, guild_ids)
         self.finished = False
 
     async def on_ready(self) -> None:

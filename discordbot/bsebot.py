@@ -3,11 +3,8 @@
 Class exists to override fetch_guild and fetch_channel to make less API calls.
 """
 
-from logging import Logger
-
 import discord
-
-from discordbot.utilities import PlaceHolderLogger
+from slomanlogger import SlomanLogger
 
 
 class BSEBot(discord.Bot):
@@ -21,7 +18,6 @@ class BSEBot(discord.Bot):
         intents: discord.Intents,
         activity: discord.Activity,
         max_messages: int = 5000,
-        logger: Logger = PlaceHolderLogger,
     ) -> None:
         """Our own implementation of discord.Bot.
 
@@ -31,10 +27,9 @@ class BSEBot(discord.Bot):
             intents (discord.Intents): _description_
             activity (discord.Activity): _description_
             max_messages (int, optional): _description_. Defaults to 5000.
-            logger (Logger, optional): _description_. Defaults to PlaceHolderLogger.
         """
         super().__init__(intents=intents, activity=activity, auto_sync_commands=True, max_messages=max_messages)
-        self.logger = logger
+        self.logger = SlomanLogger("bsebot")
 
     async def fetch_guild(self: "BSEBot", guild_id: int, /) -> discord.Guild:
         """Wrapper for getting guild and using an API call if cache is empty.

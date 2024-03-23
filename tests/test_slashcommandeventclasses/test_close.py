@@ -8,7 +8,6 @@ from discordbot.bot_enums import ActivityTypes
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from discordbot.slashcommandeventclasses.bseddies import BSEddies
 from discordbot.slashcommandeventclasses.close import CloseBet
-from discordbot.utilities import PlaceHolderLogger
 from mongo import interface
 from mongo.bsepoints.bets import UserBets
 from mongo.bsepoints.guilds import Guilds
@@ -22,11 +21,10 @@ class TestClose:
     def _data(self) -> None:
         self.client = bsebot_mocks.BSEBotMock()
         self.guild_ids = [123456, 65321]
-        self.logger = PlaceHolderLogger
 
     def test_init(self) -> None:
         """Tests basic initialisation."""
-        close = CloseBet(self.client, self.guild_ids, self.logger)
+        close = CloseBet(self.client, self.guild_ids)
         assert isinstance(close, CloseBet)
         assert isinstance(close, BSEddies)
         assert isinstance(close, BaseEvent)
@@ -39,7 +37,7 @@ class TestClose:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_create_bet_view(self, guild_data: dict) -> None:
         """Tests create_bet_view with no bets."""
-        close = CloseBet(self.client, self.guild_ids, self.logger)
+        close = CloseBet(self.client, self.guild_ids)
 
         guild = Guilds.make_data_class(guild_data)
         _users = interface_mocks.query_mock("userpoints", {"guild_id": guild.guild_id})
@@ -57,7 +55,7 @@ class TestClose:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_create_bet_view_with_bets(self, guild_data: dict, number: int) -> None:
         """Tests create_bet_view with bets."""
-        close = CloseBet(self.client, self.guild_ids, self.logger)
+        close = CloseBet(self.client, self.guild_ids)
 
         guild = Guilds.make_data_class(guild_data)
         _bets = [b for b in interface_mocks.query_mock("userbets", {"guild_id": guild.guild_id}) if "type" not in b][
@@ -75,7 +73,7 @@ class TestClose:
     @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
     async def test_close_bet_bad_id(self) -> None:
         """Tests close bet with a bad bet ID."""
-        close = CloseBet(self.client, self.guild_ids, self.logger)
+        close = CloseBet(self.client, self.guild_ids)
 
         interaction = discord_mocks.InteractionMock(123456)
         await close.close_bet(interaction, "0123", [":one:"])
@@ -95,7 +93,7 @@ class TestClose:
     @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
     async def test_close_bet_bad_bets(self, bet_data: dict) -> None:
         """Tests close_bet with bad bets."""
-        close = CloseBet(self.client, self.guild_ids, self.logger)
+        close = CloseBet(self.client, self.guild_ids)
         bet = UserBets.make_data_class(bet_data)
         interaction = discord_mocks.InteractionMock(bet.guild_id, bet.user)
         await close.close_bet(interaction, bet.bet_id, bet.options)
@@ -110,7 +108,7 @@ class TestClose:
     @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
     async def test_close_bet(self, bet_data: dict) -> None:
         """Tests close_bet."""
-        close = CloseBet(self.client, self.guild_ids, self.logger)
+        close = CloseBet(self.client, self.guild_ids)
         bet = UserBets.make_data_class(bet_data)
         interaction = discord_mocks.InteractionMock(bet.guild_id, bet.user)
         await close.close_bet(interaction, bet.bet_id, bet.options)
@@ -122,7 +120,7 @@ class TestClose:
     @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
     async def test_cancel_bet_bad_id(self) -> None:
         """Tests cancel bet with a bad bet ID."""
-        close = CloseBet(self.client, self.guild_ids, self.logger)
+        close = CloseBet(self.client, self.guild_ids)
 
         interaction = discord_mocks.InteractionMock(123456)
         await close.cancel_bet(interaction, "0123")
@@ -142,7 +140,7 @@ class TestClose:
     @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
     async def test_cancel_bet_bad_bets(self, bet_data: dict) -> None:
         """Tests cancel_bet with bad bets."""
-        close = CloseBet(self.client, self.guild_ids, self.logger)
+        close = CloseBet(self.client, self.guild_ids)
         bet = UserBets.make_data_class(bet_data)
         interaction = discord_mocks.InteractionMock(bet.guild_id, bet.user)
         await close.cancel_bet(interaction, bet.bet_id)
@@ -157,7 +155,7 @@ class TestClose:
     @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
     async def test_cancel_bet(self, bet_data: dict) -> None:
         """Tests cancel_bet."""
-        close = CloseBet(self.client, self.guild_ids, self.logger)
+        close = CloseBet(self.client, self.guild_ids)
         bet = UserBets.make_data_class(bet_data)
         interaction = discord_mocks.InteractionMock(bet.guild_id, bet.user)
         await close.cancel_bet(interaction, bet.bet_id)

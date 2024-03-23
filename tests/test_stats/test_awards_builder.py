@@ -7,7 +7,6 @@ from freezegun import freeze_time
 
 from discordbot.stats.awardsbuilder import AwardsBuilder
 from discordbot.stats.statsdataclasses import StatDB
-from discordbot.utilities import PlaceHolderLogger
 from mongo import interface
 from tests.mocks import bsebot_mocks, interface_mocks
 
@@ -19,7 +18,6 @@ class TestAwardsBuilderStatics:
     def _setup(self) -> None:
         """Setup fixture."""
         self.client = bsebot_mocks.BSEBotMock()
-        self.logger = PlaceHolderLogger
 
     @pytest.mark.parametrize(
         ("old", "new", "expected"),
@@ -31,7 +29,7 @@ class TestAwardsBuilderStatics:
     )
     def test_get_comparison_string(self, old: float, new: float, expected: str) -> None:
         """Tests getting the comparison string function."""
-        awards_builder = AwardsBuilder(self.client, 123456, self.logger)
+        awards_builder = AwardsBuilder(self.client, 123456)
         comp_string = awards_builder._get_comparison_string(new, old)
         assert expected == comp_string
 
@@ -43,7 +41,6 @@ class TestAwardsBuilderStatsAndAwards:
     def _setup(self) -> None:
         """Setup fixture."""
         self.client = bsebot_mocks.BSEBotMock()
-        self.logger = PlaceHolderLogger
 
     @pytest.mark.parametrize(
         "guild_id",
@@ -56,7 +53,7 @@ class TestAwardsBuilderStatsAndAwards:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_build_stats_and_message(self, guild_id: int) -> None:
         """Tests our build_stats_and_message function."""
-        awards_builder = AwardsBuilder(self.client, guild_id, PlaceHolderLogger)
+        awards_builder = AwardsBuilder(self.client, guild_id)
         stats, messages = await awards_builder.build_stats_and_message()
         assert isinstance(stats, list)
         assert isinstance(messages, list)
@@ -77,7 +74,7 @@ class TestAwardsBuilderStatsAndAwards:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_build_stats_and_message_annual(self, guild_id: int) -> None:
         """Tests our build_stats_and_message function in annual mode."""
-        awards_builder = AwardsBuilder(self.client, guild_id, PlaceHolderLogger, True)
+        awards_builder = AwardsBuilder(self.client, guild_id, True)
         stats, messages = await awards_builder.build_stats_and_message()
         assert isinstance(stats, list)
         assert isinstance(messages, list)
@@ -98,7 +95,7 @@ class TestAwardsBuilderStatsAndAwards:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_build_awards_and_message(self, guild_id: int) -> None:
         """Tests our build_awards_and_message function."""
-        awards_builder = AwardsBuilder(self.client, guild_id, PlaceHolderLogger)
+        awards_builder = AwardsBuilder(self.client, guild_id)
         stats, messages = await awards_builder.build_awards_and_message()
         assert isinstance(stats, list)
         assert isinstance(messages, list)
@@ -119,7 +116,7 @@ class TestAwardsBuilderStatsAndAwards:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_build_awards_and_message_annual(self, guild_id: int) -> None:
         """Tests our build_awards_and_message function in annual mode."""
-        awards_builder = AwardsBuilder(self.client, guild_id, PlaceHolderLogger, True)
+        awards_builder = AwardsBuilder(self.client, guild_id, True)
         stats, messages = await awards_builder.build_awards_and_message()
         assert isinstance(stats, list)
         assert isinstance(messages, list)

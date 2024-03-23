@@ -4,10 +4,10 @@ All client event classes inherit from this. Adds a bunch of useful properties fo
 it's children to use.
 """
 
-import logging
 from typing import Any
 
 import discord
+from slomanlogger import SlomanLogger
 
 from discordbot.bot_enums import ActivityTypes
 from discordbot.bsebot import BSEBot
@@ -28,7 +28,7 @@ class BaseEvent:
     Basically just sets up all the vars that events will need and rely on.
     """
 
-    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
         """Initialisation method that creates database Collections and various variables.
 
         Args:
@@ -46,8 +46,8 @@ class BaseEvent:
         self.guilds = Guilds()
         self.client = client
         self.guild_ids = guild_ids
-        self.embed_manager = EmbedManager(logger)
-        self.logger = logger
+        self.embed_manager = EmbedManager()
+        self.logger = SlomanLogger("bsebot")
 
     def _add_event_type_to_activity_history(
         self,

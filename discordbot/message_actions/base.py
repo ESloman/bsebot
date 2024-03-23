@@ -1,11 +1,9 @@
 """Base message action class."""
 
-from logging import Logger
-
 import discord
+from slomanlogger import SlomanLogger
 
 from discordbot.bsebot import BSEBot
-from discordbot.utilities import PlaceHolderLogger
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.interactions import UserInteractions
 from mongo.bseticketedevents import RevolutionEvent
@@ -14,15 +12,14 @@ from mongo.bseticketedevents import RevolutionEvent
 class BaseMessageAction:
     """Base message action class to be inherited from."""
 
-    def __init__(self, client: BSEBot, logger: Logger = PlaceHolderLogger) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the BSEBot client
-            logger (Logger, optional): the logger. Defaults to PlaceHolderLogger.
         """
         self.client = client
-        self.logger = logger
+        self.logger = SlomanLogger("bsebot")
         self.user_interactions = UserInteractions()
         self.guilds = Guilds()
         self.revolutions = RevolutionEvent()

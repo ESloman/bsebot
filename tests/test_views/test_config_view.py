@@ -6,7 +6,6 @@ import pytest
 
 from discordbot.constants import CREATOR
 from discordbot.selects.config import ConfigSelect
-from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.bseview import BSEView
 from discordbot.views.config import ConfigView
 from discordbot.views.config_admin import AdminConfigView
@@ -33,11 +32,11 @@ class TestConfigView:
 
         Needs to run with async as the parent class tries to get the running event loop.
         """
-        _ = ConfigView(PlaceHolderLogger)
+        _ = ConfigView()
 
     async def test_cancel_callback(self) -> None:
         """Tests cancel callback."""
-        view = ConfigView(PlaceHolderLogger)
+        view = ConfigView()
         interaction = discord_mocks.InteractionMock(123456)
         await view.cancel_callback(None, interaction)
 
@@ -50,7 +49,7 @@ class TestConfigView:
 
         Needs to run with async as the parent class tries to get the running event loop.
         """
-        _ = ConfigView(PlaceHolderLogger, user_data["uid"])
+        _ = ConfigView(user_data["uid"])
 
     @pytest.mark.parametrize("guild_data", interface_mocks.query_mock("guilds", {})[-5:])
     @pytest.mark.parametrize("user_data", interface_mocks.query_mock("userpoints", {})[-5:])
@@ -62,14 +61,14 @@ class TestConfigView:
 
         Needs to run with async as the parent class tries to get the running event loop.
         """
-        _ = ConfigView(PlaceHolderLogger, user_data["uid"], guild_data["guild_id"])
+        _ = ConfigView(user_data["uid"], guild_data["guild_id"])
 
     async def test_send_no_perms_message(self) -> None:
         """Tests send no perms message.
 
         Needs to run with async as the parent class tries to get the running event loop.
         """
-        config = ConfigView(PlaceHolderLogger)
+        config = ConfigView()
         interaction = discord_mocks.InteractionMock(123456)
         await config._send_no_perms_message(interaction)
 
@@ -83,7 +82,7 @@ class TestConfigView:
 
         Needs to run with async as the parent class tries to get the running event loop.
         """
-        config = ConfigView(PlaceHolderLogger, user_data["uid"])
+        config = ConfigView(user_data["uid"])
         config._check_perms(value, user_data["uid"])
 
     @pytest.mark.parametrize("guild_data", interface_mocks.query_mock("guilds", {})[-5:])
@@ -92,7 +91,7 @@ class TestConfigView:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_get_thread_message_and_view(self, guild_data: dict[str, any]) -> None:
         """Tests _get_thread_message_and_view method."""
-        config = ConfigView(PlaceHolderLogger, CREATOR)
+        config = ConfigView(CREATOR)
         interaction = discord_mocks.InteractionMock(guild_data["guild_id"], CREATOR)
 
         msg, view = config._get_thread_message_and_view(interaction)
@@ -106,7 +105,7 @@ class TestConfigView:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_get_valorant_message_and_view(self, guild_data: dict[str, any]) -> None:
         """Tests _get_valorant_message_and_view method."""
-        config = ConfigView(PlaceHolderLogger, CREATOR)
+        config = ConfigView(CREATOR)
         interaction = discord_mocks.InteractionMock(guild_data["guild_id"], CREATOR)
 
         msg, view = config._get_valorant_message_and_view(interaction)
@@ -120,7 +119,7 @@ class TestConfigView:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_get_daily_minimum_message_and_view(self, guild_data: dict[str, any]) -> None:
         """Tests _get_daily_minimum_message_and_view method."""
-        config = ConfigView(PlaceHolderLogger, CREATOR)
+        config = ConfigView(CREATOR)
         interaction = discord_mocks.InteractionMock(guild_data["guild_id"], CREATOR)
 
         msg, view = config._get_daily_minimum_message_and_view(interaction)
@@ -134,7 +133,7 @@ class TestConfigView:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_get_admins_message_and_view(self, guild_data: dict[str, any]) -> None:
         """Tests _get_admins_message_and_view method."""
-        config = ConfigView(PlaceHolderLogger, CREATOR)
+        config = ConfigView(CREATOR)
         interaction = discord_mocks.InteractionMock(guild_data["guild_id"], CREATOR)
 
         msg, view = config._get_admins_message_and_view(interaction)
@@ -148,7 +147,7 @@ class TestConfigView:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_get_revolution_message_and_view(self, guild_data: dict[str, any]) -> None:
         """Tests _get_revolution_message_and_view method."""
-        config = ConfigView(PlaceHolderLogger, CREATOR)
+        config = ConfigView(CREATOR)
         interaction = discord_mocks.InteractionMock(guild_data["guild_id"], CREATOR)
 
         msg, view = config._get_revolution_message_and_view(interaction)
@@ -162,7 +161,7 @@ class TestConfigView:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_get_daily_salary_message_and_view(self, user_data: dict[str, any]) -> None:
         """Tests _get_daily_salary_message_and_view method."""
-        config = ConfigView(PlaceHolderLogger, CREATOR)
+        config = ConfigView(CREATOR)
         interaction = discord_mocks.InteractionMock(user_data["guild_id"], user_data["uid"])
 
         msg, view = config._get_daily_salary_message_and_view(interaction)
@@ -176,7 +175,7 @@ class TestConfigView:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_get_daily_salary_message_and_view_guildless(self, user_data: dict[str, any]) -> None:
         """Tests _get_daily_salary_message_and_view method with no guild data."""
-        config = ConfigView(PlaceHolderLogger, CREATOR)
+        config = ConfigView(CREATOR)
         interaction = discord_mocks.InteractionMock(user_data["guild_id"], user_data["uid"])
         interaction.guild = None
 
@@ -191,7 +190,7 @@ class TestConfigView:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_get_bseddies_message_and_view(self, guild_data: dict[str, any]) -> None:
         """Tests _get_bseddies_message_and_view method."""
-        config = ConfigView(PlaceHolderLogger, CREATOR)
+        config = ConfigView(CREATOR)
         interaction = discord_mocks.InteractionMock(guild_data["guild_id"], CREATOR)
 
         msg, view = config._get_bseddies_message_and_view(interaction)
@@ -205,7 +204,7 @@ class TestConfigView:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_get_autogenerate_message_and_view(self, guild_data: dict[str, any]) -> None:
         """Tests _get_autogenerate_message_and_view method."""
-        config = ConfigView(PlaceHolderLogger, CREATOR)
+        config = ConfigView(CREATOR)
         interaction = discord_mocks.InteractionMock(guild_data["guild_id"], CREATOR)
 
         msg, view = config._get_autogenerate_message_and_view(interaction)
@@ -219,7 +218,7 @@ class TestConfigView:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_get_wordle_message_and_view(self, guild_data: dict[str, any]) -> None:
         """Tests _get_wordle_message_and_view method."""
-        config = ConfigView(PlaceHolderLogger, CREATOR)
+        config = ConfigView(CREATOR)
         interaction = discord_mocks.InteractionMock(guild_data["guild_id"], CREATOR)
 
         msg, view = config._get_wordle_message_and_view(interaction)
@@ -234,7 +233,7 @@ class TestConfigView:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_place_callback(self, user_data: dict[str, any], value: str) -> None:
         """Tests place_callback method."""
-        config = ConfigView(PlaceHolderLogger, CREATOR)
+        config = ConfigView(CREATOR)
         interaction = discord_mocks.InteractionMock(user_data["guild_id"], user_data["uid"])
 
         interaction.data["values"] = [value]

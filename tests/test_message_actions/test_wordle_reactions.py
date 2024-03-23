@@ -8,7 +8,6 @@ from bson import ObjectId
 
 from discordbot.message_actions.base import BaseMessageAction
 from discordbot.message_actions.wordle_reactions import WordleMessageAction
-from discordbot.utilities import PlaceHolderLogger
 from mongo.datatypes.guild import GuildDB
 from mongo.datatypes.message import MessageDB
 from tests.mocks import message_action_mocks
@@ -22,25 +21,25 @@ class TestWordleReactions:
     @pytest.fixture(autouse=True)
     def _data(self) -> None:
         self.client = BSEBotMock()
-        self.logger = PlaceHolderLogger
+
         self.message = MessageMock()
 
     def test_init(self) -> None:
         """Tests init."""
-        action = WordleMessageAction(self.client, self.logger)
+        action = WordleMessageAction(self.client)
         assert isinstance(action, BaseMessageAction)
 
     @pytest.mark.parametrize("message_type", [[], ["message", "link"], ["message", "wordle"]])
     async def test_pre_condition(self, message_type: list[str]) -> None:
         """Tests the pre_condition function."""
-        action = WordleMessageAction(self.client, self.logger)
+        action = WordleMessageAction(self.client)
         expected = "wordle" in message_type
         assert await action.pre_condition(self.message, message_type) == expected
 
     @pytest.mark.parametrize(("content", "exp"), message_action_mocks.get_wordle_squares_content())
     async def test_adding_squares(self, content: str, exp: str | None) -> None:
         """Tests the handle_adding_squares function."""
-        action = WordleMessageAction(self.client, self.logger)
+        action = WordleMessageAction(self.client)
         message = MessageMock(content)
         with mock.patch.object(message, "add_reaction") as patched:
             await action._handle_adding_squares(message)
@@ -51,7 +50,7 @@ class TestWordleReactions:
     @pytest.mark.parametrize(("content", "exp"), message_action_mocks.get_wordle_symmetry_content())
     async def test_handle_symmetry(self, content: str, exp: bool) -> None:
         """Tests the handle_symmetry function."""
-        action = WordleMessageAction(self.client, self.logger)
+        action = WordleMessageAction(self.client)
         message = MessageMock(content)
         with mock.patch.object(message, "add_reaction") as patched:
             await action._handle_symmetry(message)
@@ -67,7 +66,7 @@ class TestWordleReactions:
     )
     async def test_tough_day_status(self, return_val: list[dict[str, str]], exp_called: bool) -> None:
         """Tests the tough_day_status function."""
-        action = WordleMessageAction(self.client, self.logger)
+        action = WordleMessageAction(self.client)
         message = MessageMock("")
         messages = [
             MessageDB(
@@ -94,7 +93,7 @@ class TestWordleReactions:
     )
     async def test_tough_day_status_error(self, func: callable) -> None:
         """Tests the tough_day_status function with Operation error.."""
-        action = WordleMessageAction(self.client, self.logger)
+        action = WordleMessageAction(self.client)
         message = MessageMock("")
         with (
             mock.patch.object(action.user_interactions, "query", new=func),
@@ -106,7 +105,7 @@ class TestWordleReactions:
     @pytest.mark.parametrize(("content", "exp_reaction"), message_action_mocks.get_wordle_run_content())
     async def test_run(self, content: str, exp_reaction: str | None) -> None:
         """Tests the run function."""
-        action = WordleMessageAction(self.client, self.logger)
+        action = WordleMessageAction(self.client)
         message = MessageMock(content)
         with (
             mock.patch.object(action, "_handle_adding_squares") as squares_patch,

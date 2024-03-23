@@ -1,7 +1,5 @@
 """Contains our BaseContextCommand class."""
 
-import logging
-
 import discord
 
 from discordbot.bsebot import BSEBot
@@ -12,7 +10,7 @@ from discordbot.constants import CREATOR
 class BaseContextCommand(BaseEvent):
     """Base Context Command class."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
         """Initialisation method.
 
         Args:
@@ -20,7 +18,7 @@ class BaseContextCommand(BaseEvent):
             guild_ids (list): list of supported guild IDs
             logger (logging.Logger): the logger
         """
-        super().__init__(client, guild_ids, logger)
+        super().__init__(client, guild_ids)
 
     def _check_perms(self, ctx: discord.ApplicationContext) -> bool:
         """Checks if the user has the right perms.

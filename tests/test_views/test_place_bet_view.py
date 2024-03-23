@@ -3,7 +3,6 @@
 import pytest
 
 from discordbot.slashcommandeventclasses.place import PlaceBet
-from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.place import PlaceABetView
 from mongo.bsepoints.bets import UserBets
 from tests.mocks import bsebot_mocks, discord_mocks, interface_mocks
@@ -19,8 +18,8 @@ class TestPlaceABetView:
         Automatically called before each test.
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
-        self.logger = PlaceHolderLogger
-        self.place = PlaceBet(self.bsebot, [], self.logger)
+
+        self.place = PlaceBet(self.bsebot, [])
 
     @pytest.mark.parametrize("user_data", interface_mocks.query_mock("userpoints", {})[-10:])
     async def test_init(self, user_data: dict[str, any]) -> None:

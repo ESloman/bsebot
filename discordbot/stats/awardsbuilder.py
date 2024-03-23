@@ -2,9 +2,9 @@
 
 import contextlib
 import datetime
-from logging import Logger
 
 import discord
+from slomanlogger import SlomanLogger
 
 from discordbot.bot_enums import TransactionTypes
 from discordbot.bsebot import BSEBot
@@ -28,7 +28,6 @@ class AwardsBuilder:
         self: "AwardsBuilder",
         bot: BSEBot,
         guild_id: int,
-        logger: Logger,
         annual: bool = False,
         debug_mode: bool = False,
     ) -> None:
@@ -37,17 +36,16 @@ class AwardsBuilder:
         Args:
             bot (BSEBot): the BSEBot client
             guild_id (int): the guild ID
-            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             annual (bool): whether to do annual stats or monthly stats
             debug_mode (bool): whether we're running in debug mode
         """
         self.bot = bot
         self.guild_id = guild_id
-        self.logger = logger
+        self.logger = SlomanLogger("bsebot")
         self.annual = annual
         self.debug = debug_mode
 
-        self.stats = StatsGatherer(logger, annual)
+        self.stats = StatsGatherer(annual)
         self.awards = Awards()
         self.user_points = UserPoints()
 

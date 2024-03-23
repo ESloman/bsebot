@@ -5,7 +5,6 @@ from unittest import mock
 import pytest
 
 from discordbot.modals.reminder import ReminderModal
-from discordbot.utilities import PlaceHolderLogger
 from mongo import interface
 from mongo.bsepoints.guilds import Guilds
 from tests.mocks import discord_mocks, interface_mocks
@@ -20,14 +19,13 @@ class TestReminderModal:
 
         Automatically called before each test.
         """
-        self.logger = PlaceHolderLogger
 
     async def test_init(self) -> None:
         """Tests basic init.
 
         Needs to run with async as the parent class tries to get the running event loop.
         """
-        _ = ReminderModal(self.logger, 0)
+        _ = ReminderModal(0)
 
     @pytest.mark.parametrize("guild_data", interface_mocks.query_mock("guilds", {}))
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
@@ -39,7 +37,7 @@ class TestReminderModal:
 
         Needs to run with async as the parent class tries to get the running event loop.
         """
-        reminder = ReminderModal(self.logger, 0)
+        reminder = ReminderModal(0)
         reminder.reminder_reason.value = "Some reason"
         reminder.reminder_timeout.value = "4h30m"
         guild = Guilds.make_data_class(guild_data)

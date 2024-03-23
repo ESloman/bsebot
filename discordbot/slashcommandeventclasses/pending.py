@@ -1,7 +1,5 @@
 """Pending slash command."""
 
-import logging
-
 import discord
 
 from discordbot.bot_enums import ActivityTypes
@@ -12,15 +10,15 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 class Pending(BSEddies):
     """Class for handling `/bseddies pending` commands."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
             guild_ids (list): list of supported guild IDs
-            logger (logging.Logger): the logger
+
         """
-        super().__init__(client, guild_ids, logger)
+        super().__init__(client, guild_ids)
         self.activity_type = ActivityTypes.BSEDDIES_PENDING
         self.help_string = "See all the pending bets you have eddies on"
         self.command_name = "pending"

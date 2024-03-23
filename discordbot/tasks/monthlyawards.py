@@ -73,7 +73,7 @@ class MonthlyBSEddiesAwards(BaseTask):
             channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
             await channel.trigger_typing()
 
-        awards_builder = AwardsBuilder(self.bot, BSE_SERVER_ID, self.logger, False, debug)
+        awards_builder = AwardsBuilder(self.bot, BSE_SERVER_ID, False, debug)
 
         self.logger.debug("Calculating stats")
         stats, message = await awards_builder.build_stats_and_message()

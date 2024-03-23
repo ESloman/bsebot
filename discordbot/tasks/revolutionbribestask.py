@@ -210,7 +210,7 @@ class RevolutionBribeTask(BaseTask):
             self.logger.debug("Bribe message: %s", bribe_message)
             self.logger.debug("Bribe message is %s chars long.", len(bribe_message))
 
-            view = RevolutionBribeView(self.bot, event, bribe_cost, self.logger)
+            view = RevolutionBribeView(self.bot, event, bribe_cost)
             member = await guild.fetch_member(king_user.uid)
             try:
                 await member.send(content=bribe_message, view=view)

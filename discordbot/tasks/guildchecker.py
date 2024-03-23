@@ -260,7 +260,7 @@ class GuildChecker(BaseTask):
             self.logger.debug("???")
             return
         event = events[0]
-        view = RevolutionView(self.bot, event, self.logger)
+        view = RevolutionView(self.bot, event)
         view.toggle_stuff(False)
         self.bot.add_view(view)
 

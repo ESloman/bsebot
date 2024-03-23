@@ -118,7 +118,7 @@ class WordleTask(BaseTask):
         await self.bot.change_presence(status=discord.Status.online, activity=game)
 
         # actually do wordle now
-        wordle_solver = WordleSolver(self.logger)
+        wordle_solver = WordleSolver()
         await wordle_solver.setup()
 
         self.logger.debug("Solving wordle...")
@@ -128,7 +128,7 @@ class WordleTask(BaseTask):
         while not solved_wordle.solved and attempts < 5:  # noqa: PLR2004
             # if we fail - try again as there's some randomness to it
             self.logger.debug("Failed wordle - attempting again: %s", attempts)
-            wordle_solver = WordleSolver(self.logger)
+            wordle_solver = WordleSolver()
             await wordle_solver.setup()
             solved_wordle = await wordle_solver.solve()
             attempts += 1

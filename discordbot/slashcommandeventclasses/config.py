@@ -36,6 +36,6 @@ class Config(BSEddies):
 
         self._add_event_type_to_activity_history(ctx.author, ctx.guild_id, ActivityTypes.CONFIG)
 
-        config_view = ConfigView(self.logger, ctx.user.id, ctx.guild_id)
+        config_view = ConfigView(ctx.user.id, ctx.guild_id)
         msg = "## BSEBot Configuration\n\nWhat would you like to configure?"
         await ctx.respond(content=msg, view=config_view, ephemeral=True)

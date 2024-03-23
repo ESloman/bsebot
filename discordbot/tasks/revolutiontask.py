@@ -163,7 +163,7 @@ class RevolutionTask(BaseTask):
         channel = await self.bot.fetch_channel(guild_db.channel)
         await channel.trigger_typing()
 
-        revolution_view = RevolutionView(self.bot, event, self.logger)
+        revolution_view = RevolutionView(self.bot, event)
 
         message = self.embed_manager.get_revolution_message(king, role, event, guild_obj)
         message_obj = await channel.send(content=message, view=revolution_view)

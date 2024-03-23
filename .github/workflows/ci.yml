@@ -1,0 +1,127 @@
+---
+name: Testing, Linting, & Building
+
+on: push
+
+jobs:
+  linting:
+    runs-on: ubuntu-latest
+    name: Linting
+    steps:
+      - name: Check out source repository
+        uses: actions/checkout@v4
+      - name: Set up Python environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12.2"
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r test-requirements.txt
+      - name: Lint with ruff
+        run: |
+          ruff check .
+          ruff format .
+  pytest:
+    runs-on: ubuntu-latest
+    name: Pytest and coverage
+    steps:
+      - name: Check out source repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Set up Python environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12.2"
+          cache: 'pip'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r test-requirements.txt
+      - name: Pytest + Coverage
+        run: |
+          pytest -n 8 --cov=. --cov-report xml --cov-branch --durations=50
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_API_KEY }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  running:
+    services:
+      mongo:
+        image: mongo
+        env:
+          MONGO_INITDB_DATABASE: bestsummereverpoints
+        options: >-
+            --health-cmd "echo 'db.runCommand("ping").ok' | mongosh --quiet"
+            --health-interval 10s
+            --health-timeout 5s
+            --health-retries 5
+            --name bse_mongo
+            -p 27017:27017
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    concurrency: push
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81
+        with:
+          images: esloman/bsebot
+          tags: |
+            type=sha
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+      - name: Run BSEBot docker image to test
+        run: |
+          set -ux
+          HASH=$(git rev-parse --short "$GITHUB_SHA")
+          docker run -d --name bsebot --network="host" -e "DEBUG_MODE=1" -e "DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}" esloman/bsebot:sha-$HASH
+          sleep 90
+          docker logs bsebot
+          E_COUNT=$(docker logs bsebot | { grep -ic 'traceback' || true; })
+          echo "Found ${E_COUNT} errors"
+          if [[ "${E_COUNT}" -ge "1" ]]; then exit 1; fi
+  pushing:
+    if: github.ref == 'refs/heads/main'
+    needs: [pytest, linting, running]
+    concurrency: push
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          username: esloman
+          password: ${{ secrets.dockerhub_token }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81
+        with:
+          images: esloman/bsebot
+          tags: |
+            type=sha
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}

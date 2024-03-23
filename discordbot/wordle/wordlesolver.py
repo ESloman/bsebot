@@ -7,7 +7,6 @@ import datetime
 import os
 import random
 import re
-from logging import Logger
 from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
@@ -24,8 +23,8 @@ from selenium.webdriver.chrome.service import Service as FirefoxService
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webelement import WebElement
+from slomanlogger import SlomanLogger
 
-from discordbot.utilities import PlaceHolderLogger
 from discordbot.wordle.constants import (
     WORDLE_BOARD_CLASS_NAME,
     WORDLE_EXCELLENT_GUESS_NUM,
@@ -49,11 +48,10 @@ if TYPE_CHECKING:
 class WordleSolver:
     """Wordle solver class."""
 
-    def __init__(self, logger: Logger = PlaceHolderLogger, headless: bool = True) -> None:
+    def __init__(self, headless: bool = True) -> None:
         """Initialisation method.
 
         Args:
-            logger (_type_, optional): _description_. Defaults to PlaceHolderLogger.
             headless (bool, optional): _description_. Defaults to True.
         """
         self.firefox_opts = Options()
@@ -65,7 +63,7 @@ class WordleSolver:
         self.driver = None
         self.action_chain = None
         self.possible_words = copy.deepcopy(self.words)
-        self.logger = logger
+        self.logger = SlomanLogger("bsebot")
         self.wordles = WordleAttempts()
         self.data_store = DataStore()
 

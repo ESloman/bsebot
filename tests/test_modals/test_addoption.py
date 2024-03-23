@@ -7,7 +7,6 @@ import pytest
 from discordbot.modals.addoption import AddBetOption
 from discordbot.slashcommandeventclasses.close import CloseBet
 from discordbot.slashcommandeventclasses.place import PlaceBet
-from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.bet import BetView
 from mongo import interface
 from mongo.bsepoints.bets import UserBets
@@ -24,10 +23,10 @@ class TestAddOption:
         Automatically called before each test.
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
-        self.logger = PlaceHolderLogger
+
         self.view = BetView
-        self.place = PlaceBet(self.bsebot, [], self.logger)
-        self.close = CloseBet(self.bsebot, [], self.logger)
+        self.place = PlaceBet(self.bsebot, [])
+        self.close = CloseBet(self.bsebot, [])
 
     @pytest.mark.parametrize("bet_data", interface_mocks.query_mock("userbets", {})[-5:])
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
@@ -40,7 +39,7 @@ class TestAddOption:
         """
         bet = UserBets.make_data_class(bet_data)
         view = BetView(bet, self.place, self.close)
-        _ = AddBetOption(bet, view, self.place, self.close, self.logger)
+        _ = AddBetOption(bet, view, self.place, self.close)
 
     @pytest.mark.parametrize("bet_data", interface_mocks.query_mock("userbets", {})[-5:])
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
@@ -56,7 +55,7 @@ class TestAddOption:
         view = BetView(bet, self.place, self.close)
         interaction = discord_mocks.InteractionMock(bet.guild_id, bet.user)
 
-        modal = AddBetOption(bet, view, self.place, self.close, self.logger)
+        modal = AddBetOption(bet, view, self.place, self.close)
         modal.bet_options.value = "another option"
 
         await modal.callback(interaction)
@@ -72,7 +71,7 @@ class TestAddOption:
         view = BetView(bet, self.place, self.close)
         interaction = discord_mocks.InteractionMock(bet.guild_id, bet.user)
 
-        modal = AddBetOption(bet, view, self.place, self.close, self.logger)
+        modal = AddBetOption(bet, view, self.place, self.close)
         modal.bet_options.value = ""
 
         await modal.callback(interaction)
@@ -88,7 +87,7 @@ class TestAddOption:
         view = BetView(bet, self.place, self.close)
         interaction = discord_mocks.InteractionMock(bet.guild_id, bet.user)
 
-        modal = AddBetOption(bet, view, self.place, self.close, self.logger)
+        modal = AddBetOption(bet, view, self.place, self.close)
         modal.bet_options.value = "1\n2\n3\n4\n5\n6\n7\n8\n9\n10"
 
         await modal.callback(interaction)

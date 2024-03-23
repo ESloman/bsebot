@@ -7,7 +7,8 @@ import contextlib
 import datetime
 import math
 import random
-from logging import Logger
+
+from slomanlogger import SlomanLogger
 
 from discordbot.bot_enums import SupporterType, TransactionTypes
 from discordbot.constants import BET_OUTCOME_COUNT_MODIFIER, SMALL_BET_AMOUNT
@@ -26,13 +27,13 @@ class BetManager:
         guilds (Guilds): guilds collection class
     """
 
-    def __init__(self: "BetManager", logger: Logger) -> None:
+    def __init__(self: "BetManager") -> None:
         """Initialisation method.
 
         Args:
             logger (Logger): the logging object to use
         """
-        self.logger = logger
+        self.logger = SlomanLogger("bsebot")
         self.user_bets = UserBets()
         self.user_points = UserPoints()
         self.guilds = Guilds()

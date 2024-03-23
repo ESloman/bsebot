@@ -2,7 +2,6 @@
 
 import asyncio
 import datetime
-from logging import Logger
 from zoneinfo import ZoneInfo
 
 import discord
@@ -16,11 +15,10 @@ from discordbot.tasks.basetask import BaseTask, TaskSchedule
 class MessageSync(BaseTask):
     """Class for message sync task."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         bot: BSEBot,
         guild_ids: list[int],
-        logger: Logger,
         startup_tasks: list[BaseTask],
         on_message: OnMessage,
         start: bool = False,
@@ -30,12 +28,11 @@ class MessageSync(BaseTask):
         Args:
             bot (BSEBot): the BSEBot client
             guild_ids (list[int]): the list of guild IDs
-            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
             on_message (OnMessage): the OnMessage class.
             start (bool): whether to start the task automatically. Defaults to False.
         """
-        super().__init__(bot, guild_ids, logger, startup_tasks)
+        super().__init__(bot, guild_ids, startup_tasks)
         self.schedule = TaskSchedule(range(7), [2], minute=15, overriden=True)
         self.task = self.message_sync
         self.on_message = on_message

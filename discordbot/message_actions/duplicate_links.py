@@ -3,7 +3,6 @@
 import datetime
 import random
 import re
-from logging import Logger
 from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
@@ -21,14 +20,13 @@ if TYPE_CHECKING:
 class DuplicateLinkAction(BaseMessageAction):
     """Duplicated Link action."""
 
-    def __init__(self, client: BSEBot, logger: Logger) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): our BSEBot client
-            logger (Logger): our logger
         """
-        super().__init__(client, logger)
+        super().__init__(client)
         # allow the precondition to store results for the run to use
         self._results_map: dict[int, list[MessageDB]] = {}
 

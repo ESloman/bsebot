@@ -1,7 +1,6 @@
 """Command suggest message action class."""
 
 import re
-from logging import Logger
 
 import discord
 
@@ -15,14 +14,13 @@ class CommandSuggest(BaseMessageAction):
     Will provide easy links to command when used in free text.
     """
 
-    def __init__(self, client: BSEBot, logger: Logger) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): our BSEBot client
-            logger (Logger): our logger
         """
-        super().__init__(client, logger)
+        super().__init__(client)
 
     async def pre_condition(self, message: discord.Message, _: list[str]) -> bool:
         """Checks that a message contains `/COMMAND_NAME` and that it's a valid command name.

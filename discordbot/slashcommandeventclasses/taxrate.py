@@ -1,7 +1,5 @@
 """Taxrate slash command."""
 
-import logging
-
 import discord
 
 from discordbot.bot_enums import ActivityTypes
@@ -13,15 +11,15 @@ from discordbot.views.taxrate import TaxRateView
 class TaxRate(BSEddies):
     """Class for taxrate command."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
             guild_ids (list): list of supported guild IDs
-            logger (logging.Logger): the logger
+
         """
-        super().__init__(client, guild_ids, logger)
+        super().__init__(client, guild_ids)
         self.activity_type = ActivityTypes.BSEDDIES_SET_TAX_RATE
         self.help_string = "Set the tax rate for the server"
         self.command_name = "taxrate"

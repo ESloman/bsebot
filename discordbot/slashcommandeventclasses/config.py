@@ -1,7 +1,5 @@
 """Config slash command."""
 
-from logging import Logger
-
 import discord
 
 from discordbot.bot_enums import ActivityTypes
@@ -13,15 +11,15 @@ from discordbot.views.config import ConfigView
 class Config(BSEddies):
     """Class for handling `/view` commands."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int], logger: Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
             guild_ids (list): list of supported guild IDs
-            logger (logging.Logger): the logger
+
         """
-        super().__init__(client, guild_ids, logger)
+        super().__init__(client, guild_ids)
         self.dmable = True
         self.activity_type = ActivityTypes.CONFIG
         self.help_string = "Configure BSEBot settings for the user/server"

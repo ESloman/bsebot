@@ -2,7 +2,6 @@
 
 import datetime
 import math
-from logging import Logger
 from zoneinfo import ZoneInfo
 
 import discord
@@ -23,13 +22,12 @@ class RevolutionView(BSEView):
 
     _SAVE_THYSELF_BUTTON_TEXT = "Save THYSELF"
 
-    def __init__(self, client: BSEBot, event: RevolutionEventDB, logger: Logger) -> None:
+    def __init__(self, client: BSEBot, event: RevolutionEventDB) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the BSEBot client
             event (RevolutionEventType): the revolution event
-            logger (Logger): the logger to use
         """
         super().__init__(timeout=None)
         self.client = client
@@ -38,9 +36,8 @@ class RevolutionView(BSEView):
         self.revolutions = RevolutionEvent()
         self.user_points = UserPoints()
         self.guilds = Guilds()
-        self.embeds = EmbedManager(logger)
+        self.embeds = EmbedManager()
         self.activities = UserActivities()
-        self.logger = logger
 
     def toggle_stuff(self, disable: bool) -> None:
         """Toggle children.

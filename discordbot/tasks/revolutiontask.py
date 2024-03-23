@@ -4,7 +4,6 @@ import asyncio
 import datetime
 import math
 import random
-from logging import Logger
 from zoneinfo import ZoneInfo
 
 from discord.ext import tasks
@@ -22,11 +21,10 @@ from mongo.datatypes.revolution import RevolutionEventDB
 class RevolutionTask(BaseTask):
     """Class for our revolution task."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         bot: BSEBot,
         guild_ids: list[int],
-        logger: Logger,
         startup_tasks: list[BaseTask],
         giphy_token: str,
         start: bool = False,
@@ -36,15 +34,14 @@ class RevolutionTask(BaseTask):
         Args:
             bot (BSEBot): the BSEBot client
             guild_ids (list[int]): the list of guild IDs
-            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
             giphy_token (str): the token to authenticate with giphy with
             start (bool): whether to start the task at startup. Default to False.
         """
-        super().__init__(bot, guild_ids, logger, startup_tasks)
+        super().__init__(bot, guild_ids, startup_tasks)
         self.schedule = TaskSchedule([6], [16, 17, 18, 19])
         self.task = self.revolution
-        self.embed_manager = EmbedManager(logger)
+        self.embed_manager = EmbedManager()
         self.giphy_api = GiphyAPI(giphy_token)
         self.rev_started = {}
 

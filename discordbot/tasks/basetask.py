@@ -7,13 +7,12 @@ in the various tasks.
 
 import dataclasses
 import datetime
-from logging import Logger
 
 from discord.ext import commands, tasks
+from slomanlogger import SlomanLogger
 
 from discordbot.bsebot import BSEBot
 from discordbot.embedmanager import EmbedManager
-from discordbot.utilities import PlaceHolderLogger
 from mongo.bsedataclasses import BotActivities, SpoilerThreads, WordleAttempts, WordleReminders
 from mongo.bsepoints.activities import UserActivities
 from mongo.bsepoints.bets import UserBets
@@ -50,7 +49,6 @@ class BaseTask(commands.Cog):
         self,
         bot: BSEBot,
         guild_ids: list[int],
-        logger: Logger = PlaceHolderLogger,
         startup_tasks: list | None = None,
     ) -> None:
         """Initialisation method.
@@ -58,12 +56,11 @@ class BaseTask(commands.Cog):
         Args:
             bot (BSEBot): the BSEBot client
             guild_ids (list[int]): the list of guild IDs
-            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
         """
         self.bot: BSEBot = bot
         self.guild_ids: list[int] = guild_ids
-        self.logger: Logger = logger
+        self.logger = SlomanLogger("bsebot")
         self.finished: bool = False
 
         if startup_tasks is None:
@@ -74,7 +71,7 @@ class BaseTask(commands.Cog):
         self._task: tasks.Loop | None = None
         self._schedule: TaskSchedule | None = None
 
-        self.embed_manager = EmbedManager(self.logger)
+        self.embed_manager = EmbedManager()
 
         # database classes
         self.activities = UserActivities()

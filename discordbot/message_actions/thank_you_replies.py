@@ -2,7 +2,6 @@
 
 import random
 import re
-from logging import Logger
 
 import discord
 
@@ -13,14 +12,13 @@ from discordbot.message_actions.base import BaseMessageAction
 class ThankYouReplies(BaseMessageAction):
     """Message action class for sending thank you messages."""
 
-    def __init__(self, client: BSEBot, logger: Logger) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): our BSEBot client
-            logger (Logger): our logger
         """
-        super().__init__(client, logger)
+        super().__init__(client)
 
         self._thank_you_terms = [
             "thank you",

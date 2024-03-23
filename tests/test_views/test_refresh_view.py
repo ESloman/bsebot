@@ -6,7 +6,6 @@ import pytest
 
 from discordbot.slashcommandeventclasses.close import CloseBet
 from discordbot.slashcommandeventclasses.place import PlaceBet
-from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.refresh import RefreshBetView
 from mongo import interface
 from mongo.bsepoints.bets import UserBets
@@ -23,9 +22,9 @@ class TestRefreshBetView:
         Automatically called before each test.
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
-        self.logger = PlaceHolderLogger
-        self.place = PlaceBet(self.bsebot, [], self.logger)
-        self.close = CloseBet(self.bsebot, [], self.logger)
+
+        self.place = PlaceBet(self.bsebot, [])
+        self.close = CloseBet(self.bsebot, [])
 
     async def test_init(self) -> None:
         """Tests basic init.

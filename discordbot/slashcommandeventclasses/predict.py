@@ -1,7 +1,5 @@
 """Predict slash command."""
 
-import logging
-
 import discord
 
 from discordbot.bot_enums import ActivityTypes
@@ -14,16 +12,16 @@ from discordbot.tasks.eddiegains import BSEddiesManager
 class Predict(BSEddies):
     """Class for handling `/bseddies predict` command."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
             guild_ids (list): list of supported guild IDs
-            logger (logging.Logger): the logger
+
         """
-        super().__init__(client, guild_ids, logger)
-        self.manager = BSEddiesManager(client, guild_ids, logger, [])
+        super().__init__(client, guild_ids)
+        self.manager = BSEddiesManager(client, guild_ids, [])
         self.activity_type = ActivityTypes.BSEDDIES_PREDICT
         self.help_string = "Predict your daily salary gain for today"
         self.command_name = "predict"

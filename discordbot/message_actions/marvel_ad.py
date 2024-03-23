@@ -3,7 +3,6 @@
 import datetime
 import random
 import re
-from logging import Logger
 from zoneinfo import ZoneInfo
 
 import discord
@@ -16,14 +15,13 @@ from discordbot.message_actions.base import BaseMessageAction
 class MarvelComicsAdAction(BaseMessageAction):
     """Marvel comic add message action."""
 
-    def __init__(self, client: BSEBot, logger: Logger) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): our BSEBot client
-            logger (Logger): our logger
         """
-        super().__init__(client, logger)
+        super().__init__(client)
 
         self._comic_terms = [
             "comic",

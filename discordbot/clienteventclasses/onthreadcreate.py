@@ -3,8 +3,6 @@
 Handles on_thread_create events.
 """
 
-import logging
-
 import discord
 
 from discordbot.bsebot import BSEBot
@@ -16,16 +14,15 @@ from mongo.bsedataclasses import SpoilerThreads
 class OnThreadCreate(BaseEvent):
     """Class for handling on_thread_create event."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
             guild_ids (list): list of supported guild IDs
-            logger (logging.Logger): the logger
         """
-        super().__init__(client, guild_ids, logger)
-        self.on_message = OnMessage(client, guild_ids, logger)
+        super().__init__(client, guild_ids)
+        self.on_message = OnMessage(client, guild_ids)
         self.threads = SpoilerThreads()
 
     async def on_thread_create(self, thread: discord.Thread) -> None:

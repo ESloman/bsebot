@@ -13,6 +13,7 @@ import inspect
 import logging
 
 import discord
+from slomanlogger import SlomanLogger("bsebot")
 
 from apis.giphyapi import GiphyAPI
 from apis.github import GitHubAPI
@@ -124,18 +125,17 @@ class CommandManager:
 
         And finally, we call the two methods that actually register all the events and slash commands.
 
-        :param client: BSEBot object that represents our bot
-        :param guilds: list of guild IDs that we're listening on
-        :param logger:  logger object for logging
-        :param debug_mode: whether we're in debug mode or not
-        :param giphy_token:
-        :param github_token:
+        Args:
+            client (BSEBot): BSEBot object that represents our bot
+            guilds (list[int]): list of guild IDs
+            giphy_token (str | None): the giphy token
+            github_token (str | None): the github token
         """
-        self.client = client
-        self.guilds = guilds
-        self.logger = logger
-        self.giphy_token = giphy_token
-        self.github_token = github_token
+        self.client: BSEBot = client
+        self.guilds: list[int] = guilds
+        self.logger = SlomanLogger("bsebot")
+        self.giphy_token: str | None = giphy_token
+        self.github_token: str | None = github_token
 
         self.embeds = EmbedManager(self.logger)
 
@@ -207,7 +207,7 @@ class CommandManager:
             self.bseddies_close,
         )
 
-        startup_tasks = [
+        startup_tasks: list[BaseTask] = [
             self.guild_checker_task,
         ]
 
@@ -320,15 +320,15 @@ class CommandManager:
                 # message id is already in the cache
                 return
 
-            guild = await self.client.fetch_guild(payload.guild_id)  # type: discord.Guild
-            user = await self.client.fetch_user(payload.user_id)  # type: discord.User
+            guild: discord.Guild = await self.client.fetch_guild(payload.guild_id)
+            user: discord.User = await self.client.fetch_user(payload.user_id)
 
             if user.bot:
                 return
 
-            channel = await self.client.fetch_channel(payload.channel_id)  # type: discord.TextChannel
-            partial_message = channel.get_partial_message(payload.message_id)  # type: discord.PartialMessage
-            message = await partial_message.fetch()  # type: discord.Message
+            channel: discord.TextChannel = await self.client.fetch_channel(payload.channel_id)
+            partial_message: discord.PartialMessage = channel.get_partial_message(payload.message_id)
+            message: discord.Message = await partial_message.fetch()
 
             await self.on_reaction_add.handle_reaction_event(message, guild, channel, payload.emoji.name, user)
 

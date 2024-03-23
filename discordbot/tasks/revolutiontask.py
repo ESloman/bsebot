@@ -28,7 +28,7 @@ class RevolutionTask(BaseTask):
         guild_ids: list[int],
         logger: Logger,
         startup_tasks: list[BaseTask],
-        giphy_token: str,
+        giphy_token: str | None,
         start: bool = False,
     ) -> None:
         """Initialisation method.
@@ -38,7 +38,7 @@ class RevolutionTask(BaseTask):
             guild_ids (list[int]): the list of guild IDs
             logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
-            giphy_token (str): the token to authenticate with giphy with
+            giphy_token (str | None): the token to authenticate with giphy with
             start (bool): whether to start the task at startup. Default to False.
         """
         super().__init__(bot, guild_ids, logger, startup_tasks)

@@ -6,15 +6,15 @@ import aiohttp
 class GiphyAPI:
     """API Class for interacting with Giphy API."""
 
-    def __init__(self: "GiphyAPI", token: str) -> None:
+    def __init__(self: "GiphyAPI", token: str | None) -> None:
         """Initialise this class.
 
         Needs a GIPHY API Token/
 
         Args:
-            token (str): the token
+            token (str | None): the token
         """
-        self.token = token
+        self.token: str | None = token
         self.api_path = "https://api.giphy.com/v1/"
 
     async def random_gif(self, tag: str | None = None) -> str:

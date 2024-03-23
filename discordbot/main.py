@@ -27,6 +27,12 @@ from discordbot.commandmanager import CommandManager
 from discordbot.constants import BSE_SERVER_ID, SLOMAN_SERVER_ID
 from mongo.bsepoints.bets import UserBets
 
+TOKEN: str | None
+DEBUG_MODE: bool
+GIPHY_TOKEN: str | None
+GITHUB_TOKEN: str | None
+
+
 if __name__ == "__main__":
     """
     This is our primary entry point for getting the bot start.
@@ -46,25 +52,25 @@ if __name__ == "__main__":
 
     if DOTENV:
         TOKEN = dotenv.get_key(".env", "DISCORD_TOKEN")
-        DEBUG_MODE = dotenv.get_key(".env", "DEBUG_MODE")
+        e_debug = dotenv.get_key(".env", "DEBUG_MODE")
         GIPHY_TOKEN = dotenv.get_key(".env", "GIPHY_API_KEY")
         GITHUB_TOKEN = dotenv.get_key(".env", "GITHUB_API_KEY")
     else:
         TOKEN = None
-        DEBUG_MODE = None
+        e_debug = None
         GIPHY_TOKEN = None
         GITHUB_TOKEN = None
 
     if _token := os.environ.get("DISCORD_TOKEN"):
         TOKEN = _token
     if _debug := os.environ.get("DEBUG_MODE"):
-        DEBUG_MODE = _debug
+        DEBUG_MODE = bool(int(_debug))
     if _giphy_token := os.environ.get("GIPHY_TOKEN"):
         GIPHY_TOKEN = _giphy_token
     if _github := os.environ.get("GITHUB_API_KEY"):
         GITHUB_TOKEN = _github
 
-    DEBUG_MODE = False if DEBUG_MODE is None else bool(int(DEBUG_MODE))
+    DEBUG_MODE = DEBUG_MODE or (False if e_debug is None else bool(int(e_debug)))
 
     IDS = [SLOMAN_SERVER_ID] if DEBUG_MODE is True else [BSE_SERVER_ID]
 

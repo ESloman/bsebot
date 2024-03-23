@@ -6,13 +6,13 @@ import requests
 class GitHubAPI:
     """Class for interactino with Github API."""
 
-    def __init__(self: "GitHubAPI", token: str) -> None:
+    def __init__(self: "GitHubAPI", token: str | None) -> None:
         """Initialisation method.
 
         Args:
-            token (str): the API token
+            token (str | None): the API token
         """
-        self.token = token
+        self.token: str | None = token
         self.base_url = "https://api.github.com"
         self.headers = {
             "Authorization": f"Bearer {self.token}",

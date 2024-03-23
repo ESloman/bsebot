@@ -36,7 +36,7 @@ class BSEBot(discord.Bot):
         super().__init__(intents=intents, activity=activity, auto_sync_commands=True, max_messages=max_messages)
         self.logger = logger
 
-    async def fetch_guild(self: "BSEBot", guild_id: int, /) -> discord.Guild | None:
+    async def fetch_guild(self: "BSEBot", guild_id: int, /) -> discord.Guild:
         """Wrapper for getting guild and using an API call if cache is empty.
 
         Args:
@@ -55,7 +55,7 @@ class BSEBot(discord.Bot):
         self: "BSEBot",
         channel_id: int,
         /,
-    ) -> discord.abc.GuildChannel | discord.Thread | discord.abc.PrivateChannel | None:
+    ) -> discord.abc.GuildChannel | discord.Thread | discord.abc.PrivateChannel:
         """Wrapper for getting channel and using an API call if cache is empty.
 
         Args:

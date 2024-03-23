@@ -40,7 +40,8 @@ jobs:
           pip install -r requirements.txt -r test-requirements.txt -r mypy-requirements.txt
       - name: mypy
         run: |
-          mypy .
+          mypy --install-types
+          mypy . --config-file=mypy.ini
   pytest:
     runs-on: ubuntu-latest
     name: Pytest and coverage

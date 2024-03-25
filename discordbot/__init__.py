@@ -1,3 +1,3 @@
 """discordbot/ contains all of our main bot code."""
 
-__version__ = "2.6.0"
+__version__ = "2.7.0-beta.1"

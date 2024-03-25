@@ -82,8 +82,6 @@ from discordbot.tasks.taskmanager import TaskManager
 from discordbot.tasks.threadmutetask import ThreadSpoilerTask
 from discordbot.tasks.wordlereminder import WordleReminder
 from discordbot.tasks.wordletask import WordleTask
-from mongo.bsepoints.bets import UserBets
-from mongo.bsepoints.points import UserPoints
 
 
 class CommandManager:
@@ -97,7 +95,6 @@ class CommandManager:
     def __init__(  # noqa: PLR0915
         self: "CommandManager",
         client: BSEBot,
-        guild_ids: list[int],
         giphy_token: str | None = None,
     ) -> None:
         """Initialisation method.
@@ -121,24 +118,18 @@ class CommandManager:
         And finally, we call the two methods that actually register all the events and slash commands.
 
         :param client: BSEBot object that represents our bot
-        :param guild_ids: list of guild IDs that we're listening on
         :param logger:  logger object for logging
         :param debug_mode: whether we're in debug mode or not
         :param giphy_token:
         :param github_token:
         """
         self.client = client
-        self.guild_ids = guild_ids
         self.logger = SlomanLogger("bsebot")
         self.giphy_token = giphy_token
 
         self.embeds = EmbedManager()
 
         self.giphyapi = GiphyAPI(self.giphy_token)
-
-        # mongo interaction classes
-        self.user_points = UserPoints()
-        self.user_bets = UserBets(guild_ids)
 
         self.__get_cached_messages_list()
 

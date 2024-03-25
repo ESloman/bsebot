@@ -25,8 +25,6 @@ import sys
 
 from discordbot.bsebot import BSEBot
 from discordbot.commandmanager import CommandManager
-from discordbot.constants import BSE_SERVER_ID, SLOMAN_SERVER_ID
-from mongo.bsepoints.bets import UserBets
 
 if __name__ == "__main__":
     """
@@ -63,8 +61,6 @@ if __name__ == "__main__":
 
     DEBUG_MODE = False if DEBUG_MODE is None else bool(int(DEBUG_MODE))
 
-    IDS = [SLOMAN_SERVER_ID] if DEBUG_MODE is True else [BSE_SERVER_ID]
-
     output_path: Path = Path(Path.home(), "bsebotlogs", "bsebot.log")
     logger = SlomanLogger("bsebot", logging.DEBUG if DEBUG_MODE else logging.INFO, output_file=output_path)
 
@@ -92,8 +88,6 @@ if __name__ == "__main__":
 
     cli = BSEBot(intents=intents, activity=listening_activity, max_messages=5000)
 
-    com = CommandManager(cli, IDS, giphy_token=GIPHY_TOKEN)
-
-    user_bets = UserBets(IDS)
+    com = CommandManager(cli, giphy_token=GIPHY_TOKEN)
 
     cli.run(TOKEN)

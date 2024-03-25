@@ -58,7 +58,7 @@ class TestUserBets:
         """Tests UserBets _create_counter_document method."""
         user_bets = UserBets()
         with mock.patch.object(user_bets, "query", return_value=query):
-            user_bets._create_counter_document(123456)
+            user_bets.create_counter_document(123456)
 
     @pytest.mark.parametrize(("guild_id", "exp"), [(724395292912255056, "0581")])
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)

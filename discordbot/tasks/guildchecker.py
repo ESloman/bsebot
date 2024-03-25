@@ -332,6 +332,8 @@ class GuildChecker(BaseTask):
         async for guild in self.bot.fetch_guilds():
             self.logger.debug("Checking guild: %s - %s", guild.id, guild.name)
 
+            self.user_bets.create_counter_document(guild.id)
+
             _: GuildDB = self._check_guild_basic_info(guild)
 
             self.logger.debug("Checking guild membership")

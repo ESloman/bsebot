@@ -20,11 +20,10 @@ class TestAutoGenerate:
     @pytest.fixture(autouse=True)
     def _data(self) -> None:
         self.client = bsebot_mocks.BSEBotMock()
-        self.guild_ids = [123456, 65321]
 
     def test_init(self) -> None:
         """Tests basic initialisation."""
-        autogenerate = AutoGenerate(self.client, self.guild_ids)
+        autogenerate = AutoGenerate(self.client)
         assert isinstance(autogenerate, AutoGenerate)
         assert isinstance(autogenerate, BSEddies)
         assert isinstance(autogenerate, BaseEvent)
@@ -37,7 +36,7 @@ class TestAutoGenerate:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_create_auto_generate_view(self, guild_data: dict) -> None:
         """Tests create_auto_generate_view."""
-        autogenerate = AutoGenerate(self.client, self.guild_ids)
+        autogenerate = AutoGenerate(self.client)
 
         guild = Guilds.make_data_class(guild_data)
         ctx = discord_mocks.ContextMock(guild.guild_id, guild.king)
@@ -51,7 +50,7 @@ class TestAutoGenerate:
     @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
     async def test_autogenerate_wrapper_bad_type(self, guild_data: dict) -> None:
         """Tests autogenerate_wrapper random with an unknown type."""
-        autogenerate = AutoGenerate(self.client, self.guild_ids)
+        autogenerate = AutoGenerate(self.client)
 
         guild = Guilds.make_data_class(guild_data)
         ctx = discord_mocks.ContextMock(guild.guild_id, guild.king)
@@ -64,7 +63,7 @@ class TestAutoGenerate:
     @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
     async def test_autogenerate_wrapper_random(self, guild_data: dict) -> None:
         """Tests autogenerate_wrapper random."""
-        autogenerate = AutoGenerate(self.client, self.guild_ids)
+        autogenerate = AutoGenerate(self.client)
 
         guild = Guilds.make_data_class(guild_data)
         ctx = discord_mocks.ContextMock(guild.guild_id, guild.king)
@@ -77,7 +76,7 @@ class TestAutoGenerate:
     @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
     async def test_autogenerate_wrapper_bet_ids(self, guild_data: dict) -> None:
         """Tests autogenerate_wrapper with bet_ids."""
-        autogenerate = AutoGenerate(self.client, self.guild_ids)
+        autogenerate = AutoGenerate(self.client)
 
         guild = Guilds.make_data_class(guild_data)
         ctx = discord_mocks.ContextMock(guild.guild_id, guild.king)

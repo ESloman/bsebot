@@ -24,7 +24,6 @@ class RevolutionTask(BaseTask):
     def __init__(
         self,
         bot: BSEBot,
-        guild_ids: list[int],
         startup_tasks: list[BaseTask],
         giphy_token: str,
         start: bool = False,
@@ -33,19 +32,18 @@ class RevolutionTask(BaseTask):
 
         Args:
             bot (BSEBot): the BSEBot client
-            guild_ids (list[int]): the list of guild IDs
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
             giphy_token (str): the token to authenticate with giphy with
             start (bool): whether to start the task at startup. Default to False.
         """
-        super().__init__(bot, guild_ids, startup_tasks)
+        super().__init__(bot, startup_tasks)
         self.schedule = TaskSchedule([6], [16, 17, 18, 19])
         self.task = self.revolution
         self.embed_manager = EmbedManager()
         self.giphy_api = GiphyAPI(giphy_token)
         self.rev_started = {}
 
-        for guild_id in self.guild_ids:
+        for guild_id in [guild.id for guild in self.bot.guilds]:
             if _ := self.revolutions.get_open_events(guild_id):
                 self.rev_started[guild_id] = True
 

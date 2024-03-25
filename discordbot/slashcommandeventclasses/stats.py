@@ -19,15 +19,14 @@ from mongo.datatypes.message import MessageDB
 class Stats(BSEddies):
     """Class for handling `/stats` commands."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
 
         """
-        super().__init__(client, guild_ids)
+        super().__init__(client)
         self.activity_type = ActivityTypes.STATS
         self.help_string = "View some stats"
         self.command_name = "stats"

@@ -16,6 +16,6 @@ class TestOnMemberLeave:
 
     def test_init(self) -> None:
         """Tests basic initialisation."""
-        event = OnMemberLeave(self.client, [])
+        event = OnMemberLeave(self.client)
         assert isinstance(event, OnMemberLeave)
         assert isinstance(event, BaseEvent)

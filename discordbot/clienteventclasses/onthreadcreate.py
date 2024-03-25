@@ -14,15 +14,14 @@ from mongo.bsedataclasses import SpoilerThreads
 class OnThreadCreate(BaseEvent):
     """Class for handling on_thread_create event."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
         """
-        super().__init__(client, guild_ids)
-        self.on_message = OnMessage(client, guild_ids)
+        super().__init__(client)
+        self.on_message = OnMessage(client)
         self.threads = SpoilerThreads()
 
     async def on_thread_create(self, thread: discord.Thread) -> None:

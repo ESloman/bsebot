@@ -16,6 +16,6 @@ class TestOnReadyEvent:
 
     def test_init(self) -> None:
         """Tests basic initialisation."""
-        event = OnReadyEvent(self.client, [])
+        event = OnReadyEvent(self.client)
         assert isinstance(event, OnReadyEvent)
         assert isinstance(event, BaseEvent)

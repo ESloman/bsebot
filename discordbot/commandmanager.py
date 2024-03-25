@@ -15,7 +15,6 @@ import discord
 from slomanlogger import SlomanLogger
 
 from apis.giphyapi import GiphyAPI
-from apis.github import GitHubAPI
 from discordbot.bsebot import BSEBot
 
 # client events
@@ -40,7 +39,6 @@ from discordbot.embedmanager import EmbedManager
 # modals
 from discordbot.modals.betcreate import BetCreateModal
 from discordbot.modals.reminder import ReminderModal
-from discordbot.modals.suggest import SuggestModal
 
 # slash commands
 from discordbot.slashcommandeventclasses.active import Active
@@ -99,9 +97,8 @@ class CommandManager:
     def __init__(  # noqa: PLR0915
         self: "CommandManager",
         client: BSEBot,
-        guilds: list[int],
+        guild_ids: list[int],
         giphy_token: str | None = None,
-        github_token: str | None = None,
     ) -> None:
         """Initialisation method.
 
@@ -124,63 +121,61 @@ class CommandManager:
         And finally, we call the two methods that actually register all the events and slash commands.
 
         :param client: BSEBot object that represents our bot
-        :param guilds: list of guild IDs that we're listening on
+        :param guild_ids: list of guild IDs that we're listening on
         :param logger:  logger object for logging
         :param debug_mode: whether we're in debug mode or not
         :param giphy_token:
         :param github_token:
         """
         self.client = client
-        self.guilds = guilds
+        self.guild_ids = guild_ids
         self.logger = SlomanLogger("bsebot")
         self.giphy_token = giphy_token
-        self.github_token = github_token
 
         self.embeds = EmbedManager()
 
         self.giphyapi = GiphyAPI(self.giphy_token)
-        self.githubapi = GitHubAPI(self.github_token)
 
         # mongo interaction classes
         self.user_points = UserPoints()
-        self.user_bets = UserBets(guilds)
+        self.user_bets = UserBets(guild_ids)
 
         self.__get_cached_messages_list()
 
         # client event classes
-        self.on_ready = OnReadyEvent(client, guilds)
-        self.on_reaction_add = OnReactionAdd(client, guilds)
-        self.on_message = OnMessage(client, guilds)
-        self.on_message_edit = OnMessageEdit(client, guilds)
-        self.on_member_join = OnMemberJoin(client, guilds)
-        self.on_member_leave = OnMemberLeave(client, guilds)
-        self.direct_message = OnDirectMessage(client, guilds, self.giphyapi)
-        self.on_thread_create = OnThreadCreate(client, guilds)
-        self.on_thread_update = OnThreadUpdate(client, guilds)
-        self.on_emoji_create = OnEmojiCreate(client, guilds)
-        self.on_sticker_create = OnStickerCreate(client, guilds)
-        self.on_voice_state_change = OnVoiceStateChange(client, guilds)
+        self.on_ready = OnReadyEvent(client)
+        self.on_reaction_add = OnReactionAdd(client)
+        self.on_message = OnMessage(client)
+        self.on_message_edit = OnMessageEdit(client)
+        self.on_member_join = OnMemberJoin(client)
+        self.on_member_leave = OnMemberLeave(client)
+        self.direct_message = OnDirectMessage(client, self.giphyapi)
+        self.on_thread_create = OnThreadCreate(client)
+        self.on_thread_update = OnThreadUpdate(client)
+        self.on_emoji_create = OnEmojiCreate(client)
+        self.on_sticker_create = OnStickerCreate(client)
+        self.on_voice_state_change = OnVoiceStateChange(client)
 
         # slash command classes
-        self.bseddies_active = Active(client, guilds)
-        self.bseddies_gift = Gift(client, guilds)
-        self.bseddies_view = View(client, guilds)
-        self.bseddies_leaderboard = Leaderboard(client, guilds)
-        self.bseddies_close = CloseBet(client, guilds)
-        self.bseddies_config = Config(client, guilds)
-        self.bseddies_place = PlaceBet(client, guilds)
-        self.bseddies_pending = Pending(client, guilds)
-        self.bseddies_admin_give = AdminGive(client, guilds)
-        self.bseddies_high_score = HighScore(client, guilds)
-        self.bseddies_predict = Predict(client, guilds)
-        self.bseddies_refresh = RefreshBet(client, guilds)
-        self.bseddies_autogenerate = AutoGenerate(client, guilds)
-        self.bseddies_tax_rate = TaxRate(client, guilds)
-        self.bseddies_stats = Stats(client, guilds)
-        self.bseddies_king_rename = KingRename(client, guilds)
-        self.bseddies_pledge = Pledge(client, guilds)
-        self.bseddies_bless = Bless(client, guilds)
-        self.bseddies_wordle = Wordle(client, guilds)
+        self.bseddies_active = Active(client)
+        self.bseddies_gift = Gift(client)
+        self.bseddies_view = View(client)
+        self.bseddies_leaderboard = Leaderboard(client)
+        self.bseddies_close = CloseBet(client)
+        self.bseddies_config = Config(client)
+        self.bseddies_place = PlaceBet(client)
+        self.bseddies_pending = Pending(client)
+        self.bseddies_admin_give = AdminGive(client)
+        self.bseddies_high_score = HighScore(client)
+        self.bseddies_predict = Predict(client)
+        self.bseddies_refresh = RefreshBet(client)
+        self.bseddies_autogenerate = AutoGenerate(client)
+        self.bseddies_tax_rate = TaxRate(client)
+        self.bseddies_stats = Stats(client)
+        self.bseddies_king_rename = KingRename(client)
+        self.bseddies_pledge = Pledge(client)
+        self.bseddies_bless = Bless(client)
+        self.bseddies_wordle = Wordle(client)
 
         # dynamically gets all the defined application commands
         # from the class attributes
@@ -190,16 +185,15 @@ class CommandManager:
             if isinstance(attr[1], BSEddies)
         ]
 
-        self.bseddies_help = Help(client, guilds, all_commands)
+        self.bseddies_help = Help(client, all_commands)
 
         # context commands
-        self.message_delete = ContextDeleteMessage(client, guilds)
-        self.user_gift = ContextUserGift(client, guilds, self.bseddies_gift)
+        self.message_delete = ContextDeleteMessage(client)
+        self.user_gift = ContextUserGift(client, self.bseddies_gift)
 
         # tasks
         self.guild_checker_task = GuildChecker(
             self.client,
-            guilds,
             [],
             self.bseddies_place,
             self.bseddies_close,
@@ -211,26 +205,25 @@ class CommandManager:
 
         self.bet_closer_task = BetCloser(
             self.client,
-            guilds,
             startup_tasks,
             self.bseddies_place,
             self.bseddies_close,
         )
 
-        self.activity_changer = ActivityChanger(self.client, guilds, startup_tasks)
-        self.bet_reminder_task = BetReminder(self.client, guilds, startup_tasks)
-        self.eddie_gain_message_task = EddieGainMessager(self.client, guilds, startup_tasks)
-        self.eddie_king_task = BSEddiesKingTask(self.client, guilds, startup_tasks)
-        self.revolution_task = RevolutionTask(self.client, guilds, startup_tasks, self.giphy_token)
-        self.thread_task = ThreadSpoilerTask(self.client, guilds, startup_tasks)
-        self.message_sync = MessageSync(self.client, guilds, startup_tasks, self.on_message)
-        self.vally_task = AfterWorkVally(self.client, guilds, startup_tasks)
-        self.monthly_awards_task = MonthlyBSEddiesAwards(self.client, guilds, startup_tasks)
-        self.annual_awards_task = AnnualBSEddiesAwards(self.client, guilds, startup_tasks)
-        self.wordle_task = WordleTask(self.client, guilds, startup_tasks)
-        self.wordle_reminder = WordleReminder(self.client, guilds, startup_tasks)
-        self.celebrations_task = Celebrations(self.client, guilds, startup_tasks)
-        self.reminders_task = RemindersTask(self.client, guilds, startup_tasks)
+        self.activity_changer = ActivityChanger(self.client, startup_tasks)
+        self.bet_reminder_task = BetReminder(self.client, startup_tasks)
+        self.eddie_gain_message_task = EddieGainMessager(self.client, startup_tasks)
+        self.eddie_king_task = BSEddiesKingTask(self.client, startup_tasks)
+        self.revolution_task = RevolutionTask(self.client, startup_tasks, self.giphy_token)
+        self.thread_task = ThreadSpoilerTask(self.client, startup_tasks)
+        self.message_sync = MessageSync(self.client, startup_tasks, self.on_message)
+        self.vally_task = AfterWorkVally(self.client, startup_tasks)
+        self.monthly_awards_task = MonthlyBSEddiesAwards(self.client, startup_tasks)
+        self.annual_awards_task = AnnualBSEddiesAwards(self.client, startup_tasks)
+        self.wordle_task = WordleTask(self.client, startup_tasks)
+        self.wordle_reminder = WordleReminder(self.client, startup_tasks)
+        self.celebrations_task = Celebrations(self.client, startup_tasks)
+        self.reminders_task = RemindersTask(self.client, startup_tasks)
 
         # dynamically gets all the defined tasks
         # from the class attributes
@@ -240,7 +233,7 @@ class CommandManager:
             if isinstance(attr[1], BaseTask)
         ]
 
-        self.task_manager = TaskManager(self.client, guilds, startup_tasks, all_tasks)
+        self.task_manager = TaskManager(self.client, startup_tasks, all_tasks)
 
         # call the methods that register the events we're listening for
         self._register_client_events()
@@ -577,7 +570,7 @@ class CommandManager:
             Args:
                 ctx (discord.ApplicationContext): the command context
             """
-            modal = BetCreateModal(client=self.client, guild_ids=self.guilds, title="Create a bet")
+            modal = BetCreateModal(client=self.client, title="Create a bet")
             await ctx.response.send_modal(modal)
 
         @self.client.command(description="Autogenerate bets")
@@ -697,16 +690,6 @@ class CommandManager:
                 ctx (discord.ApplicationContext): the command context
             """
             await self.bseddies_help.help(ctx)
-
-        @self.client.command(description="Suggest an improvement")
-        async def suggest(ctx: discord.ApplicationContext) -> None:
-            """Command for suggesting improvements.
-
-            Args:
-                ctx (discord.ApplicationContext): the command context
-            """
-            modal = SuggestModal(github_api=self.githubapi, title="Suggest an improvement")
-            await ctx.response.send_modal(modal)
 
         @self.client.command(description="Set a reminder")
         async def remindme(ctx: discord.ApplicationContext) -> None:

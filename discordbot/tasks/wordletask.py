@@ -18,16 +18,15 @@ from discordbot.wordle.wordlesolver import WordleSolver
 class WordleTask(BaseTask):
     """Class for our wordle task."""
 
-    def __init__(self, bot: BSEBot, guild_ids: list[int], startup_tasks: list[BaseTask], start: bool = False) -> None:
+    def __init__(self, bot: BSEBot, startup_tasks: list[BaseTask], start: bool = False) -> None:
         """Initialisation method.
 
         Args:
             bot (BSEBot): the BSEBot client
-            guild_ids (list[int]): the list of guild IDs
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
             start (bool): whether to start the task on startup. Defaults to False.
         """
-        super().__init__(bot, guild_ids, startup_tasks)
+        super().__init__(bot, startup_tasks)
 
         self.schedule = TaskSchedule(range(7), [8, 9, 10, 11, 12])
 

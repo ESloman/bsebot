@@ -15,11 +15,10 @@ class TestStats:
     @pytest.fixture(autouse=True)
     def _data(self) -> None:
         self.client = BSEBotMock()
-        self.guild_ids = [123456, 65321]
 
     def test_init(self) -> None:
         """Tests basic initialisation."""
-        active = Stats(self.client, self.guild_ids)
+        active = Stats(self.client)
         assert isinstance(active, Stats)
         assert isinstance(active, BSEddies)
         assert isinstance(active, BaseEvent)

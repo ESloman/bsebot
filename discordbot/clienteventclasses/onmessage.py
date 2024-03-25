@@ -31,16 +31,15 @@ if TYPE_CHECKING:
 class OnMessage(BaseEvent):
     """Class for handling on_message events from Discord."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Sets up our list of post message action classes.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
         """
-        super().__init__(client, guild_ids)
+        super().__init__(client)
         self._post_message_action_classes: list[BaseMessageAction] = [
             AlphabeticalMessageAction(client),
             BirthdayReplies(client),

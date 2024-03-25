@@ -49,12 +49,10 @@ if __name__ == "__main__":
         TOKEN = dotenv.get_key(".env", "DISCORD_TOKEN")
         DEBUG_MODE = dotenv.get_key(".env", "DEBUG_MODE")
         GIPHY_TOKEN = dotenv.get_key(".env", "GIPHY_API_KEY")
-        GITHUB_TOKEN = dotenv.get_key(".env", "GITHUB_API_KEY")
     else:
         TOKEN = None
         DEBUG_MODE = None
         GIPHY_TOKEN = None
-        GITHUB_TOKEN = None
 
     if _token := os.environ.get("DISCORD_TOKEN"):
         TOKEN = _token
@@ -62,8 +60,6 @@ if __name__ == "__main__":
         DEBUG_MODE = _debug
     if _giphy_token := os.environ.get("GIPHY_TOKEN"):
         GIPHY_TOKEN = _giphy_token
-    if _github := os.environ.get("GITHUB_API_KEY"):
-        GITHUB_TOKEN = _github
 
     DEBUG_MODE = False if DEBUG_MODE is None else bool(int(DEBUG_MODE))
 
@@ -82,8 +78,6 @@ if __name__ == "__main__":
         logger.info("Debug mode enabled.")
     if GIPHY_TOKEN:
         logger.debug("Giphy token set.")
-    if GITHUB_TOKEN:
-        logger.debug("Github token set.")
 
     intents = discord.Intents.all()
 
@@ -98,7 +92,7 @@ if __name__ == "__main__":
 
     cli = BSEBot(intents=intents, activity=listening_activity, max_messages=5000)
 
-    com = CommandManager(cli, IDS, giphy_token=GIPHY_TOKEN, github_token=GITHUB_TOKEN)
+    com = CommandManager(cli, IDS, giphy_token=GIPHY_TOKEN)
 
     user_bets = UserBets(IDS)
 

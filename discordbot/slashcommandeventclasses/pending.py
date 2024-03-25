@@ -10,15 +10,14 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 class Pending(BSEddies):
     """Class for handling `/bseddies pending` commands."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
 
         """
-        super().__init__(client, guild_ids)
+        super().__init__(client)
         self.activity_type = ActivityTypes.BSEDDIES_PENDING
         self.help_string = "See all the pending bets you have eddies on"
         self.command_name = "pending"

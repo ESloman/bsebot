@@ -13,15 +13,14 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 class KingRename(BSEddies):
     """Class for handling `/renameking` commands."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
 
         """
-        super().__init__(client, guild_ids)
+        super().__init__(client)
         self.activity_type = ActivityTypes.RENAME_KING
         self.help_string = "Pay 500 eddies to rename one of the BSEddies roles"
         self.command_name = "rename"

@@ -17,15 +17,14 @@ from discordbot.constants import BSE_BOT_ID
 class OnMessageEdit(BaseEvent):
     """Class for handling on_message_edit events from Discord."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
         """
-        super().__init__(client, guild_ids)
-        self.on_message = discordbot.clienteventclasses.onmessage.OnMessage(client, guild_ids)
+        super().__init__(client)
+        self.on_message = discordbot.clienteventclasses.onmessage.OnMessage(client)
 
     async def message_edit(self, before: discord.Message | None, after: discord.Message) -> None:
         """Handles our on_message_edit and on_raw_message_edit events.

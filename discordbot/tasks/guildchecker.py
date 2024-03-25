@@ -24,10 +24,9 @@ if TYPE_CHECKING:
 class GuildChecker(BaseTask):
     """Class for guild checker task."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         bot: BSEBot,
-        guild_ids: list[int],
         startup_tasks: list[BaseTask],
         place: "PlaceBet",
         close: "CloseBet",
@@ -37,13 +36,12 @@ class GuildChecker(BaseTask):
 
         Args:
             bot (BSEBot): the BSEBot client
-            guild_ids (list[int]): the list of guild IDs
             startup_tasks (list | None, optional): the list of startup tasks.
             place (PlaceBet): the PlaceBet class
             close (CloseBet): the CloseBet class
             start (bool): whether to start the task. Defaults to False.
         """
-        super().__init__(bot, guild_ids, startup_tasks)
+        super().__init__(bot, startup_tasks)
         self.schedule = TaskSchedule(range(7), [3], 15)
         self.task = self.guild_checker
         self.finished: bool = False

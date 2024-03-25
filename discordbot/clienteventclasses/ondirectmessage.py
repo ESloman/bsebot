@@ -16,17 +16,15 @@ class OnDirectMessage(BaseEvent):
     def __init__(
         self,
         client: BSEBot,
-        guild_ids: list[int],
         giphyapi: GiphyAPI,
     ) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
             giphyapi (GiphyAPI): the giphy API class to use
         """
-        super().__init__(client, guild_ids)
+        super().__init__(client)
         self.giphyapi = giphyapi
 
         self.thanks = ["thank you", "thanks", "fanks", "fank you", " ty ", "thanks dad"]

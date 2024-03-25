@@ -29,20 +29,19 @@ from mongo.datatypes.user import UserDB
 class EddieGainMessager(BaseTask):
     """Class for eddie gains task."""
 
-    def __init__(self, bot: BSEBot, guild_ids: list[int], startup_tasks: list[BaseTask], start: bool = False) -> None:
+    def __init__(self, bot: BSEBot, startup_tasks: list[BaseTask], start: bool = False) -> None:
         """Initialisation method.
 
         Args:
             bot (BSEBot): the BSEBot client
-            guild_ids (list[int]): the list of guild IDs
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
             start (bool): whether to start the task automatically or not. Defaults to False.
         """
-        super().__init__(bot, guild_ids, startup_tasks)
+        super().__init__(bot, startup_tasks)
         self.schedule = TaskSchedule(range(7), [7], 30)
         self.task = self.eddie_distributer
 
-        self.eddie_manager = BSEddiesManager(self.bot, guild_ids, startup_tasks)
+        self.eddie_manager = BSEddiesManager(self.bot, startup_tasks)
         if start:
             self.task.start()
 
@@ -56,7 +55,7 @@ class EddieGainMessager(BaseTask):
             return None
 
         data = []
-        for guild_id in self.guild_ids:
+        for guild_id in [guild.id for guild in self.bot.guilds]:
             eddie_dict = self.eddie_manager.give_out_eddies(guild_id, real=True)
             data.append(eddie_dict)
 
@@ -136,19 +135,19 @@ class EddieGainMessager(BaseTask):
 class BSEddiesManager(BaseTask):
     """Class that _actually_ calculates eddies."""
 
-    def __init__(self, bot: BSEBot, guild_ids: list[int], startup_tasks: list[BaseTask]) -> None:
+    def __init__(self, bot: BSEBot, startup_tasks: list[BaseTask]) -> None:
         """Initialisation method.
 
         Args:
             bot (BSEBot): the BSEBot client
-            guild_ids (list[int]): the list of guild IDs
+
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
             on_ready (OnReadyEvent): on ready event
             github_api (GitHubAPI): the authenticated Github api class
             place (PlaceBet): the place bet class
             close (CloseBet): the close bet class
         """
-        super().__init__(bot, guild_ids, startup_tasks)
+        super().__init__(bot, startup_tasks)
         # default minimum
         self.server_min = 4
 

@@ -14,16 +14,15 @@ from mongo.datatypes.bet import BetDB
 class BetReminder(BaseTask):
     """Class for bet reminder."""
 
-    def __init__(self, bot: BSEBot, guild_ids: list[int], startup_tasks: list[BaseTask], start: bool = False) -> None:
+    def __init__(self, bot: BSEBot, startup_tasks: list[BaseTask], start: bool = False) -> None:
         """Initialisation method.
 
         Args:
             bot (BSEBot): the BSEBot client
-            guild_ids (list[int]): the list of guild IDs
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
             start (bool): whether to start on startup. Defaults to False.
         """
-        super().__init__(bot, guild_ids, startup_tasks)
+        super().__init__(bot, startup_tasks)
         self.schedule = TaskSchedule(range(7), range(24))
         self.task = self.bet_reminder
         if start:

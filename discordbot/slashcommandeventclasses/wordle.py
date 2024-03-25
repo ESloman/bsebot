@@ -50,15 +50,14 @@ class WordleStatsShareView(discord.ui.View):
 class Wordle(BSEddies):
     """Class for handling `/wordle` commands."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
 
         """
-        super().__init__(client, guild_ids)
+        super().__init__(client)
         self.activity_type = ActivityTypes.WORDLE
         self.help_string = "View some wordle stats"
         self.command_name = "wordle"

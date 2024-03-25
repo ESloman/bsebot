@@ -11,15 +11,14 @@ from discordbot.views.highscore import HighScoreBoardView
 class HighScore(BSEddies):
     """Class for handling `/bseddies highscore` commands."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
 
         """
-        super().__init__(client, guild_ids)
+        super().__init__(client)
         self.activity_type = ActivityTypes.BSEDDIES_HIGHSCORES
         self.help_string = "See everyone's highest eddie count"
         self.command_name = "highscore"

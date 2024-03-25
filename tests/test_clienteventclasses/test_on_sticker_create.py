@@ -16,6 +16,6 @@ class TestOnStickerCreate:
 
     def test_init(self) -> None:
         """Tests basic initialisation."""
-        event = OnStickerCreate(self.client, [])
+        event = OnStickerCreate(self.client)
         assert isinstance(event, OnStickerCreate)
         assert isinstance(event, BaseEvent)

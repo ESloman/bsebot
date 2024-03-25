@@ -77,6 +77,7 @@ from discordbot.tasks.guildchecker import GuildChecker
 from discordbot.tasks.messagesync import MessageSync
 from discordbot.tasks.monthlyawards import MonthlyBSEddiesAwards
 from discordbot.tasks.reminders import RemindersTask
+from discordbot.tasks.revolutionbribestask import RevolutionBribeTask
 from discordbot.tasks.revolutiontask import RevolutionTask
 from discordbot.tasks.taskmanager import TaskManager
 from discordbot.tasks.threadmutetask import ThreadSpoilerTask
@@ -215,6 +216,7 @@ class CommandManager:
         self.wordle_reminder = WordleReminder(self.client, startup_tasks)
         self.celebrations_task = Celebrations(self.client, startup_tasks)
         self.reminders_task = RemindersTask(self.client, startup_tasks)
+        self.revolution_bribe_task = RevolutionBribeTask(self.client, startup_tasks)
 
         # dynamically gets all the defined tasks
         # from the class attributes

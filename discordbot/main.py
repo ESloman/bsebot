@@ -9,23 +9,20 @@ rest of the codebase.
 
 import logging
 import os
+import sys
 from pathlib import Path
 
 import discord
+import dotenv
 from slomanlogger import SlomanLogger
-
-try:
-    import dotenv
-
-    DOTENV = True
-except ImportError:
-    DOTENV = False
-
-import sys
 
 from discordbot import __version__
 from discordbot.bsebot import BSEBot
 from discordbot.commandmanager import CommandManager
+
+TOKEN: str | None = None
+DEBUG_MODE: bool = False
+
 
 if __name__ == "__main__":
     """
@@ -44,23 +41,15 @@ if __name__ == "__main__":
     Finally, we start the asyncio loop and start listening for events.
     """
 
-    if DOTENV:
-        TOKEN = dotenv.get_key(".env", "DISCORD_TOKEN")
-        DEBUG_MODE = dotenv.get_key(".env", "DEBUG_MODE")
-        GIPHY_TOKEN = dotenv.get_key(".env", "GIPHY_API_KEY")
-    else:
-        TOKEN = None
-        DEBUG_MODE = None
-        GIPHY_TOKEN = None
+    token = dotenv.get_key(".env", "DISCORD_TOKEN")
+    if not token:
+        token = os.environ.get("DISCORD_TOKEN")
+    TOKEN = token
 
-    if _token := os.environ.get("DISCORD_TOKEN"):
-        TOKEN = _token
-    if _debug := os.environ.get("DEBUG_MODE"):
-        DEBUG_MODE = _debug
-    if _giphy_token := os.environ.get("GIPHY_TOKEN"):
-        GIPHY_TOKEN = _giphy_token
-
-    DEBUG_MODE = False if DEBUG_MODE is None else bool(int(DEBUG_MODE))
+    debug = dotenv.get_key(".env", "DEBUG_MODE")
+    if not debug:
+        debug = os.environ.get("DEBUG_MODE")
+    DEBUG_MODE = bool(int(debug)) if debug is not None else False
 
     output_path: Path = Path(Path.home(), "bsebotlogs", "bsebot.log")
     logger = SlomanLogger("bsebot", logging.DEBUG if DEBUG_MODE else logging.INFO, output_file=output_path)
@@ -73,13 +62,18 @@ if __name__ == "__main__":
         logger.error("Token isn't set - can't authenticate with Discord. Exiting.")
         sys.exit(-1)
 
-    if DEBUG_MODE:
-        logger.info("Debug mode enabled.")
-    if GIPHY_TOKEN:
-        logger.debug("Giphy token set.")
+    logger.info("Debug mode is %s.", "enabled" if DEBUG_MODE else "disabled")
+
+    # load giphy token
+    if not os.environ.get("GIPHY_TOKEN"):
+        giphy_token = dotenv.get_key(".env", "GIPHY_TOKEN")
+        if giphy_token:
+            os.environ["GIPHY_TOKEN"] = giphy_token
+            logger.verbose("Set giphy token var from .env file")
+        else:
+            logger.warning("No giphy token set.")
 
     intents = discord.Intents.all()
-
     intents.presences = False
     intents.typing = False
 
@@ -90,7 +84,5 @@ if __name__ == "__main__":
     )
 
     cli = BSEBot(intents=intents, activity=listening_activity, max_messages=5000)
-
-    com = CommandManager(cli, giphy_token=GIPHY_TOKEN)
-
+    com = CommandManager(cli)
     cli.run(TOKEN)

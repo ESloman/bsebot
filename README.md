@@ -59,7 +59,17 @@ This can then be run with:
 docker run -d -v "/path/to/env/.env:/home/app/discordbot/.env" --name bsebot --network="host" --restart="always" bsebot:local
 ```
 
+(Alternatively, you can change the image to `esloman/bsebot:latest` to pull the latest production image without having to build it yourself.)
+
 Here, we mount the `.env` file to where the bot expects it. If you don't use a `.env` file, you will need to provide the environment variables.
+
+## Docker Compose
+
+Make sure to modify the volume bindings in `docker-compose.yml`.
+
+```bash
+docker-compose up -d
+```
 
 ## Without Docker
 

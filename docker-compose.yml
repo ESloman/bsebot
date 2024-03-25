@@ -3,20 +3,30 @@ version: '3.1'
 
 services:
   mongo:
-    image: mongo:7.0.7
+    image: mongo:latest
     restart: always
     ports:
       - 27017:27017
     environment:
       MONGO_INITDB_DATABASE: bestsummereverpoints
+    healthcheck:
+      test: ["CMD-SHELL", "echo 'db.runCommand(\"ping\").ok' | mongosh --quiet"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    volumes:
+      - /home/ubuntu/data/bsemongo:/data/db
   bsebot:
-    image: elliotsloman/bsebot:latest
+    image: esloman/bsebot:latest
     depends_on:
-      - mongo
+      mongo:
+        condition: service_healthy
     restart: always
     environment:
       DEBUG: 1
       MONGODB_IP: mongo
     volumes:
-      - /home/esloman/bsebotlogs:/root/bsebotlogs
-      - /home/esloman/gitwork/bsebot/discordbot/.env:/home/app/discordbot/.env
+    # change these to whatever is needed
+      - /home/ubuntu/bsebotlogs:/root/bsebotlogs
+      - /home/ubuntu/.env:/home/app/discordbot/.env

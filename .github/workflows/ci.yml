@@ -1,7 +1,11 @@
 ---
 name: Testing, Linting, & Building
 
-on: push
+on: [push, pull_request]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   linting:
@@ -65,7 +69,6 @@ jobs:
     defaults:
       run:
         shell: bash
-    concurrency: push
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -97,7 +100,6 @@ jobs:
   pushing:
     if: github.ref == 'refs/heads/main'
     needs: [pytest, linting, running]
-    concurrency: push
     runs-on: ubuntu-latest
     defaults:
       run:

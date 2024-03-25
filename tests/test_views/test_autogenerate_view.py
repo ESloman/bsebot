@@ -22,7 +22,6 @@ class TestAutoGenerateView:
         Automatically called before each test.
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
-
         self.auto = AutoGenerate(self.bsebot)
 
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)

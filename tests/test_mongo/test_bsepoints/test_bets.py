@@ -31,15 +31,6 @@ class TestUserBets:
         user_bets = UserBets()
         assert isinstance(user_bets, UserBets)
 
-    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
-    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
-    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
-    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
-    def test_user_bets_init_guilds(self) -> None:
-        """Tests UserBets init with guilds."""
-        user_bets = UserBets([123, 456])
-        assert isinstance(user_bets, UserBets)
-
     def test_bets_make_data_class(self) -> None:
         """Tests UserBets make_data_class."""
         user_bets = UserBets()

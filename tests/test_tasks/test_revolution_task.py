@@ -26,6 +26,9 @@ class TestBSEddiesRevolutionTask:
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
 
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     def test_init(self) -> None:
         """Tests if we can initialise the task with empty data."""
         task = RevolutionTask(self.bsebot, [], "")

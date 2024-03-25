@@ -24,7 +24,7 @@ Changelog = "https://github.com/esloman/bsebot/blob/master/CHANGELOG.md"
 branch = true
 relative_files = true
 omit = ['tests/*', ]
-source = '.'
+source = ['.', ]
 
 #
 # Semantic Release Stuff

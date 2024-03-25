@@ -1,7 +1,17 @@
 ---
 name: Testing, Linting, & Building
 
-on: [push, pull_request]
+on:
+  push:
+    paths-ignore:
+      - CHANGELOG.md
+      - pyproject.toml
+      - discordbot/__init__.py
+  pull_request:
+    paths-ignore:
+      - CHANGELOG.md
+      - pyproject.toml
+      - discordbot/__init__.py
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -94,11 +104,10 @@ jobs:
           docker run -d --name bsebot --network="host" -e "DEBUG_MODE=1" -e "DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}" esloman/bsebot:sha-$HASH
           sleep 90
           docker logs bsebot
-          E_COUNT=$(docker logs bsebot | { grep -ic 'traceback' || true; })
+          E_COUNT=$(docker logs bsebot | { grep -ic -E 'traceback|error|exception' || true; })
           echo "Found ${E_COUNT} errors"
           if [[ "${E_COUNT}" -ge "1" ]]; then exit 1; fi
   pushing:
-    if: github.ref == 'refs/heads/main'
     needs: [pytest, linting, running]
     runs-on: ubuntu-latest
     defaults:
@@ -136,9 +145,10 @@ jobs:
       contents: write
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
+        token: ${{ secrets.GH_TOKEN }}
 
     - name: Python Semantic Release
       uses: python-semantic-release/python-semantic-release@master

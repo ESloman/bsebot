@@ -75,6 +75,8 @@ class TestBSEddiesRevolutionTask:
     async def test_default_execution_wrong_time(self) -> None:
         """Tests we exit out of default execution with wrong time."""
         task = RevolutionTask(self.bsebot, [], "")
+        for key in task.rev_started:
+            task.rev_started[key] = False
         await task.revolution()
 
     @pytest.mark.parametrize("timestamp", ["2024/01/21 16:00", "2024/01/21 16:01"])

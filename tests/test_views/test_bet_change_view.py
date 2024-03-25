@@ -24,8 +24,8 @@ class TestBetChange:
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
 
-        self.place = PlaceBet(self.bsebot, [])
-        self.close = CloseBet(self.bsebot, [])
+        self.place = PlaceBet(self.bsebot)
+        self.close = CloseBet(self.bsebot)
 
     @pytest.mark.parametrize("bet_data", interface_mocks.query_mock("userbets", {})[-1:])
     async def test_init(self, bet_data: dict[str, any]) -> None:

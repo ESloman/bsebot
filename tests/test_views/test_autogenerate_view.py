@@ -23,7 +23,7 @@ class TestAutoGenerateView:
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
 
-        self.auto = AutoGenerate(self.bsebot, [])
+        self.auto = AutoGenerate(self.bsebot)
 
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)

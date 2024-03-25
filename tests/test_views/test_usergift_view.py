@@ -20,7 +20,7 @@ class TestGiftUserEddiesView:
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
 
-        self.gift = Gift(self.bsebot, [])
+        self.gift = Gift(self.bsebot)
 
     async def test_init(self) -> None:
         """Tests basic init.

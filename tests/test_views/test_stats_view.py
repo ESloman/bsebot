@@ -20,7 +20,7 @@ class TestStatsView:
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
 
-        self.stats = Stats(self.bsebot, [])
+        self.stats = Stats(self.bsebot)
 
     async def test_init(self) -> None:
         """Tests basic init.

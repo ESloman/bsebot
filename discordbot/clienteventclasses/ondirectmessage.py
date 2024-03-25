@@ -16,16 +16,14 @@ class OnDirectMessage(BaseEvent):
     def __init__(
         self,
         client: BSEBot,
-        giphyapi: GiphyAPI,
     ) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            giphyapi (GiphyAPI): the giphy API class to use
         """
         super().__init__(client)
-        self.giphyapi = giphyapi
+        self.giphyapi = GiphyAPI()
 
         self.thanks = ["thank you", "thanks", "fanks", "fank you", " ty ", "thanks dad"]
         self.rude = ["fuck you", "fuck off", "faggot", "fuckyou"]

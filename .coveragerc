@@ -1,4 +1,0 @@
-[run]
-omit = tests/*
-source = .
-relative_files = True

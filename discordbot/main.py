@@ -73,6 +73,11 @@ if __name__ == "__main__":
         logger.error("Token isn't set - can't authenticate with Discord. Exiting.")
         sys.exit(-1)
 
+    if mongo_ip := os.environ.get("MONGODB_IP"):
+        logger.verbose("MongoDB IP, %s, set through environment variable.", mongo_ip)
+    else:
+        logger.warning("MongoDB IP not set - using localhost as default.")
+
     if DEBUG_MODE:
         logger.info("Debug mode enabled.")
     if GIPHY_TOKEN:

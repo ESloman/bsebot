@@ -24,7 +24,7 @@ class BaseClass:
 
     def __init__(
         self,
-        ip: str | None,
+        ip: str | None = None,
         username: str | None = None,
         password: str | None = None,
         database: str = "bestsummereverpoints",

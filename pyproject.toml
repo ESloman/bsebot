@@ -1,7 +1,7 @@
 [project]
 name = "BSEBot"
 description = "Discord bot for BSE Server."
-version = "2.5.0"
+version = "2.6.0"
 requires-python = ">= 3.12"
 
 readme = "README.md"
@@ -38,19 +38,17 @@ logging_use_named_masks = false
 major_on_zero = true
 allow_zero_version = true
 tag_format = "v{version}"
+upload_to_pypi = false
+upload_to_release = true
 version_toml = [
     "pyproject.toml:project.version",
 ]
+version_variables = ["discordbot/__init__.py:__version__"]
 
 [tool.semantic_release.branches.main]
 match = "main"
 prerelease_token = "rc"
 prerelease = false
-
-[tool.semantic_release.branches.other]
-match = ""
-prerelease_token = "beta"
-prerelease = true
 
 [tool.semantic_release.changelog]
 template_dir = "templates"

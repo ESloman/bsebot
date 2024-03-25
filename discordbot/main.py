@@ -23,6 +23,7 @@ except ImportError:
 
 import sys
 
+from discordbot import __version__
 from discordbot.bsebot import BSEBot
 from discordbot.commandmanager import CommandManager
 
@@ -65,6 +66,8 @@ if __name__ == "__main__":
     logger = SlomanLogger("bsebot", logging.DEBUG if DEBUG_MODE else logging.INFO, output_file=output_path)
 
     logger.info("Logging mode set to %s", logging.DEBUG if DEBUG_MODE else logging.INFO)
+
+    logger.info("Version is: %s", __version__)
 
     if TOKEN is None:
         logger.error("Token isn't set - can't authenticate with Discord. Exiting.")

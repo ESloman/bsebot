@@ -11,15 +11,14 @@ from discordbot.views.config import ConfigView
 class Config(BSEddies):
     """Class for handling `/view` commands."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
 
         """
-        super().__init__(client, guild_ids)
+        super().__init__(client)
         self.dmable = True
         self.activity_type = ActivityTypes.CONFIG
         self.help_string = "Configure BSEBot settings for the user/server"

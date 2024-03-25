@@ -15,7 +15,6 @@ class TaskManager(BaseTask):
     def __init__(
         self,
         bot: BSEBot,
-        guild_ids: list[int],
         startup_tasks: list[BaseTask],
         tasks: list[BaseTask],
     ) -> None:
@@ -23,11 +22,10 @@ class TaskManager(BaseTask):
 
         Args:
             bot (BSEBot): the BSEBot client
-            guild_ids (list[int]): the list of guild IDs
             startup_tasks (list | None, optional): the list of startup tasks.
             tasks (list[BaseTask]): the list of all the other tasks to manager.
         """
-        super().__init__(bot, guild_ids, startup_tasks)
+        super().__init__(bot, startup_tasks)
         self.task = self.task_checker
         self.tasks = tasks
         self.task.start()

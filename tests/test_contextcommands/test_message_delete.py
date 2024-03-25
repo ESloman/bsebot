@@ -16,5 +16,5 @@ class TestContextDeleteMessage:
 
     def test_init(self) -> None:
         """Tests init."""
-        command = ContextDeleteMessage(self.client, [])
+        command = ContextDeleteMessage(self.client)
         assert isinstance(command, BaseContextCommand)

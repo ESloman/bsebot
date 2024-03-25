@@ -13,16 +13,15 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 class Help(BSEddies):
     """Class for handling `/help` commands."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int], command_list: list[BSEddies] | None = None) -> None:
+    def __init__(self, client: BSEBot, command_list: list[BSEddies] | None = None) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
 
             command_list (list[BSEddies] | None): the list of commands
         """
-        super().__init__(client, guild_ids)
+        super().__init__(client)
         self.command_list = command_list
         self.activity_type = ActivityTypes.HELP
         self.help_string = "This command"

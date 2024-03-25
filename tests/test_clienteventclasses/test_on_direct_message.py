@@ -19,6 +19,6 @@ class TestOnDirectMessage:
 
     def test_init(self) -> None:
         """Tests basic initialisation."""
-        event = OnDirectMessage(self.client, [], self.giphy)
+        event = OnDirectMessage(self.client, self.giphy)
         assert isinstance(event, OnDirectMessage)
         assert isinstance(event, BaseEvent)

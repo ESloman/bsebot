@@ -26,7 +26,7 @@ class TestRemindersTask:
 
     def test_init(self) -> None:
         """Tests if we can initialise the task."""
-        _ = RemindersTask(self.bsebot, [], [], start=False)
+        _ = RemindersTask(self.bsebot, [], start=False)
 
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -34,7 +34,7 @@ class TestRemindersTask:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_execution(self) -> None:
         """Tests default execution."""
-        task = RemindersTask(self.bsebot, [], [], start=False)
+        task = RemindersTask(self.bsebot, [], start=False)
         await task.reminders()
 
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
@@ -43,7 +43,7 @@ class TestRemindersTask:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_execution_with_open_reminders(self) -> None:
         """Tests default execution with open reminedrs."""
-        task = RemindersTask(self.bsebot, [], [], start=False)
+        task = RemindersTask(self.bsebot, [], start=False)
         now = datetime.datetime.now(tz=pytz.utc)
         reminder_data = interface_mocks.query_mock("reminders", {})[-5:]
         for reminder in reminder_data:

@@ -15,9 +15,9 @@ class TestContextUserGift:
     def _data(self) -> None:
         self.client = BSEBotMock()
 
-        self.gift = Gift(self.client, [])
+        self.gift = Gift(self.client)
 
     def test_init(self) -> None:
         """Tests init."""
-        command = ContextUserGift(self.client, [], self.gift)
+        command = ContextUserGift(self.client, self.gift)
         assert isinstance(command, BaseContextCommand)

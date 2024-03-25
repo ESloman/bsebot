@@ -16,16 +16,15 @@ from discordbot.tasks.basetask import BaseTask, TaskSchedule
 class AnnualBSEddiesAwards(BaseTask):
     """Class for annual bseddies awards."""
 
-    def __init__(self, bot: BSEBot, guild_ids: list[int], startup_tasks: list[BaseTask], start: bool = False) -> None:
+    def __init__(self, bot: BSEBot, startup_tasks: list[BaseTask], start: bool = False) -> None:
         """Initialisation method.
 
         Args:
             bot (BSEBot): the BSEBot client
-            guild_ids (list[int]): the list of guild IDs
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
             start (bool): whether to start the task on startup. Defaults to False.
         """
-        super().__init__(bot, guild_ids, startup_tasks)
+        super().__init__(bot, startup_tasks)
         self.schedule = TaskSchedule([], hours=[14], minute=15, dates=[datetime.datetime(2021, 1, 1)])
         self.task = self.annual_bseddies_awards
         if start:
@@ -45,7 +44,7 @@ class AnnualBSEddiesAwards(BaseTask):
             self.logger.warning("Somehow task was started outside operational hours - %s", now)
             return
 
-        if BSE_SERVER_ID not in self.guild_ids:
+        if BSE_SERVER_ID not in [guild.id for guild in self.bot.guilds]:
             # does not support other servers yet
             return
 

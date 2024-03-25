@@ -15,7 +15,7 @@ from mongo.datatypes.bet import BetDB, BetterDB, OptionDB
 class UserBets(BaseClass):
     """Class for interacting with the 'userbets' MongoDB collection in the 'bestsummereverpoints' DB."""
 
-    def __init__(self, guilds: list | None = None) -> None:
+    def __init__(self) -> None:
         """Constructor method. We initialise the collection object and also the UserPoints instance we need.
 
         If we are given a list of guilds - then we make sure we have a bet counter object for that guild ID
@@ -25,12 +25,7 @@ class UserBets(BaseClass):
         super().__init__(collection="userbets")
         self.user_points = UserPoints()
 
-        if guilds is None:
-            guilds = []
-        for guild in guilds:
-            self._create_counter_document(guild)
-
-    def _create_counter_document(self, guild_id: int) -> None:
+    def create_counter_document(self, guild_id: int) -> None:
         """Method that creates our base 'counter' document for counting bet IDs.
 
         :param guild_id: int - guild ID to create document for

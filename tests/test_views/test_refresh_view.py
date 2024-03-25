@@ -23,8 +23,8 @@ class TestRefreshBetView:
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
 
-        self.place = PlaceBet(self.bsebot, [])
-        self.close = CloseBet(self.bsebot, [])
+        self.place = PlaceBet(self.bsebot)
+        self.close = CloseBet(self.bsebot)
 
     async def test_init(self) -> None:
         """Tests basic init.

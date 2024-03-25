@@ -19,7 +19,7 @@ class TestPlaceABetView:
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
 
-        self.place = PlaceBet(self.bsebot, [])
+        self.place = PlaceBet(self.bsebot)
 
     @pytest.mark.parametrize("user_data", interface_mocks.query_mock("userpoints", {})[-10:])
     async def test_init(self, user_data: dict[str, any]) -> None:

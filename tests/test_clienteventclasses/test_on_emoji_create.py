@@ -16,6 +16,6 @@ class TestOnEmojiCreate:
 
     def test_init(self) -> None:
         """Tests basic initialisation."""
-        event = OnEmojiCreate(self.client, [])
+        event = OnEmojiCreate(self.client)
         assert isinstance(event, OnEmojiCreate)
         assert isinstance(event, BaseEvent)

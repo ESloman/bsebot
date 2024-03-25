@@ -23,11 +23,11 @@ class TestActivityChanger:
 
     def test_init(self) -> None:
         """Tests if we can initialise the task."""
-        _ = ActivityChanger(self.bsebot, [], [], start=False)
+        _ = ActivityChanger(self.bsebot, [], start=False)
 
     async def test_execution_default(self) -> None:
         """Tests running the task with the default activity."""
-        task = ActivityChanger(self.bsebot, [], [], start=False)
+        task = ActivityChanger(self.bsebot, [], start=False)
         with mock.patch("random.random", return_value=0.1):
             # should always set the default activity
             activity: discord.Activity = await task.activity_changer()
@@ -44,7 +44,7 @@ class TestActivityChanger:
     @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
     async def test_execution_change(self, exc_times: int) -> None:
         """Tests running the task where we pick an activity from the pool."""
-        task = ActivityChanger(self.bsebot, [], [], start=False)
+        task = ActivityChanger(self.bsebot, [], start=False)
         with mock.patch("random.random", return_value=0.95):
             # should always set the default activity
             activity: discord.Activity = await task.activity_changer()

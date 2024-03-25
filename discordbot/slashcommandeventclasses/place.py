@@ -14,16 +14,15 @@ from mongo.datatypes.bet import BetDB
 class PlaceBet(BSEddies):
     """Class for handling `/bseddies bet place` commands."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
 
         """
-        super().__init__(client, guild_ids)
-        self.bseddies_close = CloseBet(client, guild_ids)
+        super().__init__(client)
+        self.bseddies_close = CloseBet(client)
         self.activity_type = ActivityTypes.BSEDDIES_BET_PLACE
         self.help_string = "Place eddies on a bet"
         self.command_name = "place"

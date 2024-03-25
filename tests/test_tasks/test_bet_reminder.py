@@ -29,7 +29,7 @@ class TestBetReminder:
 
     def test_init(self) -> None:
         """Tests if we can initialise the task."""
-        _ = BetReminder(self.bsebot, [], [], start=False)
+        _ = BetReminder(self.bsebot, [], start=False)
 
     @pytest.mark.parametrize(
         "bet_data", sorted(interface_mocks.query_mock("userbets", {})[-10:], key=lambda x: x["bet_id"])
@@ -39,7 +39,7 @@ class TestBetReminder:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_check_for_day_reminder(self, bet_data: dict) -> None:
         """Tests check_for_day_reminder function."""
-        task = BetReminder(self.bsebot, [], [], start=False)
+        task = BetReminder(self.bsebot, [], start=False)
         now = datetime.datetime.now(tz=pytz.utc)
         bet_data["active"] = True
         bet_data["timeout"] = now + datetime.timedelta(hours=23)
@@ -55,7 +55,7 @@ class TestBetReminder:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_check_for_day_reminder_already_gone(self, bet_data: dict) -> None:
         """Tests check_for_day_reminder function."""
-        task = BetReminder(self.bsebot, [], [], start=False)
+        task = BetReminder(self.bsebot, [], start=False)
         now = datetime.datetime.now(tz=pytz.utc)
         bet_data["active"] = True
         bet_db: BetDB = UserBets.make_data_class(bet_data)
@@ -70,7 +70,7 @@ class TestBetReminder:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_check_for_day_reminder_not_yet(self, bet_data: dict) -> None:
         """Tests check_for_day_reminder function."""
-        task = BetReminder(self.bsebot, [], [], start=False)
+        task = BetReminder(self.bsebot, [], start=False)
         now = datetime.datetime.now(tz=pytz.utc)
         bet_data["active"] = True
         bet_data["timeout"] = now + datetime.timedelta(hours=30)
@@ -86,7 +86,7 @@ class TestBetReminder:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_check_for_half_day_reminder(self, bet_data: dict) -> None:
         """Tests check_for_half_day_reminder function."""
-        task = BetReminder(self.bsebot, [], [], start=False)
+        task = BetReminder(self.bsebot, [], start=False)
         now = datetime.datetime.now(tz=pytz.utc)
         bet_data["active"] = True
         bet_data["created"] = now - datetime.timedelta(hours=5)
@@ -103,7 +103,7 @@ class TestBetReminder:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_check_for_half_day_reminder_success(self, bet_data: dict) -> None:
         """Tests check_for_half_day_reminder function."""
-        task = BetReminder(self.bsebot, [], [], start=False)
+        task = BetReminder(self.bsebot, [], start=False)
         now = datetime.datetime.now(tz=pytz.utc)
         bet_data["active"] = True
         bet_data["created"] = now - datetime.timedelta(days=10, hours=12)
@@ -120,7 +120,7 @@ class TestBetReminder:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_check_for_half_day_reminder_gone(self, bet_data: dict) -> None:
         """Tests check_for_half_day_reminder function."""
-        task = BetReminder(self.bsebot, [], [], start=False)
+        task = BetReminder(self.bsebot, [], start=False)
         now = datetime.datetime.now(tz=pytz.utc)
         bet_data["active"] = True
         bet_data["created"] = now - datetime.timedelta(days=10, hours=12)
@@ -134,5 +134,5 @@ class TestBetReminder:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_default_execution(self) -> None:
         """Tests default execution."""
-        task = BetReminder(self.bsebot, [], [], start=False)
+        task = BetReminder(self.bsebot, [], start=False)
         await task.bet_reminder()

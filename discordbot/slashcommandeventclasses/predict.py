@@ -12,16 +12,15 @@ from discordbot.tasks.eddiegains import BSEddiesManager
 class Predict(BSEddies):
     """Class for handling `/bseddies predict` command."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
 
         """
-        super().__init__(client, guild_ids)
-        self.manager = BSEddiesManager(client, guild_ids, [])
+        super().__init__(client)
+        self.manager = BSEddiesManager(client, [])
         self.activity_type = ActivityTypes.BSEDDIES_PREDICT
         self.help_string = "Predict your daily salary gain for today"
         self.command_name = "predict"

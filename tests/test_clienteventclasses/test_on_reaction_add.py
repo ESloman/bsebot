@@ -16,6 +16,6 @@ class TestOnReactionAdd:
 
     def test_init(self) -> None:
         """Tests basic initialisation."""
-        event = OnReactionAdd(self.client, [])
+        event = OnReactionAdd(self.client)
         assert isinstance(event, OnReactionAdd)
         assert isinstance(event, BaseEvent)

@@ -25,8 +25,6 @@ import sys
 
 from discordbot.bsebot import BSEBot
 from discordbot.commandmanager import CommandManager
-from discordbot.constants import BSE_SERVER_ID, SLOMAN_SERVER_ID
-from mongo.bsepoints.bets import UserBets
 
 if __name__ == "__main__":
     """
@@ -49,12 +47,10 @@ if __name__ == "__main__":
         TOKEN = dotenv.get_key(".env", "DISCORD_TOKEN")
         DEBUG_MODE = dotenv.get_key(".env", "DEBUG_MODE")
         GIPHY_TOKEN = dotenv.get_key(".env", "GIPHY_API_KEY")
-        GITHUB_TOKEN = dotenv.get_key(".env", "GITHUB_API_KEY")
     else:
         TOKEN = None
         DEBUG_MODE = None
         GIPHY_TOKEN = None
-        GITHUB_TOKEN = None
 
     if _token := os.environ.get("DISCORD_TOKEN"):
         TOKEN = _token
@@ -62,12 +58,8 @@ if __name__ == "__main__":
         DEBUG_MODE = _debug
     if _giphy_token := os.environ.get("GIPHY_TOKEN"):
         GIPHY_TOKEN = _giphy_token
-    if _github := os.environ.get("GITHUB_API_KEY"):
-        GITHUB_TOKEN = _github
 
     DEBUG_MODE = False if DEBUG_MODE is None else bool(int(DEBUG_MODE))
-
-    IDS = [SLOMAN_SERVER_ID] if DEBUG_MODE is True else [BSE_SERVER_ID]
 
     output_path: Path = Path(Path.home(), "bsebotlogs", "bsebot.log")
     logger = SlomanLogger("bsebot", logging.DEBUG if DEBUG_MODE else logging.INFO, output_file=output_path)
@@ -82,8 +74,6 @@ if __name__ == "__main__":
         logger.info("Debug mode enabled.")
     if GIPHY_TOKEN:
         logger.debug("Giphy token set.")
-    if GITHUB_TOKEN:
-        logger.debug("Github token set.")
 
     intents = discord.Intents.all()
 
@@ -98,8 +88,6 @@ if __name__ == "__main__":
 
     cli = BSEBot(intents=intents, activity=listening_activity, max_messages=5000)
 
-    com = CommandManager(cli, IDS, giphy_token=GIPHY_TOKEN, github_token=GITHUB_TOKEN)
-
-    user_bets = UserBets(IDS)
+    com = CommandManager(cli, giphy_token=GIPHY_TOKEN)
 
     cli.run(TOKEN)

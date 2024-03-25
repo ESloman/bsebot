@@ -48,18 +48,15 @@ class BaseTask(commands.Cog):
     def __init__(
         self,
         bot: BSEBot,
-        guild_ids: list[int],
         startup_tasks: list | None = None,
     ) -> None:
         """Initialisation method.
 
         Args:
             bot (BSEBot): the BSEBot client
-            guild_ids (list[int]): the list of guild IDs
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
         """
         self.bot: BSEBot = bot
-        self.guild_ids: list[int] = guild_ids
         self.logger = SlomanLogger("bsebot")
         self.finished: bool = False
 

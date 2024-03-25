@@ -16,6 +16,6 @@ class TestOnThreadCreate:
 
     def test_init(self) -> None:
         """Tests basic initialisation."""
-        event = OnThreadCreate(self.client, [])
+        event = OnThreadCreate(self.client)
         assert isinstance(event, OnThreadCreate)
         assert isinstance(event, BaseEvent)

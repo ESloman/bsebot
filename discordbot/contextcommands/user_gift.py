@@ -11,15 +11,14 @@ from discordbot.views.usergift import GiftUserEddiesView
 class ContextUserGift(BaseContextCommand):
     """Context class for gifting."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int], gift: Gift) -> None:
+    def __init__(self, client: BSEBot, gift: Gift) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
             gift (Gift): the gift class to use
         """
-        super().__init__(client, guild_ids)
+        super().__init__(client)
         self.gift = gift
 
     async def user_gift(self, ctx: discord.ApplicationContext, user: discord.Member) -> None:

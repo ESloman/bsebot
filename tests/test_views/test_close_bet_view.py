@@ -21,7 +21,7 @@ class TestCloseABetView:
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
 
-        self.close = CloseBet(self.bsebot, [])
+        self.close = CloseBet(self.bsebot)
 
     @pytest.mark.parametrize("user_data", interface_mocks.query_mock("userpoints", {})[-5:])
     async def test_init(self, user_data: dict[str, any]) -> None:

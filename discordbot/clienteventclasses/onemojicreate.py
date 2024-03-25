@@ -15,14 +15,13 @@ from discordbot.clienteventclasses.baseeventclass import BaseEvent
 class OnEmojiCreate(BaseEvent):
     """Class for handling OnEmojiCreate events."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
         """
-        super().__init__(client, guild_ids)
+        super().__init__(client)
 
     async def on_emojis_update(self, guild_id: int, _: list[discord.Emoji], after: list[discord.Emoji]) -> None:
         """Handling on emoji creation events.

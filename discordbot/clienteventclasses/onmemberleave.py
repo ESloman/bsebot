@@ -13,14 +13,13 @@ from discordbot.clienteventclasses.baseeventclass import BaseEvent
 class OnMemberLeave(BaseEvent):
     """Class for handling when a member leaves the server."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
         """
-        super().__init__(client, guild_ids)
+        super().__init__(client)
 
     def on_leave(self, member: discord.Member) -> None:
         """Method for handling when a member leaves the server.

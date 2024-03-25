@@ -25,8 +25,8 @@ class TestAddOption:
         self.bsebot = bsebot_mocks.BSEBotMock()
 
         self.view = BetView
-        self.place = PlaceBet(self.bsebot, [])
-        self.close = CloseBet(self.bsebot, [])
+        self.place = PlaceBet(self.bsebot)
+        self.close = CloseBet(self.bsebot)
 
     @pytest.mark.parametrize("bet_data", interface_mocks.query_mock("userbets", {})[-5:])
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)

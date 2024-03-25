@@ -13,15 +13,14 @@ from mongo.bsedataclasses import SpoilerThreads
 class OnThreadUpdate(BaseEvent):
     """Class for handling on_thread_update event."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
         """
-        super().__init__(client, guild_ids)
-        super().__init__(client, guild_ids)
+        super().__init__(client)
+        super().__init__(client)
         self.spoiler_threads = SpoilerThreads()
 
     async def on_update(self, _: discord.Thread, after: discord.Thread) -> None:

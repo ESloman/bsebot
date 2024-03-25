@@ -28,12 +28,11 @@ class BaseEvent:
     Basically just sets up all the vars that events will need and rely on.
     """
 
-    def __init__(self, client: BSEBot, guild_ids: list[int]) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method that creates database Collections and various variables.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list[int]): list of supported guild_ids
             logger (logging.Logger): the logger to use
         """
         self.activities = UserActivities()
@@ -45,7 +44,6 @@ class BaseEvent:
         self.interactions = UserInteractions()
         self.guilds = Guilds()
         self.client = client
-        self.guild_ids = guild_ids
         self.embed_manager = EmbedManager()
         self.logger = SlomanLogger("bsebot")
 

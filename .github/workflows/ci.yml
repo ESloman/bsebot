@@ -104,7 +104,7 @@ jobs:
           docker run -d --name bsebot --network="host" -e "DEBUG_MODE=1" -e "DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}" esloman/bsebot:sha-$HASH
           sleep 90
           docker logs bsebot
-          E_COUNT=$(docker logs bsebot | { grep -ic 'traceback' || true; })
+          E_COUNT=$(docker logs bsebot | { grep -ic -E 'traceback|error|exception' || true; })
           echo "Found ${E_COUNT} errors"
           if [[ "${E_COUNT}" -ge "1" ]]; then exit 1; fi
   pushing:
@@ -137,7 +137,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
   version:
-    # if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     needs: [pushing]
     permissions:

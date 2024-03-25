@@ -98,7 +98,6 @@ jobs:
           echo "Found ${E_COUNT} errors"
           if [[ "${E_COUNT}" -ge "1" ]]; then exit 1; fi
   pushing:
-    if: github.ref == 'refs/heads/main'
     needs: [pytest, linting, running]
     runs-on: ubuntu-latest
     defaults:

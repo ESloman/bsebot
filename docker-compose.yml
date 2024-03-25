@@ -1,0 +1,22 @@
+
+version: '3.1'
+
+services:
+  mongo:
+    image: mongo:7.0.7
+    restart: always
+    ports:
+      - 27017:27017
+    environment:
+      MONGO_INITDB_DATABASE: bestsummereverpoints
+  bsebot:
+    image: elliotsloman/bsebot:latest
+    depends_on:
+      - mongo
+    restart: always
+    environment:
+      DEBUG: 1
+      MONGODB_IP: mongo
+    volumes:
+      - /home/esloman/bsebotlogs:/root/bsebotlogs
+      - /home/esloman/gitwork/bsebot/discordbot/.env:/home/app/discordbot/.env

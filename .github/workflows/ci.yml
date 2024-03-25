@@ -1,7 +1,17 @@
 ---
 name: Testing, Linting, & Building
 
-on: [push, pull_request]
+on:
+  push:
+    paths-ignore:
+      - CHANGELOG.md
+      - pyproject.toml
+      - discordbot/__init__.py
+  pull_request:
+    paths-ignore:
+      - CHANGELOG.md
+      - pyproject.toml
+      - discordbot/__init__.py
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -127,7 +137,7 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
   version:
-    if: github.ref == 'refs/heads/main'
+    # if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     needs: [pushing]
     permissions:
@@ -138,7 +148,7 @@ jobs:
     - uses: actions/checkout@v4
       with:
         fetch-depth: 0
-        ssh-key: $ {{ secrets.SR_KEY }}
+        token: ${{ secrets.GH_TOKEN }}
 
     - name: Python Semantic Release
       uses: python-semantic-release/python-semantic-release@master

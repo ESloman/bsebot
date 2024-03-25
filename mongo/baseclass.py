@@ -1,5 +1,7 @@
 """Mongo baseclass."""
 
+import os
+
 from bson import ObjectId
 from pymongo import MongoClient
 from pymongo.collection import Collection
@@ -22,7 +24,7 @@ class BaseClass:
 
     def __init__(
         self,
-        ip: str = "127.0.0.1",
+        ip: str | None = None,
         username: str | None = None,
         password: str | None = None,
         database: str = "bestsummereverpoints",
@@ -37,6 +39,8 @@ class BaseClass:
             database (str): the database to connect to. Defaults to 'bestsummereverpoints'.
             collection (str | None): the collection to connect to. Defaults to None.
         """
+        if ip is None:
+            ip = os.environ.get("MONGODB_IP", "127.0.0.1")
         self.cli = interface.get_client(ip, username, password)
         self._bse_db = interface.get_database(self.mongo_client, database)
         self._vault = interface.get_collection(self.database, collection) if collection else None

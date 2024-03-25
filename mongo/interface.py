@@ -56,7 +56,7 @@ class CachedMongoClient:
 
 
 def get_client(
-    ip: str = "127.0.0.1",
+    ip: str | None = None,
     user_name: str | None = None,
     password: str | None = None,
     port: str = "27017",
@@ -72,6 +72,8 @@ def get_client(
     Returns:
         bool | MongoClient: either False, of the MongoClient
     """
+    if ip is None:
+        ip = "127.0.0.1"
     if user_name is None and password is None:
         connection = f"mongodb://{ip}:{port}"
     elif user_name and password:

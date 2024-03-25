@@ -46,6 +46,7 @@ class RevolutionTask(BaseTask):
         self.rev_started = {}
 
         for guild_id in self.guild_ids:
+            self.logger.debug("Checking %s for open events", guild_id)
             if _ := self.revolutions.get_open_events(guild_id):
                 self.rev_started[guild_id] = True
 

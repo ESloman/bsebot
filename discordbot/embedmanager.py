@@ -217,7 +217,7 @@ class EmbedManager:
             str: the generated message
         """
         return (
-            f"Hey {guild_db.king},\n"
+            f"Hey <@{guild_db.king}>,\n"
             f"Looks like you're in a bit of trouble with that revolution in **{guild_db.name}**. "
             f"The chance is currently **{event.chance}%** "
             f"{"(capped at 95%) " if event.chance >= 95 else ""}"  # noqa: PLR2004

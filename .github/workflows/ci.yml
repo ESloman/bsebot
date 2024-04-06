@@ -102,9 +102,9 @@ jobs:
           set -ux
           HASH=$(git rev-parse --short "$GITHUB_SHA")
           docker run -d --name bsebot --network="host" -e "DEBUG_MODE=1" -e "DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}" esloman/bsebot:sha-$HASH
-          sleep 90
+          sleep 120
           docker logs bsebot
-          E_COUNT=$(docker logs bsebot | { grep -ic -E 'traceback|error|exception' || true; })
+          E_COUNT=$(docker logs bsebot | grep -ic -E 'traceback|error|exception')
           echo "Found ${E_COUNT} errors"
           if [[ "${E_COUNT}" -ge "1" ]]; then exit 1; fi
   pushing:

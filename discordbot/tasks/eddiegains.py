@@ -22,6 +22,7 @@ from discordbot.constants import (
     WORDLE_VALUES,
 )
 from discordbot.tasks.basetask import BaseTask, TaskSchedule
+from mongo.datatypes.guild import GuildDB
 from mongo.datatypes.message import MessageDB, VCInteractionDB
 from mongo.datatypes.user import UserDB
 
@@ -45,70 +46,109 @@ class EddieGainMessager(BaseTask):
         if start:
             self.task.start()
 
-    @tasks.loop(count=1)
-    async def eddie_distributer(self) -> None | list[dict]:  # noqa: PLR0912, C901
-        """Task that distributes daily eddies."""
-        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
+    @staticmethod
+    def _format_detailed_breakdown_message_part(breakdown: dict[str, int], guild_name: str) -> str:
+        """Formats a detailed message breakdown.
 
-        if now.hour != 7 or now.minute != 30:  # noqa: PLR2004
-            self.logger.warning("Somehow task was started outside operational hours - %s?", now)
-            return None
+        Args:
+            breakdown (dict[str, int]): the breakdown
+            guild_name (str): the guild name
+        """
+        detailed_message = f"### {guild_name}"
+        for key in sorted(breakdown):
+            detailed_message += f"- `{HUMAN_MESSAGE_TYPES[key]}` : **{breakdown[key]}**\n"
+            if key in {"vc_joined", "vc_streaming"}:
+                detailed_message += " seconds"
+        detailed_message += "\n\n"
+        return detailed_message
 
-        data = []
+    def _format_guild_admin_message(self, guild_id: int, user_eddies: dict[int, list[int]]) -> str:
+        guild_db = self.guilds.get_guild(guild_id)
+        message = f"## {guild_db.name} Admin Salary Summary"
+        for user_id, data in user_eddies.items():
+            user_db = self.user_points.find_user(user_id, guild_id)
+            value, _, tax = data
+            message += f"- {user_db}: `{value}` (tax: _{tax}_)\n"
+        return message
+
+    def _format_user_eddies_message(
+        self, user_id: int, user_eddies: dict[int, list[int]], guilds: dict[int, GuildDB]
+    ) -> str:
+        """Formats a user eddies message.
+
+        Args:
+            user_id (int): the user ID of the user to process
+            user_eddies (dict[int, list[int]]): the dict mapping guild to eddies breakdown
+            guilds (dict[int, GuildDB]): the mapping of guild ID to database objects
+
+        Returns:
+            str: the formatted message
+        """
+        message = "# BSEBot Daily Salary Summary\n\n"
+        detailed_message: str = ""
+        for guild_id in user_eddies:
+            user_db = self.user_points.find_user(int(user_id), guild_id)
+            if not user_db.daily_eddies:
+                self.logger.trace("User, %s, is not configured to receive summaries for %s.", user_id, guild_id)
+                continue
+
+            guild_name = guilds[guild_id].name
+            value = user_eddies[guild_id][0]
+            tax = user_eddies[guild_id][2]
+            tax_message = (
+                f"(you {f"were taxed _{tax}_." if user_id != guilds[guild_id].king else f"received _{tax}_ in tax."})"
+            )
+            message += f"**{guild_name}**: {value} {tax_message}\n"
+
+            if user_db.summary_detailed_mode:
+                detailed_message += self._format_detailed_breakdown_message_part(user_eddies[guild_id][1], guild_name)
+
+        # add detailed summary
+        if detailed_message:
+            message += "\n\n## Salary Breakdown\n"
+            message += detailed_message
+
+        return message if message != "# BSEBot Daily Salary Summary\n\n" else ""
+
+    async def _send_user_summaries(
+        self, guilds: dict[int, GuildDB], user_to_eddies: dict[int, dict[int, list[int]]]
+    ) -> None:
+        """Sends the individual user summaries.
+
+        Args:
+            guilds (dict[int, GuildDB]): the mapping of guild IDs to guild DBs
+            user_to_eddies (dict[int, dict[int, list[int]]]): the user ID maps
+        """
+        # get and send individual user messages
+        for user_id, guild_eddies in user_to_eddies.items():
+            message = self._format_user_eddies_message(user_id, guild_eddies, guilds)
+
+            if not message:
+                # user doesn't want to get any messages
+                continue
+
+            # add the config tip
+            message += "\n\nWant to turn these notifications off? Use `/config` to disable."
+
+            user = await self.bot.fetch_user(int(user_id))
+            try:
+                await user.send(content=message, silent=True)
+            except discord.Forbidden:
+                continue
+
+    async def _send_guild_admin_summaries(
+        self, guilds: dict[int, GuildDB], data: dict[int, dict[int, list[int]]]
+    ) -> None:
+        """Sends the guild admin messages.
+
+        Args:
+            guilds (dict[int, GuildDB]): the mapping of guild IDs to guild DBs
+            data (dict[int, dict[int, list[int]]]): all the eddies data to process
+        """
+        # send guild admin messages
         for guild_id in [guild.id for guild in self.bot.guilds]:
-            eddie_dict = self.eddie_manager.give_out_eddies(guild_id, real=True)
-            data.append(eddie_dict)
-
-            guild = await self.bot.fetch_guild(guild_id)  # type: discord.Guild
-            guild_db = self.guilds.get_guild(guild_id)
-
-            current_king_id = guild_db.king
-
-            summary_message = "Eddie gain summary:\n"
-            for user_id in eddie_dict:
-                value = eddie_dict[user_id][0]
-                breakdown = eddie_dict[user_id][1]
-                tax = eddie_dict[user_id][2]
-
-                if value == 0:
-                    continue
-
-                try:
-                    user = await guild.fetch_member(int(user_id))  # type: discord.Member
-                except discord.NotFound:
-                    summary_message += f"\n- `{user_id}` :  **{value}** (tax: _{tax}_)"
-                    continue
-
-                summary_message += f"\n- `{user.display_name}` :  **{value}** (tax: _{tax}_)"
-                text = f"Your daily salary of BSEDDIES is `{value}` (after tax).\n"
-
-                if user_id == current_king_id:
-                    text += f"You gained an additional `{tax}` from tax gains\n"
-                else:
-                    text += f"You were taxed `{tax}` by the KING.\n"
-
-                text += "\nThis is based on the following amount of interactivity yesterday:"
-
-                for key in sorted(breakdown):
-                    text += f"\n- `{HUMAN_MESSAGE_TYPES[key]}`  :  **{breakdown[key]}**"
-
-                    if key in {"vc_joined", "vc_streaming"}:
-                        text += " seconds"
-
-                self.logger.info("%s is gaining `%s eddies`", user.display_name, value)
-
-                text += "\n\nWant to turn these notifications off? Use `/config` to disable."
-
-                user_dict = self.user_points.find_user(int(user_id), guild.id)
-
-                if user_dict.daily_eddies:
-                    self.logger.info("Sending message to %s for %s", user.display_name, value)
-                    try:
-                        await user.send(content=text, silent=True)
-                    except discord.Forbidden:
-                        continue
-
-            # make sure admin list is unique
+            guild_db = guilds[guild_id]
+            summary_message = self._format_guild_admin_message(guild_id, data[guild_id])
             for user_id in {*guild_db.admins, CREATOR, guild_db.owner_id}:
                 user_db = self.user_points.find_user(user_id, guild_id)
 
@@ -116,12 +156,41 @@ class EddieGainMessager(BaseTask):
                     # not configured to send summary messages
                     continue
 
-                user = await guild.fetch_member(user_id)  # type: discord.Member
+                user = await self.bot.fetch_user(user_id)
                 try:
                     await user.send(content=summary_message, silent=True)
                 except discord.Forbidden:
-                    # can't send DM messages to this user
-                    self.logger.info("%s - %s", user.display_name, summary_message)
+                    continue
+
+    @tasks.loop(count=1)
+    async def eddie_distributer(self) -> None | dict[int, dict[int, list[int]]]:
+        """Task that distributes daily eddies."""
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
+
+        if now.hour != 7 or now.minute != 30:  # noqa: PLR2004
+            self.logger.warning("Somehow task was started outside operational hours - %s?", now)
+            return None
+
+        # {server ID: salary breakdown}
+        data: dict[int, dict[int, list[int]]] = {}
+        # {user ID: {server ID: salary breakdown}}
+        user_to_eddies: dict[int, dict[int, list[int]]] = {}
+        guilds: dict[int, GuildDB] = {}
+        for guild_id in [guild.id for guild in self.bot.guilds]:
+            # actually calculate and give the users their earnt eddies
+            eddie_dict = self.eddie_manager.give_out_eddies(guild_id, real=True)
+            for user_id in eddie_dict:
+                if user_id not in user_to_eddies:
+                    user_to_eddies[user_id] = {}
+                user_to_eddies[user_id][guild_id] = eddie_dict[user_id]
+            data[guild_id] = eddie_dict
+
+            guild_db = self.guilds.get_guild(guild_id)
+            guilds[guild_id] = guild_db
+
+        await self._send_user_summaries(guilds, user_to_eddies)
+        await self._send_guild_admin_summaries(guilds, data)
+
         return data
 
     @eddie_distributer.before_loop

@@ -51,7 +51,7 @@ class TestEddieGainMessager:
             patch.object(task, "user_points", new=UserPointsMock()),
         ):
             result = await task.eddie_distributer()
-            assert isinstance(result, list)
+            assert isinstance(result, dict)
             assert len(result) > 0
 
 

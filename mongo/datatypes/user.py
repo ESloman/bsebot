@@ -25,6 +25,8 @@ class UserDB(NamedDBObject):
     """Whether the user receives daily eddie messages."""
     daily_summary: bool = False
     """Whether the user receives the daily eddies summary message."""
+    summary_detailed_mode: bool = False
+    """Whether the user summary is detailed or simple."""
     pending_points: int = dataclasses.field(default=0)
     """The number of eddies the user has on pending bets."""
     high_score: int = dataclasses.field(default=0)

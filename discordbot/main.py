@@ -24,33 +24,11 @@ TOKEN: str | None = None
 DEBUG_MODE: bool = False
 
 
-if __name__ == "__main__":
+def _main() -> None:
+    """Wrapper for our main logic.
+
+    Allows us to call this function and test it.
     """
-    This is our primary entry point for getting the bot start.
-
-    We expect a '.env' file to be located in the same directory that contains our DISCORD_TOKEN and also whether or not
-    we're in DEBUG_MODE.
-
-    We start by getting those values from the .env file and exit if we don't have a DISCORD_TOKEN.
-    We then work out which SERVER_IDs to use based on whether or not we're in DEBUG_MODE.
-
-    We then create the logger object and initialise our discord client.
-    Then, we use the client to create an instance of CommandManager - this class registers all the events we're
-    listening for.
-
-    Finally, we start the asyncio loop and start listening for events.
-    """
-
-    token = dotenv.get_key(".env", "DISCORD_TOKEN")
-    if not token:
-        token = os.environ.get("DISCORD_TOKEN")
-    TOKEN = token
-
-    debug = dotenv.get_key(".env", "DEBUG_MODE")
-    if not debug:
-        debug = os.environ.get("DEBUG_MODE")
-    DEBUG_MODE = bool(int(debug)) if debug is not None else False
-
     bselogs_dir: Path = Path(Path.home(), "bsebotlogs")
     bselogs_dir.mkdir(parents=True, exist_ok=True)
     output_path: Path = Path(bselogs_dir, "bsebot.log")
@@ -91,5 +69,34 @@ if __name__ == "__main__":
     )
 
     cli = BSEBot(intents=intents, activity=listening_activity, max_messages=5000)
-    com = CommandManager(cli)
+    _ = CommandManager(cli)
     cli.run(TOKEN)
+
+
+if __name__ == "__main__":
+    """
+    This is our primary entry point for getting the bot start.
+
+    We expect a '.env' file to be located in the same directory that contains our DISCORD_TOKEN and also whether or not
+    we're in DEBUG_MODE.
+
+    We start by getting those values from the .env file and exit if we don't have a DISCORD_TOKEN.
+    We then work out which SERVER_IDs to use based on whether or not we're in DEBUG_MODE.
+
+    We then create the logger object and initialise our discord client.
+    Then, we use the client to create an instance of CommandManager - this class registers all the events we're
+    listening for.
+
+    Finally, we start the asyncio loop and start listening for events.
+    """
+
+    token = dotenv.get_key(".env", "DISCORD_TOKEN")
+    if not token:
+        token = os.environ.get("DISCORD_TOKEN")
+    TOKEN = token
+
+    debug = dotenv.get_key(".env", "DEBUG_MODE")
+    if not debug:
+        debug = os.environ.get("DEBUG_MODE")
+    DEBUG_MODE = bool(int(debug)) if debug is not None else False
+    _main()

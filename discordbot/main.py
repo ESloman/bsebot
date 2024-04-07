@@ -51,8 +51,9 @@ if __name__ == "__main__":
         debug = os.environ.get("DEBUG_MODE")
     DEBUG_MODE = bool(int(debug)) if debug is not None else False
 
-    output_path: Path = Path(Path.home(), "bsebotlogs", "bsebot.log")
-    output_path.mkdir(parents=True, exist_ok=True)
+    bselogs_dir: Path = Path(Path.home(), "bsebotlogs")
+    bselogs_dir.mkdir(parents=True, exist_ok=True)
+    output_path: Path = Path(bselogs_dir, "bsebot.log")
     logger = SlomanLogger("bsebot", logging.DEBUG if DEBUG_MODE else logging.INFO, output_file=output_path)
 
     logger.info("Logging mode set to %s", logging.DEBUG if DEBUG_MODE else logging.INFO)

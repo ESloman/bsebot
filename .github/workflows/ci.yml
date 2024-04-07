@@ -106,8 +106,8 @@ jobs:
           sleep 120
           docker logs bsebot >> output.log
           cat output.log
-          grep -ic -P 'traceback|error|exception' output.log
-          E_COUNT=$(grep -ic -P 'traceback|error|exception' output.log)
+          grep -ic -P 'traceback\|error\|exception' output.log
+          E_COUNT=$(grep -ic -P 'traceback\|error\|exception' output.log)
           echo "Found ${E_COUNT} errors"
           if [[ "${E_COUNT}" -ge "1" ]]; then exit 1; fi
   pushing:

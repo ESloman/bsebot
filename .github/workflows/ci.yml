@@ -106,7 +106,8 @@ jobs:
           sleep 120
           docker logs bsebot >> output.log
           cat output.log
-          python .github/workflows/check_output_log.py -d
+          docker logs bsebot | grep -ic "traceback\|error\|exception"
+          # python .github/workflows/check_output_log.py -d
           E_COUNT=$(python .github/workflows/check_output_log.py)
           echo "Found ${E_COUNT} errors"
           if [[ "${E_COUNT}" -ge "1" ]]; then exit 1; fi

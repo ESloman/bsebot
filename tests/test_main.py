@@ -3,12 +3,11 @@
 import os
 from unittest import mock
 
-import discord
 import pytest
 
 from discordbot import main
 from mongo import interface
-from tests.mocks import bsebot_mocks, interface_mocks
+from tests.mocks import interface_mocks
 
 
 class TestMain:

@@ -136,7 +136,7 @@ class Celebrations(BaseTask):
         """Send celebration messages."""
         now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
-        if BSE_SERVER_ID not in self.guild_ids:
+        if BSE_SERVER_ID not in [guild.id for guild in self.bot.guilds]:
             # don't currently support any other guilds
             return
 

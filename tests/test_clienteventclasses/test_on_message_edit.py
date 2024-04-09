@@ -23,13 +23,13 @@ class TestOnMessageEdit:
 
     def test_init(self) -> None:
         """Tests basic initialisation."""
-        event = OnMessageEdit(self.client, [], self.logger)
+        event = OnMessageEdit(self.client)
         assert isinstance(event, OnMessageEdit)
         assert isinstance(event, BaseEvent)
 
     def test_check_condition_ephemeral(self) -> None:
         """Tests _check_condition with an ephemeral messsage."""
-        event = OnMessageEdit(self.client, [], self.logger)
+        event = OnMessageEdit(self.client)
         before = discord_mocks.MessageMock()
         after = discord_mocks.MessageMock()
         after.flags.ephemeral = True
@@ -38,7 +38,7 @@ class TestOnMessageEdit:
 
     def test_check_condition_application_command(self) -> None:
         """Tests _check_condition with an application command messsage."""
-        event = OnMessageEdit(self.client, [], self.logger)
+        event = OnMessageEdit(self.client)
         before = discord_mocks.MessageMock()
         after = discord_mocks.MessageMock()
         after._type = discord.MessageType.application_command
@@ -47,7 +47,7 @@ class TestOnMessageEdit:
 
     def test_check_condition_bot_embeds(self) -> None:
         """Tests _check_condition with a bot message with embeds."""
-        event = OnMessageEdit(self.client, [], self.logger)
+        event = OnMessageEdit(self.client)
         before = discord_mocks.MessageMock()
         after = discord_mocks.MessageMock(user_id=BSE_BOT_ID)
         after._embeds.append(discord.Embed())
@@ -72,7 +72,7 @@ class TestOnMessageEdit:
     )
     def test_check_condition_channel_type(self, channel_type: discord.ChannelType) -> None:
         """Tests _check_condition with an invalid channel type."""
-        event = OnMessageEdit(self.client, [], self.logger)
+        event = OnMessageEdit(self.client)
         before = discord_mocks.MessageMock()
         after = discord_mocks.MessageMock()
         after._channel._type = channel_type
@@ -81,7 +81,7 @@ class TestOnMessageEdit:
 
     def test_check_condition_just_embeds(self) -> None:
         """Tests _check_condition with an edit that's just adding an embed."""
-        event = OnMessageEdit(self.client, [], self.logger)
+        event = OnMessageEdit(self.client)
         before = discord_mocks.MessageMock()
         after = discord_mocks.MessageMock()
         after._embeds.append(discord.Embed())
@@ -90,14 +90,14 @@ class TestOnMessageEdit:
 
     def test_check_condition_pass(self) -> None:
         """Tests _check_condition that will pass."""
-        event = OnMessageEdit(self.client, [], self.logger)
+        event = OnMessageEdit(self.client)
         before = discord_mocks.MessageMock(content="Test")
         after = discord_mocks.MessageMock(content="Test 2")
         assert event._check_condition(before, after)
 
     async def test_message_edit_condition_fail(self) -> None:
         """Tests message_edit event with the condition failing."""
-        event = OnMessageEdit(self.client, [], self.logger)
+        event = OnMessageEdit(self.client)
         before = discord_mocks.MessageMock()
         after = discord_mocks.MessageMock()
         after.flags.ephemeral = True
@@ -109,7 +109,7 @@ class TestOnMessageEdit:
     @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
     async def test_message_edit(self) -> None:
         """Tests message_edit event."""
-        event = OnMessageEdit(self.client, [], self.logger)
+        event = OnMessageEdit(self.client)
         before = discord_mocks.MessageMock(content="Test")
         after = discord_mocks.MessageMock(content="Test 2")
 

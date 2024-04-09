@@ -1,12 +1,11 @@
 """Contains our EmbedManager class."""
 
 import datetime
-from logging import Logger
 
 import discord
+from slomanlogger import SlomanLogger
 
 from discordbot.constants import MIN_USERS_FILTER, USER_POINTS_FILTER
-from discordbot.utilities import PlaceHolderLogger
 from mongo.bsepoints.points import UserPoints
 from mongo.datatypes.bet import BetDB
 from mongo.datatypes.guild import GuildDB
@@ -21,14 +20,10 @@ class EmbedManager:
     Centralises where we generate repeated bits of text like bet messages, revolution text, etc.
     """
 
-    def __init__(self: "EmbedManager", logger: Logger = PlaceHolderLogger) -> None:
-        """Initialisation method.
-
-        Args:
-            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
-        """
+    def __init__(self: "EmbedManager") -> None:
+        """Initialisation method."""
         self.user_points = UserPoints()
-        self.logger = logger
+        self.logger = SlomanLogger("bsebot")
 
     def _get_bet_embed_option_val(self, bet: BetDB, option: str) -> str:
         betters = [bet.betters[b] for b in bet.betters if bet.betters[b].emoji == option]
@@ -222,7 +217,7 @@ class EmbedManager:
             str: the generated message
         """
         return (
-            f"Hey {guild_db.king},\n"
+            f"Hey <@{guild_db.king}>,\n"
             f"Looks like you're in a bit of trouble with that revolution in **{guild_db.name}**. "
             f"The chance is currently **{event.chance}%** "
             f"{"(capped at 95%) " if event.chance >= 95 else ""}"  # noqa: PLR2004

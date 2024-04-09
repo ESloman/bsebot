@@ -7,7 +7,6 @@ import pytest
 
 from discordbot.selects.autogenerate import AutoBetsSelect, BetsAmountSelect
 from discordbot.slashcommandeventclasses.autogenerate import AutoGenerate
-from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.autogenerate import AutoGenerateView
 from mongo import interface
 from tests.mocks import bsebot_mocks, discord_mocks, interface_mocks
@@ -23,8 +22,7 @@ class TestAutoGenerateView:
         Automatically called before each test.
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
-        self.logger = PlaceHolderLogger
-        self.auto = AutoGenerate(self.bsebot, [], self.logger)
+        self.auto = AutoGenerate(self.bsebot)
 
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)

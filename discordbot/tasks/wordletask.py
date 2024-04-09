@@ -3,7 +3,6 @@
 import asyncio
 import datetime
 import random
-from logging import Logger
 from zoneinfo import ZoneInfo
 
 import discord
@@ -19,19 +18,15 @@ from discordbot.wordle.wordlesolver import WordleSolver
 class WordleTask(BaseTask):
     """Class for our wordle task."""
 
-    def __init__(
-        self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask], start: bool = False
-    ) -> None:
+    def __init__(self, bot: BSEBot, startup_tasks: list[BaseTask], start: bool = False) -> None:
         """Initialisation method.
 
         Args:
             bot (BSEBot): the BSEBot client
-            guild_ids (list[int]): the list of guild IDs
-            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
             start (bool): whether to start the task on startup. Defaults to False.
         """
-        super().__init__(bot, guild_ids, logger, startup_tasks)
+        super().__init__(bot, startup_tasks)
 
         self.schedule = TaskSchedule(range(7), [8, 9, 10, 11, 12])
 
@@ -122,7 +117,7 @@ class WordleTask(BaseTask):
         await self.bot.change_presence(status=discord.Status.online, activity=game)
 
         # actually do wordle now
-        wordle_solver = WordleSolver(self.logger)
+        wordle_solver = WordleSolver()
         await wordle_solver.setup()
 
         self.logger.debug("Solving wordle...")
@@ -132,7 +127,7 @@ class WordleTask(BaseTask):
         while not solved_wordle.solved and attempts < 5:  # noqa: PLR2004
             # if we fail - try again as there's some randomness to it
             self.logger.debug("Failed wordle - attempting again: %s", attempts)
-            wordle_solver = WordleSolver(self.logger)
+            wordle_solver = WordleSolver()
             await wordle_solver.setup()
             solved_wordle = await wordle_solver.solve()
             attempts += 1

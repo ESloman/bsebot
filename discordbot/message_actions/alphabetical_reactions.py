@@ -1,7 +1,5 @@
 """Alphabetical message action class."""
 
-from logging import Logger
-
 import discord
 
 from discordbot.bsebot import BSEBot
@@ -11,14 +9,13 @@ from discordbot.message_actions.base import BaseMessageAction
 class AlphabeticalMessageAction(BaseMessageAction):
     """Aplhabetical message action class for adding reactions to alphabetical messages."""
 
-    def __init__(self, client: BSEBot, logger: Logger) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): our BSEBot client
-            logger (Logger): our logger
         """
-        super().__init__(client, logger)
+        super().__init__(client)
 
     @staticmethod
     async def pre_condition(message: discord.Message, _: list[str]) -> bool:

@@ -3,7 +3,6 @@
 import asyncio
 import datetime
 import random
-from logging import Logger
 from zoneinfo import ZoneInfo
 
 from discord.ext import tasks
@@ -18,19 +17,15 @@ from discordbot.tasks.basetask import BaseTask, TaskSchedule
 class AfterWorkVally(BaseTask):
     """Class for after work vally task."""
 
-    def __init__(
-        self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask], start: bool = False
-    ) -> None:
+    def __init__(self, bot: BSEBot, startup_tasks: list[BaseTask], start: bool = False) -> None:
         """Initialisation method.
 
         Args:
             bot (BSEBot): the BSEBot client
-            guild_ids (list[int]): the list of guild IDs
-            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
             start (bool): whether to start the task by default. Defaults to False.
         """
-        super().__init__(bot, guild_ids, logger, startup_tasks)
+        super().__init__(bot, startup_tasks)
         self.schedule = TaskSchedule(days=[0, 1, 2, 3, 4], hours=[16], minute=8)
 
         self.task = self.vally_message

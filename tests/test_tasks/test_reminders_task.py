@@ -8,7 +8,6 @@ from zoneinfo import ZoneInfo
 import pytest
 
 from discordbot.tasks.reminders import RemindersTask
-from discordbot.utilities import PlaceHolderLogger
 from mongo import interface
 from mongo.bsepoints.reminders import ServerReminders
 from tests.mocks import bsebot_mocks, interface_mocks
@@ -24,11 +23,10 @@ class TestRemindersTask:
         Automatically called before each test.
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
-        self.logger = PlaceHolderLogger
 
     def test_init(self) -> None:
         """Tests if we can initialise the task."""
-        _ = RemindersTask(self.bsebot, [], self.logger, [], start=False)
+        _ = RemindersTask(self.bsebot, [], start=False)
 
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -36,7 +34,7 @@ class TestRemindersTask:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_execution(self) -> None:
         """Tests default execution."""
-        task = RemindersTask(self.bsebot, [], self.logger, [], start=False)
+        task = RemindersTask(self.bsebot, [], start=False)
         await task.reminders()
 
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
@@ -45,7 +43,7 @@ class TestRemindersTask:
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_execution_with_open_reminders(self) -> None:
         """Tests default execution with open reminedrs."""
-        task = RemindersTask(self.bsebot, [], self.logger, [], start=False)
+        task = RemindersTask(self.bsebot, [], start=False)
         now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         reminder_data = interface_mocks.query_mock("reminders", {})[-5:]
         for reminder in reminder_data:

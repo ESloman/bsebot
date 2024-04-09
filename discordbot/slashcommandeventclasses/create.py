@@ -2,7 +2,6 @@
 
 import contextlib
 import datetime
-import logging
 from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
@@ -22,15 +21,14 @@ if TYPE_CHECKING:
 class CreateBet(BSEddies):
     """Class for handling `/bseddies bet create` command."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
-            logger (logging.Logger): the logger
+
         """
-        super().__init__(client, guild_ids, logger)
+        super().__init__(client)
         self.multiple_options_emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "0️⃣"]
         self.activity_type = ActivityTypes.BSEDDIES_BET_CREATE
         self.help_string = "Creates a bet"

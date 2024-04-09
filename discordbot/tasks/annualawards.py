@@ -2,7 +2,6 @@
 
 import asyncio
 import datetime
-from logging import Logger
 from zoneinfo import ZoneInfo
 
 import discord
@@ -17,19 +16,15 @@ from discordbot.tasks.basetask import BaseTask, TaskSchedule
 class AnnualBSEddiesAwards(BaseTask):
     """Class for annual bseddies awards."""
 
-    def __init__(
-        self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask], start: bool = False
-    ) -> None:
+    def __init__(self, bot: BSEBot, startup_tasks: list[BaseTask], start: bool = False) -> None:
         """Initialisation method.
 
         Args:
             bot (BSEBot): the BSEBot client
-            guild_ids (list[int]): the list of guild IDs
-            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
             start (bool): whether to start the task on startup. Defaults to False.
         """
-        super().__init__(bot, guild_ids, logger, startup_tasks)
+        super().__init__(bot, startup_tasks)
         self.schedule = TaskSchedule([], hours=[14], minute=15, dates=[datetime.datetime(2021, 1, 1)])
         self.task = self.annual_bseddies_awards
         if start:
@@ -49,7 +44,7 @@ class AnnualBSEddiesAwards(BaseTask):
             self.logger.warning("Somehow task was started outside operational hours - %s", now)
             return
 
-        if BSE_SERVER_ID not in self.guild_ids:
+        if BSE_SERVER_ID not in [guild.id for guild in self.bot.guilds]:
             # does not support other servers yet
             return
 
@@ -67,7 +62,7 @@ class AnnualBSEddiesAwards(BaseTask):
         channel = await self.bot.fetch_channel(BSEDDIES_REVOLUTION_CHANNEL)
         await channel.trigger_typing()
 
-        awards_builder = AwardsBuilder(self.bot, BSE_SERVER_ID, self.logger, True)
+        awards_builder = AwardsBuilder(self.bot, BSE_SERVER_ID, True)
 
         self.logger.debug("Calculating stats")
         stats, message = await awards_builder.build_stats_and_message()

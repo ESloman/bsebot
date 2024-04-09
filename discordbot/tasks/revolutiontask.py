@@ -4,7 +4,6 @@ import asyncio
 import datetime
 import math
 import random
-from logging import Logger
 from zoneinfo import ZoneInfo
 
 from discord.ext import tasks
@@ -22,33 +21,28 @@ from mongo.datatypes.revolution import RevolutionEventDB
 class RevolutionTask(BaseTask):
     """Class for our revolution task."""
 
-    def __init__(  # noqa: PLR0913
+    def __init__(
         self,
         bot: BSEBot,
-        guild_ids: list[int],
-        logger: Logger,
         startup_tasks: list[BaseTask],
-        giphy_token: str,
         start: bool = False,
     ) -> None:
         """Initialisation method.
 
         Args:
             bot (BSEBot): the BSEBot client
-            guild_ids (list[int]): the list of guild IDs
-            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
-            giphy_token (str): the token to authenticate with giphy with
             start (bool): whether to start the task at startup. Default to False.
         """
-        super().__init__(bot, guild_ids, logger, startup_tasks)
+        super().__init__(bot, startup_tasks)
         self.schedule = TaskSchedule([6], [16, 17, 18, 19])
         self.task = self.revolution
-        self.embed_manager = EmbedManager(logger)
-        self.giphy_api = GiphyAPI(giphy_token)
+        self.embed_manager = EmbedManager()
+        self.giphy_api = GiphyAPI()
         self.rev_started = {}
 
-        for guild_id in self.guild_ids:
+        for guild_id in [guild.id for guild in self.bot.guilds]:
+            self.logger.debug("Checking %s for open events", guild_id)
             if _ := self.revolutions.get_open_events(guild_id):
                 self.rev_started[guild_id] = True
 
@@ -166,7 +160,7 @@ class RevolutionTask(BaseTask):
         channel = await self.bot.fetch_channel(guild_db.channel)
         await channel.trigger_typing()
 
-        revolution_view = RevolutionView(self.bot, event, self.logger)
+        revolution_view = RevolutionView(self.bot, event)
 
         message = self.embed_manager.get_revolution_message(king, role, event, guild_obj)
         message_obj = await channel.send(content=message, view=revolution_view)

@@ -1,7 +1,6 @@
 """Admin give slash command."""
 
 import contextlib
-import logging
 
 import discord
 
@@ -13,15 +12,14 @@ from discordbot.slashcommandeventclasses.bseddies import BSEddies
 class AdminGive(BSEddies):
     """Class for handling `/bseddies admin give` command."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
-            logger (logging.Logger): the logger
+
         """
-        super().__init__(client, guild_ids, logger)
+        super().__init__(client)
         self.activity_type = ActivityTypes.BSEDDIES_ADMIN_GIVE
         self.help_string = "Allows an admin to give a user eddies"
         self.command_name = "admin_give"

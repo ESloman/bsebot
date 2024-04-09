@@ -3,7 +3,6 @@
 import asyncio
 import contextlib
 import datetime
-from logging import Logger
 from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
@@ -21,16 +20,14 @@ if TYPE_CHECKING:
 class BSEddiesKingTask(BaseTask):
     """Class for BSEddies King task."""
 
-    def __init__(self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask]) -> None:
+    def __init__(self, bot: BSEBot, startup_tasks: list[BaseTask]) -> None:
         """Initialisation method.
 
         Args:
             bot (BSEBot): the BSEBot client
-            guild_ids (list[int]): the list of guild IDs
-            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
         """
-        super().__init__(bot, guild_ids, logger, startup_tasks)
+        super().__init__(bot, startup_tasks)
         self.schedule = TaskSchedule(range(7), range(24))
         self.task = self.king_checker
         self.task.start()

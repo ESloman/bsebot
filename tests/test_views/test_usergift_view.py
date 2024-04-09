@@ -5,7 +5,6 @@ from unittest import mock
 import pytest
 
 from discordbot.slashcommandeventclasses.gift import Gift
-from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.usergift import GiftUserEddiesView
 from tests.mocks import bsebot_mocks, discord_mocks
 
@@ -20,8 +19,8 @@ class TestGiftUserEddiesView:
         Automatically called before each test.
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
-        self.logger = PlaceHolderLogger
-        self.gift = Gift(self.bsebot, [], self.logger)
+
+        self.gift = Gift(self.bsebot)
 
     async def test_init(self) -> None:
         """Tests basic init.

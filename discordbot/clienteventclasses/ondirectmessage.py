@@ -3,8 +3,6 @@
 Handles on_direct_message events.
 """
 
-import logging
-
 import discord
 
 from apis.giphyapi import GiphyAPI
@@ -18,20 +16,14 @@ class OnDirectMessage(BaseEvent):
     def __init__(
         self,
         client: BSEBot,
-        guild_ids: list[int],
-        logger: logging.Logger,
-        giphyapi: GiphyAPI,
     ) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
-            logger (logging.Logger): the logger
-            giphyapi (GiphyAPI): the giphy API class to use
         """
-        super().__init__(client, guild_ids, logger)
-        self.giphyapi = giphyapi
+        super().__init__(client)
+        self.giphyapi = GiphyAPI()
 
         self.thanks = ["thank you", "thanks", "fanks", "fank you", " ty ", "thanks dad"]
         self.rude = ["fuck you", "fuck off", "faggot", "fuckyou"]

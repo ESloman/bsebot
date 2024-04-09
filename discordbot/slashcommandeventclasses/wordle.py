@@ -2,7 +2,6 @@
 
 import contextlib
 import datetime
-import logging
 import re
 from dataclasses import asdict
 from zoneinfo import ZoneInfo
@@ -51,15 +50,14 @@ class WordleStatsShareView(discord.ui.View):
 class Wordle(BSEddies):
     """Class for handling `/wordle` commands."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
-            logger (logging.Logger): the logger
+
         """
-        super().__init__(client, guild_ids, logger)
+        super().__init__(client)
         self.activity_type = ActivityTypes.WORDLE
         self.help_string = "View some wordle stats"
         self.command_name = "wordle"

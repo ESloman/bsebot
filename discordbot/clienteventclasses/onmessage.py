@@ -4,7 +4,6 @@ Handles on_message events.
 """
 
 import contextlib
-import logging
 import re
 from typing import TYPE_CHECKING
 
@@ -32,27 +31,25 @@ if TYPE_CHECKING:
 class OnMessage(BaseEvent):
     """Class for handling on_message events from Discord."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Sets up our list of post message action classes.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
-            logger (logging.Logger): the logger
         """
-        super().__init__(client, guild_ids, logger)
+        super().__init__(client)
         self._post_message_action_classes: list[BaseMessageAction] = [
-            AlphabeticalMessageAction(client, logger),
-            BirthdayReplies(client, logger),
-            CommandSuggest(client, logger),
-            DuplicateLinkAction(client, logger),
-            MarvelComicsAdAction(client, logger),
-            RemindMeAction(client, logger),
-            RiggedAction(client, logger),
-            ThankYouReplies(client, logger),
-            WordleMessageAction(client, logger),
+            AlphabeticalMessageAction(client),
+            BirthdayReplies(client),
+            CommandSuggest(client),
+            DuplicateLinkAction(client),
+            MarvelComicsAdAction(client),
+            RemindMeAction(client),
+            RiggedAction(client),
+            ThankYouReplies(client),
+            WordleMessageAction(client),
         ]
 
     @staticmethod

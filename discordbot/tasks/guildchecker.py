@@ -1,7 +1,6 @@
 """Task for Guild Chcker."""
 
 import datetime
-from logging import Logger
 from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
@@ -25,11 +24,9 @@ if TYPE_CHECKING:
 class GuildChecker(BaseTask):
     """Class for guild checker task."""
 
-    def __init__(  # noqa: PLR0913, PLR0917
+    def __init__(
         self,
         bot: BSEBot,
-        guild_ids: list[int],
-        logger: Logger,
         startup_tasks: list[BaseTask],
         place: "PlaceBet",
         close: "CloseBet",
@@ -39,19 +36,17 @@ class GuildChecker(BaseTask):
 
         Args:
             bot (BSEBot): the BSEBot client
-            guild_ids (list[int]): the list of guild IDs
-            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks.
             place (PlaceBet): the PlaceBet class
             close (CloseBet): the CloseBet class
             start (bool): whether to start the task. Defaults to False.
         """
-        super().__init__(bot, guild_ids, logger, startup_tasks)
+        super().__init__(bot, startup_tasks)
         self.schedule = TaskSchedule(range(7), [3], 15)
         self.task = self.guild_checker
         self.finished: bool = False
 
-        self.embed_manager = EmbedManager(logger)
+        self.embed_manager = EmbedManager()
 
         self.close: "CloseBet" = close
         self.place: "PlaceBet" = place
@@ -263,7 +258,7 @@ class GuildChecker(BaseTask):
             self.logger.debug("???")
             return
         event = events[0]
-        view = RevolutionView(self.bot, event, self.logger)
+        view = RevolutionView(self.bot, event)
         view.toggle_stuff(False)
         self.bot.add_view(view)
 
@@ -336,6 +331,8 @@ class GuildChecker(BaseTask):
         self.logger.info("Running guild sync")
         async for guild in self.bot.fetch_guilds():
             self.logger.debug("Checking guild: %s - %s", guild.id, guild.name)
+
+            self.user_bets.create_counter_document(guild.id)
 
             _: GuildDB = self._check_guild_basic_info(guild)
 

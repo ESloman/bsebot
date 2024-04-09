@@ -3,7 +3,6 @@
 import asyncio
 import datetime
 import random
-from logging import Logger
 from zoneinfo import ZoneInfo
 
 import discord
@@ -19,19 +18,15 @@ from mongo.datatypes.message import MessageDB
 class WordleReminder(BaseTask):
     """Class for Wordle Reminder task."""
 
-    def __init__(
-        self, bot: BSEBot, guild_ids: list[int], logger: Logger, startup_tasks: list[BaseTask], start: bool = False
-    ) -> None:
+    def __init__(self, bot: BSEBot, startup_tasks: list[BaseTask], start: bool = False) -> None:
         """Initialisation method.
 
         Args:
             bot (BSEBot): the BSEBot client
-            guild_ids (list[int]): the list of guild IDs
-            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
             start (bool): whether to start the task on startup. Defaults to False.
         """
-        super().__init__(bot, guild_ids, logger, startup_tasks)
+        super().__init__(bot, startup_tasks)
         self.schedule = TaskSchedule(range(7), [19], 30)
         self.task = self.wordle_reminder
         if start:
@@ -66,7 +61,7 @@ class WordleReminder(BaseTask):
             {"guild_id": guild.id, "message_type": "wordle", "timestamp": {"$gte": _start, "$lte": _end}},
         )
 
-        today_ids: list[int] = [m.user_id for m in wordles_today]
+        today_ids = [m.user_id for m in wordles_today]
 
         reminders_needed: list[MessageDB] = []
         for message in wordles_yesterday:

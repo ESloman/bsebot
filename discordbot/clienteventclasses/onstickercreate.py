@@ -4,7 +4,6 @@ Handles on_sticker_update events.
 """
 
 import datetime
-import logging
 from zoneinfo import ZoneInfo
 
 import discord
@@ -16,15 +15,13 @@ from discordbot.clienteventclasses.baseeventclass import BaseEvent
 class OnStickerCreate(BaseEvent):
     """Class for handling on_sticker_update event."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
-            logger (logging.Logger): the logger
         """
-        super().__init__(client, guild_ids, logger)
+        super().__init__(client)
 
     async def on_stickers_update(
         self,

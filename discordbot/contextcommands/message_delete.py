@@ -1,7 +1,5 @@
 """Contains our ContextDeleteMessage class."""
 
-import logging
-
 import discord
 
 from discordbot.bsebot import BSEBot
@@ -11,13 +9,11 @@ from discordbot.contextcommands.base import BaseContextCommand
 class ContextDeleteMessage(BaseContextCommand):
     """Context class for delete message."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
-            logger (logging.Logger): the logger
         """
 
     async def message_delete(self, ctx: discord.ApplicationContext, message: discord.Message) -> None:

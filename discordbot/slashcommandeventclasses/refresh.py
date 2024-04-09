@@ -1,7 +1,5 @@
 """Refresh slash command."""
 
-import logging
-
 import discord
 
 from discordbot.bot_enums import ActivityTypes
@@ -15,17 +13,16 @@ from discordbot.views.refresh import RefreshBetView
 class RefreshBet(BSEddies):
     """Class for handling `/refresh` commands."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
-            logger (logging.Logger): the logger
+
         """
-        super().__init__(client, guild_ids, logger)
-        self.bseddies_close = CloseBet(client, guild_ids, logger)
-        self.bseddies_place = PlaceBet(client, guild_ids, logger)
+        super().__init__(client)
+        self.bseddies_close = CloseBet(client)
+        self.bseddies_place = PlaceBet(client)
         self.activity_type = ActivityTypes.REFRESH
         self.help_string = "Refresh a bet"
         self.command_name = "refresh"

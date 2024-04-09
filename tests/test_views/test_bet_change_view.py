@@ -6,7 +6,6 @@ import pytest
 
 from discordbot.slashcommandeventclasses.close import CloseBet
 from discordbot.slashcommandeventclasses.place import PlaceBet
-from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.bet import BetView
 from discordbot.views.betchange import BetChange
 from mongo import interface
@@ -24,9 +23,9 @@ class TestBetChange:
         Automatically called before each test.
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
-        self.logger = PlaceHolderLogger
-        self.place = PlaceBet(self.bsebot, [], self.logger)
-        self.close = CloseBet(self.bsebot, [], self.logger)
+
+        self.place = PlaceBet(self.bsebot)
+        self.close = CloseBet(self.bsebot)
 
     @pytest.mark.parametrize("bet_data", interface_mocks.query_mock("userbets", {})[-1:])
     async def test_init(self, bet_data: dict[str, any]) -> None:

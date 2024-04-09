@@ -9,7 +9,6 @@ import pytest
 from freezegun import freeze_time
 
 from discordbot.tasks.eddiegains import BSEddiesManager, EddieGainMessager
-from discordbot.utilities import PlaceHolderLogger
 from mongo import interface
 from tests.mocks import interface_mocks
 from tests.mocks.bsebot_mocks import BSEBotMock
@@ -27,16 +26,15 @@ class TestEddieGainMessager:
         Automatically called before each test.
         """
         self.bsebot = BSEBotMock()
-        self.logger = PlaceHolderLogger
 
     def test_init(self) -> None:
         """Tests if we can initialise the task."""
-        _ = EddieGainMessager(self.bsebot, [], PlaceHolderLogger, [], start=False)
+        _ = EddieGainMessager(self.bsebot, [], start=False)
 
     @pytest.mark.asyncio()
     async def test_not_execution_time(self) -> None:
         """Tests if running the task with the wrong time exits."""
-        task = EddieGainMessager(self.bsebot, [], PlaceHolderLogger, [], start=False)
+        task = EddieGainMessager(self.bsebot, [], start=False)
 
         result = await task.eddie_distributer()
         assert result is None
@@ -45,7 +43,7 @@ class TestEddieGainMessager:
     @freeze_time("2024-01-01 07:30:01")
     async def test_execution(self) -> None:
         """Tests running the task."""
-        task = EddieGainMessager(self.bsebot, [123], PlaceHolderLogger, [], start=False)
+        task = EddieGainMessager(self.bsebot, [123], start=False)
 
         with (
             patch.object(task.eddie_manager, "give_out_eddies", new=mock_eddie_manager_give_out_eddies),
@@ -67,17 +65,16 @@ class TestBSEddiesManager:
         Automatically called before each test.
         """
         self.bsebot = BSEBotMock()
-        self.logger = PlaceHolderLogger
 
     def test_init(self) -> None:
         """Tests if we can initialise the task."""
-        _ = BSEddiesManager(self.bsebot, [], PlaceHolderLogger, [])
+        _ = BSEddiesManager(self.bsebot, [])
 
     @pytest.mark.parametrize("days", [1, 2, 3, 4, 5, 10])
     def test_get_datetime_objects(self, days: int) -> None:
         """Tests our get_datetime_objects method."""
         now = datetime.datetime.now(tz=ZoneInfo("UTC"))
-        manager = BSEddiesManager(self.bsebot, [], PlaceHolderLogger, [])
+        manager = BSEddiesManager(self.bsebot, [])
         start, end = manager.get_datetime_objects(days)
 
         for obj in (start, end):
@@ -88,7 +85,7 @@ class TestBSEddiesManager:
     @pytest.mark.parametrize(("counter", "start", "expected"), mock_bseddies_manager_counters())
     def test_calc_eddies(self, counter: Counter, start: int, expected: float) -> None:
         """Tests our _calc_eddies method."""
-        manager = BSEddiesManager(self.bsebot, [], PlaceHolderLogger, [])
+        manager = BSEddiesManager(self.bsebot, [])
         eddies = manager._calc_eddies(counter, start)
         assert eddies == expected
 
@@ -106,7 +103,7 @@ class TestBSEddiesManager:
     def test_give_out_eddies_predict(self, guild_id: int, date: str) -> None:
         """Tests our give_out_eddies method."""
         with freeze_time(date):
-            manager = BSEddiesManager(self.bsebot, [], PlaceHolderLogger, [])
+            manager = BSEddiesManager(self.bsebot, [])
             results = manager.give_out_eddies(guild_id, False)
         assert isinstance(results, dict)
 
@@ -126,6 +123,6 @@ class TestBSEddiesManager:
     def test_give_out_eddies_real(self, guild_id: int, date: str) -> None:
         """Tests our give_out_eddies method."""
         with freeze_time(date):
-            manager = BSEddiesManager(self.bsebot, [], PlaceHolderLogger, [])
+            manager = BSEddiesManager(self.bsebot, [])
             results = manager.give_out_eddies(guild_id, True)
         assert isinstance(results, dict)

@@ -4,7 +4,6 @@ Handles on_reaction and on_raw_reaction_add events.
 """
 
 import datetime
-import logging
 from zoneinfo import ZoneInfo
 
 import discord
@@ -17,15 +16,13 @@ from discordbot.clienteventclasses.baseeventclass import BaseEvent
 class OnReactionAdd(BaseEvent):
     """Class for handling on_reaction_add events from Discord."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
-            logger (logging.Logger): the logger
         """
-        super().__init__(client, guild_ids, logger)
+        super().__init__(client)
 
     async def handle_reaction_event(
         self,
@@ -57,7 +54,7 @@ class OnReactionAdd(BaseEvent):
         if user.bot:
             return None
 
-        if guild.id not in self.guild_ids:
+        if guild.id not in [guild.id for guild in self.client.guilds]:
             return None
 
         return self.handle_user_reaction(reaction_emoji, message, guild, channel, user)

@@ -5,7 +5,6 @@ from unittest import mock
 import pytest
 
 from discordbot.slashcommandeventclasses.stats import Stats
-from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.stats import StatsView
 from tests.mocks import bsebot_mocks, discord_mocks
 
@@ -20,8 +19,8 @@ class TestStatsView:
         Automatically called before each test.
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
-        self.logger = PlaceHolderLogger
-        self.stats = Stats(self.bsebot, [], self.logger)
+
+        self.stats = Stats(self.bsebot)
 
     async def test_init(self) -> None:
         """Tests basic init.

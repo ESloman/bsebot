@@ -1,7 +1,6 @@
 """Revolution bribe task."""
 
 import datetime
-from logging import Logger
 from zoneinfo import ZoneInfo
 
 import discord
@@ -24,8 +23,6 @@ class RevolutionBribeTask(BaseTask):
     def __init__(
         self,
         bot: BSEBot,
-        guild_ids: list[int],
-        logger: Logger,
         startup_tasks: list[BaseTask],
         start: bool = False,
     ) -> None:
@@ -33,12 +30,10 @@ class RevolutionBribeTask(BaseTask):
 
         Args:
             bot (BSEBot): the BSEBot client
-            guild_ids (list[int]): the list of guild IDs
-            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
             start (bool): whether to start the task at startup. Default to False.
         """
-        super().__init__(bot, guild_ids, logger, startup_tasks)
+        super().__init__(bot, startup_tasks)
         self.schedule = TaskSchedule([6], [19], minute=1)
         self.task = self.bribe
         if start:
@@ -213,7 +208,7 @@ class RevolutionBribeTask(BaseTask):
             self.logger.debug("Bribe message: %s", bribe_message)
             self.logger.debug("Bribe message is %s chars long.", len(bribe_message))
 
-            view = RevolutionBribeView(self.bot, event, bribe_cost, self.logger)
+            view = RevolutionBribeView(self.bot, event, bribe_cost)
             member = await guild.fetch_member(king_user.uid)
             try:
                 await member.send(content=bribe_message, view=view)

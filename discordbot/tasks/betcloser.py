@@ -4,7 +4,6 @@ import asyncio
 import contextlib
 import dataclasses
 import datetime
-from logging import Logger
 from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
@@ -24,11 +23,9 @@ if TYPE_CHECKING:
 class BetCloser(BaseTask):
     """Class for bet closer."""
 
-    def __init__(  # noqa: PLR0913, PLR0917
+    def __init__(
         self,
         bot: BSEBot,
-        guild_ids: list[int],
-        logger: Logger,
         startup_tasks: list[BaseTask],
         place: "PlaceBet",
         close: "CloseBet",
@@ -38,19 +35,17 @@ class BetCloser(BaseTask):
 
         Args:
             bot (BSEBot): the BSEBot client
-            guild_ids (list[int]): the list of guild IDs
-            logger (Logger, optional): the logger to use. Defaults to PlaceHolderLogger.
             startup_tasks (list | None, optional): the list of startup tasks. Defaults to None.
             github_api (GitHubAPI): the authenticated Github api class
             place (PlaceBet): the place bet class
             close (CloseBet): the close bet class
             start (bool) whether to start the task. Defaults to False.
         """
-        super().__init__(bot, guild_ids, logger, startup_tasks)
+        super().__init__(bot, startup_tasks)
         self.schedule = TaskSchedule(range(7), range(24))
         self.task = self.bet_closer
 
-        self.embed_manager = EmbedManager(self.logger)
+        self.embed_manager = EmbedManager()
         self.place: "PlaceBet" = place
         self.close: "CloseBet" = close
         if start:

@@ -5,7 +5,6 @@ import pytest
 from discordbot.contextcommands.base import BaseContextCommand
 from discordbot.contextcommands.user_gift import ContextUserGift
 from discordbot.slashcommandeventclasses.gift import Gift
-from discordbot.utilities import PlaceHolderLogger
 from tests.mocks.bsebot_mocks import BSEBotMock
 
 
@@ -15,10 +14,10 @@ class TestContextUserGift:
     @pytest.fixture(autouse=True)
     def _data(self) -> None:
         self.client = BSEBotMock()
-        self.logger = PlaceHolderLogger
-        self.gift = Gift(self.client, [], self.logger)
+
+        self.gift = Gift(self.client)
 
     def test_init(self) -> None:
         """Tests init."""
-        command = ContextUserGift(self.client, [], self.logger, self.gift)
+        command = ContextUserGift(self.client, self.gift)
         assert isinstance(command, BaseContextCommand)

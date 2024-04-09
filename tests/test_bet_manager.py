@@ -6,7 +6,6 @@ from unittest.mock import patch
 import pytest
 
 from discordbot.betmanager import BetManager
-from discordbot.utilities import PlaceHolderLogger
 from mongo.bsepoints.points import UserPoints
 from mongo.datatypes.bet import BetDB
 from tests.mocks import bet_manager_mocks, interface_mocks
@@ -21,7 +20,7 @@ class TestBetManager:
 
     def test_init(self) -> None:
         """Tests that we can initialise the class."""
-        bet_manager = BetManager(PlaceHolderLogger)
+        bet_manager = BetManager()
         assert isinstance(bet_manager, BetManager)
 
     @pytest.mark.parametrize(
@@ -37,7 +36,7 @@ class TestBetManager:
     )
     def test_calculate_bet_modifiers(self, total_bet: int, winning_total: int, options_num: int, losers: int) -> None:
         """Tests our 'calculate_bet_modifiers'."""
-        bet_manager = BetManager(PlaceHolderLogger)
+        bet_manager = BetManager()
         mult, coef = bet_manager.calculate_bet_modifiers(total_bet, winning_total, options_num, losers)
         assert isinstance(mult, float) or mult == 0
         assert isinstance(coef, float)
@@ -56,7 +55,7 @@ class TestBetManager:
         self, points_bet: int, multiplier: float, coeff: float, extra: int, winners: int, value: int
     ) -> None:
         """Tests our '_calculate_single_bet_winnings'."""
-        bet_manager = BetManager(PlaceHolderLogger)
+        bet_manager = BetManager()
         points_won = bet_manager._calculate_single_bet_winnings(points_bet, multiplier, coeff, extra, winners)
         print(points_won)
         assert isinstance(points_won, int)
@@ -77,7 +76,7 @@ class TestBetManager:
         self, supporter_type: float, tax: int, actual_won: int, points_won: int, expected: tuple[int, int]
     ) -> None:
         """Tests our '_calculate_taxed_winnings'."""
-        bet_manager = BetManager(PlaceHolderLogger)
+        bet_manager = BetManager()
         _user = interface_mocks.query_mock("userpoints", {})[0]
         _user["supporter_type"] = supporter_type
         user = UserPoints.make_data_class(_user)
@@ -88,7 +87,7 @@ class TestBetManager:
 
     def test_process_bet_winner(self) -> None:
         """Tests our _process_bet_winner."""
-        bet_manager = BetManager(PlaceHolderLogger)
+        bet_manager = BetManager()
         with patch.object(bet_manager.user_points, "increment_points", new=lambda *args, **kwargs: None):  # noqa: ARG005
             bet_manager._process_bet_winner("123", 123, "456", 100)
 
@@ -101,7 +100,7 @@ class TestBetManager:
     )
     def test_close_a_bet(self, test_bet: BetDB) -> None:
         """Tests our 'close_a_bet'."""
-        bet_manager = BetManager(PlaceHolderLogger)
+        bet_manager = BetManager()
 
         _user = interface_mocks.query_mock("userpoints", {})[0]
         _user["supporter_type"] = 0 if int(test_bet.guild_id) < 900 else 1

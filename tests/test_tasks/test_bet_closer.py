@@ -9,7 +9,6 @@ import pytest
 from discordbot.slashcommandeventclasses.close import CloseBet
 from discordbot.slashcommandeventclasses.place import PlaceBet
 from discordbot.tasks.betcloser import BetCloser
-from discordbot.utilities import PlaceHolderLogger
 from mongo import interface
 from mongo.bsepoints.bets import UserBets
 from tests.mocks import bsebot_mocks, interface_mocks
@@ -25,20 +24,20 @@ class TestBetCloser:
         Automatically called before each test.
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
-        self.logger = PlaceHolderLogger
-        self.place = PlaceBet(self.bsebot, [], self.logger)
-        self.close = CloseBet(self.bsebot, [], self.logger)
+
+        self.place = PlaceBet(self.bsebot)
+        self.close = CloseBet(self.bsebot)
 
     def test_init(self) -> None:
         """Tests if we can initialise the task."""
-        _ = BetCloser(self.bsebot, [], self.logger, [], self.place, self.close, start=False)
+        _ = BetCloser(self.bsebot, [], self.place, self.close, start=False)
 
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
     @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_execution(self) -> None:
         """Tests if we can execute task."""
-        closer = BetCloser(self.bsebot, [], self.logger, [], self.place, self.close, start=False)
+        closer = BetCloser(self.bsebot, [], self.place, self.close, start=False)
         await closer.bet_closer()
 
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
@@ -47,7 +46,7 @@ class TestBetCloser:
     @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
     async def test_execution_with_timed_out_bets(self) -> None:
         """Tests if we can execute task."""
-        closer = BetCloser(self.bsebot, [], self.logger, [], self.place, self.close, start=False)
+        closer = BetCloser(self.bsebot, [], self.place, self.close, start=False)
         bet_datas = interface_mocks.query_mock("userbets", {})[-5:]
         for bet in bet_datas:
             bet["active"] = True

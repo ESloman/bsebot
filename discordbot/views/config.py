@@ -1,7 +1,6 @@
 """Config views."""
 
 import datetime
-from logging import Logger
 from zoneinfo import ZoneInfo
 
 import discord
@@ -9,7 +8,6 @@ import discord
 from discordbot.constants import CREATOR
 from discordbot.selects.config import ConfigSelect
 from discordbot.selects.wordleconfig import WordleRootSelect
-from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.bseview import BSEView
 from discordbot.views.config_activities import ActivityConfigView
 from discordbot.views.config_admin import AdminConfigView
@@ -30,18 +28,14 @@ from mongo.datatypes.guild import GuildDB
 class ConfigView(BSEView):
     """Class for config view."""
 
-    def __init__(
-        self, logger: Logger = PlaceHolderLogger, user_id: int | None = None, guild_id: int | None = None
-    ) -> None:
+    def __init__(self, user_id: int | None = None, guild_id: int | None = None) -> None:
         """Initialisation method.
 
         Args:
-            logger (Logger, optional): the logger. Defaults to PlaceHolderLogger.
             user_id (int | None, optional): the user ID. Defaults to None.
             guild_id (int | None, optional): the guild ID. Defaults to None.
         """
         super().__init__(timeout=120)
-        self.logger = logger
         self.spoiler_threads = SpoilerThreads()
         self.guilds = Guilds()
         self.user_points = UserPoints()

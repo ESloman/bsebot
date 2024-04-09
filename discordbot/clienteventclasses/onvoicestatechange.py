@@ -5,7 +5,6 @@ Handles on_voice_state_change events.
 
 import dataclasses
 import datetime
-import logging
 from zoneinfo import ZoneInfo
 
 import discord
@@ -17,15 +16,13 @@ from discordbot.clienteventclasses.baseeventclass import BaseEvent
 class OnVoiceStateChange(BaseEvent):
     """Class for handling on_thread_update event."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
-            logger (logging.Logger): the logger
         """
-        super().__init__(client, guild_ids, logger)
+        super().__init__(client)
 
     def _handle_mute_status(
         self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState, vc_doc: dict[str, any]

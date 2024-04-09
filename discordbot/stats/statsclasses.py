@@ -4,11 +4,11 @@ import dataclasses
 import datetime
 import re
 from copy import deepcopy
-from logging import Logger
 from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
 import discord
+from slomanlogger import SlomanLogger
 
 from discordbot.bot_enums import ActivityTypes, AwardsTypes, StatTypes, TransactionTypes
 from discordbot.constants import (
@@ -21,7 +21,6 @@ from discordbot.constants import (
 )
 from discordbot.stats.statsdatacache import StatsDataCache
 from discordbot.stats.statsdataclasses import StatDB
-from discordbot.utilities import PlaceHolderLogger
 
 if TYPE_CHECKING:
     from mongo.datatypes.message import ReactionDB
@@ -31,7 +30,7 @@ if TYPE_CHECKING:
 class StatsGatherer:  # noqa: PLR0904
     """Class for stats gatherer."""
 
-    def __init__(self, logger: Logger = PlaceHolderLogger, annual: bool = False) -> None:
+    def __init__(self, annual: bool = False) -> None:
         """Initialisation method.
 
         Args:
@@ -39,7 +38,7 @@ class StatsGatherer:  # noqa: PLR0904
             annual (bool, optional): whether to gather annual or monthly stats. Defaults to False.
         """
         self.annual = annual
-        self.logger = logger
+        self.logger = SlomanLogger("bsebot")
         self.cache = StatsDataCache(self.annual)
 
     @staticmethod

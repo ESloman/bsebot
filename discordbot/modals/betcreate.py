@@ -1,14 +1,12 @@
 """BetCreate modal class."""
 
-import logging
-
 import discord
+from slomanlogger import SlomanLogger
 
 from discordbot.bsebot import BSEBot
 from discordbot.slashcommandeventclasses.close import CloseBet
 from discordbot.slashcommandeventclasses.create import CreateBet
 from discordbot.slashcommandeventclasses.place import PlaceBet
-from discordbot.utilities import PlaceHolderLogger
 
 
 class BetCreateModal(discord.ui.Modal):
@@ -17,8 +15,6 @@ class BetCreateModal(discord.ui.Modal):
     def __init__(
         self,
         client: BSEBot,
-        guild_ids: list[int],
-        logger: logging.Logger = PlaceHolderLogger,
         *args: tuple[any],
         **kwargs: dict[any],
     ) -> None:
@@ -26,15 +22,14 @@ class BetCreateModal(discord.ui.Modal):
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
             logger (logging.Logger): the logger
         """
         super().__init__(*args, **kwargs)
 
-        self.logger = logger
-        self.bseddies_create = CreateBet(client, guild_ids, logger)
-        self.bseddies_place = PlaceBet(client, guild_ids, logger)
-        self.bseddies_close = CloseBet(client, guild_ids, logger)
+        self.logger = SlomanLogger("bsebot")
+        self.bseddies_create = CreateBet(client)
+        self.bseddies_place = PlaceBet(client)
+        self.bseddies_close = CloseBet(client)
 
         self.add_item(discord.ui.InputText(label="Bet title", placeholder="Enter your bet title here"))
         self.add_item(

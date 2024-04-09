@@ -6,7 +6,6 @@ from zoneinfo import ZoneInfo
 
 import pytest
 
-from discordbot.utilities import PlaceHolderLogger
 from discordbot.views.revolution import RevolutionView
 from mongo import interface
 from mongo.bseticketedevents import RevolutionEvent
@@ -23,7 +22,6 @@ class TestRevolutionView:
         Automatically called before each test.
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
-        self.logger = PlaceHolderLogger
 
     @pytest.mark.parametrize("event_data", interface_mocks.query_mock("ticketedevents", {})[-5:])
     async def test_init(self, event_data: dict) -> None:
@@ -31,7 +29,7 @@ class TestRevolutionView:
 
         Needs to run with async as the parent class tries to get the running event loop.
         """
-        _ = RevolutionView(self.bsebot, RevolutionEvent.make_data_class(event_data), self.logger)
+        _ = RevolutionView(self.bsebot, RevolutionEvent.make_data_class(event_data))
 
     @pytest.mark.parametrize("event_data", interface_mocks.query_mock("ticketedevents", {})[-5:])
     async def test_toggle_stuff(self, event_data: dict) -> None:
@@ -39,7 +37,7 @@ class TestRevolutionView:
 
         Needs to run with async as the parent class tries to get the running event loop.
         """
-        view = RevolutionView(self.bsebot, RevolutionEvent.make_data_class(event_data), self.logger)
+        view = RevolutionView(self.bsebot, RevolutionEvent.make_data_class(event_data))
         for toggle in (True, False):
             view.toggle_stuff(toggle)
             for child in view.children:
@@ -53,7 +51,7 @@ class TestRevolutionView:
 
         Needs to run with async as the parent class tries to get the running event loop.
         """
-        view = RevolutionView(self.bsebot, RevolutionEvent.make_data_class(event_data), self.logger)
+        view = RevolutionView(self.bsebot, RevolutionEvent.make_data_class(event_data))
         button = discord_mocks.ButtonMock(label=view._SAVE_THYSELF_BUTTON_TEXT)
         interaction = discord_mocks.InteractionMock(123456)
         assert await view._handle_save_thyself_button_checks(interaction, button, 123456, 123456)
@@ -66,7 +64,7 @@ class TestRevolutionView:
 
         Needs to run with async as the parent class tries to get the running event loop.
         """
-        view = RevolutionView(self.bsebot, RevolutionEvent.make_data_class(event_data), self.logger)
+        view = RevolutionView(self.bsebot, RevolutionEvent.make_data_class(event_data))
         button = discord_mocks.ButtonMock(label="Some other text.")
         interaction = discord_mocks.InteractionMock(123456)
         assert not await view._handle_save_thyself_button_checks(interaction, button, 123456, 123456)
@@ -79,7 +77,7 @@ class TestRevolutionView:
 
         Needs to run with async as the parent class tries to get the running event loop.
         """
-        view = RevolutionView(self.bsebot, RevolutionEvent.make_data_class(event_data), self.logger)
+        view = RevolutionView(self.bsebot, RevolutionEvent.make_data_class(event_data))
         button = discord_mocks.ButtonMock(label=view._SAVE_THYSELF_BUTTON_TEXT)
         interaction = discord_mocks.InteractionMock(123456)
         assert not await view._handle_save_thyself_button_checks(interaction, button, 123456, 654321)
@@ -92,7 +90,7 @@ class TestRevolutionView:
         Needs to run with async as the parent class tries to get the running event loop.
         """
         _event = RevolutionEvent.make_data_class(event_data)
-        view = RevolutionView(self.bsebot, _event, self.logger)
+        view = RevolutionView(self.bsebot, _event)
         interaction = discord_mocks.InteractionMock(123456)
         for user in [*_event.users, 123456789]:
             if "locked_in" in event_data:
@@ -111,7 +109,7 @@ class TestRevolutionView:
         Needs to run with async as the parent class tries to get the running event loop.
         """
         _event = RevolutionEvent.make_data_class(event_data)
-        view = RevolutionView(self.bsebot, _event, self.logger)
+        view = RevolutionView(self.bsebot, _event)
         for user in [*_event.users, 123456789]:
             if "locked_in" in event_data:
                 event_data["locked_in"].append(user)
@@ -130,7 +128,7 @@ class TestRevolutionView:
         Needs to run with async as the parent class tries to get the running event loop.
         """
         _event = RevolutionEvent.make_data_class(event_data)
-        view = RevolutionView(self.bsebot, _event, self.logger)
+        view = RevolutionView(self.bsebot, _event)
         for user in [*_event.users, 123456789]:
             if user == 123456789:
                 event_data["neutrals"].append(user)
@@ -148,7 +146,7 @@ class TestRevolutionView:
         Needs to run with async as the parent class tries to get the running event loop.
         """
         _event = RevolutionEvent.make_data_class(event_data)
-        view = RevolutionView(self.bsebot, _event, self.logger)
+        view = RevolutionView(self.bsebot, _event)
         interaction = discord_mocks.InteractionMock(_event.guild_id)
         msg = view._handle_save_thyself_button(_event.unfrozen(), _event.king, interaction)
         assert isinstance(msg, str)
@@ -165,7 +163,7 @@ class TestRevolutionView:
         """
         event_data["open"] = False
         _event = RevolutionEvent.make_data_class(event_data)
-        view = RevolutionView(self.bsebot, _event, self.logger)
+        view = RevolutionView(self.bsebot, _event)
         interaction = discord_mocks.InteractionMock(_event.guild_id)
         button = discord_mocks.ButtonMock(label="doesn't matter")
         with mock.patch.object(view.revolutions, "get_event", return_value=_event):
@@ -185,7 +183,7 @@ class TestRevolutionView:
         """
         event_data["open"] = True
         _event = RevolutionEvent.make_data_class(event_data)
-        view = RevolutionView(self.bsebot, _event, self.logger)
+        view = RevolutionView(self.bsebot, _event)
         interaction = discord_mocks.InteractionMock(_event.guild_id)
         button = discord_mocks.ButtonMock(label="doesn't matter")
         with mock.patch.object(view.revolutions, "get_event", return_value=_event):
@@ -206,7 +204,7 @@ class TestRevolutionView:
         event_data["open"] = True
         event_data["expired"] = datetime.datetime.now(tz=ZoneInfo("UTC")) + datetime.timedelta(hours=6)
         _event = RevolutionEvent.make_data_class(event_data)
-        view = RevolutionView(self.bsebot, _event, self.logger)
+        view = RevolutionView(self.bsebot, _event)
         interaction = discord_mocks.InteractionMock(_event.guild_id)
         button = discord_mocks.ButtonMock(label="something else")
         with (
@@ -230,7 +228,7 @@ class TestRevolutionView:
         event_data["open"] = True
         event_data["expired"] = datetime.datetime.now(tz=ZoneInfo("UTC")) + datetime.timedelta(hours=6)
         _event = RevolutionEvent.make_data_class(event_data)
-        view = RevolutionView(self.bsebot, _event, self.logger)
+        view = RevolutionView(self.bsebot, _event)
         interaction = discord_mocks.InteractionMock(_event.guild_id)
         button = discord_mocks.ButtonMock(label="OVERTHROW")
         for val in (True, False):
@@ -256,7 +254,7 @@ class TestRevolutionView:
         event_data["open"] = True
         event_data["expired"] = datetime.datetime.now(tz=ZoneInfo("UTC")) + datetime.timedelta(hours=6)
         _event = RevolutionEvent.make_data_class(event_data)
-        view = RevolutionView(self.bsebot, _event, self.logger)
+        view = RevolutionView(self.bsebot, _event)
         for user in _event.users:
             interaction = discord_mocks.InteractionMock(_event.guild_id, user)
             for button_label in ("OVERTHROW", "SUPPORT THE KING", "Impartial", "Save THYSELF"):

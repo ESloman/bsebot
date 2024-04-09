@@ -1,10 +1,10 @@
 """Reminder modal class."""
 
 import datetime
-import logging
 from zoneinfo import ZoneInfo
 
 import discord
+from slomanlogger import SlomanLogger
 
 from discordbot import utilities
 from mongo.bsepoints.reminders import ServerReminders
@@ -13,16 +13,15 @@ from mongo.bsepoints.reminders import ServerReminders
 class ReminderModal(discord.ui.Modal):
     """Reminder modal class."""
 
-    def __init__(self, logger: logging.Logger, message_id: int, *args: tuple[any], **kwargs: dict[any]) -> None:
+    def __init__(self, message_id: int, *args: tuple[any], **kwargs: dict[any]) -> None:
         """Initialisation method.
 
         Args:
-            logger (logging.Logger): the logger
             message_id (int): the message ID
         """
         super().__init__(*args, title="Create a reminder", **kwargs)
 
-        self.logger = logger
+        self.logger = SlomanLogger("bsebot")
         self.server_reminders = ServerReminders()
         self.message_id = message_id
 

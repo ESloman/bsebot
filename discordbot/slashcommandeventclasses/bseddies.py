@@ -1,6 +1,5 @@
 """BSEddies slash command base class."""
 
-import logging
 from typing import TYPE_CHECKING
 
 import discord
@@ -19,15 +18,14 @@ class BSEddies(BaseEvent):
     All slash command classes will inherit from this class.
     """
 
-    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
-            logger (logging.Logger): the logger
+
         """
-        super().__init__(client, guild_ids, logger)
+        super().__init__(client)
         self.dmable = False
 
         # these need to be set

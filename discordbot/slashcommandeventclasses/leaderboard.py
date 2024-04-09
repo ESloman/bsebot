@@ -1,7 +1,5 @@
 """Leaderboard slash command."""
 
-import logging
-
 import discord
 
 from discordbot.bot_enums import ActivityTypes
@@ -13,15 +11,14 @@ from discordbot.views.leaderboard import LeaderBoardView
 class Leaderboard(BSEddies):
     """Class for handling `/leaderboard` commands."""
 
-    def __init__(self, client: BSEBot, guild_ids: list[int], logger: logging.Logger) -> None:
+    def __init__(self, client: BSEBot) -> None:
         """Initialisation method.
 
         Args:
             client (BSEBot): the connected BSEBot client
-            guild_ids (list): list of supported guild IDs
-            logger (logging.Logger): the logger
+
         """
-        super().__init__(client, guild_ids, logger)
+        super().__init__(client)
         self.activity_type = ActivityTypes.BSEDDIES_LEADERBOARD
         self.command_name = "leaderboard"
         self.help_string = "See the BSEddies leaderboard"

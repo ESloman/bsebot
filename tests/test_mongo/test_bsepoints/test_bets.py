@@ -31,15 +31,6 @@ class TestUserBets:
         user_bets = UserBets()
         assert isinstance(user_bets, UserBets)
 
-    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
-    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
-    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
-    @mock.patch.object(interface, "insert", new=interface_mocks.insert_mock)
-    def test_user_bets_init_guilds(self) -> None:
-        """Tests UserBets init with guilds."""
-        user_bets = UserBets([123, 456])
-        assert isinstance(user_bets, UserBets)
-
     def test_bets_make_data_class(self) -> None:
         """Tests UserBets make_data_class."""
         user_bets = UserBets()
@@ -58,7 +49,7 @@ class TestUserBets:
         """Tests UserBets _create_counter_document method."""
         user_bets = UserBets()
         with mock.patch.object(user_bets, "query", return_value=query):
-            user_bets._create_counter_document(123456)
+            user_bets.create_counter_document(123456)
 
     @pytest.mark.parametrize(("guild_id", "exp"), [(724395292912255056, "0581")])
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)

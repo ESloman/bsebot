@@ -4,7 +4,6 @@ import pytest
 
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from discordbot.clienteventclasses.onthreadcreate import OnThreadCreate
-from discordbot.utilities import PlaceHolderLogger
 from tests.mocks.bsebot_mocks import BSEBotMock
 
 
@@ -14,10 +13,9 @@ class TestOnThreadCreate:
     @pytest.fixture(autouse=True)
     def _data(self) -> None:
         self.client = BSEBotMock()
-        self.logger = PlaceHolderLogger
 
     def test_init(self) -> None:
         """Tests basic initialisation."""
-        event = OnThreadCreate(self.client, [], self.logger)
+        event = OnThreadCreate(self.client)
         assert isinstance(event, OnThreadCreate)
         assert isinstance(event, BaseEvent)

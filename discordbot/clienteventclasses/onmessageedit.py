@@ -33,10 +33,7 @@ class OnMessageEdit(BaseEvent):
             before (Optional[discord.Message]): the message before
             after (discord.Message): the message after
         """
-        if after.flags.ephemeral:
-            return
-
-        if after.type == discord.MessageType.application_command:
+        if after.flags.ephemeral or after.type == discord.MessageType.application_command:
             return
 
         if after.embeds and after.author.id == BSE_BOT_ID:
@@ -49,7 +46,7 @@ class OnMessageEdit(BaseEvent):
             discord.ChannelType.public_thread,
             discord.ChannelType.private_thread,
             discord.ChannelType.news_thread,
-        }:
+        } or isinstance(after.channel, discord.DMChannel):
             return
 
         if before and before.content == after.content and after.embeds and not before.embeds:

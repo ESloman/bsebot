@@ -102,12 +102,15 @@ jobs:
         run: |
           set -ux
           HASH=$(git rev-parse --short "$GITHUB_SHA")
-          docker run -d --name bsebot --network="host" -e "DEBUG_MODE=1" -e "DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}" esloman/bsebot:sha-$HASH
+          docker run --rm --name bsebot --network="host" -e "DEBUG_MODE=1" -e "DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}" esloman/bsebot:sha-$HASH
           sleep 120
           docker logs bsebot > output.log 2>&1
+          sleep 5
           ls -la
           cat output.log
+          sleep 5
           docker logs bsebot | grep -ic "traceback"
+          sleep 5
           python .github/workflows/check_output_log.py -d
           E_COUNT=$(python .github/workflows/check_output_log.py)
           echo "Found ${E_COUNT} errors"

@@ -105,7 +105,7 @@ jobs:
           mkdir bsebotlogs
           docker run -d --name bsebot --network="host" -v $(pwd)/bsebotlogs:/root/bsebotlogs -e "DEBUG_MODE=1" -e "DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}" esloman/bsebot:sha-$HASH
           sleep 120
-          python .github/workflows/check_output_log.py -d
+          docker logs bsebot
           E_COUNT=$(python .github/workflows/check_output_log.py)
           echo "Found ${E_COUNT} errors"
           if [[ "${E_COUNT}" -ge "1" ]]; then exit 1; fi

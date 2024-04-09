@@ -2,9 +2,9 @@
 
 import datetime
 from unittest import mock
+from zoneinfo import ZoneInfo
 
 import pytest
-import pytz
 
 from discordbot.slashcommandeventclasses.close import CloseBet
 from discordbot.slashcommandeventclasses.place import PlaceBet
@@ -50,7 +50,7 @@ class TestBetCloser:
         bet_datas = interface_mocks.query_mock("userbets", {})[-5:]
         for bet in bet_datas:
             bet["active"] = True
-            bet["timeout"] = datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(days=2)
+            bet["timeout"] = datetime.datetime.now(tz=ZoneInfo("UTC")) - datetime.timedelta(days=2)
         bets = [UserBets.make_data_class(b) for b in bet_datas]
         with mock.patch.object(closer.user_bets, "get_all_active_bets", return_value=bets):
             await closer.bet_closer()

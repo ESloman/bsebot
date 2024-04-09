@@ -3,9 +3,9 @@
 import datetime
 import random
 from unittest import mock
+from zoneinfo import ZoneInfo
 
 import pytest
-import pytz
 
 from discordbot.bot_enums import ActivityTypes
 from mongo import interface
@@ -71,7 +71,7 @@ class TestUserActivities:
         test that the function converts the returned entries into dataclasses.
         """
         activities = UserActivities()
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         all_activities = activities.get_guild_activities_by_timestamp(
             guild_id, now.replace(year=2023, month=12, day=1), now
         )

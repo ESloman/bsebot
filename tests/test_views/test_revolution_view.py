@@ -2,9 +2,9 @@
 
 import datetime
 from unittest import mock
+from zoneinfo import ZoneInfo
 
 import pytest
-import pytz
 
 from discordbot.views.revolution import RevolutionView
 from mongo import interface
@@ -202,7 +202,7 @@ class TestRevolutionView:
         Needs to run with async as the parent class tries to get the running event loop.
         """
         event_data["open"] = True
-        event_data["expired"] = datetime.datetime.now(tz=pytz.utc) + datetime.timedelta(hours=6)
+        event_data["expired"] = datetime.datetime.now(tz=ZoneInfo("UTC")) + datetime.timedelta(hours=6)
         _event = RevolutionEvent.make_data_class(event_data)
         view = RevolutionView(self.bsebot, _event)
         interaction = discord_mocks.InteractionMock(_event.guild_id)
@@ -226,7 +226,7 @@ class TestRevolutionView:
         Needs to run with async as the parent class tries to get the running event loop.
         """
         event_data["open"] = True
-        event_data["expired"] = datetime.datetime.now(tz=pytz.utc) + datetime.timedelta(hours=6)
+        event_data["expired"] = datetime.datetime.now(tz=ZoneInfo("UTC")) + datetime.timedelta(hours=6)
         _event = RevolutionEvent.make_data_class(event_data)
         view = RevolutionView(self.bsebot, _event)
         interaction = discord_mocks.InteractionMock(_event.guild_id)
@@ -252,7 +252,7 @@ class TestRevolutionView:
         Needs to run with async as the parent class tries to get the running event loop.
         """
         event_data["open"] = True
-        event_data["expired"] = datetime.datetime.now(tz=pytz.utc) + datetime.timedelta(hours=6)
+        event_data["expired"] = datetime.datetime.now(tz=ZoneInfo("UTC")) + datetime.timedelta(hours=6)
         _event = RevolutionEvent.make_data_class(event_data)
         view = RevolutionView(self.bsebot, _event)
         for user in _event.users:

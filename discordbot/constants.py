@@ -136,6 +136,7 @@ JERK_OFF_CHAT = 470696533873000449
 # the bseddies awards money
 MONTHLY_AWARDS_PRIZE = 100
 ANNUAL_AWARDS_AWARD = 500
+STAT_DATETIME_FORMAT = "%b %y"
 
 # regex for recognising a message is wordle
 WORDLE_REGEX = r"Wordle \d?\,?\d\d\d [\dX]/\d\n\n"

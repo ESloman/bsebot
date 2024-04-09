@@ -91,6 +91,7 @@ class TestBSEddiesRevolutionTask:
     async def test_default_execution_create(self, timestamp: str) -> None:
         """Tests default execution with creating the event."""
         task = RevolutionTask(self.bsebot, [])
+        task.rev_started = {}
         with freeze_time(timestamp), mock.patch.object(task.giphy_api, "random_gif"):
             await task.revolution()
 

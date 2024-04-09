@@ -14,7 +14,6 @@ import inspect
 import discord
 from slomanlogger import SlomanLogger
 
-from apis.giphyapi import GiphyAPI
 from discordbot.bsebot import BSEBot
 
 # client events
@@ -96,7 +95,6 @@ class CommandManager:
     def __init__(  # noqa: PLR0915
         self: "CommandManager",
         client: BSEBot,
-        giphy_token: str | None = None,
     ) -> None:
         """Initialisation method.
 
@@ -118,19 +116,13 @@ class CommandManager:
 
         And finally, we call the two methods that actually register all the events and slash commands.
 
-        :param client: BSEBot object that represents our bot
-        :param logger:  logger object for logging
-        :param debug_mode: whether we're in debug mode or not
-        :param giphy_token:
-        :param github_token:
+        Args:
+            client (BSEBot): the authenticated client
         """
         self.client = client
         self.logger = SlomanLogger("bsebot")
-        self.giphy_token = giphy_token
 
         self.embeds = EmbedManager()
-
-        self.giphyapi = GiphyAPI(self.giphy_token)
 
         self.__get_cached_messages_list()
 
@@ -141,7 +133,7 @@ class CommandManager:
         self.on_message_edit = OnMessageEdit(client)
         self.on_member_join = OnMemberJoin(client)
         self.on_member_leave = OnMemberLeave(client)
-        self.direct_message = OnDirectMessage(client, self.giphyapi)
+        self.direct_message = OnDirectMessage(client)
         self.on_thread_create = OnThreadCreate(client)
         self.on_thread_update = OnThreadUpdate(client)
         self.on_emoji_create = OnEmojiCreate(client)
@@ -206,7 +198,7 @@ class CommandManager:
         self.bet_reminder_task = BetReminder(self.client, startup_tasks)
         self.eddie_gain_message_task = EddieGainMessager(self.client, startup_tasks)
         self.eddie_king_task = BSEddiesKingTask(self.client, startup_tasks)
-        self.revolution_task = RevolutionTask(self.client, startup_tasks, self.giphy_token)
+        self.revolution_task = RevolutionTask(self.client, startup_tasks)
         self.thread_task = ThreadSpoilerTask(self.client, startup_tasks)
         self.message_sync = MessageSync(self.client, startup_tasks, self.on_message)
         self.vally_task = AfterWorkVally(self.client, startup_tasks)

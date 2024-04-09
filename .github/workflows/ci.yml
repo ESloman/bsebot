@@ -102,7 +102,7 @@ jobs:
         run: |
           set -ux
           HASH=$(git rev-parse --short "$GITHUB_SHA")
-          docker run --rm --name bsebot --network="host" -e "DEBUG_MODE=1" -e "DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}" esloman/bsebot:sha-$HASH
+          docker run -d --rm --name bsebot --network="host" -e "DEBUG_MODE=1" -e "DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}" esloman/bsebot:sha-$HASH
           sleep 120
           docker logs bsebot > output.log 2>&1
           sleep 5

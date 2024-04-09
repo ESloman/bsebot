@@ -9,7 +9,6 @@ from bson import ObjectId
 from discordbot.clienteventclasses.baseeventclass import BaseEvent
 from discordbot.clienteventclasses.onmessageedit import OnMessageEdit
 from discordbot.constants import BSE_BOT_ID
-from discordbot.utilities import PlaceHolderLogger
 from mongo import interface
 from mongo.datatypes.message import MessageDB
 from tests.mocks import bsebot_mocks, discord_mocks, interface_mocks
@@ -21,7 +20,6 @@ class TestOnMessageEdit:
     @pytest.fixture(autouse=True)
     def _data(self) -> None:
         self.client = bsebot_mocks.BSEBotMock()
-        self.logger = PlaceHolderLogger
 
     def test_init(self) -> None:
         """Tests basic initialisation."""

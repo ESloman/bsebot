@@ -9,7 +9,6 @@ from freezegun import freeze_time
 
 from discordbot.constants import BSE_SERVER_ID
 from discordbot.tasks.celebrations import Celebrations
-from discordbot.utilities import PlaceHolderLogger
 from tests.mocks import bsebot_mocks
 
 
@@ -23,7 +22,6 @@ class TestCelebrations:
         Automatically called before each test.
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
-        self.logger = PlaceHolderLogger
 
     def test_init(self) -> None:
         """Tests if we can initialise the task."""

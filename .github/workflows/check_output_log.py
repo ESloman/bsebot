@@ -1,7 +1,7 @@
-"""Checks the output in output.log for any errors."""
+"""Checks the docker logs output of bsebot to check for errors."""
 
+import subprocess  # noqa: S404
 import sys
-from pathlib import Path
 
 DEBUG: bool = False
 
@@ -10,14 +10,14 @@ if __name__ == "__main__":
         print("Debug mode enabled.")
         DEBUG = True
 
-    path: Path = Path("output.log")
+    bytes_output: bytes = subprocess.check_output(["docker", "logs", "bsebot"])  # noqa: S603, S607
+    output: list[str] = str(bytes_output).split("\n")
     errors: int = 0
-    with open(path, encoding="utf-8") as output:
-        for line in output:
-            if any(x in line.lower() for x in ["error", "traceback", "exception"]):
-                errors += 1
-                if DEBUG:
-                    print(f"Line '{line.strip()}' was NOT clean - increased error count to {errors=}.")
-            elif DEBUG:
-                print(f"Line '{line.lower()}' was clean.")
+    for line in output:
+        if any(x in line.lower() for x in ["error", "traceback", "exception"]):
+            errors += 1
+            if DEBUG:
+                print(f"Line '{line.strip()}' was NOT clean - increased error count to {errors=}.")
+        elif DEBUG:
+            print(f"Line '{line.lower()}' was clean.")
     print(errors)

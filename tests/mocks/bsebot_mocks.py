@@ -7,6 +7,10 @@ from tests.mocks import discord_mocks, interface_mocks
 
 
 class BSEBotMock:
+    def __init__(self) -> None:
+        """Initialisation method."""
+        self._guilds = interface_mocks.query_mock("guilds", {})
+
     @property
     def user(self) -> discord_mocks.MemberMock:
         """Mocks the user property."""
@@ -15,8 +19,7 @@ class BSEBotMock:
     @property
     def guilds(self):
         """Mock for guilds property."""
-        _guilds = interface_mocks.query_mock("guilds", {})
-        return [discord_mocks.GuildMock(guild["guild_id"], guild["owner_id"], guild["name"]) for guild in _guilds]
+        return [discord_mocks.GuildMock(guild["guild_id"], guild["owner_id"], guild["name"]) for guild in self._guilds]
 
     def add_view(self, *args, **kwargs) -> None:
         """Mock for adding a view."""

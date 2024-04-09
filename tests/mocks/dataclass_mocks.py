@@ -1,8 +1,8 @@
 """Mocks for dataclasses."""
 
 import datetime
+from zoneinfo import ZoneInfo
 
-import pytz
 from bson import ObjectId
 
 from mongo.datatypes.bet import BetterDB, OptionDB
@@ -305,7 +305,7 @@ def get_channel_inputs() -> list[dict[str, any]]:
             "channel_id": 987654321,
             "name": "some-channel-name",
             "type": 5,
-            "created": datetime.datetime.now(tz=pytz.utc) - datetime.timedelta(days=x),
+            "created": datetime.datetime.now(tz=ZoneInfo("UTC")) - datetime.timedelta(days=x),
             "category_id": 123654789,
             "is_nsfw": x < 5,
         }

@@ -26,18 +26,24 @@ class OnMessageEdit(BaseEvent):
         super().__init__(client)
         self.on_message = discordbot.clienteventclasses.onmessage.OnMessage(client)
 
-    async def message_edit(self, before: discord.Message | None, after: discord.Message) -> None:
-        """Handles our on_message_edit and on_raw_message_edit events.
+    @staticmethod
+    def _check_condition(before: discord.Message | None, after: discord.Message) -> bool:
+        """Checks to see if we care about the message being edited.
 
         Args:
-            before (Optional[discord.Message]): the message before
-            after (discord.Message): the message after
+            before (discord.Message | None): message before
+            after (discord.Message): message after
+
+        Returns:
+            bool: whether to continue with this message or not
         """
         if after.flags.ephemeral or after.type == discord.MessageType.application_command:
-            return
+            # message is ephemeral or an application command
+            return False
 
         if after.embeds and after.author.id == BSE_BOT_ID:
-            return
+            # message is a bot message with embeds
+            return False
 
         if after.channel.type not in {
             discord.ChannelType.text,
@@ -47,10 +53,19 @@ class OnMessageEdit(BaseEvent):
             discord.ChannelType.private_thread,
             discord.ChannelType.news_thread,
         } or isinstance(after.channel, discord.DMChannel):
-            return
+            return False
 
-        if before and before.content == after.content and after.embeds and not before.embeds:
-            # edit is just adding an embed - skip
+        # edit is just adding an embed - skip
+        return not (before and before.content == after.content and after.embeds and not before.embeds)
+
+    async def message_edit(self, before: discord.Message | None, after: discord.Message) -> None:
+        """Handles our on_message_edit and on_raw_message_edit events.
+
+        Args:
+            before (Optional[discord.Message]): the message before
+            after (discord.Message): the message after
+        """
+        if not self._check_condition(before, after):
             return
 
         try:
@@ -67,7 +82,7 @@ class OnMessageEdit(BaseEvent):
             message_type = await self.on_message.message_received(after)
             db_message = self.interactions.get_message(guild_id, after.id)
             if not db_message:
-                self.logger.debug("Message couldn't be processed: %s %s", message_type, after)
+                self.logger.warning("Message couldn't be processed: %s %s", message_type, after)
                 return
 
         message_type = await self.on_message.message_received(after, True)

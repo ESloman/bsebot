@@ -3,9 +3,9 @@
 import datetime
 import random
 from unittest import mock
+from zoneinfo import ZoneInfo
 
 import pytest
-import pytz
 
 from discordbot.tasks.reminders import RemindersTask
 from mongo import interface
@@ -44,7 +44,7 @@ class TestRemindersTask:
     async def test_execution_with_open_reminders(self) -> None:
         """Tests default execution with open reminedrs."""
         task = RemindersTask(self.bsebot, [], start=False)
-        now = datetime.datetime.now(tz=pytz.utc)
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         reminder_data = interface_mocks.query_mock("reminders", {})[-5:]
         for reminder in reminder_data:
             reminder["active"] = True

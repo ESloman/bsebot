@@ -31,7 +31,6 @@ class TestEddieGainMessager:
         """Tests if we can initialise the task."""
         _ = EddieGainMessager(self.bsebot, [], start=False)
 
-    @pytest.mark.asyncio()
     async def test_not_execution_time(self) -> None:
         """Tests if running the task with the wrong time exits."""
         task = EddieGainMessager(self.bsebot, [], start=False)
@@ -39,7 +38,6 @@ class TestEddieGainMessager:
         result = await task.eddie_distributer()
         assert result is None
 
-    @pytest.mark.asyncio()
     @freeze_time("2024-01-01 07:30:01")
     async def test_execution(self) -> None:
         """Tests running the task."""

@@ -40,28 +40,49 @@ class EddieGainMessager(BaseTask):
         super().__init__(bot, startup_tasks)
         self.schedule = TaskSchedule(range(7), [7], 30)
         self.task = self.eddie_distributer
+        self._check_salary_time()
 
         self.eddie_manager = BSEddiesManager(self.bot, startup_tasks)
         if start:
             self.task.start()
 
+    def _check_salary_time(self) -> None:
+        """Checks the last salary time to see if we need to override the schedule."""
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
+
+        if now.hour < 7 or (now.hour == 7 and now.minute < 30):  # noqa: PLR2004
+            # will still trigger the salary time naturally
+            return
+
+        guilds = self.guilds.get_all_guilds()
+        for guild_id in [guild.guild_id for guild in guilds]:
+            guild_db = self.guilds.get_guild(guild_id)
+            if (last_salary_time := guild_db.last_salary_time) and last_salary_time.date() < now.date():
+                # override schedule to trigger ASAP
+                self.logger.warning("Missed daily salary for %s at %s", guild_db.name, last_salary_time.date())
+                self.schedule.overriden = True
+
     @tasks.loop(count=1)
-    async def eddie_distributer(self) -> None | list[dict]:  # noqa: PLR0912, C901
+    async def eddie_distributer(self) -> None | list[dict]:  # noqa: PLR0912, C901, PLR0915
         """Task that distributes daily eddies."""
         now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
-        if now.hour != 7 or now.minute != 30:  # noqa: PLR2004
+        if (now.hour != 7 or now.minute != 30) and not self.schedule.overriden:  # noqa: PLR2004
             self.logger.warning("Somehow task was started outside operational hours - %s?", now)
             return None
 
         data = []
         for guild_id in [guild.id for guild in self.bot.guilds]:
+            guild_db = self.guilds.get_guild(guild_id)
+
+            if (last_salary_time := guild_db.last_salary_time) and last_salary_time.date() == now.date():
+                self.logger.warning("Already did the salary for %s at %s", guild_db.name, last_salary_time.date())
+                continue
+
             eddie_dict = self.eddie_manager.give_out_eddies(guild_id, real=True)
             data.append(eddie_dict)
 
-            guild = await self.bot.fetch_guild(guild_id)  # type: discord.Guild
-            guild_db = self.guilds.get_guild(guild_id)
-
+            guild: discord.Guild = await self.bot.fetch_guild(guild_id)
             current_king_id = guild_db.king
 
             summary_message = "Eddie gain summary:\n"
@@ -122,6 +143,11 @@ class EddieGainMessager(BaseTask):
                 except discord.Forbidden:
                     # can't send DM messages to this user
                     self.logger.info("%s - %s", user.display_name, summary_message)
+
+            self.guilds.set_last_salary_time(guild_id, now)
+
+        self.schedule.overriden = False
+
         return data
 
     @eddie_distributer.before_loop

@@ -2,6 +2,7 @@
 
 import datetime
 from unittest import mock
+from zoneinfo import ZoneInfo
 
 import pytest
 
@@ -21,6 +22,17 @@ class TestGuilds:  # noqa: PLR0904
         assert isinstance(guilds, Guilds)
         assert guilds.database is not None
         assert guilds.vault is not None
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_guilds_get_all_guilds(self) -> None:
+        """Tests Guilds get_all_guilds method."""
+        guilds = Guilds()
+        guilds_dbs = guilds.get_all_guilds()
+        assert isinstance(guilds_dbs, list)
+        for guild in guilds_dbs:
+            assert isinstance(guild, GuildDB)
 
     @pytest.mark.parametrize(
         "guild_id",
@@ -195,6 +207,14 @@ class TestGuilds:  # noqa: PLR0904
         """Tests Guilds set_daily_minimum."""
         guilds = Guilds()
         guilds.set_daily_minimum(123456, 4)
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    def test_guilds_set_last_salary_time(self) -> None:
+        """Tests Guilds set_last_salary_time."""
+        guilds = Guilds()
+        guilds.set_last_salary_time(123456, datetime.datetime.now(tz=ZoneInfo("UTC")))
 
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)

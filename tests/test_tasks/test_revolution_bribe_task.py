@@ -1,6 +1,7 @@
 """Tests our revolution task."""
 
 import datetime
+import operator
 from unittest import mock
 from zoneinfo import ZoneInfo
 
@@ -33,7 +34,7 @@ class TestBSEddiesRevolutionTask:
         assert task.task.is_running()
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])[-1:]
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))[-1:]
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -47,7 +48,7 @@ class TestBSEddiesRevolutionTask:
         assert len(king_times.keys())
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])[-1:]
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))[-1:]
     )
     def test_guild_bribe_conditions_no_revolution(self, guild_data: dict[str, any]) -> None:
         """Tests guild bribe conditions with revolution not set."""
@@ -57,7 +58,7 @@ class TestBSEddiesRevolutionTask:
         assert not task._check_guild_bribe_conditions(guild_db, [])
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])[-1:]
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))[-1:]
     )
     def test_guild_bribe_conditions_no_open_events(self, guild_data: dict[str, any]) -> None:
         """Tests guild bribe conditions with no open events."""
@@ -67,7 +68,7 @@ class TestBSEddiesRevolutionTask:
         assert not task._check_guild_bribe_conditions(guild_db, [])
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])[-1:]
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))[-1:]
     )
     def test_guild_bribe_conditions_king_too_long(self, guild_data: dict[str, any]) -> None:
         """Tests guild bribe conditions with a long king."""
@@ -82,7 +83,7 @@ class TestBSEddiesRevolutionTask:
         assert not task._check_guild_bribe_conditions(guild_db, events)
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])[-1:]
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))[-1:]
     )
     def test_guild_bribe_conditions(self, guild_data: dict[str, any]) -> None:
         """Tests guild bribe conditions with a long king."""
@@ -97,7 +98,7 @@ class TestBSEddiesRevolutionTask:
         assert task._check_guild_bribe_conditions(guild_db, events)
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])[-1:]
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))[-1:]
     )
     def test_event_bribe_conditions_chance(self, guild_data: dict[str, any]) -> None:
         """Tests event bribe conditions with too low a chance."""
@@ -108,7 +109,7 @@ class TestBSEddiesRevolutionTask:
         assert not task._check_event_bribe_conditions(event_db)
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])[-1:]
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))[-1:]
     )
     def test_event_bribe_conditions_saved(self, guild_data: dict[str, any]) -> None:
         """Tests event bribe conditions with a few save attempts."""
@@ -120,7 +121,7 @@ class TestBSEddiesRevolutionTask:
         assert not task._check_event_bribe_conditions(event_db)
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])[-1:]
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))[-1:]
     )
     def test_event_bribe_conditions(self, guild_data: dict[str, any]) -> None:
         """Tests event bribe conditions."""
@@ -132,7 +133,7 @@ class TestBSEddiesRevolutionTask:
         assert task._check_event_bribe_conditions(event_db)
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])[-1:]
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))[-1:]
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -146,7 +147,7 @@ class TestBSEddiesRevolutionTask:
             assert not task._check_bribe_conditions(guild)
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])[-1:]
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))[-1:]
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -164,7 +165,7 @@ class TestBSEddiesRevolutionTask:
             assert not task._check_bribe_conditions(guild)
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])[-1:]
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))[-1:]
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -189,7 +190,7 @@ class TestBSEddiesRevolutionTask:
             assert not task._check_bribe_conditions(guild)
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])[-1:]
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))[-1:]
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -214,7 +215,7 @@ class TestBSEddiesRevolutionTask:
             assert not task._check_bribe_conditions(guild)
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])[-1:]
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))[-1:]
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -240,7 +241,7 @@ class TestBSEddiesRevolutionTask:
             assert not task._check_bribe_conditions(guild)
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])[:1]
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))[:1]
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)

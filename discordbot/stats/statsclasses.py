@@ -2221,8 +2221,7 @@ class StatsGatherer:  # noqa: PLR0904
             # last thing someone did was become KING
             uid = event.uid
             end_time = datetime.datetime.now(tz=ZoneInfo("UTC"))
-            if end_time > end:
-                end_time = end
+            end_time = max(end_time, end)
             timestamp = event.timestamp  # type: datetime.datetime
             time_king = (end_time - timestamp).total_seconds()
             if uid not in kings:

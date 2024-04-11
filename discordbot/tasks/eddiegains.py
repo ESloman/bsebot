@@ -132,6 +132,9 @@ class EddieGainMessager(BaseTask):
             # make sure admin list is unique
             for user_id in {*guild_db.admins, CREATOR, guild_db.owner_id}:
                 user_db = self.user_points.find_user(user_id, guild_id)
+                if not user_db:
+                    self.logger.warning("Couldn't find %s in %s", user_id, guild_db.name)
+                    continue
 
                 if not user_db.daily_summary:
                     # not configured to send summary messages

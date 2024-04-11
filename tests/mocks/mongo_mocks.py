@@ -4,7 +4,6 @@ import random
 
 from bson import ObjectId
 
-from mongo.datatypes.guild import GuildDB
 from mongo.datatypes.user import UserDB
 
 
@@ -122,11 +121,3 @@ class UserPointsMock:
             points=random.randint(10, 4567),
             daily_eddies=user_id % 2 == 0,
         )
-
-
-class GuildsMock:
-    """Mock Guilds class."""
-
-    def get_guild(self, guild_id: int) -> GuildDB:
-        """Mock for get_guild."""
-        return GuildDB(_id=ObjectId(), guild_id=guild_id, king=3, admins=[], owner_id=guild_id, name="somename")

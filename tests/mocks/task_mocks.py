@@ -4,19 +4,21 @@ import random
 from collections import Counter
 
 from discordbot.constants import HUMAN_MESSAGE_TYPES
+from tests.mocks import interface_mocks
 
 
-def mock_eddie_manager_give_out_eddies(_: int, real: bool) -> dict:
+def mock_eddie_manager_give_out_eddies(guild_id: int, real: bool) -> dict:
     """Mocks the give out eddies function."""
+    uids = [x["uid"] for x in interface_mocks.query_mock("userpoints", {"guild_id": guild_id})]
     data = {}
     for _x in range(5):  # noqa: B007
-        uid = random.randint(123456, 654321)
+        uid = random.choice(uids)
         message_types = random.choices(list(HUMAN_MESSAGE_TYPES.keys()), k=5)
         mock_breakdown = {_type: random.randint(0, 10) for _type in message_types}
         eddies = sum(mock_breakdown.values())
         tax = random.randint(0, 10)
         data[uid] = [eddies, mock_breakdown, tax]
-    data[123500] = [0, {}, 0]
+    data[random.choice(uids)] = [0, {}, 0]
     return data
 
 

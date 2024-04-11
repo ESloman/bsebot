@@ -2,6 +2,7 @@ pytest
 ruff
 pytest-asyncio
 pytest-cov
+pytest-timeout
 pytest-xdist
 coverage
 freezegun

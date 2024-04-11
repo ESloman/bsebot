@@ -117,4 +117,5 @@ class TestWordleReminder:
     async def test_default_execution_reminders(self) -> None:
         """Tests execution where reminders are needed."""
         task = WordleReminder(self.bsebot, [], start=False)
-        await task.wordle_reminder()
+        with mock.patch("discordbot.utilities.calculate_message_odds", new=lambda *args: [(x, 1) for x in args[2]]):
+            await task.wordle_reminder()

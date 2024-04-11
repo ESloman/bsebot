@@ -60,7 +60,7 @@ jobs:
           pip install -r requirements.txt -r test-requirements.txt
       - name: Pytest + Coverage
         run: |
-          pytest -n 8 --cov=. --cov-report xml --cov-branch --durations=50
+          pytest -r fEs -n 8 --cov=. --cov-report xml --cov-branch --durations=50
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:

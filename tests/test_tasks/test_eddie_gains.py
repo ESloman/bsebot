@@ -24,11 +24,17 @@ class TestEddieGainMessager:
         """
         self.bsebot = bsebot_mocks.BSEBotMock()
 
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     def test_init(self) -> None:
         """Tests if we can initialise the task."""
         _ = EddieGainMessager(self.bsebot, [], start=False)
 
     @freeze_time("2024-01-01 08:30:01")
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
     async def test_not_execution_time(self) -> None:
         """Tests if running the task with the wrong time exits."""
         task = EddieGainMessager(self.bsebot, [], start=False)
@@ -46,8 +52,12 @@ class TestEddieGainMessager:
         """Tests if running the task with the wrong time but overriden works."""
         task = EddieGainMessager(self.bsebot, [], start=False)
         task.schedule.overriden = True
-        result = await task.eddie_distributer()
-        assert result is not None
+        with (
+            mock.patch.object(task.eddie_manager, "give_out_eddies", new=task_mocks.mock_eddie_manager_give_out_eddies),
+        ):
+            result = await task.eddie_distributer()
+            assert isinstance(result, list)
+            assert len(result) > 0
 
     @freeze_time("2024-01-01 07:30:01")
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)

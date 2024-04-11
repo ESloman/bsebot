@@ -3,6 +3,7 @@
 import asyncio
 import datetime
 import math
+import operator
 import re
 from collections import Counter
 from zoneinfo import ZoneInfo
@@ -333,7 +334,7 @@ class BSEddiesManager(BaseTask):
         # handle VC stuff here
         # VC events are different as we want to work out eddies on time spent in VC
         vc_joined_events = [vc for vc in user_results if "vc_joined" in vc.message_type]
-        vc_total_time = sum([vc.time_in_vc for vc in vc_joined_events])
+        vc_total_time = sum(vc.time_in_vc for vc in vc_joined_events)
         vc_eddies = vc_total_time * MESSAGE_VALUES["vc_joined"]
 
         if vc_total_time:
@@ -343,7 +344,7 @@ class BSEddiesManager(BaseTask):
         eddies_gained += vc_eddies
 
         vc_streaming_events = [vc for vc in user_results if "vc_streaming" in vc.message_type]
-        stream_total_time = sum([vc.time_streaming for vc in vc_streaming_events])
+        stream_total_time = sum(vc.time_streaming for vc in vc_streaming_events)
         stream_eddies = stream_total_time * MESSAGE_VALUES["vc_streaming"]
 
         if stream_total_time:
@@ -474,7 +475,7 @@ class BSEddiesManager(BaseTask):
 
         # do wordle here
         if wordle_messages:
-            wordle_messages = sorted(wordle_messages, key=lambda x: x[1])
+            wordle_messages = sorted(wordle_messages, key=operator.itemgetter(1))
             top_guess = wordle_messages[0][1]
 
             if bot_guesses < top_guess:

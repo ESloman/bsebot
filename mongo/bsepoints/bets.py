@@ -112,7 +112,7 @@ class UserBets(BaseClass):
         Returns:
             int: total eddies
         """
-        return sum([better.points for better in bet.betters.values()])
+        return sum(better.points for better in bet.betters.values())
 
     def get_all_active_bets(self, guild_id: int) -> list[BetDB]:
         """Gets all active bets.

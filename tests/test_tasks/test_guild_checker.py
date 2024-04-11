@@ -1,5 +1,6 @@
 """Tests our guild checker task."""
 
+import operator
 from unittest import mock
 
 import pytest
@@ -29,7 +30,7 @@ class TestGuildChecker:
         _ = GuildChecker(self.bsebot, [], self.place, self.close, start=False)
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -44,7 +45,7 @@ class TestGuildChecker:
         assert guild_db.guild_id == guild_data["guild_id"]
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -73,7 +74,7 @@ class TestGuildChecker:
         assert guild_db.guild_id == 123456
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -87,7 +88,7 @@ class TestGuildChecker:
         await checker._check_guild_members(guild)
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -101,7 +102,7 @@ class TestGuildChecker:
         await checker._check_guild_emojis(guild)
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -115,7 +116,7 @@ class TestGuildChecker:
         await checker._check_guild_stickers(guild)
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -129,7 +130,7 @@ class TestGuildChecker:
         await checker._check_guild_join_threads(guild)
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -143,7 +144,7 @@ class TestGuildChecker:
         await checker._check_threads(guild)
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -155,7 +156,7 @@ class TestGuildChecker:
         checker._check_events(guild)
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -167,7 +168,7 @@ class TestGuildChecker:
         await checker._check_bets(guild)
 
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)

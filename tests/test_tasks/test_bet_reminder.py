@@ -1,6 +1,7 @@
 """Tests our bet reminder task."""
 
 import datetime
+import operator
 from typing import TYPE_CHECKING
 from unittest import mock
 from zoneinfo import ZoneInfo
@@ -32,7 +33,7 @@ class TestBetReminder:
         _ = BetReminder(self.bsebot, [], start=False)
 
     @pytest.mark.parametrize(
-        "bet_data", sorted(interface_mocks.query_mock("userbets", {})[-10:], key=lambda x: x["bet_id"])
+        "bet_data", sorted(interface_mocks.query_mock("userbets", {})[-10:], key=operator.itemgetter("bet_id"))
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -48,7 +49,7 @@ class TestBetReminder:
         assert success
 
     @pytest.mark.parametrize(
-        "bet_data", sorted(interface_mocks.query_mock("userbets", {})[-10:], key=lambda x: x["bet_id"])
+        "bet_data", sorted(interface_mocks.query_mock("userbets", {})[-10:], key=operator.itemgetter("bet_id"))
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -63,7 +64,7 @@ class TestBetReminder:
         assert not success
 
     @pytest.mark.parametrize(
-        "bet_data", sorted(interface_mocks.query_mock("userbets", {})[-10:], key=lambda x: x["bet_id"])
+        "bet_data", sorted(interface_mocks.query_mock("userbets", {})[-10:], key=operator.itemgetter("bet_id"))
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -79,7 +80,7 @@ class TestBetReminder:
         assert not success
 
     @pytest.mark.parametrize(
-        "bet_data", sorted(interface_mocks.query_mock("userbets", {})[-10:], key=lambda x: x["bet_id"])
+        "bet_data", sorted(interface_mocks.query_mock("userbets", {})[-10:], key=operator.itemgetter("bet_id"))
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -96,7 +97,7 @@ class TestBetReminder:
         assert not success
 
     @pytest.mark.parametrize(
-        "bet_data", sorted(interface_mocks.query_mock("userbets", {})[-10:], key=lambda x: x["bet_id"])
+        "bet_data", sorted(interface_mocks.query_mock("userbets", {})[-10:], key=operator.itemgetter("bet_id"))
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -113,7 +114,7 @@ class TestBetReminder:
         assert success
 
     @pytest.mark.parametrize(
-        "bet_data", sorted(interface_mocks.query_mock("userbets", {})[-10:], key=lambda x: x["bet_id"])
+        "bet_data", sorted(interface_mocks.query_mock("userbets", {})[-10:], key=operator.itemgetter("bet_id"))
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)

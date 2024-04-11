@@ -188,10 +188,8 @@ class BetManager:
             "winners": {},
         }
 
-        total_eddies_bet = sum([bet.betters[b].points for b in bet.betters])
-        winning_outcome_eddies = sum(
-            [bet.betters[b].points for b in bet.betters if bet.betters[b].emoji in emoji],
-        )
+        total_eddies_bet = sum(bet.betters[b].points for b in bet.betters)
+        winning_outcome_eddies = sum(bet.betters[b].points for b in bet.betters if bet.betters[b].emoji in emoji)
 
         multiplier, coefficient = self.calculate_bet_modifiers(
             total_eddies_bet,

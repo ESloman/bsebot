@@ -148,7 +148,7 @@ class WordleSolver:
                 if row[0] == "word" and row[1] == "count":
                     continue
                 words_f[row[0]] = int(row[1])
-        _sum = sum([words_f[i] for i in words_f if len(i) == WORDLE_WORD_LENGTH])
+        _sum = sum(words_f[i] for i in words_f if len(i) == WORDLE_WORD_LENGTH)
         return {word: float(words_f[word]) / _sum for word in words_f if len(word) == WORDLE_WORD_LENGTH}
 
     def _pick_starting_word(self) -> str:

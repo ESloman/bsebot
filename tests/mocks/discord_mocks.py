@@ -207,7 +207,7 @@ class GuildMock:
     def __init__(self, guild_id: int, owner_id: int | None = None, name: str = "") -> None:
         """Init."""
         self._id = guild_id
-        self._owner_id = owner_id if owner_id else 987654
+        self._owner_id = owner_id or 987654
         self._created_at = datetime.datetime.now()
         self._name = name
 

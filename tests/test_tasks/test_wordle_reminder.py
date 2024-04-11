@@ -1,6 +1,7 @@
 """Tests our wordle reminder task."""
 
 import datetime
+import operator
 from unittest import mock
 from zoneinfo import ZoneInfo
 
@@ -38,7 +39,7 @@ class TestWordleReminder:
 
     @freeze_time("2024/01/01 19:30")
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -56,7 +57,7 @@ class TestWordleReminder:
 
     @freeze_time("2024/01/01 19:30")
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -82,7 +83,7 @@ class TestWordleReminder:
 
     @freeze_time("2024/01/08 19:30")
     @pytest.mark.parametrize(
-        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=lambda x: x["guild_id"])
+        "guild_data", sorted(interface_mocks.query_mock("guilds", {}), key=operator.itemgetter("guild_id"))
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)

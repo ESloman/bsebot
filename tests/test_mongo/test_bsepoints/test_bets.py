@@ -1,5 +1,6 @@
 """Tests our UserBets class."""
 
+import operator
 from unittest import mock
 
 import pytest
@@ -184,7 +185,7 @@ class TestUserBets:
         # load list of entries dynamically
         [
             (entry["guild_id"], entry["user"], entry["option_dict"])
-            for entry in sorted(_get_bet_data(100), key=lambda x: x["_id"])
+            for entry in sorted(_get_bet_data(100), key=operator.itemgetter("_id"))
         ],
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
@@ -214,7 +215,7 @@ class TestUserBets:
 
     @pytest.mark.parametrize(
         "bet",
-        [UserBets.make_data_class(entry) for entry in sorted(_get_bet_data(50), key=lambda x: x["_id"])],
+        [UserBets.make_data_class(entry) for entry in sorted(_get_bet_data(50), key=operator.itemgetter("_id"))],
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -241,7 +242,7 @@ class TestUserBets:
 
     @pytest.mark.parametrize(
         "bet",
-        [UserBets.make_data_class(entry) for entry in sorted(_get_bet_data(5), key=lambda x: x["_id"])],
+        [UserBets.make_data_class(entry) for entry in sorted(_get_bet_data(5), key=operator.itemgetter("_id"))],
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -258,7 +259,7 @@ class TestUserBets:
 
     @pytest.mark.parametrize(
         "bet",
-        [UserBets.make_data_class(entry) for entry in sorted(_get_bet_data(50), key=lambda x: x["_id"])],
+        [UserBets.make_data_class(entry) for entry in sorted(_get_bet_data(50), key=operator.itemgetter("_id"))],
     )
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
     @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
@@ -279,7 +280,7 @@ class TestUserBets:
         "bet",
         [
             UserBets.make_data_class(entry)
-            for entry in sorted(_get_bet_data(100), key=lambda x: x["_id"])
+            for entry in sorted(_get_bet_data(100), key=operator.itemgetter("_id"))
             if entry.get("betters")
         ],
     )
@@ -301,7 +302,7 @@ class TestUserBets:
         "bet",
         [
             UserBets.make_data_class(entry)
-            for entry in sorted(_get_bet_data(50), key=lambda x: x["_id"])
+            for entry in sorted(_get_bet_data(50), key=operator.itemgetter("_id"))
             if entry.get("betters")
         ],
     )

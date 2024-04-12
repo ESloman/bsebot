@@ -188,7 +188,7 @@ class EddieGainMessager(BaseTask):
         """Task that distributes daily eddies."""
         now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
-        if now.hour != 7 or now.minute != 30:  # noqa: PLR2004
+        if (now.hour != 7 or now.minute != 30) and not self.schedule.overriden:  # noqa: PLR2004
             self.logger.warning("Somehow task was started outside operational hours - %s?", now)
             return None
 

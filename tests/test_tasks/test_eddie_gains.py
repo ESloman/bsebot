@@ -56,7 +56,7 @@ class TestEddieGainMessager:
             mock.patch.object(task.eddie_manager, "give_out_eddies", new=task_mocks.mock_eddie_manager_give_out_eddies),
         ):
             result = await task.eddie_distributer()
-            assert isinstance(result, list)
+            assert isinstance(result, dict)
             assert len(result) > 0
 
     @freeze_time("2024-01-01 07:30:01")

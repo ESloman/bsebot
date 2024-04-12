@@ -40,6 +40,15 @@ class Guilds(BaseClass):  # noqa: PLR0904
         """
         return GuildDB(**data)
 
+    def get_all_guilds(self) -> list[GuildDB]:
+        """Gets all the guilds from the database.
+
+        Returns:
+            list[GuildDB]: the list of guilds
+        """
+        results: list[GuildDB] = self.query({}, projection={"tax_rate_history": False, "king_history": False})
+        return results
+
     def get_guild(self, guild_id: int) -> GuildDB | None:
         """Gets an already created guild document from the database.
 
@@ -215,6 +224,18 @@ class Guilds(BaseClass):  # noqa: PLR0904
             UpdateResult: update result
         """
         return self.update({"guild_id": guild_id}, {"$set": {"daily_minimum": amount}})
+
+    def set_last_salary_time(self, guild_id: int, timestamp: datetime.datetime) -> UpdateResult:
+        """Sets the last salary time for a given guild ID.
+
+        Args:
+            guild_id (int): guild ID to update
+            timestamp (datetime.datetime): the timestamp to set it to
+
+        Returns:
+            UpdateResult: update result
+        """
+        return self.update({"guild_id": guild_id}, {"$set": {"last_salary_time": timestamp}})
 
     #
     #  Tax stuff

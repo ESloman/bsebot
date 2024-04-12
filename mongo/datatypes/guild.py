@@ -31,6 +31,8 @@ class GuildDB(NamedDBObject):
     """The eddies tax rate for supporters."""
     tax_rate_history: list[dict[str, any]] = dataclasses.field(default_factory=list)
     """The tax rate history."""
+    last_salary_time: datetime.datetime | None = None
+    """The last time a salary event was triggered for this guild."""
 
     # KING stuff
     role: int | None = None

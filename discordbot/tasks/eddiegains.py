@@ -3,6 +3,7 @@
 import asyncio
 import datetime
 import math
+import operator
 import re
 from collections import Counter
 from zoneinfo import ZoneInfo
@@ -41,6 +42,7 @@ class EddieGainMessager(BaseTask):
         super().__init__(bot, startup_tasks)
         self.schedule = TaskSchedule(range(7), [7], 30)
         self.task = self.eddie_distributer
+        self._check_salary_time()
 
         self.eddie_manager = BSEddiesManager(self.bot, startup_tasks)
         if start:
@@ -61,6 +63,22 @@ class EddieGainMessager(BaseTask):
                 detailed_message += " seconds"
         detailed_message += "\n\n"
         return detailed_message
+
+    def _check_salary_time(self) -> None:
+        """Checks the last salary time to see if we need to override the schedule."""
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
+
+        if now.hour < 7 or (now.hour == 7 and now.minute < 30):  # noqa: PLR2004
+            # will still trigger the salary time naturally
+            return
+
+        guilds = self.guilds.get_all_guilds()
+        for guild_id in [guild.guild_id for guild in guilds]:
+            guild_db = self.guilds.get_guild(guild_id)
+            if (last_salary_time := guild_db.last_salary_time) and last_salary_time.date() < now.date():
+                # override schedule to trigger ASAP
+                self.logger.warning("Missed daily salary for %s at %s", guild_db.name, last_salary_time.date())
+                self.schedule.overriden = True
 
     def _format_guild_admin_message(self, guild_id: int, user_eddies: dict[int, list[int]]) -> str:
         guild_db = self.guilds.get_guild(guild_id)
@@ -151,6 +169,9 @@ class EddieGainMessager(BaseTask):
             summary_message = self._format_guild_admin_message(guild_id, data[guild_id])
             for user_id in {*guild_db.admins, CREATOR, guild_db.owner_id}:
                 user_db = self.user_points.find_user(user_id, guild_id)
+                if not user_db:
+                    self.logger.warning("Couldn't find %s in %s", user_id, guild_db.name)
+                    continue
 
                 if not user_db.daily_summary:
                     # not configured to send summary messages
@@ -177,6 +198,11 @@ class EddieGainMessager(BaseTask):
         user_to_eddies: dict[int, dict[int, list[int]]] = {}
         guilds: dict[int, GuildDB] = {}
         for guild_id in [guild.id for guild in self.bot.guilds]:
+            guild_db = self.guilds.get_guild(guild_id)
+            if (last_salary_time := guild_db.last_salary_time) and last_salary_time.date() == now.date():
+                self.logger.warning("Already did the salary for %s at %s", guild_db.name, last_salary_time.date())
+                continue
+            guilds[guild_id] = guild_db
             # actually calculate and give the users their earnt eddies
             eddie_dict = self.eddie_manager.give_out_eddies(guild_id, real=True)
             for user_id in eddie_dict:
@@ -184,9 +210,7 @@ class EddieGainMessager(BaseTask):
                     user_to_eddies[user_id] = {}
                 user_to_eddies[user_id][guild_id] = eddie_dict[user_id]
             data[guild_id] = eddie_dict
-
-            guild_db = self.guilds.get_guild(guild_id)
-            guilds[guild_id] = guild_db
+            self.guilds.set_last_salary_time(guild_id, now)
 
         await self._send_user_summaries(guilds, user_to_eddies)
         await self._send_guild_admin_summaries(guilds, data)
@@ -373,7 +397,7 @@ class BSEddiesManager(BaseTask):
         # handle VC stuff here
         # VC events are different as we want to work out eddies on time spent in VC
         vc_joined_events = [vc for vc in user_results if "vc_joined" in vc.message_type]
-        vc_total_time = sum([vc.time_in_vc for vc in vc_joined_events])
+        vc_total_time = sum(vc.time_in_vc for vc in vc_joined_events)
         vc_eddies = vc_total_time * MESSAGE_VALUES["vc_joined"]
 
         if vc_total_time:
@@ -383,7 +407,7 @@ class BSEddiesManager(BaseTask):
         eddies_gained += vc_eddies
 
         vc_streaming_events = [vc for vc in user_results if "vc_streaming" in vc.message_type]
-        stream_total_time = sum([vc.time_streaming for vc in vc_streaming_events])
+        stream_total_time = sum(vc.time_streaming for vc in vc_streaming_events)
         stream_eddies = stream_total_time * MESSAGE_VALUES["vc_streaming"]
 
         if stream_total_time:
@@ -514,7 +538,7 @@ class BSEddiesManager(BaseTask):
 
         # do wordle here
         if wordle_messages:
-            wordle_messages = sorted(wordle_messages, key=lambda x: x[1])
+            wordle_messages = sorted(wordle_messages, key=operator.itemgetter(1))
             top_guess = wordle_messages[0][1]
 
             if bot_guesses < top_guess:

@@ -73,14 +73,22 @@ class EddieGainMessager(BaseTask):
             return
 
         guilds = self.guilds.get_all_guilds()
-        for guild_id in [guild.guild_id for guild in guilds]:
-            guild_db = self.guilds.get_guild(guild_id)
+        for guild_db in guilds:
             if (last_salary_time := guild_db.last_salary_time) and last_salary_time.date() < now.date():
                 # override schedule to trigger ASAP
                 self.logger.warning("Missed daily salary for %s at %s", guild_db.name, last_salary_time.date())
                 self.schedule.overriden = True
 
     def _format_guild_admin_message(self, guild_id: int, user_eddies: dict[int, list[int]]) -> str:
+        """Formats an admin salary summary for a specific guild.
+
+        Args:
+            guild_id (int): the guild ID
+            user_eddies (dict[int, list[int]]): the data
+
+        Returns:
+            str: the formatted message
+        """
         guild_db = self.guilds.get_guild(guild_id)
         message = f"## {guild_db.name} Admin Salary Summary"
         for user_id, data in user_eddies.items():

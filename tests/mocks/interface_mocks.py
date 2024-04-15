@@ -3,10 +3,10 @@
 import contextlib
 import copy
 import datetime
-import json
 import pathlib
 from difflib import SequenceMatcher
 
+import orjson
 from bson import ObjectId
 
 _CURRENT_DIR = pathlib.Path(pathlib.Path(__file__).parents[0])
@@ -62,11 +62,10 @@ def query_mock(  # noqa: C901, PLR0912, PLR0915
     else:
         if not path.exists():
             return []
-        with open(path, encoding="utf-8") as json_file:
-            all_data = json.load(json_file)
-            for entry in all_data:
-                _datetime_convert(entry)
-            _CACHE[path] = all_data
+        all_data = orjson.loads(path.read_text(encoding="utf-8"))
+        for entry in all_data:
+            _datetime_convert(entry)
+        _CACHE[path] = all_data
 
     # search all data for matching parameters
     _filtered_data = all_data

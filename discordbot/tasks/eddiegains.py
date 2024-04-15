@@ -93,6 +93,9 @@ class EddieGainMessager(BaseTask):
         message = f"## {guild_db.name} Admin Salary Summary"
         for user_id, data in user_eddies.items():
             user_db = self.user_points.find_user(user_id, guild_id)
+            if not user_db:
+                self.logger.warning("Couldn't find %s in %s (%s). Skipping.", user_id, guild_id, guild_db.name)
+                continue
             value, _, tax = data
             message += f"- {user_db}: `{value}` (tax: _{tax}_)\n"
         return message
@@ -113,7 +116,10 @@ class EddieGainMessager(BaseTask):
         message = "# BSEBot Daily Salary Summary\n\n"
         detailed_message: str = ""
         for guild_id in user_eddies:
-            user_db = self.user_points.find_user(int(user_id), guild_id)
+            try:
+                user_db = self.user_points.find_user(int(user_id), guild_id)
+            except IndexError:
+                self.logger.debug("User ID: %s, guild ID: %s, guild name: %s", user_id, guild_id, guilds[guild_id].name)
             if not user_db.daily_eddies:
                 self.logger.trace("User, %s, is not configured to receive summaries for %s.", user_id, guild_id)
                 continue

@@ -116,10 +116,7 @@ class EddieGainMessager(BaseTask):
         message = "# BSEBot Daily Salary Summary\n\n"
         detailed_message: str = ""
         for guild_id in user_eddies:
-            try:
-                user_db = self.user_points.find_user(int(user_id), guild_id)
-            except IndexError:
-                self.logger.debug("User ID: %s, guild ID: %s, guild name: %s", user_id, guild_id, guilds[guild_id].name)
+            user_db = self.user_points.find_user(int(user_id), guild_id)
             if not user_db.daily_eddies:
                 self.logger.trace("User, %s, is not configured to receive summaries for %s.", user_id, guild_id)
                 continue

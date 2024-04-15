@@ -1,6 +1,8 @@
 """Tests our eddie gains task."""
 
+import copy
 import datetime
+import random
 from collections import Counter
 from unittest import mock
 from zoneinfo import ZoneInfo
@@ -8,8 +10,12 @@ from zoneinfo import ZoneInfo
 import pytest
 from freezegun import freeze_time
 
+from discordbot.constants import HUMAN_MESSAGE_TYPES
 from discordbot.tasks.eddiegains import BSEddiesManager, EddieGainMessager
 from mongo import interface
+from mongo.bsepoints.guilds import Guilds
+from mongo.bsepoints.points import UserPoints
+from mongo.datatypes.user import UserDB
 from tests.mocks import bsebot_mocks, interface_mocks, task_mocks
 
 
@@ -30,6 +36,49 @@ class TestEddieGainMessager:
     def test_init(self) -> None:
         """Tests if we can initialise the task."""
         _ = EddieGainMessager(self.bsebot, [], start=False)
+
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_format_detailed_breakdown_message_part(self) -> None:
+        """Tests formatting a breakdown."""
+        task = EddieGainMessager(self.bsebot, [], start=False)
+        breakdown = dict.fromkeys(HUMAN_MESSAGE_TYPES, int(random.random() * random.randint(1, 100)))
+        message = task._format_detailed_breakdown_message_part(breakdown, "My cool guild")
+        assert isinstance(message, str)
+        assert "### My cool guild" in message
+        for value in HUMAN_MESSAGE_TYPES.values():
+            assert value in message
+
+    @freeze_time("2024-01-01 04:30:01")
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_check_salary_time_false(self) -> None:
+        """Tests checking salary time when there's still time to trigger."""
+        task = EddieGainMessager(self.bsebot, [], start=False)
+        with mock.patch.object(task.guilds, "get_all_guilds") as get_all_guilds:
+            assert task._check_salary_time() is None
+            assert not get_all_guilds.call_count
+
+    @freeze_time("2024-01-01 08:30:01")
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    def test_check_salary_time(self) -> None:
+        """Tests checking salary time when there's still time to trigger."""
+        # setup
+        guilds = [copy.deepcopy(guild) for guild in interface_mocks.query_mock("guilds", {})]
+        assert len(guilds) >= 2
+        now = datetime.datetime.now(tz=ZoneInfo("UTC"))
+        guilds[0]["last_salary_time"] = now.replace(hour=7, minute=30)
+        guilds[1]["last_salary_time"] = now - datetime.timedelta(days=1)
+        guild_dbs = [Guilds.make_data_class(guild) for guild in guilds]
+        task = EddieGainMessager(self.bsebot, [], start=False)
+        task.schedule.overriden = False
+        with mock.patch.object(task.guilds, "get_all_guilds", new=lambda: guild_dbs):  # noqa: PT008
+            task._check_salary_time()
+            assert task.schedule.overriden
 
     @freeze_time("2024-01-01 08:30:01")
     @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
@@ -56,7 +105,7 @@ class TestEddieGainMessager:
             mock.patch.object(task.eddie_manager, "give_out_eddies", new=task_mocks.mock_eddie_manager_give_out_eddies),
         ):
             result = await task.eddie_distributer()
-            assert isinstance(result, list)
+            assert isinstance(result, dict)
             assert len(result) > 0
 
     @freeze_time("2024-01-01 07:30:01")
@@ -66,13 +115,89 @@ class TestEddieGainMessager:
     @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
     async def test_execution(self) -> None:
         """Tests running the task."""
-        task = EddieGainMessager(self.bsebot, [123], start=False)
+        task = EddieGainMessager(self.bsebot, [], start=False)
 
         with (
             mock.patch.object(task.eddie_manager, "give_out_eddies", new=task_mocks.mock_eddie_manager_give_out_eddies),
         ):
             result = await task.eddie_distributer()
-            assert isinstance(result, list)
+            assert isinstance(result, dict)
+            assert len(result) > 0
+
+    @freeze_time("2024-01-01 07:30:01")
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    async def test_execution_enable_daily_eddies(self) -> None:
+        """Tests running the task but ensuring daily_eddies is set."""
+        task = EddieGainMessager(self.bsebot, [], start=False)
+
+        def _find_user_replacement(user_id: int, guild_id: int) -> UserDB | None:
+            try:
+                user = interface_mocks.query_mock("userpoints", {"uid": user_id, "guild_id": guild_id})[0]
+            except IndexError:
+                return None
+            user["daily_eddies"] = True
+            return UserPoints.make_data_class(user)
+
+        with (
+            mock.patch.object(task.eddie_manager, "give_out_eddies", new=task_mocks.mock_eddie_manager_give_out_eddies),
+            mock.patch.object(task.user_points, "find_user", new=_find_user_replacement),
+        ):
+            result = await task.eddie_distributer()
+            assert isinstance(result, dict)
+            assert len(result) > 0
+
+    @freeze_time("2024-01-01 07:30:01")
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    async def test_execution_enable_disable_daily_eddies(self) -> None:
+        """Tests running the task but ensuring daily_eddies is not set."""
+        task = EddieGainMessager(self.bsebot, [], start=False)
+
+        def _find_user_replacement(user_id: int, guild_id: int) -> UserDB | None:
+            try:
+                user = interface_mocks.query_mock("userpoints", {"uid": user_id, "guild_id": guild_id})[0]
+            except IndexError:
+                return None
+            user["daily_eddies"] = False
+            return UserPoints.make_data_class(user)
+
+        with (
+            mock.patch.object(task.eddie_manager, "give_out_eddies", new=task_mocks.mock_eddie_manager_give_out_eddies),
+            mock.patch.object(task.user_points, "find_user", new=_find_user_replacement),
+        ):
+            result = await task.eddie_distributer()
+            assert isinstance(result, dict)
+            assert len(result) > 0
+
+    @freeze_time("2024-01-01 07:30:01")
+    @mock.patch.object(interface, "get_collection", new=interface_mocks.get_collection_mock)
+    @mock.patch.object(interface, "get_database", new=interface_mocks.get_database_mock)
+    @mock.patch.object(interface, "query", new=interface_mocks.query_mock)
+    @mock.patch.object(interface, "update", new=interface_mocks.update_mock)
+    async def test_execution_enable_enable_detailed_mode(self) -> None:
+        """Tests running the task but ensuring detailed mode is set."""
+        task = EddieGainMessager(self.bsebot, [], start=False)
+
+        def _find_user_replacement(user_id: int, guild_id: int) -> UserDB | None:
+            try:
+                user = interface_mocks.query_mock("userpoints", {"uid": user_id, "guild_id": guild_id})[0]
+            except IndexError:
+                return None
+            user["daily_eddies"] = True
+            user["summary_detailed_mode"] = True
+            return UserPoints.make_data_class(user)
+
+        with (
+            mock.patch.object(task.eddie_manager, "give_out_eddies", new=task_mocks.mock_eddie_manager_give_out_eddies),
+            mock.patch.object(task.user_points, "find_user", new=_find_user_replacement),
+        ):
+            result = await task.eddie_distributer()
+            assert isinstance(result, dict)
             assert len(result) > 0
 
 

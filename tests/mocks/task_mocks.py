@@ -9,16 +9,15 @@ from tests.mocks import interface_mocks
 
 def mock_eddie_manager_give_out_eddies(guild_id: int, real: bool) -> dict:
     """Mocks the give out eddies function."""
-    uids = [x["uid"] for x in interface_mocks.query_mock("userpoints", {"guild_id": guild_id})]
+    uids = [x["uid"] for x in interface_mocks.query_mock("userpoints", {"guild_id": guild_id, "inactive": False})][-5:]
     data = {}
-    for _x in range(5):  # noqa: B007
-        uid = random.choice(uids)
+    for uid in uids:
         message_types = random.choices(list(HUMAN_MESSAGE_TYPES.keys()), k=5)
         mock_breakdown = {_type: random.randint(0, 10) for _type in message_types}
         eddies = sum(mock_breakdown.values())
         tax = random.randint(0, 10)
         data[uid] = [eddies, mock_breakdown, tax]
-    data[random.choice(uids)] = [0, {}, 0]
+    data[uids[-1]] = [0, {}, 0]
     return data
 
 

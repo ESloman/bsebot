@@ -1,6 +1,7 @@
 FROM python:3.12.3-slim
 
-RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
+RUN apt-get update && apt-get -yq install gnupg2 \
+    && wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
     && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
     && apt-get update \
     && apt-get install -yq jq tzdata nano unzip google-chrome-stable \

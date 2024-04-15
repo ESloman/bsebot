@@ -1,5 +1,6 @@
 """Tests our eddie gains task."""
 
+import copy
 import datetime
 import random
 from collections import Counter
@@ -65,7 +66,7 @@ class TestEddieGainMessager:
     def test_check_salary_time(self) -> None:
         """Tests checking salary time when there's still time to trigger."""
         # setup
-        guilds = interface_mocks.query_mock("guilds", {})
+        guilds = [copy.deepcopy(guild) for guild in interface_mocks.query_mock("guilds", {})]
         assert len(guilds) >= 2
         now = datetime.datetime.now(tz=ZoneInfo("UTC"))
         guilds[0]["last_salary_time"] = now.replace(hour=7, minute=30)

@@ -188,10 +188,15 @@ class EddieGainMessager(BaseTask):
                     # not configured to send summary messages
                     continue
 
+                if len(summary_message) > 1999:   # noqa: PLR2004
+                    self.logger.warning("Admin summary message is too long.")
+                    self.logger.warning("Message: %s", summary_message)
+
                 user = await self.bot.fetch_user(user_id)
                 try:
                     await user.send(content=summary_message, silent=True)
-                except discord.Forbidden:
+                except (discord.Forbidden, discord.HTTPException) as exc:
+                    self.logger.warning("Error sending admin summary: %s", exc)
                     continue
 
     @tasks.loop(count=1)

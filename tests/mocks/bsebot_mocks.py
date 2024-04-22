@@ -57,7 +57,7 @@ def get_guild(self: any, guild_id: int) -> discord_mocks.GuildMock:
     return discord_mocks.GuildMock(guild_id)
 
 
-async def fetch_guild(self: any, guild_id: int) -> discord_mocks.GuildMock:
+async def fetch_guild(self: any, guild_id: int) -> discord_mocks.GuildMock:  # noqa: RUF029
     """Fetch guild mock."""
     return discord_mocks.GuildMock(guild_id)
 
@@ -69,6 +69,6 @@ def get_channel(self: any, channel_id: int) -> discord_mocks.ChannelMock:
     return discord_mocks.ChannelMock(channel_id)
 
 
-async def fetch_channel(self: any, channel_id: int) -> discord_mocks.ChannelMock:
+async def fetch_channel(self: any, channel_id: int) -> discord_mocks.ChannelMock:  # noqa: RUF029
     """Fetch channel mock."""
     return discord_mocks.ChannelMock(channel_id)

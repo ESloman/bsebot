@@ -188,7 +188,7 @@ class EddieGainMessager(BaseTask):
                     # not configured to send summary messages
                     continue
 
-                if len(summary_message) > 1999:   # noqa: PLR2004
+                if len(summary_message) > 1999:  # noqa: PLR2004
                     self.logger.warning("Admin summary message is too long.")
                     self.logger.warning("Message: %s", summary_message)
 
@@ -557,8 +557,7 @@ class BSEddiesManager(BaseTask):
             wordle_messages = sorted(wordle_messages, key=operator.itemgetter(1))
             top_guess = wordle_messages[0][1]
 
-            if bot_guesses < top_guess:
-                top_guess = bot_guesses
+            top_guess = min(bot_guesses, top_guess)
 
             for wordle_attempt in wordle_messages:
                 if wordle_attempt[1] == top_guess:

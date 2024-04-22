@@ -258,7 +258,7 @@ class CommandManager:
             await self.on_ready.on_ready()
 
         @self.client.event
-        async def on_member_join(member: discord.Member) -> None:
+        async def on_member_join(member: discord.Member) -> None:  # noqa: RUF029
             """Event that's called when a new member joins the guild.
 
             Args:
@@ -267,7 +267,7 @@ class CommandManager:
             self.on_member_join.on_join(member)
 
         @self.client.event
-        async def on_member_remove(member: discord.Member) -> None:
+        async def on_member_remove(member: discord.Member) -> None:  # noqa: RUF029
             """Event that's called when a member leaves the guild.
 
             Args:

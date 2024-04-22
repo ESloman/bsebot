@@ -56,7 +56,7 @@ class EddieGainMessager(BaseTask):
             breakdown (dict[str, int]): the breakdown
             guild_name (str): the guild name
         """
-        detailed_message = f"### {guild_name}"
+        detailed_message = f"### {guild_name}\n"
         for key in sorted(breakdown):
             detailed_message += f"- `{HUMAN_MESSAGE_TYPES[key]}` : **{breakdown[key]}**\n"
             if key in {"vc_joined", "vc_streaming"}:
@@ -97,7 +97,7 @@ class EddieGainMessager(BaseTask):
                 self.logger.warning("Couldn't find %s in %s (%s). Skipping.", user_id, guild_id, guild_db.name)
                 continue
             value, _, tax = data
-            message += f"- {user_db}: `{value}` (tax: _{tax}_)\n"
+            message += f"- {user_db.name} ({user_db.uid}): `{value}` (tax: _{tax}_)\n"
         return message
 
     def _format_user_eddies_message(

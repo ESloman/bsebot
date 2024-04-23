@@ -61,7 +61,7 @@ class EddieGainMessager(BaseTask):
             detailed_message += f"- `{HUMAN_MESSAGE_TYPES[key]}` : **{breakdown[key]}**\n"
             if key in {"vc_joined", "vc_streaming"}:
                 detailed_message += " seconds"
-        detailed_message += "\n\n"
+        detailed_message += "\n"
         return detailed_message
 
     def _check_salary_time(self) -> None:
@@ -90,14 +90,14 @@ class EddieGainMessager(BaseTask):
             str: the formatted message
         """
         guild_db = self.guilds.get_guild(guild_id)
-        message = f"## {guild_db.name} Admin Salary Summary"
+        message = f"## {guild_db.name} Admin Salary Summary\n"
         for user_id, data in user_eddies.items():
             user_db = self.user_points.find_user(user_id, guild_id)
             if not user_db:
                 self.logger.warning("Couldn't find %s in %s (%s). Skipping.", user_id, guild_id, guild_db.name)
                 continue
             value, _, tax = data
-            message += f"- {user_db.name} ({user_db.uid}): `{value}` (tax: _{tax}_)\n"
+            message += f"- {user_db.name}: `{value}` (tax: _{tax}_)\n"
         return message
 
     def _format_user_eddies_message(
@@ -134,7 +134,7 @@ class EddieGainMessager(BaseTask):
 
         # add detailed summary
         if detailed_message:
-            message += "\n\n## Salary Breakdown\n"
+            message += "\n## Salary Breakdown\n"
             message += detailed_message
 
         return message if message != "# BSEBot Daily Salary Summary\n\n" else ""
@@ -157,7 +157,7 @@ class EddieGainMessager(BaseTask):
                 continue
 
             # add the config tip
-            message += "\n\nWant to turn these notifications off? Use `/config` to disable."
+            message += "\nWant to turn these notifications off? Use `/config` to disable."
 
             user = await self.bot.fetch_user(int(user_id))
             try:

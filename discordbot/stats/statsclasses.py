@@ -287,7 +287,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         try:
             busiest = max(threads, key=lambda x: threads[x]["count"])
-        except IndexError:
+        except (ValueError, StopIteration):
             busiest = 0
             threads[0] = {"count": 0, "users": []}
 
@@ -436,7 +436,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         try:
             quietest = min(threads, key=lambda x: threads[x]["count"])
-        except IndexError:
+        except (ValueError, StopIteration):
             quietest = 0
             threads[0] = {"count": 0, "users": []}
 
@@ -914,7 +914,7 @@ class StatsGatherer:  # noqa: PLR0904
             most_used_emoji = max(emoji_count, key=lambda x: emoji_count[x])
 
             emoji_id = next(emoji.eid for emoji in all_emojis if emoji.name == most_used_emoji)
-        except IndexError:
+        except (ValueError, StopIteration):
             most_used_emoji = 0
             emoji_id = None
             emoji_count[0] = None
@@ -1055,7 +1055,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         try:
             chattiest = max(message_users, key=lambda x: message_users[x]["count"])
-        except IndexError:
+        except (ValueError, StopIteration):
             chattiest = BSE_BOT_ID
             message_users[BSE_BOT_ID] = {"count": 0}
 
@@ -1100,7 +1100,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         try:
             least_chattiest = min(message_users, key=lambda x: message_users[x])
-        except IndexError:
+        except (ValueError, StopIteration):
             least_chattiest = BSE_BOT_ID
             message_users[BSE_BOT_ID] = 0
 
@@ -1145,7 +1145,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         try:
             chattiest = max(message_users, key=lambda x: message_users[x])
-        except IndexError:
+        except (ValueError, StopIteration):
             chattiest = BSE_BOT_ID
             message_users[BSE_BOT_ID] = 0
 
@@ -1235,7 +1235,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         try:
             user = max(message_users, key=lambda x: message_users[x])
-        except IndexError:
+        except (ValueError, StopIteration):
             # no data - possible if they've never done a wordle
             user = BSE_BOT_ID
             message_users[BSE_BOT_ID] = 0
@@ -1311,7 +1311,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         try:
             best_avg = min(wordle_avgs, key=lambda x: wordle_avgs[x])
-        except IndexError:
+        except (ValueError, StopIteration):
             # no data - possible if they've never done a wordle
             best_avg = BSE_BOT_ID
             wordle_avgs[BSE_BOT_ID] = 0
@@ -1389,7 +1389,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         try:
             worst_avg = max(wordle_avgs, key=lambda x: wordle_avgs[x])
-        except IndexError:
+        except (ValueError, StopIteration):
             # no data - possible if they've never done a wordle
             worst_avg = BSE_BOT_ID
             wordle_avgs[BSE_BOT_ID] = 0
@@ -1442,7 +1442,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         try:
             user = max(wordle_count, key=lambda x: wordle_count[x])
-        except IndexError:
+        except (ValueError, StopIteration):
             # no data - possible if they've never done a wordle
             user = BSE_BOT_ID
             wordle_count[BSE_BOT_ID] = 0
@@ -1500,7 +1500,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         try:
             user = max(wordle_count, key=lambda x: wordle_count[x])
-        except IndexError:
+        except (ValueError, StopIteration):
             # no data - possible if they've never done a wordle
             user = BSE_BOT_ID
             wordle_count[BSE_BOT_ID] = 0
@@ -1556,7 +1556,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         try:
             user = max(wordle_count, key=lambda x: wordle_count[x])
-        except IndexError:
+        except (ValueError, StopIteration):
             # no data - possible if they've never done a wordle
             user = BSE_BOT_ID
             wordle_count[BSE_BOT_ID] = 0
@@ -1601,7 +1601,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         try:
             twitter_addict = max(tweet_users, key=lambda x: tweet_users[x])
-        except IndexError:
+        except (ValueError, StopIteration):
             # no data for anyone yet
             twitter_addict = BSE_BOT_ID
             tweet_users[BSE_BOT_ID] = 0
@@ -1647,7 +1647,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         try:
             masturbator = max(jerk_off_users, key=lambda x: jerk_off_users[x])
-        except IndexError:
+        except (ValueError, StopIteration):
             # no data
             masturbator = BSE_BOT_ID
             jerk_off_users[BSE_BOT_ID] = 0
@@ -1692,7 +1692,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         try:
             big_memer = max(reaction_users, key=lambda x: reaction_users[x])
-        except IndexError:
+        except (ValueError, StopIteration):
             # no data
             big_memer = BSE_BOT_ID
             reaction_users[BSE_BOT_ID] = 0
@@ -1739,7 +1739,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         try:
             react_king = max(reaction_users, key=lambda x: reaction_users[x])
-        except IndexError:
+        except (ValueError, StopIteration):
             # no data
             react_king = BSE_BOT_ID
             reaction_users[BSE_BOT_ID] = 0
@@ -1791,14 +1791,14 @@ class StatsGatherer:  # noqa: PLR0904
 
         try:
             serial_replier = max(replies, key=lambda x: replies[x])
-        except IndexError:
+        except (ValueError, StopIteration):
             # no data
             serial_replier = BSE_BOT_ID
             replies[BSE_BOT_ID] = 0
 
         try:
             conversation_starter = max(replied_to, key=lambda x: replied_to[x])
-        except IndexError:
+        except (ValueError, StopIteration):
             # no data
             conversation_starter = BSE_BOT_ID
             replied_to[BSE_BOT_ID] = 0
@@ -1863,7 +1863,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         try:
             fattest_fingers = max(message_users, key=lambda x: message_users[x]["count"])
-        except IndexError:
+        except (ValueError, StopIteration):
             fattest_fingers = BSE_BOT_ID
             message_users = {BSE_BOT_ID: {"count": 0, "messages": 0}}
 
@@ -1917,7 +1917,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         try:
             most_swears = max(swear_dict, key=lambda x: swear_dict[x])
-        except IndexError:
+        except (ValueError, StopIteration):
             most_swears = BSE_BOT_ID
             swear_dict[BSE_BOT_ID] = None
 
@@ -1982,7 +1982,7 @@ class StatsGatherer:  # noqa: PLR0904
         # sort the percentages
         try:
             top = max(users, key=lambda x: users[x]["percentage"])
-        except IndexError:
+        except (ValueError, StopIteration):
             top = BSE_BOT_ID
             users[BSE_BOT_ID] = {"percentage": 0, "channel": 0}
 
@@ -2070,7 +2070,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         try:
             busiest = max(bet_users, key=lambda x: bet_users[x])
-        except IndexError:
+        except (ValueError, StopIteration):
             # no bets were created this month
             busiest = BSE_BOT_ID
             bet_users[BSE_BOT_ID] = 0
@@ -2115,7 +2115,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         try:
             most_placed = max(bet_users, key=lambda x: bet_users[x])
-        except IndexError:
+        except (ValueError, StopIteration):
             most_placed = BSE_BOT_ID
             bet_users[BSE_BOT_ID] = 0
 
@@ -2159,7 +2159,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         try:
             most_placed = max(bet_users, key=lambda x: bet_users[x])
-        except IndexError:
+        except (ValueError, StopIteration):
             most_placed = BSE_BOT_ID
             bet_users[BSE_BOT_ID] = 0
 
@@ -2275,7 +2275,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         try:
             big_gamer = max(user_dict, key=lambda x: user_dict[x]["count"])
-        except IndexError:
+        except (ValueError, StopIteration):
             big_gamer = BSE_BOT_ID
             user_dict[BSE_BOT_ID] = {"count": 0, "channels": {}}
 
@@ -2326,7 +2326,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         try:
             big_streamer = max(user_dict, key=lambda x: user_dict[x]["count"])
-        except IndexError:
+        except (ValueError, StopIteration):
             big_streamer = BSE_BOT_ID
             user_dict[BSE_BOT_ID] = {"count": 0, "channels": {}}
 

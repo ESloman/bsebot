@@ -239,7 +239,7 @@ class StatsGatherer:  # noqa: PLR0904
             if user_id not in channels[channel_id]["users"]:
                 channels[channel_id]["users"].append(user_id)
 
-        busiest = sorted(channels, key=lambda x: channels[x]["count"], reverse=True)[0]
+        busiest = max(channels, key=lambda x: channels[x]["count"])
 
         data_class = StatDB(
             _id="",
@@ -286,7 +286,7 @@ class StatsGatherer:  # noqa: PLR0904
                 threads[thread_id]["users"].append(user_id)
 
         try:
-            busiest = sorted(threads, key=lambda x: threads[x]["count"], reverse=True)[0]
+            busiest = max(threads, key=lambda x: threads[x]["count"])
         except IndexError:
             busiest = 0
             threads[0] = {"count": 0, "users": []}
@@ -336,7 +336,7 @@ class StatsGatherer:  # noqa: PLR0904
             if user_id not in days[day]["users"]:
                 days[day]["users"].append(user_id)
 
-        busiest = sorted(days, key=lambda x: days[x]["count"], reverse=True)[0]  # type: datetime.date
+        busiest = max(days, key=lambda x: days[x]["count"])  # type: datetime.date
 
         data_class = StatDB(
             _id="",
@@ -388,7 +388,7 @@ class StatsGatherer:  # noqa: PLR0904
             if user_id not in channels[channel_id]["users"]:
                 channels[channel_id]["users"].append(user_id)
 
-        quietest = sorted(channels, key=lambda x: channels[x]["count"], reverse=False)[0]
+        quietest = min(channels, key=lambda x: channels[x]["count"])
 
         data_class = StatDB(
             _id="",
@@ -435,7 +435,7 @@ class StatsGatherer:  # noqa: PLR0904
                 threads[thread_id]["users"].append(user_id)
 
         try:
-            quietest = sorted(threads, key=lambda x: threads[x]["count"], reverse=False)[0]
+            quietest = min(threads, key=lambda x: threads[x]["count"])
         except IndexError:
             quietest = 0
             threads[0] = {"count": 0, "users": []}
@@ -485,7 +485,7 @@ class StatsGatherer:  # noqa: PLR0904
             if user_id not in days[day]["users"]:
                 days[day]["users"].append(user_id)
 
-        quietest = sorted(days, key=lambda x: days[x]["count"], reverse=False)[0]  # type: datetime.date
+        quietest = min(days, key=lambda x: days[x]["count"])  # type: datetime.date
 
         data_class = StatDB(
             _id="",
@@ -709,7 +709,7 @@ class StatsGatherer:  # noqa: PLR0904
             if user_id not in channels[channel_id]:
                 channels[channel_id].append(user_id)
 
-        most_popular_channel = sorted(channels, key=lambda x: len(channels[x]), reverse=True)[0]
+        most_popular_channel = max(channels, key=lambda x: len(channels[x]))
 
         data_class = StatDB(
             _id="",
@@ -792,7 +792,7 @@ class StatsGatherer:  # noqa: PLR0904
             if user_id not in channels[channel_id]["users"]:
                 channels[channel_id]["users"].append(user_id)
 
-        vc_most_time = sorted(channels, key=lambda x: channels[x]["count"], reverse=True)[0]
+        vc_most_time = max(channels, key=lambda x: channels[x]["count"])
 
         data_class = StatDB(
             _id="",
@@ -838,7 +838,7 @@ class StatsGatherer:  # noqa: PLR0904
             if user_id not in channels[channel_id]["users"]:
                 channels[channel_id]["users"].append(user_id)
 
-        vc_most_users = sorted(channels, key=lambda x: len(channels[x]["users"]), reverse=True)[0]
+        vc_most_users = max(channels, key=lambda x: len(channels[x]["users"]))
 
         data_class = StatDB(
             _id="",
@@ -911,7 +911,7 @@ class StatsGatherer:  # noqa: PLR0904
                     emoji_count[emoji_name] += len(emojis)
 
         try:
-            most_used_emoji = sorted(emoji_count, key=lambda x: emoji_count[x], reverse=True)[0]
+            most_used_emoji = max(emoji_count, key=lambda x: emoji_count[x])
 
             emoji_id = next(emoji.eid for emoji in all_emojis if emoji.name == most_used_emoji)
         except IndexError:
@@ -1054,7 +1054,7 @@ class StatsGatherer:  # noqa: PLR0904
                 message_users[uid]["channels"].append(message.channel_id)
 
         try:
-            chattiest = sorted(message_users, key=lambda x: message_users[x]["count"], reverse=True)[0]
+            chattiest = max(message_users, key=lambda x: message_users[x]["count"])
         except IndexError:
             chattiest = BSE_BOT_ID
             message_users[BSE_BOT_ID] = {"count": 0}
@@ -1099,7 +1099,7 @@ class StatsGatherer:  # noqa: PLR0904
             message_users[uid] += 1
 
         try:
-            least_chattiest = sorted(message_users, key=lambda x: message_users[x])[0]
+            least_chattiest = min(message_users, key=lambda x: message_users[x])
         except IndexError:
             least_chattiest = BSE_BOT_ID
             message_users[BSE_BOT_ID] = 0
@@ -1144,7 +1144,7 @@ class StatsGatherer:  # noqa: PLR0904
             message_users[uid] += 1
 
         try:
-            chattiest = sorted(message_users, key=lambda x: message_users[x], reverse=True)[0]
+            chattiest = max(message_users, key=lambda x: message_users[x])
         except IndexError:
             chattiest = BSE_BOT_ID
             message_users[BSE_BOT_ID] = 0
@@ -1234,7 +1234,7 @@ class StatsGatherer:  # noqa: PLR0904
                 message_users[message.user_id] += 1
 
         try:
-            user = sorted(message_users, key=lambda x: message_users[x], reverse=True)[0]
+            user = max(message_users, key=lambda x: message_users[x])
         except IndexError:
             # no data - possible if they've never done a wordle
             user = BSE_BOT_ID
@@ -1310,7 +1310,7 @@ class StatsGatherer:  # noqa: PLR0904
             wordle_avgs[uid] = avg
 
         try:
-            best_avg = sorted(wordle_avgs, key=lambda x: wordle_avgs[x])[0]
+            best_avg = min(wordle_avgs, key=lambda x: wordle_avgs[x])
         except IndexError:
             # no data - possible if they've never done a wordle
             best_avg = BSE_BOT_ID
@@ -1388,7 +1388,7 @@ class StatsGatherer:  # noqa: PLR0904
             wordle_avgs[uid] = avg
 
         try:
-            worst_avg = sorted(wordle_avgs, key=lambda x: wordle_avgs[x], reverse=True)[0]
+            worst_avg = max(wordle_avgs, key=lambda x: wordle_avgs[x])
         except IndexError:
             # no data - possible if they've never done a wordle
             worst_avg = BSE_BOT_ID
@@ -1441,7 +1441,7 @@ class StatsGatherer:  # noqa: PLR0904
             wordle_count[uid] += 1
 
         try:
-            user = sorted(wordle_count, key=lambda x: wordle_count[x], reverse=True)[0]
+            user = max(wordle_count, key=lambda x: wordle_count[x])
         except IndexError:
             # no data - possible if they've never done a wordle
             user = BSE_BOT_ID
@@ -1499,7 +1499,7 @@ class StatsGatherer:  # noqa: PLR0904
                 wordle_count[uid] += 1
 
         try:
-            user = sorted(wordle_count, key=lambda x: wordle_count[x], reverse=True)[0]
+            user = max(wordle_count, key=lambda x: wordle_count[x])
         except IndexError:
             # no data - possible if they've never done a wordle
             user = BSE_BOT_ID
@@ -1555,7 +1555,7 @@ class StatsGatherer:  # noqa: PLR0904
             wordle_count[uid] += 1
 
         try:
-            user = sorted(wordle_count, key=lambda x: wordle_count[x], reverse=True)[0]
+            user = max(wordle_count, key=lambda x: wordle_count[x])
         except IndexError:
             # no data - possible if they've never done a wordle
             user = BSE_BOT_ID
@@ -1600,7 +1600,7 @@ class StatsGatherer:  # noqa: PLR0904
                 tweet_users[user_id] += 1
 
         try:
-            twitter_addict = sorted(tweet_users, key=lambda x: tweet_users[x], reverse=True)[0]
+            twitter_addict = max(tweet_users, key=lambda x: tweet_users[x])
         except IndexError:
             # no data for anyone yet
             twitter_addict = BSE_BOT_ID
@@ -1646,7 +1646,7 @@ class StatsGatherer:  # noqa: PLR0904
                 jerk_off_users[user_id] += 1
 
         try:
-            masturbator = sorted(jerk_off_users, key=lambda x: jerk_off_users[x], reverse=True)[0]
+            masturbator = max(jerk_off_users, key=lambda x: jerk_off_users[x])
         except IndexError:
             # no data
             masturbator = BSE_BOT_ID
@@ -1691,7 +1691,7 @@ class StatsGatherer:  # noqa: PLR0904
             reaction_users[user_id] += len(reactions)
 
         try:
-            big_memer = sorted(reaction_users, key=lambda x: reaction_users[x], reverse=True)[0]
+            big_memer = max(reaction_users, key=lambda x: reaction_users[x])
         except IndexError:
             # no data
             big_memer = BSE_BOT_ID
@@ -1738,7 +1738,7 @@ class StatsGatherer:  # noqa: PLR0904
             reaction_users[user_id] += 1
 
         try:
-            react_king = sorted(reaction_users, key=lambda x: reaction_users[x], reverse=True)[0]
+            react_king = max(reaction_users, key=lambda x: reaction_users[x])
         except IndexError:
             # no data
             react_king = BSE_BOT_ID
@@ -1790,14 +1790,14 @@ class StatsGatherer:  # noqa: PLR0904
                 replies[user_id] += 1
 
         try:
-            serial_replier = sorted(replies, key=lambda x: replies[x], reverse=True)[0]
+            serial_replier = max(replies, key=lambda x: replies[x])
         except IndexError:
             # no data
             serial_replier = BSE_BOT_ID
             replies[BSE_BOT_ID] = 0
 
         try:
-            conversation_starter = sorted(replied_to, key=lambda x: replied_to[x], reverse=True)[0]
+            conversation_starter = max(replied_to, key=lambda x: replied_to[x])
         except IndexError:
             # no data
             conversation_starter = BSE_BOT_ID
@@ -1862,7 +1862,7 @@ class StatsGatherer:  # noqa: PLR0904
             message_users[uid]["messages"] += 1
 
         try:
-            fattest_fingers = sorted(message_users, key=lambda x: message_users[x]["count"], reverse=True)[0]
+            fattest_fingers = max(message_users, key=lambda x: message_users[x]["count"])
         except IndexError:
             fattest_fingers = BSE_BOT_ID
             message_users = {BSE_BOT_ID: {"count": 0, "messages": 0}}
@@ -1916,7 +1916,7 @@ class StatsGatherer:  # noqa: PLR0904
             swear_dict[uid] += swear_count
 
         try:
-            most_swears = sorted(swear_dict, key=lambda x: swear_dict[x], reverse=True)[0]
+            most_swears = max(swear_dict, key=lambda x: swear_dict[x])
         except IndexError:
             most_swears = BSE_BOT_ID
             swear_dict[BSE_BOT_ID] = None
@@ -1973,7 +1973,7 @@ class StatsGatherer:  # noqa: PLR0904
         for user in users:
             u_dict = users[user]
             total = u_dict.pop("total")
-            top_channel_id = sorted(u_dict, key=lambda x: u_dict[x], reverse=True)[0]
+            top_channel_id = max(u_dict, key=lambda x: u_dict[x])
             percentage = (u_dict[top_channel_id] / total) * 100
             u_dict["total"] = total
             u_dict["percentage"] = percentage
@@ -1981,7 +1981,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         # sort the percentages
         try:
-            top = sorted(users, key=lambda x: users[x]["percentage"], reverse=True)[0]
+            top = max(users, key=lambda x: users[x]["percentage"])
         except IndexError:
             top = BSE_BOT_ID
             users[BSE_BOT_ID] = {"percentage": 0, "channel": 0}
@@ -2029,7 +2029,7 @@ class StatsGatherer:  # noqa: PLR0904
             users[user_id]["channels"][str(channel_id)] += 1
 
         # sort the channels
-        top = sorted(users, key=lambda x: len(users[x]["channels"]), reverse=True)[0]
+        top = max(users, key=lambda x: len(users[x]["channels"]))
 
         data_class = StatDB(
             _id="",
@@ -2069,7 +2069,7 @@ class StatsGatherer:  # noqa: PLR0904
             bet_users[u] += 1
 
         try:
-            busiest = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
+            busiest = max(bet_users, key=lambda x: bet_users[x])
         except IndexError:
             # no bets were created this month
             busiest = BSE_BOT_ID
@@ -2114,7 +2114,7 @@ class StatsGatherer:  # noqa: PLR0904
             bet_users[trans.uid] -= trans.amount
 
         try:
-            most_placed = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
+            most_placed = max(bet_users, key=lambda x: bet_users[x])
         except IndexError:
             most_placed = BSE_BOT_ID
             bet_users[BSE_BOT_ID] = 0
@@ -2158,7 +2158,7 @@ class StatsGatherer:  # noqa: PLR0904
             bet_users[trans.uid] += trans.amount
 
         try:
-            most_placed = sorted(bet_users, key=lambda x: bet_users[x], reverse=True)[0]
+            most_placed = max(bet_users, key=lambda x: bet_users[x])
         except IndexError:
             most_placed = BSE_BOT_ID
             bet_users[BSE_BOT_ID] = 0
@@ -2228,7 +2228,7 @@ class StatsGatherer:  # noqa: PLR0904
                 kings[uid] = 0
             kings[uid] += time_king
 
-        longest_king = sorted(kings, key=lambda x: kings[x], reverse=True)[0]
+        longest_king = max(kings, key=lambda x: kings[x])
 
         data_class = StatDB(
             _id="",
@@ -2274,7 +2274,7 @@ class StatsGatherer:  # noqa: PLR0904
                 user_dict[user_id]["channels"].append(channel_id)
 
         try:
-            big_gamer = sorted(user_dict, key=lambda x: user_dict[x]["count"], reverse=True)[0]
+            big_gamer = max(user_dict, key=lambda x: user_dict[x]["count"])
         except IndexError:
             big_gamer = BSE_BOT_ID
             user_dict[BSE_BOT_ID] = {"count": 0, "channels": {}}
@@ -2325,7 +2325,7 @@ class StatsGatherer:  # noqa: PLR0904
                 user_dict[user_id]["channels"].append(channel_id)
 
         try:
-            big_streamer = sorted(user_dict, key=lambda x: user_dict[x]["count"], reverse=True)[0]
+            big_streamer = max(user_dict, key=lambda x: user_dict[x]["count"])
         except IndexError:
             big_streamer = BSE_BOT_ID
             user_dict[BSE_BOT_ID] = {"count": 0, "channels": {}}

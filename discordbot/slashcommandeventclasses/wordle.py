@@ -198,11 +198,7 @@ class Wordle(BSEddies):
 
         msg += f"- Your average this month so far is `{avg_this_month}`.\n"
 
-        top_month = sorted(
-            [a for a in all_month_avgs if all_month_avgs[a]],
-            key=lambda x: all_month_avgs[x],
-            reverse=False,
-        )[0]
+        top_month = min([a for a in all_month_avgs if all_month_avgs[a]], key=lambda x: all_month_avgs[x])
         msg += f"\n- Your **best** ever month was {top_month.strftime("%b %y")} with `{all_month_avgs[top_month]}`\n"
 
         msg += "\n## Lifetime Score count\n"

@@ -80,7 +80,7 @@ def calculate_message_odds(
             continue
 
         parts = message.split(split)
-        main_bit = sorted(parts, key=len, reverse=True)[0]
+        main_bit = max(parts, key=len)
 
         try:
             results = interactions.query({"guild_id": guild_id, "is_bot": True, "$text": {"$search": message}})

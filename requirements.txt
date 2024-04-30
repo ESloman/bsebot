@@ -3,7 +3,7 @@ python-dotenv==1.0.1
 pymongo==4.7.0
 xlsxwriter==3.2.0
 py-cord[speed] @ git+https://github.com/Pycord-Development/pycord
-selenium==4.18.1
+selenium==4.20.0
 pre-commit==3.6.2
 seaborn==0.13.2
 sloman-logging @ git+https://github.com/esloman/sloman-logging@v0.2.0

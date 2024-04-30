@@ -101,7 +101,7 @@ class StatsDataCache:
             {
                 "guild_id": guild_id,
                 "timestamp": {"$gt": start, "$lt": end},
-                "message_type": {"$nin": ["emoji_used", "vc_joined", "vc_streaming"]},
+                "message_type": "message",
                 "is_bot": {"$ne": True},
             },
         )
@@ -140,7 +140,7 @@ class StatsDataCache:
                 "guild_id": guild_id,
                 "edited": {"$gt": start, "$lt": end},
                 "edit_count": {"$gte": 1},
-                "message_type": {"$nin": ["emoji_used", "vc_joined", "vc_streaming"]},
+                "message_type": "message",
                 "is_bot": {"$ne": True},
             },
         )

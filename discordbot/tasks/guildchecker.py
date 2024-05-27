@@ -48,8 +48,8 @@ class GuildChecker(BaseTask):
 
         self.embed_manager = EmbedManager()
 
-        self.close: "CloseBet" = close
-        self.place: "PlaceBet" = place
+        self.close: CloseBet = close
+        self.place: PlaceBet = place
 
         # override to run at startup
         self.schedule.overriden = not self.finished

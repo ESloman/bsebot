@@ -25,7 +25,7 @@ class StatsView(BSEView):
         """
         super().__init__(timeout=None)
 
-        self.stats_class: "Stats" = stats_class
+        self.stats_class: Stats = stats_class
         self.stats_mode = StatsModeSelect()
 
         self.add_item(self.stats_mode)

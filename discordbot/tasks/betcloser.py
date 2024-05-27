@@ -46,8 +46,8 @@ class BetCloser(BaseTask):
         self.task = self.bet_closer
 
         self.embed_manager = EmbedManager()
-        self.place: "PlaceBet" = place
-        self.close: "CloseBet" = close
+        self.place: PlaceBet = place
+        self.close: CloseBet = close
         if start:
             self.task.start()
 

@@ -859,7 +859,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         return self.add_annual_changes(start, data_class)
 
-    def most_popular_server_emoji(  # noqa: C901, PLR0912
+    def most_popular_server_emoji(  # noqa: C901
         self,
         guild_id: int,
         start: datetime.datetime,

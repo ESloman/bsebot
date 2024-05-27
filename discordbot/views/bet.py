@@ -30,8 +30,8 @@ class BetView(BSEView):
         """
         super().__init__(timeout=None)
         self.bet: BetDB = bet
-        self.place: "PlaceBet" = bseddies_place
-        self.close: "CloseBet" = bseddies_close
+        self.place: PlaceBet = bseddies_place
+        self.close: CloseBet = bseddies_close
         self.user_bets = UserBets()
 
     @discord.ui.button(label="Place a bet", style=discord.ButtonStyle.blurple, emoji="💰")

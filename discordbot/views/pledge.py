@@ -30,7 +30,7 @@ class PledgeView(BSEView):
         self.user_points = UserPoints()
 
     @discord.ui.button(label="Pledge", style=discord.ButtonStyle.blurple, row=2)
-    async def submit_callback(  # noqa: C901, PLR0912
+    async def submit_callback(  # noqa: C901
         self, _: discord.ui.Button, interaction: discord.Interaction
     ) -> None:
         """Button callback.

@@ -1,6 +1,6 @@
 requests==2.32.0
 python-dotenv==1.0.1
-pymongo==4.7.0
+pymongo==4.7.2
 xlsxwriter==3.2.0
 py-cord[speed] @ git+https://github.com/Pycord-Development/pycord
 selenium==4.21.0

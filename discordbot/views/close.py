@@ -35,7 +35,7 @@ class CloseABetView(BSEView):
 
         self.bet_outcome_select = BetOutcomesSelect(options, discord.ui.Button, True)
         self.add_item(self.bet_outcome_select)
-        self.close: "CloseBet" = close
+        self.close: CloseBet = close
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=2, disabled=True)
     async def submit_button_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:

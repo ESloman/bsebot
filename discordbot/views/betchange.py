@@ -30,7 +30,7 @@ class BetChange(BSEView):
         """
         super().__init__(timeout=None)
         self.bet: BetDB = bet
-        self.view: "BetView" = view
+        self.view: BetView = view
         self.user_bets = UserBets()
         self.embed_manager = EmbedManager()
 

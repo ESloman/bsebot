@@ -50,7 +50,7 @@ class RevolutionTask(BaseTask):
             self.task.start()
 
     @tasks.loop(minutes=1)
-    async def revolution(self) -> None:  # noqa: C901, PLR0912
+    async def revolution(self) -> None:  # noqa: C901
         """Our revolution task.
 
         Creates a revolution event weekly and then handles the

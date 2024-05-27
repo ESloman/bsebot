@@ -46,9 +46,9 @@ class AddBetOption(discord.ui.Modal):
 
         self.logger = SlomanLogger("bsebot")
         self.bet: BetDB = bet
-        self.place: "PlaceBet" = bseddies_place
-        self.close: "CloseBet" = bseddies_close
-        self.view: "BetView" = view
+        self.place: PlaceBet = bseddies_place
+        self.close: CloseBet = bseddies_close
+        self.view: BetView = view
         self.embed_manager = EmbedManager()
         self.user_bets = UserBets()
 

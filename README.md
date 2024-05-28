@@ -9,7 +9,6 @@ Bot was originally created for the `BSE` server to fulfill a need to have someth
 - economy system (eddies)
 - betting system
 - daily wordle
-- reminders
 
 # Contributing
 

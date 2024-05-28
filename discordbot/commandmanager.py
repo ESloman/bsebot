@@ -37,7 +37,6 @@ from discordbot.embedmanager import EmbedManager
 
 # modals
 from discordbot.modals.betcreate import BetCreateModal
-from discordbot.modals.reminder import ReminderModal
 
 # slash commands
 from discordbot.slashcommandeventclasses.active import Active
@@ -75,7 +74,6 @@ from discordbot.tasks.eddiekingtask import BSEddiesKingTask
 from discordbot.tasks.guildchecker import GuildChecker
 from discordbot.tasks.messagesync import MessageSync
 from discordbot.tasks.monthlyawards import MonthlyBSEddiesAwards
-from discordbot.tasks.reminders import RemindersTask
 from discordbot.tasks.revolutionbribestask import RevolutionBribeTask
 from discordbot.tasks.revolutiontask import RevolutionTask
 from discordbot.tasks.taskmanager import TaskManager
@@ -207,7 +205,6 @@ class CommandManager:
         self.wordle_task = WordleTask(self.client, startup_tasks)
         self.wordle_reminder = WordleReminder(self.client, startup_tasks)
         self.celebrations_task = Celebrations(self.client, startup_tasks)
-        self.reminders_task = RemindersTask(self.client, startup_tasks)
         self.revolution_bribe_task = RevolutionBribeTask(self.client, startup_tasks)
 
         # dynamically gets all the defined tasks
@@ -676,16 +673,6 @@ class CommandManager:
             """
             await self.bseddies_help.help(ctx)
 
-        @self.client.command(description="Set a reminder")
-        async def remindme(ctx: discord.ApplicationContext) -> None:
-            """Command for reminders.
-
-            Args:
-                ctx (discord.ApplicationContext): the command context
-            """
-            modal = ReminderModal(None, title="Set a reminder")
-            await ctx.response.send_modal(modal)
-
         @self.client.command(description="See some stats")
         async def stats(ctx: discord.ApplicationContext) -> None:
             """Stats Slash command.
@@ -728,17 +715,6 @@ class CommandManager:
                 message (discord.Message): the message to delete
             """
             await self.message_delete.message_delete(ctx, message)
-
-        @self.client.message_command(name="Remind me")
-        async def remind_me(ctx: discord.ApplicationCommand, message: discord.Message) -> None:
-            """Allows triggering of the reminder modal using an existing message.
-
-            Args:
-                ctx (discord.ApplicationCommand): the command context
-                message (discord.Message): the message to trigger a reminder
-            """
-            modal = ReminderModal(message.id, title="Set a reminder")
-            await ctx.response.send_modal(modal)
 
         @self.client.user_command(name="Gift")
         async def gift(ctx: discord.ApplicationCommand, user: discord.Member) -> None:

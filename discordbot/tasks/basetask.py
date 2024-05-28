@@ -21,7 +21,6 @@ from mongo.bsepoints.emojis import ServerEmojis
 from mongo.bsepoints.guilds import Guilds
 from mongo.bsepoints.interactions import UserInteractions
 from mongo.bsepoints.points import UserPoints
-from mongo.bsepoints.reminders import ServerReminders
 from mongo.bsepoints.stickers import ServerStickers
 from mongo.bseticketedevents import RevolutionEvent
 
@@ -80,7 +79,6 @@ class BaseTask(commands.Cog):
         self.revolutions = RevolutionEvent()
         self.interactions = UserInteractions()
         self.guilds = Guilds()
-        self.server_reminders = ServerReminders()
         self.spoilers = SpoilerThreads()
         self.wordles = WordleAttempts()
         self.wordle_reminders = WordleReminders()

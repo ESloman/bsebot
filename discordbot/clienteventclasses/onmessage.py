@@ -19,7 +19,6 @@ from discordbot.message_actions.birthday_replies import BirthdayReplies
 from discordbot.message_actions.command_suggestion import CommandSuggest
 from discordbot.message_actions.duplicate_links import DuplicateLinkAction
 from discordbot.message_actions.marvel_ad import MarvelComicsAdAction
-from discordbot.message_actions.remind_me import RemindMeAction
 from discordbot.message_actions.rigged import RiggedAction
 from discordbot.message_actions.thank_you_replies import ThankYouReplies
 from discordbot.message_actions.wordle_reactions import WordleMessageAction
@@ -46,7 +45,6 @@ class OnMessage(BaseEvent):
             CommandSuggest(client),
             DuplicateLinkAction(client),
             MarvelComicsAdAction(client),
-            RemindMeAction(client),
             RiggedAction(client),
             ThankYouReplies(client),
             WordleMessageAction(client),

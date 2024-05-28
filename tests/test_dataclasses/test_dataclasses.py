@@ -13,7 +13,6 @@ from mongo.datatypes.channel import ChannelDB
 from mongo.datatypes.customs import EmojiDB, StickerDB
 from mongo.datatypes.guild import GuildDB
 from mongo.datatypes.message import MessageDB, ReactionDB, ReplyDB, VCInteractionDB, WordleMessageDB
-from mongo.datatypes.reminder import ReminderDB
 from mongo.datatypes.revolution import RevolutionEventDB, RevolutionEventUnFrozenDB
 from mongo.datatypes.thread import ThreadDB
 from mongo.datatypes.user import UserDB
@@ -259,22 +258,6 @@ class TestMessageDB:
         # test the frozen-ness
         with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
             wordle_message.content = ""
-
-
-class TestReminderDB:
-    """Tests our reminder datatypes."""
-
-    @pytest.mark.parametrize("reminder", dataclass_mocks.get_reminder_inputs())
-    def test_userdb_init(self, reminder: dict[str, any]) -> None:
-        """Tests our ReminderDB dataclass."""
-        reminder_db = ReminderDB(**reminder)
-        assert isinstance(reminder_db, ReminderDB)
-        for key in reminder:
-            assert reminder[key] == getattr(reminder_db, key)
-
-        # test the frozen-ness
-        with pytest.raises(dataclasses.FrozenInstanceError, match=FROZEN_INSTANCE_ERROR_REGEX):
-            reminder_db.points = 100
 
 
 class TestRevolutionEventsDB:

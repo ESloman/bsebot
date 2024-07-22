@@ -135,7 +135,7 @@ class SpoilerThreads(BaseClass):
         """
         return self.query({"guild_id": guild_id})
 
-    def insert_spoiler_thread(  # noqa: PLR0913
+    def insert_spoiler_thread(
         self,
         guild_id: int,
         thread_id: int,

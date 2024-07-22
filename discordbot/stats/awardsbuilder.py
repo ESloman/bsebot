@@ -78,7 +78,7 @@ class AwardsBuilder:
 
         return _string
 
-    async def build_stats_and_message(  # noqa: PLR0912, C901, PLR0915
+    async def build_stats_and_message(  # noqa: PLR0912, PLR0915
         self: "AwardsBuilder",
     ) -> tuple[list[StatDB], list[str]]:
         """Uses StatsGatherer to query for all the required stats.
@@ -551,7 +551,7 @@ class AwardsBuilder:
 
         return awards, bseddies_awards
 
-    async def send_stats_and_awards(  # noqa: C901, PLR0912
+    async def send_stats_and_awards(  # noqa: PLR0912
         self: "AwardsBuilder",
         stats: list[StatDB],
         stats_message: list[str],

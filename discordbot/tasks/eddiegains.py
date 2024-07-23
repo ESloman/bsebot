@@ -571,7 +571,7 @@ class BSEddiesManager(BaseTask):
         tax_rate, supporter_tax_rate = self.guilds.get_tax_rate(guild_id)
         self.logger.info("Tax rate is: %s, %s", tax_rate, supporter_tax_rate)
 
-        for _user in eddie_gain_dict:
+        for _user, user_dict in eddie_gain_dict.items():
             if _user == "guild":
                 continue
 
@@ -582,18 +582,20 @@ class BSEddiesManager(BaseTask):
                 # apply tax
                 taxed = math.floor(eddie_gain_dict[_user][0] * tr)
                 eddie_gain_dict[_user][0] -= taxed
-                eddie_gain_dict[_user].append(taxed)
+                user_dict.append(taxed)
                 tax_gains += taxed
 
-            if real:
-                self.logger.info("Incrementing %s by %s", _user, eddie_gain_dict[_user][0])
-                self.user_points.increment_points(
-                    _user,
-                    guild_id,
-                    eddie_gain_dict[_user][0],
-                    TransactionTypes.DAILY_SALARY,
-                )
-            self.logger.info("%s gained %s", _user, eddie_gain_dict[_user][0])
+            self.logger.info("%s gained %s", _user, user_dict[0])
+            if not real:
+                continue
+
+            self.logger.info("Incrementing %s by %s", _user, user_dict[0])
+            self.user_points.increment_points(
+                _user,
+                guild_id,
+                eddie_gain_dict[_user][0],
+                TransactionTypes.DAILY_SALARY,
+            )
 
         if current_king_id not in eddie_gain_dict:
             # king isn't gaining eddies lol

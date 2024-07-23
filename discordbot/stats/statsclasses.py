@@ -859,7 +859,7 @@ class StatsGatherer:  # noqa: PLR0904
 
         return self.add_annual_changes(start, data_class)
 
-    def most_popular_server_emoji(  # noqa: C901
+    def most_popular_server_emoji(
         self,
         guild_id: int,
         start: datetime.datetime,
@@ -1304,8 +1304,7 @@ class StatsGatherer:  # noqa: PLR0904
         else:
             self.logger.debug("Length of wordle count (%s) is less than one - skipping threshold", len(wordle_count))
         wordle_avgs = {}
-        for uid in wordle_count:
-            all_guesses = wordle_count[uid]
+        for uid, all_guesses in wordle_count.items():
             avg = sum(all_guesses) / len(all_guesses)
             wordle_avgs[uid] = avg
 
@@ -1382,8 +1381,7 @@ class StatsGatherer:  # noqa: PLR0904
             self.logger.debug("Length of wordle count (%s) is less than one - skipping threshold", len(wordle_count))
 
         wordle_avgs: dict[int, float] = {}
-        for uid in wordle_count:
-            all_guesses = wordle_count[uid]
+        for uid, all_guesses in wordle_count.items():
             avg = sum(all_guesses) / len(all_guesses)
             wordle_avgs[uid] = avg
 
@@ -1970,8 +1968,7 @@ class StatsGatherer:  # noqa: PLR0904
             users[user_id]["total"] += 1
 
         # calc highest percentage
-        for user in users:
-            u_dict = users[user]
+        for u_dict in users.values():
             total = u_dict.pop("total")
             top_channel_id = max(u_dict, key=lambda x: u_dict[x])
             percentage = (u_dict[top_channel_id] / total) * 100

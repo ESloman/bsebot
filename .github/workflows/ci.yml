@@ -85,7 +85,7 @@ jobs:
             type=sha
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
       - name: Build Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: false
@@ -126,7 +126,7 @@ jobs:
             type=semver,pattern={{version}},enable=${{ startsWith(github.event.head_commit.message, 'release') }}
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') && startsWith(github.event.head_commit.message, 'release')}}
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true

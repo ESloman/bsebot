@@ -19,6 +19,10 @@ ignore = [
     "ASYNC110", # async-busy-wait: happy to wait await asyncio.sleep()
     "COM812", # missing-trailing-comma: ruff-format recommends disabling
     "CPY001", # missing-copyright-notice: don't care
+    "DOC201",
+    "DOC501",
+    "DOC502",
+    "DOC202",
     "D301",   # escape-sequence-in-docstring: too many false positives
     "D412",   # blank-lines-between-header-and-content: need blanklines in module docstrings for docs formatting
     "D417",   # undocumented-param: doesn't work with 'NAME (type): DESC' convention we use
@@ -82,6 +86,7 @@ max-complexity = 14
     "ANN002",  # missing-type-args: not interested in type annotating *args for tests
     "ANN003",  # missing-type-kwargs: not interested in type annotating **kwargs for tests
     "ANN201",  # missing-return-type-undocumented-public-function: not bothered about type annotations in tests
+    "DOC201",  # missing-return-type-docs: not important for tests
     "E721",    # use is for type checks
     "D101",    # undocumented-public-class: not bothered about fully documented test classes
     "PLC0206", # extracting values from dictionary

@@ -1,5 +1,39 @@
 # CHANGELOG
 
+## v2.11.0 (2024-08-03)
+
+### Chore
+
+* chore: bump pre-commit from 3.7.1 to 3.8.0 (#662) ([`81fc5eb`](https://github.com/ESloman/bsebot/commit/81fc5eb59b92b3f0105d7f88ce2f18a93f26dfdb))
+
+* chore: bump selenium from 4.21.0 to 4.23.1 (#661) ([`08148e5`](https://github.com/ESloman/bsebot/commit/08148e5f8127f209599f929c53e8f07b505bf02d))
+
+* chore: bump pymongo from 4.7.2 to 4.8.0 (#658) ([`52b37dd`](https://github.com/ESloman/bsebot/commit/52b37dd446ac8dcf1192b49aa5ce384f2fe8e059))
+
+* chore: bump docker/build-push-action from 5 to 6 (#656) ([`76ed255`](https://github.com/ESloman/bsebot/commit/76ed255925c34baa3ce6ac83dc06ccc20c4c27e3))
+
+* chore: bump python from 3.12.3 to 3.12.4 (#655) ([`07dd135`](https://github.com/ESloman/bsebot/commit/07dd135728fba0f28f456da4b7cf0990938fd009))
+
+* chore: bump requests from 2.32.2 to 2.32.3 (#653) ([`a07dbce`](https://github.com/ESloman/bsebot/commit/a07dbce0e74c60afa78e5d1270b4f3f54443e212))
+
+### Ci
+
+* ci: fix errors ([`f69fe3b`](https://github.com/ESloman/bsebot/commit/f69fe3b4ee07a335c08d9a7afcacb139a29f7073))
+
+* ci: add release workflow ([`389c129`](https://github.com/ESloman/bsebot/commit/389c1294bfef786bb04b065f74331623869f5430))
+
+### Feature
+
+* feat: add basic info command (#666) ([`caa5494`](https://github.com/ESloman/bsebot/commit/caa549411fc9e585364fba3701f3bc9f10fdef2f))
+
+### Fix
+
+* fix: temp fix for vc stat failure (#667)
+
+Apply a quick fix for VC failure. ([`7364788`](https://github.com/ESloman/bsebot/commit/736478841e7824f4161757b7da5642e66508ab26))
+
+* fix: fix wordle task not working (#665) ([`016555a`](https://github.com/ESloman/bsebot/commit/016555ac6c5788a8fd85735cd6de25d0c61adb6f))
+
 ## v2.10.0 (2024-08-03)
 
 ### Chore

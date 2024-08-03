@@ -1,17 +1,7 @@
 ---
 name: Testing, Linting, & Building
 
-on:
-  push:
-    paths-ignore:
-      - CHANGELOG.md
-      - pyproject.toml
-      - discordbot/__init__.py
-  pull_request:
-    paths-ignore:
-      - CHANGELOG.md
-      - pyproject.toml
-      - discordbot/__init__.py
+on: [push, pull_request]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -23,6 +13,7 @@ defaults:
 
 jobs:
   linting:
+    if: true && !startsWith(github.event.head_commit.message, 'release')
     runs-on: ubuntu-latest
     name: Linting
     steps:
@@ -42,6 +33,7 @@ jobs:
           ruff check .
           ruff format .
   pytest:
+    if: true && !startsWith(github.event.head_commit.message, 'release')
     runs-on: ubuntu-latest
     name: Pytest and coverage
     steps:
@@ -67,7 +59,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GIT_API_KEY }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   running:
-    services:
+   if: true && !startsWith(github.event.head_commit.message, 'release')
+   services:
       mongo:
         image: mongo
         env:

@@ -17,7 +17,6 @@ defaults:
 jobs:
   pushing:
     if: startsWith(github.event.head_commit.message, 'release')
-    needs: [pytest, linting, running]
     runs-on: ubuntu-latest
     defaults:
       run:

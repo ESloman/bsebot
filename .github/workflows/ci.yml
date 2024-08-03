@@ -59,8 +59,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GIT_API_KEY }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   running:
-   if: true && !startsWith(github.event.head_commit.message, 'release')
-   services:
+    if: true && !startsWith(github.event.head_commit.message, 'release')
+    services:
       mongo:
         image: mongo
         env:

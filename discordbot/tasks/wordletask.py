@@ -45,7 +45,7 @@ class WordleTask(BaseTask):
 
         ret = self.wordles.find_wordles_at_timestamp(now, BSE_SERVER_ID)
         self.sent_wordle = ret is not None
-        self.schedule.overriden = ret is not None
+        self.schedule.overriden = ret is None
 
     async def _send_wordles(self, solved_wordle: WordleSolve) -> None:
         """Sends the solved wordle to the necessary guilds.

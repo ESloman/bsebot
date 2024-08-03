@@ -1,5 +1,14 @@
 # CHANGELOG
 
+## v2.11.1 (2024-08-03)
+
+### Fix
+
+* fix: resolves a couple of minor bugs (#668)
+
+* don&#39;t trigger message action on deleted duplicates #639
+* fix: fix wordle task startup condition ([`76a171b`](https://github.com/ESloman/bsebot/commit/76a171b91bf4f9d97a24fba42c31e7ff58dd7bca))
+
 ## v2.11.0 (2024-08-03)
 
 ### Chore

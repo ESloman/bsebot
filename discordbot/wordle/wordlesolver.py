@@ -97,17 +97,18 @@ class WordleSolver:
             pass
 
         try:
-            accept_button = driver.find_element(By.ID, WORDLE_GDPR_ACCEPT_ID)
+            accept_button = driver.find_element(By.CLASS_NAME, WORDLE_GDPR_ACCEPT_ID)
             accept_button.click()
         except (ElementNotInteractableException, StaleElementReferenceException, NoSuchElementException):
             pass
 
         try:
             # sometimes there's a play button now
-            play_button = driver.find_element(By.CSS_SELECTOR, f"button[class*='{WORDLE_PLAY_CLASS_NAME}']")
+            button_elements = driver.find_elements(By.CSS_SELECTOR, f"button[class*='{WORDLE_PLAY_CLASS_NAME}']")
+            play_button = next(element for element in button_elements if element.text == "Play")
             play_button.click()
             await asyncio.sleep(1)
-        except (ElementNotInteractableException, StaleElementReferenceException, NoSuchElementException):
+        except (ElementNotInteractableException, StaleElementReferenceException, NoSuchElementException, StopIteration):
             pass
 
         try:

@@ -49,6 +49,7 @@ from discordbot.slashcommandeventclasses.config import Config
 from discordbot.slashcommandeventclasses.gift import Gift
 from discordbot.slashcommandeventclasses.help import Help
 from discordbot.slashcommandeventclasses.highscore import HighScore
+from discordbot.slashcommandeventclasses.info import Info
 from discordbot.slashcommandeventclasses.king_rename import KingRename
 from discordbot.slashcommandeventclasses.leaderboard import Leaderboard
 from discordbot.slashcommandeventclasses.pending import Pending
@@ -158,6 +159,7 @@ class CommandManager:
         self.bseddies_pledge = Pledge(client)
         self.bseddies_bless = Bless(client)
         self.bseddies_wordle = Wordle(client)
+        self.info = Info(client)
 
         # dynamically gets all the defined application commands
         # from the class attributes
@@ -672,6 +674,15 @@ class CommandManager:
                 ctx (discord.ApplicationContext): the command context
             """
             await self.bseddies_help.help(ctx)
+
+        @self.client.command(description="BSEBot information")
+        async def info(ctx: discord.ApplicationContext) -> None:
+            """Info command.
+
+            Args:
+                ctx (discord.ApplicationContext): _description_
+            """
+            await self.info.info(ctx)
 
         @self.client.command(description="See some stats")
         async def stats(ctx: discord.ApplicationContext) -> None:

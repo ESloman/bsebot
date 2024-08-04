@@ -1,6 +1,6 @@
 FROM python:3.12.4-slim
 
-RUN apt-get update && apt-get -yq install curl git gnupg2 \
+RUN apt-get update && apt-get -y --no-install-recommends install curl git gnupg2 \
     && curl -q https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
     && sh -c 'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' \
     && apt-get update \

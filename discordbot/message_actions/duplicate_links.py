@@ -81,6 +81,17 @@ class DuplicateLinkAction(BaseMessageAction):
             return False
 
         results = sorted(results, key=lambda x: x.timestamp, reverse=False)
+
+        # make sure that our message still exists - could have been deleted
+        actual_results: list[MessageDB] = []
+        for result in results:
+            res_channel = await self.client.fetch_channel(result.channel_id)
+            try:
+                await res_channel.fetch_message(result.message_id)
+            except discord.NotFound:
+                continue
+            actual_results.append(result)
+
         self._results_map[message.id] = results
         return True
 

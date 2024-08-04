@@ -1,17 +1,7 @@
 ---
 name: Testing, Linting, & Building
 
-on:
-  push:
-    paths-ignore:
-      - CHANGELOG.md
-      - pyproject.toml
-      - discordbot/__init__.py
-  pull_request:
-    paths-ignore:
-      - CHANGELOG.md
-      - pyproject.toml
-      - discordbot/__init__.py
+on: [push, pull_request]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -23,6 +13,7 @@ defaults:
 
 jobs:
   linting:
+    if: true && !startsWith(github.event.head_commit.message, 'release')
     runs-on: ubuntu-latest
     name: Linting
     steps:
@@ -42,6 +33,7 @@ jobs:
           ruff check .
           ruff format .
   pytest:
+    if: true && !startsWith(github.event.head_commit.message, 'release')
     runs-on: ubuntu-latest
     name: Pytest and coverage
     steps:
@@ -67,6 +59,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GIT_API_KEY }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   running:
+    if: true && !startsWith(github.event.head_commit.message, 'release')
     services:
       mongo:
         image: mongo
@@ -92,7 +85,7 @@ jobs:
             type=sha
             type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
       - name: Build Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: false
@@ -130,16 +123,17 @@ jobs:
           images: esloman/bsebot
           tags: |
             type=sha
-            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
+            type=semver,pattern={{version}},enable=${{ startsWith(github.event.head_commit.message, 'release') }}
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') && startsWith(github.event.head_commit.message, 'release')}}
       - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
   version:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && !startsWith(github.event.head_commit.message, 'release')
     runs-on: ubuntu-latest
     needs: [pushing]
     permissions:
@@ -151,7 +145,6 @@ jobs:
       with:
         fetch-depth: 0
         token: ${{ secrets.GH_TOKEN }}
-
     - name: Python Semantic Release
       uses: python-semantic-release/python-semantic-release@master
       with:

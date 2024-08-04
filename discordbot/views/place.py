@@ -37,7 +37,7 @@ class PlaceABetView(BSEView):
         self.add_item(BetOutcomesSelect(options))
         self.add_item(BetAmountSelect(user_eddies))
 
-        self.place: "PlaceBet" = place
+        self.place: PlaceBet = place
 
     @discord.ui.button(label="Submit", style=discord.ButtonStyle.green, row=3, disabled=True, emoji="💰")
     async def submit_button_callback(self, _: discord.ui.Button, interaction: discord.Interaction) -> None:

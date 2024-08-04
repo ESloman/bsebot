@@ -79,7 +79,7 @@ class BSEddiesKingTask(BaseTask):
 
             users = self.user_points.get_all_users_for_guild(guild.id)
             users = [u for u in users if not u.inactive and u.uid in member_ids]
-            top_user = sorted(users, key=lambda x: x.points, reverse=True)[0]
+            top_user = max(users, key=lambda x: x.points)
 
             if current_king is not None and top_user.uid == current_king:
                 # current king is fine

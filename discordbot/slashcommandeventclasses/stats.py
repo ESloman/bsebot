@@ -32,7 +32,7 @@ class Stats(BSEddies):
         self.command_name = "stats"
 
     @staticmethod
-    def _do_message_counts(messages: list[MessageDB]) -> dict[str, any]:  # noqa: C901, PLR0915
+    def _do_message_counts(messages: list[MessageDB]) -> dict[str, any]:  # noqa: PLR0915
         _swears = ["fuck", "shit", "cunt", "piss", "cock", "bollock", "dick", "twat"]
 
         _dict = {}

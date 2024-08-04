@@ -16,8 +16,13 @@ ignore = [
     "AIR", "BLE", "DJ", "DTZ", "EM", "FA", "FBT", "FIX", "INP", "ISC", "NPY", "PD", "PGH", "PTH", "SLOT", "T10", "T20", 
     # specific rule ignores
     "ANN101", # missing-type-self: happy for self to not have type annotations
+    "ASYNC110", # async-busy-wait: happy to wait await asyncio.sleep()
     "COM812", # missing-trailing-comma: ruff-format recommends disabling
     "CPY001", # missing-copyright-notice: don't care
+    "DOC201",
+    "DOC501",
+    "DOC502",
+    "DOC202",
     "D301",   # escape-sequence-in-docstring: too many false positives
     "D412",   # blank-lines-between-header-and-content: need blanklines in module docstrings for docs formatting
     "D417",   # undocumented-param: doesn't work with 'NAME (type): DESC' convention we use
@@ -64,10 +69,11 @@ preview = true
 
 [lint.pylint]
 max-args = 6
+max-branches = 14
 
 [lint.mccabe]
 # Unlike Flake8, default to a complexity level of 10.
-max-complexity = 10
+max-complexity = 14
 
 [lint.per-file-ignores]
 "*/*__init__.py" = [
@@ -80,7 +86,10 @@ max-complexity = 10
     "ANN002",  # missing-type-args: not interested in type annotating *args for tests
     "ANN003",  # missing-type-kwargs: not interested in type annotating **kwargs for tests
     "ANN201",  # missing-return-type-undocumented-public-function: not bothered about type annotations in tests
+    "DOC201",  # missing-return-type-docs: not important for tests
+    "E721",    # use is for type checks
     "D101",    # undocumented-public-class: not bothered about fully documented test classes
+    "PLC0206", # extracting values from dictionary
     "PLR2004", # magic-value-comparison: not bothered about 'magic' values in tests
     "PLR6301", # don't care that test methods could be static - legit usecase when using pytest parameters
     "PLR1702", # don't care about nested blocks in tests/mocks

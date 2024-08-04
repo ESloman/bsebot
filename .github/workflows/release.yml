@@ -1,0 +1,48 @@
+---
+name: Release
+
+on:
+  push:
+    branches:
+      main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  pushing:
+    if: startsWith(github.event.head_commit.message, 'release')
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Log in to the Container registry
+        uses: docker/login-action@v3
+        with:
+          username: esloman
+          password: ${{ secrets.dockerhub_token }}
+      - name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@8e5442c4ef9f78752691e2d8f8d19755c6f78e81
+        with:
+          images: esloman/bsebot
+          tags: |
+            type=sha
+            type=semver,pattern={{version}},enable=${{ startsWith(github.event.head_commit.message, 'release') }}
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') && startsWith(github.event.head_commit.message, 'release')}}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+  

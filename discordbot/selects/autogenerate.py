@@ -101,8 +101,7 @@ class AutoBetsSelect(BSESelect):
             options.append(SelectOption(label=label, value=value, description=bet.title))
 
         max_vals = 4
-        if len(potential_bets) < max_vals:
-            max_vals = len(potential_bets)
+        max_vals = min(len(potential_bets), max_vals)
 
         super().__init__(
             placeholder="Select bets to create",

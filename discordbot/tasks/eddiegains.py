@@ -56,12 +56,12 @@ class EddieGainMessager(BaseTask):
             breakdown (dict[str, int]): the breakdown
             guild_name (str): the guild name
         """
-        detailed_message = f"### {guild_name}"
+        detailed_message = f"### {guild_name}\n"
         for key in sorted(breakdown):
             detailed_message += f"- `{HUMAN_MESSAGE_TYPES[key]}` : **{breakdown[key]}**\n"
             if key in {"vc_joined", "vc_streaming"}:
                 detailed_message += " seconds"
-        detailed_message += "\n\n"
+        detailed_message += "\n"
         return detailed_message
 
     def _check_salary_time(self) -> None:
@@ -90,14 +90,14 @@ class EddieGainMessager(BaseTask):
             str: the formatted message
         """
         guild_db = self.guilds.get_guild(guild_id)
-        message = f"## {guild_db.name} Admin Salary Summary"
+        message = f"## {guild_db.name} Admin Salary Summary\n"
         for user_id, data in user_eddies.items():
             user_db = self.user_points.find_user(user_id, guild_id)
             if not user_db:
                 self.logger.warning("Couldn't find %s in %s (%s). Skipping.", user_id, guild_id, guild_db.name)
                 continue
             value, _, tax = data
-            message += f"- {user_db}: `{value}` (tax: _{tax}_)\n"
+            message += f"- {user_db.name}: `{value}` (tax: _{tax}_)\n"
         return message
 
     def _format_user_eddies_message(
@@ -134,7 +134,7 @@ class EddieGainMessager(BaseTask):
 
         # add detailed summary
         if detailed_message:
-            message += "\n\n## Salary Breakdown\n"
+            message += "\n## Salary Breakdown\n"
             message += detailed_message
 
         return message if message != "# BSEBot Daily Salary Summary\n\n" else ""
@@ -157,7 +157,7 @@ class EddieGainMessager(BaseTask):
                 continue
 
             # add the config tip
-            message += "\n\nWant to turn these notifications off? Use `/config` to disable."
+            message += "\nWant to turn these notifications off? Use `/config` to disable."
 
             user = await self.bot.fetch_user(int(user_id))
             try:
@@ -188,10 +188,15 @@ class EddieGainMessager(BaseTask):
                     # not configured to send summary messages
                     continue
 
+                if len(summary_message) > 1999:  # noqa: PLR2004
+                    self.logger.warning("Admin summary message is too long.")
+                    self.logger.warning("Message: %s", summary_message)
+
                 user = await self.bot.fetch_user(user_id)
                 try:
                     await user.send(content=summary_message, silent=True)
-                except discord.Forbidden:
+                except (discord.Forbidden, discord.HTTPException) as exc:
+                    self.logger.warning("Error sending admin summary: %s", exc)
                     continue
 
     @tasks.loop(count=1)
@@ -552,8 +557,7 @@ class BSEddiesManager(BaseTask):
             wordle_messages = sorted(wordle_messages, key=operator.itemgetter(1))
             top_guess = wordle_messages[0][1]
 
-            if bot_guesses < top_guess:
-                top_guess = bot_guesses
+            top_guess = min(bot_guesses, top_guess)
 
             for wordle_attempt in wordle_messages:
                 if wordle_attempt[1] == top_guess:
@@ -567,7 +571,7 @@ class BSEddiesManager(BaseTask):
         tax_rate, supporter_tax_rate = self.guilds.get_tax_rate(guild_id)
         self.logger.info("Tax rate is: %s, %s", tax_rate, supporter_tax_rate)
 
-        for _user in eddie_gain_dict:
+        for _user, user_dict in eddie_gain_dict.items():
             if _user == "guild":
                 continue
 
@@ -578,18 +582,20 @@ class BSEddiesManager(BaseTask):
                 # apply tax
                 taxed = math.floor(eddie_gain_dict[_user][0] * tr)
                 eddie_gain_dict[_user][0] -= taxed
-                eddie_gain_dict[_user].append(taxed)
+                user_dict.append(taxed)
                 tax_gains += taxed
 
-            if real:
-                self.logger.info("Incrementing %s by %s", _user, eddie_gain_dict[_user][0])
-                self.user_points.increment_points(
-                    _user,
-                    guild_id,
-                    eddie_gain_dict[_user][0],
-                    TransactionTypes.DAILY_SALARY,
-                )
-            self.logger.info("%s gained %s", _user, eddie_gain_dict[_user][0])
+            self.logger.info("%s gained %s", _user, user_dict[0])
+            if not real:
+                continue
+
+            self.logger.info("Incrementing %s by %s", _user, user_dict[0])
+            self.user_points.increment_points(
+                _user,
+                guild_id,
+                eddie_gain_dict[_user][0],
+                TransactionTypes.DAILY_SALARY,
+            )
 
         if current_king_id not in eddie_gain_dict:
             # king isn't gaining eddies lol

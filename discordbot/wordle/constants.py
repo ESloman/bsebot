@@ -2,7 +2,7 @@
 
 WORDLE_URL = "https://www.nytimes.com/games/wordle/index.html"
 
-WORDLE_GDPR_ACCEPT_ID = "pz-gdpr-btn-accept"
+WORDLE_GDPR_ACCEPT_ID = "fides-accept-all-button"
 WORDLE_TUTORIAL_CLOSE_CLASS_NAME = "Modal-module_closeIcon__"
 WORDLE_FOOTNOTE = "Settings-module_footnote__"
 WORDLE_SETTINGS_BUTTON = "settings-button"

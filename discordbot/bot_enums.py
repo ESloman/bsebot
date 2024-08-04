@@ -92,6 +92,7 @@ class ActivityTypes(IntEnum):
     CONFIG = 47
     REFRESH = 48
     WORDLE = 49
+    INFO = 50
 
 
 class AwardsTypes(IntEnum):

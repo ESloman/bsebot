@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## v2.11.2 (2024-08-04)
+
+### Ci
+
+* ci: change base Docker image to slim (#670) ([`1a1aacd`](https://github.com/ESloman/bsebot/commit/1a1aacdab130123985af7c0964383ad3ce5de6d3))
+
+### Fix
+
+* fix: fix for awards error (#671) ([`f9e0010`](https://github.com/ESloman/bsebot/commit/f9e001044e5dfd9eed0ce903f3aa68fe47b8ff31))
+
 ## v2.11.1 (2024-08-03)
 
 ### Fix

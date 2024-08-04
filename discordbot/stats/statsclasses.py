@@ -797,7 +797,7 @@ class StatsGatherer:  # noqa: PLR0904
             vc_most_time = max(channels, key=lambda x: channels[x]["count"])
         except ValueError:
             vc_most_time = GENERAL_VC_CHAT
-            channels[vc_most_time] = {"users": 0, "count": 0}
+            channels[vc_most_time] = {"users": [], "count": 0}
 
         data_class = StatDB(
             _id="",
@@ -847,7 +847,7 @@ class StatsGatherer:  # noqa: PLR0904
             vc_most_users = max(channels, key=lambda x: channels[x]["users"])
         except ValueError:
             vc_most_users = GENERAL_VC_CHAT
-            channels[vc_most_users] = {"users": 0, "count": 0}
+            channels[vc_most_users] = {"users": [], "count": 0}
 
         data_class = StatDB(
             _id="",

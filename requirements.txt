@@ -1,6 +1,6 @@
 requests==2.32.3
 python-dotenv==1.0.1
-pymongo==4.8.0
+pymongo==4.9.1
 xlsxwriter==3.2.0
 py-cord[speed]==2.6.0
 selenium==4.23.1

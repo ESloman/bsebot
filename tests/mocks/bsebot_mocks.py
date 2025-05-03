@@ -3,13 +3,16 @@
 import discord
 
 from discordbot.constants import BSE_BOT_ID
-from tests.mocks import discord_mocks, interface_mocks
+from tests.mocks import discord_mocks
 
 
 class BSEBotMock:
     def __init__(self) -> None:
         """Initialisation method."""
-        self._guilds = interface_mocks.query_mock("guilds", {})
+        self._guilds = [
+            {"guild_id": "g1234567", "owner_id": "o1234567", "name": "name"},
+            {"guild_id": "g123456789", "owner_id": "o123456789", "name": "name123"},
+        ]
 
     @property
     def user(self) -> discord_mocks.MemberMock:
@@ -45,8 +48,7 @@ class BSEBotMock:
 
     async def fetch_guilds(self):
         """Mock for fetching guilds."""
-        guilds = interface_mocks.query_mock("guilds", {})
-        for guild in guilds:
+        for guild in self._guilds:
             yield discord_mocks.GuildMock(guild["guild_id"], guild["owner_id"], guild["name"])
 
 

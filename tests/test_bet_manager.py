@@ -77,8 +77,7 @@ class TestBetManager:
     ) -> None:
         """Tests our '_calculate_taxed_winnings'."""
         bet_manager = BetManager()
-        _user = interface_mocks.query_mock("userpoints", {})[0]
-        _user["supporter_type"] = supporter_type
+        _user = interface_mocks.mock_user(supporter_type=supporter_type)
         user = UserPoints.make_data_class(_user)
         with patch.object(bet_manager.user_points, "find_user", return_value=user):
             result = bet_manager._calculate_taxed_winnings(user.uid, user.guild_id, tax, actual_won, points_won)
@@ -102,8 +101,7 @@ class TestBetManager:
         """Tests our 'close_a_bet'."""
         bet_manager = BetManager()
 
-        _user = interface_mocks.query_mock("userpoints", {})[0]
-        _user["supporter_type"] = 0 if int(test_bet.guild_id) < 900 else 1
+        _user = interface_mocks.mock_user(supporter_type=0 if int(test_bet.guild_id) < 900 else 1)
         user = UserPoints.make_data_class(_user)
 
         # SO MANY MOCKS

@@ -244,7 +244,7 @@ class BaseClass:
             docs.extend(ret)
         return [self.make_data_class(doc) for doc in docs]
 
-    def get_collection_names(self) -> None | list:
+    def get_collection_names(self) -> list | None:
         """Gets collection names of database.
 
         Returns:

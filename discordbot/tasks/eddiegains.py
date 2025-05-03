@@ -125,7 +125,7 @@ class EddieGainMessager(BaseTask):
             value = user_eddies[guild_id][0]
             tax = user_eddies[guild_id][2]
             tax_message = (
-                f"(you {f"were taxed _{tax}_." if user_id != guilds[guild_id].king else f"received _{tax}_ in tax."})"
+                f"(you {f'were taxed _{tax}_.' if user_id != guilds[guild_id].king else f'received _{tax}_ in tax.'})"
             )
             message += f"**{guild_name}**: {value} {tax_message}\n"
 
@@ -200,7 +200,7 @@ class EddieGainMessager(BaseTask):
                     continue
 
     @tasks.loop(count=1)
-    async def eddie_distributer(self) -> None | dict[int, dict[int, list[int]]]:
+    async def eddie_distributer(self) -> dict[int, dict[int, list[int]]] | None:
         """Task that distributes daily eddies."""
         now = datetime.datetime.now(tz=ZoneInfo("UTC"))
 
@@ -580,7 +580,7 @@ class BSEddiesManager(BaseTask):
 
             if _user != current_king_id:
                 # apply tax
-                taxed = math.floor(eddie_gain_dict[_user][0] * tr)
+                taxed = math.floor(user_dict[0] * tr)
                 eddie_gain_dict[_user][0] -= taxed
                 user_dict.append(taxed)
                 tax_gains += taxed
@@ -593,7 +593,7 @@ class BSEddiesManager(BaseTask):
             self.user_points.increment_points(
                 _user,
                 guild_id,
-                eddie_gain_dict[_user][0],
+                user_dict[0],
                 TransactionTypes.DAILY_SALARY,
             )
 

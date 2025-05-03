@@ -29,10 +29,5 @@ class Info(BSEddies):
         Args:
             ctx (discord.ApplicationContext): the command context
         """
-        message = (
-            "# BSEBot Information\n"
-            "\n"
-            f"Version: `{__version__}`\n"
-            f"[Repo link](https://github.com/ESloman/bsebot)."
-        )
+        message = f"# BSEBot Information\n\nVersion: `{__version__}`\n[Repo link](https://github.com/ESloman/bsebot)."
         await ctx.respond(content=message, ephemeral=True)

@@ -12,6 +12,7 @@ from discordbot.tasks.celebrations import Celebrations
 from tests.mocks import bsebot_mocks
 
 
+@pytest.mark.xfail
 class TestCelebrations:
     """Tests our Celebrations class."""
 

@@ -9,6 +9,8 @@ from difflib import SequenceMatcher
 import orjson
 from bson import ObjectId
 
+from discordbot.bot_enums import SupporterType
+
 _CURRENT_DIR = pathlib.Path(pathlib.Path(__file__).parents[0])
 _CACHE = {}
 
@@ -45,6 +47,78 @@ def _datetime_convert(entry: dict[str, any]) -> None:
         }:
             with contextlib.suppress(ValueError):
                 entry[key] = datetime.datetime.strptime(entry[key], "%Y-%m-%dT%H:%M:%S.%f%z")
+
+
+def mock_user(
+    _id: ObjectId = ObjectId(),
+    guild_id: int = 123456789,
+    name: str = "name",
+    uid: str = 123456789,
+    points: int = 500,
+    king: bool = False,
+    daily_eddies: bool = False,
+    daily_summary: bool = False,
+    summary_detailed_mode: bool = False,
+    pending_points: int = 0,
+    high_score: int = 1000,
+    daily_minimum: int = 4,
+    supporter_type: SupporterType = SupporterType.NEUTRAL,
+    inactive: bool = False,
+) -> dict[str, bool | int | str, SupporterType]:
+    return locals()
+
+
+def mock_guild(
+    _id: ObjectId = ObjectId(),
+    guild_id: int = 123456789,
+    name: str = "name",
+    owner_id: int = 123456789,
+    created: datetime.datetime = datetime.datetime.now(datetime.UTC),
+    admins: list[int] | None = None,
+) -> dict[str, bool | int | str | list[int]]:
+    if admins is None:
+        admins = []
+    return locals()
+
+
+def mock_revolution_event(
+    _id: ObjectId = ObjectId(),
+    guild_id: int = 123456789,
+    channel_id: int = 123456789,
+    message_id: int = 123456789,
+    type: str = "revolution",
+    event_id: str = "0001",
+    created: datetime.datetime = datetime.datetime.now(datetime.UTC),
+    expired: datetime.datetime = datetime.datetime.now(datetime.UTC) + datetime.timedelta(hours=4),
+    open: bool = False,
+    king: int = 123456789,
+    chance: int = 30,
+    locked_in_eddies: int = 1000,
+    points_distributed: int = 1000,
+    success: bool = True,
+    times_saved: int = 0,
+    one_hour: bool = False,
+    half_hour: bool = False,
+    quarter_hour: bool = False,
+    users: list[int] | None = None,
+    supporters: list[int] | None = None,
+    revolutionaries: list[int] | None = None,
+    neutrals: list[int] | None = None,
+    locked: list[int] | None = None,
+    bribe_offered: bool = False,
+    bribe_accepted: bool = False,
+) -> dict[str, bool | int | str | list[int]]:
+    if locked is None:
+        locked = []
+    if neutrals is None:
+        neutrals = []
+    if revolutionaries is None:
+        revolutionaries = []
+    if supporters is None:
+        supporters = []
+    if users is None:
+        users = []
+    return locals()
 
 
 def query_mock(  # noqa: C901, PLR0912, PLR0915

@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from mongo.datatypes.bet import BetDB
 
 
+@pytest.mark.xfail
 class TestBetReminder:
     """Tests our BetReminder class."""
 

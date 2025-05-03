@@ -14,11 +14,9 @@ class TestRevolutionEmbed:
 
     @pytest.fixture(autouse=True)
     def _test_data(self) -> None:
-        self.guild = Guilds.make_data_class(interface_mocks.query_mock("guilds", {"revolution": True})[0])
-        self.event = RevolutionEvent.make_data_class(
-            interface_mocks.query_mock("ticketedevents", {"type": "revolution"})[-1]
-        )
-        self.user = UserPoints.make_data_class(interface_mocks.query_mock("userpoints", {"uid": self.event.king})[-1])
+        self.guild = Guilds.make_data_class(interface_mocks.mock_guild())
+        self.event = RevolutionEvent.make_data_class(interface_mocks.mock_revolution_event())
+        self.user = UserPoints.make_data_class(interface_mocks.mock_user())
 
     def test_get_revolution_bribe_message(self) -> None:
         """Tests our get_revolution_bribe_message with some standard parameters."""

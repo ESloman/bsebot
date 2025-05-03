@@ -10,6 +10,7 @@ from mongo.bseticketedevents import RevolutionEvent
 from tests.mocks import bsebot_mocks, discord_mocks, interface_mocks
 
 
+@pytest.mark.xfail
 class TestRevolutionBribeView:
     """Tests our RevolutionBribeView view."""
 

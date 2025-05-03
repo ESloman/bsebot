@@ -335,8 +335,7 @@ class ConfigView(BSEView):
 
         view = DailyMessageView(daily_eddies, is_admin, daily_summary)
         msg = (
-            "## Daily Salary Message\n\n"
-            "Select whether you want to receive the _(silent)_ daily salary message or not."
+            "## Daily Salary Message\n\nSelect whether you want to receive the _(silent)_ daily salary message or not."
         )
 
         if is_admin:

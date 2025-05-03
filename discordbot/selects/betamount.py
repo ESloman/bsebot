@@ -68,7 +68,7 @@ class BetAmountSelect(BSESelect):
         if not user_eddies:
             return [0]
         amounts = [amount for amount in self.min_amounts if amount <= user_eddies]
-        rounded = round(user_eddies, -int(math.floor(math.log10(abs(user_eddies)))))
+        rounded = round(user_eddies, -math.floor(math.log10(abs(user_eddies))))
         percs = (x / 10.0 for x in range(1, 10))
         for perc in percs:
             value = rounded * perc

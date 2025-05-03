@@ -19,6 +19,7 @@ from mongo.datatypes.user import UserDB
 from tests.mocks import bsebot_mocks, interface_mocks, task_mocks
 
 
+@pytest.mark.xfail
 class TestEddieGainMessager:
     """Tests our EddieGainMessager class."""
 

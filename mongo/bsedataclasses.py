@@ -161,7 +161,7 @@ class SpoilerThreads(BaseClass):
         document["_id"] = _id
         return self.make_data_class(document)
 
-    def get_thread_by_id(self, guild_id: int, thread_id: int) -> None | ThreadDB:
+    def get_thread_by_id(self, guild_id: int, thread_id: int) -> ThreadDB | None:
         """Gets a database thread by ID.
 
         Args:
@@ -248,12 +248,12 @@ class Awards(BaseClass):
             "year": year,
         }
 
-        for key in kwargs:
+        for key, _value in kwargs.items():
             if key == "_id":
                 # skip _id key
                 continue
             if key not in doc:
-                doc[key] = kwargs[key]
+                doc[key] = _value
 
         _id = self.insert(doc)[0] if not dry_run else ObjectId()
         doc["_id"] = _id
@@ -305,11 +305,11 @@ class Awards(BaseClass):
             "year": year,
         }
 
-        for key in kwargs:
+        for key, _value in kwargs.items():
             if key == "_id":
                 continue
             if key not in doc:
-                doc[key] = kwargs[key]
+                doc[key] = _value
 
         _id = self.insert(doc)[0] if not dry_run else ObjectId()
         doc["_id"] = _id

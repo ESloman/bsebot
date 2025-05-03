@@ -37,7 +37,7 @@ class RiggedAction(BaseMessageAction):
             return False
 
         if (
-            any(re.findall("\brigged\b", message.content.lower()))
+            any(re.findall(r"\brigged\b", message.content.lower()))
             and guild_db.last_revolution_time
             and 0 < (message.created_at - guild_db.last_revolution_time).total_seconds() <= 900  # noqa: PLR2004
         ):

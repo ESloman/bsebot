@@ -59,7 +59,7 @@ class EmbedManager:
         if not bet.active:
             footer = "This bet is closed for new bets. Awaiting results from the bet creator."
         elif timeout := bet.timeout:
-            footer = f"This bet will stop taking bets on {timeout.strftime("%d %b %y %H:%M:%S")}."
+            footer = f"This bet will stop taking bets on {timeout.strftime('%d %b %y %H:%M:%S')}."
         else:
             footer = "Unknown state."
 
@@ -104,7 +104,7 @@ class EmbedManager:
             message += f"\n- **{users.index(user) + 1})**  {name}  :  {user.points}"
 
         message += (
-            f"\n\nLast refreshed at `{datetime.datetime.now(tz=datetime.UTC).strftime("%d %b %y %H:%M")}` "
+            f"\n\nLast refreshed at `{datetime.datetime.now(tz=datetime.UTC).strftime('%d %b %y %H:%M')}` "
             f"by _{username}_."
         )
 
@@ -148,7 +148,7 @@ class EmbedManager:
             message += f"\n- **{users.index(user) + 1})**  {name}  :  {user.high_score}"
 
         message += (
-            f"\n\nLast refreshed at `{datetime.datetime.now(tz=datetime.UTC).strftime("%d %b %y %H:%M")}` "
+            f"\n\nLast refreshed at `{datetime.datetime.now(tz=datetime.UTC).strftime('%d %b %y %H:%M')}` "
             f"by _{username}_."
         )
 
@@ -198,8 +198,8 @@ class EmbedManager:
             "The KING may spend 10% of their eddies using the _Save Thyself_ "
             "button to reduce revolution chance by 15%.\n"
             f"**Success rate**: `{chance}%`\n"
-            f"**Revolutionaries**: `{", ".join(revos) if revos else None}`\n"
-            f"**Supporters**: `{", ".join(supps) if supps else None}`\n"
+            f"**Revolutionaries**: `{', '.join(revos) if revos else None}`\n"
+            f"**Supporters**: `{', '.join(supps) if supps else None}`\n"
             f"**Locked in KING eddies**: `{event.locked_in_eddies}`"
         )
 
@@ -220,7 +220,7 @@ class EmbedManager:
             f"Hey <@{guild_db.king}>,\n"
             f"Looks like you're in a bit of trouble with that revolution in **{guild_db.name}**. "
             f"The chance is currently **{event.chance}%** "
-            f"{"(capped at 95%) " if event.chance >= 95 else ""}"  # noqa: PLR2004
+            f"{'(capped at 95%) ' if event.chance >= 95 else ''}"  # noqa: PLR2004
             "and you can't afford to save thyself to reduce that. "
             "_But_, I have an offer for you that might help if you're willing to accept it.\n\n"
             "For a small price, I will _secretly_ reduce the revolution chance by *50* for you. "
@@ -228,7 +228,7 @@ class EmbedManager:
             "### What happens if you accept?\n"
             f"- revolution chance reduced by 50 (so to _{event.chance - 50}_ for you)\n"
             f"- if the chance is still above 50, chance is capped to 50 "
-            f"({"won't affect you" if (event.chance - 50) > 50 else "will affect you"})\n"  # noqa: PLR2004
+            f"({"won't affect you" if (event.chance - 50) > 50 else 'will affect you'})\n"  # noqa: PLR2004
             f"- I will take _{bribe_cost}_ eddies off of you (leaving you on _{user.points - bribe_cost}_)\n"
             f"- once the event is over, I will let you know if accepting the bribe actually helped or not\n"
             "\n"

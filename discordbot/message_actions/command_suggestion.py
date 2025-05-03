@@ -71,6 +71,6 @@ class CommandSuggest(BaseMessageAction):
                 app_command = app_map[match_name]
                 msg += f"- {app_command.mention}\n"
 
-        msg += "\n" f"For more information on commands, use {app_map["help"].mention}."
+        msg += f"\nFor more information on commands, use {app_map['help'].mention}."
 
         await message.reply(content=msg, suppress=True)

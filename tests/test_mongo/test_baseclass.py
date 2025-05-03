@@ -29,7 +29,7 @@ class TestBaseClass:
     def test_base_class_vault_exc(self) -> None:
         """Tests BaseClass vault property raises an exception correctly."""
         base_cls = BaseClass()
-        with pytest.raises(NoVaultError, match="No vault instantiated."):
+        with pytest.raises(NoVaultError, match=r"No vault instantiated\."):
             _ = base_cls.vault
 
     def test_base_class_vault(self) -> None:
@@ -68,12 +68,12 @@ class TestBaseClass:
     def test_insert_incorrect_document(self, doc: any) -> None:
         """Tests BaseClass insert method with incorrect document."""
         base_cls = BaseClass()
-        with pytest.raises(IncorrectDocumentError, match="Given document isn't a dictionary or a list."):
+        with pytest.raises(IncorrectDocumentError, match=r"Given document isn't a dictionary or a list\."):
             base_cls.insert(doc)
 
     @pytest.mark.parametrize("doc", [[None], [{}, None, {}], [123, "doc", {}, {}]])
     def test_insert_incorrect_documents(self, doc: any) -> None:
         """Tests BaseClass insert method with incorrect documents."""
         base_cls = BaseClass()
-        with pytest.raises(IncorrectDocumentError, match="Not all documents in the list are dictionaries."):
+        with pytest.raises(IncorrectDocumentError, match=r"Not all documents in the list are dictionaries\."):
             base_cls.insert(doc)

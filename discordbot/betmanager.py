@@ -107,7 +107,7 @@ class BetManager:
 
         # add on loser points
         with contextlib.suppress(ValueError, ZeroDivisionError, TypeError):
-            points_won += int(math.floor(extra_eddies / num_winners))
+            points_won += math.floor(extra_eddies / num_winners)
         return points_won
 
     def _calculate_taxed_winnings(

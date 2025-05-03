@@ -71,11 +71,11 @@ class MockCollection:
         """Mock delete_one method."""
         return MockResult(1)
 
-    def update_many(self, filter: dict[str, any], update: dict[str, any], upsert: bool = False):  # noqa: A002
+    def update_many(self, filter: dict[str, any], update: dict[str, any], upsert: bool = False):
         """Mock update_many method."""
         return MockResult(5)
 
-    def update_one(self, filter: dict[str, any], update: dict[str, any], upsert: bool = False):  # noqa: A002
+    def update_one(self, filter: dict[str, any], update: dict[str, any], upsert: bool = False):
         """Mock update_one method."""
         return MockResult(1)
 

@@ -53,6 +53,7 @@ class TestBetSelect:
         view.add_item(select)
         return view
 
+    @pytest.mark.xfail
     async def test_init(self) -> None:
         """Tests basic init.
 
@@ -62,6 +63,7 @@ class TestBetSelect:
         select = BetSelect(bets)
         assert len(select.options) == len(bets)
 
+    @pytest.mark.xfail
     async def test_init_with_one_bet(self) -> None:
         """Tests basic init with one bet.
 

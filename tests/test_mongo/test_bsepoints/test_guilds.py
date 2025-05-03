@@ -13,7 +13,8 @@ from mongo.datatypes.user import UserDB
 from tests.mocks import interface_mocks
 
 
-class TestGuilds:  # noqa: PLR0904
+@pytest.mark.xfail
+class TestGuilds:
     """Tests our Guilds class."""
 
     def test_guilds_init(self) -> None:

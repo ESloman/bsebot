@@ -40,7 +40,7 @@ class TaxRate(BSEddies):
 
         value, supporter_value = self.guilds.get_tax_rate(guild_id)
 
-        message = "Tax rate is currently:\n" f"- `{value * 100}%`\n- `{supporter_value * 100}%` for supporters"
+        message = f"Tax rate is currently:\n- `{value * 100}%`\n- `{supporter_value * 100}%` for supporters"
 
         if ctx.user.id != king_id:
             await ctx.respond(content=message, ephemeral=True, delete_after=10)

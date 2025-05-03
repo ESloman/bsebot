@@ -11,7 +11,7 @@ from tests.mocks import interface_mocks
 
 
 class MemberMock:
-    def __init__(self, id: int, name: str = "some_name", mention: str = "some_mention") -> None:  # noqa: A002
+    def __init__(self, id: int, name: str = "some_name", mention: str = "some_mention") -> None:
         """Init."""
         self.id: int = id
         self.name: str = name
@@ -364,7 +364,7 @@ class StickerMock:
         self.guild = GuildMock
 
 
-class MessageMock:  # noqa: PLR0904
+class MessageMock:
     def __init__(self, content: str = "", guild_id: int = 123, message_id: int = 987654, user_id: int = 567890) -> None:
         """Init."""
         self._id = message_id

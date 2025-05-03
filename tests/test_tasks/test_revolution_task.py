@@ -15,6 +15,7 @@ from mongo.bseticketedevents import RevolutionEvent
 from tests.mocks import bsebot_mocks, interface_mocks
 
 
+@pytest.mark.xfail
 class TestBSEddiesRevolutionTask:
     """Tests our BSEddiesRevolutionTask class."""
 

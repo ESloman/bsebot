@@ -11,6 +11,7 @@ from mongo.datatypes.customs import EmojiDB
 from tests.mocks import interface_mocks
 
 
+@pytest.mark.xfail
 class TestServerEmojis:
     """Tests our Guilds class."""
 

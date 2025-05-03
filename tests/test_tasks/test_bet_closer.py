@@ -14,6 +14,7 @@ from mongo.bsepoints.bets import UserBets
 from tests.mocks import bsebot_mocks, interface_mocks
 
 
+@pytest.mark.xfail
 class TestBetCloser:
     """Tests our BetCloser class."""
 

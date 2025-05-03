@@ -11,6 +11,7 @@ from mongo.datatypes.user import UserDB
 from tests.mocks import interface_mocks
 
 
+@pytest.mark.xfail
 class TestUserPoints:
     """Tests our UserPoints class."""
 

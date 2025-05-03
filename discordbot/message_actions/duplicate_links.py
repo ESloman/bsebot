@@ -2,7 +2,6 @@
 
 import datetime
 import random
-import re
 from typing import TYPE_CHECKING
 from zoneinfo import ZoneInfo
 
@@ -47,7 +46,7 @@ class DuplicateLinkAction(BaseMessageAction):
         try:
             link = next(
                 _link
-                for _link in re.split(" \n", message.content)
+                for _link in message.content.split(" \n")
                 if "https" in _link and any(x in _link for x in ["twitter", "x.com", "youtube"])
             )
         except StopIteration:

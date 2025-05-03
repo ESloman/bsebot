@@ -62,7 +62,7 @@ class PlaceBet(BSEddies):
         bet_id: str,
         amount: int,
         emoji: str,
-    ) -> None | bool:
+    ) -> bool | None:
         """Main method for placing a bet.
 
         Validates that a bet exists, is active and that the user has the right amount of BSEddies.
@@ -122,7 +122,7 @@ class PlaceBet(BSEddies):
         success = self.user_bets.add_better_to_bet(bet_id, guild.id, ctx.user.id, emoji, amount)
 
         if not success["success"]:
-            msg = f"Your bet on **Bet {bet_id}** failed because of: __{success["reason"]}__?"
+            msg = f"Your bet on **Bet {bet_id}** failed because of: __{success['reason']}__?"
             await response.edit_message(content=msg, view=None, delete_after=10)
             return False
 

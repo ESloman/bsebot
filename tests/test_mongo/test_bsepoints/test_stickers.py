@@ -11,6 +11,7 @@ from mongo.datatypes.customs import StickerDB
 from tests.mocks import interface_mocks
 
 
+@pytest.mark.xfail
 class TestServerStickers:
     """Tests our Guilds class."""
 

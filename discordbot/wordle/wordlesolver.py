@@ -90,6 +90,13 @@ class WordleSolver:
         await asyncio.sleep(2)
 
         try:
+            # cookies button
+            reject_all = driver.find_element(By.CLASS_NAME, "fides-reject-all-button")
+            reject_all.click()
+        except (ElementNotInteractableException, StaleElementReferenceException, NoSuchElementException):
+            pass
+
+        try:
             # updated terms button
             continue_button = driver.find_element(By.CLASS_NAME, "purr-blocker-card__button")
             continue_button.click()

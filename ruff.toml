@@ -13,7 +13,7 @@ target-version = "py313"
 select = ["ALL"]
 ignore = [
     # ruleset ignores
-    "AIR", "BLE", "DJ", "DTZ", "EM", "FA", "FBT", "FIX", "INP", "ISC", "NPY", "PD", "PGH", "PTH", "SLOT", "T10", "T20", 
+    "AIR", "BLE", "DJ", "DTZ", "EM", "FA", "FBT", "FIX", "INP", "ISC", "NPY", "PD", "PGH", "PTH", "SLOT", "T10", "T20",
     # specific rule ignores
     "ASYNC110", # async-busy-wait: happy to wait await asyncio.sleep()
     "COM812", # missing-trailing-comma: ruff-format recommends disabling
@@ -59,7 +59,7 @@ exclude = [
     "node_modules",
     "venv",
     "wvenv",
-    "docs/",    
+    "docs/",
     "datafiles"
 ]
 

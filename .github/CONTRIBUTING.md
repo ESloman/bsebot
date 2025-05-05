@@ -9,12 +9,13 @@ BSEBot was first created as a bot for the **BSE** Discord server and as an excus
 There is some additional information in the repository [Wiki](https://github.com/ESloman/bsebot/wiki) but it is far from complete.
 
 ## Want to ask questions?
+
 - Drop me a message on Discord: _ESloman#6969_
 - [Join my bot testing server](https://discord.gg/R39Kw7gXSa)
-- To see the BSEBot in action: [join the BSE server.](https://discord.gg/dGMPswqf49)
 
 ## Code formatting
-I try to adhere to `PEP8` standards as much as possible but with a line length of **120**. Every commit will trigger a `ruff` GitHub action that will parse the code and fail that commit if it finds any flaws. 
+
+I try to adhere to `PEP8` standards as much as possible but with a line length of **120**. Every commit will trigger a `ruff` GitHub action that will parse the code and fail that commit if it finds any flaws.
 
 You can run `ruff` in the root directory `bsebot`. The configuration file already exists so it should pick that up. Additionally, we have a `ruff` pre-commit hook setup. You can install `pre-commit` and that should also lint your code before commit; it'll also attempt to fix any issues it's found.
 
@@ -32,6 +33,7 @@ Aiming for 80% coverage of any new code and eventually getting the entire reposi
 ## What to contribute
 
 There are lots of areas of the project that need attention; and therefore a variety of different areas that need contributions. This inclues things like:
+
 - doc string updates
 - type hint updates
 - adding tests to increase coverage
@@ -40,9 +42,8 @@ There are lots of areas of the project that need attention; and therefore a vari
 - fixing other [SonarCloud issues](https://sonarcloud.io/project/issues?resolved=false&id=ESloman_bsebot)
 - adding a new feature/something that interests you
 
-
 ## Requirements
 
-1. python 3.12+ installed
+1. python 3.13+ installed
 2. install `requirements.txt`
 3. install `test-requirements.txt`

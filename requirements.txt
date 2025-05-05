@@ -1,9 +1,8 @@
-requests==2.32.3
-python-dotenv==1.1.0
-pymongo==4.12.1
-xlsxwriter==3.2.3
 py-cord[speed] @ git+https://github.com/Pycord-Development/pycord#egg=py-cord[speed]
-selenium==4.32.0
-pre-commit==4.2.0
+pymongo==4.12.1
+python-dotenv==1.1.0
+requests==2.32.3
 seaborn==0.13.2
+selenium==4.32.0
 sloman-logging @ git+https://github.com/esloman/sloman-logging@v0.2.0
+xlsxwriter==3.2.3

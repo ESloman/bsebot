@@ -147,12 +147,13 @@ Bumps python from 3.12.2 to 3.12.3.
 
 ---
 updated-dependencies:
-- dependency-name: python
+
+* dependency-name: python
   dependency-type: direct:production
   update-type: version-update:semver-patch
 ...
 
-Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Signed-off-by: dependabot[bot] &lt;<support@github.com>&gt;
 Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`f6cf999`](https://github.com/ESloman/bsebot/commit/f6cf99981b1e9297eab7ce975c61d102bc21fc9a))
 
 ### Fix
@@ -317,11 +318,12 @@ Rather than hard-coding all the amounts - try and generate some that are more dy
 
 Add a system that allows the user to bribe the bot into reducing the chance of a revolution.
 This is only offered to the user if:
-- high chance of losing
-- they can&#39;t afford to &#39;save thyself&#39; without losing the King title
-- they haven&#39;t already saved themselves
-- they haven&#39;t been King for more than a month
-- they aren&#39;t in the top 2 for longest Kings
+
+* high chance of losing
+* they can&#39;t afford to &#39;save thyself&#39; without losing the King title
+* they haven&#39;t already saved themselves
+* they haven&#39;t been King for more than a month
+* they aren&#39;t in the top 2 for longest Kings
 
 They get the choice of accepting or refusing the offer. ([`d7aa9bf`](https://github.com/ESloman/bsebot/commit/d7aa9bfb5995b3b8a297afa4bc7aa70d5a9c43b0))
 
@@ -331,41 +333,42 @@ Change to esloman repo ([`133d913`](https://github.com/ESloman/bsebot/commit/133
 
 * Add alphabetical reactions (#587)
 
-- update to add a message reaction for alphabetical messages
-- add `alphabetical` message type and eddies award
-- add tests for it
-- update to ruff 0.3.4 ([`a864271`](https://github.com/ESloman/bsebot/commit/a8642714b0b8b3313bfa69a21d9b6785bfe8b8e5))
+* update to add a message reaction for alphabetical messages
+* add `alphabetical` message type and eddies award
+* add tests for it
+* update to ruff 0.3.4 ([`a864271`](https://github.com/ESloman/bsebot/commit/a8642714b0b8b3313bfa69a21d9b6785bfe8b8e5))
 
 * #390 - A better task manager (#583)
 
 Improve the task manager to actually disable/enable tasks when they&#39;re not required.
 
-- Define a `TaskSchedule` class for defining when a task should run.
-- Task Manager will check each task to see if it matches the schedule - disabling those that aren&#39;t needed and enable those that do
-- Have an &#39;overriden&#39; property which allows us to trigger a task despite it&#39;s schedule
-- Set schedules for each task
-- Set default status of tasks to not started
-- Set loop count to 1 for infrequent tasks - preventing them running accidentally multiple times ([`b247eef`](https://github.com/ESloman/bsebot/commit/b247eef28725a9c41de9626328f380f01ffbb7d0))
+* Define a `TaskSchedule` class for defining when a task should run.
+* Task Manager will check each task to see if it matches the schedule - disabling those that aren&#39;t needed and enable those that do
+* Have an &#39;overriden&#39; property which allows us to trigger a task despite it&#39;s schedule
+* Set schedules for each task
+* Set default status of tasks to not started
+* Set loop count to 1 for infrequent tasks - preventing them running accidentally multiple times ([`b247eef`](https://github.com/ESloman/bsebot/commit/b247eef28725a9c41de9626328f380f01ffbb7d0))
 
 * Fix sonar issues (#581)
 
 Fixes a number of sonar issues:
-- replace pytz with zoneinfo
-- reduce the complexity of some functions
-- add some base UI classes: BSEView and BSESelect
-- add some more consistency to callback names
-- add some more tests
-- add type hints ([`7d7e11d`](https://github.com/ESloman/bsebot/commit/7d7e11d96475cc55aa88b3e09a9dc09dbfcb1f2b))
+
+* replace pytz with zoneinfo
+* reduce the complexity of some functions
+* add some base UI classes: BSEView and BSESelect
+* add some more consistency to callback names
+* add some more tests
+* add type hints ([`7d7e11d`](https://github.com/ESloman/bsebot/commit/7d7e11d96475cc55aa88b3e09a9dc09dbfcb1f2b))
 
 * #579 - Remove credentials from Docker image (#580)
 
-- Remove credentials from image
-- Remove build args
-- Update workflows to use environment variables for running
-- Add some logging regarding flags and tokens
-- Update log rotation values
-- Update the `update.sh` script to mount a local `.env` and mount the logs  directory so we can persist logs too
-- Update README.md ([`553194a`](https://github.com/ESloman/bsebot/commit/553194ad4003acbb3d7cfdc569368c99ab30caf1))
+* Remove credentials from image
+* Remove build args
+* Update workflows to use environment variables for running
+* Add some logging regarding flags and tokens
+* Update log rotation values
+* Update the `update.sh` script to mount a local `.env` and mount the logs  directory so we can persist logs too
+* Update README.md ([`553194a`](https://github.com/ESloman/bsebot/commit/553194ad4003acbb3d7cfdc569368c99ab30caf1))
 
 * Fix tests ([`be0bd7a`](https://github.com/ESloman/bsebot/commit/be0bd7ae3dcf53180bf8634d33f3b9272386ff6f))
 
@@ -422,15 +425,15 @@ Add channel cache to cache channel names for easier retrieval ([`df89ee3`](https
 
 * Add tests for the API classes (#559)
 
-- add tests for github class
-- add tests for giphy class ([`21470f2`](https://github.com/ESloman/bsebot/commit/21470f2b039c550811aaba83822e7e80cc4662ea))
+* add tests for github class
+* add tests for giphy class ([`21470f2`](https://github.com/ESloman/bsebot/commit/21470f2b039c550811aaba83822e7e80cc4662ea))
 
 * Fix some type hints (#558)
 
-- remove anything to do with releases/updates
-- resolve some circular import type hint shenanigans by only importing the offenders in `if TYPE_CHECKING` blocks
-- add tests to cover the changed code
-- fix some other bugs ([`22cd401`](https://github.com/ESloman/bsebot/commit/22cd40182deb87cd5959b8ae4bb51dd06a5ad844))
+* remove anything to do with releases/updates
+* resolve some circular import type hint shenanigans by only importing the offenders in `if TYPE_CHECKING` blocks
+* add tests to cover the changed code
+* fix some other bugs ([`22cd401`](https://github.com/ESloman/bsebot/commit/22cd40182deb87cd5959b8ae4bb51dd06a5ad844))
 
 * Fix some sonar issues (#557)
 
@@ -446,24 +449,26 @@ Update docs ([`90a8018`](https://github.com/ESloman/bsebot/commit/90a80180657a8b
 This is probably the largest PR being submitted at once - it&#39;s a shame that these changes will largely go unnoticed by the userbase and should be relatively seamless. The aim is to make it easier to contribute to the repository and make the codebase more resilient. The former is achieved with better type hints and better consistency when using database interactions. The latter is achieved with better testing (both in quantity and quality) and reducing the number of SonarCloud issues.
 
 Massive refactor to use dataclasses over TypedDicts. Changes:
-- changed typed dicts to dataclasses (and refactor the file structure for datatypes)
-- refactor mongo classes to remove unnecessary intermediate class
-- refactor mongo classes to enforce a `make_data_class` method
-- refactor mongo queries to return whatever `make_data_class` returns
-- add a &#34;minimum_projection&#34; level to allow us to set minimum projections to ensure our dataclasses can always be instantiated
-- update everywhere to use new dataclasses
-- add an entire suite of tests for all the dataclasses and database classes using mock data
+
+* changed typed dicts to dataclasses (and refactor the file structure for datatypes)
+* refactor mongo classes to remove unnecessary intermediate class
+* refactor mongo classes to enforce a `make_data_class` method
+* refactor mongo queries to return whatever `make_data_class` returns
+* add a &#34;minimum_projection&#34; level to allow us to set minimum projections to ensure our dataclasses can always be instantiated
+* update everywhere to use new dataclasses
+* add an entire suite of tests for all the dataclasses and database classes using mock data
 
 Other changes unrelated to the main objective:
-- remove some unnecessary/deprecated methods that weren&#39;t being used
-- update README.md and CONTRIBUTING.md
-- fix a host of sonar issues across the board
-- refactor a few of the classes to reduce complexity where possible
-- optimise some of the stats stuff to make less API calls
-- make it easier to test/debug the stats stuff
-- switch all datetime stuff to UTC
-- updated a whole bunch of type hints
-- added test suites for other areas of the code as well ([`0461499`](https://github.com/ESloman/bsebot/commit/0461499bd14cd03e45d9e94f0f0bbfe14e5d1b45))
+
+* remove some unnecessary/deprecated methods that weren&#39;t being used
+* update README.md and CONTRIBUTING.md
+* fix a host of sonar issues across the board
+* refactor a few of the classes to reduce complexity where possible
+* optimise some of the stats stuff to make less API calls
+* make it easier to test/debug the stats stuff
+* switch all datetime stuff to UTC
+* updated a whole bunch of type hints
+* added test suites for other areas of the code as well ([`0461499`](https://github.com/ESloman/bsebot/commit/0461499bd14cd03e45d9e94f0f0bbfe14e5d1b45))
 
 * Another fix ([`d5690d5`](https://github.com/ESloman/bsebot/commit/d5690d57a32a037a6e24699688765979a8463e0c))
 
@@ -484,26 +489,27 @@ Catch an additional exception type. `child.values` can now be `None`. Fix for al
 * #544 - Add additional wordle awards (#545)
 
 Adds two new awards:
-- most symmetrical wordles
-- most green wordles
+
+* most symmetrical wordles
+* most green wordles
 
 Fixes some other misc issues. ([`261ce3b`](https://github.com/ESloman/bsebot/commit/261ce3becda83ba38267a8b2f255cb5ee25d0901))
 
 * Tidy up and fix some configuration (#542)
 
-- Update Dockerfile to remove unnecessary bits
-- Update .dockerignore to reduce docker image size
-- Update .gitignore
-- Trim down the README.md
-- Update sonar-project.properties to specify Python version(s)
-- add coverage config to pyproject.toml
-- fix a bug
-- update ruff config ([`abc318b`](https://github.com/ESloman/bsebot/commit/abc318b61725bf56ca616c6bd8bde6fcac3efaf2))
+* Update Dockerfile to remove unnecessary bits
+* Update .dockerignore to reduce docker image size
+* Update .gitignore
+* Trim down the README.md
+* Update sonar-project.properties to specify Python version(s)
+* add coverage config to pyproject.toml
+* fix a bug
+* update ruff config ([`abc318b`](https://github.com/ESloman/bsebot/commit/abc318b61725bf56ca616c6bd8bde6fcac3efaf2))
 
 * Add reaction for wordle symmetry (#541)
 
-- add reaction when Wordle result is symmetrical
-- add tests for Wordle reaction action ([`9886a52`](https://github.com/ESloman/bsebot/commit/9886a52135f7000f6a8321200e109529e62325e6))
+* add reaction when Wordle result is symmetrical
+* add tests for Wordle reaction action ([`9886a52`](https://github.com/ESloman/bsebot/commit/9886a52135f7000f6a8321200e109529e62325e6))
 
 * Bump docker/metadata-action from 5.4.0 to 5.5.0 (#539) ([`5e5b815`](https://github.com/ESloman/bsebot/commit/5e5b8155cf3978f81346526a7f0dc1d368e022a0))
 
@@ -511,8 +517,8 @@ Fixes some other misc issues. ([`261ce3b`](https://github.com/ESloman/bsebot/com
 
 * Add SonarCloud integration (#538)
 
-- Add sonar analysis
-- Update README.md to include sonar badges ([`1946b75`](https://github.com/ESloman/bsebot/commit/1946b75379ef313d31fa12d5e9094e9a55902a6b))
+* Add sonar analysis
+* Update README.md to include sonar badges ([`1946b75`](https://github.com/ESloman/bsebot/commit/1946b75379ef313d31fa12d5e9094e9a55902a6b))
 
 * Bump python from 3.11.5 to 3.12.1 (#528) ([`39ae6e1`](https://github.com/ESloman/bsebot/commit/39ae6e1f1785d5219f782d55091ff285a1c091ef))
 
@@ -529,9 +535,9 @@ Adds tests for a few things - new tests should be added over time. ([`a436c40`](
 
 * Some misc fixes (#536)
 
-- Prevent awards from repeating entries
-- Let wordle task print the words it guessed
-- Removed some incorrect bits from comments ([`f55affd`](https://github.com/ESloman/bsebot/commit/f55affd061077227a8e1336240bbfab5364d1db8))
+* Prevent awards from repeating entries
+* Let wordle task print the words it guessed
+* Removed some incorrect bits from comments ([`f55affd`](https://github.com/ESloman/bsebot/commit/f55affd061077227a8e1336240bbfab5364d1db8))
 
 * Fix the stats comparisons (#532)
 
@@ -583,16 +589,16 @@ Fix the stat comparisons. Hopefully this will actually show us some data now. ([
 
 * Documentation updates (#299)
 
-- Update various files
-- Add new files ([`cb4e446`](https://github.com/ESloman/bsebot/commit/cb4e4463d94898a195743c3d048bc476bbd909ca))
+* Update various files
+* Add new files ([`cb4e446`](https://github.com/ESloman/bsebot/commit/cb4e4463d94898a195743c3d048bc476bbd909ca))
 
 * Codify some further changes (#499)
 
-- Set the bot as the winner if no-one else wins
-- Fix a bug with scheduling
-- Fix some bugs with the worst wordle award
-- Further filtering in the wordle stats graph
-- Don&#39;t send awards in Jan ([`31d025f`](https://github.com/ESloman/bsebot/commit/31d025fe6461e86acb47488e2965e8227cb99819))
+* Set the bot as the winner if no-one else wins
+* Fix a bug with scheduling
+* Fix some bugs with the worst wordle award
+* Further filtering in the wordle stats graph
+* Don&#39;t send awards in Jan ([`31d025f`](https://github.com/ESloman/bsebot/commit/31d025fe6461e86acb47488e2965e8227cb99819))
 
 * Bump seaborn from 0.12.2 to 0.13.0 (#500) ([`412a04f`](https://github.com/ESloman/bsebot/commit/412a04ff6d795573a0b297fa317b90bf2a78a0e0))
 
@@ -732,18 +738,20 @@ Used by the &#39;King&#39;; will also allow them to change the rates ([`bfddf89`
 * #444 - Wordle Refactor (#445)
 
 Refactors various different Wordle related things:
-- fix bug with wordle stats not working sometimes
-- get wordle starting words from the database
-- allow wordle starting words to be configured via /config
-- wordle starting words are weighted by their success rate
-- allow wordle reminders to be configured via /config
-- move all wordle config to just one &#34;Wordle&#34; option that has sub-options
+
+* fix bug with wordle stats not working sometimes
+* get wordle starting words from the database
+* allow wordle starting words to be configured via /config
+* wordle starting words are weighted by their success rate
+* allow wordle reminders to be configured via /config
+* move all wordle config to just one &#34;Wordle&#34; option that has sub-options
 
 Other stuff changed:
- - add AttributeError to selects try/except
- - fixed bug with Marvel Unlimited AD
- - remove bet ID from bet embed
- - add /place mention to bet reminders ([`d4fc886`](https://github.com/ESloman/bsebot/commit/d4fc886ce3a265ffced840ed03ae2e4f0fa49aa7))
+
+* add AttributeError to selects try/except
+* fixed bug with Marvel Unlimited AD
+* remove bet ID from bet embed
+* add /place mention to bet reminders ([`d4fc886`](https://github.com/ESloman/bsebot/commit/d4fc886ce3a265ffced840ed03ae2e4f0fa49aa7))
 
 * Add a &#34;halfway&#34; bet reminder (#443)
 
@@ -758,18 +766,20 @@ Other stuff changed:
 * Bump ruff from 0.0.267 to 0.0.270 (#440)
 
 Bumps [ruff](https://github.com/charliermarsh/ruff) from 0.0.267 to 0.0.270.
-- [Release notes](https://github.com/charliermarsh/ruff/releases)
-- [Changelog](https://github.com/charliermarsh/ruff/blob/main/BREAKING_CHANGES.md)
-- [Commits](https://github.com/charliermarsh/ruff/compare/v0.0.267...v0.0.270)
+
+* [Release notes](https://github.com/charliermarsh/ruff/releases)
+* [Changelog](https://github.com/charliermarsh/ruff/blob/main/BREAKING_CHANGES.md)
+* [Commits](https://github.com/charliermarsh/ruff/compare/v0.0.267...v0.0.270)
 
 ---
 updated-dependencies:
-- dependency-name: ruff
+
+* dependency-name: ruff
   dependency-type: direct:production
   update-type: version-update:semver-patch
 ...
 
-Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Signed-off-by: dependabot[bot] &lt;<support@github.com>&gt;
 Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`5db399b`](https://github.com/ESloman/bsebot/commit/5db399b57c47eb68a9d2bb6783fa21c2e2194de8))
 
 * #443 - Activities updates (#442)
@@ -855,27 +865,28 @@ Add a share button ([`2509fab`](https://github.com/ESloman/bsebot/commit/2509fab
 
 * #419 - Don&#39;t be as hasty with command suggestions (#421)
 
-- Amend regex for matching command names
-- Remove bet fields update as we&#39;ve done that now
-- Fix bug with message references in other servers that we don&#39;t have permissions for ([`85dd756`](https://github.com/ESloman/bsebot/commit/85dd756239d901d2a8574d7348e967f32cfd711f))
+* Amend regex for matching command names
+* Remove bet fields update as we&#39;ve done that now
+* Fix bug with message references in other servers that we don&#39;t have permissions for ([`85dd756`](https://github.com/ESloman/bsebot/commit/85dd756239d901d2a8574d7348e967f32cfd711f))
 
 * Various enhancements and fixes (#418)
 
 This is a large PR that resolves a number of open issues and adds a bunch of stuff that isn&#39;t in issues.
 Includes:
-- Allow users to gift to other users as a context menu command (#73)
-- Getting wordle config from guild configuration and adding functionality to change that (#307, #250)
-- Adding beginnings of some unit tests. This is for non-discord related functionality. (#130)
-- Add a dynamic help command (#417)
-- Add BSEddies configuration options (#250)
-- Allow users to add autogenerate bet options (#250, #330)
-- Fixed some typos in places
-- Add a command suggestion message action
-- Added a `/wordle` stats command
-- Add some debug logging to places
-- Allow admins to get the eddies message summary message (and added needed configuration)
-- Fix some bugs with user_ids still
-- Add more `delete_afters` ([`b7ce1bf`](https://github.com/ESloman/bsebot/commit/b7ce1bfc55dcbabf5d3182933d432e2648b77655))
+
+* Allow users to gift to other users as a context menu command (#73)
+* Getting wordle config from guild configuration and adding functionality to change that (#307, #250)
+* Adding beginnings of some unit tests. This is for non-discord related functionality. (#130)
+* Add a dynamic help command (#417)
+* Add BSEddies configuration options (#250)
+* Allow users to add autogenerate bet options (#250, #330)
+* Fixed some typos in places
+* Add a command suggestion message action
+* Added a `/wordle` stats command
+* Add some debug logging to places
+* Allow admins to get the eddies message summary message (and added needed configuration)
+* Fix some bugs with user_ids still
+* Add more `delete_afters` ([`b7ce1bf`](https://github.com/ESloman/bsebot/commit/b7ce1bfc55dcbabf5d3182933d432e2648b77655))
 
 * #82 - Create an activity task (#416)
 
@@ -889,14 +900,14 @@ Can be expanded later. ([`eb640d5`](https://github.com/ESloman/bsebot/commit/eb6
 
 * Some bug fixes (#413)
 
-- Fix error with some slash commands not working
-- Remove UTC stuff from BSEddies ([`613debb`](https://github.com/ESloman/bsebot/commit/613debb39d300649a67ae2c1e9b93a0cc4ce4c9e))
+* Fix error with some slash commands not working
+* Remove UTC stuff from BSEddies ([`613debb`](https://github.com/ESloman/bsebot/commit/613debb39d300649a67ae2c1e9b93a0cc4ce4c9e))
 
 * #109 - Add comparisons to previous stats (#412)
 
-- Add basics of adding comparisons to previous stats
-- Works for a few simple stats
-- Not tested yet lol ([`174eaf8`](https://github.com/ESloman/bsebot/commit/174eaf807e0ac8e14d9bc336e80302b543a9be4a))
+* Add basics of adding comparisons to previous stats
+* Works for a few simple stats
+* Not tested yet lol ([`174eaf8`](https://github.com/ESloman/bsebot/commit/174eaf807e0ac8e14d9bc336e80302b543a9be4a))
 
 * #410 - Allow some hardcoded odds (#411)
 
@@ -912,21 +923,23 @@ Also make sure we&#39;re sending different messages for each wordle reminder on 
 
 * #402 - Tough one (#407)
 
-- Send a meme when most people get 6/6 for wordle
-- add the logger to all the message actions ([`a56bec4`](https://github.com/ESloman/bsebot/commit/a56bec494f3e2a36788e8b1adee95b4a2bbcb7a5))
+* Send a meme when most people get 6/6 for wordle
+* add the logger to all the message actions ([`a56bec4`](https://github.com/ESloman/bsebot/commit/a56bec494f3e2a36788e8b1adee95b4a2bbcb7a5))
 
 * #404 - Additional message actions (#406)
 
 Added two new message actions:
-- a `remind me` message action, triggering if it seems the user wants to set a reminder. This informs the user about the possibility of using the bot to set a reminder. This is on a cooldown
-- a `duplicated link` message action. This triggers if the same link was posted in the same server within the last couple of days. ([`12c3da2`](https://github.com/ESloman/bsebot/commit/12c3da2fb866657ad9e89fadf2ce2392ee161715))
+
+* a `remind me` message action, triggering if it seems the user wants to set a reminder. This informs the user about the possibility of using the bot to set a reminder. This is on a cooldown
+* a `duplicated link` message action. This triggers if the same link was posted in the same server within the last couple of days. ([`12c3da2`](https://github.com/ESloman/bsebot/commit/12c3da2fb866657ad9e89fadf2ce2392ee161715))
 
 * Bet updates (#241, #332) (#405)
 
 This update is threefold:
-- Allow the creator of the bet to add another option post-creation
-- Allow users to change their bets to some extent
-- Add some extra top-level fields for bets that will make future easier (#403)
+
+* Allow the creator of the bet to add another option post-creation
+* Allow users to change their bets to some extent
+* Add some extra top-level fields for bets that will make future easier (#403)
 
 Users will only be able to change their bets 5 minutes after they placed theirs, or five minutes after a new option was added. This is mainly targeting the use case where people place on one outcome accidentally or wish to change it after placing it too quickly without thinking. Adding a new bet option allows users to change their existing bets if they want to change it to the new one. Made it five minutes to prevent users changing a bet after the real outcome becomes clear; though this might be changed in the future to be a certain fraction of the total bet time (longer bets should have more leeway for changing their mind). ([`0e284cf`](https://github.com/ESloman/bsebot/commit/0e284cf7254c1fe58f76a503766f8d45ce4c1540))
 
@@ -988,14 +1001,15 @@ Allow users to be &#39;impartial&#39;. This means users can make a conscious dec
 * #296 - Add Task Manager (#389)
 
 Beginnings of Task Manager implementation and general tasks refactor.
-- Add `task` property to BaseTask
-- Make sure all tasks set property correctly
-- Add task manager that loops through all the tasks periodically and makes sure they&#39;re running
-- Actually make sure all loops have a correct doc string
-- Add some typing to BaseTask
-- Correct typo in all socket methods
-- Add cog_unload function to BaseTask
-- Added type hints to various places that needed them ([`7e3aea8`](https://github.com/ESloman/bsebot/commit/7e3aea81194b37aca4d79f191ef6559295a65bc0))
+
+* Add `task` property to BaseTask
+* Make sure all tasks set property correctly
+* Add task manager that loops through all the tasks periodically and makes sure they&#39;re running
+* Actually make sure all loops have a correct doc string
+* Add some typing to BaseTask
+* Correct typo in all socket methods
+* Add cog_unload function to BaseTask
+* Added type hints to various places that needed them ([`7e3aea8`](https://github.com/ESloman/bsebot/commit/7e3aea81194b37aca4d79f191ef6559295a65bc0))
 
 * Bump webdriver-manager from 3.8.5 to 3.8.6 (#386) ([`20b479c`](https://github.com/ESloman/bsebot/commit/20b479c0b308dff8f67841a0051ca15475ea2ea2))
 
@@ -1004,8 +1018,9 @@ Beginnings of Task Manager implementation and general tasks refactor.
 * #293 - Add /remindme functionality (#388)
 
 Add functionality for reminders. There are two ways to create a reminder:
-- using a slash command `/remindme`
-- right-clicking a message and using a context menu command
+
+* using a slash command `/remindme`
+* right-clicking a message and using a context menu command
 Both methods will trigger a modal to be filled out. This will then enter a reminder into the database.
 
 A new task has been added to check for expired reminders. ([`1b2d40c`](https://github.com/ESloman/bsebot/commit/1b2d40c8c1a50d02afca989eebef54671174dd73))
@@ -1034,9 +1049,9 @@ Add config option for revolution event; allows disabling/enabling of revolution 
 
 Updates to the wordlereminder task to add some new messages for when people forget their Wordle
 
----------
+---
 
-Co-authored-by: esloman &lt;elliot.sloman@hotmail.com&gt; ([`fbe6dff`](https://github.com/ESloman/bsebot/commit/fbe6dffa62bae31993803f9acbf92760f3932df6))
+Co-authored-by: esloman &lt;<elliot.sloman@hotmail.com>&gt; ([`fbe6dff`](https://github.com/ESloman/bsebot/commit/fbe6dffa62bae31993803f9acbf92760f3932df6))
 
 * Fix bugs with UTC stuff (#375)
 
@@ -1050,10 +1065,10 @@ Fix a couple of bugs with recent stats and awards ([`6b9e9cc`](https://github.co
 
 * #333 - Allow bets to have multiple winners (#373)
 
-- modify `close` and related things to allow bets to have multiple winning outcomes. Users can still only select one outcome.
-- fix some naming issues
-- fix a circular import
-- tidy up guildchecker a bit ([`6c6b880`](https://github.com/ESloman/bsebot/commit/6c6b880fa6f402c9f0f3a46607e5d10f2c6c9975))
+* modify `close` and related things to allow bets to have multiple winning outcomes. Users can still only select one outcome.
+* fix some naming issues
+* fix a circular import
+* tidy up guildchecker a bit ([`6c6b880`](https://github.com/ESloman/bsebot/commit/6c6b880fa6f402c9f0f3a46607e5d10f2c6c9975))
 
 * Update dependabot.yml
 
@@ -1061,10 +1076,10 @@ Change checks to weekly ([`7376f81`](https://github.com/ESloman/bsebot/commit/73
 
 * Various bug fixes and improvements (#371)
 
-- Make sure tax rate message includes support value #326 
-- Fix message sync failing on channels it doesn&#39;t have access to
-- Don&#39;t trigger actions on message sync
-- Add context command structure ([`4b2ddf2`](https://github.com/ESloman/bsebot/commit/4b2ddf28f9d107fd73422bb40cd2fa6995d907b7))
+* Make sure tax rate message includes support value #326
+* Fix message sync failing on channels it doesn&#39;t have access to
+* Don&#39;t trigger actions on message sync
+* Add context command structure ([`4b2ddf2`](https://github.com/ESloman/bsebot/commit/4b2ddf28f9d107fd73422bb40cd2fa6995d907b7))
 
 * Add message sync task (#370)
 
@@ -1073,37 +1088,39 @@ Change checks to weekly ([`7376f81`](https://github.com/ESloman/bsebot/commit/73
 
 * #250 - Add admin config stuff (#369)
 
-- Added admin config stuff
-- Use admin list for making sure only certain users can configure things ([`1b28f7b`](https://github.com/ESloman/bsebot/commit/1b28f7be5dcd7ca5df21d239ffd145b77aea5911))
+* Added admin config stuff
+* Use admin list for making sure only certain users can configure things ([`1b28f7b`](https://github.com/ESloman/bsebot/commit/1b28f7be5dcd7ca5df21d239ffd145b77aea5911))
 
 * #250 - Add additional configuration options to `/config` (#368)
 
 Added:
-- wordle config options (can now turn wordle off, set the channel, enable/disable wordle reminders)
-- valorant config options (can now turn valorant rollcall off, set the channel, set the role)
-- salary config options (can now set the daily minimum amount of eddies)
+
+* wordle config options (can now turn wordle off, set the channel, enable/disable wordle reminders)
+* valorant config options (can now turn valorant rollcall off, set the channel, set the role)
+* salary config options (can now set the daily minimum amount of eddies)
 
 Added database entries in guilds for each new option and use those options in the various places they&#39;re required. ([`59a53a6`](https://github.com/ESloman/bsebot/commit/59a53a622e6658d64526dc9a71c9f1471f5ad5d7))
 
 * #331  - Add VC select to `/autogenerate` (#367)
 
 This refactors the autogenerate section and adds another select, for the voice channel to fill from, to the View.
-- Instead of doing everything in callbacks, rely on a `update` method on the root view for handling state.
-- Added a &#34;paginated&#34; method to split the number of selects across two &#34;pages&#34;. User must fill in the first section first and then move on to the second page.
-- VC select selects the voice channel that user option will be filled from rather than using the channel ID in the bet data type. This fulfills a bit of #71 to allow the project to be a bit more server independent. ([`7d9ed1e`](https://github.com/ESloman/bsebot/commit/7d9ed1e24833035d8af6657494d82c90045f09fe))
+
+* Instead of doing everything in callbacks, rely on a `update` method on the root view for handling state.
+* Added a &#34;paginated&#34; method to split the number of selects across two &#34;pages&#34;. User must fill in the first section first and then move on to the second page.
+* VC select selects the voice channel that user option will be filled from rather than using the channel ID in the bet data type. This fulfills a bit of #71 to allow the project to be a bit more server independent. ([`7d9ed1e`](https://github.com/ESloman/bsebot/commit/7d9ed1e24833035d8af6657494d82c90045f09fe))
 
 * #327 - Refactor timeout string converstion (#366)
 
-- Add utility function `convert_time_str` for converting a time str to an integer for total seconds. Use this function in `/create`.
-- Add support for adding timeouts using &#34;weeks&#34; as well
-- Fix a couple of bugs with some bet view functions ([`732127c`](https://github.com/ESloman/bsebot/commit/732127c135bd22c1972f4ae7f216182a2d852715))
+* Add utility function `convert_time_str` for converting a time str to an integer for total seconds. Use this function in `/create`.
+* Add support for adding timeouts using &#34;weeks&#34; as well
+* Fix a couple of bugs with some bet view functions ([`732127c`](https://github.com/ESloman/bsebot/commit/732127c135bd22c1972f4ae7f216182a2d852715))
 
 * #322 - Application commands and direct messages (#365)
 
-- Stop _all_ slash commands from working in DMs unless the `self.dmable` attribute is set.
-- Refactor `/view` to let it work in DMs; to prove that we can have functional slash commands in direct messages.
-- Add extra functionality to guild sync that keeps the name updated
-- Updated GuildDB type to add name attribute ([`c47dbee`](https://github.com/ESloman/bsebot/commit/c47dbee270f45108064536f182cc00e90da85474))
+* Stop _all_ slash commands from working in DMs unless the `self.dmable` attribute is set.
+* Refactor `/view` to let it work in DMs; to prove that we can have functional slash commands in direct messages.
+* Add extra functionality to guild sync that keeps the name updated
+* Updated GuildDB type to add name attribute ([`c47dbee`](https://github.com/ESloman/bsebot/commit/c47dbee270f45108064536f182cc00e90da85474))
 
 * Bump selenium from 4.8.2 to 4.8.3 (#364) ([`be0fca7`](https://github.com/ESloman/bsebot/commit/be0fca719ba5caad1a47ea8c2e6cdb1268a09336))
 
@@ -1120,14 +1137,14 @@ Start storing user names in the DB and add updating them to guild checker task (
 
 * #250 - Beginnings of `/config` and more thread control (#358)
 
-- Add beginnings of /config command
-- Allow users to change thread settings
-- Modify thread client events to be better at joining old threads
-- Add info about /config to thread messages telling users how to turn it off
-- Make on_message ignore ephemeral messages
-- Change thread mute reminders logic to be based on thread_info and not existing threads in general chat
-- Refactor all of the slashcommand imports to remove init imports
-- Refactor all of the views/selects imports to remove init imports ([`0f46550`](https://github.com/ESloman/bsebot/commit/0f46550426ac2488961a31d977c178945a97a84c))
+* Add beginnings of /config command
+* Allow users to change thread settings
+* Modify thread client events to be better at joining old threads
+* Add info about /config to thread messages telling users how to turn it off
+* Make on_message ignore ephemeral messages
+* Change thread mute reminders logic to be based on thread_info and not existing threads in general chat
+* Refactor all of the slashcommand imports to remove init imports
+* Refactor all of the views/selects imports to remove init imports ([`0f46550`](https://github.com/ESloman/bsebot/commit/0f46550426ac2488961a31d977c178945a97a84c))
 
 * Bump ruff from 0.0.256 to 0.0.257 (#356) ([`223c014`](https://github.com/ESloman/bsebot/commit/223c014a04a2d3bfc0905481c9962183ef11ac1f))
 
@@ -1185,7 +1202,8 @@ When collecting stats, don&#39;t use messages from bots ([`c5d72fe`](https://git
 
 * #339 #130 - CICD changes (#342)
 
-#339 #130 - CICD changes
+# 339 #130 - CICD changes
+
 Only push to dockerhub on main
 Actually launch BSEBot docker container and test on PRs to main
 Fix some errors
@@ -1199,10 +1217,10 @@ Modify main.py to favour environment variables ([`e302418`](https://github.com/E
 
 * #336 - Make transactions and activities use a separate collection (#338)
 
-- Add collection classes for transactions and activities
-- Replace previous usage to new usage
-- Simplify some logic so that the `increment_points` function handles the transaction adding
-- remove `decrement_points` and just make sure we use `increment_points` with the amount made negative ([`d27e03c`](https://github.com/ESloman/bsebot/commit/d27e03cbbe963d71bd18b27776f524aef56ae39f))
+* Add collection classes for transactions and activities
+* Replace previous usage to new usage
+* Simplify some logic so that the `increment_points` function handles the transaction adding
+* remove `decrement_points` and just make sure we use `increment_points` with the amount made negative ([`d27e03c`](https://github.com/ESloman/bsebot/commit/d27e03cbbe963d71bd18b27776f524aef56ae39f))
 
 * Bump pre-commit from 3.1.0 to 3.1.1 (#328) ([`35773d6`](https://github.com/ESloman/bsebot/commit/35773d6ed0ee835c93ccb03adf969841e4f56f92))
 
@@ -1215,11 +1233,11 @@ Switch to using &#34;global commands&#34; rather than guild commands ([`403a304`
 * Fix some revolution woes (#320)
 
 * #319 #317 - Fix some revolution woes
-- use `fetch_` in places where `get_` returned None
-- `_message.send` should be `_message.reply`
-- better separate events for different guilds
-- stop king task logging so much during revolution events (related to above)
-- don&#39;t use bse channels as default
+* use `fetch_` in places where `get_` returned None
+* `_message.send` should be `_message.reply`
+* better separate events for different guilds
+* stop king task logging so much during revolution events (related to above)
+* don&#39;t use bse channels as default
 
 * #319 - Fix some revolution woes
 Fix bug with king rename that wasn&#39;t sending the message
@@ -1234,18 +1252,20 @@ Use silent for all of the direct messages
 * Bump python-dotenv from 0.21.1 to 1.0.0 (#311)
 
 Bumps [python-dotenv](https://github.com/theskumar/python-dotenv) from 0.21.1 to 1.0.0.
-- [Release notes](https://github.com/theskumar/python-dotenv/releases)
-- [Changelog](https://github.com/theskumar/python-dotenv/blob/main/CHANGELOG.md)
-- [Commits](https://github.com/theskumar/python-dotenv/compare/v0.21.1...v1.0.0)
+
+* [Release notes](https://github.com/theskumar/python-dotenv/releases)
+* [Changelog](https://github.com/theskumar/python-dotenv/blob/main/CHANGELOG.md)
+* [Commits](https://github.com/theskumar/python-dotenv/compare/v0.21.1...v1.0.0)
 
 ---
 updated-dependencies:
-- dependency-name: python-dotenv
+
+* dependency-name: python-dotenv
   dependency-type: direct:production
   update-type: version-update:semver-major
 ...
 
-Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+Signed-off-by: dependabot[bot] &lt;<support@github.com>&gt;
 Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt; ([`133c120`](https://github.com/ESloman/bsebot/commit/133c120f9d322dd38dc8ac246a6db84a41aed1d4))
 
 * Bump pre-commit from 3.0.4 to 3.1.0 (#310) ([`8ee9700`](https://github.com/ESloman/bsebot/commit/8ee97008535f95be98f5ae1dbf7713a30b8b1e7b))
@@ -1319,29 +1339,35 @@ Update README.md ([`010a608`](https://github.com/ESloman/bsebot/commit/010a60807
 * add release checker (#290) (#291)
 
 Couple of tweaks:
-- make wordle message silent
-- remove erroneous comma
 
-#290 - Add a release checker
+* make wordle message silent
+* remove erroneous comma
+
+# 290 - Add a release checker
+
 Checks periodically for new github releases and posts release notes to discord ([`9725776`](https://github.com/ESloman/bsebot/commit/9725776086efa9194025663883b765d32d0a3fe2))
 
 * esloman/various (#288)
 
-#81 - Make a Github API class
-- add class for github api interaction
-- only got one method; for raising issues currently
+# 81 - Make a Github API class
 
-#71 - Suggest an improvement command
+* add class for github api interaction
+* only got one method; for raising issues currently
+
+# 71 - Suggest an improvement command
+
 Add a suggest improvement command and supporting infrastructure
 
-#122 - Disable revolution buttons when event expires
+# 122 - Disable revolution buttons when event expires
+
 Simple fix; edit to remove the view (and therefore buttons).
 
-#127 - make &#39;save thyself&#39; validation message ephemeral
+# 127 - make &#39;save thyself&#39; validation message ephemeral
 
-#257 - add a help command
+# 257 - add a help command
 
-#282 - Refactor bsepoints.py
+# 282 - Refactor bsepoints.py
+
 Turn this one large file into lots of smaller files
 Edit all the other files to update references to the various classes ([`fb4dc9d`](https://github.com/ESloman/bsebot/commit/fb4dc9d31a0bb10e5cb33b9f45eacc97644b1c2a))
 
@@ -1359,23 +1385,23 @@ fix for rename was always tagging the king user ([`ee7b6e3`](https://github.com/
 
 * Various Changes (#277)
 
-- #276 Allow renaming of supporter/revolutionary roles
-- #275 Add a &#39;bless&#39; command for the king to bless either supporters or everyone
-- fix some potential bugs with pledging and whatnot
-- #269 - Change &#39;@silent&#39; to using silent=True parameter
-- #255 - Add ruff as a linting option
-- #222 - Become less dependent on .env file ([`ce4c0d6`](https://github.com/ESloman/bsebot/commit/ce4c0d614d62fd79024d6d309a959bf589d88acc))
+* #276 Allow renaming of supporter/revolutionary roles
+* #275 Add a &#39;bless&#39; command for the king to bless either supporters or everyone
+* fix some potential bugs with pledging and whatnot
+* #269 - Change &#39;@silent&#39; to using silent=True parameter
+* #255 - Add ruff as a linting option
+* #222 - Become less dependent on .env file ([`ce4c0d6`](https://github.com/ESloman/bsebot/commit/ce4c0d614d62fd79024d6d309a959bf589d88acc))
 
 * Bump py-cord[speed] from 2.3.2 to 2.4.0 (#273) ([`67b9f1d`](https://github.com/ESloman/bsebot/commit/67b9f1df7be16d7039a60a05b598a280bd22b186))
 
 * Various changes (#274)
 
-- #269: Began using `@silent` for some messages
-- #271: Use Guilds collection for various guild metrics
-- #272: Add command to allow &#34;pledging support the King&#34;
-- #268: Supporters should get taxed less
-- #136: Revolution reminders should be replies
-- #80: Revolution shouldn&#39;t trigger when King is young ([`974303c`](https://github.com/ESloman/bsebot/commit/974303ca278937353b73a08a5b8bb3ceeb78a9f1))
+* #269: Began using `@silent` for some messages
+* #271: Use Guilds collection for various guild metrics
+* #272: Add command to allow &#34;pledging support the King&#34;
+* #268: Supporters should get taxed less
+* #136: Revolution reminders should be replies
+* #80: Revolution shouldn&#39;t trigger when King is young ([`974303c`](https://github.com/ESloman/bsebot/commit/974303ca278937353b73a08a5b8bb3ceeb78a9f1))
 
 * Bump python from 3.11.1 to 3.11.2 (#270) ([`b6a8b48`](https://github.com/ESloman/bsebot/commit/b6a8b48689d9e6bc6dbe755c135fcf2f63bb2523))
 
@@ -1383,9 +1409,9 @@ fix for rename was always tagging the king user ([`ee7b6e3`](https://github.com/
 
 * #258 - Add further wordle reactions (#263)
 
-- add a reaction for 6/6
-- add yellows reaction
-- add greens reaction ([`c81e039`](https://github.com/ESloman/bsebot/commit/c81e0392e04a20d35e76aeef4c4d8cae71974efd))
+* add a reaction for 6/6
+* add yellows reaction
+* add greens reaction ([`c81e039`](https://github.com/ESloman/bsebot/commit/c81e0392e04a20d35e76aeef4c4d8cae71974efd))
 
 * #261 - Fix BSEddies awards bug (#264) ([`c431fe0`](https://github.com/ESloman/bsebot/commit/c431fe0c8626e2fc74d106c6bb56b0f269920c66))
 
@@ -1397,8 +1423,9 @@ fix for rename was always tagging the king user ([`ee7b6e3`](https://github.com/
 
 * Startup task (#254)
 
-#235 - Startup task don&#39;t trigger every 2 minutes
-#235 - finish processing all the guilds before setting finished to true ([`e2ae298`](https://github.com/ESloman/bsebot/commit/e2ae29858c7434e7e6b17cdb4be151fcdcd8d0a9))
+# 235 - Startup task don&#39;t trigger every 2 minutes
+
+# 235 - finish processing all the guilds before setting finished to true ([`e2ae298`](https://github.com/ESloman/bsebot/commit/e2ae29858c7434e7e6b17cdb4be151fcdcd8d0a9))
 
 * Bump python-dotenv from 0.21.0 to 0.21.1 (#252) ([`7d024a4`](https://github.com/ESloman/bsebot/commit/7d024a4e6660a9b2e0e05ed4ae749284ea4f7efc))
 
@@ -1406,16 +1433,16 @@ fix for rename was always tagging the king user ([`ee7b6e3`](https://github.com/
 
 * #235 - Add startup task (#253)
 
-- Create a new `GuildChecker` task that runs on startup and subsequently every 12 hours
-- Remove most things from the `on_ready` client event
-- Make GuildChecker wait for `on_ready` to be done
-- Make all the other tasks wait for GuildChecker to be complete too
-- Fix some of the logic in startup functions so it works as expected ([`0653fc2`](https://github.com/ESloman/bsebot/commit/0653fc213ad938b36493404d91cb23fcfdb0102a))
+* Create a new `GuildChecker` task that runs on startup and subsequently every 12 hours
+* Remove most things from the `on_ready` client event
+* Make GuildChecker wait for `on_ready` to be done
+* Make all the other tasks wait for GuildChecker to be complete too
+* Fix some of the logic in startup functions so it works as expected ([`0653fc2`](https://github.com/ESloman/bsebot/commit/0653fc213ad938b36493404d91cb23fcfdb0102a))
 
 * New KING RENAME command (#249)
 
-- add slash command to change king role #206
-- add beginnings of guilds Collection for storing guild specific information #79 ([`675e097`](https://github.com/ESloman/bsebot/commit/675e0974608fdb171502ab0fa5a07bf7c79def2c))
+* add slash command to change king role #206
+* add beginnings of guilds Collection for storing guild specific information #79 ([`675e097`](https://github.com/ESloman/bsebot/commit/675e0974608fdb171502ab0fa5a07bf7c79def2c))
 
 * Esloman/misc (#248)
 
@@ -1426,14 +1453,14 @@ fix for rename was always tagging the king user ([`ee7b6e3`](https://github.com/
 
 * #183 Wordle solving improvements (#247)
 
-- add word frequency data
-- use word frequency data as weightings in random.choices for picking words ([`ec47ee8`](https://github.com/ESloman/bsebot/commit/ec47ee8e51e5bb6db960b23e17ee9489a38d27ed))
+* add word frequency data
+* use word frequency data as weightings in random.choices for picking words ([`ec47ee8`](https://github.com/ESloman/bsebot/commit/ec47ee8e51e5bb6db960b23e17ee9489a38d27ed))
 
 * #184 - Refactor selects.py (#246)
 
-- Create selects subdir with __init__
-- move selects into their own files within subfolder
-- update the various files that relied on those select classes ([`4f8116a`](https://github.com/ESloman/bsebot/commit/4f8116acd5fc8ebc308322672c81428814a28ccf))
+* Create selects subdir with __init__
+* move selects into their own files within subfolder
+* update the various files that relied on those select classes ([`4f8116a`](https://github.com/ESloman/bsebot/commit/4f8116acd5fc8ebc308322672c81428814a28ccf))
 
 * #193 add more trigger_typing (#244) ([`a7dcc55`](https://github.com/ESloman/bsebot/commit/a7dcc556b5e8e01d8718540f06249c1e72c324ed))
 
@@ -1474,7 +1501,7 @@ Update `on_thread_update` to work with Discord&#39;s thread changes ([`e20fb00`]
 
 * Message edit debug #225 (#228)
 
-- Add some debug information for message edit ([`4c110a8`](https://github.com/ESloman/bsebot/commit/4c110a8f5bbbb77c77a616d96ce321dacb06c1ad))
+* Add some debug information for message edit ([`4c110a8`](https://github.com/ESloman/bsebot/commit/4c110a8f5bbbb77c77a616d96ce321dacb06c1ad))
 
 * Docs updates (#224) (#201, #16)
 
@@ -1511,9 +1538,9 @@ Adding some shields and update badge urls ([`ec90dd7`](https://github.com/ESloma
 
 * Enable dependabot for managing versions
 
-- added dependabot.yml file
-- update requirements.txt
-- added environment to workflow ([`1c216f0`](https://github.com/ESloman/bsebot/commit/1c216f02ac970fe9010fbe15a1b020c6b51e8624))
+* added dependabot.yml file
+* update requirements.txt
+* added environment to workflow ([`1c216f0`](https://github.com/ESloman/bsebot/commit/1c216f02ac970fe9010fbe15a1b020c6b51e8624))
 
 * Trigger wordle if we missed it (#210) (#211)
 
@@ -1526,10 +1553,10 @@ Additionally (#201), remove some files that aren&#39;t used anymore and (#208), 
 
 * Hotfix for stats (#198)
 
-- Fixes #196, #197, #200
-- Make keys strings
-- Fix date year being incorrect
-- Make year/month optional kwargs for stats documenting ([`bf58e89`](https://github.com/ESloman/bsebot/commit/bf58e897a97ad963b9daed8dc7f682461524a9fd))
+* Fixes #196, #197, #200
+* Make keys strings
+* Fix date year being incorrect
+* Make year/month optional kwargs for stats documenting ([`bf58e89`](https://github.com/ESloman/bsebot/commit/bf58e897a97ad963b9daed8dc7f682461524a9fd))
 
 * Add a hotfix for wordle threshold (#194)
 
@@ -1542,8 +1569,8 @@ Ensure that users doing `/wrapped22` will get a wordle result if they&#39;ve don
 
 * Add a share button for Wrapped22 (#188) (#189)
 
-- Added a wrapped view
-- View button shares the message publicly ([`dadedc5`](https://github.com/ESloman/bsebot/commit/dadedc5691042abd04391c56a55e97f5f0c1503f))
+* Added a wrapped view
+* View button shares the message publicly ([`dadedc5`](https://github.com/ESloman/bsebot/commit/dadedc5691042abd04391c56a55e97f5f0c1503f))
 
 * Awards improvements (#186)
 
@@ -1553,48 +1580,51 @@ Ensure that users doing `/wrapped22` will get a wordle result if they&#39;ve don
 * Adding BSE Wrapped 22 (#185)
 
 Add initial logic for Wrapped 2022:
-- added a new stats slashcommand with a wrapped22 function (#147)
-- makes gathering user stats a bit more dynamic for wrapped and future work (#137)
-- fix a lot of errors if stats didn&#39;t have data (#108) ([`69ef77f`](https://github.com/ESloman/bsebot/commit/69ef77f9e7a930d737db89cc41715bb09ac26f89))
+
+* added a new stats slashcommand with a wrapped22 function (#147)
+* makes gathering user stats a bit more dynamic for wrapped and future work (#137)
+* fix a lot of errors if stats didn&#39;t have data (#108) ([`69ef77f`](https://github.com/ESloman/bsebot/commit/69ef77f9e7a930d737db89cc41715bb09ac26f89))
 
 * Wordle solving #176 (#177)
 
-- Solve the wordle ourselves using selenium and chrome driver
-- Words are selected randomly based on the previously entered word
-- Construct the shared text ourselves
-- Retry a few times if we fail (due to the randomness of our selections)
-- Log wordle attempts to the DB ([`656f57a`](https://github.com/ESloman/bsebot/commit/656f57a22d1eaab30a45e98408efaf09f1743c34))
+* Solve the wordle ourselves using selenium and chrome driver
+* Words are selected randomly based on the previously entered word
+* Construct the shared text ourselves
+* Retry a few times if we fail (due to the randomness of our selections)
+* Log wordle attempts to the DB ([`656f57a`](https://github.com/ESloman/bsebot/commit/656f57a22d1eaab30a45e98408efaf09f1743c34))
 
 * 2.1.0
 
 Closes out feature set for 2.1.0.
 Changes:
-- Added more awards and stats for BSEddies awards (#159)
-- Split award messages if they&#39;re over 2000 chars (#160)
-- BSEddies awards; runners up are logged to DB (#165)
-- Added additional tasks for holidays (#166)
-- Added bot politeness for when being thanked (#168)
-- Implemented bet reminders for bets that live for more than ~2 days (#131)
-- added more type hinting (#129)
+
+* Added more awards and stats for BSEddies awards (#159)
+* Split award messages if they&#39;re over 2000 chars (#160)
+* BSEddies awards; runners up are logged to DB (#165)
+* Added additional tasks for holidays (#166)
+* Added bot politeness for when being thanked (#168)
+* Implemented bet reminders for bets that live for more than ~2 days (#131)
+* added more type hinting (#129)
 
 Bug fixes:
-- `/create` not deferring properly (#145)
-- wordle reminder triggers when a user fails their wordle attempt (#161) 
-- bot too eager to say &#39;you&#39;re welcome&#39; (#173)
-- stop other bots (craigbot, patchbot, etc) from winning BSEddies awards (#159) ([`445d288`](https://github.com/ESloman/bsebot/commit/445d288f12621b2f6e7e5dfd9dc184cf616dd7ec))
+
+* `/create` not deferring properly (#145)
+* wordle reminder triggers when a user fails their wordle attempt (#161)
+* bot too eager to say &#39;you&#39;re welcome&#39; (#173)
+* stop other bots (craigbot, patchbot, etc) from winning BSEddies awards (#159) ([`445d288`](https://github.com/ESloman/bsebot/commit/445d288f12621b2f6e7e5dfd9dc184cf616dd7ec))
 
 * Eagerness fixes (#174)
 
 * Fix eagerness with &#39;you&#39;re welcome&#39; (#173)
-- Use regex matching with word boundaries
-- Don&#39;t reply to self messages ([`f529bda`](https://github.com/ESloman/bsebot/commit/f529bda93c5984a5aa1ed4318ff28d7c96c3ced3))
+* Use regex matching with word boundaries
+* Don&#39;t reply to self messages ([`f529bda`](https://github.com/ESloman/bsebot/commit/f529bda93c5984a5aa1ed4318ff28d7c96c3ced3))
 
 * Add Celebrations task (#166) (#170)
 
-- Added basic framework for celebrations
-- Add message for Christmas
-- Add message for NY day
-- Add message for bot birthday ([`3c70f9b`](https://github.com/ESloman/bsebot/commit/3c70f9ba0e903f7d29db9bf9b294b5230b664757))
+* Added basic framework for celebrations
+* Add message for Christmas
+* Add message for NY day
+* Add message for bot birthday ([`3c70f9b`](https://github.com/ESloman/bsebot/commit/3c70f9ba0e903f7d29db9bf9b294b5230b664757))
 
 * Simple thanks (#168) (#169)
 
@@ -1603,28 +1633,28 @@ Add very primitive way of replying to users that thank us ([`6507f75`](https://g
 * BSEddies Awards (#167)
 
 * BSEddies Awards (#165)
-- Log stat dicts to the DB
+* Log stat dicts to the DB
 
 * BSEddies Awards (#159)
-- add the single minded award
-- add diverse portfolio award
-- add some debug for some other errors ([`03a7446`](https://github.com/ESloman/bsebot/commit/03a7446cc9e0019fb519d18f8231625e31bdf18e))
+* add the single minded award
+* add diverse portfolio award
+* add some debug for some other errors ([`03a7446`](https://github.com/ESloman/bsebot/commit/03a7446cc9e0019fb519d18f8231625e31bdf18e))
 
 * BSEddies Awards Updates (#164) (#159, #160)
 
 * Updates for wordle logic
-- change wordle eddie values
-- make sure eddie gain class won&#39;t crash in the morning
+* change wordle eddie values
+* make sure eddie gain class won&#39;t crash in the morning
 
 * BSEddies Awards (#159, #160)
-- Add message splitting in case we hit the char limit (#160)
-- Add server emojis created for the year (#159)
-- Add edited messages award (#159) ([`52bd8f7`](https://github.com/ESloman/bsebot/commit/52bd8f776ef5f758b86ba6146fc7a83133fad7ca))
+* Add message splitting in case we hit the char limit (#160)
+* Add server emojis created for the year (#159)
+* Add edited messages award (#159) ([`52bd8f7`](https://github.com/ESloman/bsebot/commit/52bd8f776ef5f758b86ba6146fc7a83133fad7ca))
 
 * Update wordle logic (#161) (#163)
 
-- Amend regex so that we account for failed attempts
-- Don&#39;t remind the bot to do the wordle, regardless if it&#39;s done it or not ([`6a50f23`](https://github.com/ESloman/bsebot/commit/6a50f2366d5112de927d6d97136b8e6c978987b0))
+* Amend regex so that we account for failed attempts
+* Don&#39;t remind the bot to do the wordle, regardless if it&#39;s done it or not ([`6a50f23`](https://github.com/ESloman/bsebot/commit/6a50f2366d5112de927d6d97136b8e6c978987b0))
 
 * Edited messages (#158)
 
@@ -1635,43 +1665,44 @@ Add very primitive way of replying to users that thank us ([`6507f75`](https://g
 * BSEddies awards (#143) (#157)
 
 BSEddies awards (#143)
-- Add server owner as a monthly award as well
-- Fix a few niggles with how vc time is displayed in eddie breakdown ([`a9f677e`](https://github.com/ESloman/bsebot/commit/a9f677e51d6b0a985c62c8984025607e39b9b6e4))
+
+* Add server owner as a monthly award as well
+* Fix a few niggles with how vc time is displayed in eddie breakdown ([`a9f677e`](https://github.com/ESloman/bsebot/commit/a9f677e51d6b0a985c62c8984025607e39b9b6e4))
 
 * Fixes (#156)
 
-- fix for archived threads ([`449fcaa`](https://github.com/ESloman/bsebot/commit/449fcaa65d2d1db5c29c9cdf0cdfb366aa2554fc))
+* fix for archived threads ([`449fcaa`](https://github.com/ESloman/bsebot/commit/449fcaa65d2d1db5c29c9cdf0cdfb366aa2554fc))
 
 * Various fixes (#155)
 
-- thread_create sets uses message ID as message ID
-- fix issue with awards text
-- make sure we don&#39;t send awards/stats to debug channel
-- go back to normal installation of pycord (#154) ([`1d8d87c`](https://github.com/ESloman/bsebot/commit/1d8d87cd50d101f6a4a6d6ca1628041b7ab242d9))
+* thread_create sets uses message ID as message ID
+* fix issue with awards text
+* make sure we don&#39;t send awards/stats to debug channel
+* go back to normal installation of pycord (#154) ([`1d8d87c`](https://github.com/ESloman/bsebot/commit/1d8d87cd50d101f6a4a6d6ca1628041b7ab242d9))
 
 * Wordle reminder (#153) (#151)
 
-- Commit changes made in prod to get it functional.
-- Enable actual reminder sending ([`6665409`](https://github.com/ESloman/bsebot/commit/6665409a74bcd14783182a4e4d754ceec098a54d))
+* Commit changes made in prod to get it functional.
+* Enable actual reminder sending ([`6665409`](https://github.com/ESloman/bsebot/commit/6665409a74bcd14783182a4e4d754ceec098a54d))
 
 * Wordle reminder (#151) (#152)
 
 * Wordle reminder (#151)
-- Add wordle reminder task in debug only atm
-- Fix errors with message edit ([`43e423c`](https://github.com/ESloman/bsebot/commit/43e423c2b45e7095b56f65715f6de1e41029e131))
+* Add wordle reminder task in debug only atm
+* Fix errors with message edit ([`43e423c`](https://github.com/ESloman/bsebot/commit/43e423c2b45e7095b56f65715f6de1e41029e131))
 
 * Predict improvements (#150) (#100, #112)
 
-- predict should show me everything now
-- daily message should show taxed eddies correctly and general tax info ([`830fb29`](https://github.com/ESloman/bsebot/commit/830fb29f5b264da1dbe133ee880ccf6db3086538))
+* predict should show me everything now
+* daily message should show taxed eddies correctly and general tax info ([`830fb29`](https://github.com/ESloman/bsebot/commit/830fb29f5b264da1dbe133ee880ccf6db3086538))
 
 * Don&#39;t care if message_type is application command ([`293615b`](https://github.com/ESloman/bsebot/commit/293615b91e10083830d455e40fcad2ee5a1b4cc3))
 
 * Leaderboard should show who refreshed it (#103) (#149)
 
 * Leaderboard should show who refreshed it (#103)
-- Leaderboard shows name of user who triggered slashcommand or pressed button
-- Highscore now does the same ([`ed6d8a3`](https://github.com/ESloman/bsebot/commit/ed6d8a3a157d9ebf11e1327b1fe98fdb296e2d6a))
+* Leaderboard shows name of user who triggered slashcommand or pressed button
+* Highscore now does the same ([`ed6d8a3`](https://github.com/ESloman/bsebot/commit/ed6d8a3a157d9ebf11e1327b1fe98fdb296e2d6a))
 
 * Fix errors (#148) (#145)
 
@@ -1687,14 +1718,14 @@ When using the `create` command to create a bet - the &#39;sending command&#39; 
 * BSEddies awards (#143)
 
 * Various improvements for BSEddies Awards:
-- Add emojis for stats/awards (#142)
-- Add most replies/replied to awards (#115)
-- Finalise thread stats and awards (#132)
-- Add server owner award (#139)
-- Add quietest channel/thread/day (#116)
-- Add support for filtering out deleted channels for &#39;quietest_channel&#39;
-- Increment max_messages parameter (#141)
-- Add support for checking if messages were sent in a VC or not (sigh) ([`d2ef01d`](https://github.com/ESloman/bsebot/commit/d2ef01ddb20688420b1b625e995bac249daf2c7f))
+* Add emojis for stats/awards (#142)
+* Add most replies/replied to awards (#115)
+* Finalise thread stats and awards (#132)
+* Add server owner award (#139)
+* Add quietest channel/thread/day (#116)
+* Add support for filtering out deleted channels for &#39;quietest_channel&#39;
+* Increment max_messages parameter (#141)
+* Add support for checking if messages were sent in a VC or not (sigh) ([`d2ef01d`](https://github.com/ESloman/bsebot/commit/d2ef01ddb20688420b1b625e995bac249daf2c7f))
 
 * Bseddies awards (#138) (#132)
 
@@ -1706,70 +1737,70 @@ For longer bets, add a reminder message twenty four hours before it expires. ([`
 
 * Better threads handling (#132)
 
-- Track whether a message is threaded or not
-- Add thread flag to dicts ([`3924efb`](https://github.com/ESloman/bsebot/commit/3924efb4031ae67c61a3532aa0874e5dcf3bdbb2))
+* Track whether a message is threaded or not
+* Add thread flag to dicts ([`3924efb`](https://github.com/ESloman/bsebot/commit/3924efb4031ae67c61a3532aa0874e5dcf3bdbb2))
 
 * BSEddies awards and other fixes and improvements (#133)
 
 Various changes to the awards/stats and some other improvements along the way.
 
-- Add some VC stats (#117)
-- Allow King to be counted properly (#126)
-- Wordle stat now excludes those that haven&#39;t done at least half the wordles (#118)
-- Add a most popular server emoji stat (#114)
-- Add dataclasses and type hints for DB dics (#129)
-- Fix an issue with revolution formatting (#104)
-- Refactoring to reduce some complexity
-- Various bug fixes to do with message caching ([`38d3c02`](https://github.com/ESloman/bsebot/commit/38d3c022cb57f171c25b6336fa77c90d5599a55e))
+* Add some VC stats (#117)
+* Allow King to be counted properly (#126)
+* Wordle stat now excludes those that haven&#39;t done at least half the wordles (#118)
+* Add a most popular server emoji stat (#114)
+* Add dataclasses and type hints for DB dics (#129)
+* Fix an issue with revolution formatting (#104)
+* Refactoring to reduce some complexity
+* Various bug fixes to do with message caching ([`38d3c02`](https://github.com/ESloman/bsebot/commit/38d3c022cb57f171c25b6336fa77c90d5599a55e))
 
 * Bug fixes (#119, #120, #104) (#124)
 
-- Stop pook from breaking revolution event; don&#39;t allow users to use the &#39;Save THYSELF&#39; button 
-- Allow users to switch sides during a revolution event
-- Fix a formatting issue with revolution text ([`9955221`](https://github.com/ESloman/bsebot/commit/99552214ff6476357b730c0a54ab11ed0480ee4a))
+* Stop pook from breaking revolution event; don&#39;t allow users to use the &#39;Save THYSELF&#39; button
+* Allow users to switch sides during a revolution event
+* Fix a formatting issue with revolution text ([`9955221`](https://github.com/ESloman/bsebot/commit/99552214ff6476357b730c0a54ab11ed0480ee4a))
 
 * BSEddies Awards (#76 #77) (#113)
 
-- Refactor to add in &#39;AwardsBuilder&#39; which builds the stats and awards message for both monthly and annually. Removes duplicated code from monthly and annual tasks and will make future updates easier.
-- Add additional stats and awards
-- Add &#39;Annual awards&#39; task which will trigger on the first of each year
-- Add some extra tidbits to some of the existing stats ([`77991b9`](https://github.com/ESloman/bsebot/commit/77991b956e11dfffa4da80db044aa78010ffd2a3))
+* Refactor to add in &#39;AwardsBuilder&#39; which builds the stats and awards message for both monthly and annually. Removes duplicated code from monthly and annual tasks and will make future updates easier.
+* Add additional stats and awards
+* Add &#39;Annual awards&#39; task which will trigger on the first of each year
+* Add some extra tidbits to some of the existing stats ([`77991b9`](https://github.com/ESloman/bsebot/commit/77991b956e11dfffa4da80db044aa78010ffd2a3))
 
 * Track time spent in voice channels (#18)
 
-- Add the framework for tracking users in VCs
-- Add giving them eddies for doing so ([`f453119`](https://github.com/ESloman/bsebot/commit/f453119c38f806ef294bed7b6cc9a4479b84df34))
+* Add the framework for tracking users in VCs
+* Add giving them eddies for doing so ([`f453119`](https://github.com/ESloman/bsebot/commit/f453119c38f806ef294bed7b6cc9a4479b84df34))
 
 * BSEddies Awards updates (#105)
 
-- Add twitter addict award
-- Add some more information
-- Add some fixes for posting data to DB
-- Change method of building to get speed enhancements for pycord ([`037ddd0`](https://github.com/ESloman/bsebot/commit/037ddd0782b846ea9a1d336890c7a2c84408b021))
+* Add twitter addict award
+* Add some more information
+* Add some fixes for posting data to DB
+* Change method of building to get speed enhancements for pycord ([`037ddd0`](https://github.com/ESloman/bsebot/commit/037ddd0782b846ea9a1d336890c7a2c84408b021))
 
 * Implement Flake8 (#101)
 
-- Add `flake8` linting action to github for commits and PRs
-- Add `flake8` configuration file
-- Fix the all the linting issues to conform with PEP8 and tidy up the repo ([`cc01dbf`](https://github.com/ESloman/bsebot/commit/cc01dbfc86d57ac329922cd1bd838fbd30c6b4c5))
+* Add `flake8` linting action to github for commits and PRs
+* Add `flake8` configuration file
+* Fix the all the linting issues to conform with PEP8 and tidy up the repo ([`cc01dbf`](https://github.com/ESloman/bsebot/commit/cc01dbfc86d57ac329922cd1bd838fbd30c6b4c5))
 
 * Further refactoring
 
-- Move all tasks into sub-directory
-- Fix bug with daily salary and threads
-- Refactor some long lines ([`c5235e9`](https://github.com/ESloman/bsebot/commit/c5235e929e54819da11a574169f604965090c76f))
+* Move all tasks into sub-directory
+* Fix bug with daily salary and threads
+* Refactor some long lines ([`c5235e9`](https://github.com/ESloman/bsebot/commit/c5235e929e54819da11a574169f604965090c76f))
 
 * BSEddies Awards and other updates
 
-- Update python version to 3.11
-- Update build process to allow `py-cord` to be installed on 3.11
-- Some major refactors to remove redundant code and tidy up
-- Enable the BSEddies awards! Stats and prizes for our good members - coming soon. ([`9f94544`](https://github.com/ESloman/bsebot/commit/9f94544d7a52ccfb9ba225180476246a3e164a31))
+* Update python version to 3.11
+* Update build process to allow `py-cord` to be installed on 3.11
+* Some major refactors to remove redundant code and tidy up
+* Enable the BSEddies awards! Stats and prizes for our good members - coming soon. ([`9f94544`](https://github.com/ESloman/bsebot/commit/9f94544d7a52ccfb9ba225180476246a3e164a31))
 
 * Refactor and upgrade
 
-- Remove uneeded importants
-- Fix build to pull dev version for pycord from github for python 3.11 support ([`f67b9c8`](https://github.com/ESloman/bsebot/commit/f67b9c8873b581c305a300b31e9ec45b1da0de60))
+* Remove uneeded importants
+* Fix build to pull dev version for pycord from github for python 3.11 support ([`f67b9c8`](https://github.com/ESloman/bsebot/commit/f67b9c8873b581c305a300b31e9ec45b1da0de60))
 
 * Refactor (#96)
 
@@ -1778,29 +1809,29 @@ Various changes to the awards/stats and some other improvements along the way.
 
 * Bseddies awards (#95)
 
-- Refactor the stats a little
-- Add participation stat
-- Add the awards to the DB for future use ([`5fc70ea`](https://github.com/ESloman/bsebot/commit/5fc70ea67778a4a9cdc43b59584e7793183319b5))
+* Refactor the stats a little
+* Add participation stat
+* Add the awards to the DB for future use ([`5fc70ea`](https://github.com/ESloman/bsebot/commit/5fc70ea67778a4a9cdc43b59584e7793183319b5))
 
 * Bug fixing and tidy up (#94)
 
-- Resolve #93: Cancelling a bet still allowed bets to show up in `/pending`
-- Resolve #85: Revolution event not showing supporters/revs correctly
-- Resolve #92: Update docker image to use Python 3.11 (and resolve build issues caused by this)
-- Simplify some dependencies and update versions
-- Remove some unused files and packages ([`7945bba`](https://github.com/ESloman/bsebot/commit/7945bba162b0cb1c0348fb4dfe30e86e71c3666a))
+* Resolve #93: Cancelling a bet still allowed bets to show up in `/pending`
+* Resolve #85: Revolution event not showing supporters/revs correctly
+* Resolve #92: Update docker image to use Python 3.11 (and resolve build issues caused by this)
+* Simplify some dependencies and update versions
+* Remove some unused files and packages ([`7945bba`](https://github.com/ESloman/bsebot/commit/7945bba162b0cb1c0348fb4dfe30e86e71c3666a))
 
 * Major refactor (#91)
 
-- Create folders for client event classes, slash commands and views
-- Each command, event, and view is a separate file
-- Change docs accordingly
-- Remove beta mode
-- Move the commands sync
-- Remove all print statements and replace with logging
-- Add more logging to the on_ready event on startup
-- Make sure to add more type hints
-- Actually add emoji and sticker event listeners ([`da8e468`](https://github.com/ESloman/bsebot/commit/da8e46852d2d5f34c1e1d2a217e35f0a7738bc74))
+* Create folders for client event classes, slash commands and views
+* Each command, event, and view is a separate file
+* Change docs accordingly
+* Remove beta mode
+* Move the commands sync
+* Remove all print statements and replace with logging
+* Add more logging to the on_ready event on startup
+* Make sure to add more type hints
+* Actually add emoji and sticker event listeners ([`da8e468`](https://github.com/ESloman/bsebot/commit/da8e46852d2d5f34c1e1d2a217e35f0a7738bc74))
 
 * Disable auto-syncing to mitigate API rate limits and manually sync on startup (#89) ([`debcdee`](https://github.com/ESloman/bsebot/commit/debcdee6e8239e773f19a61592f53d1e56ae4a87))
 
@@ -1808,9 +1839,9 @@ Various changes to the awards/stats and some other improvements along the way.
 
 Add functionality to trigger a monthly &#39;stats&#39; message for the server. This triggers on the first day of a month and provides stats on the previous month. There are also some stats that can be &#39;won&#39; - these are the BSEddies Awards. Users can win these and will gain a small eddie prize.
 
-- Add awards task
-- Add stats gathering and caching class
-- Add supporting enums and constants for needed vars ([`9d5a3cf`](https://github.com/ESloman/bsebot/commit/9d5a3cf95837c92b058006e4fdf942e3d628e570))
+* Add awards task
+* Add stats gathering and caching class
+* Add supporting enums and constants for needed vars ([`9d5a3cf`](https://github.com/ESloman/bsebot/commit/9d5a3cf95837c92b058006e4fdf942e3d628e570))
 
 * Docs update (#88)
 
@@ -1826,17 +1857,17 @@ Add functionality to trigger a monthly &#39;stats&#39; message for the server. T
 Fix some startup errors on fresh installs ([`dbe2386`](https://github.com/ESloman/bsebot/commit/dbe2386e80259967b36fd233e0813636cad67d60))
 
 * Fix some startup errors on fresh installs
-- Allocate some tasks to prime server only
-- Fix for when no hash doc in local deployment ([`2a01aa2`](https://github.com/ESloman/bsebot/commit/2a01aa237d73602a74f02984c912940f9d478446))
+* Allocate some tasks to prime server only
+* Fix for when no hash doc in local deployment ([`2a01aa2`](https://github.com/ESloman/bsebot/commit/2a01aa237d73602a74f02984c912940f9d478446))
 
 * Repo admin updates
-- Updates to readme.md and contributing.md
-- Updates to .gitignore
-- Updates to requirements.txt ([`0a57eed`](https://github.com/ESloman/bsebot/commit/0a57eed1a0c82cc580d606fd68d038c8c1741c67))
+* Updates to readme.md and contributing.md
+* Updates to .gitignore
+* Updates to requirements.txt ([`0a57eed`](https://github.com/ESloman/bsebot/commit/0a57eed1a0c82cc580d606fd68d038c8c1741c67))
 
 * Tweak for spoiler thread task
 
-- Stop bot posting in spoiler threads that have finished airing ([`ab52968`](https://github.com/ESloman/bsebot/commit/ab52968cefeb39c1a74b2c4236cb11cc40fe8daa))
+* Stop bot posting in spoiler threads that have finished airing ([`ab52968`](https://github.com/ESloman/bsebot/commit/ab52968cefeb39c1a74b2c4236cb11cc40fe8daa))
 
 * Modify some of the reminder messages for revolution events ([`846ee49`](https://github.com/ESloman/bsebot/commit/846ee494ca7e992f64ba144446dfd6dc5fbae767))
 
@@ -1846,15 +1877,15 @@ Fix some startup errors on fresh installs ([`dbe2386`](https://github.com/ESloma
 
 * Increase wordle time variance ([`f527044`](https://github.com/ESloman/bsebot/commit/f5270441f31fb2e1584b76f165fc95f937df8958))
 
-* - Fix issue when user tries to place bets when they have 0 eddies
-- Fix issue with bet place when the eddies/half eddies the user has is equal to a value already in the options list ([`2351359`](https://github.com/ESloman/bsebot/commit/2351359d07c5def96f2dadc0f85993dae105025a))
+* * Fix issue when user tries to place bets when they have 0 eddies
+* Fix issue with bet place when the eddies/half eddies the user has is equal to a value already in the options list ([`2351359`](https://github.com/ESloman/bsebot/commit/2351359d07c5def96f2dadc0f85993dae105025a))
 
 * Disable some event intents as those events aren&#39;t used. ([`06b0dfb`](https://github.com/ESloman/bsebot/commit/06b0dfbffe5fd717d59696d9a408d955fda8d084))
 
 * Init bet views in threads
 
-- Ensure that bet views in threads are re-initialised upon startup
-- Make sure that pending bet views are also re-initialised correctly ([`8fc00b3`](https://github.com/ESloman/bsebot/commit/8fc00b38f3be6797e6ca89118aae3f6f75d7001c))
+* Ensure that bet views in threads are re-initialised upon startup
+* Make sure that pending bet views are also re-initialised correctly ([`8fc00b3`](https://github.com/ESloman/bsebot/commit/8fc00b38f3be6797e6ca89118aae3f6f75d7001c))
 
 * Fix issue with revolution event - where the KING spending eddies to reduce the chance incorrectly states how many eddies they spent ([`5ca09e7`](https://github.com/ESloman/bsebot/commit/5ca09e74870cf54c8cae129e151d661564444edc))
 
@@ -1862,21 +1893,21 @@ Fix some startup errors on fresh installs ([`dbe2386`](https://github.com/ESloma
 
 * Fix for reactions in thread messages
 
-- Fix error for reacts in thread messages causing errors ([`842ecf5`](https://github.com/ESloman/bsebot/commit/842ecf5c13c8548fb935cb09287aedc7b0505aa8))
+* Fix error for reacts in thread messages causing errors ([`842ecf5`](https://github.com/ESloman/bsebot/commit/842ecf5c13c8548fb935cb09287aedc7b0505aa8))
 
 * Enable update message
 
-- Finalise code for sending update messages ([`62582ca`](https://github.com/ESloman/bsebot/commit/62582ca0b6ebbe0f51dc91a49c0653a752fdb47e))
+* Finalise code for sending update messages ([`62582ca`](https://github.com/ESloman/bsebot/commit/62582ca0b6ebbe0f51dc91a49c0653a752fdb47e))
 
 * Add &#39;Cancel bet&#39; button
 
-- Adds a &#39;Cancel&#39; button to bets to remove them from play. Everyone gets their eddies back with no penalties. ([`53f78d2`](https://github.com/ESloman/bsebot/commit/53f78d295f5e49ae6507e2f896834318d79dce7a))
+* Adds a &#39;Cancel&#39; button to bets to remove them from play. Everyone gets their eddies back with no penalties. ([`53f78d2`](https://github.com/ESloman/bsebot/commit/53f78d295f5e49ae6507e2f896834318d79dce7a))
 
 * Some bug fixes
 
-- Remove redundant line from Dockerfile
-- Fix ordering of logging to prevent an error
-- Wrap git stuff in try/except ([`4501fcd`](https://github.com/ESloman/bsebot/commit/4501fcd88aff98426a2e588ada45f758adf133ba))
+* Remove redundant line from Dockerfile
+* Fix ordering of logging to prevent an error
+* Wrap git stuff in try/except ([`4501fcd`](https://github.com/ESloman/bsebot/commit/4501fcd88aff98426a2e588ada45f758adf133ba))
 
 * New daily vally message
 
@@ -1888,15 +1919,15 @@ Add logic and supporting infrastructure for posting updates automatically on a r
 
 * Revolution event update
 
-- Add button for the King that allows them to reduce event chance for a large cost of eddies
-- King will no longer change during a revolution event, regardless of who has the most eddies ([`5486ec4`](https://github.com/ESloman/bsebot/commit/5486ec476f8d4f2cd35df8c9a64ca831f8e965c9))
+* Add button for the King that allows them to reduce event chance for a large cost of eddies
+* King will no longer change during a revolution event, regardless of who has the most eddies ([`5486ec4`](https://github.com/ESloman/bsebot/commit/5486ec476f8d4f2cd35df8c9a64ca831f8e965c9))
 
 * Improvements to autogenerate command
 
-- add timeout select to autogenerate
-- random bet selection is smarter: will actually pick the right number with validating the conditions
-- fix a bug with some particular bet types
-- tidy up some code ([`a811634`](https://github.com/ESloman/bsebot/commit/a811634935abaea5b9e2a5350d4a856af4f04070))
+* add timeout select to autogenerate
+* random bet selection is smarter: will actually pick the right number with validating the conditions
+* fix a bug with some particular bet types
+* tidy up some code ([`a811634`](https://github.com/ESloman/bsebot/commit/a811634935abaea5b9e2a5350d4a856af4f04070))
 
 * updates for bets ([`933e6a4`](https://github.com/ESloman/bsebot/commit/933e6a412cb122d65e52b1ecc5e385cc474d4098))
 
@@ -1917,14 +1948,14 @@ Add logic and supporting infrastructure for posting updates automatically on a r
 * Remove redundant imports ([`3eadb68`](https://github.com/ESloman/bsebot/commit/3eadb68a5acb49695061bdbf4cc0ee158d0af46b))
 
 * Various changes:
-- added more randomness to bet odds
-- bets have lower returns if everyone voted for winning outcome
-- bet winnings are now taxed
-- notification in the bseddies channel when a king changes
-- notification in the bseddies channel when the tax rate changes
-- remove all custom_ids from bet views and selects to prevent fuck ups
-- add some logic to autogenerate that will fill options with those in the voice channel
-- add the logic back to autogenerate that will only select a bet if the requirements are met ([`048dd6a`](https://github.com/ESloman/bsebot/commit/048dd6ac97a688d279aaba27856d3fcc85cac1ed))
+* added more randomness to bet odds
+* bets have lower returns if everyone voted for winning outcome
+* bet winnings are now taxed
+* notification in the bseddies channel when a king changes
+* notification in the bseddies channel when the tax rate changes
+* remove all custom_ids from bet views and selects to prevent fuck ups
+* add some logic to autogenerate that will fill options with those in the voice channel
+* add the logic back to autogenerate that will only select a bet if the requirements are met ([`048dd6a`](https://github.com/ESloman/bsebot/commit/048dd6ac97a688d279aaba27856d3fcc85cac1ed))
 
 * Tax bet winnings
 
@@ -1977,9 +2008,9 @@ Some tidy up
 Disable wordle task for now ([`0e127fc`](https://github.com/ESloman/bsebot/commit/0e127fcad5ac5f89225cb030a4b97627fba92e48))
 
 * A few new features and major updates and minor updates:
-- add spoiler thread task
-- bet winners now get a share of bet loser eddies that were bet
-- Beginning adding the autogenerate slash command back in ([`4d6ac13`](https://github.com/ESloman/bsebot/commit/4d6ac13dd3a4cfebfb2820ba283d10ed448dc69f))
+* add spoiler thread task
+* bet winners now get a share of bet loser eddies that were bet
+* Beginning adding the autogenerate slash command back in ([`4d6ac13`](https://github.com/ESloman/bsebot/commit/4d6ac13dd3a4cfebfb2820ba283d10ed448dc69f))
 
 * Tweaks to tasks ([`b577e92`](https://github.com/ESloman/bsebot/commit/b577e922ed290c3132b2c5ddf61615ad1f1beb3d))
 
@@ -1990,13 +2021,13 @@ Disable wordle task for now ([`0e127fc`](https://github.com/ESloman/bsebot/commi
 * Add daily wordle task ([`f1fa5a3`](https://github.com/ESloman/bsebot/commit/f1fa5a319f7755bfd3742de00ce659767a7a0aba))
 
 * Fixes and improvements after day one:
-- Users can only support/overthrow once
-- Make sure the keys are created in the DB object
-- Fixes for if we need to restart the bot during an event
-- Cap the chance value publicly
-- tidy up some messages
-- make sure bet timeout message is cast to lowercase
-- added task for daily vally message ([`c9ef5b4`](https://github.com/ESloman/bsebot/commit/c9ef5b4e02d37b5d68a8d5e0ec1f391d8537e823))
+* Users can only support/overthrow once
+* Make sure the keys are created in the DB object
+* Fixes for if we need to restart the bot during an event
+* Cap the chance value publicly
+* tidy up some messages
+* make sure bet timeout message is cast to lowercase
+* added task for daily vally message ([`c9ef5b4`](https://github.com/ESloman/bsebot/commit/c9ef5b4e02d37b5d68a8d5e0ec1f391d8537e823))
 
 * Fixes for event ([`d4f64bf`](https://github.com/ESloman/bsebot/commit/d4f64bf95562e08030916590f7f0fe76c54feff5))
 
@@ -2043,20 +2074,22 @@ Floor the taxed amounts ([`e47fe2e`](https://github.com/ESloman/bsebot/commit/e4
 * Add persistent view for revolution event ([`7cbe56e`](https://github.com/ESloman/bsebot/commit/7cbe56e9c1e696ad2832915cc7dbfb4ece002a58))
 
 * Large update: #61 #62 #63 #68 #69 #75
-- Added supporting work for custom emojis and stickers
-- Added new revolution event framework (just need to add variable tax rate)
-- various tweaks to do with replies and stuff
-- Lots of other minor updates ([`f6beef3`](https://github.com/ESloman/bsebot/commit/f6beef397b552e67f8323e525f5c4d86bf33e662))
+* Added supporting work for custom emojis and stickers
+* Added new revolution event framework (just need to add variable tax rate)
+* various tweaks to do with replies and stuff
+* Lots of other minor updates ([`f6beef3`](https://github.com/ESloman/bsebot/commit/f6beef397b552e67f8323e525f5c4d86bf33e662))
 
 * Only show users who have ever received/used eddies in leaderboards ([`717e20a`](https://github.com/ESloman/bsebot/commit/717e20a65b6e0d6278bafd9467953eb8c8347190))
 
 * Add basics of activity and fix bug with eddie amounts
-#63 #74
+
+# 63 #74
+
 Bot now say it&#39;s listening to conversations and issue with amounts is resolved ([`4669435`](https://github.com/ESloman/bsebot/commit/4669435bd551c16ed6398fc881da6350e0c7d1c8))
 
 * Fix bug with placeholder outcome names
 
-Part of #63 
+Part of #63
 Fix a bug where having only one bet available to place/close will cause placeholder values to appear for outcomes rather than actual outcome values. ([`09b63f4`](https://github.com/ESloman/bsebot/commit/09b63f4f7b8f2ec16601e91b73f5eca54e1d9202))
 
 * Update Dockerfile #64
@@ -2163,9 +2196,9 @@ Also updated the daily minimum ([`f48c222`](https://github.com/ESloman/bsebot/co
 * Add support for members leaving the server ([`7600dda`](https://github.com/ESloman/bsebot/commit/7600ddac979f1cfa490a65b20c61385451c0056f))
 
 * Multiple QoL updates:
-- stop more &#34;interaction failed&#34; messages by using ctx.send instead of ctx.channel.send
-- prevent &#34;inactive&#34; users from being king or getting daily eddies
-- when a user joins - if they exist already - just set them to &#39;active&#39; again ([`673bc75`](https://github.com/ESloman/bsebot/commit/673bc75ded6268fb91aa8aa253f874bc063ad872))
+* stop more &#34;interaction failed&#34; messages by using ctx.send instead of ctx.channel.send
+* prevent &#34;inactive&#34; users from being king or getting daily eddies
+* when a user joins - if they exist already - just set them to &#39;active&#39; again ([`673bc75`](https://github.com/ESloman/bsebot/commit/673bc75ded6268fb91aa8aa253f874bc063ad872))
 
 * Add support for new version of discord-slash library ([`8fa45d7`](https://github.com/ESloman/bsebot/commit/8fa45d7dff3896baf6a5cd3527cbc421354302ab))
 
@@ -2183,10 +2216,10 @@ Add some more private channels to constants ([`20def4e`](https://github.com/ESlo
 * Update player disconnect logic ([`672b39b`](https://github.com/ESloman/bsebot/commit/672b39b5c2f5a284a4cc84f763ba9245316e2fd6))
 
 * Add basic framework for #60
-- allow users to turn specified game servers on
-- wait 5 minutes after all players disconnect before shutting down the server
-- add some more exception handling
-- remove redundant logging ([`0bcc9e1`](https://github.com/ESloman/bsebot/commit/0bcc9e1038ba529ce7d54a6a72c35b9726b67838))
+* allow users to turn specified game servers on
+* wait 5 minutes after all players disconnect before shutting down the server
+* add some more exception handling
+* remove redundant logging ([`0bcc9e1`](https://github.com/ESloman/bsebot/commit/0bcc9e1038ba529ce7d54a6a72c35b9726b67838))
 
 * Add better handling for exceptions here ([`0323aae`](https://github.com/ESloman/bsebot/commit/0323aae5250ff531529f208936f4e2e3eb45eebf))
 
@@ -2224,9 +2257,9 @@ Add some more private channels to constants ([`20def4e`](https://github.com/ESlo
 
 * Logic for controlling the AWS Game Instance
 This effectively resolves #56, #57, #58 and #59.
-- Add commands to turn aws instance on and off
-- Add task to update a &#34;status&#34; message with server info and connected players
-- Add task to turn off the server if uptime is above a certain amonut and no-one is connected ([`752e50e`](https://github.com/ESloman/bsebot/commit/752e50e9529a97ffdb235fad0dbc4999f8231477))
+* Add commands to turn aws instance on and off
+* Add task to update a &#34;status&#34; message with server info and connected players
+* Add task to turn off the server if uptime is above a certain amonut and no-one is connected ([`752e50e`](https://github.com/ESloman/bsebot/commit/752e50e9529a97ffdb235fad0dbc4999f8231477))
 
 * Prevent users from betting negative eddies, resolves #54 ([`62f1a1a`](https://github.com/ESloman/bsebot/commit/62f1a1a68eb5bf971567608e9a17f7fd9884d6f6))
 
@@ -2263,10 +2296,10 @@ We send one warning to the user about 24 hours before they get culled. ([`b9cb43
 * Add &#39;@everyone&#39; tag to the revolution event ([`aa5bc0a`](https://github.com/ESloman/bsebot/commit/aa5bc0afdfd9b2970d6344169cd50e47798c7d03))
 
 * Finish off the work for #40
-- added a method to send a random gif in the &#34;countdown&#34; phase
-- change loop timer to be more frequent as we get closer to the expiry of the event
-- change loop timer to be minutes on the day of
-- change loop timer to be 8 hours when it&#39;s not a sunday (ie it&#39;s never going to go off)
+* added a method to send a random gif in the &#34;countdown&#34; phase
+* change loop timer to be more frequent as we get closer to the expiry of the event
+* change loop timer to be minutes on the day of
+* change loop timer to be 8 hours when it&#39;s not a sunday (ie it&#39;s never going to go off)
 Resolves #40 ([`82d6869`](https://github.com/ESloman/bsebot/commit/82d6869f7754ce1ab7399596972c8d7da1395834))
 
 * Add in logic that gives users with &#34;pending eddies&#34; a bit longer before they&#39;re culled ([`452e73f`](https://github.com/ESloman/bsebot/commit/452e73fb065d7b5c45599d632a25febfe1015683))
@@ -2274,13 +2307,13 @@ Resolves #40 ([`82d6869`](https://github.com/ESloman/bsebot/commit/82d6869f7754c
 * Make the revolution event GIF random ([`17e047d`](https://github.com/ESloman/bsebot/commit/17e047dc2cffec8beeeec8a083911e1826d7ab15))
 
 * Some minor tweaks
-- Make sure that users also gain at least one point from a user&#39;s inactivity
-- Use the right list when determining grammar correctly
-- re-ordering logic when determining who gets points for user inactivity ([`30f9772`](https://github.com/ESloman/bsebot/commit/30f97727e56ae066bc54992ebc24bdacdf346da1))
+* Make sure that users also gain at least one point from a user&#39;s inactivity
+* Use the right list when determining grammar correctly
+* re-ordering logic when determining who gets points for user inactivity ([`30f9772`](https://github.com/ESloman/bsebot/commit/30f97727e56ae066bc54992ebc24bdacdf346da1))
 
 * Fixes a couple of bugs:
-- Fixes #50, make sure KING loses eddies
-- Fixes #51, make sure we use USER_CREATE interactions so we know how long to wait before we try and cull new users ([`d5c9319`](https://github.com/ESloman/bsebot/commit/d5c931975922fc2fdb7cfe7a5c62215308967ce6))
+* Fixes #50, make sure KING loses eddies
+* Fixes #51, make sure we use USER_CREATE interactions so we know how long to wait before we try and cull new users ([`d5c9319`](https://github.com/ESloman/bsebot/commit/d5c931975922fc2fdb7cfe7a5c62215308967ce6))
 
 * Update inactive user task with another interaction to ignore ([`7f9d90a`](https://github.com/ESloman/bsebot/commit/7f9d90a57fecf418b9c41375e6c75188d8bdb8f6))
 
@@ -2291,21 +2324,21 @@ Fix typo preventing code execution ([`0a27199`](https://github.com/ESloman/bsebo
 * Add some debug logging to the revolution event #40 ([`2e2ea9e`](https://github.com/ESloman/bsebot/commit/2e2ea9e350e8de7212a401a46527f7de4f7211df))
 
 * Updates to inactive user task
-- make the culling period shorter to account for weekly revolution events
-- restrict the events that count as &#39;interactions&#39; ([`bdfce25`](https://github.com/ESloman/bsebot/commit/bdfce255da02f81948891a135adb77323c0115d8))
+* make the culling period shorter to account for weekly revolution events
+* restrict the events that count as &#39;interactions&#39; ([`bdfce25`](https://github.com/ESloman/bsebot/commit/bdfce255da02f81948891a135adb77323c0115d8))
 
 * Make revolution event have a 3.5 hour expiry time - #40 ([`75d8da1`](https://github.com/ESloman/bsebot/commit/75d8da1a3d36196af01fcbecd27c17d7a3f718ba))
 
 * Add basic framework for messaging people a random gif if they say &#34;thanks&#34;
-- added aiohttp api class for giphy, resolves #41
-- added random gif method for said class
-- use said method in a DM handling class, resolves #10 ([`32ef6e5`](https://github.com/ESloman/bsebot/commit/32ef6e5075685f7e8b2614588396580cbd9c890b))
+* added aiohttp api class for giphy, resolves #41
+* added random gif method for said class
+* use said method in a DM handling class, resolves #10 ([`32ef6e5`](https://github.com/ESloman/bsebot/commit/32ef6e5075685f7e8b2614588396580cbd9c890b))
 
 * Final bit of functionality for revolution events #40:
-- Add file to create event in DB
-- Add actual channel ID
-- Allow passing in of channel ID to DB entry creation logic
-- Chance success calculation more accurate ([`6bd2755`](https://github.com/ESloman/bsebot/commit/6bd275570946c4025e3423ef9bc94a564bbd035c))
+* Add file to create event in DB
+* Add actual channel ID
+* Allow passing in of channel ID to DB entry creation logic
+* Chance success calculation more accurate ([`6bd2755`](https://github.com/ESloman/bsebot/commit/6bd275570946c4025e3423ef9bc94a564bbd035c))
 
 * Remove the admin requirement from the &#34;/bseddies king&#34; command #43 ([`c8db2df`](https://github.com/ESloman/bsebot/commit/c8db2dfd9bd3e1dfc082366d893c05c5b88d3903))
 
@@ -2315,8 +2348,8 @@ Fix typo preventing code execution ([`0a27199`](https://github.com/ESloman/bsebo
 Resolves #43 ([`6fa8776`](https://github.com/ESloman/bsebot/commit/6fa8776d2d3e6ea3b355bc063e94256638a8a434))
 
 * Couple of extra slash commands:
-- &#34;/bseddies admin switch&#34; - resolves #44
-- &#34;/bseddies king&#34; - first bit of work for #43 ([`6efdedc`](https://github.com/ESloman/bsebot/commit/6efdedc96f65f0f4513434b5a17f963f73dbf6a6))
+* &#34;/bseddies admin switch&#34; - resolves #44
+* &#34;/bseddies king&#34; - first bit of work for #43 ([`6efdedc`](https://github.com/ESloman/bsebot/commit/6efdedc96f65f0f4513434b5a17f963f73dbf6a6))
 
 * Fix activity type being set incorrectly for KING_GAIN ([`91bdf3f`](https://github.com/ESloman/bsebot/commit/91bdf3f3fa421f9a195740c8618cac9255a6450c))
 
@@ -2347,9 +2380,9 @@ This reverts commit ad7725f84dac0eacf6ac42c0c5fb0a178ef846ce. ([`9fc138a`](https
 * Change the daily salary to round down rather than round up ([`36b83b8`](https://github.com/ESloman/bsebot/commit/36b83b86279cb6a49460900686e1ff02279d70f9))
 
 * Various changes:
-- fix the grammatical mistakes in decay messages, resolves #46
-- changed the number of personalised bets in autogen to 1
-- Added a &#39;high score&#39; leaderboard for displaying high scores only, resolves #42 ([`03e646b`](https://github.com/ESloman/bsebot/commit/03e646b97ca3ccf0d5dbf0adea44d882e7279ffb))
+* fix the grammatical mistakes in decay messages, resolves #46
+* changed the number of personalised bets in autogen to 1
+* Added a &#39;high score&#39; leaderboard for displaying high scores only, resolves #42 ([`03e646b`](https://github.com/ESloman/bsebot/commit/03e646b97ca3ccf0d5dbf0adea44d882e7279ffb))
 
 * Actually add the functionality and deducts and adds points for each user - #40 ([`f2c5490`](https://github.com/ESloman/bsebot/commit/f2c549027cd29f283387b738350b25e8ee897685))
 
@@ -2358,17 +2391,17 @@ This reverts commit ad7725f84dac0eacf6ac42c0c5fb0a178ef846ce. ([`9fc138a`](https
 * Change the default channel ID for #40 whilst under test ([`a71bed2`](https://github.com/ESloman/bsebot/commit/a71bed2a61a3efac8656ff2a8941f2c2efc5fdb1))
 
 * Beginnings of #40. This adds:
-- mongo classes for interacting with revolutions
-- task for creating/resolving revolutions
-- add reaction event class for revolutions ([`d3e9dd8`](https://github.com/ESloman/bsebot/commit/d3e9dd87b1ddcfa9a7481234d0f94ff33f5062ab))
+* mongo classes for interacting with revolutions
+* task for creating/resolving revolutions
+* add reaction event class for revolutions ([`d3e9dd8`](https://github.com/ESloman/bsebot/commit/d3e9dd87b1ddcfa9a7481234d0f94ff33f5062ab))
 
 * Some minor fixes:
-- fix a bug if we didn&#39;t have high_score in the DB for a user
-- add limit to the number of non-generic bets we can get autogenerated ([`ddae3ab`](https://github.com/ESloman/bsebot/commit/ddae3ab0511f4a4dd9ac6e5a6e9b1c6e6fa94793))
+* fix a bug if we didn&#39;t have high_score in the DB for a user
+* add limit to the number of non-generic bets we can get autogenerated ([`ddae3ab`](https://github.com/ESloman/bsebot/commit/ddae3ab0511f4a4dd9ac6e5a6e9b1c6e6fa94793))
 
 * Completes the first three tasks for #42.
-- Added functionality to maintain the high score
-- Added high score into `view` command ([`5d6b4c0`](https://github.com/ESloman/bsebot/commit/5d6b4c0ed453c202be1d25640737112e8847d75f))
+* Added functionality to maintain the high score
+* Added high score into `view` command ([`5d6b4c0`](https://github.com/ESloman/bsebot/commit/5d6b4c0ed453c202be1d25640737112e8847d75f))
 
 * We don&#39;t particularly care or need to do anything if the user doesn&#39;t need any points culling ([`c540ab9`](https://github.com/ESloman/bsebot/commit/c540ab966f077f96dfe297564af62df3b62ea667))
 
@@ -2403,32 +2436,32 @@ Added the logic for sending the user&#39;s a notification to say they&#39;ve gai
 * Add functionality to check voice channels for online members if the bet specifies it needs some people, resolves #37 ([`c4e7b91`](https://github.com/ESloman/bsebot/commit/c4e7b91a271137601fecdabc226b22620a39e376))
 
 * Added framework for Auto Generated Bets:
-- created Collection class for inserting bets to select from and selecting bets from the DB
-- Add slash command to trigger bet generation
-- Add json file to parse with the bets in ([`c518e19`](https://github.com/ESloman/bsebot/commit/c518e197428a369a0e2e291f12f5d5225ab6f84c))
+* created Collection class for inserting bets to select from and selecting bets from the DB
+* Add slash command to trigger bet generation
+* Add json file to parse with the bets in ([`c518e19`](https://github.com/ESloman/bsebot/commit/c518e197428a369a0e2e291f12f5d5225ab6f84c))
 
 * Some minor refactoring:
-- created a &#39;reactioneventclasses&#39; file for classes for each reaction event type we&#39;re handling
-- move the logic for reaction client events to the above file
-- moved the BaseEvent class to a separate file
-- tidy up some of the imports in a few files ([`8d40963`](https://github.com/ESloman/bsebot/commit/8d4096381333c313f9a5643ec322248649a5d153))
+* created a &#39;reactioneventclasses&#39; file for classes for each reaction event type we&#39;re handling
+* move the logic for reaction client events to the above file
+* moved the BaseEvent class to a separate file
+* tidy up some of the imports in a few files ([`8d40963`](https://github.com/ESloman/bsebot/commit/8d4096381333c313f9a5643ec322248649a5d153))
 
 * Update betmanager.py
 
 Fix bug that causes bets not to close properly ([`c65a5f1`](https://github.com/ESloman/bsebot/commit/c65a5f1d417433554a867f0ddd173ce7eb696e32))
 
-* - Add collection class for loans
-- Added slash commands to take a loan, repay a loan, and view your loan
-- Added tasks that consistently checks that loans haven&#39;t expired
-- Added additional framework that makes these loans possible: transaction types, constants, etc
+* * Add collection class for loans
+* Added slash commands to take a loan, repay a loan, and view your loan
+* Added tasks that consistently checks that loans haven&#39;t expired
+* Added additional framework that makes these loans possible: transaction types, constants, etc
 
 All this resolves #20 ([`24d306d`](https://github.com/ESloman/bsebot/commit/24d306d2d3bd8a09a605c082612895db5092935b))
 
 * Make sure we append user ID to recent transaction history items too for #9 ([`5f76172`](https://github.com/ESloman/bsebot/commit/5f761728b15cd2165b7424e00592ce4ab572c8cb))
 
 * This completes most of the work for #9
-- Allow user to specify if they want the full transaction history
-- Create a XLSX file with the user&#39;s full history and send it to them if they so wish ([`ed51117`](https://github.com/ESloman/bsebot/commit/ed51117a78f486e14216ef9b3a747f8e7797e81e))
+* Allow user to specify if they want the full transaction history
+* Create a XLSX file with the user&#39;s full history and send it to them if they so wish ([`ed51117`](https://github.com/ESloman/bsebot/commit/ed51117a78f486e14216ef9b3a747f8e7797e81e))
 
 * Resolves #32
 Changed the algorithm to be fairer. We&#39;ll monitor it and see how it feels in the long run. ([`a1b7510`](https://github.com/ESloman/bsebot/commit/a1b7510729bc972ff58e00cc2c6ed132ace78002))
@@ -2455,8 +2488,8 @@ Add the framework and functionality to allow users to toggle the daily notificat
 * Add transaction history command, completes a task for #9 ([`1f87d20`](https://github.com/ESloman/bsebot/commit/1f87d20e530183f6e53271c028592a9bbee4fe75))
 
 * Summary of changes:
-- change the way we distribute eddies on a win, resolves #28
-- prevent users from winning their own bets if they are the only better, resolves #27 ([`2e5257f`](https://github.com/ESloman/bsebot/commit/2e5257fbaa0fc337c43be8e5d0eb4da8952d149b))
+* change the way we distribute eddies on a win, resolves #28
+* prevent users from winning their own bets if they are the only better, resolves #27 ([`2e5257f`](https://github.com/ESloman/bsebot/commit/2e5257fbaa0fc337c43be8e5d0eb4da8952d149b))
 
 * Resolves #25
 We put the &#39;title&#39; as part of the description now and make it bold. Have to use some regex to get the bet ID out of this now. ([`36c5856`](https://github.com/ESloman/bsebot/commit/36c5856279395a0289fc216b6d98338d4fda112c))
@@ -2465,9 +2498,9 @@ We put the &#39;title&#39; as part of the description now and make it bold. Have
 Use &lt;&gt; tags on URLS to stop embeds being generated ([`5ecaf8e`](https://github.com/ESloman/bsebot/commit/5ecaf8e5cff3d6c8a8a6e92d7c6b34edca80b083))
 
 * Some minor fixes and improvements
-- Log DM&#39;s to the bot properly so we can analise the contents
-- Add another private channel to constants.py
-- Make sure the creator gets extra bets ([`c802b9d`](https://github.com/ESloman/bsebot/commit/c802b9d79d665a393c82a90e269a6f7632751d81))
+* Log DM&#39;s to the bot properly so we can analise the contents
+* Add another private channel to constants.py
+* Make sure the creator gets extra bets ([`c802b9d`](https://github.com/ESloman/bsebot/commit/c802b9d79d665a393c82a90e269a6f7632751d81))
 
 * Resolves #26
 Add code to update king history on change ([`94f4593`](https://github.com/ESloman/bsebot/commit/94f459373004a7b75f2d0d2564159be0e2cdc76e))
@@ -2496,13 +2529,13 @@ Added a much more details README file. ([`505bd35`](https://github.com/ESloman/b
 * Add a bunch of comments and type hints to a couple more files to #16 ([`15520b9`](https://github.com/ESloman/bsebot/commit/15520b9b943fcb7b160f0b7ea2cc28ccc2af3111))
 
 * Some more minor fixes:
-- add in &#34;DEBUG_MODE&#34; flag and set our guilds based on that and not BETA_MODE
-- Get booleans for BETA_MODE and DEBUG_MODE correctly
-- added some comments to main.py for #16 ([`778ddfa`](https://github.com/ESloman/bsebot/commit/778ddfa27d9e16673e5665953a464063a892caff))
+* add in &#34;DEBUG_MODE&#34; flag and set our guilds based on that and not BETA_MODE
+* Get booleans for BETA_MODE and DEBUG_MODE correctly
+* added some comments to main.py for #16 ([`778ddfa`](https://github.com/ESloman/bsebot/commit/778ddfa27d9e16673e5665953a464063a892caff))
 
 * Some minor fixes:
-- Make sure that the transaction history entries that take away points are indeed negative
-- Make sure we have the &#39;daily_minimum&#39; key when we&#39;re processing daily eddies ([`e99c0fa`](https://github.com/ESloman/bsebot/commit/e99c0fa777f1fbf34e39764d3a128e42f5f6cd6b))
+* Make sure that the transaction history entries that take away points are indeed negative
+* Make sure we have the &#39;daily_minimum&#39; key when we&#39;re processing daily eddies ([`e99c0fa`](https://github.com/ESloman/bsebot/commit/e99c0fa777f1fbf34e39764d3a128e42f5f6cd6b))
 
 * More updates for #16.
 Updated this files with more comments and type hints ([`11c9f4e`](https://github.com/ESloman/bsebot/commit/11c9f4ed4c2bba1831bcd67b7501b2c13699050b))
@@ -2576,16 +2609,16 @@ Add pending points total to &#39;view&#39; points command ([`562824d`](https://g
 Add functionality to disallow users from creating too many active bets ([`7a8e8bc`](https://github.com/ESloman/bsebot/commit/7a8e8bcf6f9e2ffa5e5500e0a984e1f24e62e429))
 
 * Big pre-release update.
-- Make sure that bets exist before we attempt to place BSEddies on them or close them
-- Make sure that users actually get their daily salary gain
-- Make sure that we apply daily salary gain to all server members and not just those that interacted with the server in the last 24h
-- Add loggers rather than print statements and actually output to a log file
-- Add &#34;pending_points&#34; entry and attempt to track that
-- Make sure we add a new user to the DB when a new member joins the server
-- Only make sure we message the boys about their daily salary gain
-- Moved the final stuff over from command manager classes to the right event classes
-- Added lots more method comments to make it easier to understand what the methods are doing
-- Removed some redundant code and imports ([`ebc1dff`](https://github.com/ESloman/bsebot/commit/ebc1dff58a52efe86b838aba407d7eb46f1bac39))
+* Make sure that bets exist before we attempt to place BSEddies on them or close them
+* Make sure that users actually get their daily salary gain
+* Make sure that we apply daily salary gain to all server members and not just those that interacted with the server in the last 24h
+* Add loggers rather than print statements and actually output to a log file
+* Add &#34;pending_points&#34; entry and attempt to track that
+* Make sure we add a new user to the DB when a new member joins the server
+* Only make sure we message the boys about their daily salary gain
+* Moved the final stuff over from command manager classes to the right event classes
+* Added lots more method comments to make it easier to understand what the methods are doing
+* Removed some redundant code and imports ([`ebc1dff`](https://github.com/ESloman/bsebot/commit/ebc1dff58a52efe86b838aba407d7eb46f1bac39))
 
 * Remove &#34;debug&#34; vars and use real data ([`f2c4c28`](https://github.com/ESloman/bsebot/commit/f2c4c28d09b271a5ad31abfaf19613d70b207085))
 
@@ -2641,18 +2674,18 @@ Added BETA_MODE flag. ([`ed6f698`](https://github.com/ESloman/bsebot/commit/ed6f
 * Fix mongo issues ([`a540f5e`](https://github.com/ESloman/bsebot/commit/a540f5e4fb4d4e41e09d54ebd331a83db7af572e))
 
 * Commit BETA features. This includes:
-- creating bets
-- counting points placed on a bet
-- closing a bet
-- placing a bet
-- viewing points
-- viewing the leaderboard ([`42a3b28`](https://github.com/ESloman/bsebot/commit/42a3b28d66a1f533f193704032cecb7977a17557))
+* creating bets
+* counting points placed on a bet
+* closing a bet
+* placing a bet
+* viewing points
+* viewing the leaderboard ([`42a3b28`](https://github.com/ESloman/bsebot/commit/42a3b28d66a1f533f193704032cecb7977a17557))
 
 * Update default mongo port ([`99fa088`](https://github.com/ESloman/bsebot/commit/99fa088183fb80ec660d27b499d4eb44756f4afe))
 
 * First commit.
-- Basic mongo interface / db classes / collection classes for point storage
-- Basic bot script that registers some slash commands and performs some actions ([`1d2cb16`](https://github.com/ESloman/bsebot/commit/1d2cb16013579c4caaa697330ac0a1c4a40181c8))
+* Basic mongo interface / db classes / collection classes for point storage
+* Basic bot script that registers some slash commands and performs some actions ([`1d2cb16`](https://github.com/ESloman/bsebot/commit/1d2cb16013579c4caaa697330ac0a1c4a40181c8))
 
 * Update .gitignore to hide .idea files ([`0f7c441`](https://github.com/ESloman/bsebot/commit/0f7c4416fdcf56fb500c379857c3d586d973ead4))
 

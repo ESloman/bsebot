@@ -1,7 +1,45 @@
 repos:
-- repo: https://github.com/astral-sh/ruff-pre-commit
-  rev: 'v0.11.8'
-  hooks:
-    - id: ruff
-      args: [--fix, --exit-non-zero-on-fix]
-    - id: ruff-format
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: 'v0.11.8'
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+      - id: ruff-format
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: pytest
+        language: system
+        pass_filenames: false
+        always_run: true
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-added-large-files
+      - id: pretty-format-json
+        files: \.json$
+        args: [--autofix, --no-sort-keys, --indent=4]
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: check-executables-have-shebangs
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: requirements-txt-fixer
+
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.5
+    hooks:
+      - id: forbid-tabs
+      - id: remove-tabs
+      - id: forbid-crlf
+      - id: remove-crlf
+
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.44.0
+    hooks:
+      - id: markdownlint
+        files: \.md$
+        args: [--fix]
+        language_version: lts

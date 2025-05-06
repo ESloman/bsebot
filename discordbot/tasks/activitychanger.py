@@ -53,23 +53,32 @@ class ActivityChanger(BaseTask):
             activity = self.default_activity
         else:
             # pick one randomly from database
+            self.logger.info("Selecting non-default activity")
             all_activities = self.bot_activities.get_all_activities()
 
             # crude way of weighting
             total = len(all_activities)
-            weights = []
+            self.logger.debug("Found %s activities as potential possibilities", total)
 
+            total_usage = sum(activity.count for activity in all_activities)
+            weights = []
             for activity in all_activities:
-                weight = total - activity.count
+                weight = 1 - (activity.count / total_usage)
                 # just make sure that the weight is non-zero
-                weight = min(weight, 0)
+                weight = max(weight, 0)
                 if weight == 0:
                     weight += 0.1
                 weights.append(weight)
 
+            if not weights:
+                self.logger.warning("Weights was empty - no activities found?")
+                return None
+
+            self.logger.debug("Activity weigts: %s", weights)
             _activity = random.choices(all_activities, weights)[0]
 
             new_activity = {"name": _activity.name, "details": "Waiting for commands!"}
+            self.logger.info("New activity name: %s, category: %s", _activity.name, _activity.category)
 
             match _activity.category:
                 case "listening":

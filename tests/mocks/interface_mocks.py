@@ -65,6 +65,7 @@ def mock_user(
     supporter_type: SupporterType = SupporterType.NEUTRAL,
     inactive: bool = False,
 ) -> dict[str, bool | int | str, SupporterType]:
+    """Creates a mock user dictionary with some default values."""
     return locals()
 
 
@@ -76,6 +77,7 @@ def mock_guild(
     created: datetime.datetime = datetime.datetime.now(datetime.UTC),
     admins: list[int] | None = None,
 ) -> dict[str, bool | int | str | list[int]]:
+    """Creates a mock guild dictionary with some default values."""
     if admins is None:
         admins = []
     return locals()
@@ -108,6 +110,7 @@ def mock_revolution_event(
     bribe_offered: bool = False,
     bribe_accepted: bool = False,
 ) -> dict[str, bool | int | str | list[int]]:
+    """Creates a mock revolution event dictionary with some default values."""
     if locked is None:
         locked = []
     if neutrals is None:
@@ -118,6 +121,19 @@ def mock_revolution_event(
         supporters = []
     if users is None:
         users = []
+    return locals()
+
+
+def mock_bot_activity(
+    _id: ObjectId = ObjectId(),
+    category: str = "playing",
+    name: str = "some activity",
+    created_by: int = 123456789,
+    created: datetime.datetime = datetime.datetime.now(datetime.UTC),
+    count: int = 5,
+    archived: bool = False,
+) -> dict[str, str | int | bool | datetime.datetime]:
+    """Creates a mock bot activity dictionary with some default values."""
     return locals()
 
 

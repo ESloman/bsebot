@@ -1,5 +1,25 @@
 # CHANGELOG
 
+
+## v2.12.1 (2025-05-06)
+
+### Bug Fixes
+
+- Fix issue with activity changer ([#688](https://github.com/ESloman/bsebot/pull/688),
+  [`45bcdc6`](https://github.com/ESloman/bsebot/commit/45bcdc6ebfd2749f8b1f2ead18da0db0d9956266))
+
+### Chores
+
+- Update pre commit stuff ([#687](https://github.com/ESloman/bsebot/pull/687),
+  [`ab9c1e0`](https://github.com/ESloman/bsebot/commit/ab9c1e0b3dd401be393422f849c76dc4356a022a))
+
+* chore: add more pre-commit hooks, tidy up some bits
+
+* chore: add pre-commit job
+
+* chore: update python version
+
+
 ## v2.12.0 (2025-05-05)
 
 ### Chores
@@ -32,61 +52,18 @@ Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.c
 - 2025 updates
   ([`ed97afb`](https://github.com/ESloman/bsebot/commit/ed97afb7e79defd4f6747a7e557a75c3bff2458c))
 
-- feat: 2025 updates
+* feat: 2025 updates
 
 Begin making some updates. Start with updating all the requirement versions. Secondly, change the
   way we do testing. Remove all the old test data and we'll rely on mocks entirely. Set all failing
   tests because of this to 'xfail' and we'll fix them as we go.
 
-- fix: fix the wordle solution
+* fix: fix the wordle solution
 
-- fix: fix requirements.txt
+* fix: fix requirements.txt
 
-- chore: update python version
+* chore: update python version
 
-## v2.12.0 (2025-05-05)
-
-### Chores
-
-- Add CODEOWNERS ([#686](https://github.com/ESloman/bsebot/pull/686),
-  [`0b13284`](https://github.com/ESloman/bsebot/commit/0b132846ef7ea909808ad923e5283559cdb52579))
-
-- Bump docker/build-push-action from 5 to 6 ([#672](https://github.com/ESloman/bsebot/pull/672),
-  [`51c4a6e`](https://github.com/ESloman/bsebot/commit/51c4a6ef894b9fcf30ed49c007c1aef7a41a588d))
-
-Bumps [docker/build-push-action](https://github.com/docker/build-push-action) from 5 to 6. -
-  [Release notes](https://github.com/docker/build-push-action/releases) -
-  [Commits](https://github.com/docker/build-push-action/compare/v5...v6)
-
---- updated-dependencies: - dependency-name: docker/build-push-action dependency-type:
-  direct:production
-
-update-type: version-update:semver-major ...
-
-Signed-off-by: dependabot[bot] <support@github.com>
-
-Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>
-
-- Bump docker/metadata-action from 5.5.1 to 5.7.0
-  ([#685](https://github.com/ESloman/bsebot/pull/685),
-  [`af66162`](https://github.com/ESloman/bsebot/commit/af66162e2ca5b4ec868e253a4048787d16633cee))
-
-### Features
-
-- 2025 updates
-  ([`ed97afb`](https://github.com/ESloman/bsebot/commit/ed97afb7e79defd4f6747a7e557a75c3bff2458c))
-
-- feat: 2025 updates
-
-Begin making some updates. Start with updating all the requirement versions. Secondly, change the
-  way we do testing. Remove all the old test data and we'll rely on mocks entirely. Set all failing
-  tests because of this to 'xfail' and we'll fix them as we go.
-
-- fix: fix the wordle solution
-
-- fix: fix requirements.txt
-
-- chore: update python version
 
 ## v2.11.2 (2024-08-04)
 
@@ -100,6 +77,7 @@ Begin making some updates. Start with updating all the requirement versions. Sec
 - Change base Docker image to slim ([#670](https://github.com/ESloman/bsebot/pull/670),
   [`1a1aacd`](https://github.com/ESloman/bsebot/commit/1a1aacdab130123985af7c0964383ad3ce5de6d3))
 
+
 ## v2.11.1 (2024-08-03)
 
 ### Bug Fixes
@@ -107,7 +85,8 @@ Begin making some updates. Start with updating all the requirement versions. Sec
 - Resolves a couple of minor bugs ([#668](https://github.com/ESloman/bsebot/pull/668),
   [`76a171b`](https://github.com/ESloman/bsebot/commit/76a171b91bf4f9d97a24fba42c31e7ff58dd7bca))
 
-- don't trigger message action on deleted duplicates #639 * fix: fix wordle task startup condition
+* don't trigger message action on deleted duplicates #639 * fix: fix wordle task startup condition
+
 
 ## v2.11.0 (2024-08-03)
 
@@ -154,6 +133,7 @@ Apply a quick fix for VC failure.
 - Add basic info command ([#666](https://github.com/ESloman/bsebot/pull/666),
   [`caa5494`](https://github.com/ESloman/bsebot/commit/caa549411fc9e585364fba3701f3bc9f10fdef2f))
 
+
 ## v2.10.0 (2024-08-03)
 
 ### Bug Fixes
@@ -185,6 +165,7 @@ Apply a quick fix for VC failure.
 - Update ruff version ([#660](https://github.com/ESloman/bsebot/pull/660),
   [`40b5eb9`](https://github.com/ESloman/bsebot/commit/40b5eb9dcb302d0967cdd8f9125e0d152aa26fdd))
 
+
 ## v2.9.4 (2024-05-27)
 
 ### Bug Fixes
@@ -215,12 +196,14 @@ Changing the message means that we actually return what we want. MongoDB behavio
 - Update ruff version ([#650](https://github.com/ESloman/bsebot/pull/650),
   [`cecdc82`](https://github.com/ESloman/bsebot/commit/cecdc828c75011f141f4acc951e2d8a4f089116f))
 
+
 ## v2.9.3 (2024-04-23)
 
 ### Bug Fixes
 
 - Tweak some salary messages ([#638](https://github.com/ESloman/bsebot/pull/638),
   [`a67862f`](https://github.com/ESloman/bsebot/commit/a67862ffa2f2c43bf69523d8f37e69f25c1a4cc6))
+
 
 ## v2.9.2 (2024-04-22)
 
@@ -235,8 +218,8 @@ Changing the message means that we actually return what we want. MongoDB behavio
   ([#636](https://github.com/ESloman/bsebot/pull/636),
   [`cb99fdc`](https://github.com/ESloman/bsebot/commit/cb99fdc3de53b64180fea64522ac2cfa8a583f05))
 
-- Prevent errors when message is too long ([#635](https://github.com/ESloman/bsebot/pull/635),
-  [`4aaf3f9`](https://github.com/ESloman/bsebot/commit/4aaf3f9d605e70b5fa2c043f00ad8c9d0b588f48))
+
+## v2.9.1 (2024-04-17)
 
 ### Bug Fixes
 
@@ -263,12 +246,14 @@ Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.c
 - #631 use orjson ([#633](https://github.com/ESloman/bsebot/pull/633),
   [`e0aeb7f`](https://github.com/ESloman/bsebot/commit/e0aeb7f3954c8c85669cbe375a650d463d7e0f15))
 
+
 ## v2.9.0 (2024-04-15)
 
 ### Features
 
 - #618 improve salary message ([#632](https://github.com/ESloman/bsebot/pull/632),
   [`3e69afb`](https://github.com/ESloman/bsebot/commit/3e69afb5e7b8aab97b2d7180e58c2dc28896d331))
+
 
 ## v2.8.0 (2024-04-12)
 
@@ -282,12 +267,14 @@ Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.c
 - Update pytest config ([#629](https://github.com/ESloman/bsebot/pull/629),
   [`9712cf2`](https://github.com/ESloman/bsebot/commit/9712cf2385538743fc7b83321f0e812510849b43))
 
+
 ## v2.7.3 (2024-04-11)
 
 ### Bug Fixes
 
 - Resolve linting errors ([#628](https://github.com/ESloman/bsebot/pull/628),
   [`2db7fc7`](https://github.com/ESloman/bsebot/commit/2db7fc75d4a517a7355be3dd544778c8d23397f6))
+
 
 ## v2.7.2 (2024-04-09)
 
@@ -296,8 +283,8 @@ Co-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.c
 - Resolve some sonar issues ([#624](https://github.com/ESloman/bsebot/pull/624),
   [`27ea1e9`](https://github.com/ESloman/bsebot/commit/27ea1e96db456f62ecc34d4a27553673ce9ed897))
 
-- Replace a duplicated string with a constant *Reduce complexity of this function* Refactor to
-  reduce further complexity *Switch tests to ZoneInfo* Add tests for celebrations task * Add tests
+* Replace a duplicated string with a constant * Reduce complexity of this function * Refactor to
+  reduce further complexity * Switch tests to ZoneInfo * Add tests for celebrations task * Add tests
   for onmessageedit
 
 ### Continuous Integration
@@ -315,6 +302,7 @@ Ensure that we are actually checking for errors after we run the BSEBot containe
 
 Refactor and simplify main.
 
+
 ## v2.7.1 (2024-04-09)
 
 ### Bug Fixes
@@ -326,6 +314,7 @@ Refactor and simplify main.
 
 - Update dependabot config ([#621](https://github.com/ESloman/bsebot/pull/621),
   [`814b485`](https://github.com/ESloman/bsebot/commit/814b485b1c10f5025dc96b5e55c77e85c18e5387))
+
 
 ## v2.7.0 (2024-03-25)
 
@@ -375,5 +364,6 @@ Closes #600
 
 - Update to use sloman-logging package ([#603](https://github.com/ESloman/bsebot/pull/603),
   [`002f5f6`](https://github.com/ESloman/bsebot/commit/002f5f60d024fbe436dfb7968b3a76ba85755576))
+
 
 ## v2.6.0 (2024-03-25)

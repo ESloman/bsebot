@@ -1,4 +1,4 @@
-FROM python:3.13.3-slim
+FROM python:3.13.4-slim
 
 RUN apt-get update && apt-get -y --no-install-recommends install curl git gnupg2 \
     && curl -q https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \
